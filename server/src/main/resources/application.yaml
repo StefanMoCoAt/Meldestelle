@@ -1,5 +1,4 @@
 # Grundkonfiguration für Ktor in YAML
-
 ktor:
   deployment:
     # Der Port, auf dem der Server lauschen soll
@@ -9,11 +8,7 @@ ktor:
     # watch:
     #  - classes
     #  - resources
-
   application:
     # Hier wird Ktor gesagt, welche Funktion die Konfiguration enthält
-    # PASSE DEN PFAD AN, falls deine Application.kt oder module() anders heißt/liegt!
     modules:
       - at.mocode.ApplicationKt.module
-      # Wenn Application.kt direkt unter at.mocode liegt:
-      # - at.mocode.ApplicationKt.module

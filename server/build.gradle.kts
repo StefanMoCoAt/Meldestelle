@@ -22,4 +22,16 @@ dependencies {
     testImplementation(libs.jupiter.junit.jupiter)
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.junit.junit.jupiter)
+
+    // Exposed für Datenbankzugriff (Core, DAO-Pattern, JDBC-Implementierung)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.dao)
+    implementation(libs.exposed.jdbc)
+
+    // JDBC Treiber für PostgreSQL (nur zur Laufzeit benötigt)
+    runtimeOnly(libs.postgresql.driver)
+
+    // HikariCP für Connection Pooling
+    implementation(libs.hikari.cp)
+
 }
