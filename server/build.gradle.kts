@@ -20,4 +20,6 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.jupiter.junit.jupiter)
+    implementation(libs.ktor.server.config.yaml)
+    testImplementation(libs.junit.junit.jupiter)
 }
