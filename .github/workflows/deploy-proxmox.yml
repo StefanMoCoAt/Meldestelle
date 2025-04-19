@@ -1,0 +1,56 @@
+# Name des Workflows (erscheint im Actions-Tab auf GitHub)
+name: Build and Deploy Ktor Server to Proxmox
+
+# Trigger: Wann soll der Workflow starten?
+on:
+  # Bei jedem Push auf den 'main' Branch
+  push:
+    branches: [ main ]
+  # Erlaubt auch das manuelle Starten über den Actions-Tab
+  workflow_dispatch:
+
+# Definition der auszuführenden Jobs
+jobs:
+  # Ein Job namens 'build-and-deploy' (Name ist frei wählbar)
+  build-and-deploy:
+    # Angezeigter Name für den Job auf GitHub
+    name: Build and Deploy Ktor Server
+
+    # WICHTIG: Dieser Job MUSS auf deinem selbst gehosteten Runner laufen!
+    # Stelle sicher, dass die Labels hier (mindestens 'self-hosted')
+    # mit den Labels deines Runners übereinstimmen.
+    runs-on: self-hosted
+
+    # Die Schritte, die in diesem Job ausgeführt werden
+    steps:
+      # Schritt 1: Code aus dem Repository holen
+      # verwendet die Standard-Action von GitHub dafür
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      # Schritt 2: Docker Image für den Ktor-Server bauen
+      # verwendet die 'Dockerfile' im Hauptverzeichnis des Projekts.
+      # Taggt das Image als 'meldestelle/server: latest' (muss zum Compose-File passen)
+      - name: Build Docker image
+        # Führt 'docker build' im Root-Verzeichnis des ausgecheckten Codes aus
+        run: docker build -t meldestelle/server:latest .
+
+      # Schritt 3: Anwendung via Docker Compose starten/aktualisieren
+      # stellt alle in docker-compose.yml definierten Services bereit
+      - name: Deploy application via Docker Compose
+        # Macht die GitHub Secrets als Umgebungsvariablen NUR für diesen Schritt verfügbar
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          # Füge hier optional weitere Secrets hinzu, die deine Compose-Datei braucht
+          # z.B. PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PGADMIN_PASSWORD }}
+        # Führt 'docker compose up' aus.
+        # Docker Compose liest die oben gesetzten ENV-Variablen und verwendet sie für die
+        # Ersetzung von ${...} in der docker-compose.yml (z.B. für den 'db' Service).
+        # Der 'server' Service bekommt seine DB-Variablen auch über die 'environment'-Sektion
+        # in der docker-compose.yml, die ebenfalls diese ENV-Variablen nutzt.
+        # --build: Baut Images neu, falls nötig (besonders wichtig für den 'server'-Service)
+        # -d: Startet Container im Hintergrund
+        # --force-recreate: Erzwingt Neuerstellung, kann helfen, alte Zustände zu vermeiden
+        run: docker compose up --build -d --force-recreate

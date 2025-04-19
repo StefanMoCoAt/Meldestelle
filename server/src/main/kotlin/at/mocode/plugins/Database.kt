@@ -2,11 +2,10 @@ package at.mocode.plugins
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database
 import org.slf4j.LoggerFactory
 
-fun Application.configureDatabase() {
+fun configureDatabase() {
     val log = LoggerFactory.getLogger("DatabaseInitialization")
     log.info("Initializing database connection from environment variables...")
 
