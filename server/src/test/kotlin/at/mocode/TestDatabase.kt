@@ -1,55 +1,63 @@
 package at.mocode
 
 import at.mocode.model.Turnier
-import at.mocode.plugins.configureDatabase
 import at.mocode.tables.TurniereTable
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.html.*
-import io.ktor.server.netty.*
 import io.ktor.server.routing.*
 import kotlinx.html.*
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 
+/**
+ * Test-spezifische Version der configureDatabase-Funktion, die eine In-Memory-Datenbank verwendet.
+ */
+fun configureTestDatabase() {
+    val log = LoggerFactory.getLogger("TestDatabaseInitialization")
+    log.info("Initializing in-memory H2 database for testing...")
 
+    // Verbinde mit einer In-Memory-H2-Datenbank
+    Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
 
-fun main(args: Array<String>) {
-    EngineMain.main(args)
+    // Initialisiere das Datenbankschema
+    transaction {
+        log.info("Creating test database schema...")
+        SchemaUtils.create(TurniereTable)
+
+        // Füge ein Test-Turnier hinzu
+        log.info("Inserting test tournament data...")
+        TurniereTable.insert {
+            it[id] = "dummy-01"
+            it[name] = "Erstes DB Turnier"
+            it[datum] = "19.04.2025"
+            it[logoUrl] = null
+            it[ausschreibungUrl] = "/pdfs/ausschreibung_dummy.pdf"
+        }
+
+        log.info("Test database initialized successfully!")
+    }
 }
 
-fun Application.module() {
+/**
+ * Test-spezifische Version des Anwendungsmoduls, die die In-Memory-Datenbank verwendet.
+ */
+fun Application.testModule() {
+    // Konfiguriere die Test-Datenbank
+    configureTestDatabase()
 
-    // Als Erstes die Datenbank konfigurieren:
-    configureDatabase()
-
-    // Danach deine anderen Konfigurationen (Routing etc.):
+    // Konfiguriere das Routing wie in der Original-Anwendung
     routing {
         get("/") {
-            // Logger holen (optional, aber nützlich)
             val log = LoggerFactory.getLogger("RootRoute")
-            // --- Datenbankoperationen ---
-            // alle DB-Zugriffe mit Exposed sollten in einer Transaktion stattfinden
-            val turniereFromDb = transaction {
-                // Optional: Füge ein Test-Turnier hinzu, WENN die Tabelle leer ist.
-                // Das ist nur für den ersten Test praktisch.
-                if (TurniereTable.selectAll().count() == 0L) {
-                    log.info("Turnier table is empty, inserting dummy tournament...")
-                    TurniereTable.insert {
-                        it[id] = "dummy-01" // Eindeutige ID
-                        it[name] = "Erstes DB Turnier"
-                        it[datum] = "19.04.2025" // Heutiges Datum?
-                        it[logoUrl] = null // Optional, kann null sein
-                        it[ausschreibungUrl] = "/pdfs/ausschreibung_dummy.pdf" // Beispielpfad
-                    }
-                }
 
-                // Lese ALLE Einträge aus der TurniereTable
-                log.info("Fetching all tournaments from database...")
+            // Lese Daten aus der Test-Datenbank
+            val turniereFromDb = transaction {
                 TurniereTable.selectAll().map { row ->
-                    // Wandle jede Datenbank-Zeile (row) wieder in ein Turnier-Objekt um
                     Turnier(
                         id = row[TurniereTable.id],
                         name = row[TurniereTable.name],
@@ -57,31 +65,28 @@ fun Application.module() {
                         logoUrl = row[TurniereTable.logoUrl],
                         ausschreibungUrl = row[TurniereTable.ausschreibungUrl]
                     )
-                } // Das Ergebnis ist eine List<Turnier>
-            } // Ende der Transaktion
+                }
+            }
 
-            // --- HTML-Antwort generieren ---
+            // HTML-Antwort generieren (wie in Application.kt)
             call.respondHtml(HttpStatusCode.OK) {
                 head {
                     title { +"Meldestelle Portal" }
                 }
                 body {
                     h1 { +"Willkommen beim Meldestelle Portal!" }
-                    p { +"Datenbankverbindung erfolgreich!" } // Kleine Bestätigung
+                    p { +"Datenbankverbindung erfolgreich!" }
                     hr()
-                    h2 { +"Aktuelle Turniere (aus Datenbank):" } // Geänderte Überschrift
+                    h2 { +"Aktuelle Turniere (aus Datenbank):" }
 
-                    // Gib die Turnierliste aus der Datenbank aus
                     ul {
                         if (turniereFromDb.isEmpty()) {
                             li { +"Keine Turniere in der Datenbank gefunden." }
                         } else {
-                            // Schleife über die Liste aus der DB
                             turniereFromDb.forEach { turnier ->
                                 li {
                                     strong { +turnier.name }
                                     +" (${turnier.datum})"
-                                    // Füge die Buttons wieder hinzu
                                     +" "
                                     if (turnier.ausschreibungUrl != null) {
                                         a(href = turnier.ausschreibungUrl, target = "_blank") {
@@ -96,11 +101,10 @@ fun Application.module() {
                             }
                         }
                     }
-                    // Link zum (noch nicht funktionierenden) Admin-Bereich
                     hr()
                     p { a(href = "/admin/tournaments") { +"Zur Turnierverwaltung (TODO)" } }
                 }
-            } // <--- HIER endet der respondHtml-Block
-        } // Ende get("/")
+            }
+        }
     }
 }

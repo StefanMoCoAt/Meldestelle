@@ -1,0 +1,32 @@
+# editorconfig.org
+# Hilft, konsistente Code-Stile über verschiedene Editoren/IDEs hinweg beizubehalten.
+
+# Markiert dies als Root-Konfigurationsdatei
+root = true
+
+[*] # Einstellungen für ALLE Dateien
+# Zeichensatz
+charset = utf-8
+# Zeilenende (Unix-Style)
+end_of_line = lf
+# Fügt eine leere Zeile am Dateiende ein (gute Praxis)
+insert_final_newline = true
+# Entfernt Leerzeichen am Zeilenende
+trim_trailing_whitespace = true
+# Einrückungsstil: Leerzeichen (statt Tabs)
+indent_style = space
+# Einrückungsgröße: 4 Leerzeichen (Standard für Kotlin/Java)
+indent_size = 4
+
+# Spezifisch für Kotlin und Kotlin Script (.gradle.kts) Dateien
+# Erbt die Einstellungen von [*] - 4 Leerzeichen passen zur Kotlin-Konvention.
+# max_line_length = 120 # Könnte man hinzufügen, aber oft besser durch Linter/Formatter geregelt
+
+[*.xml] # Spezifisch für XML-Dateien
+indent_size = 4 # Oft auch 4 Leerzeichen
+
+[*.{yml,yaml}] # Spezifisch für YAML-Dateien
+indent_size = 2 # Hier sind 2 Leerzeichen eine häufige Konvention
+
+# [*.md] # Beispiel für Markdown, falls benötigt
+# trim_trailing_whitespace = false # Bei Markdown oft sinnvoll, das Trimmen auszuschalten

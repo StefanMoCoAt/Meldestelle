@@ -3,12 +3,12 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    
+    kotlin("plugin.serialization") version libs.versions.kotlin.get()
 }
 
 kotlin {
     jvm()
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser {
@@ -25,11 +25,21 @@ kotlin {
             }
         }
     }
-    
+
     sourceSets {
-        commonMain.dependencies {
-            // put your Multiplatform dependencies here
+        val commonMain by getting {
+            dependencies {
+                // put your Multiplatform dependencies here
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+            }
+        }
+
+        val jvmMain by getting {
+            dependsOn(commonMain)
+        }
+
+        val wasmJsMain by getting {
+            dependsOn(commonMain)
         }
     }
 }
-

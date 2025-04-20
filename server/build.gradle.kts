@@ -12,15 +12,18 @@ application {
 }
 
 dependencies {
-    implementation(projects.shared)
+    implementation(project(":shared"))
     implementation(libs.logback)
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.config.yaml)
+    implementation(libs.ktor.server.html.builder)
+
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.jupiter.junit.jupiter)
-    implementation(libs.ktor.server.config.yaml)
+
     testImplementation(libs.junit.junit.jupiter)
 
     // Exposed für Datenbankzugriff (Core, DAO-Pattern, JDBC-Implementierung)
@@ -30,6 +33,9 @@ dependencies {
 
     // JDBC Treiber für PostgreSQL (nur zur Laufzeit benötigt)
     runtimeOnly(libs.postgresql.driver)
+
+    // H2 Datenbank für Tests und lokale Entwicklung
+    runtimeOnly(libs.h2.driver)
 
     // HikariCP für Connection Pooling
     implementation(libs.hikari.cp)
