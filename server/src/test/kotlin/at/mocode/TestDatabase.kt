@@ -1,6 +1,6 @@
 package at.mocode
 
-import at.mocode.model.Turnier
+import at.mocode.model.entitaeten.Turnier
 import at.mocode.tables.TurniereTable
 import io.ktor.http.*
 import io.ktor.server.application.*

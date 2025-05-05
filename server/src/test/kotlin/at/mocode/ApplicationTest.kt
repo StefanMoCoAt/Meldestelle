@@ -1,6 +1,6 @@
 package at.mocode
 
-import at.mocode.model.Turnier
+import at.mocode.model.entitaeten.Turnier
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
 import java.io.StringWriter
