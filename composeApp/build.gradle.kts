@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
@@ -10,8 +12,7 @@ plugins {
 
 kotlin {
     jvm("desktop")
-    
-    @OptIn(ExperimentalWasmDsl::class)
+
     wasmJs {
         outputModuleName = "composeApp"
         browser {
@@ -30,10 +31,10 @@ kotlin {
         }
         binaries.executable()
     }
-    
+
     sourceSets {
         val desktopMain by getting
-        
+
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)

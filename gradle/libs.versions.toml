@@ -4,6 +4,7 @@ kotlin = "2.1.20"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.8.1"
 kotlinx-datetime = "0.6.1"
+compose-plugin = "2.1.20"
 
 # UI frameworks
 compose-multiplatform = "1.7.3"
@@ -28,6 +29,7 @@ junit-jupiter = "5.12.0"
 # Utilities
 uuid = "0.8.4"
 bignum = "0.3.10"
+#junit-jupiter-version = "5.8.1"
 
 [libraries]
 # Kotlin and related libraries
@@ -67,11 +69,16 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 # Utilities
 uuid = { group = "com.benasher44", name = "uuid", version.ref = "uuid" }
 bignum = { group = "com.ionspin.kotlin", name = "bignum", version.ref = "bignum" }
+#jupiter-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit-jupiter-version" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
-composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+
+jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

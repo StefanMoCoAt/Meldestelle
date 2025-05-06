@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
@@ -34,6 +34,12 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.uuid)
                 implementation(libs.bignum)
+            }
+        }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
             }
         }
 

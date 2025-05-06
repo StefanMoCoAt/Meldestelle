@@ -1,14 +1,73 @@
-# Grundkonfiguration für Ktor in YAML
+# Meldestelle Server Configuration
 ktor:
   deployment:
-    # Der Port, auf dem der Server lauschen soll
+    # Server port configuration
     port: 8081
-    # port: ${PORT:8080} # Alternative: Nutzt Env-Variable PORT, sonst 8080
-    # Optional für Entwicklung: Server bei Änderungen neu laden
-    # watch:
-    #  - classes
-    #  - resources
+    # Connection timeout in seconds
+    connectionTimeout: 30
+    # Maximum number of concurrent connections
+    maxConnections: 1000
+    # Enable development mode with hot-reload (only for development)
+    watch:
+      - classes
+      - resources
   application:
-    # Hier wird Ktor gesagt, welche Funktion die Konfiguration enthält
     modules:
-      - at.mocode.ApplicationKt.module
+      - at.mocode.server.ApplicationKt.module
+
+# Database Configuration
+database:
+  # Database driver (postgresql for production, h2 for development)
+  driver: "${DB_DRIVER:postgresql}"
+  # Database connection settings
+  host: "${DB_HOST:localhost}"
+  port: "${DB_PORT:5432}"
+  name: "${DB_NAME:meldestelle}"
+  user: "${DB_USER:postgres}"
+  password: "${DB_PASSWORD:postgres}"
+  # Connection pool settings
+  pool:
+    maxSize: "${DB_POOL_SIZE:10}"
+    minIdle: "${DB_POOL_MIN_IDLE:2}"
+    idleTimeout: 10000
+    connectionTimeout: 5000
+    maxLifetime: 1800000
+
+# Security Configuration
+security:
+  # JWT configuration
+  jwt:
+    issuer: "meldestelle-server"
+    audience: "meldestelle-clients"
+    realm: "meldestelle"
+    # Secret should be set via environment variable in production
+    secret: "${JWT_SECRET:dev-secret-key-change-in-production}"
+    # Token validity duration in milliseconds (24 hours)
+    validity: 86400000
+
+# CORS Configuration
+cors:
+  # Allow requests from these origins
+  allowedHosts:
+    - "localhost:3000"
+    - "127.0.0.1:3000"
+    - "meldestelle.mocode.at"
+  # Allow these HTTP methods
+  allowedMethods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  # Allow credentials (cookies, auth headers)
+  allowCredentials: true
+
+# Application-specific settings
+application:
+  name: "Meldestelle Server"
+  version: "1.0.0"
+  environment: "${ENVIRONMENT:development}"
+  # Feature flags
+  features:
+    enableRegistration: true
+    enableEmailNotifications: "${ENABLE_EMAIL:false}"
