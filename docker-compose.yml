@@ -39,8 +39,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    # ports: # Nur bei Bedarf freigeben, z.B. für lokalen Zugriff
-    #  - "127.0.0.1:54321:5432" # Host-Port 54321 → Container-Port 5432
+    ports: # Nur bei Bedarf freigeben, z.B. für lokalen Zugriff
+      - "127.0.0.1:54321:5432" # Host-Port 54321 → Container-Port 5432
 
   # Optional: PgAdmin Service
 #  pgadmin:

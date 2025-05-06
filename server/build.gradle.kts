@@ -19,6 +19,11 @@ dependencies {
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.html.builder)
 
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.uuid)
+    implementation(libs.bignum)
+
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.junit.jupiter)
@@ -27,6 +32,7 @@ dependencies {
     implementation(libs.exposed.core)
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.kotlin.datetime)
 
     // JDBC Treiber für PostgreSQL (nur zur Laufzeit benötigt)
     runtimeOnly(libs.postgresql.driver)

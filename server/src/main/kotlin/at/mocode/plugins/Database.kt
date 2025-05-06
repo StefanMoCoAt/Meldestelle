@@ -1,13 +1,12 @@
 package at.mocode.plugins
 
+import at.mocode.tables.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.Database
-import org.slf4j.LoggerFactory
-
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import at.mocode.tables.TurniereTable
+import org.slf4j.LoggerFactory
 
 fun configureDatabase() {
     val log = LoggerFactory.getLogger("DatabaseInitialization")
@@ -100,8 +99,17 @@ fun configureDatabase() {
     // --- TODO für den NÄCHSTEN Schritt ---
     // Hier kommt später die Logik zum Erstellen der Tabellen hin,
     // z.B. innerhalb einer Transaktion:
-    // transaction {
-    //     SchemaUtils.create(TurniereTable) // Erstellt die Tabelle, wenn sie nicht existiert
-    // }
+    transaction {
+        SchemaUtils.create(
+            VereineTable,
+            PersonenTable,
+            PferdeTable,
+            VeranstaltungenTable, // NEU
+            TurniereTable,
+            ArtikelTable,
+            PlaetzeTable // NEU
+            // ... weitere Tabellen ...
+        )
+    }
     // ------------------------------------
 }
