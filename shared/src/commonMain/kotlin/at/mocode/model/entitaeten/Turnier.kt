@@ -1,31 +1,22 @@
 package at.mocode.model.entitaeten
 
-// Hinweis: In einem Kotlin Multiplatform-Projekt können JVM-spezifische Klassen wie
-// java.math.BigDecimal und java.util.UUID nicht im commonMain-Quellcode verwendet werden.
-// Stattdessen werden multiplatformfähige Alternativen verwendet:
-// - com.benasher44.uuid.Uuid anstelle von java.util.UUID
-// - com.ionspin.kotlin.bignum.decimal.BigDecimal anstelle von java.math.BigDecimal
-// Diese Klassen bieten ähnliche Funktionalität, sind aber auf allen Plattformen verfügbar.
-//
-// Für JVM-spezifischen Code können diese Klassen im jvmMain-Quellset verwendet werden.
-// Siehe: shared/src/jvmMain/kotlin/at/mocode/model/JvmSerializer.kt
-
 import at.mocode.model.enums.NennungsArt
-import at.mocode.model.serializer.*
+import at.mocode.model.serializers.*
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
-import com.benasher44.uuid.Uuid as UUID
 
 @Serializable
 data class Turnier(
-    @Serializable(with = JavaUUIDSerializer::class)
-    val id: UUID = UUID.randomUUID(),
-    @Serializable(with = JavaUUIDSerializer::class)
-    var veranstaltungId: UUID,
+    @Serializable(with = UuidSerializer::class)
+    val id: Uuid = uuid4(),
+    @Serializable(with = UuidSerializer::class)
+    var veranstaltungId: Uuid,
     var oepsTurnierNr: String,
     var titel: String,
     var untertitel: String?,
@@ -44,17 +35,17 @@ data class Turnier(
     var startgeldStandard: BigDecimal?,
     var austragungsplaetze: List<Platz> = emptyList(),
     var vorbereitungsplaetze: List<Platz> = emptyList(),
-    @Serializable(with = JavaUUIDSerializer::class)
-    var turnierleiterId: UUID?, // FK zu Person
-    @Serializable(with = JavaUUIDSerializer::class)
-    var turnierbeauftragterId: UUID?, // FK zu Person
-    var richterIds: List<@Serializable(with = JavaUUIDSerializer::class)UUID> = emptyList(), // Pool an Richtern
-    var parcoursbauerIds: List<@Serializable(with = JavaUUIDSerializer::class)UUID> = emptyList(), // FKs zu Person
-    var parcoursAssistentIds: List<@Serializable(with = JavaUUIDSerializer::class)UUID> = emptyList(), // FKs zu Person
+    @Serializable(with = UuidSerializer::class)
+    var turnierleiterId: Uuid?, // FK zu Person
+    @Serializable(with = UuidSerializer::class)
+    var turnierbeauftragterId: Uuid?, // FK zu Person
+    var richterIds: List<@Serializable(with = UuidSerializer::class) Uuid> = emptyList(), // Pool an Richtern
+    var parcoursbauerIds: List<@Serializable(with = UuidSerializer::class) Uuid> = emptyList(), // FKs zu Person
+    var parcoursAssistentIds: List<@Serializable(with = UuidSerializer::class) Uuid> = emptyList(), // FKs zu Person
     var tierarztInfos: String?,
     var hufschmiedInfo: String?,
-    @Serializable(with = JavaUUIDSerializer::class)
-    var meldestelleVerantwortlicherId: UUID?, // FK zu Person
+    @Serializable(with = UuidSerializer::class)
+    var meldestelleVerantwortlicherId: Uuid?, // FK zu Person
     var meldestelleTelefon: String?,
     var meldestelleOeffnungszeiten: String?,
     var ergebnislistenUrl: String?, // Wird später meist system-generiert

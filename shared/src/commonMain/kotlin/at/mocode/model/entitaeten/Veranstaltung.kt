@@ -1,13 +1,20 @@
 package at.mocode.model.entitaeten
 
-import at.mocode.model.serializer.JavaUUIDSerializer
-import at.mocode.model.serializer.KotlinInstantSerializer
+import at.mocode.model.enums.VeranstalterTyp
+import at.mocode.model.serializers.KotlinInstantSerializer
+import at.mocode.model.serializers.KotlinLocalDateSerializer
+import at.mocode.model.serializers.UuidSerializer
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Veranstaltung(
-    @Serializable(with = JavaUUIDSerializer::class) // Beispiel für Serializer, falls nötig
-    val id: UUID = UUID.randomUUID(),
+    @Serializable(with = UuidSerializer::class) // Beispiel für Serializer, falls nötig
+    val id: Uuid = uuid4(),
     var name: String,
     @Serializable(with = KotlinLocalDateSerializer::class) // Beispiel für Serializer
     var datumVon: LocalDate,

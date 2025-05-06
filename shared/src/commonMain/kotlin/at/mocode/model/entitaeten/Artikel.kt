@@ -1,14 +1,19 @@
 package at.mocode.model.entitaeten
 
-import at.mocode.model.serializer.BigDecimalSerializer
-import at.mocode.model.serializer.JavaUUIDSerializer
-import at.mocode.model.serializer.KotlinInstantSerializer
+import at.mocode.model.serializers.BigDecimalSerializer
+import at.mocode.model.serializers.KotlinInstantSerializer
+import at.mocode.model.serializers.UuidSerializer
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Artikel(
-    @Serializable(with = JavaUUIDSerializer::class)
-    val id: UUID = UUID.randomUUID(),
+    @Serializable(with = UuidSerializer::class)
+    val id: Uuid = uuid4(),
     var bezeichnung: String,
     @Serializable(with = BigDecimalSerializer::class) // Beispiel für Serializer
     var preis: BigDecimal,

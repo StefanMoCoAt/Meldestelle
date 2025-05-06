@@ -2,7 +2,7 @@ package at.mocode.model.stammdaten
 
 import at.mocode.model.enums.LizenzTyp
 import at.mocode.model.enums.Sparte
-import at.mocode.model.serializer.KotlinLocalDateSerializer
+import at.mocode.model.serializers.KotlinLocalDateSerializer
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 

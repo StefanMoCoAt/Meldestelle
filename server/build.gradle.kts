@@ -22,9 +22,6 @@ dependencies {
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.junit.jupiter)
-    testImplementation(libs.jupiter.junit.jupiter)
-
-    testImplementation(libs.junit.junit.jupiter)
 
     // Exposed für Datenbankzugriff (Core, DAO-Pattern, JDBC-Implementierung)
     implementation(libs.exposed.core)

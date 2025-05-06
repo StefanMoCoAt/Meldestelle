@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    kotlin("plugin.serialization") version libs.versions.kotlin.get()
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -29,20 +29,20 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                // put your Multiplatform dependencies here
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
-                implementation("com.benasher44:uuid:0.8.1")
-                implementation("com.ionspin.kotlin:bignum:0.3.8")
+                // Multiplatform dependencies
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.uuid)
+                implementation(libs.bignum)
             }
         }
 
-        val jvmMain by getting {
-            dependsOn(commonMain)
-        }
-
-        val wasmJsMain by getting {
-            dependsOn(commonMain)
-        }
+//        val jvmMain by getting {
+//            dependsOn(commonMain)
+//        }
+//
+//        val wasmJsMain by getting {
+//            dependsOn(commonMain)
+//        }
     }
 }

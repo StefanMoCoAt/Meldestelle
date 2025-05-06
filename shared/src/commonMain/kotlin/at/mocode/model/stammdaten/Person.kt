@@ -2,16 +2,20 @@ package at.mocode.model.stammdaten
 
 import at.mocode.model.enums.FunktionaerRolle
 import at.mocode.model.enums.Geschlecht
-import at.mocode.model.serializer.JavaUUIDSerializer
-import at.mocode.model.serializer.KotlinInstantSerializer
-import at.mocode.model.serializer.KotlinLocalDateSerializer
+import at.mocode.model.serializers.KotlinInstantSerializer
+import at.mocode.model.serializers.KotlinLocalDateSerializer
+import at.mocode.model.serializers.UuidSerializer
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Person(
-    @Serializable(with = JavaUUIDSerializer::class)
-    val id: UUID = UUID.randomUUID(),
+    @Serializable(with = UuidSerializer::class)
+    val id: Uuid = uuid4(),
     var oepsSatzNr: String?,
     var nachname: String,
     var vorname: String,
@@ -25,8 +29,8 @@ data class Person(
     var adresse: String?,
     var plz: String?,
     var ort: String?,
-    @Serializable(with = JavaUUIDSerializer::class)
-    var stammVereinId: UUID?, // FK zum Verein
+    @Serializable(with = UuidSerializer::class)
+    var stammVereinId: Uuid?, // FK zum Verein
     var mitgliedsNummerIntern: String?,
     var letzteZahlungJahr: Int?,
     var feiId: String?,

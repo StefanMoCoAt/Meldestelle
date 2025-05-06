@@ -1,14 +1,17 @@
 package at.mocode.model.stammdaten
 
-import at.mocode.model.serializer.JavaUUIDSerializer
-import at.mocode.model.serializer.KotlinInstantSerializer
-import com.benasher44.uuid.UUID
+import at.mocode.model.serializers.KotlinInstantSerializer
+import at.mocode.model.serializers.UuidSerializer
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Verein(
-    @Serializable(with = JavaUUIDSerializer::class)
-    val id: UUID = UUID.randomUUID(),
+    @Serializable(with = UuidSerializer::class)
+    val id: Uuid = uuid4(),
     var oepsVereinsNr: String,
     var name: String,
     var kuerzel: String?,
