@@ -1,6 +1,6 @@
 package at.mocode.server.tables
 
-import at.mocode.server.enums.PlatzTyp
+import at.mocode.shared.model.enums.PlatzTyp
 import org.jetbrains.exposed.sql.Table
 
 /**
@@ -9,19 +9,19 @@ import org.jetbrains.exposed.sql.Table
  * - Added proper imports for enums
  * - Added index for name field
  */
-object PlaetzeTable : Table(name = "plaetze") {
-    val id = uuid(name = "id")
-    val turnierId = uuid(name = "turnier_id").references(ref = TurniereTable.id)
-    val name = varchar(name = "name", length = 100)
-    val dimension = varchar(name = "dimension", length = 50).nullable()
-    val boden = varchar(name = "boden", length = 100).nullable()
-    val typ = enumerationByName(name = "typ", length = 20, klass = PlatzTyp::class)
+object PlaetzeTable : Table("plaetze") {
+    val id = uuid("id")
+    val turnierId = uuid("turnier_id").references(TurniereTable.id)
+    val name = varchar("name", 100)
+    val dimension = varchar("dimension", 50).nullable()
+    val boden = varchar("boden", 100).nullable()
+    val typ = enumerationByName("typ", 20, PlatzTyp::class)
 
-    override val primaryKey = PrimaryKey(firstColumn = id)
+    override val primaryKey = PrimaryKey(id)
 
     init {
-        index(isUnique = false, turnierId)
-        index(isUnique = false, name)
-        index(isUnique = false, typ)
+        index(false, turnierId)
+        index(false, name)
+        index(false, typ)
     }
 }

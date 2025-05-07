@@ -1,21 +1,10 @@
 package at.mocode.shared.model.entitaeten
 
-import at.mocode.shared.model.serializers.BigDecimalSerializer
-import at.mocode.shared.model.serializers.KotlinInstantSerializer
-import at.mocode.shared.model.serializers.UuidSerializer
-import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class ArtikelTest {
 
@@ -75,7 +64,7 @@ class ArtikelTest {
             einheit = "Stück"
         )
 
-        val originalUpdatedAt = artikel.updatedAt
+        val originalUpdatedAt = artikel.updatedAt.toString()
 
         // Modify properties
         artikel.bezeichnung = "Geänderter Artikel"
@@ -89,7 +78,7 @@ class ArtikelTest {
         assertEquals(BigDecimal.parseString("15.00"), artikel.preis)
         assertEquals("Box", artikel.einheit)
         assertEquals(true, artikel.istVerbandsabgabe)
-        assertNotEquals(originalUpdatedAt, artikel.updatedAt)
+        assertNotEquals(originalUpdatedAt, artikel.updatedAt.toString())
     }
 
     @Test

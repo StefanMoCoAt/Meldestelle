@@ -1,7 +1,8 @@
 package at.mocode.server.tables
 
-import at.mocode.server.enums.LizenzTyp
-import at.mocode.server.enums.Sparte
+
+import at.mocode.shared.model.enums.LizenzTyp
+import at.mocode.shared.model.enums.Sparte
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 
@@ -12,19 +13,19 @@ import org.jetbrains.exposed.sql.kotlin.datetime.date
  * - Uncommented the sparte field
  * - Added index for lizenzTyp and gueltigBisJahr
  */
-object LizenzenTable : Table(name = "lizenzen") {
-    val id = uuid(name = "id")
-    val personId = uuid(name = "person_id").references(PersonenTable.id)
-    val lizenzTyp = enumerationByName(name = "lizenz_typ", length = 50, klass = LizenzTyp::class)
-    val stufe = varchar(name = "stufe", 20).nullable()
-    val sparte = enumerationByName(name = "sparte", length = 50, klass = Sparte::class).nullable()
-    val gueltigBisJahr = integer(name = "gueltig_bis_jahr").nullable()
-    val ausgestelltAm = date(name = "ausgestellt_am").nullable()
+object LizenzenTable : Table("lizenzen") {
+    val id = uuid("id")
+    val personId = uuid("person_id").references(PersonenTable.id)
+    val lizenzTyp = enumerationByName("lizenz_typ", 50, LizenzTyp::class)
+    val stufe = varchar("stufe", 20).nullable()
+    val sparte = enumerationByName("sparte", 50, Sparte::class).nullable()
+    val gueltigBisJahr = integer("gueltig_bis_jahr").nullable()
+    val ausgestelltAm = date("ausgestellt_am").nullable()
 
-    override val primaryKey = PrimaryKey(firstColumn = id)
+    override val primaryKey = PrimaryKey(id)
 
     init {
-        index(isUnique = false, personId)
-        index(isUnique = false, lizenzTyp, gueltigBisJahr)
+        index(false, personId)
+        index(false, lizenzTyp, gueltigBisJahr)
     }
 }

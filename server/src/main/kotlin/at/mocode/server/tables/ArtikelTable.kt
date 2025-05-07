@@ -9,18 +9,18 @@ import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
  * - Changed unique index on bezeichnung to non-unique
  * - Added init block for defining indexes
  */
-object ArtikelTable : Table(name = "artikel") {
-    val id = uuid(name = "id")
-    val bezeichnung = varchar(name = "bezeichnung", length = 255)
-    val preis = varchar(name = "preis", length = 50)
-    val einheit = varchar(name = "einheit", length = 50)
-    val istVerbandsabgabe = bool(name = "ist_verbandsabgabe").default(defaultValue = false)
-    val createdAt = timestamp(name = "created_at")
-    val updatedAt = timestamp(name = "updated_at")
+object ArtikelTable : Table("artikel") {
+    val id = uuid("id")
+    val bezeichnung = varchar("bezeichnung", 255)
+    val preis = varchar("preis", 50)
+    val einheit = varchar("einheit", 50)
+    val istVerbandsabgabe = bool("ist_verbandsabgabe").default(false)
+    val createdAt = timestamp("created_at")
+    val updatedAt = timestamp("updated_at")
 
     override val primaryKey = PrimaryKey(id)
 
     init {
-        index(isUnique = false, bezeichnung)
+        index(false, bezeichnung)
     }
 }

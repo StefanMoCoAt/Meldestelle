@@ -1,6 +1,6 @@
 package at.mocode.server.tables
 
-import at.mocode.server.enums.GeschlechtPferd
+import at.mocode.shared.model.enums.GeschlechtPferd
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
@@ -11,36 +11,36 @@ import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
  * - Added indexes for foreign key fields
  * - Added index for common search fields (name, rasse)
  */
-object PferdeTable : Table(name = "pferde") {
-    val id = uuid(name = "id")
-    val oepsKopfNr = varchar(name = "oeps_kopf_nr", length = 10).uniqueIndex().nullable()
-    val oepsSatzNr = varchar(name = "oeps_satz_nr", length = 15).uniqueIndex().nullable()
-    val name = varchar(name = "name", length = 255)
-    val lebensnummer = varchar(name = "lebensnummer", length = 20).nullable()
-    val feiPassNr = varchar(name = "fei_pass_nr", length = 20).nullable()
-    val geschlecht = enumerationByName(name = "geschlecht", length = 10, klass = GeschlechtPferd::class).nullable()
-    val geburtsjahr = integer(name = "geburtsjahr").nullable()
-    val rasse = varchar(name = "rasse", length = 100).nullable()
-    val farbe = varchar(name = "farbe", length = 50).nullable()
-    val vaterName = varchar(name = "vater_name", length = 255).nullable()
-    val mutterName = varchar(name = "mutter_name", length = 255).nullable()
-    val mutterVaterName = varchar(name = "mutter_vater_name", length = 255).nullable()
-    val besitzerId = uuid(name = "besitzer_id").references(ref = PersonenTable.id).nullable()
-    val verantwortlichePersonId = uuid(name = "verantwortliche_person_id").references(ref = PersonenTable.id).nullable()
-    val heimatVereinId = uuid(name = "heimat_verein_id").references(ref = VereineTable.id).nullable()
-    val letzteZahlungJahrOeps = integer(name = "letzte_zahlung_jahr_oeps").nullable()
-    val stockmassCm = integer(name = "stockmass_cm").nullable()
-    val istAktiv = bool(name = "ist_aktiv").default(defaultValue = true)
-    val createdAt = timestamp(name = "created_at")
-    val updatedAt = timestamp(name = "updated_at")
+object PferdeTable : Table("pferde") {
+    val id = uuid("id")
+    val oepsKopfNr = varchar("oeps_kopf_nr", 10).uniqueIndex().nullable()
+    val oepsSatzNr = varchar("oeps_satz_nr", 15).uniqueIndex().nullable()
+    val name = varchar("name", 255)
+    val lebensnummer = varchar("lebensnummer", 20).nullable()
+    val feiPassNr = varchar("fei_pass_nr", 20).nullable()
+    val geschlecht = enumerationByName("geschlecht", 10, GeschlechtPferd::class).nullable()
+    val geburtsjahr = integer("geburtsjahr").nullable()
+    val rasse = varchar("rasse", 100).nullable()
+    val farbe = varchar("farbe", 50).nullable()
+    val vaterName = varchar("vater_name", 255).nullable()
+    val mutterName = varchar("mutter_name", 255).nullable()
+    val mutterVaterName = varchar("mutter_vater_name", 255).nullable()
+    val besitzerId = uuid("besitzer_id").references(PersonenTable.id).nullable()
+    val verantwortlichePersonId = uuid("verantwortliche_person_id").references(PersonenTable.id).nullable()
+    val heimatVereinId = uuid("heimat_verein_id").references(VereineTable.id).nullable()
+    val letzteZahlungJahrOeps = integer("letzte_zahlung_jahr_oeps").nullable()
+    val stockmassCm = integer("stockmass_cm").nullable()
+    val istAktiv = bool("ist_aktiv").default(defaultValue = true)
+    val createdAt = timestamp("created_at")
+    val updatedAt = timestamp("updated_at")
 
-    override val primaryKey = PrimaryKey(firstColumn = id)
+    override val primaryKey = PrimaryKey(id)
 
     init {
-        index(isUnique = false, name)
-        index(isUnique = false, rasse)
-        index(isUnique = false, besitzerId)
-        index(isUnique = false, verantwortlichePersonId)
-        index(isUnique = false, heimatVereinId)
+        index(false, rasse)
+        index(false, besitzerId)
+        index(false, verantwortlichePersonId)
+        index(false, heimatVereinId)
+        index(false, name)
     }
 }

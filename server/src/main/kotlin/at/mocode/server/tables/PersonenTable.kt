@@ -1,6 +1,6 @@
 package at.mocode.server.tables
 
-import at.mocode.server.enums.Geschlecht
+import at.mocode.shared.model.enums.Geschlecht
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
@@ -13,39 +13,39 @@ import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
  * - Fixed the unique index on nachname+vorname to be non-unique
  * - Added indexes for email and stammVereinId for common queries
  */
-object PersonenTable : Table(name = "personen") {
-    val id = uuid(name = "id")
-    val oepsSatzNr = varchar(name = "oeps_satz_nr", length = 10).uniqueIndex().nullable()
-    val nachname = varchar(name = "nachname", length = 100)
-    val vorname = varchar(name = "vorname", length = 100)
-    val titel = varchar(name = "titel", length = 50).nullable()
-    val geburtsdatum = date(name = "geburtsdatum").nullable()
-    val geschlecht = enumerationByName(name = "geschlecht", length = 10, klass = Geschlecht::class).nullable()
-    val nationalitaet = varchar(name = "nationalitaet", length = 3).nullable()
-    val email = varchar(name = "email", length = 255).nullable()
-    val telefon = varchar(name = "telefon", length = 50).nullable()
-    val adresse = varchar(name = "adresse", length = 255).nullable()
-    val plz = varchar(name = "plz", length = 10).nullable()
-    val ort = varchar(name = "ort", length = 100).nullable()
-    val stammVereinId = uuid(name = "stamm_verein_id").references(ref = VereineTable.id).nullable()
-    val mitgliedsNummerIntern = varchar(name = "mitglieds_nr_intern", length = 50).nullable()
-    val letzteZahlungJahr = integer(name = "letzte_zahlung_jahr").nullable()
-    val feiId = varchar(name = "fei_id", length = 20).nullable()
-    val istGesperrt = bool(name = "ist_gesperrt").default(defaultValue = false)
-    val sperrGrund = text(name = "sperr_grund").nullable()
-    val rollenCsv = text(name = "rollen_csv").nullable()
-    val qualifikationenRichterCsv = text(name = "qualifikationen_richter_csv").nullable()
-    val qualifikationenParcoursbauerCsv = text(name = "qualifikationen_parcoursbauer_csv").nullable()
-    val istAktiv = bool(name = "ist_aktiv").default(true)
-    val createdAt = timestamp(name = "created_at")
-    val updatedAt = timestamp(name = "updated_at")
+object PersonenTable : Table("personen") {
+    val id = uuid("id")
+    val oepsSatzNr = varchar("oeps_satz_nr", 10).uniqueIndex().nullable()
+    val nachname = varchar("nachname", 100)
+    val vorname = varchar("vorname", 100)
+    val titel = varchar("titel", 50).nullable()
+    val geburtsdatum = date("geburtsdatum").nullable()
+    val geschlecht = enumerationByName("geschlecht", 10, Geschlecht::class).nullable()
+    val nationalitaet = varchar("nationalitaet", 3).nullable()
+    val email = varchar("email", 255).nullable()
+    val telefon = varchar("telefon", 50).nullable()
+    val adresse = varchar("adresse", 255).nullable()
+    val plz = varchar("plz", 10).nullable()
+    val ort = varchar("ort", 100).nullable()
+    val stammVereinId = uuid("stamm_verein_id").references(VereineTable.id).nullable()
+    val mitgliedsNummerIntern = varchar("mitglieds_nr_intern", 50).nullable()
+    val letzteZahlungJahr = integer("letzte_zahlung_jahr").nullable()
+    val feiId = varchar("fei_id", 20).nullable()
+    val istGesperrt = bool("ist_gesperrt").default(false)
+    val sperrGrund = text("sperr_grund").nullable()
+    val rollenCsv = text("rollen_csv").nullable()
+    val qualifikationenRichterCsv = text("qualifikationen_richter_csv").nullable()
+    val qualifikationenParcoursbauerCsv = text("qualifikationen_parcoursbauer_csv").nullable()
+    val istAktiv = bool("ist_aktiv").default(true)
+    val createdAt = timestamp("created_at")
+    val updatedAt = timestamp("updated_at")
 
-    override val primaryKey = PrimaryKey(firstColumn = id)
+    override val primaryKey = PrimaryKey(id)
 
     init {
-        index(isUnique = false, nachname, vorname)
-        index(isUnique = false, nachname)
-        index(isUnique = false, email)
-        index(isUnique = false, stammVereinId)
+        index(false, nachname, vorname)
+        index(false, nachname)
+        index(false, email)
+        index(false, stammVereinId)
     }
 }

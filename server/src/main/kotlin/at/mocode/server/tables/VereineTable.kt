@@ -9,27 +9,27 @@ import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
  * - Added indexes for common search fields (name, bundesland)
  * - Added init block for defining indexes
  */
-object VereineTable : Table(name = "vereine") {
-    val id = uuid(name = "id")
-    val oepsVereinsNr = varchar(name = "oeps_vereins_nr", length = 10).uniqueIndex()
-    val name = varchar(name = "name", length = 255)
-    val kuerzel = varchar(name = "kuerzel", length = 50).nullable()
-    val bundesland = varchar(name = "bundesland", length = 10).nullable()
-    val adresse = varchar(name = "adresse", length = 255).nullable()
-    val plz = varchar(name = "plz", length = 10).nullable()
-    val ort = varchar(name = "ort", length = 100).nullable()
-    val email = varchar(name = "email", length = 255).nullable()
-    val telefon = varchar(name = "telefon", length = 50).nullable()
-    val webseite = varchar(name = "webseite", length = 500).nullable()
-    val istAktiv = bool(name = "ist_aktiv").default(defaultValue = true)
-    val createdAt = timestamp(name = "created_at")
-    val updatedAt = timestamp(name = "updated_at")
+object VereineTable : Table("vereine") {
+    val id = uuid("id")
+    val oepsVereinsNr = varchar("oeps_vereins_nr", 10).uniqueIndex()
+    val name = varchar("name", 255)
+    val kuerzel = varchar("kuerzel", 50).nullable()
+    val bundesland = varchar("bundesland", 10).nullable()
+    val adresse = varchar("adresse", 255).nullable()
+    val plz = varchar("plz", 10).nullable()
+    val ort = varchar("ort", 100).nullable()
+    val email = varchar("email", 255).nullable()
+    val telefon = varchar("telefon", 50).nullable()
+    val webseite = varchar("webseite", 500).nullable()
+    val istAktiv = bool("ist_aktiv").default(true)
+    val createdAt = timestamp("created_at")
+    val updatedAt = timestamp("updated_at")
 
-    override val primaryKey = PrimaryKey(firstColumn = id)
+    override val primaryKey = PrimaryKey(id)
 
     init {
-        index(isUnique = false, name)
-        index(isUnique = false, bundesland)
-        index(isUnique = false, ort)
+        index(false, name)
+        index(false, bundesland)
+        index(false, ort)
     }
 }
