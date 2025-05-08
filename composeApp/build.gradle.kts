@@ -1,19 +1,28 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat // HIER FEHLTE DER IMPORT
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.compose.compiler)
 }
 
 kotlin {
     jvm("desktop")
 
     wasmJs {
+
+        var isMpp: Boolean = false // Beispiel: Deine aktuelle Zuweisung
+
+        @Deprecated("Use getMpp() instead", ReplaceWith("getMpp()"))
+        fun isMpp(): Boolean = isMpp
+
+        fun getMpp(): Boolean = isMpp
+
+
         outputModuleName = "composeApp"
         browser {
             val rootDirPath = project.rootDir.path
@@ -33,26 +42,32 @@ kotlin {
     }
 
     sourceSets {
-        val desktopMain by getting
-
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(projects.shared)
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotlinx.coroutines.swing)
+            }
         }
-        desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
+
+        val commonMain by getting {
+            dependencies {
+                commonMain.dependencies {
+                    implementation(projects.shared)
+                    implementation(compose.runtime)
+                    implementation(compose.foundation)
+                    implementation(compose.material)
+                    implementation(compose.ui)
+                    implementation(compose.components.resources)
+                    implementation(compose.components.uiToolingPreview)
+                }
+                desktopMain.dependencies {
+                    implementation(compose.desktop.currentOs)
+                    implementation(libs.kotlinx.coroutines.swing)
+                }
+            }
         }
     }
 }
-
 
 compose.desktop {
     application {

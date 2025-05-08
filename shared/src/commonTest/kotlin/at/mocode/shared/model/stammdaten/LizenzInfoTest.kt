@@ -2,14 +2,10 @@ package at.mocode.shared.model.stammdaten
 
 import at.mocode.shared.model.enums.LizenzTyp
 import at.mocode.shared.model.enums.Sparte
-import at.mocode.shared.model.serializers.KotlinLocalDateSerializer
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class LizenzInfoTest {

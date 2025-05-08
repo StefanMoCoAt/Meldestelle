@@ -5,6 +5,7 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlin.test.*
+import kotlin.time.Duration.Companion.milliseconds
 
 class ArtikelTest {
 
@@ -71,7 +72,7 @@ class ArtikelTest {
         artikel.preis = BigDecimal.parseString("15.00")
         artikel.einheit = "Box"
         artikel.istVerbandsabgabe = true
-        artikel.updatedAt = Clock.System.now()
+        artikel.updatedAt = Clock.System.now().plus(1.milliseconds)
 
         // Verify modifications
         assertEquals("Geänderter Artikel", artikel.bezeichnung)

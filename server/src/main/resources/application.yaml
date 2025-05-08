@@ -41,7 +41,7 @@ security:
     audience: "meldestelle-clients"
     realm: "meldestelle"
     # Secret should be set via environment variable in production
-    secret: "${JWT_SECRET:dev-secret-key-change-in-production}"
+    secret: "${JWT_SECRET:dev-secret-key-change-in-production"
     # Token validity duration in milliseconds (24 hours)
     validity: 86400000
 

@@ -1,6 +1,5 @@
 package at.mocode.server.tables
 
-
 import at.mocode.shared.model.enums.LizenzTyp
 import at.mocode.shared.model.enums.Sparte
 import org.jetbrains.exposed.sql.Table

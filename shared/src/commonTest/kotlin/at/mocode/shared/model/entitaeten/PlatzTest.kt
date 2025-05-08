@@ -1,15 +1,10 @@
 package at.mocode.shared.model.entitaeten
 
 import at.mocode.shared.model.enums.PlatzTyp
-import at.mocode.shared.model.serializers.UuidSerializer
-import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 

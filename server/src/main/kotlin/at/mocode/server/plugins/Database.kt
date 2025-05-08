@@ -1,13 +1,6 @@
 package at.mocode.server.plugins
 
-import at.mocode.server.tables.ArtikelTable
-import at.mocode.server.tables.LizenzenTable
-import at.mocode.server.tables.PersonenTable
-import at.mocode.server.tables.PferdeTable
-import at.mocode.server.tables.PlaetzeTable
-import at.mocode.server.tables.TurniereTable
-import at.mocode.server.tables.VeranstaltungenTable
-import at.mocode.server.tables.VereineTable
+import at.mocode.server.tables.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
@@ -15,6 +8,7 @@ import io.ktor.server.config.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
@@ -69,7 +63,7 @@ fun Application.configureDatabase() {
 /**
  * Configures an in-memory H2 database for testing
  */
-private fun configureTestDatabase(log: org.slf4j.Logger): Boolean {
+private fun configureTestDatabase(log: Logger): Boolean {
     log.info("Test environment detected, using in-memory H2 database (test)...")
     return try {
         Database.connect(
@@ -89,7 +83,7 @@ private fun configureTestDatabase(log: org.slf4j.Logger): Boolean {
 /**
  * Configures an in-memory H2 database for development
  */
-private fun configureDevelopmentDatabase(log: org.slf4j.Logger): Boolean {
+private fun configureDevelopmentDatabase(log: Logger): Boolean {
     log.info("Development environment detected, using in-memory H2 database (dev)...")
     return try {
         Database.connect(
@@ -109,7 +103,7 @@ private fun configureDevelopmentDatabase(log: org.slf4j.Logger): Boolean {
 /**
  * Configures a PostgreSQL database for production
  */
-private fun configureProductionDatabase(log: org.slf4j.Logger, dbConfig: ApplicationConfig?): Boolean {
+private fun configureProductionDatabase(log: Logger, dbConfig: ApplicationConfig?): Boolean {
     log.info("Production environment detected, connecting to PostgreSQL...")
 
     // Get database configuration from application.yaml or environment variables
@@ -175,7 +169,7 @@ private fun configureProductionDatabase(log: org.slf4j.Logger, dbConfig: Applica
 /**
  * Initializes the database schema
  */
-private fun initializeSchema(log: org.slf4j.Logger, isTestEnvironment: Boolean, isIdeaEnvironment: Boolean) {
+private fun initializeSchema(log: Logger, isTestEnvironment: Boolean, isIdeaEnvironment: Boolean) {
     transaction {
         log.info("Initializing/Verifying database schema...")
         try {
