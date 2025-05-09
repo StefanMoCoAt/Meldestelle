@@ -1,4 +1,4 @@
-package at.mocode.server
+package at.mocode.compose
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application

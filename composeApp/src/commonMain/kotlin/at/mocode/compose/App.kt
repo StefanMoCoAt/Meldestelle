@@ -1,4 +1,4 @@
-package at.mocode.server
+package at.mocode.compose
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column

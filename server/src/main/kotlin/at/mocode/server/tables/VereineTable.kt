@@ -3,12 +3,6 @@ package at.mocode.server.tables
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
-/**
- * Optimized version of VereineTable
- * Changes:
- * - Added indexes for common search fields (name, bundesland)
- * - Added init block for defining indexes
- */
 object VereineTable : Table("vereine") {
     val id = uuid("id")
     val oepsVereinsNr = varchar("oeps_vereins_nr", 10).uniqueIndex()

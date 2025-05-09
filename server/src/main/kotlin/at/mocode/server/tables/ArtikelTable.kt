@@ -3,12 +3,6 @@ package at.mocode.server.tables
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
-/**
- * Optimized version of ArtikelTable
- * Changes:
- * - Changed unique index on bezeichnung to non-unique
- * - Added init block for defining indexes
- */
 object ArtikelTable : Table("artikel") {
     val id = uuid("id")
     val bezeichnung = varchar("bezeichnung", 255)

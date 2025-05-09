@@ -1,12 +1,7 @@
 package at.mocode.shared.model.entitaeten
 
-
 import at.mocode.shared.model.enums.NennungsArt
-import at.mocode.shared.model.serializers.BigDecimalSerializer
-import at.mocode.shared.model.serializers.KotlinInstantSerializer
-import at.mocode.shared.model.serializers.KotlinLocalDateSerializer
-import at.mocode.shared.model.serializers.KotlinLocalDateTimeSerializer
-import at.mocode.shared.model.serializers.UuidSerializer
+import at.mocode.shared.model.serializers.*
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
 import com.ionspin.kotlin.bignum.decimal.BigDecimal

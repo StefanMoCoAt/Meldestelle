@@ -5,14 +5,6 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
-/**
- * Optimized version of PersonenTable
- * Changes:
- * - Added proper imports for enums
- * - Replaced inline comments with KDoc
- * - Fixed the unique index on nachname+vorname to be non-unique
- * - Added indexes for email and stammVereinId for common queries
- */
 object PersonenTable : Table("personen") {
     val id = uuid("id")
     val oepsSatzNr = varchar("oeps_satz_nr", 10).uniqueIndex().nullable()

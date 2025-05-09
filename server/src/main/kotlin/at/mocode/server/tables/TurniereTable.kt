@@ -5,13 +5,6 @@ import org.jetbrains.exposed.sql.kotlin.datetime.date // Für kotlinx-datetime L
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime // Für kotlinx-datetime LocalDateTime
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp // Für kotlinx-datetime Instant
 
-/**
- * Optimized version of TurniereTable
- * Changes:
- * - Added proper imports for enums
- * - Added indexes for foreign key fields and common search fields
- * - Added init block for defining indexes
- */
 object TurniereTable : Table("turniere") { // Name der Tabelle in PostgreSQL
     val id = uuid("id")
     val veranstaltungId = uuid("veranstaltung_id").references(VeranstaltungenTable.id)

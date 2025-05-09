@@ -3,12 +3,6 @@ package at.mocode.server.tables
 import at.mocode.shared.model.enums.PlatzTyp
 import org.jetbrains.exposed.sql.Table
 
-/**
- * Optimized version of PlaetzeTable
- * Changes:
- * - Added proper imports for enums
- * - Added index for name field
- */
 object PlaetzeTable : Table("plaetze") {
     val id = uuid("id")
     val turnierId = uuid("turnier_id").references(TurniereTable.id)

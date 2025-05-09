@@ -4,13 +4,6 @@ import at.mocode.shared.model.enums.GeschlechtPferd
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
-/**
- * Optimized version of PferdeTable
- * Changes:
- * - Added proper imports for enums
- * - Added indexes for foreign key fields
- * - Added index for common search fields (name, rasse)
- */
 object PferdeTable : Table("pferde") {
     val id = uuid("id")
     val oepsKopfNr = varchar("oeps_kopf_nr", 10).uniqueIndex().nullable()

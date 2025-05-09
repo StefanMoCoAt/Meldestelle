@@ -5,13 +5,6 @@ import at.mocode.shared.model.enums.Sparte
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 
-/**
- * Optimized version of LizenzenTable
- * Changes:
- * - Added proper imports for enums
- * - Uncommented the sparte field
- * - Added index for lizenzTyp and gueltigBisJahr
- */
 object LizenzenTable : Table("lizenzen") {
     val id = uuid("id")
     val personId = uuid("person_id").references(PersonenTable.id)

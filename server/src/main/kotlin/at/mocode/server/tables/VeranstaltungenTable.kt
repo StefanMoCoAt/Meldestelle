@@ -5,13 +5,6 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
-/**
- * Optimized version of VeranstaltungenTable
- * Changes:
- * - Added proper imports for enums
- * - Added indexes for common search fields
- * - Added init block for defining indexes
- */
 object VeranstaltungenTable : Table("veranstaltungen") {
     val id = uuid("id")
     val name = varchar("name", 255)
