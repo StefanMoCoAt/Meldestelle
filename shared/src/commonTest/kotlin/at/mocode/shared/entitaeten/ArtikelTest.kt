@@ -1,5 +1,6 @@
 package at.mocode.shared.entitaeten
 
+import at.mocode.shared.model.Artikel
 import com.benasher44.uuid.uuid4
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.datetime.Clock

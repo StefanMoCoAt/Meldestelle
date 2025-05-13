@@ -1,6 +1,7 @@
 package at.mocode.shared.entitaeten
 
 import at.mocode.shared.enums.PlatzTyp
+import at.mocode.shared.model.Platz
 import com.benasher44.uuid.uuid4
 import kotlinx.serialization.json.Json
 import kotlin.test.Test

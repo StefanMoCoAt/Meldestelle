@@ -1,4 +1,4 @@
-package at.mocode.shared.entitaeten
+package at.mocode.shared.model
 
 import at.mocode.shared.serializers.UuidSerializer
 import com.benasher44.uuid.Uuid

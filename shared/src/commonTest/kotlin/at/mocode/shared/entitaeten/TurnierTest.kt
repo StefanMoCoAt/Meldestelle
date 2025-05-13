@@ -2,6 +2,10 @@ package at.mocode.shared.entitaeten
 
 import at.mocode.shared.enums.NennungsArt
 import at.mocode.shared.enums.PlatzTyp
+import at.mocode.shared.model.Artikel
+import at.mocode.shared.model.MeisterschaftReferenz
+import at.mocode.shared.model.Platz
+import at.mocode.shared.model.Turnier
 import com.benasher44.uuid.uuid4
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.datetime.Clock
@@ -94,8 +98,10 @@ class TurnierTest {
 
         // Create some test objects for lists
         val nennungsArt = listOf(NennungsArt.OEPS_ZNS, NennungsArt.EIGENES_ONLINE)
-        val austragungsplatz = Platz(name = "Hauptplatz", dimension = "60x20m", boden = "Sand", typ = PlatzTyp.AUSTRAGUNG)
-        val vorbereitungsplatz = Platz(name = "Abreiteplatz", dimension = "40x20m", boden = "Sand", typ = PlatzTyp.VORBEREITUNG)
+        val austragungsplatz =
+            Platz(name = "Hauptplatz", dimension = "60x20m", boden = "Sand", typ = PlatzTyp.AUSTRAGUNG)
+        val vorbereitungsplatz =
+            Platz(name = "Abreiteplatz", dimension = "40x20m", boden = "Sand", typ = PlatzTyp.VORBEREITUNG)
         val richterIds = listOf(uuid4(), uuid4())
         val parcoursbauerIds = listOf(uuid4())
         val parcoursAssistentIds = listOf(uuid4())
@@ -218,9 +224,11 @@ class TurnierTest {
 
         // Create some test objects for lists
         val nennungsArt = listOf(NennungsArt.DIREKT_VERANSTALTER_EMAIL)
-        val austragungsplatz = Platz(name = "Neuer Hauptplatz", dimension = "70x30m", boden = "Gras", typ = PlatzTyp.AUSTRAGUNG)
+        val austragungsplatz =
+            Platz(name = "Neuer Hauptplatz", dimension = "70x30m", boden = "Gras", typ = PlatzTyp.AUSTRAGUNG)
         val richterIds = listOf(uuid4())
-        val artikel = Artikel(bezeichnung = "Neue Startgebühr", preis = BigDecimal.parseString("30.00"), einheit = "Start")
+        val artikel =
+            Artikel(bezeichnung = "Neue Startgebühr", preis = BigDecimal.parseString("30.00"), einheit = "Start")
 
         // Modify properties
         turnier.veranstaltungId = newVeranstaltungId

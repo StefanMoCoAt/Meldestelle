@@ -4,6 +4,7 @@ import at.mocode.shared.enums.Sparte
 import at.mocode.shared.serializers.KotlinInstantSerializer
 import at.mocode.shared.serializers.UuidSerializer
 import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -11,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Pruefungsaufgabe(
     @Serializable(with = UuidSerializer::class)
-    val id: Uuid,
+    val id: Uuid = uuid4(),
     var kuerzel: String, // Eindeutiges Kürzel, z.B. "A1", "LF3", "FEI GP PSG"
     var nameLang: String, // Vollständiger Name, z.B. "Dressuraufgabe A1 (GM, 20x40m)"
     var kategorieText: String?, // Übergeordnete Kategorie, z.B. "Dressuraufgaben Klasse A", "FEI Grand Prix Serie"

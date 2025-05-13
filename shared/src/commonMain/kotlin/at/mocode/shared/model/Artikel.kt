@@ -1,25 +1,26 @@
-package at.mocode.shared.entitaeten
+package at.mocode.shared.model
 
+import at.mocode.shared.serializers.BigDecimalSerializer
 import at.mocode.shared.serializers.KotlinInstantSerializer
 import at.mocode.shared.serializers.UuidSerializer
 import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
-
 @Serializable
-data class Abteilung(
+data class Artikel(
     @Serializable(with = UuidSerializer::class)
-    val id: Uuid,
-    @Serializable(with = UuidSerializer::class)
-    val bewerbId: Uuid,
-    val bezeichnung: String, // z.B. "R1", "R2/RS2 u. höher"
-    val beginnZeit: String, // TIME als String, z.B. "09:00" oder "anschließend"
-    val istFixeBeginnZeit: Boolean = false,
+    val id: Uuid = uuid4(),
+    var bezeichnung: String,
+    @Serializable(with = BigDecimalSerializer::class) // Beispiel für Serializer
+    var preis: BigDecimal,
+    var einheit: String,
+    var istVerbandsabgabe: Boolean = false,
     @Serializable(with = KotlinInstantSerializer::class)
     val createdAt: Instant = Clock.System.now(),
     @Serializable(with = KotlinInstantSerializer::class)
     var updatedAt: Instant = Clock.System.now()
 )
-

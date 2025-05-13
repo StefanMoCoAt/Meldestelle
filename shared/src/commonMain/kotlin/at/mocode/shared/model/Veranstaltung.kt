@@ -1,4 +1,4 @@
-package at.mocode.shared.entitaeten
+package at.mocode.shared.model
 
 import at.mocode.shared.enums.VeranstalterTyp
 import at.mocode.shared.serializers.KotlinInstantSerializer

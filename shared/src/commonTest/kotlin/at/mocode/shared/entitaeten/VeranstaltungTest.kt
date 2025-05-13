@@ -1,6 +1,7 @@
 package at.mocode.shared.entitaeten
 
 import at.mocode.shared.enums.VeranstalterTyp
+import at.mocode.shared.model.Veranstaltung
 import com.benasher44.uuid.uuid4
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
