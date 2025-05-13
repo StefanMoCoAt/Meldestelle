@@ -1,0 +1,131 @@
+@startuml
+' Allgemeines Layout
+skinparam linetype ortho
+hide empty members
+
+' Entitäten
+entity "Event" as Event {
+  + id: UUID (PK)
+  --
+  bezeichnung: String
+  datumVon: LocalDate
+  datumBis: LocalDate
+  ortName: String
+  veranstalterVereinId: UUID (FK)
+}
+
+entity "Turnier" as Turnier {
+  + id: UUID (PK)
+  --
+  eventId: UUID (FK)
+  oepsTurnierNr: String
+  titel: String
+  sparte: SparteEnum
+  oetoKategorien: List<String>
+  nennschluss: LocalDateTime
+}
+
+entity "Bewerb" as Bewerb {
+  + id: UUID (PK)
+  --
+  turnierId: UUID (FK)
+  nummer: String
+  bezeichnung: String
+  klasseText: String
+  richtverfahren: String
+  startgeld: BigDecimal
+}
+
+entity "Abteilung" as Abteilung {
+  + id: UUID (PK)
+  --
+  bewerbId: UUID (FK)
+  abteilungsKennzeichen: String
+  bezeichnung: String
+}
+
+entity "Person" as Person {
+  + id: UUID (PK)
+  --
+  oepsSatzNr: String
+  nachname: String
+  vorname: String
+  stammVereinId: UUID (FK)
+  datenQuelle: PersonDatenQuelleEnum
+}
+
+entity "Pferd" as Pferd {
+  + id: UUID (PK)
+  --
+  oepsKopfNr: String
+  name: String
+  geburtsjahr: Int
+  besitzerPersonId: UUID (FK)
+  datenQuelle: PferdDatenQuelleEnum
+}
+
+entity "Verein" as Verein {
+  + id: UUID (PK)
+  --
+  oepsVereinsNr: String
+  name: String
+}
+
+entity "Lizenz" as Lizenz {
+  + id: UUID (PK)
+  --
+  personId: UUID (FK)
+  lizenzTypOepsCode: String
+  gueltigBisJahr: Int
+}
+
+entity "Nennung" as Nennung {
+  + id: UUID (PK)
+  --
+  turnierId: UUID (FK)
+  bewerbId: UUID (FK)
+  abteilungId: UUID (FK) ?
+  personId: UUID (FK)
+  pferdId: UUID (FK)
+  status: NennungsStatusEnum
+}
+
+entity "Startfolge" as Startfolge {
+  + id: UUID (PK)
+  --
+  nennungId: UUID (FK)
+  startNummer: Int
+  startZeitGeplant: LocalDateTime
+}
+
+entity "Ergebnis" as Ergebnis {
+  + id: UUID (PK)
+  --
+  startfolgeId: UUID (FK)
+  platzierung: Int
+  wertnote: Double
+  fehler: Double
+  zeitSekunden: Double
+}
+
+' Beziehungen
+Event "1" -- "0..*" Turnier : beinhaltet
+Turnier "1" -- "0..*" Bewerb : hat
+Bewerb "1" -- "0..*" Abteilung : wird geteilt in
+Turnier "1" -- "0..*" Nennung : hat
+Bewerb "1" -- "0..*" Nennung : ist Ziel von
+Abteilung "1" -- "0..*" Nennung : ist Ziel von (optional)
+Person "1" -- "0..*" Nennung : nennt als Reiter
+Pferd "1" -- "0..*" Nennung : wird genannt mit
+Nennung "1" -- "0..1" Startfolge : führt zu
+Startfolge "1" -- "0..1" Ergebnis : erzielt
+Person "1" -- "0..*" Lizenz : besitzt
+Verein "1" -- "0..*" Person : hat als Mitglied (Stammverein)
+Verein "1" -- "0..*" Event : veranstaltet
+Person "1" -- "0..*" Pferd : besitzt (als Besitzer)
+Person "1" -- "0..*" Pferd : ist verantwortlich für (als Verantwortlicher)
+
+
+' TODO: Weitere Entitäten und Beziehungen hinzufügen (Platz, Artikel, FunktionaerZuordnung etc.)
+' TODO: Attribute detaillierter ausarbeiten
+@enduml
