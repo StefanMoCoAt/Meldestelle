@@ -1,131 +1,371 @@
 @startuml
-' Allgemeines Layout
+' Diagramm-Optionen
 skinparam linetype ortho
 hide empty members
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 11
+skinparam roundCorner 10
+allow_mixing
 
-' Entitäten
-entity "Event" as Event {
+' --- Enums (Auswahl, können bei Bedarf erweitert werden) ---
+enum SparteEnum {
+DRESSUR
+SPRINGEN
+VIELSEITIGKEIT
+FAHREN
+VOLTIGIEREN
+WESTERN
+DISTANZ
+ISLAND
+PFERDESPORT_SPIEL
+SONDERPRUEFUNG
+SONSTIGE
+UNBEKANNT
+}
+
+enum RegelwerkTypEnum {
+OETO
+FEI
+SONSTIGE
+}
+
+enum PruefungsaufgabeNationEnum {
+NATIONAL_OEPS
+FEI
+SONSTIGE
+}
+
+enum PruefungsaufgabeRichtverfahrenModusEnum {
+GM
+GT
+NICHT_SPEZIFIZIERT
+}
+
+enum PruefungsaufgabeViereckEnum {
+VIERECK_20x40
+VIERECK_20x60
+ANDERE
+UNBEKANNT
+}
+
+enum ArtDesStechensEnum {
+KEIN_STECHEN
+FEHLER_ZEIT_NORMAL
+FEHLER_ZEIT_AM3
+SIEGERUNDE_SR1_MIT_UEBERNAHME_GP
+SIEGERUNDE_SR2_OHNE_UEBERNAHME_GP
+ZWEI_STECHEN_AM4
+ZWEI_STECHEN_AM6
+SONDERREGELUNG_AUSSCHREIBUNG
+}
+
+enum FunktionaerRolleEnum {
+RICHTER
+PARCOURS_BAUER
+PARCOURSBAU_ASSISTENT
+STEWARD
+TURNIERLEITER
+TURNIERBEAUFTRAGTER
+TIERARZT
+HUFSCHMIED
+SPRECHER
+REITERSPRECHER
+SONSTIGE
+}
+
+enum RichterPositionEnum {
+C
+E
+H
+B
+M
+VORSITZ
+SONSTIGE
+}
+
+enum DatenQuelleEnum {
+OEPS_ZNS
+MANUELL_NATIONAL
+MANUELL_INTERNATIONAL
+SYSTEM_GENERIERTR
+}
+
+enum NennungStatusEnum {
+GEMELDET
+MANUELL_ERFASST
+BESTAETIGT
+NACHGENANNT
+BEZAHLT
+STARTBERECHTIGT
+ABGEMELDET_REITER
+ABGEMELDET_VERANSTALTER
+STORNIERT_SYSTEM
+}
+
+enum BeginnzeitTypEnum {
+FIX_UM
+ANSCHLIESSEND
+CA_UM
+NACH_VORHERIGEM_BEWERB_ABTEILUNG
+}
+
+enum EventStatusEnum {
+IN_PLANUNG
+GENEHMIGT_VERANSTALTER
+OEFFENTLICH_SICHTBAR
+AKTIV
+ABGESCHLOSSEN
+ABGESAGT
+}
+
+enum PlatzTypEnum {
+AUSTRAGUNG
+VORBEREITUNG
+LONGIEREN
+SONSTIGES
+} ' Hinzugefügt für die Platz-Entität
+
+
+' --- Entitäten für verwaltbare Auswahllisten (Lookup Tables / Master Data) ---
+entity "Pruefungsaufgabe" {
+  + id: UUID (PK)
+  --
+  kuerzel: String
+  nameLang: String
+  sparte: SparteEnum
+  nation: PruefungsaufgabeNationEnum
+  richtverfahrenModusDefault: PruefungsaufgabeRichtverfahrenModusEnum?
+  viereckGroesseDefault: PruefungsaufgabeViereckEnum?
+  istAktiv: Boolean
+}
+
+entity "Richtverfahren" {
+  + id: UUID (PK)
+  --
+  code: String
+  bezeichnung: String
+  sparte: SparteEnum
+  oetoParagraphVerweis: String?
+  istAktiv: Boolean
+}
+
+entity "BewerbsKlasseDefinition" as BewerbsKlasseDef {
+  + id: UUID (PK)
+  --
+  kuerzel: String
+  bezeichnung: String
+  sparte: SparteEnum
+  istAktiv: Boolean
+}
+
+entity "BewerbsKategorieOetoDefinition" as BewerbsKatOetoDef {
+  + id: UUID (PK)
+  --
+  kuerzel: String
+  bezeichnung: String
+  sparte: SparteEnum
+  istAktiv: Boolean
+}
+
+' --- Kern-Entitäten ---
+entity "Event" {
   + id: UUID (PK)
   --
   bezeichnung: String
   datumVon: LocalDate
   datumBis: LocalDate
-  ortName: String
-  veranstalterVereinId: UUID (FK)
+  veranstalterVereinId: UUID (FK)?
 }
 
-entity "Turnier" as Turnier {
+entity "Turnier" {
   + id: UUID (PK)
   --
   eventId: UUID (FK)
   oepsTurnierNr: String
   titel: String
   sparte: SparteEnum
-  oetoKategorien: List<String>
-  nennschluss: LocalDateTime
+  oetoKategorieIds: List<UUID> ' FKs zu BewerbsKatOetoDef
+  regelwerkTyp: RegelwerkTypEnum
+  datumVon: LocalDate
+  datumBis: LocalDate
 }
 
-entity "Bewerb" as Bewerb {
+entity "BewerbBasis" {
   + id: UUID (PK)
   --
   turnierId: UUID (FK)
-  nummer: String
-  bezeichnung: String
-  klasseText: String
-  richtverfahren: String
-  startgeld: BigDecimal
+  nummerInAusschreibung: String
+  uebergeordneteBezeichnung: String
+  sparte: SparteEnum
+  klasseId: UUID (FK zu BewerbsKlasseDef.id)?
+  oetoKategorieId: UUID (FK zu BewerbsKatOetoDef.id)
+  dressurDetailsId: UUID (FK, optional)
+  springDetailsId: UUID (FK, optional)
 }
 
-entity "Abteilung" as Abteilung {
+entity "DressurBewerbDetails" {
+  + bewerbBasisId: UUID (PK, FK)
+  --
+  pruefungsaufgabeId: UUID (FK)
+  richtverfahrenId: UUID (FK)
+  viereckGroesse: PruefungsaufgabeViereckEnum
+}
+
+entity "SpringBewerbDetails" {
+  + bewerbBasisId: UUID (PK, FK)
+  --
+  richtverfahrenId: UUID (FK)
+  artDesStechens: ArtDesStechensEnum?
+  parcoursskizzeUrl: String?
+}
+
+entity "Abteilung" {
   + id: UUID (PK)
   --
-  bewerbId: UUID (FK)
+  bewerbBasisId: UUID (FK)
   abteilungsKennzeichen: String
-  bezeichnung: String
+  bezeichnungOeffentlich: String?
 }
 
-entity "Person" as Person {
+entity "Person" {
   + id: UUID (PK)
   --
-  oepsSatzNr: String
   nachname: String
   vorname: String
-  stammVereinId: UUID (FK)
-  datenQuelle: PersonDatenQuelleEnum
+  oepsSatzNr: String?
+  datenQuelle: DatenQuelleEnum
+  stammVereinId: UUID (FK)?
 }
 
-entity "Pferd" as Pferd {
+entity "Pferd" {
   + id: UUID (PK)
   --
-  oepsKopfNr: String
   name: String
-  geburtsjahr: Int
-  besitzerPersonId: UUID (FK)
-  datenQuelle: PferdDatenQuelleEnum
+  oepsKopfNr: String?
+  datenQuelle: DatenQuelleEnum
+  besitzerPersonId: UUID (FK)?
 }
 
-entity "Verein" as Verein {
+entity "Verein" {
   + id: UUID (PK)
   --
   oepsVereinsNr: String
   name: String
 }
 
-entity "Lizenz" as Lizenz {
+entity "Lizenz" {
   + id: UUID (PK)
   --
   personId: UUID (FK)
   lizenzTypOepsCode: String
-  gueltigBisJahr: Int
+  bezeichnung: String
 }
 
-entity "Nennung" as Nennung {
+entity "Nennung" {
   + id: UUID (PK)
   --
   turnierId: UUID (FK)
-  bewerbId: UUID (FK)
-  abteilungId: UUID (FK) ?
+  abteilungId: UUID (FK)
   personId: UUID (FK)
   pferdId: UUID (FK)
-  status: NennungsStatusEnum
+  status: NennungStatusEnum
 }
 
-entity "Startfolge" as Startfolge {
+entity "Startfolge" {
   + id: UUID (PK)
   --
   nennungId: UUID (FK)
+  abteilungId: UUID (FK)
   startNummer: Int
-  startZeitGeplant: LocalDateTime
+  startZeitGeplant: LocalDateTime?
+  pferdepassKontrolliert: Boolean
 }
 
-entity "Ergebnis" as Ergebnis {
+entity "Ergebnis" {
   + id: UUID (PK)
   --
   startfolgeId: UUID (FK)
-  platzierung: Int
-  wertnote: Double
-  fehler: Double
-  zeitSekunden: Double
+  platzierung: Int?
 }
 
-' Beziehungen
-Event "1" -- "0..*" Turnier : beinhaltet
-Turnier "1" -- "0..*" Bewerb : hat
-Bewerb "1" -- "0..*" Abteilung : wird geteilt in
-Turnier "1" -- "0..*" Nennung : hat
-Bewerb "1" -- "0..*" Nennung : ist Ziel von
-Abteilung "1" -- "0..*" Nennung : ist Ziel von (optional)
-Person "1" -- "0..*" Nennung : nennt als Reiter
-Pferd "1" -- "0..*" Nennung : wird genannt mit
-Nennung "1" -- "0..1" Startfolge : führt zu
-Startfolge "1" -- "0..1" Ergebnis : erzielt
-Person "1" -- "0..*" Lizenz : besitzt
-Verein "1" -- "0..*" Person : hat als Mitglied (Stammverein)
-Verein "1" -- "0..*" Event : veranstaltet
-Person "1" -- "0..*" Pferd : besitzt (als Besitzer)
-Person "1" -- "0..*" Pferd : ist verantwortlich für (als Verantwortlicher)
+entity "Platz" {
+  + id: UUID (PK)
+  --
+  name: String
+  typ: PlatzTypEnum
+}
 
+entity "PlatzZuordnungTurnier" as PlatzZuordnung {
+  turnierId: UUID (FK)
+  platzId: UUID (FK)
+  (PK: turnierId, platzId)
+}
 
-' TODO: Weitere Entitäten und Beziehungen hinzufügen (Platz, Artikel, FunktionaerZuordnung etc.)
-' TODO: Attribute detaillierter ausarbeiten
+entity "Artikel" {
+  + id: UUID (PK)
+  --
+  bezeichnung: String
+  standardPreis: BigDecimal?
+}
+
+entity "TurnierArtikel" {
+  + id: UUID (PK)
+  --
+  turnierId: UUID (FK)
+  artikelId: UUID (FK)
+  preis: BigDecimal
+}
+
+entity "FunktionaerEinsatz" {
+  + id: UUID (PK)
+  --
+  personId: UUID (FK)
+  eventId: UUID (FK)
+  turnierId: UUID (FK)?
+  abteilungId: UUID (FK)?
+  rolle: FunktionaerRolleEnum
+  positionRichter: RichterPositionEnum?
+  geplanterStart: LocalDateTime
+  geplantesEnde: LocalDateTime
+}
+
+' --- Beziehungen ---
+Event "1" -- "0..*" Turnier
+Turnier "1" -- "0..*" BewerbBasis
+BewerbBasis "1" -- "0..1" DressurDetails
+BewerbBasis "1" -- "0..1" SpringDetails
+BewerbBasis "1" -- "1..*" Abteilung
+
+Turnier "1" -- "0..*" Nennung
+Abteilung "1" -- "0..*" Nennung
+Person "1" -- "0..*" Nennung
+Pferd "1" -- "0..*" Nennung
+Nennung "1" -- "0..1" Startfolge
+Startfolge "1" -- "0..1" Ergebnis
+
+Person "1" -- "0..*" Lizenz
+Verein "1" -- "0..*" Person : Stammverein
+Person "1" -- "0..*" Pferd : Besitzer
+
+Turnier "1" -- "0..*" TurnierArtikel
+Artikel "1" -- "0..*" TurnierArtikel
+
+Turnier "1" -- "0..*" PlatzZuordnung
+Platz "1" -- "0..*" PlatzZuordnung
+
+Event "1" -- "0..*" FunktionaerEinsatz
+Person "1" -- "0..*" FunktionaerEinsatz
+Turnier --  FunktionaerEinsatz
+Abteilung -- FunktionaerEinsatz
+
+DressurDetails "1" -- "1" Pruefungsaufgabe
+DressurDetails "1" -- "1" Richtverfahren
+SpringDetails "1" -- "1" Richtverfahren
+
+BewerbBasis "1" -- "1" BewerbsKlasseDef
+BewerbBasis "1" -- "1" BewerbsKatOetoDef
+
+Turnier "1" -- "0..*" BewerbsKatOetoDef : "verwendet ÖTO Kategorien"
+
 @enduml
