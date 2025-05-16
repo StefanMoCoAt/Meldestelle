@@ -1,0 +1,389 @@
+@startuml
+!theme vibrant
+
+title Datenbankmodell ÖTO - Service-Orientierte Modulare Struktur (inkl. aller Sparten)
+
+' #####################################################################
+' ### Service OeTO-Verwaltung (Regeln, Lizenzen, Definitionen)      ###
+' #####################################################################
+package Service_OeTO_Verwaltung {
+  entity OETORegelReferenz {
+    + oeto_regel_referenz_id : UUID <<PK>>
+    --
+    paragraph_nummer : VARCHAR
+    kapitel_titel : VARCHAR
+    kurzbeschreibung_regel : TEXT
+    oeto_version_datum : DATE
+    url_detail : VARCHAR
+  }
+
+  entity QualifikationsTyp {
+    + qual_typ_code : VARCHAR <<PK>>
+    --
+    bezeichnung : VARCHAR
+    sparte : VARCHAR
+    # oeto_regel_ref_id : UUID <<FK>>
+  }
+
+  entity LizenzTyp_OEPS {
+    + lizenz_typ_code : VARCHAR(4) <<PK>>
+    --
+    bezeichnung : VARCHAR
+    sparte : VARCHAR
+    # oeto_regel_ref_id : UUID <<FK>>
+  }
+
+  entity AltersklasseDefinition {
+    + altersklasse_code : VARCHAR(4) <<PK>>
+    --
+    bezeichnung : VARCHAR
+    min_alter : INTEGER
+    max_alter : INTEGER
+    # oeto_regel_ref_id : UUID <<FK>>
+  }
+
+  entity Sportfachliche_Stammdaten {
+    + stammdatum_id : UUID <<PK>>
+    --
+    typ : VARCHAR ' z.B. DRESSURAUFGABE, HINDERNISTYP_SPRINGEN, WERTUNGSVERFAHREN_SPRINGEN, RVK_PUNKTETABELLE
+    code : VARCHAR ' z.B. "GA02/23", "OXER_STANDARD", "FEHLER_ZEIT", "RVK_STANDARD_2025"
+    bezeichnung : VARCHAR
+    beschreibung_details : TEXT
+    sparte_zugehoerigkeit : VARCHAR ' Für welche Sparte(n) ist dieser Stammdatensatz relevant
+    # oeto_regel_ref_id : UUID <<FK>>
+  }
+}
+' --- Ende Service OeTO-Verwaltung ---
+
+
+' #####################################################################
+' ### Service ZNS-Daten (Import/Export von OEPS Stammdaten)         ###
+' #####################################################################
+package Service_ZNS_Daten {
+  entity Verein_ZNS {
+    + oeps_vereins_nr : VARCHAR(4) <<PK>>
+    --
+    name : VARCHAR(50)
+  }
+
+  entity Person_ZNS {
+    + oeps_satz_nr_person : VARCHAR(6) <<PK>>
+    --
+    familienname : VARCHAR(50)
+    vorname : VARCHAR(25)
+    geburtsdatum : DATE
+    geschlecht : CHAR(1)
+    nationalitaet_code : VARCHAR(3)
+    # oeps_hauptverein_nr : VARCHAR(4) <<FK>>
+    mitglieds_nr_verein : VARCHAR(8)
+    fei_id_person : VARCHAR(10)
+    ist_auf_sperrliste : BOOLEAN
+    kader_flag : CHAR(1)
+    telefon : VARCHAR(21)
+  }
+
+  entity Person_hat_Lizenz_ZNS {
+    # oeps_satz_nr_person : VARCHAR(6) <<FK>>
+    # lizenz_typ_code : VARCHAR(4) <<FK>>
+    --
+    PRIMARY KEY (oeps_satz_nr_person, lizenz_typ_code)
+    bezahlt_im_jahr : INTEGER
+  }
+
+  entity Person_hat_Qualifikation_ZNS {
+    # oeps_satz_nr_person : VARCHAR(6) <<FK>>
+    # qual_typ_code : VARCHAR <<FK>>
+    --
+    PRIMARY KEY (oeps_satz_nr_person, qual_typ_code)
+  }
+
+  entity Pferd_ZNS {
+    + oeps_satz_nr_pferd : VARCHAR(10) <<PK>>
+    --
+    name : VARCHAR(30)
+    lebensnummer : VARCHAR(9)
+    geburtsjahr : INTEGER
+    geschlecht : CHAR(1)
+    farbe : VARCHAR(15)
+    abstammung_vater_name : VARCHAR(30)
+    # oeps_verein_nr_pferd : VARCHAR(4) <<FK>>
+    letzte_zahlung_pferdegebuehr_jahr : INTEGER
+    fei_pass_nr : VARCHAR(10)
+  }
+}
+' --- Ende Service ZNS-Daten ---
+
+
+' #####################################################################
+' ### Service Veranstaltungsplanung (Events, Turniere, Bewerbe)     ###
+' #####################################################################
+package Service_Veranstaltungsplanung {
+  entity VeranstaltungsRahmen {
+    + veranst_rahmen_id : UUID <<PK>>
+    --
+    name : VARCHAR
+    ' # austragungsort_id : UUID <<FK>>
+    datum_von_gesamt : DATE
+    datum_bis_gesamt : DATE
+    # hauptveranstalter_verein_nr : VARCHAR(4) <<FK>>
+    beschreibung : TEXT
+  }
+
+  entity Turnier_OEPS {
+    + oeps_turnier_nr : VARCHAR(5) <<PK>>
+    --
+    # veranst_rahmen_id : UUID <<FK>>
+    name_zusatz : VARCHAR
+    datum_von_turnier : DATE
+    datum_bis_turnier : DATE
+    kategorie_text_turnier : VARCHAR(25)
+    turnierart_sparte : VARCHAR
+    ' # ausschreibung_dok_id : UUID <<FK>>
+  }
+
+  entity Pruefung_OEPS {
+    + pruefung_db_id : UUID <<PK>>
+    --
+    # oeps_turnier_nr : VARCHAR(5) <<FK>>
+    oeps_bewerb_nr_display : VARCHAR(3)
+    name_text_pruefung : VARCHAR(35)
+    klasse_text : VARCHAR(4)
+    kategorie_text_pruefung : VARCHAR(8)
+    datum_pruefung : DATE
+    art_disziplin_haupt : VARCHAR ' Zur Filterung für spezifische Details: Dressur, Springen, Vielseitigkeit, RVK
+    # oeto_regel_ref_id_pruefung : UUID <<FK>>
+  }
+
+  entity Pruefung_Abteilung {
+    + pruefung_abteilung_db_id : UUID <<PK>>
+    --
+    # pruefung_db_id : UUID <<FK>>
+    oeps_abteilung_nr : INTEGER
+    bezeichnung_abteilung : VARCHAR
+    anzahl_starter_abteilung_gemeldet : INTEGER
+    geldpreis_summe_abteilung : DECIMAL
+  }
+
+  entity Meisterschaft_Cup_Serie {
+    + mcs_id : UUID <<PK>>
+    --
+    name : VARCHAR
+    typ : VARCHAR
+    jahr : INTEGER
+    sparte : VARCHAR
+    # oeto_regel_ref_id_mcs : UUID <<FK>>
+  }
+
+  entity MCS_Wertungspruefung {
+    # mcs_id : UUID <<FK>>
+    # pruefung_abteilung_db_id : UUID <<FK>>
+    --
+    PRIMARY KEY (mcs_id, pruefung_abteilung_db_id)
+    faktor_fuer_wertung : DECIMAL
+    bemerkung : VARCHAR
+  }
+
+  ' --- Spartenspezifische Details für Prüfungen ---
+  package Sportfachliche_Details_Pruefung {
+    entity DressurPruefungSpezifika {
+      # pruefung_db_id : UUID <<PK>> <<FK>>
+      --
+      # aufgabe_stammdatum_id : UUID <<FK>> ' Service_OeTO_Verwaltung.Sportfachliche_Stammdaten (Typ DRESSURAUFGABE)
+      platz_groesse_code : VARCHAR
+      # oeto_regel_ref_id_dressur : UUID <<FK>>
+    }
+    entity SpringenPruefungSpezifika {
+      # pruefung_db_id : UUID <<PK>> <<FK>>
+      --
+      # parcours_designer_person_id : VARCHAR(6) <<FK>> ' Service_ZNS_Daten.Person_ZNS
+      anzahl_hindernisse : INTEGER
+      hoehe_max_cm : INTEGER
+      erlaubte_zeit_sek : INTEGER
+      # wertungs_verfahren_stammdatum_id : UUID <<FK>> ' Service_OeTO_Verwaltung.Sportfachliche_Stammdaten (Typ WERTUNGSVERFAHREN_SPRINGEN)
+      anzahl_umlaeufe : INTEGER
+      anzahl_stechen : INTEGER
+      # oeto_regel_ref_id_springen : UUID <<FK>>
+    }
+    entity VielseitigkeitPruefungSpezifika {
+      # pruefung_db_id : UUID <<PK>> <<FK>> ' Hauptprüfung VS
+      --
+      # dressur_aufgabe_stammdatum_id : UUID <<FK>> ' Service_OeTO_Verwaltung.Sportfachliche_Stammdaten (Typ DRESSURAUFGABE)
+      gelaende_laenge_m : INTEGER
+      gelaende_anzahl_hindernisse : INTEGER
+      gelaende_erlaubte_zeit_sek : INTEGER
+      gelaende_optimalzeit_sek : INTEGER
+      springen_parcours_anforderungen_text : VARCHAR
+      # oeto_regel_ref_id_vs : UUID <<FK>>
+    }
+    entity ReitervierkampfPruefungSpezifika {
+      # pruefung_db_id : UUID <<PK>> <<FK>>
+      --
+      dressur_anforderungen_text : VARCHAR ' oder Verweis auf Aufgabe
+      springen_anforderungen_text : VARCHAR ' oder Verweis auf Parcoursdetails
+      lauf_distanz_m : INTEGER
+      schwimm_distanz_m : INTEGER
+      # punkte_tabelle_stammdatum_id : UUID <<FK>> ' Service_OeTO_Verwaltung.Sportfachliche_Stammdaten (Typ RVK_PUNKTETABELLE)
+      # oeto_regel_ref_id_rvk : UUID <<FK>>
+    }
+  }
+}
+' --- Ende Service Veranstaltungsplanung ---
+
+
+' #####################################################################
+' ### Service Nennungsabwicklung (Nennungen, Ergebnisse)            ###
+' #####################################################################
+package Service_Nennungsabwicklung {
+  entity Nennung_OEPS {
+    + nennung_db_id : UUID <<PK>>
+    --
+    # pruefung_abteilung_db_id : UUID <<FK>>
+    # oeps_satz_nr_reiter : VARCHAR(6) <<FK>>
+    # oeps_satz_nr_pferd : VARCHAR(10) <<FK>>
+    # genutzte_lizenz_person_satz_nr : VARCHAR(6) <<FK>>
+    # genutzte_lizenz_typ_code : VARCHAR(4) <<FK>>
+    nennungs_zeitpunkt : TIMESTAMP
+    status_nennung : VARCHAR
+    kopf_nr_pferd_fuer_nennung : VARCHAR(4)
+  }
+
+  entity Ergebnis_OEPS_Zeile {
+    + ergebnis_zeile_db_id : UUID <<PK>>
+    --
+    # nennung_db_id : UUID <<FK>>
+    # pruefung_abteilung_db_id : UUID <<FK>>
+    platz : INTEGER
+    ausschluss_disq_code : CHAR(1)
+    punkte_wertnote_text_ergebnis : VARCHAR(6)
+    zeit_prozent_text_ergebnis : VARCHAR(5)
+    stechen_sr_info_text_ergebnis : VARCHAR(4)
+    geldpreis_betrag_ergebnis : DECIMAL
+    nation_code_fuer_ergebnis : VARCHAR(3)
+    platziert_flag : CHAR(1)
+  }
+
+  ' --- Spartenspezifische Details für Ergebnisse ---
+  package Sportfachliche_Details_Ergebnis {
+    entity DressurErgebnisSpezifika {
+      # ergebnis_zeile_db_id : UUID <<PK>> <<FK>>
+      --
+      gesamt_wertnote : DECIMAL(5,3)
+      gesamt_prozent : DECIMAL(5,2)
+      ' Hier könnten Details zu Richterbewertungen pro Lektion folgen (eigene Entitäten)
+    }
+    entity SpringenErgebnisSpezifika {
+      # ergebnis_zeile_db_id : UUID <<PK>> <<FK>>
+      --
+      stilnote_gesamt : DECIMAL(3,1) ' Falls zutreffend
+      ' Für Details pro Umlauf/Stechen: separate Entität SpringenUmlaufErgebnis
+    }
+    ' Kind von SpringenErgebnisSpezifika oder direkt von Ergebnis_OEPS_Zeile
+    entity SpringenUmlaufErgebnis {
+      + umlauf_ergebnis_id : UUID <<PK>>
+      --
+      # ergebnis_zeile_db_id : UUID <<FK>> ' oder springen_ergebnis_spezifika_id
+      umlauf_oder_stechen_nr : INTEGER ' 1=Grundumlauf, 2=Stechen etc.
+      fehlerpunkte_hindernis : DECIMAL(4,2)
+      fehlerpunkte_zeit : DECIMAL(4,2)
+      zeit_benoetigt_sek : DECIMAL(5,2)
+      stilnote_umlauf : DECIMAL(3,1)
+    }
+    entity VielseitigkeitErgebnisSpezifika {
+      # ergebnis_zeile_db_id : UUID <<PK>> <<FK>> ' Gesamtergebnis VS
+      --
+      minuspunkte_dressur : DECIMAL(5,2)
+      minuspunkte_gelaende_hindernis : DECIMAL(5,2)
+      minuspunkte_gelaende_zeit : DECIMAL(5,2)
+      minuspunkte_springen_hindernis : DECIMAL(5,2)
+      minuspunkte_springen_zeit : DECIMAL(5,2)
+      gesamt_minuspunkte : DECIMAL(5,2)
+      ' Ggf. Verweise auf Detailergebnisse der Teilprüfungen, wenn diese als eigene Ergebnis_OEPS_Zeile erfasst werden
+    }
+    entity ReitervierkampfErgebnisSpezifika {
+      # ergebnis_zeile_db_id : UUID <<PK>> <<FK>> ' Gesamtergebnis RVK
+      --
+      punkte_dressur : INTEGER
+      leistung_dressur_roh : VARCHAR ' z.B. Wertnote
+      punkte_springen : INTEGER
+      leistung_springen_roh : VARCHAR ' z.B. Fehler/Zeit
+      punkte_laufen : INTEGER
+      leistung_laufen_roh : VARCHAR ' z.B. Zeit
+      punkte_schwimmen : INTEGER
+      leistung_schwimmen_roh : VARCHAR ' z.B. Zeit
+      gesamt_punkte_rvk : INTEGER
+    }
+  }
+}
+' --- Ende Service Nennungsabwicklung ---
+
+
+' #####################################################################
+' ### Definition der Beziehungen (insbesondere Paketübergreifend)   ###
+' #####################################################################
+
+' Service OeTO-Verwaltung Beziehungen
+Service_OeTO_Verwaltung.QualifikationsTyp -- Service_OeTO_Verwaltung.OETORegelReferenz
+Service_OeTO_Verwaltung.LizenzTyp_OEPS -- Service_OeTO_Verwaltung.OETORegelReferenz
+Service_OeTO_Verwaltung.AltersklasseDefinition -- Service_OeTO_Verwaltung.OETORegelReferenz
+Service_OeTO_Verwaltung.Sportfachliche_Stammdaten -- Service_OeTO_Verwaltung.OETORegelReferenz
+
+' Service ZNS-Daten Beziehungen
+Service_ZNS_Daten.Person_ZNS -- Service_ZNS_Daten.Verein_ZNS
+Service_ZNS_Daten.Person_hat_Lizenz_ZNS -- Service_ZNS_Daten.Person_ZNS
+Service_ZNS_Daten.Person_hat_Lizenz_ZNS -- Service_OeTO_Verwaltung.LizenzTyp_OEPS
+Service_ZNS_Daten.Person_hat_Qualifikation_ZNS -- Service_ZNS_Daten.Person_ZNS
+Service_ZNS_Daten.Person_hat_Qualifikation_ZNS -- Service_OeTO_Verwaltung.QualifikationsTyp
+Service_ZNS_Daten.Pferd_ZNS -- Service_ZNS_Daten.Verein_ZNS
+
+' Service Veranstaltungsplanung Beziehungen
+Service_Veranstaltungsplanung.VeranstaltungsRahmen -- Service_ZNS_Daten.Verein_ZNS : "veranstaltet von"
+Service_Veranstaltungsplanung.Turnier_OEPS -- Service_Veranstaltungsplanung.VeranstaltungsRahmen : "ist Teil von"
+Service_Veranstaltungsplanung.Pruefung_OEPS -- Service_Veranstaltungsplanung.Turnier_OEPS : "gehört zu"
+Service_Veranstaltungsplanung.Pruefung_OEPS -- Service_OeTO_Verwaltung.OETORegelReferenz : "unterliegt Regel"
+Service_Veranstaltungsplanung.Pruefung_Abteilung -- Service_Veranstaltungsplanung.Pruefung_OEPS : "ist Abteilung von"
+Service_Veranstaltungsplanung.Meisterschaft_Cup_Serie -- Service_OeTO_Verwaltung.OETORegelReferenz : "hat Regelwerk"
+Service_Veranstaltungsplanung.MCS_Wertungspruefung -- Service_Veranstaltungsplanung.Meisterschaft_Cup_Serie
+Service_Veranstaltungsplanung.MCS_Wertungspruefung -- Service_Veranstaltungsplanung.Pruefung_Abteilung
+
+' Spartendetails für Prüfung
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.DressurPruefungSpezifika -- Service_Veranstaltungsplanung.Pruefung_OEPS
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.DressurPruefungSpezifika -- Service_OeTO_Verwaltung.Sportfachliche_Stammdaten : "nutzt Aufgabe"
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.DressurPruefungSpezifika -- Service_OeTO_Verwaltung.OETORegelReferenz
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.SpringenPruefungSpezifika -- Service_Veranstaltungsplanung.Pruefung_OEPS
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.SpringenPruefungSpezifika -- Service_ZNS_Daten.Person_ZNS : "Parcoursdesigner"
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.SpringenPruefungSpezifika -- Service_OeTO_Verwaltung.Sportfachliche_Stammdaten : "nach Wertungsart"
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.SpringenPruefungSpezifika -- Service_OeTO_Verwaltung.OETORegelReferenz
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.VielseitigkeitPruefungSpezifika -- Service_Veranstaltungsplanung.Pruefung_OEPS
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.VielseitigkeitPruefungSpezifika -- Service_OeTO_Verwaltung.Sportfachliche_Stammdaten : "nutzt Dressuraufgabe"
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.VielseitigkeitPruefungSpezifika -- Service_OeTO_Verwaltung.OETORegelReferenz
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.ReitervierkampfPruefungSpezifika -- Service_Veranstaltungsplanung.Pruefung_OEPS
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.ReitervierkampfPruefungSpezifika -- Service_OeTO_Verwaltung.Sportfachliche_Stammdaten : "nutzt Punktetabelle"
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.ReitervierkampfPruefungSpezifika -- Service_OeTO_Verwaltung.OETORegelReferenz
+
+
+' Service Nennungsabwicklung Beziehungen
+Service_Nennungsabwicklung.Nennung_OEPS -- Service_Veranstaltungsplanung.Pruefung_Abteilung : "für"
+Service_Nennungsabwicklung.Nennung_OEPS -- Service_ZNS_Daten.Person_ZNS : "durch Reiter"
+Service_Nennungsabwicklung.Nennung_OEPS -- Service_ZNS_Daten.Pferd_ZNS : "mit Pferd"
+Service_Nennungsabwicklung.Nennung_OEPS -- Service_ZNS_Daten.Person_hat_Lizenz_ZNS : "unter Lizenz"
+Service_Nennungsabwicklung.Ergebnis_OEPS_Zeile -- Service_Nennungsabwicklung.Nennung_OEPS : "von"
+Service_Nennungsabwicklung.Ergebnis_OEPS_Zeile -- Service_Veranstaltungsplanung.Pruefung_Abteilung : "in Abteilung"
+
+' Spartendetails für Ergebnis
+Service_Nennungsabwicklung.Sportfachliche_Details_Ergebnis.DressurErgebnisSpezifika -- Service_Nennungsabwicklung.Ergebnis_OEPS_Zeile
+Service_Nennungsabwicklung.Sportfachliche_Details_Ergebnis.SpringenErgebnisSpezifika -- Service_Nennungsabwicklung.Ergebnis_OEPS_Zeile
+Service_Nennungsabwicklung.Sportfachliche_Details_Ergebnis.SpringenUmlaufErgebnis -- Service_Nennungsabwicklung.Sportfachliche_Details_Ergebnis.SpringenErgebnisSpezifika : "Detail zu" ' Oder zu Ergebnis_OEPS_Zeile
+Service_Nennungsabwicklung.Sportfachliche_Details_Ergebnis.VielseitigkeitErgebnisSpezifika -- Service_Nennungsabwicklung.Ergebnis_OEPS_Zeile
+Service_Nennungsabwicklung.Sportfachliche_Details_Ergebnis.ReitervierkampfErgebnisSpezifika -- Service_Nennungsabwicklung.Ergebnis_OEPS_Zeile
+
+
+' --- Allgemeine Hinweise ---
+' - Alle vier Sparten (Dressur, Springen, Vielseitigkeit, Reitervierkampf) sind nun mit spezifischen
+'   Detailentitäten für Prüfung und Ergebnis exemplarisch im Modell enthalten.
+' - Die Komplexität und der Detaillierungsgrad dieser spartenspezifischen Entitäten können je nach
+'   Anforderung noch deutlich erweitert werden (z.B. detaillierte Hindernisprotokolle im Springen,
+'   Richterbewertungsbögen für Dressur, Phasen-Ergebnisse für Vielseitigkeit).
+' - Dieses Diagramm stellt einen umfassenden Entwurf dar, der als Grundlage für die weitere
+'    iterative Verfeinerung dienen kann.
+
+@enduml

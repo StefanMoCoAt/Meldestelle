@@ -1,0 +1,68 @@
+@startuml
+
+enum KurzbezeichnungTurnierBewerbE {
+  CDN ... Dressur
+  CSN ... Springen
+  CCN ... Vielseitigkeit
+  CAN ... Fahren
+  CVN ... Voltigieren
+  CEN ... Distanzreiten
+  CHNI ... Turniere für Islandpferde
+  CHNV ... Reitervierkampf
+  TREC ... Orientierungsreiten
+  CPEDN ... Pferdesportler mit Behinderung Dressur
+  CPEAN ... Pferdesportler mit Behinderung Fahren
+  CMGN ... Mounted Games
+  CWEN ... Working Equitation
+}
+note top of KurzbezeichnungTurnierBewerbE
+   Die Gliederung nach Sparten und die Kurzbezeichnung von Tur-
+   nieren und Bewerben, die nach der ÖTO ausgetragen werden,
+   erfolgt in Übereinstimmung mit der FEI. Die angegebenen
+   Bezeichnungen gelten für nationale Turniere;
+end note
+
+enum TeilnehmerkreisesE {
+  J ... JG, JN und/oder YR
+  P ... Ponys
+  N ... Noriker
+  H ... Haflinger
+  L ... Ländliche Reiter auf Warmblutpferden
+  A ... Vollblutaraberbewerbe
+  K ... Kaltblut
+  D ... Damensattel
+
+}
+note top of TeilnehmerkreisesE
+   Die Einschränkungen des Teilnehmerkreises für Turniere oder
+   einzelne Bewerbe auf die folgenden Reiter oder Pferde durch
+   die Ausschreibung sind in der Bezeichnung durch Anhängen
+   des angegebenen Buchstaben zu berücksichtigen:
+end note
+
+enum TurnierGliederungE {
+  A* ... -A*
+  A ... -A
+  B* ... -B*
+  B ... -B
+  C ... -C
+  C-NEU ... -C-NEU
+}
+ note top of TurnierGliederungE
+  Zur Gliederung nach den Anforderungen werden nationale Tur-
+  niere in die Kategorien A*, A, B*, B, C und C-NEU eingeteilt. Der
+  Kurzbezeichnung gemäß Abs. 2 und 3 ist zur Kennzeichnung
+  entweder -A*, -A, -B*, -B, -C oder -C-NEU anzuhängen.
+ end note
+
+entity "Ergebnis" {
+  + id: UUID (PK)
+  --
+  startfolgeId: UUID (FK)
+  platzierung: Int?
+}
+
+
+
+
+@enduml
