@@ -1,7 +1,7 @@
 package at.mocode.shared.model
 
 import at.mocode.shared.enums.BeginnzeitTyp
-import at.mocode.shared.enums.Sparte
+import at.mocode.shared.enums.SparteE
 import at.mocode.shared.serializers.*
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
@@ -24,7 +24,7 @@ data class Bewerb(
     var nummer: String,                     // Offizielle Nummer aus Ausschreibung, z.B. "12"
     var bezeichnungOffiziell: String,       // z.B. "Dressurprüfung Kl. L", "Standardspringprüfung 115cm"
     var internerName: String?,              // Für Listen, falls abweichend/kürzer
-    var sparte: Sparte,
+    var sparteE: SparteE,
     var klasse: String?,                    // z.B. "L", "115cm", "Reiterpass"
     var kategorieOetoDesBewerbs: String?, // ÖTO Kategorie, z.B. "CDN-C Neu". Kann vom Turnier abweichen/spezifischer sein.
     // Wird für die Gültigkeit von Regeln/Lizenzen herangezogen.

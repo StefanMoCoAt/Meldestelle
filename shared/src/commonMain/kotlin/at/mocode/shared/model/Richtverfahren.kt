@@ -1,6 +1,6 @@
 package at.mocode.shared.model
 
-import at.mocode.shared.enums.Sparte
+import at.mocode.shared.enums.SparteE
 import at.mocode.shared.serializers.KotlinInstantSerializer
 import at.mocode.shared.serializers.UuidSerializer
 import com.benasher44.uuid.Uuid
@@ -15,7 +15,7 @@ data class Richtverfahren(
     val id: Uuid = uuid4(),
     var code: String, // Eindeutiger Code, z.B. "A", "A2_OETO204", "C_ZEIT", "STIL_A_IDEALZEIT"
     var bezeichnung: String, // z.B. "Standardspringprüfung nach Fehlern und Zeit (§204 A2)", "Stilspringprüfung Kl. A mit Idealzeit"
-    var sparte: Sparte,
+    var sparteE: SparteE,
     var basisRegelnBeschreibungKurz: String?, // Kurze Beschreibung oder Hauptmerkmal
     var oetoParagraphVerweis: String?, // z.B. "ÖTO §204 A2", "ÖTO §104"
     var hatStechen: Boolean = false,

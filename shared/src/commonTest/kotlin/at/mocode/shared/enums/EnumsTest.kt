@@ -87,40 +87,40 @@ class EnumsTest {
     @Test
     fun testSparteEnum() {
         // Test all enum values
-        val values = Sparte.entries.toTypedArray()
+        val values = SparteE.entries.toTypedArray()
         assertEquals(12, values.size)
 
         // Test specific enum values
-        assertEquals(Sparte.DRESSUR, values[0])
-        assertEquals(Sparte.SPRINGEN, values[1])
-        assertEquals(Sparte.VIELSEITIGKEIT, values[2])
-        assertEquals(Sparte.FAHREN, values[3])
-        assertEquals(Sparte.VOLTIGIEREN, values[4])
-        assertEquals(Sparte.WESTERN, values[5])
-        assertEquals(Sparte.DISTANZ, values[6])
-        assertEquals(Sparte.ISLAND, values[7])
-        assertEquals(Sparte.PFERDESPORT_SPIEL, values[8])
-        assertEquals(Sparte.BASIS, values[9])
-        assertEquals(Sparte.KOMBINIERT, values[10])
-        assertEquals(Sparte.SONSTIGES, values[11])
+        assertEquals(SparteE.DRESSUR, values[0])
+        assertEquals(SparteE.SPRINGEN, values[1])
+        assertEquals(SparteE.VIELSEITIGKEIT, values[2])
+        assertEquals(SparteE.FAHREN, values[3])
+        assertEquals(SparteE.VOLTIGIEREN, values[4])
+        assertEquals(SparteE.WESTERN, values[5])
+        assertEquals(SparteE.DISTANZ, values[6])
+        assertEquals(SparteE.ISLAND, values[7])
+        assertEquals(SparteE.PFERDESPORT_SPIEL, values[8])
+        assertEquals(SparteE.BASIS, values[9])
+        assertEquals(SparteE.KOMBINIERT, values[10])
+        assertEquals(SparteE.SONSTIGES, values[11])
 
         // Test serialization and deserialization
-        testEnumSerialization(Sparte.DRESSUR)
-        testEnumSerialization(Sparte.SPRINGEN)
-        testEnumSerialization(Sparte.VIELSEITIGKEIT)
-        testEnumSerialization(Sparte.FAHREN)
-        testEnumSerialization(Sparte.VOLTIGIEREN)
-        testEnumSerialization(Sparte.WESTERN)
-        testEnumSerialization(Sparte.DISTANZ)
-        testEnumSerialization(Sparte.ISLAND)
-        testEnumSerialization(Sparte.PFERDESPORT_SPIEL)
-        testEnumSerialization(Sparte.BASIS)
-        testEnumSerialization(Sparte.KOMBINIERT)
-        testEnumSerialization(Sparte.SONSTIGES)
+        testEnumSerialization(SparteE.DRESSUR)
+        testEnumSerialization(SparteE.SPRINGEN)
+        testEnumSerialization(SparteE.VIELSEITIGKEIT)
+        testEnumSerialization(SparteE.FAHREN)
+        testEnumSerialization(SparteE.VOLTIGIEREN)
+        testEnumSerialization(SparteE.WESTERN)
+        testEnumSerialization(SparteE.DISTANZ)
+        testEnumSerialization(SparteE.ISLAND)
+        testEnumSerialization(SparteE.PFERDESPORT_SPIEL)
+        testEnumSerialization(SparteE.BASIS)
+        testEnumSerialization(SparteE.KOMBINIERT)
+        testEnumSerialization(SparteE.SONSTIGES)
 
         // Test comparison
-        assertEquals(Sparte.DRESSUR, Sparte.DRESSUR)
-        assertNotEquals(Sparte.DRESSUR, Sparte.SPRINGEN)
+        assertEquals(SparteE.DRESSUR, SparteE.DRESSUR)
+        assertNotEquals(SparteE.DRESSUR, SparteE.SPRINGEN)
     }
 
     @Test
@@ -455,7 +455,7 @@ class EnumsTest {
     }
 
     // Test serialization for a specific enum value
-    private fun testEnumSerialization(value: Sparte) {
+    private fun testEnumSerialization(value: SparteE) {
         val json = Json { prettyPrint = true }
         val jsonString = json.encodeToString(value)
 
@@ -463,7 +463,7 @@ class EnumsTest {
         assertEquals("\"${value.name}\"", jsonString)
 
         // Verify deserialization
-        val deserializedValue = json.decodeFromString<Sparte>(jsonString)
+        val deserializedValue = json.decodeFromString<SparteE>(jsonString)
         assertEquals(value, deserializedValue)
     }
 

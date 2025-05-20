@@ -1,7 +1,7 @@
 package at.mocode.shared.stammdaten
 
 import at.mocode.shared.enums.LizenzTyp
-import at.mocode.shared.enums.Sparte
+import at.mocode.shared.enums.SparteE
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -16,7 +16,7 @@ class LizenzInfoTest {
         val lizenzInfo = LizenzInfo(
             lizenzTyp = LizenzTyp.REITER,
             stufe = null,
-            sparte = null,
+            sparteE = null,
             gueltigBisJahr = null,
             ausgestelltAm = null
         )
@@ -26,7 +26,7 @@ class LizenzInfoTest {
 
         // Verify optional fields are null
         assertEquals(null, lizenzInfo.stufe)
-        assertEquals(null, lizenzInfo.sparte)
+        assertEquals(null, lizenzInfo.sparteE)
         assertEquals(null, lizenzInfo.gueltigBisJahr)
         assertEquals(null, lizenzInfo.ausgestelltAm)
     }
@@ -39,7 +39,7 @@ class LizenzInfoTest {
         val lizenzInfo = LizenzInfo(
             lizenzTyp = LizenzTyp.FAHRER,
             stufe = "A",
-            sparte = Sparte.DRESSUR,
+            sparteE = SparteE.DRESSUR,
             gueltigBisJahr = 2024,
             ausgestelltAm = ausgestelltAm
         )
@@ -47,7 +47,7 @@ class LizenzInfoTest {
         // Verify all fields
         assertEquals(LizenzTyp.FAHRER, lizenzInfo.lizenzTyp)
         assertEquals("A", lizenzInfo.stufe)
-        assertEquals(Sparte.DRESSUR, lizenzInfo.sparte)
+        assertEquals(SparteE.DRESSUR, lizenzInfo.sparteE)
         assertEquals(2024, lizenzInfo.gueltigBisJahr)
         assertEquals(ausgestelltAm, lizenzInfo.ausgestelltAm)
     }
@@ -60,7 +60,7 @@ class LizenzInfoTest {
         val lizenzInfo = LizenzInfo(
             lizenzTyp = LizenzTyp.VOLTIGIERER,
             stufe = "B",
-            sparte = Sparte.VOLTIGIEREN,
+            sparteE = SparteE.VOLTIGIEREN,
             gueltigBisJahr = 2025,
             ausgestelltAm = ausgestelltAm
         )
@@ -90,7 +90,7 @@ class LizenzInfoTest {
         // Verify deserialized object matches original
         assertEquals(lizenzInfo.lizenzTyp, deserializedLizenzInfo.lizenzTyp)
         assertEquals(lizenzInfo.stufe, deserializedLizenzInfo.stufe)
-        assertEquals(lizenzInfo.sparte, deserializedLizenzInfo.sparte)
+        assertEquals(lizenzInfo.sparteE, deserializedLizenzInfo.sparteE)
         assertEquals(lizenzInfo.gueltigBisJahr, deserializedLizenzInfo.gueltigBisJahr)
         assertEquals(lizenzInfo.ausgestelltAm, deserializedLizenzInfo.ausgestelltAm)
     }
@@ -101,7 +101,7 @@ class LizenzInfoTest {
         val original = LizenzInfo(
             lizenzTyp = LizenzTyp.WESTERN,
             stufe = "C",
-            sparte = Sparte.WESTERN,
+            sparteE = SparteE.WESTERN,
             gueltigBisJahr = 2023,
             ausgestelltAm = null
         )
@@ -115,7 +115,7 @@ class LizenzInfoTest {
 
         // Verify copied properties
         assertEquals(original.lizenzTyp, copy.lizenzTyp)
-        assertEquals(original.sparte, copy.sparte)
+        assertEquals(original.sparteE, copy.sparteE)
 
         // Verify modified properties
         assertEquals("B", copy.stufe)
@@ -148,7 +148,7 @@ class LizenzInfoTest {
             val lizenzInfo = LizenzInfo(
                 lizenzTyp = lizenzTyp,
                 stufe = "Test",
-                sparte = Sparte.SONSTIGES,
+                sparteE = SparteE.SONSTIGES,
                 gueltigBisJahr = 2024,
                 ausgestelltAm = null
             )

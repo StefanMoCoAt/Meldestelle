@@ -3,7 +3,7 @@ package at.mocode.shared.stammdaten
 import at.mocode.shared.enums.FunktionaerRolle
 import at.mocode.shared.enums.Geschlecht
 import at.mocode.shared.enums.LizenzTyp
-import at.mocode.shared.enums.Sparte
+import at.mocode.shared.enums.SparteE
 import com.benasher44.uuid.uuid4
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -83,7 +83,7 @@ class PersonTest {
             LizenzInfo(
                 lizenzTyp = LizenzTyp.REITER,
                 stufe = "A",
-                sparte = Sparte.SPRINGEN,
+                sparteE = SparteE.SPRINGEN,
                 gueltigBisJahr = 2024,
                 ausgestelltAm = null
             )
@@ -180,7 +180,7 @@ class PersonTest {
             LizenzInfo(
                 lizenzTyp = LizenzTyp.FAHRER,
                 stufe = "B",
-                sparte = Sparte.DRESSUR,
+                sparteE = SparteE.DRESSUR,
                 gueltigBisJahr = 2025,
                 ausgestelltAm = null
             )
@@ -250,7 +250,7 @@ class PersonTest {
             LizenzInfo(
                 lizenzTyp = LizenzTyp.REITER,
                 stufe = "A",
-                sparte = Sparte.SPRINGEN,
+                sparteE = SparteE.SPRINGEN,
                 gueltigBisJahr = 2024,
                 ausgestelltAm = null
             )

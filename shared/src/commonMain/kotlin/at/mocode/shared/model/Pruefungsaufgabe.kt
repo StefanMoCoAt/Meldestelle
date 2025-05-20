@@ -1,6 +1,6 @@
 package at.mocode.shared.model
 
-import at.mocode.shared.enums.Sparte
+import at.mocode.shared.enums.SparteE
 import at.mocode.shared.serializers.KotlinInstantSerializer
 import at.mocode.shared.serializers.UuidSerializer
 import com.benasher44.uuid.Uuid
@@ -16,7 +16,7 @@ data class Pruefungsaufgabe(
     var kuerzel: String, // Eindeutiges Kürzel, z.B. "A1", "LF3", "FEI GP PSG"
     var nameLang: String, // Vollständiger Name, z.B. "Dressuraufgabe A1 (GM, 20x40m)"
     var kategorieText: String?, // Übergeordnete Kategorie, z.B. "Dressuraufgaben Klasse A", "FEI Grand Prix Serie"
-    var sparte: Sparte, // Primär DRESSUR, aber auch für Vielseitigkeit etc.
+    var sparteE: SparteE, // Primär DRESSUR, aber auch für Vielseitigkeit etc.
     var nation: PruefungsaufgabeNationEnum = PruefungsaufgabeNationEnum.NATIONAL,
     var richtverfahrenModusDefault: PruefungsaufgabeRichtverfahrenModusEnum?, // GM, GT - als Default für diese Aufgabe
     var viereckGroesseDefault: PruefungsaufgabeViereckEnum?, // VIERECK_20x40, VIERECK_20x60 - als Default

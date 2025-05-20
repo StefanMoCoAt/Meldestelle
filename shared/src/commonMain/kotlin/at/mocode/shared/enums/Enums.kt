@@ -3,13 +3,43 @@ package at.mocode.shared.enums
 import kotlinx.serialization.Serializable
 
 @Serializable
+enum class RegelwerkTypE { OETO, FEI, SONSTIGE }
+
+@Serializable
+enum class DatenQuelleE { OEPS_ZNS, MANUELL }
+
+@Serializable
+enum class VerbandE { OEPS, FEI, SONSTIGE }
+
+@Serializable
+enum class LizenzKategorieE { REITERLIZENZ, FAHRERLIZENZ, STARTKARTE }
+
+@Serializable
+enum class SportfachStammdatenTypE { DRESSURAUFGABE, WERTUNGSVERFAHREN_SPRINGEN, WERTUNGSVERFAHREN_DRESSUR, BEWERBSKLASSE, BEWERBSKATEGORIE_OETO }
+
+@Serializable
+enum class PruefungsViereckE { VIERECK_20X40, VIERECK_20X60 }
+
+@Serializable
+enum class RichtverfahrenModusE { GM, GT }
+
+@Serializable
+enum class GeschlechtE { M, W }
+
+@Serializable
+enum class PferdeGeschlechtE {
+    HENGST, STUTE, WALLACH, UNBEKANNT
+}
+
+
+@Serializable
 enum class VeranstalterTyp { VEREIN, FIRMA, PRIVATPERSON, SONSTIGE, UNBEKANNT }
 @Serializable
 enum class PlatzTyp { AUSTRAGUNG, VORBEREITUNG, LONGIEREN, SONSTIGES }
 @Serializable
 enum class NennungsArt { OEPS_ZNS, EIGENES_ONLINE, DIREKT_VERANSTALTER_EMAIL, DIREKT_VERANSTALTER_TELEFON, DIREKT_VERANSTALTER_WHATSAPP, SONSTIGE }
 @Serializable
-enum class Sparte { DRESSUR, SPRINGEN, VIELSEITIGKEIT, FAHREN, VOLTIGIEREN, WESTERN, DISTANZ, ISLAND, PFERDESPORT_SPIEL, BASIS, KOMBINIERT, SONSTIGES }
+enum class SparteE { DRESSUR, SPRINGEN, VIELSEITIGKEIT, FAHREN, VOLTIGIEREN, WESTERN, DISTANZ, ISLAND, PFERDESPORT_SPIEL, BASIS, KOMBINIERT, SONSTIGES }
 @Serializable
 enum class BewerbStatus { GEPLANT, OFFEN_FUER_NENNUNG, GESCHLOSSEN_FUER_NENNUNG, LAEUFT, ABGESCHLOSSEN, ABGESAGT }
 @Serializable

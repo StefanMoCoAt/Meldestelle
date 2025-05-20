@@ -1,0 +1,464 @@
+@startuml
+!theme vibrant
+
+title Datenbankmodell ÖTO - Service-Orientierte Modulare Struktur (Stand: 19. Mai 2025, 10:53 Uhr)
+
+' Diagramm-Optionen
+skinparam linetype ortho
+hide empty members
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 9 ' Etwas kleiner für mehr Übersicht
+skinparam roundCorner 10
+allow_mixing
+skinparam packageStyle rect
+
+' --- Enums (mit Suffix E) ---
+enum SparteE {
+ DRESSUR, SPRINGEN, VIELSEITIGKEIT, FAHREN, VOLTIGIEREN, WESTERN,
+ DISTANZ, ISLAND, PFERDESPORT_SPIEL, SONDERPRUEFUNG, SONSTIGE, UNBEKANNT
+ }
+enum RegelwerkTypE {
+ OETO, FEI, SONSTIGE
+ }
+enum PruefungsaufgabeNationE {
+ NATIONAL_OEPS, FEI, SONSTIGE
+ }
+enum PruefungsaufgabeRichtverfahrenModusE {
+ GM, GT, NICHT_SPEZIFIZIERT
+ }
+enum PruefungsaufgabeViereckE {
+ VIERECK_20x40, VIERECK_20x60, ANDERE, UNBEKANNT
+ }
+enum ArtDesStechensE {
+ KEIN_STECHEN, FEHLER_ZEIT_NORMAL, FEHLER_ZEIT_AM3,
+ SIEGERUNDE_SR1_MIT_UEBERNAHME_GP, SIEGERUNDE_SR2_OHNE_UEBERNAHME_GP,
+ ZWEI_STECHEN_AM4, ZWEI_STECHEN_AM6, SONDERREGELUNG_AUSSCHREIBUNG
+ }
+enum FunktionaerRolleE {
+ RICHTER, RICHTER_VORSITZ, RICHTER_BEI_C, RICHTER_AM_ABREITEPLATZ,
+ PARCOURSBAUER, PARCOURSBAU_ASSISTENT, STEWARD, TECHNISCHER_DELEGIERTER,
+ TURNIERLEITER, TURNIERBEAUFTRAGTER, TIERARZT_TURNIER, HUFSCHMIED_TURNIER,
+ MELD रात्रि, RECHENSTELLE, SPRECHER, REITERSPRECHER, ZEITNEHMER, SCHREIBER_RICHTER,
+ HELFER_PARCOURS, SONSTIGE_FUNKTION
+ }
+enum RichterPositionE {
+ C, E, H, B, M, VORSITZ, RICHTERTURM, SONSTIGE_POSITION
+ }
+enum DatenQuelleE {
+ OEPS_ZNS, MANUELL_NATIONAL, MANUELL_INTERNATIONAL, SYSTEM_GENERIERTR
+ }
+enum NennungStatusE {
+ GEMELDET, MANUELL_ERFASST, BESTAETIGT, NACHGENANNT, BEZAHLT, STARTBERECHTIGT,
+ ABGEMELDET_REITER, ABGEMELDET_VERANSTALTER, STORNIERT_SYSTEM
+ }
+enum BeginnzeitTypE {
+ FIX_UM, ANSCHLIESSEND, CA_UM, NACH_VORHERIGEM_BEWERB_ABTEILUNG
+ }
+enum EventStatusE {
+ IN_PLANUNG, GENEHMIGT_VERANSTALTER, OEFFENTLICH_SICHTBAR, AKTIV, ABGESCHLOSSEN, ABGESAGT
+ }
+enum PlatzTypE {
+ AUSTRAGUNG, VORBEREITUNG, LONGIEREN, SONSTIGES
+ }
+enum SportfachStammdatenTypE {
+DRESSURAUFGABE, HINDERNISTYP_SPRINGEN, WERTUNGSVERFAHREN_SPRINGEN,
+ WERTUNGSVERFAHREN_DRESSUR, RVK_PUNKTETABELLE, OETO_REGEL_TEXT, SONSTIGES
+ }
+enum CupSerieTypE {
+ CUP, MEISTERSCHAFT_LAND, MEISTERSCHAFT_BUND, SERIE, SONDERWERTUNG
+ }
+
+' #####################################################################
+' ### Service OeTO-Verwaltung (Regeln, Lizenzen, Definitionen)      ###
+' #####################################################################
+package "Service OeTO-Verwaltung" {
+  entity OETORegelReferenz {
+    + oeto_regel_referenz_id : UUID <<PK>>
+    --
+    paragraph_nummer : VARCHAR
+    kapitel_titel : VARCHAR?
+    kurzbeschreibung_regel : TEXT?
+    oeto_version_datum : DATE
+    url_detail : VARCHAR?
+    regelwerk_typ : RegelwerkTypE
+  }
+
+' Definiert Funktionärsqualifikationen
+  entity QualifikationsTyp {
+    + qual_typ_code : VARCHAR(20) <<PK>> ' z.B. "R-DPF", "PB-S", "TD-NAT"
+    --
+    bezeichnung : VARCHAR
+    sparte : SparteE
+    oeto_regel_ref_id : UUID <<FK>>?
+  }
+  QualifikationsTyp -- "?" OETORegelReferenz
+
+' Globale Lizenz-/Startkartendefinitionen
+  entity LizenzTypGlobal {
+    + lizenz_typ_global_code : VARCHAR(10) <<PK>> ' z.B. "R1", "RS2", "F1", "S" (Startkarte)
+    --
+    bezeichnung : VARCHAR
+    sparte_primaer : SparteE?
+    kategorie_lizenz: VARCHAR ' z.B. "Reiterlizenz", "Startkarte", "Fahrerlizenz"
+    stufe: VARCHAR? ' z.B. "1", "2", "S"
+    beschreibung_berechtigung : TEXT?
+    oeto_regel_ref_id : UUID <<FK>>?
+  }
+  LizenzTypGlobal -- "?" OETORegelReferenz
+
+  entity AltersklasseDefinition {
+    + altersklasse_code : VARCHAR(10) <<PK>> ' z.B. "JG", "U18", "YR", "ALLG"
+    --
+    bezeichnung : VARCHAR
+    min_alter : INTEGER?
+    max_alter : INTEGER?
+    geschlecht_filter : CHAR(1)?
+    oeto_regel_ref_id : UUID <<FK>>?
+  }
+  AltersklasseDefinition -- "?" OETORegelReferenz
+
+' Für Dressuraufgaben, Richtverfahren etc.
+  entity Sportfachliche_Stammdaten {
+    + stammdatum_id : UUID <<PK>>
+    --
+    typ : SportfachStammdatenTypE
+    code : VARCHAR ' z.B. "GA02/23", "A2_OETO204"
+    bezeichnung : VARCHAR
+    beschreibung_details_json : TEXT ' Strukturierte Details
+    sparte_zugehoerigkeit : SparteE
+    nation_gueltigkeit: PruefungsaufgabeNationE?
+    viereck_groesse: PruefungsaufgabeViereckE?
+    richtverfahren_modus: PruefungsaufgabeRichtverfahrenModusE?
+    istAktiv: Boolean
+    oeto_regel_ref_id : UUID <<FK>>?
+  }
+  Sportfachliche_Stammdaten -- "?" OETORegelReferenz
+}
+
+' #####################################################################
+' ### Service ZNS-Daten (Staging/Rohdaten von OEPS)                ###
+' #####################################################################
+package "Service ZNS-Daten (Staging)" {
+  entity Verein_ZNS_Staging {
+    + oeps_vereins_nr : VARCHAR(4) <<PK>>
+    name : VARCHAR(50)
+    import_timestamp: TIMESTAMP
+  }
+
+  entity Person_ZNS_Staging {
+    + oeps_satz_nr_person : VARCHAR(6) <<PK>>
+    --
+    familienname : VARCHAR(50)
+    vorname : VARCHAR(25)
+    geburtsdatum_text : VARCHAR(8)
+    geschlecht_code : CHAR(1)
+    nationalitaet_code : VARCHAR(3)
+    bundesland_code_oeps : VARCHAR(2)?
+    vereinsname_oeps_roh : VARCHAR(50)?
+    mitglied_nr_verein : VARCHAR(8)?
+    fei_id_person : VARCHAR(10)?
+    sperrliste_flag_oeps : CHAR(1)?
+    kader_flag_oeps : CHAR(1)?
+    telefon_roh : VARCHAR(21)?
+    reiterlizenz_roh : VARCHAR(4)?
+    startkarte_roh : CHAR(1)?
+    fahrlizenz_roh : VARCHAR(2)?
+    altersklasse_jugend_code_oeps : VARCHAR(2)?
+    altersklasse_jungerreiter_code_oeps : CHAR(1)?
+    jahr_letzte_zahlung_lizenz_oeps : INTEGER?
+    lizenzinfo_raw_oeps : VARCHAR(10)?
+    qualifikationen_raw_oeps: VARCHAR(30)? ' Aus RICHT01.dat
+    import_timestamp: TIMESTAMP
+  }
+
+  entity Pferd_ZNS_Staging {
+    + oeps_satz_nr_pferd : VARCHAR(10) <<PK>>
+    --
+    oeps_kopf_nr : VARCHAR(4)?
+    name : VARCHAR(30)
+    lebensnummer : VARCHAR(9)?
+    geburtsjahr : INTEGER?
+    geschlecht_code : CHAR(1)?
+    farbe : VARCHAR(15)?
+    abstammung_vater_name_roh : VARCHAR(30)?
+    abstammung_info_roh : VARCHAR(15)?
+    oeps_verein_nr_pferd_roh : VARCHAR(4)?
+    verantwortliche_person_name_roh: VARCHAR(75)?
+    fei_pass_nr : VARCHAR(10)?
+    letzte_zahlung_pferdegebuehr_jahr : INTEGER?
+    import_timestamp: TIMESTAMP
+  }
+}
+
+' ####################################################################################
+' ### Domänen Service: Sportler & Pferde Verwaltung (aus ZNS und manuell)         ###
+' ####################################################################################
+package "Service Sportler & Pferde Verwaltung (Domäne)" {
+    entity DomPerson {
+        + person_id: UUID <<PK>>
+        --
+        oeps_satz_nr: VARCHAR(6) <<UQ>>?
+        nachname: VARCHAR
+        vorname: VARCHAR
+        geburtsdatum: DATE?
+        geschlecht: GeschlechtE?
+        nationalitaet_code: VARCHAR(3)?
+        fei_id: VARCHAR(10)?
+        telefon: VARCHAR?
+        email: VARCHAR?
+        stamm_verein_id: UUID <<FK>>?
+        ist_gesperrt: BOOLEAN
+        sperr_grund: TEXT?
+        daten_quelle: DatenQuelleE
+        ist_aktiv: BOOLEAN
+    }
+
+    entity DomPferd {
+        + pferd_id: UUID <<PK>>
+        --
+        oeps_satz_nr_pferd: VARCHAR(10) <<UQ>>?
+        oeps_kopf_nr: VARCHAR(4)?
+        name: VARCHAR
+        lebensnummer: VARCHAR?
+        geburtsjahr: INTEGER?
+        geschlecht_pferd: CHAR(1)?
+        besitzer_person_id: UUID <<FK>>?
+        verantwortlicher_person_id: UUID <<FK>>?
+        heimat_verein_id: UUID <<FK>>?
+        daten_quelle: DatenQuelleE
+        ist_aktiv: BOOLEAN
+    }
+
+    entity DomVerein {
+        + verein_id: UUID <<PK>>
+        --
+        oeps_vereins_nr: VARCHAR(4) <<UQ>>
+        name: VARCHAR
+        kuerzel: VARCHAR?
+        bundesland_code: VARCHAR(2)?
+    }
+
+' Zugeordnete Lizenz/Quali einer Person
+    entity DomLizenz {
+        + lizenz_id: UUID <<PK>>
+        --
+        person_id: UUID <<FK>>
+        lizenz_typ_global_code: VARCHAR(10) <<FK>> ' Verweis auf Service_OeTO_Verwaltung.LizenzTypGlobal
+        gueltig_bis_jahr: INTEGER?
+        ist_aktiv_bezahlt_oeps: BOOLEAN
+    }
+
+    DomPerson "1" -- "0..*" DomLizenz
+    DomLizenz -- "1" Service_OeTO_Verwaltung.LizenzTypGlobal
+    DomPerson "0..1" -- "1" DomVerein : "hat Stammverein"
+    DomPferd "0..1" -- "1" DomPerson : "hat Besitzer"
+    DomPferd "0..1" -- "1" DomPerson : "hat Verantwortlichen"
+    DomPferd "0..1" -- "1" DomVerein : "hat Heimatverein"
+}
+
+' #####################################################################
+' ### Service Veranstaltungsplanung (Events, Turniere, Prüfungen)   ###
+' #####################################################################
+package "Service Veranstaltungsplanung" {
+  entity VeranstaltungsRahmen {
+    + veranst_rahmen_id : UUID <<PK>>
+    name : VARCHAR
+    datum_von_gesamt : DATE
+    datum_bis_gesamt : DATE
+    hauptveranstalter_verein_id : UUID <<FK>>? ' Verweis auf DomVerein
+    ort_text: VARCHAR
+    status: EventStatusE
+  }
+
+  entity Turnier_OEPS {
+    + turnier_id : UUID <<PK>>
+    veranst_rahmen_id : UUID <<FK>>
+    oeps_turnier_nr : VARCHAR(5) <<UQ>>
+    name_zusatz : VARCHAR?
+    datum_von_turnier : DATE
+    datum_bis_turnier : DATE
+    oeto_kategorie_definition_ids: List<UUID> ' FKs zu Service_OeTO_Verwaltung.BewerbsKategorieOetoDefinition
+    regelwerk_typ : RegelwerkTypE
+    hauptsparte: SparteE
+  }
+
+' Entspricht BewerbBasis
+  entity Pruefung_OEPS {
+    + pruefung_db_id : UUID <<PK>>
+    turnier_id : UUID <<FK>>
+    oeps_bewerb_nr_anzeige : INTEGER ' Deine nummerInAusschreibung
+    name_text_uebergeordnet : VARCHAR
+    sparte : SparteE
+    oeps_kategorie_definition_id : UUID <<FK>> ' FK zu Service_OeTO_Verwaltung.BewerbsKategorieOetoDefinition
+    ' Verweise auf spartenspezifische Details (1:1)
+    ' dressur_spezifika_id: UUID <<FK>>?
+    ' springen_spezifika_id: UUID <<FK>>?
+  }
+
+  entity Pruefung_Abteilung {
+    + pruefung_abteilung_db_id : UUID <<PK>>
+    pruefung_db_id : UUID <<FK>> ' FK zu Pruefung_OEPS
+    abteilungs_kennzeichen : VARCHAR ' z.B. "1", "A"
+    bezeichnung_abteilung : VARCHAR?
+    ' ... strukturierte Teilungskriterien ...
+  }
+
+  entity Meisterschaft_Cup_Serie {
+    + mcs_id : UUID <<PK>>
+    name : VARCHAR
+    typ : CupSerieTypE
+    jahr : INTEGER
+    sparte : SparteE
+  }
+
+  entity MCS_Wertungspruefung {
+    mcs_id : UUID <<PK>> <<FK>>
+    pruefung_abteilung_db_id : UUID <<PK>> <<FK>>
+    faktor_fuer_wertung : DECIMAL?
+  }
+
+  entity Platz {
+      + platz_id: UUID <<PK>>
+      name: VARCHAR
+      typ: PlatzTypE
+      '.. berichtFelder ..
+  }
+
+  entity Turnier_hat_Platz {
+      turnier_id: UUID <<PK>> <<FK>>
+      platz_id: UUID <<PK>> <<FK>>
+      verwendungszweck: VARCHAR?
+  }
+
+  package "Sportfachliche Details Pruefung" {
+    entity DressurPruefungSpezifika {
+      + pruefung_db_id : UUID <<PK>> <<FK>> ' 1:1 zu Pruefung_OEPS
+      aufgabe_stammdatum_id : UUID <<FK>> ' Zu Service_OeTO_Verwaltung.Sportfachliche_Stammdaten
+      klasse_definition_id : UUID <<FK>>? ' Zu Service_OeTO_Verwaltung.BewerbsKlasseDefinition
+      richtverfahren_stammdatum_id: UUID <<FK>>? ' Zu Service_OeTO_Verwaltung.Sportfachliche_Stammdaten
+      viereck_groesse_code : PruefungsaufgabeViereckE
+      ' geplanteRichterPositionen: List<RichterPositionE> ' oder über BewerbFunktionaerZuordnung
+    }
+    entity SpringPruefungSpezifika {
+      + pruefung_db_id : UUID <<PK>> <<FK>> ' 1:1 zu Pruefung_OEPS
+      klasse_definition_id : UUID <<FK>>?
+      richtverfahren_stammdatum_id: UUID <<FK>>?
+      art_des_stechens : ArtDesStechensE?
+      '.. parcours infos ..
+    }
+  }
+
+  VeranstaltungsRahmen "1" -- "0..*" Turnier_OEPS
+  Turnier_OEPS "1" -- "0..*" Pruefung_OEPS
+  Pruefung_OEPS "1" -- "1..*" Pruefung_Abteilung
+  Pruefung_OEPS "1" o-- "0..1" Sportfachliche_Details_Pruefung.DressurPruefungSpezifika
+  Pruefung_OEPS "1" o-- "0..1" Sportfachliche_Details_Pruefung.SpringenPruefungSpezifika
+  Meisterschaft_Cup_Serie "1" -- "0..*" MCS_Wertungspruefung
+  Pruefung_Abteilung "1" -- "0..*" MCS_Wertungspruefung
+  Turnier_OEPS "1" -- "0..*" Turnier_hat_Platz
+  Platz "1" -- "0..*" Turnier_hat_Platz
+  Sportfachliche_Details_Pruefung.DressurPruefungSpezifika -- Service_OeTO_Verwaltung.Sportfachliche_Stammdaten
+  Sportfachliche_Details_Pruefung.SpringenPruefungSpezifika -- Service_OeTO_Verwaltung.Sportfachliche_Stammdaten
+  Pruefung_OEPS -- Service_OeTO_Verwaltung.BewerbsKategorieOetoDefinition
+  Turnier_OEPS -- Service_OeTO_Verwaltung.BewerbsKategorieOetoDefinition
+}
+
+
+' #####################################################################
+' ### Service Nennungsabwicklung (Nennungen, Startlisten, Ergebnisse) ###
+' #####################################################################
+package "Service Nennungsabwicklung" {
+  entity Nennung {
+    + nennung_id : UUID <<PK>>
+    pruefung_abteilung_db_id : UUID <<FK>>
+    teilnehmer_person_id : UUID <<FK>> ' Verweis auf DomPerson
+    genanntes_pferd_id : UUID <<FK>> ' Verweis auf DomPferd
+    genutzte_lizenz_id: UUID <<FK>>? ' Verweis auf DomLizenz
+    nennungs_zeitpunkt : TIMESTAMP
+    status_nennung : NennungStatusE
+    kopf_nr_pferd_fuer_nennung : VARCHAR(4)?
+    startgeld_bezahlt: BOOLEAN
+    pferdepass_kontrolliert: BOOLEAN
+  }
+
+  entity NennungsTeilnehmerSnapshot {
+    + snapshot_id: UUID <<PK>>
+    nennung_id: UUID <<FK>>
+    ' Gesnapshotete Daten '
+    person_nachname_snapshot: VARCHAR
+    pferd_name_snapshot: VARCHAR
+  }
+  Nennung "1" -- "0..1" NennungsTeilnehmerSnapshot
+
+  entity Startfolge {
+    + startfolge_id: UUID <<PK>>
+    nennung_id: UUID <<FK>>
+    start_nummer_display: INTEGER
+    start_zeit_geplant: TIMESTAMP?
+    s4_kader_flag: BOOLEAN
+  }
+  Nennung "1" -- "0..1" Startfolge
+
+  entity Ergebnis_Zeile {
+    + ergebnis_zeile_id : UUID <<PK>>
+    startfolge_id : UUID <<FK>>
+    platz : INTEGER?
+    ' Verweise auf spartenspezifische Ergebnisdetails '
+  }
+  Startfolge "1" -- "0..1" Ergebnis_Zeile
+
+  package "Sportfachliche Details Ergebnis" {
+    entity DressurErgebnisSpezifika {
+      + ergebnis_zeile_id : UUID <<PK>> <<FK>>
+      gesamt_wertnote : DECIMAL(5,3)?
+      gesamt_prozent : DECIMAL(5,2)?
+    }
+    entity SpringenErgebnisSpezifika {
+      + ergebnis_zeile_id : UUID <<PK>> <<FK>>
+      stilnote_gesamt : DECIMAL(3,1)?
+    }
+    entity SpringenUmlaufErgebnis {
+      + umlauf_ergebnis_id : UUID <<PK>>
+      springen_ergebnis_spezifika_id : UUID <<FK>>
+      umlauf_oder_stechen_nr : INTEGER
+      fehlerpunkte_hindernis : DECIMAL(4,2)?
+      fehlerpunkte_zeit : DECIMAL(4,2)?
+      zeit_benoetigt_sek : DECIMAL(5,2)?
+    }
+    SpringenErgebnisSpezifika "1" -- "0..*" SpringenUmlaufErgebnis
+  }
+  Ergebnis_Zeile "1" -- "0..1" Sportfachliche_Details_Ergebnis.DressurErgebnisSpezifika
+  Ergebnis_Zeile "1" -- "0..1" Sportfachliche_Details_Ergebnis.SpringenErgebnisSpezifika
+}
+
+' #####################################################################
+' ### Paketübergreifende Beziehungen (Auswahl)                       ###
+' #####################################################################
+Service_Veranstaltungsplanung.VeranstaltungsRahmen -- Service_Sportler_Pferde_Verwaltung.DomVerein : "veranstaltet von"
+Service_Veranstaltungsplanung.Turnier_OEPS -- Service_Veranstaltungsplanung.VeranstaltungsRahmen
+Service_Veranstaltungsplanung.Pruefung_OEPS -- Service_Veranstaltungsplanung.Turnier_OEPS
+Service_Veranstaltungsplanung.Pruefung_Abteilung -- Service_Veranstaltungsplanung.Pruefung_OEPS
+Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.SpringenPruefungSpezifika -- Service_Sportler_Pferde_Verwaltung.DomPerson : "Parcoursdesigner"
+
+Service_Nennungsabwicklung.Nennung -- Service_Veranstaltungsplanung.Pruefung_Abteilung
+Service_Nennungsabwicklung.Nennung -- Service_Sportler_Pferde_Verwaltung.DomPerson : "Reiter"
+Service_Nennungsabwicklung.Nennung -- Service_Sportler_Pferde_Verwaltung.DomPferd : "Pferd"
+Service_Nennungsabwicklung.Nennung -- Service_Sportler_Pferde_Verwaltung.DomLizenz : "genutzte Lizenz"
+
+' Beziehungen für Funktionärsplanung (noch konzeptionell)
+entity FunktionaerEinsatzPlanung {
+  + einsatz_plan_id: UUID <<PK>>
+  # event_id: UUID <<FK>>
+  # turnier_id: UUID <<FK>>?
+  # pruefung_abteilung_id: UUID <<FK>>?
+  # funktionaer_person_id: UUID <<FK zu DomPerson>>
+  rolle: FunktionaerRolleE
+  position_richter: RichterPositionE?
+  start_zeit: TIMESTAMP
+  ende_zeit: TIMESTAMP
+}
+Service_Veranstaltungsplanung.VeranstaltungsRahmen -- "0..*" FunktionaerEinsatzPlanung
+Service_Sportler_Pferde_Verwaltung.DomPerson -- "0..*" FunktionaerEinsatzPlanung
+
+@enduml
