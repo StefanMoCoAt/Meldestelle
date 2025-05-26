@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
  * @property vorname Vorname der Person.
  * @property titel Akademischer Titel oder Anrede (z.B. Dr., Ing.).
  * @property geburtsdatum Geburtsdatum der Person.
- * @property geschlecht Geschlecht der Person.
+ * @property geschlechtE Geschlecht der Person.
  * @property nationalitaetLandId Fremdschlüssel zur `LandDefinition` für die Nationalität.
  * @property feiId Optionale FEI-Identifikationsnummer der Person.
  * @property telefon Private oder geschäftliche Telefonnummer.
@@ -59,7 +59,7 @@ data class DomPerson(
     @Serializable(with = KotlinLocalDateSerializer::class)
     var geburtsdatum: LocalDate? = null, // Konvertiert aus Person_ZNS_Staging.geburtsdatumTextRoh
 
-    var geschlecht: GeschlechtE? = null,   // Konvertiert aus Person_ZNS_Staging.geschlechtCodeRoh
+    var geschlechtE: GeschlechtE? = null,   // Konvertiert aus Person_ZNS_Staging.geschlechtCodeRoh
 
     @Serializable(with = UuidSerializer::class)
     var nationalitaetLandId: Uuid? = null, // Aufgelöst aus Person_ZNS_Staging.nationalitaetCodeRoh via LandDefinition

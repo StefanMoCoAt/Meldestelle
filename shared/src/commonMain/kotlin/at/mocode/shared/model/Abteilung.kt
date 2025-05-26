@@ -1,6 +1,6 @@
 package at.mocode.shared.model
 
-import at.mocode.shared.enums.BeginnzeitTyp
+import at.mocode.shared.enums.BeginnzeitTypE
 import at.mocode.shared.serializers.BigDecimalSerializer
 import at.mocode.shared.serializers.KotlinInstantSerializer
 import at.mocode.shared.serializers.KotlinLocalTimeSerializer
@@ -41,7 +41,7 @@ data class Abteilung(
     @Serializable(with = UuidSerializer::class)
     var platzId: Uuid?, // FK zum Austragungsplatz (kann vom Hauptbewerb abweichen)
     var datum: LocalDate?,
-    var beginnzeitTyp: BeginnzeitTyp = BeginnzeitTyp.ANSCHLIESSEND,
+    var beginnzeitTypE: BeginnzeitTypE = BeginnzeitTypE.ANSCHLIESSEND,
     @Serializable(with = KotlinLocalTimeSerializer::class)
     var beginnzeitFix: LocalTime? = null,
     @Serializable(with = UuidSerializer::class)

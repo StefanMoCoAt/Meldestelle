@@ -1,6 +1,6 @@
 package at.mocode.shared.model
 
-import at.mocode.shared.enums.VeranstalterTyp
+import at.mocode.shared.enums.VeranstalterTypE
 import at.mocode.shared.serializers.KotlinInstantSerializer
 import at.mocode.shared.serializers.KotlinLocalDateSerializer
 import at.mocode.shared.serializers.UuidSerializer
@@ -22,7 +22,7 @@ data class Veranstaltung(
     var datumBis: LocalDate,
     var veranstalterName: String,
     var veranstalterOepsNummer: String?,
-    var veranstalterTyp: VeranstalterTyp = VeranstalterTyp.UNBEKANNT,
+    var veranstalterTypE: VeranstalterTypE = VeranstalterTypE.UNBEKANNT,
     var veranstaltungsortName: String,
     var veranstaltungsortAdresse: String,
     var kontaktpersonName: String?,

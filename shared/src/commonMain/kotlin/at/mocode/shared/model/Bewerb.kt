@@ -1,6 +1,6 @@
 package at.mocode.shared.model
 
-import at.mocode.shared.enums.BeginnzeitTyp
+import at.mocode.shared.enums.BeginnzeitTypE
 import at.mocode.shared.enums.SparteE
 import at.mocode.shared.serializers.*
 import com.benasher44.uuid.Uuid
@@ -66,7 +66,7 @@ data class Bewerb(
     var standardPlatzId: Uuid?, // FK zum Default-Austragungsplatz
     @Serializable(with = KotlinLocalDateSerializer::class)
     var standardDatum: LocalDate?,
-    var standardBeginnzeitTyp: BeginnzeitTyp = BeginnzeitTyp.ANSCHLIESSEND, // neuer Enum Wert
+    var standardBeginnzeitTypE: BeginnzeitTypE = BeginnzeitTypE.ANSCHLIESSEND, // neuer Enum Wert
     @Serializable(with = KotlinLocalTimeSerializer::class)
     var standardBeginnzeitFix: LocalTime? = null,
     @Serializable(with = UuidSerializer::class)

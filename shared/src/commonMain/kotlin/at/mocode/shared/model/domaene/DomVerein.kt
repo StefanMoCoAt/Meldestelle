@@ -1,4 +1,4 @@
-package at.mocode.shared.model.domaene.verein
+package at.mocode.shared.model.domaene
 
 import at.mocode.shared.enums.DatenQuelleE
 import at.mocode.shared.serializers.KotlinInstantSerializer

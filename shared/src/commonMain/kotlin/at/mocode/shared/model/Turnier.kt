@@ -31,7 +31,7 @@ data class Turnier(
     var datumBis: LocalDate,
     @Serializable(with = KotlinLocalDateTimeSerializer::class) // Beispiel
     var nennungsschluss: LocalDateTime?,
-    var nennungsArt: List<NennungsArt> = emptyList(),
+    var nennungsArt: List<NennungsArtE> = emptyList(),
     var nennungsHinweis: String?,
     var eigenesNennsystemUrl: String?,
     @Serializable(with = BigDecimalSerializer::class)

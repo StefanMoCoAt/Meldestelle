@@ -1,0 +1,283 @@
+@startuml
+!theme vibrant
+
+title Datenbankmodell ÖTO - Fokus: Domänen-Stammdaten (Stand: 26. Mai 2025, 20:12 Uhr)
+
+' Diagramm-Optionen
+skinparam linetype ortho
+hide empty members
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 9
+skinparam roundCorner 10
+allow_mixing
+skinparam packageStyle rect
+
+' --- Enums (mit Suffix E) - Auswahl ---
+enum DatenQuelleE {
+ OEPS_ZNS,
+ MANUELL_NATIONAL,
+ MANUELL_INTERNATIONAL,
+ SYSTEM_GENERIERTR
+ }
+enum GeschlechtE {
+ M,
+ W,
+ UNBEKANNT
+ }
+ ' Angepasst gemäß deiner Implementierung
+enum PferdeGeschlechtE {
+ HENGST,
+ STUTE,
+ WALLACH,
+ UNBEKANNT
+ }
+enum SparteE {
+ DRESSUR,
+ SPRINGEN,
+ VIELSEITIGKEIT,
+ }
+
+
+' #####################################################################
+' ### Service OeTO-Verwaltung (Definitionen) - Gekürzt dargestellt  ###
+' #####################################################################
+package "Service OeTO-Verwaltung" {
+  entity LizenzTypGlobal {
+    + lizenzTypGlobalId : UUID <<PK>>
+    --
+    lizenzTypGlobalCode : VARCHAR(15) <<UQ>> ' Eindeutiges OEPS Kürzel
+    bezeichnung : VARCHAR(100)
+    spartePrimaer : SparteE?
+    kategorieLizenzText : VARCHAR(50) ' LizenzKategorieE als String oder Enum intern
+    stufe: VARCHAR(10)?
+    aufschluesselungKombilizenzCodes: List<VARCHAR(10)>?
+    istAktiv: Boolean
+  }
+
+  entity QualifikationsTyp {
+    + qualTypId : UUID <<PK>>
+    --
+    qualTypCode : VARCHAR(30) <<UQ>> ' Eindeutiges Kürzel
+    bezeichnung : VARCHAR(100)
+    sparte : SparteE
+    istAktiv: Boolean
+  }
+
+  entity LandDefinition {
+    + landId: UUID <<PK>>
+    --
+    isoAlpha2Code: String <<UQ>>
+    isoAlpha3Code: String <<UQ>>
+    nameDeutsch: String
+  }
+
+  entity BundeslandDefinition {
+    + bundeslandId: UUID <<PK>>
+    --
+    landId: UUID <<FK>>
+    oepsCode: String? ' Eindeutig für Österreich
+    name: String
+  }
+}
+
+' #####################################################################
+' ### Service ZNS-Daten (Staging) - Gekürzt dargestellt            ###
+' #####################################################################
+package "Service ZNS-Daten (Staging)" {
+  entity Person_ZNS_Staging {
+    + oeps_satz_nr_person : VARCHAR(6) <<PK>>
+    --
+    familienname_roh : VARCHAR(50)
+    vorname_roh : VARCHAR(25)
+    '.. viele weitere Rohdaten-Felder ..
+    lizenzinfo_raw_oeps_roh : VARCHAR(10)?
+    qualifikationen_raw_oeps_roh: VARCHAR(30)?
+    import_timestamp: TIMESTAMP
+  }
+  entity Pferd_ZNS_Staging {
+    + oeps_satz_nr_pferd : VARCHAR(10) <<PK>>
+    '.. viele weitere Rohdaten-Felder ..
+    import_timestamp: TIMESTAMP
+  }
+  entity Verein_ZNS_Staging {
+    + oeps_vereins_nr : VARCHAR(4) <<PK>>
+    name_roh : VARCHAR(50)
+    import_timestamp: TIMESTAMP
+  }
+}
+
+' ####################################################################################
+' ### Service Domänen-Stammdaten (Unsere finalisierten Domänenobjekte)             ###
+' ####################################################################################
+package "Service Domänen-Stammdaten" {
+    entity DomVerein {
+        + vereinId: UUID <<PK>>
+        --
+        oepsVereinsNr: String? <<UQ>>
+        name: String
+        kuerzel: String?
+        adresseStrasse: String?
+        plz: String?
+        ort: String?
+        bundeslandId: UUID <<FK>>?
+        landId: UUID <<FK>>
+        emailAllgemein: String?
+        telefonAllgemein: String?
+        webseiteUrl: String?
+        datenQuelle: DatenQuelleE
+        istAktiv: Boolean
+        notizenIntern: String?
+        createdAt: Instant
+        updatedAt: Instant
+    }
+
+    entity DomPerson {
+        + personId: UUID <<PK>>
+        --
+        oepsSatzNr: String? <<UQ>>
+        nachname: String
+        vorname: String
+        titel: String?
+        geburtsdatum: LocalDate?
+        geschlecht: GeschlechtE?
+        nationalitaetLandId: UUID <<FK>>?
+        feiId: String?
+        telefon: String?
+        email: String?
+        strasse: String?
+        plz: String?
+        ort: String?
+        adresszusatzZusatzinfo: String?
+        stammVereinId: UUID <<FK>>?
+        mitgliedsNummerBeiStammVerein: String?
+        istGesperrt: Boolean
+        sperrGrund: String?
+        altersklasseOepsCodeRaw: String?
+        istJungerReiterOepsFlag: Boolean
+        kaderStatusOepsRaw: String?
+        datenQuelle: DatenQuelleE
+        istAktiv: Boolean
+        notizenIntern: String?
+        createdAt: Instant
+        updatedAt: Instant
+    }
+
+    entity DomPferd {
+        + pferdId: UUID <<PK>>
+        --
+        oepsSatzNrPferd: String? <<UQ>>
+        oepsKopfNr: String?
+        name: String
+        lebensnummer: String?
+        feiPassNr: String?
+        geburtsjahr: Int?
+        geschlecht: PferdeGeschlechtE?
+        farbe: String?
+        rasse: String?
+        abstammungVaterName: String?
+        abstammungMutterName: String?
+        abstammungMutterVaterName: String?
+        abstammungZusatzInfo: String?
+        besitzerPersonId: UUID <<FK>>?
+        verantwortlichePersonId: UUID <<FK>>?
+        heimatVereinId: UUID <<FK>>?
+        letzteZahlungPferdegebuehrJahrOeps: Int?
+        stockmassCm: Int?
+        datenQuelle: DatenQuelleE
+        istAktiv: Boolean
+        notizenIntern: String?
+        createdAt: Instant
+        updatedAt: Instant
+    }
+
+    entity DomLizenz {
+        + lizenzId: UUID <<PK>>
+        --
+        personId: UUID <<FK>>
+        lizenzTypGlobalId: UUID <<FK>> ' Verweis auf Service_OeTO_Verwaltung.LizenzTypGlobal
+        gueltigBisJahr: Int?
+        ausgestelltAm: LocalDate?
+        istAktivBezahltOeps: Boolean
+        notiz: String?
+        createdAt: Instant
+        updatedAt: Instant
+    }
+
+    entity DomQualifikation {
+        + qualifikationId: UUID <<PK>>
+        --
+        personId: UUID <<FK>>
+        qualTypId: UUID <<FK>> ' Verweis auf Service_OeTO_Verwaltung.QualifikationsTyp
+        bemerkung: String?
+        gueltigVon: LocalDate?
+        gueltigBis: LocalDate?
+        istAktiv: Boolean
+        createdAt: Instant
+        updatedAt: Instant
+    }
+}
+
+' --- Beziehungen für Domänen-Stammdaten ---
+Service_Domänen_Stammdaten.DomVerein -- "? Service_OeTO_Verwaltung.BundeslandDefinition : hat Bundesland"
+Service_Domänen_Stammdaten.DomVerein -- "1" Service_OeTO_Verwaltung.LandDefinition : ist in Land"
+
+Service_Domänen_Stammdaten.DomPerson -- "? Service_OeTO_Verwaltung.LandDefinition : hat Nationalität"
+Service_Domänen_Stammdaten.DomPerson "0..1" -- "1" Service_Domänen_Stammdaten.DomVerein : hat Stammverein >
+Service_Domänen_Stammdaten.DomPerson "1" -- "0..*" Service_Domänen_Stammdaten.DomLizenz : besitzt
+Service_Domänen_Stammdaten.DomPerson "1" -- "0..*" Service_Domänen_Stammdaten.DomQualifikation : besitzt
+
+Service_Domänen_Stammdaten.DomPferd "0..1" -- "1" Service_Domänen_Stammdaten.DomPerson : hat Besitzer >
+Service_Domänen_Stammdaten.DomPferd "0..1" -- "1" Service_Domänen_Stammdaten.DomPerson : hat Verantwortlichen >
+Service_Domänen_Stammdaten.DomPferd "0..1" -- "1" Service_Domänen_Stammdaten.DomVerein : hat Heimatverein >
+
+Service_Domänen_Stammdaten.DomLizenz -- "1" Service_OeTO_Verwaltung.LizenzTypGlobal : ist vom Typ
+Service_Domänen_Stammdaten.DomQualifikation -- "1" Service_OeTO_Verwaltung.QualifikationsTyp : ist vom Typ
+
+
+' --- Andeutung der weiteren Pakete und wichtigsten Entitäten (stark gekürzt) ---
+package "Service Veranstaltungsplanung" {
+  entity VeranstaltungsRahmen
+  entity Turnier_OEPS
+  'BewerbBasis'
+  entity Pruefung_OEPS
+  package "Sportfachliche Details Pruefung" {
+    entity DressurPruefungSpezifika
+    entity SpringPruefungSpezifika
+  }
+  entity Pruefung_Abteilung
+  entity Meisterschaft_Cup_Serie
+}
+
+package "Service Nennungsabwicklung" {
+  entity Nennung
+  entity NennungsTeilnehmerSnapshot
+  entity Startfolge
+  entity Ergebnis_Zeile
+  package "Sportfachliche Details Ergebnis" {
+    entity DressurErgebnisSpezifika
+    entity SpringenErgebnisSpezifika
+  }
+}
+
+package "Service Funktionärsplanung" {
+    entity FunktionaerEinsatzPlanung
+}
+
+
+' --- Wichtige übergreifende Beziehungen (Beispiele) ---
+Service_Veranstaltungsplanung.VeranstaltungsRahmen "1" -- "0..*" Service_Veranstaltungsplanung.Turnier_OEPS
+Service_Veranstaltungsplanung.Turnier_OEPS "1" -- "0..*" Service_Veranstaltungsplanung.Pruefung_OEPS
+Service_Veranstaltungsplanung.Pruefung_OEPS "1" o-- "0..1" Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.DressurPruefungSpezifika
+Service_Veranstaltungsplanung.Pruefung_OEPS "1" o-- "0..1" Service_Veranstaltungsplanung.Sportfachliche_Details_Pruefung.SpringPruefungSpezifika
+Service_Veranstaltungsplanung.Pruefung_OEPS "1" -- "1..*" Service_Veranstaltungsplanung.Pruefung_Abteilung
+
+Service_Nennungsabwicklung.Nennung -- Service_Veranstaltungsplanung.Pruefung_Abteilung
+Service_Nennungsabwicklung.Nennung -- Service_Domänen_Stammdaten.DomPerson
+Service_Nennungsabwicklung.Nennung -- Service_Domänen_Stammdaten.DomPferd
+
+Service_Funktionärsplanung.FunktionaerEinsatzPlanung -- Service_Domänen_Stammdaten.DomPerson
+Service_Funktionärsplanung.FunktionaerEinsatzPlanung -- Service_Veranstaltungsplanung.VeranstaltungsRahmen
+' ... usw.
+
+@enduml

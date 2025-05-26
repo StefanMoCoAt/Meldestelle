@@ -1,6 +1,6 @@
 package at.mocode.shared.model
 
-import at.mocode.shared.enums.PlatzTyp
+import at.mocode.shared.enums.PlatzTypE
 import at.mocode.shared.serializers.UuidSerializer
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
@@ -13,5 +13,5 @@ data class Platz(
     var name: String,
     var dimension: String?,
     var boden: String?,
-    var typ: PlatzTyp
+    var typ: PlatzTypE
 )

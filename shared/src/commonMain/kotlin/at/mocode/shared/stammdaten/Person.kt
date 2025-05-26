@@ -1,7 +1,7 @@
 package at.mocode.shared.stammdaten
 
 import at.mocode.shared.enums.FunktionaerRolle
-import at.mocode.shared.enums.Geschlecht
+import at.mocode.shared.enums.GeschlechtE
 import at.mocode.shared.serializers.KotlinInstantSerializer
 import at.mocode.shared.serializers.KotlinLocalDateSerializer
 import at.mocode.shared.serializers.UuidSerializer
@@ -22,7 +22,7 @@ data class Person(
     var titel: String?,
     @Serializable(with = KotlinLocalDateSerializer::class)
     var geburtsdatum: LocalDate?,
-    var geschlecht: Geschlecht? = Geschlecht.UNBEKANNT,
+    var geschlechtE: GeschlechtE?,
     var nationalitaet: String?, // 3-Letter Code
     var email: String?,
     var telefon: String?,
