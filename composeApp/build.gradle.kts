@@ -10,7 +10,7 @@ plugins {
 
 kotlin {
     jvm("desktop")
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         outputModuleName = "composeApp"
@@ -21,7 +21,7 @@ kotlin {
                 outputFileName = "composeApp.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
                     static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
+                        // Serve sources to debug inside the browser
                         add(rootDirPath)
                         add(projectDirPath)
                     }
@@ -30,21 +30,36 @@ kotlin {
         }
         binaries.executable()
     }
-    
+
     sourceSets {
         val desktopMain by getting
-        
+
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(projects.shared)
+            implementation(libs.kotlinx.serialization.core)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(project(":shared"))
         }
+
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.js)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
@@ -63,4 +78,24 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+// Configure the wasmJsBrowserDistribution task to handle duplicate files
+tasks.configureEach {
+    if (this is Copy) {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+}
+
+// Use afterEvaluate to ensure all tasks are created before configuration
+afterEvaluate {
+    tasks.findByName("wasmJsBrowserDistribution")?.let { task ->
+        logger.lifecycle("Configuring duplicatesStrategy for wasmJsBrowserDistribution task")
+        if (task is Sync) {
+            task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            logger.lifecycle("Successfully set duplicatesStrategy to INCLUDE for Sync task")
+        } else {
+            logger.lifecycle("Task is not a Sync task, it's a ${task.javaClass.name}")
+        }
+    } ?: logger.lifecycle("wasmJsBrowserDistribution task not found")
 }

@@ -14,17 +14,21 @@ application {
 dependencies {
     implementation(project(":shared"))
     implementation(libs.logback)
+
+    // Ktor
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.html.builder)
 
-    testImplementation(libs.ktor.server.tests)
+    implementation(libs.jakarta.mail.api)
+    implementation(libs.jakarta.mail.impl)
+
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.junit.jupiter)
-    testImplementation(libs.jupiter.junit.jupiter)
-
-    testImplementation(libs.junit.junit.jupiter)
+    testImplementation(libs.ktor.server.test.host)
 
     // Exposed für Datenbankzugriff (Core, DAO-Pattern, JDBC-Implementierung)
     implementation(libs.exposed.core)

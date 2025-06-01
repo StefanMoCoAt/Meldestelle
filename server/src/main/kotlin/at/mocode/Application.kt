@@ -1,106 +1,93 @@
 package at.mocode
 
-import at.mocode.model.Turnier
-import at.mocode.plugins.configureDatabase
-import at.mocode.tables.TurniereTable
-import io.ktor.http.*
+import at.mocode.config.EmailConfig
+import at.mocode.email.EmailService
+import at.mocode.model.Nennung
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.html.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.*
-import kotlinx.html.*
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.slf4j.LoggerFactory
-
-
+import kotlinx.serialization.json.Json
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
 }
 
 fun Application.module() {
+// Install ContentNegotiation to handle JSON
+    install(ContentNegotiation) {
+        json(Json {
+            prettyPrint = true
+            isLenient = true
+        })
+    }
 
-    // Als Erstes die Datenbank konfigurieren:
-    configureDatabase()
+    // Initialize EmailService if the configuration is valid
+    val emailService = if (EmailConfig.isValid()) {
+        EmailService(
+            smtpHost = EmailConfig.smtpHost,
+            smtpPort = EmailConfig.smtpPort,
+            smtpUsername = EmailConfig.smtpUsername,
+            smtpPassword = EmailConfig.smtpPassword,
+            recipientEmail = EmailConfig.recipientEmail
+        )
+    } else {
+        log.warn("Email configuration is invalid: ${EmailConfig.getValidationErrors()}")
+        null
+    }
 
-    // Danach deine anderen Konfigurationen (Routing etc.):
     routing {
         get("/") {
-            // Logger holen (optional, aber nützlich)
-            val log = LoggerFactory.getLogger("RootRoute")
-            // --- Datenbankoperationen ---
-            // alle DB-Zugriffe mit Exposed sollten in einer Transaktion stattfinden
-            val turniereFromDb = transaction {
-                // Optional: Füge ein Test-Turnier hinzu, WENN die Tabelle leer ist.
-                // Das ist nur für den ersten Test praktisch.
-                if (TurniereTable.selectAll().count() == 0L) {
-                    log.info("Turnier table is empty, inserting dummy tournament...")
-                    TurniereTable.insert {
-                        it[id] = "dummy-01" // Eindeutige ID
-                        it[name] = "Erstes DB Turnier"
-                        it[datum] = "19.04.2025" // Heutiges Datum?
-                        it[logoUrl] = null // Optional, kann null sein
-                        it[ausschreibungUrl] = "/pdfs/ausschreibung_dummy.pdf" // Beispielpfad
+            call.respondText("Ktor ist erreichbar!")
+        }
+
+        // Endpoint for form submissions
+        post("/api/nennung") {
+            try {
+                // Parse the request body as Nennung
+                val nennung = call.receive<Nennung>()
+
+                // Log the received data
+                log.info("Received nennung: $nennung")
+
+                // Send email notification if email service is available
+                val emailSent = if (emailService != null) {
+                    val result = emailService.sendNennungEmail(nennung)
+                    if (result) {
+                        log.info("Email notification sent successfully")
+                    } else {
+                        log.error("Failed to send email notification")
                     }
+                    result
+                } else {
+                    log.warn("Email service not available, skipping notification")
+                    false
                 }
 
-                // Lese ALLE Einträge aus der TurniereTable
-                log.info("Fetching all tournaments from database...")
-                TurniereTable.selectAll().map { row ->
-                    // Wandle jede Datenbank-Zeile (row) wieder in ein Turnier-Objekt um
-                    Turnier(
-                        id = row[TurniereTable.id],
-                        name = row[TurniereTable.name],
-                        datum = row[TurniereTable.datum],
-                        logoUrl = row[TurniereTable.logoUrl],
-                        ausschreibungUrl = row[TurniereTable.ausschreibungUrl]
+                // Respond with success, even if email failed (we don't want to block the user)
+                call.respond(
+                    HttpStatusCode.OK,
+                    mapOf(
+                        "success" to true,
+                        "emailSent" to emailSent,
+                        "message" to "Nennung erfolgreich empfangen"
                     )
-                } // Das Ergebnis ist eine List<Turnier>
-            } // Ende der Transaktion
-
-            // --- HTML-Antwort generieren ---
-            call.respondHtml(HttpStatusCode.OK) {
-                head {
-                    title { +"Meldestelle Portal" }
-                }
-                body {
-                    h1 { +"Willkommen beim Meldestelle Portal!" }
-                    p { +"Datenbankverbindung erfolgreich!" } // Kleine Bestätigung
-                    hr()
-                    h2 { +"Aktuelle Turniere (aus Datenbank):" } // Geänderte Überschrift
-
-                    // Gib die Turnierliste aus der Datenbank aus
-                    ul {
-                        if (turniereFromDb.isEmpty()) {
-                            li { +"Keine Turniere in der Datenbank gefunden." }
-                        } else {
-                            // Schleife über die Liste aus der DB
-                            turniereFromDb.forEach { turnier ->
-                                li {
-                                    strong { +turnier.name }
-                                    +" (${turnier.datum})"
-                                    // Füge die Buttons wieder hinzu
-                                    +" "
-                                    if (turnier.ausschreibungUrl != null) {
-                                        a(href = turnier.ausschreibungUrl, target = "_blank") {
-                                            button { +"Ausschreibung" }
-                                        }
-                                        +" "
-                                    }
-                                    a(href = "/nennung/${turnier.id}") {
-                                        button { +"Online Nennen" }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // Link zum (noch nicht funktionierenden) Admin-Bereich
-                    hr()
-                    p { a(href = "/admin/tournaments") { +"Zur Turnierverwaltung (TODO)" } }
-                }
-            } // <--- HIER endet der respondHtml-Block
-        } // Ende get("/")
+                )
+            } catch (e: Exception) {
+                log.error("Error processing nennung", e)
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    mapOf(
+                        "success" to false,
+                        "message" to "Fehler bei der Verarbeitung der Nennung: ${e.message}"
+                    )
+                )
+            }
+        }
     }
 }

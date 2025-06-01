@@ -6,3 +6,12 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
 }
+
+// Define repositories for all projects
+allprojects {
+    repositories {
+        mavenCentral()
+        google()
+        gradlePluginPortal()
+    }
+}

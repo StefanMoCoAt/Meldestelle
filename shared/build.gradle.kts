@@ -30,16 +30,16 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 // put your Multiplatform dependencies here
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.1")
+                implementation(libs.kotlinx.serialization.json)
             }
         }
 
-        val jvmMain by getting {
-            dependsOn(commonMain)
-        }
-
-        val wasmJsMain by getting {
-            dependsOn(commonMain)
-        }
+//        val jvmMain by getting {
+//            dependsOn(commonMain)
+//        }
+//
+//        val wasmJsMain by getting {
+//            dependsOn(commonMain)
+//        }
     }
 }
