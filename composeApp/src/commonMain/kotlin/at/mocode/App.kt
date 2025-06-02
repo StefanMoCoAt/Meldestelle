@@ -13,11 +13,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import at.mocode.model.Nennung
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -37,6 +41,16 @@ fun App() {
     val phoneFocus = remember { FocusRequester() }
     val commentsFocus = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
+
+    // Function to handle focus navigation to the next field
+    fun navigateToNextField(nextFocus: FocusRequester?) {
+        nextFocus?.let {
+            coroutineScope.launch {
+                it.requestFocus()
+            }
+        }
+    }
+
 
     MaterialTheme {
         var formSubmitted by remember { mutableStateOf(false) }
@@ -152,6 +166,12 @@ fun App() {
                             .fillMaxWidth()
                             .padding(bottom = 8.dp)
                             .focusRequester(riderNameFocus),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                navigateToNextField(horseNameFocus)
+                            }
+                        ),
                         isError = showRiderNameError,
                         supportingText = {
                             if (showRiderNameError) {
@@ -171,6 +191,12 @@ fun App() {
                             .fillMaxWidth()
                             .padding(bottom = 8.dp)
                             .focusRequester(horseNameFocus),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                navigateToNextField(emailFocus)
+                            }
+                        ),
                         isError = showHorseNameError,
                         supportingText = {
                             if (showHorseNameError) {
@@ -192,6 +218,12 @@ fun App() {
                             .fillMaxWidth()
                             .padding(bottom = 8.dp)
                             .focusRequester(emailFocus),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                navigateToNextField(phoneFocus)
+                            }
+                        ),
                         isError = showContactError || showEmailError,
                         supportingText = {
                             when {
@@ -214,6 +246,12 @@ fun App() {
                             .fillMaxWidth()
                             .padding(bottom = 8.dp)
                             .focusRequester(phoneFocus),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                navigateToNextField(commentsFocus)
+                            }
+                        ),
                         isError = showContactError,
                         supportingText = {
                             if (showContactError) {
@@ -287,82 +325,88 @@ fun App() {
                             .height(120.dp)
                             .padding(bottom = 16.dp)
                             .focusRequester(commentsFocus),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                coroutineScope.launch {
+                                    focusManager.clearFocus()
+                                }
+                            }
+                        ),
                         minLines = 3
                     )
-                    AnimatedVisibility(visible = isFormValid) {
-                        Button(
-                            onClick = {
-                                // Validiere alle Felder und zeige Fehler an
-                                showRiderNameError = !isRiderNameValid
-                                showHorseNameError = !isHorseNameValid
-                                showContactError = !isContactValid
-                                showEventsError = !isEventsValid
-                                showEmailError = email.isNotBlank() && !isValidEmail(email)
 
-                                errorMessage = null // Reset error message on new submission attempt
-                                successMessage = null
+                    Button(
+                        onClick = {
+                            // Validiere alle Felder und zeige Fehler an
+                            showRiderNameError = !isRiderNameValid
+                            showHorseNameError = !isHorseNameValid
+                            showContactError = !isContactValid
+                            showEventsError = !isEventsValid
+                            showEmailError = email.isNotBlank() && !isValidEmail(email)
 
-                                // Prüfe, ob das Formular gültig ist
-                                val isFormValid = isRiderNameValid && isHorseNameValid && isContactValid &&
-                                    isEventsValid && (email.isBlank() || isValidEmail(email))
+                            errorMessage = null // Reset error message on new submission attempt
+                            successMessage = null
 
-                                if (isFormValid) {
-                                    isLoading = true // Start loading
-                                    val formData = Nennung(
-                                        riderName = riderName,
-                                        horseName = horseName,
-                                        email = email,
-                                        phone = phone,
-                                        selectedEvents = selectedEvents.toList(),
-                                        comments = comments
-                                    )
+                            // Prüfe, ob das Formular gültig ist
+                            val isFormValid = isRiderNameValid && isHorseNameValid && isContactValid &&
+                                isEventsValid && (email.isBlank() || isValidEmail(email))
 
-                                    // Speichere die Daten für die Bestätigungsseite
-                                    submittedData = formData
+                            if (isFormValid) {
+                                isLoading = true // Start loading
+                                val formData = Nennung(
+                                    riderName = riderName,
+                                    horseName = horseName,
+                                    email = email,
+                                    phone = phone,
+                                    selectedEvents = selectedEvents.toList(),
+                                    comments = comments
+                                )
 
-                                    coroutineScope.launch {
-                                        try {
-                                            // Verwende den vollständigen Pfad für die API-Anfrage
-                                            val response = httpClient.post("api/nennung") {
-                                                contentType(ContentType.Application.Json)
-                                                setBody(formData)
-                                            }
-                                            if (response.status.isSuccess()) {
-                                                // Setze formSubmitted auf true, um zur Bestätigungsseite zu wechseln
-                                                formSubmitted = true
-                                            } else {
-                                                // Fehlerbehandlung für Server-Fehler
-                                                val errorBody = response.toString()
-                                                println("Fehler vom Server: ${response.status}, $errorBody")
-                                                errorMessage =
-                                                    "Fehler beim Senden der Nennung (Server: ${response.status}). Bitte versuchen Sie es später erneut."
-                                            }
-                                        } catch (e: Exception) {
-                                            // Fehlerbehandlung für Netzwerk- oder Client-Fehler
-                                            println("Netzwerk- oder Client-Fehler: ${e.message}")
-                                            errorMessage =
-                                                "Netzwerkfehler: ${e.message}. Bitte überprüfen Sie Ihre Internetverbindung."
-                                        } finally {
-                                            isLoading = false // Stop loading
+                                // Speichere die Daten für die Bestätigungsseite
+                                submittedData = formData
+
+                                coroutineScope.launch {
+                                    try {
+                                        // Verwende den vollständigen Pfad für die API-Anfrage
+                                        val response = httpClient.post("api/nennung") {
+                                            contentType(ContentType.Application.Json)
+                                            setBody(formData)
                                         }
+                                        if (response.status.isSuccess()) {
+                                            // Setze formSubmitted auf true, um zur Bestätigungsseite zu wechseln
+                                            formSubmitted = true
+                                        } else {
+                                            // Fehlerbehandlung für Server-Fehler
+                                            val errorBody = response.toString()
+                                            println("Fehler vom Server: ${response.status}, $errorBody")
+                                            errorMessage =
+                                                "Fehler beim Senden der Nennung (Server: ${response.status}). Bitte versuchen Sie es später erneut."
+                                        }
+                                    } catch (e: Exception) {
+                                        // Fehlerbehandlung für Netzwerk- oder Client-Fehler
+                                        println("Netzwerk- oder Client-Fehler: ${e.message}")
+                                        errorMessage =
+                                            "Netzwerkfehler: ${e.message}. Bitte überprüfen Sie Ihre Internetverbindung."
+                                    } finally {
+                                        isLoading = false // Stop loading
                                     }
-                                } else {
-                                    // Zeige eine allgemeine Fehlermeldung an
-                                    errorMessage =
-                                        "Bitte füllen Sie alle Pflichtfelder (*) korrekt aus und wählen Sie mindestens einen Bewerb."
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                            enabled = !isLoading // Button deaktivieren während Ladevorgang
-                        ) {
-                            if (isLoading) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                             } else {
-                                Text("Jetzt Nennen")
+                                // Zeige eine allgemeine Fehlermeldung an
+                                errorMessage =
+                                    "Bitte füllen Sie alle Pflichtfelder (*) korrekt aus und wählen Sie mindestens einen Bewerb."
                             }
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                        enabled = !isLoading // Button deaktivieren während Ladevorgang
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        } else {
+                            Text("Jetzt Nennen")
                         }
                     }
-
 
                 } else {
                     // formSubmitted == true
