@@ -1,11 +1,12 @@
 package at.mocode
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,15 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.ImeAction
 import at.mocode.model.Nennung
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -369,7 +367,7 @@ fun App() {
                                 coroutineScope.launch {
                                     try {
                                         // Verwende den vollständigen Pfad für die API-Anfrage
-                                        val response = httpClient.post("api/nennung") {
+                                        val response = httpClient.post("http://localhost:8081/api/nennung") {
                                             contentType(ContentType.Application.Json)
                                             setBody(formData)
                                         }
@@ -563,7 +561,9 @@ val httpClient = HttpClient {
             // Setze die Basis-URL für alle Anfragen
             url {
                 protocol = URLProtocol.HTTP
-                host = "localhost"
+                // Verwende den Host aus der Konstante
+                // In Constants.kt kann der Wert je nach Umgebung angepasst werden
+                host = API_HOST
                 port = SERVER_PORT // Verwende den Port aus Constants.kt
             }
         }

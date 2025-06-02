@@ -6,6 +6,7 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ApplicationTest {
 
@@ -16,7 +17,7 @@ class ApplicationTest {
         }
         val response = client.get("/")
         assertEquals(HttpStatusCode.OK, response.status)
-        assertEquals("Ktor ist erreichbar!", response.bodyAsText())
+        assertTrue(response.bodyAsText().contains("Ktor ist erreichbar!"))
+        assertTrue(response.bodyAsText().contains("Go to API Test Page"))
     }
-
 }

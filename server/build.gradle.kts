@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.config.yaml)
     implementation(libs.ktor.server.html.builder)
+    implementation(libs.ktor.server.cors)
 
     implementation(libs.jakarta.mail.api)
     implementation(libs.jakarta.mail.impl)
