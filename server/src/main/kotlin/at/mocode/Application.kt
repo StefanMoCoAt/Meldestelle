@@ -31,7 +31,15 @@ fun Application.module() {
 
     // Install CORS to allow cross-origin requests
     install(CORS) {
-        // Allow requests from the frontend origin
+        // Allow requests from the frontend origins
+        // localhost:3000 - Frontend on host (mapped from container port 80)
+        // localhost:9090 - Backend on host (mapped from container port 8080)
+        // frontend - Frontend container in Docker network
+        allowHost("localhost:3000", schemes = listOf("http", "https"))
+        allowHost("localhost:9090", schemes = listOf("http", "https"))
+        allowHost("frontend", schemes = listOf("http", "https"))
+
+        // For development
         allowHost("localhost:8080", schemes = listOf("http", "https"))
 
         // Allow requests with credentials (cookies, authorization headers)
@@ -71,6 +79,11 @@ fun Application.module() {
         // Serve static files from resources/static directory
         static("/static") {
             resources("static")
+        }
+
+        // Health check endpoint for Docker
+        get("/health") {
+            call.respond(HttpStatusCode.OK, "OK")
         }
 
         get("/") {

@@ -5,9 +5,9 @@ services:
       dockerfile: server/Dockerfile
     container_name: online-nennen-backend
     ports:
-      # Port 8080 des Ktor-Servers im Docker wird auf Port 9090 des Host-Systems gemappt
+      # Port 8081 des Ktor-Servers im Docker wird auf Port 9090 des Host-Systems gemappt
       # Dein externer Nginx auf Proxmox würde dann auf http://localhost:9090 proxyen
-      - "127.0.0.1:9090:8080"
+      - "127.0.0.1:9090:8081"
     restart: unless-stopped
     env_file:
       - .env # Lädt Umgebungsvariablen aus der .env Datei
@@ -64,4 +64,4 @@ volumes:
 networks:
   meldestelle-net:
     driver: bridge
-    name: meldestelle-network
+    name: meldestelle-net

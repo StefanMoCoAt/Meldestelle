@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Test</h1>
+
+    <h2>GET Endpoints</h2>
+    <button onclick="testEndpoint('/')">Test Root Endpoint</button>
+    <button onclick="testEndpoint('/api/debug')">Test /api/debug</button>
+    <button onclick="testEndpoint('api/debug')">Test api/debug</button>
+    <button onclick="testEndpoint('/api/nennung')">Test GET /api/nennung</button>
+    <button onclick="testEndpoint('api/nennung')">Test GET api/nennung</button>
+
+    <h2>POST Endpoints</h2>
+    <button onclick="testPostEndpoint('/api/nennung')">Test POST /api/nennung</button>
+    <button onclick="testPostEndpoint('api/nennung')">Test POST api/nennung</button>
+
+    <h2>Result:</h2>
+    <div id="result" class="result">Click a button to test an endpoint</div>
+
+    <script>
+        function testEndpoint(endpoint) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = 'Loading...';
+
+            fetch(endpoint)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    resultDiv.textContent = `Success! Response from ${endpoint}:\n${data}`;
+                })
+                .catch(error => {
+                    resultDiv.textContent = `Error testing ${endpoint}: ${error.message}`;
+                });
+        }
+
+        function testPostEndpoint(endpoint) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = 'Loading...';
+
+            const testData = {
+                riderName: "Test Rider",
+                horseName: "Test Horse",
+                email: "test@example.com",
+                phone: "123456789",
+                selectedEvents: ["1 Pony Stilspringprüfung 60 cm"],
+                comments: "Test comment"
+            };
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(testData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    resultDiv.textContent = `Success! Response from POST ${endpoint}:\n${data}`;
+                })
+                .catch(error => {
+                    resultDiv.textContent = `Error testing POST ${endpoint}: ${error.message}`;
+                });
+        }
+    </script>
+</body>
+</html>

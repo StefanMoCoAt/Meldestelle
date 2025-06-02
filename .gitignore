@@ -16,7 +16,7 @@ captures
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
-/.env
+#/.env
 
 # Ignore Gradle build output directory
 build
