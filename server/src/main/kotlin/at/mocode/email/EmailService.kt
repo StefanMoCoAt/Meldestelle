@@ -25,11 +25,23 @@ class EmailService(
      * @return true if the email was sent successfully, false otherwise
      */
     fun sendNennungEmail(nennung: Nennung): Boolean {
+        println("Attempting to send email for ${nennung.riderName} with ${nennung.horseName}")
+        println("SMTP Configuration: Host=$smtpHost, Port=$smtpPort, Username=$smtpUsername")
+        println("Email addresses: From=$senderEmail, To=$recipientEmail")
+
         val properties = Properties().apply {
             put("mail.smtp.auth", "true")
             put("mail.smtp.starttls.enable", "true")
             put("mail.smtp.host", smtpHost)
             put("mail.smtp.port", smtpPort.toString())
+            // Add debug property
+            put("mail.debug", "true")
+
+            // Simplified SSL/TLS configuration that works with Gmail
+            put("mail.smtp.ssl.protocols", "TLSv1.2")
+            put("mail.smtp.ssl.trust", "*")
+
+            // Note: The previous configuration with socketFactory was causing SSL/TLS handshake issues
         }
 
         return try {
@@ -46,9 +58,12 @@ class EmailService(
                 setText(createEmailContent(nennung))
             }
 
+            println("Email message prepared, attempting to send...")
             Transport.send(message)
+            println("Email sent successfully!")
             true
         } catch (e: MessagingException) {
+            println("Failed to send email: ${e.message}")
             e.printStackTrace()
             false
         }

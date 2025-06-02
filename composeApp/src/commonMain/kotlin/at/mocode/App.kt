@@ -561,9 +561,9 @@ val httpClient = HttpClient {
             // Setze die Basis-URL für alle Anfragen
             url {
                 protocol = URLProtocol.HTTP
-                // Verwende den Host aus der Konstante
-                // In Constants.kt kann der Wert je nach Umgebung angepasst werden
-                host = API_HOST
+                // Verwende den Host aus der plattformspezifischen Implementierung
+                // PlatformInfo.apiHost liefert "backend" für JVM und "localhost" für WASM
+                host = PlatformInfo.apiHost
                 port = SERVER_PORT // Verwende den Port aus Constants.kt
             }
         }
