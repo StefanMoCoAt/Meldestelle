@@ -1,0 +1,25 @@
+# Gradle files
+.gradle/
+build/
+!build/libs/*.jar
+
+# Git files
+.git/
+.gitignore
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db

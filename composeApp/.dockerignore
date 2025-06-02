@@ -1,0 +1,29 @@
+# Gradle files
+.gradle/
+build/
+!build/dist/wasmJs/productionExecutable/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Test files
+**/src/test/
+
+# Git files
+.git/
+.gitignore
+
+# Temporary files
+*.tmp
+*.temp
