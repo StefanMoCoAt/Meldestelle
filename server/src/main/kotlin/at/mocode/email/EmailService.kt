@@ -5,6 +5,7 @@ import jakarta.mail.*
 import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
 import java.util.*
+import org.slf4j.LoggerFactory
 
 /**
  * Service for sending email notifications for form submissions.
@@ -17,6 +18,7 @@ class EmailService(
     private val recipientEmail: String,
     private val senderEmail: String = smtpUsername
 ) {
+    private val log = LoggerFactory.getLogger(EmailService::class.java)
 
     /**
      * Sends an email notification with the form submission data.
@@ -25,21 +27,20 @@ class EmailService(
      * @return true if the email was sent successfully, false otherwise
      */
     fun sendNennungEmail(nennung: Nennung): Boolean {
-        println("Attempting to send email for ${nennung.riderName} with ${nennung.horseName}")
-        println("SMTP Configuration: Host=$smtpHost, Port=$smtpPort, Username=$smtpUsername")
-        println("Email addresses: From=$senderEmail, To=$recipientEmail")
+        log.info("Attempting to send email for ${nennung.riderName} with ${nennung.horseName}")
+        log.debug("SMTP Configuration: Host=$smtpHost, Port=$smtpPort, Username=$smtpUsername")
+        log.debug("Email addresses: From=$senderEmail, To=$recipientEmail")
 
         val properties = Properties().apply {
             put("mail.smtp.auth", "true")
             put("mail.smtp.starttls.enable", "true")
             put("mail.smtp.host", smtpHost)
             put("mail.smtp.port", smtpPort.toString())
-            // Add debug property
-            put("mail.debug", "true")
+            // Debug property set to false for production
+            put("mail.debug", "false")
 
             // Simplified SSL/TLS configuration that works with Gmail
             put("mail.smtp.ssl.protocols", "TLSv1.2")
-            put("mail.smtp.ssl.trust", "*")
 
             // Note: The previous configuration with socketFactory was causing SSL/TLS handshake issues
         }
@@ -58,13 +59,12 @@ class EmailService(
                 setText(createEmailContent(nennung))
             }
 
-            println("Email message prepared, attempting to send...")
+            log.info("Email message prepared, attempting to send...")
             Transport.send(message)
-            println("Email sent successfully!")
+            log.info("Email sent successfully!")
             true
         } catch (e: MessagingException) {
-            println("Failed to send email: ${e.message}")
-            e.printStackTrace()
+            log.error("Failed to send email: ${e.message}", e)
             false
         }
     }

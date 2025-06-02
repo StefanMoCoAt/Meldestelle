@@ -4,7 +4,7 @@ ktor:
     # Der Port, auf dem der Server lauschen soll
     port: 8081
     # port: ${PORT:8081} # Alternative: Nutzt Env-Variable PORT, sonst 8081
-    # Optional für Entwicklung: Server bei Änderungen neu laden
+    # Optional, für Entwicklung: Server bei Änderungen neu laden
     # watch:
     #  - classes
     #  - resources

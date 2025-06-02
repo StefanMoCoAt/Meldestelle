@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 /**
  * Standard API response format for all endpoints.
- * This class ensures consistent response structure and proper serialization.
+ * This class ensures a consistent response structure and proper serialization.
  */
 @Serializable
 data class ApiResponse(
