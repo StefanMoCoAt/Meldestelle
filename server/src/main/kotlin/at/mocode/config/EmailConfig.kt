@@ -6,7 +6,7 @@ package at.mocode.config
  */
 object EmailConfig {
     // SMTP server configuration
-    val smtpHost: String = System.getenv("SMTP_HOST") ?: "smtp.world4you.com"
+    val smtpHost: String = System.getenv("SMTP_HOST") ?: "smtp.gmail.com"
     val smtpPort: Int = System.getenv("SMTP_PORT")?.toIntOrNull() ?: 587
 
     // Authentication credentials
@@ -14,7 +14,7 @@ object EmailConfig {
     val smtpPassword: String = System.getenv("SMTP_PASSWORD") ?: ""
 
     // Email addresses
-    val recipientEmail: String = System.getenv("RECIPIENT_EMAIL") ?: "online-nennen@mo-code.at"
+    val recipientEmail: String = System.getenv("RECIPIENT_EMAIL") ?: "stefan.mo.co+nennen@gmail.com"
     val senderEmail: String = System.getenv("SMTP_SENDER_EMAIL") ?: smtpUsername
 
     /**
