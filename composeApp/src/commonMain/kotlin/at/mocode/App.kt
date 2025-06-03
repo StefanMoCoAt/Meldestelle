@@ -71,9 +71,6 @@ fun App() {
                             onNewSubmission = {
                                 // Keep the same tournament selected for another submission
                                 currentScreen = Screen.Form
-                            },
-                            onBackToTurnierList = {
-                                currentScreen = Screen.TurnierList
                             }
                         )
                     } ?: run {

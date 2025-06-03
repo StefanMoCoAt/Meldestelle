@@ -10,7 +10,7 @@ import io.ktor.server.routing.*
  */
 fun Application.configureHealthRouting() {
     routing {
-        // Health check endpoint for Docker
+        // Health check endpoint for Docker - explicitly at root level
         get("/health") {
             call.respond(HttpStatusCode.OK, "OK")
         }

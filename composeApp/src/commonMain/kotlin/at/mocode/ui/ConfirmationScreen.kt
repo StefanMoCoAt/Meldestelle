@@ -16,13 +16,11 @@ import at.mocode.model.Nennung
  *
  * @param submittedData The data that was submitted in the form
  * @param onNewSubmission Callback function called when the user wants to submit a new entry
- * @param onBackToTurnierList Callback function called when the user wants to go back to the tournament list
  */
 @Composable
 fun ConfirmationScreen(
     submittedData: Nennung,
-    onNewSubmission: () -> Unit,
-    onBackToTurnierList: () -> Unit
+    onNewSubmission: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -138,24 +136,12 @@ fun ConfirmationScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Buttons for navigation
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // Button for new submission
+        Button(
+            onClick = onNewSubmission,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
         ) {
-            Button(
-                onClick = onBackToTurnierList,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Zurück zur Turnierliste")
-            }
-
-            Button(
-                onClick = onNewSubmission,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Weitere Nennung abgeben")
-            }
+            Text("Weitere Nennung abgeben")
         }
     }
 }

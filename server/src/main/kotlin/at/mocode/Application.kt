@@ -24,7 +24,7 @@ fun Application.module() {
     DatabaseConfig.init(this)
     DatabaseFactory.init(this)
 
-    // Initialize repository and add sample data if empty
+    // Initialize the repository and add sample data if empty
     val turnierRepository = TurnierRepository()
     turnierRepository.addSampleDataIfEmpty()
 

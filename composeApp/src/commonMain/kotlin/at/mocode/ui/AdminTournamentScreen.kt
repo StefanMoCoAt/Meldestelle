@@ -680,7 +680,7 @@ fun TurnierListItem(
 
                 // Simple URL display
                 SelectionContainer {
-                    Text("Nennformular: http://localhost:8081/form/" + turnier.number.toString())
+                    Text("Nennformular: http://localhost:3000/form/" + turnier.number.toString())
                 }
             }
 
