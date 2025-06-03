@@ -55,7 +55,8 @@ class EmailService(
             val message = MimeMessage(session).apply {
                 setFrom(InternetAddress(senderEmail))
                 setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail))
-                subject = "Neue Nennung: ${nennung.riderName} mit ${nennung.horseName}"
+                subject = nennung.turnier?.let { "Neue Nennung für ${it.name}: ${nennung.riderName} mit ${nennung.horseName}" }
+                    ?: "Neue Nennung: ${nennung.riderName} mit ${nennung.horseName}"
                 setText(createEmailContent(nennung))
             }
 
@@ -77,8 +78,13 @@ class EmailService(
      */
     private fun createEmailContent(nennung: Nennung): String {
         val sb = StringBuilder()
-        sb.appendLine("Neue Nennung eingegangen:")
-        sb.appendLine()
+
+        // Add tournament information if available
+        nennung.turnier?.let { turnier ->
+            sb.appendLine(turnier.name)
+            sb.appendLine()
+        }
+
         sb.appendLine("Reiter: ${nennung.riderName}")
         sb.appendLine("Pferd: ${nennung.horseName}")
         sb.appendLine("E-Mail: ${nennung.email}")

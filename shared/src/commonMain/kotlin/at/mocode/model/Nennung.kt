@@ -9,5 +9,6 @@ data class Nennung(
     val email: String,
     val phone: String,
     val selectedEvents: List<String>,
-    val comments: String
+    val comments: String,
+    val turnier: Turnier? = null
 )

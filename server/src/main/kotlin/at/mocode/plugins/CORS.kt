@@ -19,6 +19,7 @@ fun Application.configureCORS() {
             allowHost("localhost:3000", schemes = listOf("http", "https"))
             allowHost("localhost:9090", schemes = listOf("http", "https"))
             allowHost("localhost:8080", schemes = listOf("http", "https"))
+            allowHost("localhost:8081", schemes = listOf("http", "https"))
         }
 
         // Allow requests with credentials (cookies, authorization headers)

@@ -16,11 +16,13 @@ import at.mocode.model.Nennung
  *
  * @param submittedData The data that was submitted in the form
  * @param onNewSubmission Callback function called when the user wants to submit a new entry
+ * @param onBackToTurnierList Callback function called when the user wants to go back to the tournament list
  */
 @Composable
 fun ConfirmationScreen(
     submittedData: Nennung,
-    onNewSubmission: () -> Unit
+    onNewSubmission: () -> Unit,
+    onBackToTurnierList: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -42,12 +44,22 @@ fun ConfirmationScreen(
             shape = MaterialTheme.shapes.medium
         ) {
             Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    "CSN-C NEU CSNP-C NEU NEUMARKT/M., OÖ",
-                    textAlign = TextAlign.Center
-                )
-                Text("7.JUNI 2025", textAlign = TextAlign.Center)
-                Text("Turnier-Nr.: 25319", textAlign = TextAlign.Center)
+                submittedData.turnier?.let { turnier ->
+                    Text(
+                        turnier.name,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(turnier.datum, textAlign = TextAlign.Center)
+                    Text("Turnier-Nr.: ${turnier.number}", textAlign = TextAlign.Center)
+                } ?: run {
+                    // Fallback for backward compatibility
+                    Text(
+                        "CSN-C NEU CSNP-C NEU NEUMARKT/M., OÖ",
+                        textAlign = TextAlign.Center
+                    )
+                    Text("7.JUNI 2025", textAlign = TextAlign.Center)
+                    Text("Turnier-Nr.: 25319", textAlign = TextAlign.Center)
+                }
             }
         }
 
@@ -126,12 +138,24 @@ fun ConfirmationScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Button for another submission
-        Button(
-            onClick = onNewSubmission,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+        // Buttons for navigation
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Weitere Nennung abgeben")
+            Button(
+                onClick = onBackToTurnierList,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Zurück zur Turnierliste")
+            }
+
+            Button(
+                onClick = onNewSubmission,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Weitere Nennung abgeben")
+            }
         }
     }
 }

@@ -30,13 +30,17 @@ import kotlinx.coroutines.launch
 /**
  * Form screen for submitting a "Nennung" (registration/entry)
  *
+ * @param turnier The tournament for which the registration is being submitted
  * @param onFormSubmitted Callback function called when the form is successfully submitted
  * @param onSubmittedDataReceived Callback function called with the submitted data
+ * @param onBackClicked Callback function called when the back button is clicked
  */
 @Composable
 fun FormScreen(
+    turnier: at.mocode.model.Turnier,
     onFormSubmitted: () -> Unit,
-    onSubmittedDataReceived: (Nennung) -> Unit
+    onSubmittedDataReceived: (Nennung) -> Unit,
+    onBackClicked: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val riderNameFocus = remember { FocusRequester() }
@@ -64,18 +68,10 @@ fun FormScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
 
-    val events = listOf(
-        "1 Pony Stilspringprüfung 60 cm",
-        "2 Stilspringprüfung 60 cm",
-        "3 Pony Stilspringprüfung 70 cm",
-        "4 Stilspringprüfung 80 cm",
-        "5 Pony Stilspringprüfung 95 cm",
-        "6 Stilspringprüfung 95 cm",
-        "7 Einlaufspringprüfung 95cm",
-        "8 Springpferdeprüfung 105 cm",
-        "9 Stilspringprüfung 105 cm",
-        "10 Standardspringprüfung 105cm"
-    )
+    // Convert the tournament's competitions to event strings
+    val events = turnier.bewerbe.map { bewerb ->
+        "${bewerb.nummer} ${bewerb.titel} ${bewerb.klasse}"
+    }
     val selectedEvents = remember { mutableStateListOf<String>() }
 
     val isRiderNameValid = riderName.isNotBlank()
@@ -104,6 +100,8 @@ fun FormScreen(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+        // No back button as per requirements
+
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -118,11 +116,11 @@ fun FormScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    "CSN-C NEU CSNP-C NEU NEUMARKT/M., OÖ",
+                    turnier.name,
                     textAlign = TextAlign.Center
                 )
-                Text("7.JUNI 2025", textAlign = TextAlign.Center)
-                Text("Turnier-Nr.: 25319", textAlign = TextAlign.Center)
+                Text(turnier.datum, textAlign = TextAlign.Center)
+                Text("Turnier-Nr.: ${turnier.number}", textAlign = TextAlign.Center)
             }
         }
 
@@ -348,7 +346,8 @@ fun FormScreen(
                         email = email,
                         phone = phone,
                         selectedEvents = selectedEvents.toList(),
-                        comments = comments
+                        comments = comments,
+                        turnier = turnier
                     )
 
                     // Save the data for the confirmation page
@@ -374,7 +373,8 @@ fun FormScreen(
                                 } catch (parseError: Exception) {
                                     // Fallback if no structured response can be parsed
                                     println("Could not parse error response: ${parseError.message}")
-                                    errorMessage = "Error sending the entry (Server: ${response.status}). Please try again later."
+                                    errorMessage =
+                                        "Error sending the entry (Server: ${response.status}). Please try again later."
                                 }
                             }
                         } catch (e: Exception) {
@@ -399,7 +399,7 @@ fun FormScreen(
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
             } else {
-                Text("Submit Entry")
+                Text("Jetzt Nennen")
             }
         }
     }
