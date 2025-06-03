@@ -1,7 +1,6 @@
 package at.mocode.database
 
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.Table
 
 /**
  * Database table for tournaments (Turnier)

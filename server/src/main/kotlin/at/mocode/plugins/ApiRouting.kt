@@ -3,7 +3,6 @@ package at.mocode.plugins
 import at.mocode.database.TurnierRepository
 import at.mocode.email.EmailService
 import at.mocode.model.ApiResponse
-import at.mocode.model.Bewerb
 import at.mocode.model.Nennung
 import at.mocode.model.Turnier
 import io.ktor.http.*
