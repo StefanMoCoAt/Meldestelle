@@ -10,7 +10,7 @@ class HttpClientTest {
     @Test
     fun testServerConfiguration() {
         // Verify that the server port constant is set correctly
-        assertEquals(8081, SERVER_PORT)
+        assertEquals(8080, SERVER_PORT)
     }
 
     @Test

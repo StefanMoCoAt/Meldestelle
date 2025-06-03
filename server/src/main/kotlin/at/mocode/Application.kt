@@ -1,6 +1,9 @@
 package at.mocode
 
+import at.mocode.config.DatabaseConfig
 import at.mocode.config.EmailConfig
+import at.mocode.database.DatabaseFactory
+import at.mocode.database.TurnierRepository
 import at.mocode.email.EmailService
 import at.mocode.plugins.*
 import io.ktor.server.application.*
@@ -16,6 +19,14 @@ fun Application.module() {
 
     // Configure CORS
     configureCORS()
+
+    // Initialize database
+    DatabaseConfig.init(this)
+    DatabaseFactory.init(this)
+
+    // Initialize repository and add sample data if empty
+    val turnierRepository = TurnierRepository()
+    turnierRepository.addSampleDataIfEmpty()
 
     // Initialize EmailService if the configuration is valid
     val emailService = if (EmailConfig.isValid()) {
@@ -35,5 +46,5 @@ fun Application.module() {
     // Configure routing
     configureStaticRouting()
     configureHealthRouting()
-    configureApiRouting(emailService)
+    configureApiRouting(emailService, turnierRepository)
 }

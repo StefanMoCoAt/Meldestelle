@@ -42,6 +42,9 @@ dependencies {
     // H2 Datenbank für Tests und lokale Entwicklung
     runtimeOnly(libs.h2.driver)
 
+    // SQLite Datenbank für lokale Speicherung
+    runtimeOnly(libs.sqlite.driver)
+
     // HikariCP für Connection Pooling
     implementation(libs.hikari.cp)
 

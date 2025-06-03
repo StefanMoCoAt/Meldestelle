@@ -137,7 +137,7 @@ class FormValidationTest {
     private fun isValidEmail(email: String): Boolean {
         if (email.isBlank()) return false
 
-        // More strict regex that requires domain to have at least one dot
+        // Stricter regex that requires domain to have at least one dot
         val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z0-9.-]+$"
         return email.matches(emailRegex.toRegex())
     }

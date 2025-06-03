@@ -1,5 +1,6 @@
 package at.mocode.plugins
 
+import at.mocode.database.TurnierRepository
 import at.mocode.email.EmailService
 import at.mocode.model.ApiResponse
 import at.mocode.model.Bewerb
@@ -14,7 +15,7 @@ import io.ktor.server.routing.*
 /**
  * Configures API routing for the application
  */
-fun Application.configureApiRouting(emailService: EmailService?) {
+fun Application.configureApiRouting(emailService: EmailService?, turnierRepository: TurnierRepository) {
     routing {
         // Group all API endpoints under /api
         route("/api") {
@@ -34,38 +35,8 @@ fun Application.configureApiRouting(emailService: EmailService?) {
                 // Get all tournaments
                 get {
                     try {
-                        // For now, return sample data
-                        // In a real application, this would come from a database
-                        val turniere = listOf(
-                            Turnier(
-                                name = "CSN-C NEU CSNP-C NEU NEUMARKT/M., OÖ",
-                                datum = "7.JUNI 2025",
-                                number = 25319,
-                                bewerbe = listOf(
-                                    Bewerb(1, "Pony Stilspringprüfung", "60 cm", null),
-                                    Bewerb(2, "Stilspringprüfung", "60 cm", null),
-                                    Bewerb(3, "Pony Stilspringprüfung", "70 cm", null),
-                                    Bewerb(4, "Stilspringprüfung", "80 cm", null),
-                                    Bewerb(5, "Pony Stilspringprüfung", "95 cm", null),
-                                    Bewerb(6, "Stilspringprüfung", "95 cm", null),
-                                    Bewerb(7, "Einlaufspringprüfung", "95cm", null),
-                                    Bewerb(8, "Springpferdeprüfung", "105 cm", null),
-                                    Bewerb(9, "Stilspringprüfung", "105 cm", null),
-                                    Bewerb(10, "Standardspringprüfung", "105cm", null)
-                                )
-                            ),
-                            Turnier(
-                                name = "CSN-B LAMBACH, OÖ",
-                                datum = "14.JUNI 2025",
-                                number = 25320,
-                                bewerbe = listOf(
-                                    Bewerb(1, "Stilspringprüfung", "80 cm", null),
-                                    Bewerb(2, "Stilspringprüfung", "95 cm", null),
-                                    Bewerb(3, "Standardspringprüfung", "105 cm", null)
-                                )
-                            )
-                        )
-
+                        // Get tournaments from the database
+                        val turniere = turnierRepository.getAllTurniere()
                         call.respond(HttpStatusCode.OK, turniere)
                     } catch (e: Exception) {
                         application.log.error("Error getting tournaments", e)
@@ -84,9 +55,9 @@ fun Application.configureApiRouting(emailService: EmailService?) {
                     try {
                         val turnier = call.receive<Turnier>()
 
-                        // In a real application, this would be saved to a database
-                        // For now, just log it and return success
-                        application.log.info("Created tournament: $turnier")
+                        // Save the tournament to the database
+                        val createdTurnier = turnierRepository.createTurnier(turnier)
+                        application.log.info("Created tournament: $createdTurnier")
 
                         call.respond(
                             HttpStatusCode.Created,
@@ -126,9 +97,20 @@ fun Application.configureApiRouting(emailService: EmailService?) {
 
                             val turnier = call.receive<Turnier>()
 
-                            // In a real application, this would update the tournament in a database
-                            // For now, just log it and return success
-                            application.log.info("Updated tournament: $turnier")
+                            // Update the tournament in the database
+                            val updatedTurnier = turnierRepository.updateTurnier(number, turnier)
+                            if (updatedTurnier == null) {
+                                call.respond(
+                                    HttpStatusCode.NotFound,
+                                    ApiResponse(
+                                        success = false,
+                                        message = "Turnier mit Nummer $number nicht gefunden"
+                                    )
+                                )
+                                return@put
+                            }
+
+                            application.log.info("Updated tournament: $updatedTurnier")
 
                             call.respond(
                                 HttpStatusCode.OK,
@@ -164,8 +146,19 @@ fun Application.configureApiRouting(emailService: EmailService?) {
                                 return@delete
                             }
 
-                            // In a real application, this would delete the tournament from a database
-                            // For now, just log it and return success
+                            // Delete the tournament from the database
+                            val deleted = turnierRepository.deleteTurnier(number)
+                            if (!deleted) {
+                                call.respond(
+                                    HttpStatusCode.NotFound,
+                                    ApiResponse(
+                                        success = false,
+                                        message = "Turnier mit Nummer $number nicht gefunden"
+                                    )
+                                )
+                                return@delete
+                            }
+
                             application.log.info("Deleted tournament with number: $number")
 
                             call.respond(

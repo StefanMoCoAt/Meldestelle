@@ -28,12 +28,12 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      # Schritt 2: Docker Image für den Ktor-Server bauen
-      # verwendet die 'Dockerfile' im Hauptverzeichnis des Projekts.
-      # Taggt das Image als 'meldestelle/server: latest' (muss zum Compose-File passen)
-      - name: Build Docker image
-        # Führt 'docker build' im Root-Verzeichnis des ausgecheckten Codes aus
-        run: docker build -t meldestelle/server:latest .
+      # Schritt 2: Docker Images für den Ktor-Server und Frontend bauen
+      # Wir verwenden jetzt die Docker Compose Build-Funktionalität
+      # anstatt die Images manuell zu bauen
+      - name: Build Docker images
+        # Führt 'docker compose build' im Root-Verzeichnis des ausgecheckten Codes aus
+        run: docker compose build
 
       # Schritt 3: Anwendung via Docker Compose starten/aktualisieren
       # stellt alle in docker-compose.yml definierten Services bereit
@@ -43,6 +43,14 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_SENDER_EMAIL: ${{ secrets.SMTP_SENDER_EMAIL }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+
           # Füge hier optional weitere Secrets hinzu, die deine Compose-Datei braucht
           # z.B. PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PGADMIN_PASSWORD }}
         # Führt 'docker compose up' aus.

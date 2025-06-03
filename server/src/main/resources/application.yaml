@@ -12,3 +12,8 @@ ktor:
     # Hier wird Ktor gesagt, welche Funktion die Konfiguration enthält
     modules:
       - at.mocode.ApplicationKt.module
+
+# Datenbank-Konfiguration
+database:
+  driver: "org.sqlite.JDBC"
+  url: "jdbc:sqlite:meldestelle.db"

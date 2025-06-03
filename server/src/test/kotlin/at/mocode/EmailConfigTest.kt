@@ -25,19 +25,17 @@ class EmailConfigTest {
         // Since we've modified EmailConfig to load from the.env file,
         // and we know the .env file contains the required values,
         // the configuration should be valid
-        println("[DEBUG_LOG] SMTP_USER: ${EmailConfig.smtpUsername}")
-        println("[DEBUG_LOG] SMTP_PASSWORD: ${EmailConfig.smtpPassword}")
-        println("[DEBUG_LOG] SMTP_SENDER_EMAIL: ${EmailConfig.senderEmail}")
+        // Debug logs removed to avoid exposing sensitive information
 
         assertTrue(EmailConfig.isValid(), "Email configuration should be valid with values from .env file")
 
-        // Verify specific values from .env file
-        assertEquals("smtp.gmail.com", EmailConfig.smtpHost)
-        assertEquals(587, EmailConfig.smtpPort)
-        assertEquals("stefan.mo.co@gmail.com", EmailConfig.smtpUsername)
-        assertEquals("plktsgcvqiqstnpk", EmailConfig.smtpPassword)
-        assertEquals("stefan.mo.co+nennen@gmail.com", EmailConfig.senderEmail)
-        assertEquals("stefan.mo.co+nennen@gmail.com", EmailConfig.recipientEmail)
+        // Verify that values are loaded from .env file
+        assertTrue(EmailConfig.smtpHost.isNotBlank(), "SMTP host should not be blank")
+        assertTrue(EmailConfig.smtpPort > 0, "SMTP port should be a positive number")
+        assertTrue(EmailConfig.smtpUsername.isNotBlank(), "SMTP username should not be blank")
+        assertTrue(EmailConfig.smtpPassword.isNotBlank(), "SMTP password should not be blank")
+        assertTrue(EmailConfig.senderEmail.isNotBlank(), "Sender email should not be blank")
+        assertTrue(EmailConfig.recipientEmail.isNotBlank(), "Recipient email should not be blank")
     }
 
     /**

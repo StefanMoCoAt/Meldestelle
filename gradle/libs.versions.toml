@@ -13,6 +13,7 @@ exposed = "0.52.0"
 postgresql = "42.7.3"
 hikari = "5.1.0"
 h2 = "2.2.224"
+sqlite = "3.45.2.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -50,6 +51,7 @@ exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "e
 postgresql-driver = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 hikari-cp = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 h2-driver = { module = "com.h2database:h2", version.ref = "h2" }
+sqlite-driver = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
 
 [plugins]
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
