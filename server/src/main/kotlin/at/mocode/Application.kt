@@ -9,22 +9,30 @@ import at.mocode.plugins.*
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
 
+/**
+ * Application entry point.
+ * Starts the Ktor server using the Netty engine.
+ */
 fun main(args: Array<String>) {
     EngineMain.main(args)
 }
 
+/**
+ * Application module configuration.
+ * This function is called by Ktor during server startup to configure all components.
+ */
 fun Application.module() {
-    // Configure serialization
+    // Configure JSON serialization for request/response handling
     configureSerialization()
 
-    // Configure CORS
+    // Configure Cross-Origin Resource Sharing for frontend-backend communication
     configureCORS()
 
-    // Initialize database
+    // Initialize database configuration and connection factory
     DatabaseConfig.init(this)
     DatabaseFactory.init(this)
 
-    // Initialize the repository and add sample data if empty
+    // Initialize the tournament repository and add sample data if the database is empty
     val turnierRepository = TurnierRepository()
     turnierRepository.addSampleDataIfEmpty()
 
@@ -43,8 +51,8 @@ fun Application.module() {
         null
     }
 
-    // Configure routing
-    configureStaticRouting()
-    configureHealthRouting()
-    configureApiRouting(emailService, turnierRepository)
+    // Configure routing for different parts of the application
+    configureStaticRouting()     // Serves static files
+    configureHealthRouting()     // Health check endpoints
+    configureApiRouting(emailService, turnierRepository)  // API endpoints
 }

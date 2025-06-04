@@ -29,17 +29,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                // put your Multiplatform dependencies here
                 implementation(libs.kotlinx.serialization.json)
             }
         }
-
-//        val jvmMain by getting {
-//            dependsOn(commonMain)
-//        }
-//
-//        val wasmJsMain by getting {
-//            dependsOn(commonMain)
-//        }
     }
 }

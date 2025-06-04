@@ -15,7 +15,15 @@ import at.mocode.ui.TurnierListScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
- * Main application composable
+ * Main application composable that serves as the entry point for the UI.
+ *
+ * This composable handles the navigation between different screens:
+ * - Tournament list screen (initial screen)
+ * - Registration form screen
+ * - Confirmation screen
+ * - Admin tournament management screen
+ *
+ * It maintains the navigation state and passes data between screens.
  */
 @Composable
 @Preview
@@ -26,6 +34,31 @@ fun App() {
         var selectedTurnier by remember { mutableStateOf<Turnier?>(null) }
         var submittedData by remember { mutableStateOf<Nennung?>(null) }
 
+        // Navigation functions
+        val navigateToTurnierList = {
+            currentScreen = Screen.TurnierList
+        }
+
+        val navigateToForm = { turnier: Turnier? ->
+            if (turnier != null) {
+                selectedTurnier = turnier
+            }
+            currentScreen = Screen.Form
+        }
+
+        val navigateToConfirmation = {
+            currentScreen = Screen.Confirmation
+        }
+
+        val navigateToAdmin = {
+            currentScreen = Screen.AdminTournament
+        }
+
+        val updateSubmittedData = { data: Nennung ->
+            submittedData = data
+        }
+
+        // Main content
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -33,55 +66,57 @@ fun App() {
                 .safeContentPadding(),
             contentAlignment = Alignment.TopCenter
         ) {
+            // Render the current screen
             when (val screen = currentScreen) {
                 is Screen.TurnierList -> {
                     TurnierListScreen(
                         onTurnierSelected = { turnier ->
-                            selectedTurnier = turnier
-                            currentScreen = Screen.Form
+                            navigateToForm(turnier)
                         },
                         onAdminClicked = {
-                            currentScreen = Screen.AdminTournament
+                            navigateToAdmin()
                         }
                     )
                 }
                 is Screen.Form -> {
+                    // Show form screen if a tournament is selected, otherwise go back to list
                     selectedTurnier?.let { turnier ->
                         FormScreen(
                             turnier = turnier,
                             onFormSubmitted = {
-                                currentScreen = Screen.Confirmation
+                                navigateToConfirmation()
                             },
-                            onSubmittedDataReceived = {
-                                submittedData = it
+                            onSubmittedDataReceived = { data ->
+                                updateSubmittedData(data)
                             },
                             onBackClicked = {
-                                currentScreen = Screen.TurnierList
+                                navigateToTurnierList()
                             }
                         )
                     } ?: run {
                         // Fallback if no tournament is selected
-                        currentScreen = Screen.TurnierList
+                        navigateToTurnierList()
                     }
                 }
                 is Screen.Confirmation -> {
+                    // Show confirmation screen if data is submitted, otherwise go back to list
                     submittedData?.let { data ->
                         ConfirmationScreen(
                             submittedData = data,
                             onNewSubmission = {
                                 // Keep the same tournament selected for another submission
-                                currentScreen = Screen.Form
+                                navigateToForm(null)
                             }
                         )
                     } ?: run {
                         // Fallback if no data is submitted
-                        currentScreen = Screen.TurnierList
+                        navigateToTurnierList()
                     }
                 }
                 is Screen.AdminTournament -> {
                     AdminTournamentScreen(
                         onBackClicked = {
-                            currentScreen = Screen.TurnierList
+                            navigateToTurnierList()
                         }
                     )
                 }
@@ -91,11 +126,31 @@ fun App() {
 }
 
 /**
- * Sealed class representing the different screens in the application
+ * Sealed class representing the different screens in the application.
+ * This is used for type-safe navigation between screens.
  */
 sealed class Screen {
+    /**
+     * The tournament list screen.
+     * This is the initial screen showing all available tournaments.
+     */
     object TurnierList : Screen()
+
+    /**
+     * The registration form screen.
+     * Displayed when a user selects a tournament to register for.
+     */
     object Form : Screen()
+
+    /**
+     * The confirmation screen.
+     * Shown after a successful form submission.
+     */
     object Confirmation : Screen()
+
+    /**
+     * The admin tournament management screen.
+     * Provides CRUD operations for tournaments.
+     */
     object AdminTournament : Screen()
 }

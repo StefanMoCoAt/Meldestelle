@@ -12,7 +12,15 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 /**
- * Configures API routing for the application
+ * Configures API routing for the application.
+ *
+ * This function sets up all REST API endpoints for the application, organized into logical groups:
+ * - /api/debug - Debug endpoint to verify API functionality
+ * - /api/turniere - CRUD operations for tournaments
+ * - /api/nennung - Endpoints for handling tournament registrations
+ *
+ * @param emailService Optional email service for sending notifications
+ * @param turnierRepository Repository for tournament data access
  */
 fun Application.configureApiRouting(emailService: EmailService?, turnierRepository: TurnierRepository) {
     routing {
@@ -29,9 +37,10 @@ fun Application.configureApiRouting(emailService: EmailService?, turnierReposito
                 )
             }
 
-            // Group all tournament endpoints
+            // Tournament endpoints (/api/turniere)
+            // Provides CRUD operations for tournament management
             route("/turniere") {
-                // Get all tournaments
+                // GET /api/turniere - Retrieve all tournaments
                 get {
                     try {
                         // Get tournaments from the database
@@ -49,7 +58,7 @@ fun Application.configureApiRouting(emailService: EmailService?, turnierReposito
                     }
                 }
 
-                // Create a new tournament
+                // POST /api/turniere - Create a new tournament
                 post {
                     try {
                         val turnier = call.receive<Turnier>()
@@ -77,9 +86,10 @@ fun Application.configureApiRouting(emailService: EmailService?, turnierReposito
                     }
                 }
 
-                // Update or delete a specific tournament
+                // Tournament operations by ID (/api/turniere/{number})
+                // Provides operations for a specific tournament identified by its number
                 route("/{number}") {
-                    // Update a tournament
+                    // PUT /api/turniere/{number} - Update an existing tournament
                     put {
                         try {
                             val number = call.parameters["number"]?.toIntOrNull()
@@ -130,7 +140,7 @@ fun Application.configureApiRouting(emailService: EmailService?, turnierReposito
                         }
                     }
 
-                    // Delete a tournament
+                    // DELETE /api/turniere/{number} - Delete an existing tournament
                     delete {
                         try {
                             val number = call.parameters["number"]?.toIntOrNull()
@@ -181,9 +191,10 @@ fun Application.configureApiRouting(emailService: EmailService?, turnierReposito
                 }
             }
 
-            // Group all nennung endpoints
+            // Registration endpoints (/api/nennung)
+            // Handles tournament registration submissions and related operations
             route("/nennung") {
-                // Debug endpoint for the nennung endpoint (GET method)
+                // GET /api/nennung - Debug endpoint to verify registration API functionality
                 get {
                     call.respond(
                         HttpStatusCode.OK,
@@ -194,7 +205,7 @@ fun Application.configureApiRouting(emailService: EmailService?, turnierReposito
                     )
                 }
 
-                // Endpoint for form submissions
+                // POST /api/nennung - Submit a new tournament registration
                 post {
                     try {
                         // Parse the request body as Nennung

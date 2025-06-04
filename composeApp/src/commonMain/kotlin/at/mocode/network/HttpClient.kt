@@ -9,24 +9,35 @@ import at.mocode.SERVER_PORT
 import io.ktor.client.request.request
 
 /**
- * Ktor HTTP Client Instance for making API requests
- * Uses platform-specific configuration through PlatformInfo
+ * Shared HTTP client instance for making API requests across the application.
+ *
+ * Features:
+ * - Content negotiation with JSON serialization/deserialization
+ * - Platform-specific host configuration through PlatformInfo
+ * - Consistent port configuration using SERVER_PORT constant
+ *
+ * This client is used by all screens that need to communicate with the backend API.
  */
 val httpClient = HttpClient {
+    // Install content negotiation plugin to handle JSON serialization/deserialization
     install(ContentNegotiation) {
-        json() // Uses kotlinx.serialization
+        json() // Uses kotlinx.serialization for JSON processing
     }
 
-    // Configure the engine for absolute URLs
+    // Configure the HTTP engine with platform-specific settings
     engine {
-        // For WASM/JS client
         request {
-            // Set the base URL for all requests
+            // Configure default URL components for all requests
             url {
+                // Use HTTP protocol for all requests
                 protocol = URLProtocol.HTTP
-                // Use the host from the platform-specific implementation
-                // PlatformInfo.apiHost returns "backend" for JVM and "localhost" for WASM
+
+                // Use platform-specific host:
+                // - In JVM (desktop): Uses API_HOST constant ("backend")
+                // - In WASM/JS (browser): Uses "localhost" in development, API_HOST in production
                 host = PlatformInfo.apiHost
+
+                // Use the standard server port defined in Constants.kt
                 port = SERVER_PORT
             }
         }

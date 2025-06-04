@@ -80,22 +80,18 @@ compose.desktop {
     }
 }
 
-// Configure the wasmJsBrowserDistribution task to handle duplicate files
+// Configure tasks to handle duplicate files
 tasks.configureEach {
     if (this is Copy) {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 }
 
-// Use afterEvaluate to ensure all tasks are created before configuration
+// Configure wasmJsBrowserDistribution task
 afterEvaluate {
     tasks.findByName("wasmJsBrowserDistribution")?.let { task ->
-        logger.lifecycle("Configuring duplicatesStrategy for wasmJsBrowserDistribution task")
         if (task is Sync) {
             task.duplicatesStrategy = DuplicatesStrategy.INCLUDE
-            logger.lifecycle("Successfully set duplicatesStrategy to INCLUDE for Sync task")
-        } else {
-            logger.lifecycle("Task is not a Sync task, it's a ${task.javaClass.name}")
         }
-    } ?: logger.lifecycle("wasmJsBrowserDistribution task not found")
+    }
 }
