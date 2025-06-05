@@ -16,10 +16,7 @@ fun Route.homeRoutes() {
     get("/") {
         log.info("Handling request to home page")
 
-        // Insert dummy tournament if needed
-        turnierRepository.insertDummyTurnierIfEmpty()
-
-        // Get all tournaments
+        // Get all tournaments from the database
         val turniere = turnierRepository.getAllTurniere()
 
         // Render the home page

@@ -178,10 +178,10 @@ class LayoutTemplate {
                 textarea,
                 select {
                     width: 100%;
-                    padding: 1.2rem;
-                    border: none;
+                    padding: 0.8rem;
+                    border: 1px solid var(--border-color);
                     border-radius: 6px;
-                    font-size: 2rem;
+                    font-size: 1rem;
                     transition: all 0.3s;
                     margin-bottom: 1.2rem;
                     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -220,7 +220,6 @@ class LayoutTemplate {
                     letter-spacing: 0.5px;
                     font-weight: 500;
                     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                    width: 100%;
                     text-align: center;
                 }
 
@@ -359,8 +358,7 @@ class LayoutTemplate {
                     }
 
                     .button, button {
-                        width: 100%;
-                        text-align: center;
+                        display: block;
                         margin-bottom: 0.5rem;
                     }
                 }

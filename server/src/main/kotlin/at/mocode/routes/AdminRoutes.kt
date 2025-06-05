@@ -73,19 +73,24 @@ fun Route.adminRoutes() {
         val bewerbKlasse = formParameters.getAll("bewerb-klasse[]") ?: emptyList()
         val bewerbTask = formParameters.getAll("bewerb-task[]") ?: emptyList()
 
+        log.info("Received competitions for creation: ${bewerbNummern.size} numbers, ${bewerbTitel.size} titles, ${bewerbKlasse.size} classes, ${bewerbTask.size} tasks")
+
         // Create list of competitions
         val bewerbe = mutableListOf<Bewerb>()
         for (i in bewerbNummern.indices) {
-            if (i < bewerbTitel.size && i < bewerbKlasse.size && i < bewerbTask.size) {
-                bewerbe.add(
-                    Bewerb(
-                        nummer = bewerbNummern[i],
-                        titel = bewerbTitel[i],
-                        klasse = bewerbKlasse[i],
-                        task = if (bewerbTask[i].isNotBlank()) bewerbTask[i] else null
-                    )
+            val titel = if (i < bewerbTitel.size) bewerbTitel[i] else "Unbenannter Bewerb"
+            val klasse = if (i < bewerbKlasse.size) bewerbKlasse[i] else "Keine Klasse"
+            val task = if (i < bewerbTask.size && bewerbTask[i].isNotBlank()) bewerbTask[i] else null
+
+            bewerbe.add(
+                Bewerb(
+                    nummer = bewerbNummern[i],
+                    titel = titel,
+                    klasse = klasse,
+                    task = task
                 )
-            }
+            )
+            log.info("Added competition for creation: ${bewerbNummern[i]}, $titel, $klasse, $task")
         }
 
         // Create the tournament
@@ -126,19 +131,24 @@ fun Route.adminRoutes() {
         val bewerbKlasse = formParameters.getAll("bewerb-klasse[]") ?: emptyList()
         val bewerbTask = formParameters.getAll("bewerb-task[]") ?: emptyList()
 
+        log.info("Received competitions for update: ${bewerbNummern.size} numbers, ${bewerbTitel.size} titles, ${bewerbKlasse.size} classes, ${bewerbTask.size} tasks")
+
         // Create list of competitions
         val bewerbe = mutableListOf<Bewerb>()
         for (i in bewerbNummern.indices) {
-            if (i < bewerbTitel.size && i < bewerbKlasse.size && i < bewerbTask.size) {
-                bewerbe.add(
-                    Bewerb(
-                        nummer = bewerbNummern[i],
-                        titel = bewerbTitel[i],
-                        klasse = bewerbKlasse[i],
-                        task = if (bewerbTask[i].isNotBlank()) bewerbTask[i] else null
-                    )
+            val titel = if (i < bewerbTitel.size) bewerbTitel[i] else "Unbenannter Bewerb"
+            val klasse = if (i < bewerbKlasse.size) bewerbKlasse[i] else "Keine Klasse"
+            val task = if (i < bewerbTask.size && bewerbTask[i].isNotBlank()) bewerbTask[i] else null
+
+            bewerbe.add(
+                Bewerb(
+                    nummer = bewerbNummern[i],
+                    titel = titel,
+                    klasse = klasse,
+                    task = task
                 )
-            }
+            )
+            log.info("Added competition for update: ${bewerbNummern[i]}, $titel, $klasse, $task")
         }
 
         // Update the tournament

@@ -8,7 +8,7 @@ services:
     ports:
       - "8080:8081"
     volumes:
-      - sqlite_data:/app/data # Volume für SQLite Datenbank
+      - ./data:/app/data # Direktes Mapping des data Verzeichnisses
     environment:
       - USE_SQLITE=true
     networks:
@@ -17,5 +17,3 @@ services:
 networks:
   meldestelle-net:
     driver: bridge
-volumes:
-  sqlite_data: # Volume für SQLite Datenbank
