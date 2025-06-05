@@ -37,12 +37,15 @@ fun configureDatabase() {
             throw e // Rethrow error, test should fail
         }
     } else {
-        // Check if we're running in IDEA (no Docker environment variables set)
-        // We only check one variable, that's usually enough
+        // Check if we should use SQLite (either in IDEA or in Docker with SQLite)
+        // First check for explicit SQLite flag
+        val useSqlite = System.getenv("USE_SQLITE")?.toBoolean() ?: false
+
+        // Then check if we're in IDEA (no Docker environment variables set)
         val dbHostFromEnv = System.getenv("DB_HOST")
         val isIdeaEnvironment = (dbHostFromEnv == null)
 
-        if (isIdeaEnvironment) {
+        if (useSqlite || isIdeaEnvironment) {
             // Ensure the data directory exists
             val dataDir = File("data")
             if (!dataDir.exists()) {

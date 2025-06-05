@@ -1,6 +1,7 @@
 package at.mocode.routes
 
 import at.mocode.model.Bewerb
+import at.mocode.config.DependencyInjection
 import at.mocode.repository.TurnierRepository
 import at.mocode.views.AdminView
 import io.ktor.http.*
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory
  */
 fun Route.adminRoutes() {
     val log = LoggerFactory.getLogger("AdminRoutes")
-    val turnierRepository = TurnierRepository()
+    val turnierRepository = DependencyInjection.turnierRepository
     val adminView = AdminView()
 
     // Route to display the tournament management page

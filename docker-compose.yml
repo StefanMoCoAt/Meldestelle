@@ -9,6 +9,8 @@ services:
       - "8080:8081"
     volumes:
       - sqlite_data:/app/data # Volume für SQLite Datenbank
+    environment:
+      - USE_SQLITE=true
     networks:
       - meldestelle-net
 
