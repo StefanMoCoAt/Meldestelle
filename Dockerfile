@@ -11,5 +11,7 @@ RUN gradle :server:shadowJar --no-configure-on-demand
 FROM openjdk:21-slim-bookworm AS runtime
 WORKDIR /app
 COPY --from=build /home/gradle/src/server/build/libs/*.jar ./app.jar
-EXPOSE 8080
+# Create data directory for SQLite database
+RUN mkdir -p /app/data
+EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
