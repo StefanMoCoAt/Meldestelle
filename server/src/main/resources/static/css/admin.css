@@ -1,0 +1,407 @@
+/* Modern admin interface styles with enhanced UX */
+
+/* Admin dashboard layout */
+.admin-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.admin-dashboard-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1.5rem;
+    transition: all var(--transition-fast);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow-lg);
+}
+
+.admin-dashboard-card:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--primary-color);
+}
+
+.admin-dashboard-card h3 {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.admin-dashboard-card .stat {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.admin-dashboard-card .stat-label {
+    color: var(--light-text);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Admin section styling */
+.admin-section {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+
+.admin-section:hover {
+    box-shadow: var(--box-shadow-lg);
+}
+
+.admin-section .card-header {
+    background: linear-gradient(to right, rgba(67, 97, 238, 0.05), rgba(114, 9, 183, 0.05));
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-section .card-body {
+    padding: 1.5rem;
+}
+
+.admin-section h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.admin-section h2 i {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+    background-color: rgba(67, 97, 238, 0.1);
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: transform var(--transition-fast);
+}
+
+.admin-section:hover h2 i {
+    transform: rotate(10deg);
+}
+
+/* Admin form styling */
+.admin-form {
+    width: 100%;
+}
+
+.admin-form .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -0.75rem;
+}
+
+.admin-form .form-group {
+    padding: 0 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-form .form-group-third {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+}
+
+.admin-form label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: var(--text-color);
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    outline: none;
+}
+
+/* Competition section styling */
+.bewerbe-section {
+    border-top: 1px solid var(--border-color);
+    padding-top: 2rem;
+    margin-top: 2rem;
+    position: relative;
+}
+
+.bewerbe-section h3 {
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.bewerbe-section h3 i {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+    color: var(--accent-color);
+}
+
+/* Competition container styling */
+.bewerb-container {
+    background-color: var(--neutral-50);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+    position: relative;
+    transition: all var(--transition-fast);
+    box-shadow: var(--box-shadow-sm);
+}
+
+.bewerb-container:hover {
+    background-color: white;
+    transform: translateY(-3px);
+    box-shadow: var(--box-shadow);
+    border-color: var(--primary-color);
+}
+
+.bewerb-container h4 {
+    color: var(--secondary-color);
+    font-size: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.bewerb-container h4 i {
+    margin-right: 0.5rem;
+    color: var(--accent-color);
+    transition: transform var(--transition-fast);
+}
+
+.bewerb-container:hover h4 i {
+    transform: rotate(10deg);
+}
+
+/* Empty state styling */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    background-color: var(--neutral-50);
+    border-radius: var(--border-radius);
+    border: 1px dashed var(--border-color);
+    margin: 2rem 0;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    display: block;
+    color: var(--secondary-color);
+    opacity: 0.7;
+}
+
+.empty-state p {
+    font-size: 1.25rem;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.empty-state .button {
+    margin-top: 1rem;
+}
+
+/* Admin table styling */
+.admin-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 1.5rem;
+}
+
+.admin-table th {
+    background-color: var(--neutral-100);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    color: var(--primary-color);
+    padding: 1rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.admin-table tr:hover td {
+    background-color: rgba(67, 97, 238, 0.03);
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Admin action buttons */
+.admin-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    justify-content: flex-end;
+}
+
+.admin-actions .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-actions .button i {
+    margin-right: 0.5rem;
+    font-size: 1em;
+}
+
+/* Admin tabs */
+.admin-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.admin-tab {
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: var(--light-text);
+    cursor: pointer;
+    position: relative;
+    transition: all var(--transition-fast);
+}
+
+.admin-tab:hover {
+    color: var(--primary-color);
+}
+
+.admin-tab.active {
+    color: var(--primary-color);
+}
+
+.admin-tab.active:after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary-color);
+}
+
+/* Admin filters */
+.admin-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--neutral-50);
+    border-radius: var(--border-radius);
+}
+
+.admin-filter {
+    flex: 1;
+    min-width: 200px;
+}
+
+.admin-filter label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.875rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .admin-dashboard {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+
+    .admin-form .form-group-third {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-section .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-actions {
+        flex-direction: column;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .admin-form .form-group-third {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .admin-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .bewerb-container {
+        padding: 1.25rem;
+    }
+
+    .admin-section .card-body {
+        padding: 1.25rem;
+    }
+}

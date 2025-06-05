@@ -25,367 +25,73 @@ class LayoutTemplate {
             meta(name = "viewport", content = "width=device-width, initial-scale=1.0")
             title { +title }
             link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
-            link(rel = "stylesheet", href = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap")
-            link(rel = "stylesheet", href = "https://fonts.googleapis.com/icon?family=Material+Icons")
-            link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css")
-            style {
-                +"""
-                /* Base styles */
-                :root {
-                    --primary-color: #5d8aa8;
-                    --primary-hover: #4a7a98;
-                    --secondary-color: #7d9eb1;
-                    --secondary-hover: #6a8ca1;
-                    --text-color: #333;
-                    --light-text: #666;
-                    --lighter-text: #999;
-                    --border-color: #e0e0e0;
-                    --light-bg: #f5f7fa;
-                    --container-bg: #fff;
-                    --success-color: #66bb6a;
-                    --warning-color: #ffa726;
-                    --error-color: #ef5350;
-                }
-
-                * {
-                    box-sizing: border-box;
-                    margin: 0;
-                    padding: 0;
-                }
-
-                body {
-                    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    line-height: 1.6;
-                    color: var(--text-color);
-                    background-color: var(--light-bg);
-                    padding: 0;
-                    margin: 0;
-                }
-
-                .container {
-                    width: 100%;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 0 20px;
-                }
-
-                /* Navigation */
-                nav.nav-extended {
-                    background-color: var(--primary-color);
-                    margin-bottom: 20px;
-                }
-
-                nav .brand-logo {
-                    font-size: 1.6rem;
-                    font-weight: 500;
-                    padding-left: 10px;
-                }
-
-                nav .brand-logo i {
-                    margin-right: 8px;
-                }
-
-                nav ul li a {
-                    font-weight: 500;
-                    transition: background-color 0.3s;
-                }
-
-                nav ul li a:hover {
-                    background-color: rgba(255,255,255,0.1);
-                }
-
-                .sidenav {
-                    width: 280px;
-                }
-
-                .sidenav .user-view {
-                    padding: 20px 16px 12px;
-                }
-
-                .sidenav .user-view .name {
-                    font-size: 1.4rem;
-                    font-weight: 500;
-                    margin-top: 8px;
-                    color: var(--primary-color);
-                }
-
-                .sidenav li > a {
-                    display: flex;
-                    align-items: center;
-                    font-weight: 500;
-                }
-
-                .sidenav li > a > i {
-                    margin-right: 16px;
-                    color: var(--primary-color);
-                }
-
-                /* Main content */
-                main {
-                    padding: 2rem 0;
-                }
-
-                .content-card {
-                    background-color: var(--container-bg);
-                    border-radius: 8px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-                    padding: 2rem;
-                    margin-bottom: 2rem;
-                }
-
-                /* Typography */
-                h1, h2, h3, h4, h5, h6 {
-                    margin-bottom: 1rem;
-                    line-height: 1.2;
-                    color: var(--text-color);
-                }
-
-                h1 {
-                    font-size: 2.2rem;
-                    text-align: center;
-                    margin-bottom: 1.5rem;
-                }
-
-                h2 {
-                    font-size: 1.8rem;
-                    margin-top: 1.5rem;
-                }
-
-                h3 {
-                    font-size: 1.5rem;
-                    margin-top: 1.2rem;
-                }
-
-                p {
-                    margin-bottom: 1rem;
-                }
-
-                /* Forms */
-                .form-group {
-                    margin-bottom: 1.5rem;
-                }
-
-                label {
-                    display: block;
-                    margin-bottom: 0.5rem;
-                    font-weight: 600;
-                }
-
-                input[type="text"],
-                input[type="email"],
-                input[type="tel"],
-                input[type="number"],
-                textarea,
-                select {
-                    width: 100%;
-                    padding: 0.8rem;
-                    border: 1px solid var(--border-color);
-                    border-radius: 6px;
-                    font-size: 1rem;
-                    transition: all 0.3s;
-                    margin-bottom: 1.2rem;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                    background-color: white;
-                }
-
-                input[type="text"]:focus,
-                input[type="email"]:focus,
-                input[type="tel"]:focus,
-                input[type="number"]:focus,
-                textarea:focus,
-                select:focus {
-                    border-color: var(--primary-color);
-                    outline: none;
-                    box-shadow: 0 2px 8px rgba(93,138,168,0.2);
-                }
-
-                .required:after {
-                    content: " *";
-                    color: var(--error-color);
-                }
-
-                /* Buttons */
-                .button, button {
-                    display: inline-block;
-                    background-color: var(--primary-color);
-                    color: white;
-                    padding: 0.9rem 1.8rem;
-                    border: none;
-                    border-radius: 4px;
-                    font-size: 1.1rem;
-                    cursor: pointer;
-                    text-decoration: none;
-                    transition: all 0.3s;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    font-weight: 500;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                    text-align: center;
-                }
-
-                .button:hover, button:hover {
-                    background-color: var(--primary-hover);
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-                    transform: translateY(-2px);
-                }
-
-                .button-secondary {
-                    background-color: var(--secondary-color);
-                }
-
-                .button-secondary:hover {
-                    background-color: var(--secondary-hover);
-                }
-
-                /* Tables */
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-bottom: 1.5rem;
-                }
-
-                th, td {
-                    padding: 0.75rem;
-                    text-align: left;
-                    border-bottom: 1px solid var(--border-color);
-                }
-
-                th {
-                    background-color: var(--light-bg);
-                    font-weight: 600;
-                }
-
-                tr:hover {
-                    background-color: rgba(0,0,0,0.02);
-                }
-
-                /* Lists */
-                ul, ol {
-                    margin-bottom: 1rem;
-                    padding-left: 1.5rem;
-                }
-
-                li {
-                    margin-bottom: 0.5rem;
-                }
-
-                /* Utilities */
-                .text-center {
-                    text-align: center;
-                }
-
-                .mt-1 { margin-top: 0.5rem; }
-                .mt-2 { margin-top: 1rem; }
-                .mt-3 { margin-top: 1.5rem; }
-                .mt-4 { margin-top: 2rem; }
-
-                .mb-1 { margin-bottom: 0.5rem; }
-                .mb-2 { margin-bottom: 1rem; }
-                .mb-3 { margin-bottom: 1.5rem; }
-                .mb-4 { margin-bottom: 2rem; }
-
-                /* Footer */
-                footer {
-                    background-color: var(--text-color);
-                    color: white;
-                    padding: 2rem 0;
-                    margin-top: 2rem;
-                }
-
-                footer a {
-                    color: white;
-                    text-decoration: none;
-                }
-
-                footer a:hover {
-                    text-decoration: underline;
-                }
-
-                /* Responsive design */
-                @media (max-width: 768px) {
-                    .menu-toggle {
-                        display: block;
-                    }
-
-                    nav ul {
-                        display: none;
-                        position: absolute;
-                        top: 60px;
-                        left: 0;
-                        right: 0;
-                        flex-direction: column;
-                        background-color: var(--primary-color);
-                        padding: 1rem;
-                        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                    }
-
-                    nav ul.show {
-                        display: flex;
-                    }
-
-                    nav ul li {
-                        margin: 0.5rem 0;
-                    }
-
-                    .content-card {
-                        padding: 1.5rem;
-                    }
-
-                    h1 {
-                        font-size: 1.8rem;
-                    }
-
-                    h2 {
-                        font-size: 1.5rem;
-                    }
-
-                    h3 {
-                        font-size: 1.3rem;
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    .container {
-                        padding: 0 15px;
-                    }
-
-                    .content-card {
-                        padding: 1rem;
-                    }
-
-                    h1 {
-                        font-size: 1.6rem;
-                    }
-
-                    .button, button {
-                        display: block;
-                        margin-bottom: 0.5rem;
-                    }
-                }
-                """
-            }
-            script(src = "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js") {}
+            link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap")
+            link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css")
+            link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css")
+            link(rel = "stylesheet", href = "/css/main.css")
+            script(src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js") {}
+            script(src = "https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js") {}
             script {
                 unsafe {
                     +"""
                     document.addEventListener('DOMContentLoaded', function() {
-                        // Mobile menu toggle
-                        const menuToggle = document.querySelector('.menu-toggle');
-                        const navMenu = document.querySelector('nav ul');
+                        // Initialize Bootstrap tooltips
+                        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
-                        if (menuToggle && navMenu) {
-                            menuToggle.addEventListener('click', function() {
-                                navMenu.classList.toggle('show');
+                        // Initialize Bootstrap popovers
+                        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+                        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+
+                        // Add Bootstrap validation classes to forms
+                        const forms = document.querySelectorAll('.needs-validation');
+                        Array.from(forms).forEach(form => {
+                            form.addEventListener('submit', event => {
+                                if (!form.checkValidity()) {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                }
+                                form.classList.add('was-validated');
+                            }, false);
+                        });
+
+                        // Initialize AOS (Animate On Scroll)
+                        AOS.init({
+                            duration: 800,
+                            easing: 'ease-in-out',
+                            once: true
+                        });
+
+                        // Navbar scroll effect
+                        const navbar = document.querySelector('.navbar');
+                        if (navbar) {
+                            window.addEventListener('scroll', function() {
+                                if (window.scrollY > 50) {
+                                    navbar.classList.add('navbar-scrolled');
+                                } else {
+                                    navbar.classList.remove('navbar-scrolled');
+                                }
                             });
                         }
 
-                        // Initialize Materialize components
-                        M.AutoInit();
+                        // Add ripple effect to buttons
+                        const buttons = document.querySelectorAll('.button, .btn');
+                        buttons.forEach(button => {
+                            button.addEventListener('click', function(e) {
+                                const x = e.clientX - e.target.getBoundingClientRect().left;
+                                const y = e.clientY - e.target.getBoundingClientRect().top;
 
-                        // Enhance form elements
-                        const inputs = document.querySelectorAll('input, textarea, select');
-                        inputs.forEach(input => {
-                            input.classList.add('browser-default');
+                                const ripple = document.createElement('span');
+                                ripple.classList.add('ripple-effect');
+                                ripple.style.left = x + 'px';
+                                ripple.style.top = y + 'px';
+
+                                this.appendChild(ripple);
+
+                                setTimeout(() => {
+                                    ripple.remove();
+                                }, 600);
+                            });
                         });
                     });
                     """
@@ -394,28 +100,35 @@ class LayoutTemplate {
         }
         body {
             if (showNavbar) {
-                nav(classes = "nav-extended z-depth-1") {
-                    div("nav-wrapper") {
-                        div("container") {
-                            a(href = "/", classes = "brand-logo") {
-                                i("material-icons left") { +"sports_handball" }
-                                +"Meldestelle Portal"
-                            }
-                            a(href = "#", classes = "sidenav-trigger") {
-                                attributes["data-target"] = "mobile-nav"
-                                i("material-icons") { +"menu" }
-                            }
-                            ul(classes = "right hide-on-med-and-down") {
-                                li {
-                                    a(href = "/") {
-                                        i("material-icons left") { +"home" }
+                nav(classes = "navbar navbar-expand-lg navbar-dark fixed-top") {
+                    div("container") {
+                        a(href = "/", classes = "navbar-brand") {
+                            i("fas fa-horse-head") {}
+                            +"Meldestelle Portal"
+                        }
+                        button(classes = "navbar-toggler") {
+                            type = ButtonType.button
+                            attributes["data-bs-toggle"] = "collapse"
+                            attributes["data-bs-target"] = "#navbarContent"
+                            attributes["aria-controls"] = "navbarContent"
+                            attributes["aria-expanded"] = "false"
+                            attributes["aria-label"] = "Toggle navigation"
+                            span(classes = "navbar-toggler-icon") {}
+                        }
+
+                        div(classes = "collapse navbar-collapse") {
+                            id = "navbarContent"
+                            ul(classes = "navbar-nav ms-auto mb-2 mb-lg-0") {
+                                li(classes = "nav-item") {
+                                    a(href = "/", classes = "nav-link active") {
+                                        i("fas fa-home") {}
                                         +"Home"
                                     }
                                 }
                                 if (showAdminLink) {
-                                    li {
-                                        a(href = "/admin/tournaments") {
-                                            i("material-icons left") { +"event" }
+                                    li(classes = "nav-item") {
+                                        a(href = "/admin/tournaments", classes = "nav-link") {
+                                            i("fas fa-calendar-alt") {}
                                             +"Turnierverwaltung"
                                         }
                                     }
@@ -424,46 +137,74 @@ class LayoutTemplate {
                         }
                     }
                 }
+            }
+            // Add padding to account for fixed navbar
+            div(classes = "navbar-spacer") {}
 
-                // Mobile sidenav
-                ul(classes = "sidenav") {
-                    attributes["id"] = "mobile-nav"
-                    li {
-                        div("user-view") {
-                            div("background blue-grey lighten-4") {
-                                style = "height: 80px;"
-                            }
-                            span("name") { +"Meldestelle Portal" }
-                        }
-                    }
-                    li {
-                        a(href = "/") {
-                            i("material-icons") { +"home" }
-                            +"Home"
-                        }
-                    }
-                    if (showAdminLink) {
-                        li {
-                            a(href = "/admin/tournaments") {
-                                i("material-icons") { +"event" }
-                                +"Turnierverwaltung"
-                            }
+            main(classes = "py-5") {
+                div("container") {
+                    div(classes = "card shadow") {
+                        attributes["data-aos"] = "fade-up"
+                        attributes["data-aos-delay"] = "100"
+                        div("card-body") {
+                            content()
                         }
                     }
                 }
             }
-            main {
+            footer(classes = "footer mt-5") {
+                attributes["data-aos"] = "fade-up"
+                attributes["data-aos-delay"] = "200"
                 div("container") {
-                    div("content-card") {
-                        content()
+                    div("footer-content") {
+                        div("row gy-4") {
+                            div("col-lg-4 col-md-6") {
+                                div("footer-info") {
+                                    h3(classes = "gradient-text") { +"Meldestelle Portal" }
+                                    p {
+                                        +"Ihre zentrale Plattform für Turnierorganisation und Anmeldungen."
+                                    }
+                                    div("social-links mt-3") {
+                                        a(href = "#", classes = "facebook") { i("fab fa-facebook-f") {} }
+                                        a(href = "#", classes = "twitter") { i("fab fa-twitter") {} }
+                                        a(href = "#", classes = "instagram") { i("fab fa-instagram") {} }
+                                        a(href = "#", classes = "linkedin") { i("fab fa-linkedin-in") {} }
+                                    }
+                                }
+                            }
+                            div("col-lg-4 col-md-6") {
+                                div("footer-links") {
+                                    h4 { +"Nützliche Links" }
+                                    ul {
+                                        li { a(href = "/") { +"Home" } }
+                                        li { a(href = "#") { +"Über uns" } }
+                                        li { a(href = "#") { +"Turniere" } }
+                                        li { a(href = "#") { +"Kontakt" } }
+                                    }
+                                }
+                            }
+                            div("col-lg-4 col-md-6") {
+                                div("footer-contact") {
+                                    h4 { +"Kontakt" }
+                                    p {
+                                        i("fas fa-envelope me-2") {}
+                                        +"info@meldestelle-portal.at"
+                                    }
+                                    p {
+                                        i("fas fa-phone me-2") {}
+                                        +"+43 123 456 789"
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
-            }
-            footer {
-                div("container") {
-                    div("text-center") {
-                        p { +"© ${java.time.Year.now().value} Meldestelle Portal. Alle Rechte vorbehalten." }
-                        p {
+                    div("footer-legal text-center") {
+                        div("copyright") {
+                            +"© ${java.time.Year.now().value} "
+                            strong { +"Meldestelle Portal" }
+                            +". Alle Rechte vorbehalten."
+                        }
+                        div("credits") {
                             +"Entwickelt von "
                             a(href = "#") { +"mocode" }
                         }

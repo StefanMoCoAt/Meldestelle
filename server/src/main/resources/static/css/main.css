@@ -1,0 +1,21 @@
+/* Main CSS file that imports all other CSS files */
+
+/* Import variables first */
+@import url('variables.css');
+
+/* Base styles */
+@import url('base.css');
+
+/* Component styles */
+@import url('navigation.css');
+@import url('forms.css');
+@import url('buttons.css');
+@import url('tables.css');
+@import url('footer.css');
+
+/* Special effects and animations */
+@import url('effects.css');
+
+/* Page-specific styles */
+@import url('tournament.css');
+@import url('admin.css');

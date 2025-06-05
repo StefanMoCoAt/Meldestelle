@@ -144,132 +144,6 @@ class NennungView {
                         }
                     }
 
-                    // Additional styles specific to the registration form
-                    style {
-                        +"""
-                        .tournament-info {
-                            margin-bottom: 2rem;
-                        }
-
-                        .tournament-info h2 {
-                            color: var(--primary-color);
-                        }
-
-                        .form-section {
-                            background-color: white;
-                            border-radius: 8px;
-                            padding: 2rem;
-                            margin-bottom: 2rem;
-                            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-                            border-left: 4px solid var(--primary-color);
-                        }
-
-                        .form-section h3 {
-                            border-bottom: 1px solid var(--border-color);
-                            padding-bottom: 0.8rem;
-                            margin-bottom: 1.5rem;
-                            text-align: left;
-                            color: var(--primary-color);
-                            font-size: 1.4rem;
-                        }
-
-                        .form-row {
-                            display: flex;
-                            flex-direction: column;
-                            width: 100%;
-                            margin: 0;
-                        }
-
-                        @media (min-width: 768px) {
-                            .form-row {
-                                flex-direction: row;
-                                gap: 20px;
-                            }
-
-                            .form-group-half {
-                                flex: 1;
-                            }
-                        }
-
-                        .form-group {
-                            width: 100%;
-                            margin: 0 0 1.5rem 0;
-                        }
-
-                        .form-group-half {
-                            flex: 0 0 100%;
-                            margin: 0 0 1.5rem 0;
-                            max-width: 100%;
-                        }
-
-                        .form-hint {
-                            font-size: 0.9rem;
-                            color: var(--light-text);
-                            margin-top: 0.5rem;
-                            text-align: center;
-                        }
-
-                        .competitions-list {
-                            display: flex;
-                            flex-direction: column;
-                            align-items: flex-start;
-                            gap: 15px;
-                            width: 100%;
-                            margin: 0;
-                        }
-
-                        .competition-item {
-                            padding: 18px;
-                            border-radius: 8px;
-                            transition: all 0.3s;
-                            width: 100%;
-                            text-align: left;
-                            border: 1px solid var(--border-color);
-                            background-color: white;
-                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                        }
-
-                        .competition-item:hover {
-                            background-color: rgba(0,0,0,0.02);
-                            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-                        }
-
-                        .competition-item label {
-                            display: flex;
-                            align-items: center;
-                            justify-content: flex-start;
-                            cursor: pointer;
-                        }
-
-                        .competition-item input[type="checkbox"] {
-                            margin-right: 15px;
-                            transform: scale(1.2);
-                        }
-
-                        .competition-details {
-                            text-align: left;
-                        }
-
-                        /* Participant information styling */
-                        .participant-details {
-                            width: 100%;
-                        }
-
-                        .participant-details label {
-                            display: block;
-                            margin-bottom: 0.5rem;
-                            font-weight: 500;
-                        }
-
-                        .participant-details input {
-                            width: 100%;
-                        }
-
-                        @media (max-width: 768px) {
-                            /* Mobile styles already handled by the responsive layout */
-                        }
-                        """
-                    }
                 }
             }
         }
@@ -318,7 +192,11 @@ class NennungView {
                         }
 
                         p(classes = "confirmation-message") {
-                            +"Sie erhalten in Kürze eine Bestätigung per E-Mail."
+                            +"Start und Ergebnislisten auf"
+                        }
+
+                        p(classes = "confirmation-message") {
+                            +"www.ihremeldestelle.at"
                         }
 
                         div(classes = "confirmation-actions") {
@@ -328,63 +206,6 @@ class NennungView {
                         }
                     }
 
-                    // Additional styles specific to the confirmation page
-                    style {
-                        +"""
-                        .confirmation-box {
-                            background-color: var(--light-bg);
-                            border-radius: 8px;
-                            padding: 2rem;
-                            text-align: center;
-                            max-width: 600px;
-                            margin: 0 auto;
-                            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-                        }
-
-                        .confirmation-icon {
-                            font-size: 4rem;
-                            color: var(--success-color);
-                            margin-bottom: 1rem;
-                        }
-
-                        .confirmation-details {
-                            margin: 1.5rem 0;
-                            padding: 1rem;
-                            background-color: var(--container-bg);
-                            border-radius: 8px;
-                            text-align: left;
-                        }
-
-                        .detail-item {
-                            display: flex;
-                            margin-bottom: 0.5rem;
-                            padding: 0.5rem 0;
-                            border-bottom: 1px solid var(--border-color);
-                        }
-
-                        .detail-item:last-child {
-                            border-bottom: none;
-                        }
-
-                        .detail-label {
-                            font-weight: bold;
-                            width: 100px;
-                        }
-
-                        .detail-value {
-                            flex: 1;
-                        }
-
-                        .confirmation-message {
-                            margin: 1.5rem 0;
-                            color: var(--light-text);
-                        }
-
-                        .confirmation-actions {
-                            margin-top: 1.5rem;
-                        }
-                        """
-                    }
                 }
             }
         }

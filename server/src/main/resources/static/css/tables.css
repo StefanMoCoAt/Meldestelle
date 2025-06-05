@@ -1,0 +1,289 @@
+/* Modern table styles with enhanced UX */
+
+/* Base table styling */
+.table {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    vertical-align: middle;
+    border-color: var(--border-color);
+    --bs-table-striped-bg: var(--neutral-50);
+    --bs-table-striped-color: var(--text-color);
+    --bs-table-active-bg: var(--neutral-100);
+    --bs-table-active-color: var(--text-color);
+    --bs-table-hover-bg: var(--neutral-100);
+    --bs-table-hover-color: var(--text-color);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Enhanced table header */
+.table thead {
+    position: relative;
+}
+
+.table thead th {
+    background-color: var(--neutral-100);
+    font-weight: 700;
+    border-top: none;
+    border-bottom: 2px solid var(--primary-color);
+    padding: 1rem;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    color: var(--primary-color);
+    vertical-align: bottom;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Table body styling */
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-fast);
+}
+
+/* Custom table hover effect */
+.table-hover tbody tr {
+    transition: all var(--transition-fast);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(67, 97, 238, 0.05);
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-sm);
+}
+
+/* Striped table */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--neutral-50);
+}
+
+/* Bordered table */
+.table-bordered {
+    border: 1px solid var(--border-color);
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid var(--border-color);
+}
+
+/* Custom modern table */
+.table-modern {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    border: 1px solid var(--border-color);
+}
+
+.table-modern thead th {
+    background-color: var(--primary-color);
+    color: white;
+    border-bottom: none;
+}
+
+.table-modern thead th:first-child {
+    border-top-left-radius: var(--border-radius);
+}
+
+.table-modern thead th:last-child {
+    border-top-right-radius: var(--border-radius);
+}
+
+.table-modern tbody tr:last-child td:first-child {
+    border-bottom-left-radius: var(--border-radius);
+}
+
+.table-modern tbody tr:last-child td:last-child {
+    border-bottom-right-radius: var(--border-radius);
+}
+
+/* Table with cards for mobile */
+.table-responsive-card {
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .table-responsive-card table,
+    .table-responsive-card thead,
+    .table-responsive-card tbody,
+    .table-responsive-card th,
+    .table-responsive-card td,
+    .table-responsive-card tr {
+        display: block;
+    }
+
+    .table-responsive-card thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .table-responsive-card tr {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        margin-bottom: 1rem;
+        box-shadow: var(--box-shadow-sm);
+        background-color: white;
+    }
+
+    .table-responsive-card td {
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+
+    .table-responsive-card td:last-child {
+        border-bottom: none;
+    }
+
+    .table-responsive-card td:before {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        content: attr(data-label);
+    }
+}
+
+/* Table with horizontal scroll for mobile */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Table caption */
+.table caption {
+    padding: 0.5rem;
+    caption-side: bottom;
+    text-align: center;
+    color: var(--light-text);
+    font-style: italic;
+}
+
+/* Table with actions */
+.table .actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.table .actions .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Table with status indicators */
+.table .status-indicator {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.table .status-active {
+    background-color: var(--success-color);
+}
+
+.table .status-pending {
+    background-color: var(--warning-color);
+}
+
+.table .status-inactive {
+    background-color: var(--error-color);
+}
+
+/* Modern list styles */
+.list-modern {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 1.5rem;
+}
+
+.list-modern li {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-sm);
+    transition: all var(--transition-fast);
+    border-left: 3px solid var(--primary-color);
+}
+
+.list-modern li:hover {
+    transform: translateX(5px);
+    box-shadow: var(--box-shadow);
+}
+
+/* Competition list specific styles */
+.competition-list {
+    margin: 0;
+    padding-left: 0;
+    list-style-type: none;
+}
+
+.competition-list li {
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding: 0.75rem 0.75rem 0.75rem 1.5rem;
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+    background-color: var(--neutral-50);
+}
+
+.competition-list li:hover {
+    background-color: white;
+    box-shadow: var(--box-shadow-sm);
+    transform: translateX(3px);
+}
+
+.competition-list li:before {
+    content: "";
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+}
+
+/* Feature list */
+.feature-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.feature-list li {
+    padding-left: 2rem;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.feature-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+}

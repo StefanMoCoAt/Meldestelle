@@ -77,57 +77,6 @@ class HomeView {
                         }
                     }
 
-                    style {
-                        +"""
-                        .tournament-list {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 16px;
-                            max-width: 800px;
-                            margin: 0 auto;
-                        }
-
-                        .tournament-item {
-                            border: 1px solid var(--border-color);
-                            border-radius: 12px;
-                            padding: 24px;
-                            transition: box-shadow 0.3s;
-                            background-color: var(--container-bg);
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                        }
-
-                        .tournament-item:hover {
-                            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-                        }
-
-                        .tournament-header h3 {
-                            margin-top: 0;
-                            color: var(--primary-color);
-                            font-size: 1.4rem;
-                        }
-
-                        .tournament-header p {
-                            color: var(--light-text);
-                            margin-bottom: 0.5rem;
-                            font-size: 0.95rem;
-                        }
-
-                        .tournament-competitions h4 {
-                            font-size: 1.1rem;
-                            margin-bottom: 0.5rem;
-                            color: var(--secondary-color);
-                        }
-
-                        .tournament-competitions ul {
-                            padding-left: 1.2rem;
-                        }
-
-                        .tournament-actions {
-                            margin-top: 1rem;
-                            text-align: right;
-                        }
-                        """
-                    }
                 }
             }
         }
