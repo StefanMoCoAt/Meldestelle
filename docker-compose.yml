@@ -11,6 +11,13 @@ services:
       - ./data:/app/data # Direktes Mapping des data Verzeichnisses
     environment:
       - USE_SQLITE=true
+      # Email configuration - uses GitHub Actions secrets if available, otherwise fallback values
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-your-email@gmail.com}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-your-app-password}
+      - RECIPIENT_EMAIL=${RECIPIENT_EMAIL:-recipient@example.com}
+      - SMTP_SENDER_EMAIL=${SMTP_SENDER_EMAIL:-your-email@gmail.com}
     networks:
       - meldestelle-net
 

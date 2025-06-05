@@ -16,6 +16,27 @@ This is a Kotlin Multiplatform project targeting Web, Desktop, Server.
 * `/shared` is for the code that will be shared between all targets in the project.
   The most important subfolder is `commonMain`. If preferred, you can add code to the platform-specific folders here too.
 
+## Email Configuration
+
+The application uses email to send notifications for form submissions. The email configuration can be set up in several ways:
+
+1. **Environment Variables**: The application reads email configuration from environment variables.
+2. **.env File**: If environment variables are not set, the application looks for a `.env` file.
+3. **Default Values**: If neither environment variables nor a `.env` file is found, default values are used.
+
+### GitHub Actions Secrets
+
+For deployment with GitHub Actions, the email configuration is stored in GitHub repository secrets. The following secrets need to be set up in your GitHub repository:
+
+- `SMTP_HOST`: The SMTP server host (e.g., smtp.gmail.com)
+- `SMTP_PORT`: The SMTP server port (e.g., 587)
+- `SMTP_USER`: The SMTP username (usually your email address)
+- `SMTP_PASSWORD`: The SMTP password or app password
+- `RECIPIENT_EMAIL`: The email address that will receive form submissions
+- `SMTP_SENDER_EMAIL`: The email address that will appear as the sender (usually the same as SMTP_USER)
+
+These secrets are automatically passed to the Docker container during deployment via the GitHub Actions workflow.
+
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
 [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
