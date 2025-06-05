@@ -56,7 +56,7 @@ class EmailService private constructor(
     }
 
     /**
-     * Creates email session with the configured properties.
+     * Creates an email session with the configured properties.
      *
      * @param debug Whether to enable debug mode for the mail session
      * @return The configured mail session
@@ -93,7 +93,7 @@ class EmailService private constructor(
 
     /**
      * Sends an email notification with the form submission data.
-     * Includes retry mechanism for transient failures.
+     * Includes a retry mechanism for transient failures.
      *
      * @param nennung The form submission data
      * @return true if the email was sent successfully, false otherwise
@@ -123,7 +123,7 @@ class EmailService private constructor(
                     subject = nennung.turnier?.let { "Neue Nennung für ${it.name}: ${nennung.riderName} mit ${nennung.horseName}" }
                         ?: "Neue Nennung: ${nennung.riderName} mit ${nennung.horseName}"
 
-                    // Create multipart message with both plain text and HTML versions
+                    // Create a multipart message with both plain text and HTML versions
                     val multipart = MimeMultipart("alternative")
 
                     // Plain text part

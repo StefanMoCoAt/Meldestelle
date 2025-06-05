@@ -27,7 +27,7 @@ class TurnierRepository {
     fun createTurnier(number: Int, name: String, datum: String, bewerbe: List<Bewerb>): Turnier? = transaction {
         try {
             // Check if a tournament with this number already exists
-            val existingTurnier = TurniereTable.select { TurniereTable.number eq number }.singleOrNull()
+            val existingTurnier = TurniereTable.selectAll().where { TurniereTable.number eq number }.singleOrNull()
             if (existingTurnier != null) {
                 log.error("Tournament with number $number already exists")
                 return@transaction null
@@ -75,7 +75,7 @@ class TurnierRepository {
     fun updateTurnier(number: Int, name: String, datum: String, bewerbe: List<Bewerb>): Turnier? = transaction {
         try {
             // Check if the tournament exists
-            val existingTurnier = TurniereTable.select { TurniereTable.number eq number }.singleOrNull()
+            val existingTurnier = TurniereTable.selectAll().where { TurniereTable.number eq number }.singleOrNull()
             if (existingTurnier == null) {
                 log.error("Tournament with number $number not found")
                 return@transaction null

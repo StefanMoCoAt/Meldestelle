@@ -8,7 +8,7 @@ import org.jetbrains.exposed.sql.Column
  */
 object TurniereTable : Table("turniere") {
     /**
-     * Unique number for the tournament, used as primary key.
+     * Unique number for the tournament, used as a primary key.
      */
     val number: Column<Int> = integer("number").uniqueIndex()
 
@@ -36,7 +36,7 @@ object BewerbeTable : Table("bewerbe") {
     val id: Column<Int> = integer("id").autoIncrement()
 
     /**
-     * Number of the competition.
+     * Amount of the competition.
      */
     val nummer: Column<Int> = integer("nummer")
 
@@ -131,7 +131,7 @@ object NennungEventsTable : Table("nennung_events") {
     val nennungId: Column<Int> = integer("nennung_id")
 
     /**
-     * Number of the selected competition.
+     * Amount of the selected competition.
      */
     val eventNumber: Column<String> = varchar("event_number", 100)
 

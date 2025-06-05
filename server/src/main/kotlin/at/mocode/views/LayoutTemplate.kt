@@ -18,6 +18,7 @@ class LayoutTemplate {
         title: String,
         showNavbar: Boolean = true,
         showAdminLink: Boolean = true,
+        showFooter: Boolean = true,
         content: FlowContent.() -> Unit
     ) {
         head {
@@ -152,61 +153,63 @@ class LayoutTemplate {
                     }
                 }
             }
-            footer(classes = "footer mt-5") {
-                attributes["data-aos"] = "fade-up"
-                attributes["data-aos-delay"] = "200"
-                div("container") {
-                    div("footer-content") {
-                        div("row gy-4") {
-                            div("col-lg-4 col-md-6") {
-                                div("footer-info") {
-                                    h3(classes = "gradient-text") { +"Meldestelle Portal" }
-                                    p {
-                                        +"Ihre zentrale Plattform für Turnierorganisation und Anmeldungen."
-                                    }
-                                    div("social-links mt-3") {
-                                        a(href = "#", classes = "facebook") { i("fab fa-facebook-f") {} }
-                                        a(href = "#", classes = "twitter") { i("fab fa-twitter") {} }
-                                        a(href = "#", classes = "instagram") { i("fab fa-instagram") {} }
-                                        a(href = "#", classes = "linkedin") { i("fab fa-linkedin-in") {} }
-                                    }
-                                }
-                            }
-                            div("col-lg-4 col-md-6") {
-                                div("footer-links") {
-                                    h4 { +"Nützliche Links" }
-                                    ul {
-                                        li { a(href = "/") { +"Home" } }
-                                        li { a(href = "#") { +"Über uns" } }
-                                        li { a(href = "#") { +"Turniere" } }
-                                        li { a(href = "#") { +"Kontakt" } }
+            if (showFooter) {
+                footer(classes = "footer mt-5") {
+                    attributes["data-aos"] = "fade-up"
+                    attributes["data-aos-delay"] = "200"
+                    div("container") {
+                        div("footer-content") {
+                            div("row gy-4") {
+                                div("col-lg-4 col-md-6") {
+                                    div("footer-info") {
+                                        h3(classes = "gradient-text") { +"Meldestelle Portal" }
+                                        p {
+                                            +"Ihre zentrale Plattform für Turnierorganisation und Anmeldungen."
+                                        }
+                                        div("social-links mt-3") {
+                                            a(href = "#", classes = "facebook") { i("fab fa-facebook-f") {} }
+                                            a(href = "#", classes = "twitter") { i("fab fa-twitter") {} }
+                                            a(href = "#", classes = "instagram") { i("fab fa-instagram") {} }
+                                            a(href = "#", classes = "linkedin") { i("fab fa-linkedin-in") {} }
+                                        }
                                     }
                                 }
-                            }
-                            div("col-lg-4 col-md-6") {
-                                div("footer-contact") {
-                                    h4 { +"Kontakt" }
-                                    p {
-                                        i("fas fa-envelope me-2") {}
-                                        +"info@meldestelle-portal.at"
+                                div("col-lg-4 col-md-6") {
+                                    div("footer-links") {
+                                        h4 { +"Nützliche Links" }
+                                        ul {
+                                            li { a(href = "/") { +"Home" } }
+                                            li { a(href = "#") { +"Über uns" } }
+                                            li { a(href = "#") { +"Turniere" } }
+                                            li { a(href = "#") { +"Kontakt" } }
+                                        }
                                     }
-                                    p {
-                                        i("fas fa-phone me-2") {}
-                                        +"+43 123 456 789"
+                                }
+                                div("col-lg-4 col-md-6") {
+                                    div("footer-contact") {
+                                        h4 { +"Kontakt" }
+                                        p {
+                                            i("fas fa-envelope me-2") {}
+                                            +"info@meldestelle-portal.at"
+                                        }
+                                        p {
+                                            i("fas fa-phone me-2") {}
+                                            +"+43 123 456 789"
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    div("footer-legal text-center") {
-                        div("copyright") {
-                            +"© ${java.time.Year.now().value} "
-                            strong { +"Meldestelle Portal" }
-                            +". Alle Rechte vorbehalten."
-                        }
-                        div("credits") {
-                            +"Entwickelt von "
-                            a(href = "#") { +"mocode" }
+                        div("footer-legal text-center") {
+                            div("copyright") {
+                                +"© ${java.time.Year.now().value} "
+                                strong { +"Meldestelle Portal" }
+                                +". Alle Rechte vorbehalten."
+                            }
+                            div("credits") {
+                                +"Entwickelt von "
+                                a(href = "#") { +"mocode" }
+                            }
                         }
                     }
                 }

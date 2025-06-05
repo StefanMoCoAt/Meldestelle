@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Bewerb(
-    /** Competition number, e.g. 1, 2, etc. */
+    /** Competition number, e.g., 1, 2, etc. */
     val nummer: Int,
 
     /** Title of the competition, e.g. "Stilspringprüfung" or "Dressurprüfung" */

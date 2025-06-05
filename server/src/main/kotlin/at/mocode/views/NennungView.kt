@@ -23,7 +23,8 @@ class NennungView {
                 applyLayout(
                     title = "Online-Nennen - ${turnier.name}",
                     showNavbar = false,
-                    showAdminLink = false
+                    showAdminLink = false,
+                    showFooter = false
                 ) {
                     h1 { +"Online-Nennen" }
 
@@ -44,7 +45,7 @@ class NennungView {
                                 div(classes = "competition-item") {
                                     div(classes = "participant-details") {
                                         label(classes = "required") { +"Reiter-Name" }
-                                        input(type = InputType.text, name = "riderName") {
+                                        input(type = InputType.text, name = "riderName", classes = "form-control") {
                                             attributes["required"] = "required"
                                             attributes["placeholder"] = "Vor- und Nachname"
                                         }
@@ -55,7 +56,7 @@ class NennungView {
                                 div(classes = "competition-item") {
                                     div(classes = "participant-details") {
                                         label(classes = "required") { +"Kopf-Nr./Pferd" }
-                                        input(type = InputType.text, name = "horseName") {
+                                        input(type = InputType.text, name = "horseName", classes = "form-control") {
                                             attributes["required"] = "required"
                                             attributes["placeholder"] = "Name des Pferdes"
                                         }
@@ -65,12 +66,11 @@ class NennungView {
                                 // Contact information
                                 div(classes = "competition-item") {
                                     div(classes = "participant-details") {
-                                        div(classes = "form-row") {
-                                            div(classes = "form-group form-group-half") {
-                                                label { +"E-Mail" }
-                                                input(type = InputType.email, name = "email") {
-                                                    attributes["placeholder"] = "ihre@email.com"
-                                                }
+                                        div(classes = "form-group") {
+                                            label { +"E-Mail" }
+                                            input(type = InputType.email, name = "email") {
+                                                attributes["placeholder"] = "ihre@email.com"
+                                                attributes["class"] = "form-control"
                                             }
                                         }
                                     }
@@ -79,12 +79,11 @@ class NennungView {
                                 // Contact information
                                 div(classes = "competition-item") {
                                     div(classes = "participant-details") {
-                                        div(classes = "form-row") {
-                                            div(classes = "form-group form-group-half") {
-                                                label { +"Telefon-Nr." }
-                                                input(type = InputType.tel, name = "phone") {
-                                                    attributes["placeholder"] = "Ihre Telefonnummer"
-                                                }
+                                        div(classes = "form-group") {
+                                            label { +"Telefon-Nr." }
+                                            input(type = InputType.tel, name = "phone") {
+                                                attributes["placeholder"] = "Ihre Telefonnummer"
+                                                attributes["class"] = "form-control"
                                             }
                                         }
                                     }
@@ -104,8 +103,8 @@ class NennungView {
                                 div(classes = "competitions-list") {
                                     turnier.bewerbe.forEach { bewerb ->
                                         div(classes = "competition-item") {
-                                            label {
-                                                input(type = InputType.checkBox, name = "selectedEvents") {
+                                            label(classes = "form-check") {
+                                                input(type = InputType.checkBox, name = "selectedEvents", classes = "form-check-input") {
                                                     attributes["value"] = bewerb.nummer.toString()
                                                 }
                                                 span(classes = "competition-details") {
@@ -128,7 +127,7 @@ class NennungView {
 
                             div(classes = "form-group") {
                                 label { +"Wünsche/Bemerkungen" }
-                                textArea {
+                                textArea(classes = "form-control") {
                                     attributes["rows"] = "4"
                                     attributes["name"] = "comments"
                                     attributes["placeholder"] = "Ihre Wünsche oder Bemerkungen zur Nennung..."
@@ -137,7 +136,8 @@ class NennungView {
                         }
 
                         // Submit button
-                        div(classes = "form-actions text-center mt-4") {
+                        div(classes = "form-actions mt-4") {
+                            attributes["style"] = "justify-content: center;"
                             button(type = ButtonType.submit, classes = "button") {
                                 +"Jetzt Nennen"
                             }
@@ -155,16 +155,17 @@ class NennungView {
      * @param turnier The tournament the registration was for
      * @param riderName The name of the rider
      * @param horseName The name of the horse
+     * @param selectedEvents The list of selected competition IDs
      */
-    suspend fun renderConfirmationPage(call: ApplicationCall, turnier: Turnier, riderName: String, horseName: String) {
+    suspend fun renderConfirmationPage(call: ApplicationCall, turnier: Turnier, riderName: String, horseName: String, selectedEvents: List<String>) {
         call.respondHtml(HttpStatusCode.OK) {
             layoutTemplate.apply {
                 applyLayout(
                     title = "Nennung bestätigt - ${turnier.name}",
                     showNavbar = false,
-                    showAdminLink = false
+                    showAdminLink = false,
+                    showFooter = false
                 ) {
-                    h1 { +"Nennung bestätigt" }
 
                     div(classes = "confirmation-box") {
                         div(classes = "confirmation-icon") {
@@ -188,6 +189,28 @@ class NennungView {
                             div(classes = "detail-item") {
                                 span(classes = "detail-label") { +"Pferd:" }
                                 span(classes = "detail-value") { +horseName }
+                            }
+
+                            // Display selected competitions
+                            if (selectedEvents.isNotEmpty()) {
+                                div(classes = "detail-item mt-3") {
+                                    span(classes = "detail-label") { +"Ausgewählte Bewerbe:" }
+                                    div(classes = "selected-competitions") {
+                                        ul(classes = "competition-list") {
+                                            selectedEvents.forEach { eventId ->
+                                                val bewerb = turnier.bewerbe.find { it.nummer.toString() == eventId }
+                                                if (bewerb != null) {
+                                                    li {
+                                                        +"${bewerb.nummer}. ${bewerb.titel} - ${bewerb.klasse}"
+                                                        if (bewerb.task != null) {
+                                                            +" - ${bewerb.task}"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
 

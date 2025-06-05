@@ -77,6 +77,12 @@ fun Route.nennungRoutes() {
             return@post
         }
 
+        // Validate that at least one competition is selected
+        if (selectedEvents.isEmpty()) {
+            call.respond(HttpStatusCode.BadRequest, "Bitte wählen Sie mindestens einen Bewerb aus")
+            return@post
+        }
+
         // Create Nennung object using repository
         val nennung = nennungRepository.createNennung(
             riderName = riderName,
@@ -105,7 +111,7 @@ fun Route.nennungRoutes() {
         }
 
         // Render confirmation page
-        nennungView.renderConfirmationPage(call, turnier, riderName, horseName)
+        nennungView.renderConfirmationPage(call, turnier, riderName, horseName, selectedEvents)
     }
 }
 

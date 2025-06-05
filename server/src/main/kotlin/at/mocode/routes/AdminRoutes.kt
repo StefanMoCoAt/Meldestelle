@@ -1,8 +1,7 @@
 package at.mocode.routes
 
-import at.mocode.model.Bewerb
 import at.mocode.config.DependencyInjection
-import at.mocode.repository.TurnierRepository
+import at.mocode.model.Bewerb
 import at.mocode.views.AdminView
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -75,7 +74,7 @@ fun Route.adminRoutes() {
 
         log.info("Received competitions for creation: ${bewerbNummern.size} numbers, ${bewerbTitel.size} titles, ${bewerbKlasse.size} classes, ${bewerbTask.size} tasks")
 
-        // Create list of competitions
+        // Create a list of competitions
         val bewerbe = mutableListOf<Bewerb>()
         for (i in bewerbNummern.indices) {
             val titel = if (i < bewerbTitel.size) bewerbTitel[i] else "Unbenannter Bewerb"
@@ -133,7 +132,7 @@ fun Route.adminRoutes() {
 
         log.info("Received competitions for update: ${bewerbNummern.size} numbers, ${bewerbTitel.size} titles, ${bewerbKlasse.size} classes, ${bewerbTask.size} tasks")
 
-        // Create list of competitions
+        // Create a list of competitions
         val bewerbe = mutableListOf<Bewerb>()
         for (i in bewerbNummern.indices) {
             val titel = if (i < bewerbTitel.size) bewerbTitel[i] else "Unbenannter Bewerb"

@@ -38,7 +38,7 @@ fun configureDatabase() {
         }
     } else {
         // Check if we should use SQLite (either in IDEA or in Docker with SQLite)
-        // First check for explicit SQLite flag
+        // First check for an explicit SQLite flag
         val useSqlite = System.getenv("USE_SQLITE")?.toBoolean() ?: false
 
         // Then check if we're in IDEA (no Docker environment variables set)
@@ -59,7 +59,7 @@ fun configureDatabase() {
                 connectionSuccessful = true
             } catch (e: Exception) {
                 log.error("Failed to connect to SQLite (dev)!", e)
-                // Maybe don't throw here so the app starts in IDE anyway? Currently it throws.
+                // Maybe don't throw here so the app starts in IDE anyway? Currently, it throws.
                 throw e
             }
         } else {
@@ -76,7 +76,7 @@ fun configureDatabase() {
                 val maxPoolSize = System.getenv("DB_POOL_SIZE")?.toIntOrNull() ?: 10
                 val jdbcURL = "jdbc:postgresql://$dbHost:$dbPort/$dbName"
 
-                log.info("Attempting to connect to PostgreSQL at URL: {}", jdbcURL)
+                log.info("Attempting to connect to PostgresQL at URL: {}", jdbcURL)
 
                 val hikariConfig = HikariConfig().apply {
                     this.driverClassName = driverClassName
@@ -88,7 +88,7 @@ fun configureDatabase() {
                 }
                 val dataSource = HikariDataSource(hikariConfig)
                 Database.connect(dataSource)
-                log.info("PostgreSQL connection pool initialized successfully!")
+                log.info("PostgresQL connection pool initialized successfully!")
                 connectionSuccessful = true
             } catch (e: Exception) {
                 log.error("Failed to initialize PostgreSQL connection pool!", e)
@@ -109,7 +109,7 @@ fun configureDatabase() {
         } catch (e: Exception) {
             log.error("Failed to initialize database schema!", e)
             // Here you could decide if a schema error is critical
-            // throw e // Commented out: App might start anyway, even if schema is missing/wrong
+            // throw e // Commented out: App might start anyway, even if the schema is missing/wrong
         }
     }
 }
