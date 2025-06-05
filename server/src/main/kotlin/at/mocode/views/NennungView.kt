@@ -29,11 +29,13 @@ class NennungView {
                     h1 { +"Online-Nennen" }
 
                     // Tournament description
-                    div(classes = "tournament-info text-center mb-4") {
+
+                    div(classes = "tournament-info mb-3") {
                         h2 { +turnier.name }
                         p { +turnier.datum }
                         p { +"Turnier-Nr.: ${turnier.number}" }
                     }
+
 
                     form(
                         action = "/nennung/${turnier.number}/submit",

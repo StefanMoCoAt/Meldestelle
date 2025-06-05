@@ -2,7 +2,7 @@
 
 /* Tournament list container */
 .tournament-list {
-    max-width: 900px;
+    max-width: 1080px;
     margin: 0 auto;
     padding: 1rem 0;
 }
@@ -203,10 +203,11 @@
 
 /* Tournament info for registration page */
 .tournament-info {
-    margin-bottom: 3rem;
+    max-width: 840px;
+    margin: 0 auto;
     text-align: center;
     position: relative;
-    padding-bottom: 2rem;
+    padding-bottom: 1.5rem;
 }
 
 .tournament-info:after {
@@ -229,14 +230,14 @@
 }
 
 .tournament-info p {
-    color: var(--light-text);
+    color: var(--text-color);
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
 
 /* Registration form styles */
 .registration-form {
-    max-width: 800px;
+    max-width: 960px;
     margin: 0 auto;
 }
 
@@ -364,7 +365,7 @@
 
 /* Confirmation page styles */
 .confirmation-box {
-    max-width: 700px;
+    max-width: 840px;
     margin: 0 auto;
     text-align: center;
     background-color: var(--container-bg);
