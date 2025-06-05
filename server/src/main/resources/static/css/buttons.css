@@ -25,21 +25,21 @@
 /* Primary button */
 .btn-primary, .button {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--container-bg);
     box-shadow: var(--box-shadow-sm);
 }
 
 /* Secondary button */
 .btn-secondary, .button-secondary {
     background-color: var(--secondary-color);
-    color: white;
+    color: var(--container-bg);
     box-shadow: var(--box-shadow-sm);
 }
 
 /* Accent button */
 .btn-accent, .button-accent {
     background-color: var(--accent-color);
-    color: white;
+    color: var(--container-bg);
     box-shadow: var(--box-shadow-sm);
 }
 
@@ -81,7 +81,7 @@
 
 .btn:focus, .button:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
+    box-shadow: 0 0 0 3px rgba(43, 103, 119, 0.3); /* Light version of primary color #2b6777 */
 }
 
 /* Ripple effect for buttons */
@@ -93,7 +93,7 @@
     top: 0;
     left: 0;
     pointer-events: none;
-    background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+    background-image: radial-gradient(circle, var(--container-bg) 10%, transparent 10.01%);
     background-repeat: no-repeat;
     background-position: 50%;
     transform: scale(10, 10);
@@ -175,9 +175,9 @@
     position: absolute;
     width: 1rem;
     height: 1rem;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3); /* Semi-transparent border */
     border-radius: 50%;
-    border-top-color: white;
+    border-top-color: var(--container-bg);
     animation: spin 0.8s linear infinite;
 }
 

@@ -52,7 +52,7 @@
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(67, 97, 238, 0.05);
+    background-color: rgba(43, 103, 119, 0.05); /* Light version of primary color #2b6777 */
     transform: translateY(-2px);
     box-shadow: var(--box-shadow-sm);
 }
@@ -82,7 +82,7 @@
 
 .table-modern thead th {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--container-bg);
     border-bottom: none;
 }
 
@@ -128,7 +128,7 @@
         border-radius: var(--border-radius);
         margin-bottom: 1rem;
         box-shadow: var(--box-shadow-sm);
-        background-color: white;
+        background-color: var(--container-bg);
     }
 
     .table-responsive-card td {
@@ -214,7 +214,7 @@
 .list-modern li {
     padding: 1rem;
     margin-bottom: 0.5rem;
-    background-color: white;
+    background-color: var(--container-bg);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow-sm);
     transition: all var(--transition-fast);
@@ -243,7 +243,7 @@
 }
 
 .competition-list li:hover {
-    background-color: white;
+    background-color: var(--container-bg);
     box-shadow: var(--box-shadow-sm);
     transform: translateX(3px);
 }

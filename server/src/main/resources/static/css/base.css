@@ -1,6 +1,6 @@
 /* Base styles - Modern and accessible */
 body {
-    font-family: 'Inter', 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Helvetica', 'Arial', sans-serif;
     color: var(--text-color);
     background-color: var(--neutral-50);
     line-height: 1.7;

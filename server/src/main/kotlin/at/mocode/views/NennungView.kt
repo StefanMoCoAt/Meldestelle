@@ -35,7 +35,109 @@ class NennungView {
                         p { +"Turnier-Nr.: ${turnier.number}" }
                     }
 
-                    form(action = "/nennung/${turnier.number}/submit", method = FormMethod.post, classes = "registration-form") {
+                    form(
+                        action = "/nennung/${turnier.number}/submit",
+                        method = FormMethod.post,
+                        classes = "registration-form needs-validation"
+                    ) {
+                        attributes["onsubmit"] = "return validateForm(this)"
+                        style {
+                            unsafe {
+                                +"""
+                                .validation-error {
+                                    border: 2px solid red !important;
+                                    background-color: rgba(255, 0, 0, 0.05) !important;
+                                    transition: all 0.3s ease;
+                                }
+                                """
+                            }
+                        }
+                        script {
+                            unsafe {
+                                +"""
+                                function validateForm(form) {
+
+                                    // Check if rider name is provided
+                                    var riderName = form.querySelector('input[name="riderName"]').value.trim();
+                                    if (riderName === '') {
+                                        // Focus on the rider name field
+                                        var riderNameField = form.querySelector('input[name="riderName"]');
+                                        riderNameField.focus();
+                                        // Highlight the field
+                                        riderNameField.classList.add('validation-error');
+                                        setTimeout(function() {
+                                            riderNameField.classList.remove('validation-error');
+                                        }, 2000);
+                                        return false;
+                                    }
+
+                                    // Check if horse name is provided
+                                    var horseName = form.querySelector('input[name="horseName"]').value.trim();
+                                    if (horseName === '') {
+                                        // Focus on the horse name field
+                                        var horseNameField = form.querySelector('input[name="horseName"]');
+                                        horseNameField.focus();
+                                        // Highlight the field
+                                        horseNameField.classList.add('validation-error');
+                                        setTimeout(function() {
+                                            horseNameField.classList.remove('validation-error');
+                                        }, 2000);
+                                        return false;
+                                    }
+
+                                    // Check if at least one contact method is provided
+                                    var email = form.querySelector('input[name="email"]').value.trim();
+                                    var phone = form.querySelector('input[name="phone"]').value.trim();
+                                    if (email === '' && phone === '') {
+                                        // Focus on the email field
+                                        var emailField = form.querySelector('input[name="email"]');
+                                        emailField.focus();
+                                        // Highlight both email and phone fields
+                                        emailField.classList.add('validation-error');
+                                        var phoneField = form.querySelector('input[name="phone"]');
+                                        phoneField.classList.add('validation-error');
+                                        setTimeout(function() {
+                                            emailField.classList.remove('validation-error');
+                                            phoneField.classList.remove('validation-error');
+                                        }, 2000);
+                                        return false;
+                                    }
+
+                                    // Check if at least one competition is selected
+                                    var checkboxes = form.querySelectorAll('input[name="selectedEvents"]');
+                                    var checked = false;
+                                    for (var i = 0; i < checkboxes.length; i++) {
+                                        if (checkboxes[i].checked) {
+                                            checked = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!checked) {
+                                        // Focus on the competitions section
+                                        var competitionsSections = form.querySelectorAll('div.form-section h3');
+                                        var competitionsSection = null;
+                                        for (var i = 0; i < competitionsSections.length; i++) {
+                                            if (competitionsSections[i].textContent === 'Bewerbe') {
+                                                competitionsSection = competitionsSections[i].parentNode;
+                                                break;
+                                            }
+                                        }
+                                        if (competitionsSection) {
+                                            competitionsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                            // Highlight the section
+                                            competitionsSection.classList.add('validation-error');
+                                            setTimeout(function() {
+                                                competitionsSection.classList.remove('validation-error');
+                                            }, 2000);
+                                        }
+                                        return false;
+                                    }
+
+                                    return true;
+                                }
+                                """
+                            }
+                        }
                         div(classes = "form-section mb-4") {
                             h3 { +"Teilnehmer-Informationen" }
 
@@ -48,6 +150,10 @@ class NennungView {
                                         input(type = InputType.text, name = "riderName", classes = "form-control") {
                                             attributes["required"] = "required"
                                             attributes["placeholder"] = "Vor- und Nachname"
+                                            attributes["class"] = "form-control"
+                                            attributes["oninvalid"] =
+                                                "this.setCustomValidity('Fügen Sie den Namen des Reiters ein!')"
+                                            attributes["oninput"] = "this.setCustomValidity('')"
                                         }
                                     }
                                 }
@@ -58,7 +164,11 @@ class NennungView {
                                         label(classes = "required") { +"Kopf-Nr./Pferd" }
                                         input(type = InputType.text, name = "horseName", classes = "form-control") {
                                             attributes["required"] = "required"
-                                            attributes["placeholder"] = "Name des Pferdes"
+                                            attributes["placeholder"] = "Kopf-Nr. / Name des Pferdes"
+                                            attributes["class"] = "form-control"
+                                            attributes["oninvalid"] =
+                                                "this.setCustomValidity('Fügen Sie die Kopf-Nr. und oder den Pferdenamen ein!')"
+                                            attributes["oninput"] = "this.setCustomValidity('')"
                                         }
                                     }
                                 }
@@ -67,10 +177,13 @@ class NennungView {
                                 div(classes = "competition-item") {
                                     div(classes = "participant-details") {
                                         div(classes = "form-group") {
-                                            label { +"E-Mail" }
+                                            label(classes = "required") { +"E-Mail" }
                                             input(type = InputType.email, name = "email") {
                                                 attributes["placeholder"] = "ihre@email.com"
                                                 attributes["class"] = "form-control"
+                                                attributes["oninvalid"] =
+                                                    "this.setCustomValidity('Fügen Sie Ihre E-Mail Adresse oder Telefon-Nr. ein!')"
+                                                attributes["oninput"] = "this.setCustomValidity('')"
                                             }
                                         }
                                     }
@@ -80,17 +193,20 @@ class NennungView {
                                 div(classes = "competition-item") {
                                     div(classes = "participant-details") {
                                         div(classes = "form-group") {
-                                            label { +"Telefon-Nr." }
+                                            label(classes = "required") { +"Telefon-Nr." }
                                             input(type = InputType.tel, name = "phone") {
                                                 attributes["placeholder"] = "Ihre Telefonnummer"
                                                 attributes["class"] = "form-control"
+                                                attributes["oninvalid"] =
+                                                    "this.setCustomValidity('Fügen Sie Ihre E-Mail Adresse oder Telefon-Nr. ein!')"
+                                                attributes["oninput"] = "this.setCustomValidity('')"
                                             }
                                         }
                                     }
                                 }
 
                             }
-                            p(classes = "form-hint") { +"Bitte geben Sie mindestens eine Kontaktmöglichkeit an (E-Mail oder Telefon)." }
+                            p(classes = "form-hint") { +"Bitte geben Sie mindestens eine Kontaktmöglichkeit an (E-Mail oder Telefon). Sie müssen nicht beide Felder ausfüllen." }
                         }
 
                         // Competitions list
@@ -104,7 +220,11 @@ class NennungView {
                                     turnier.bewerbe.forEach { bewerb ->
                                         div(classes = "competition-item") {
                                             label(classes = "form-check") {
-                                                input(type = InputType.checkBox, name = "selectedEvents", classes = "form-check-input") {
+                                                input(
+                                                    type = InputType.checkBox,
+                                                    name = "selectedEvents",
+                                                    classes = "form-check-input"
+                                                ) {
                                                     attributes["value"] = bewerb.nummer.toString()
                                                 }
                                                 span(classes = "competition-details") {
@@ -157,7 +277,13 @@ class NennungView {
      * @param horseName The name of the horse
      * @param selectedEvents The list of selected competition IDs
      */
-    suspend fun renderConfirmationPage(call: ApplicationCall, turnier: Turnier, riderName: String, horseName: String, selectedEvents: List<String>) {
+    suspend fun renderConfirmationPage(
+        call: ApplicationCall,
+        turnier: Turnier,
+        riderName: String,
+        horseName: String,
+        selectedEvents: List<String>
+    ) {
         call.respondHtml(HttpStatusCode.OK) {
             layoutTemplate.apply {
                 applyLayout(
@@ -175,11 +301,11 @@ class NennungView {
                         h2 { +"Vielen Dank für Ihre Nennung!" }
 
                         div(classes = "confirmation-details") {
-                            p {
-                                +"Ihre Nennung für "
-                                strong { +turnier.name }
-                                +" wurde erfolgreich übermittelt."
-                            }
+                            p(classes = "confirmation-message") { +"Ihre Nennung für " }
+
+                            p(classes = "confirmation-message") { strong { +turnier.name } }
+
+                            p(classes = "confirmation-message") { +" wurde erfolgreich übermittelt." }
 
                             div(classes = "detail-item") {
                                 span(classes = "detail-label") { +"Reiter:" }
@@ -200,8 +326,8 @@ class NennungView {
                                             selectedEvents.forEach { eventId ->
                                                 val bewerb = turnier.bewerbe.find { it.nummer.toString() == eventId }
                                                 if (bewerb != null) {
-                                                    li {
-                                                        +"${bewerb.nummer}. ${bewerb.titel} - ${bewerb.klasse}"
+                                                    span(classes = "detail-value") {
+                                                        +"${bewerb.nummer}  .  ${bewerb.titel} - ${bewerb.klasse}"
                                                         if (bewerb.task != null) {
                                                             +" - ${bewerb.task}"
                                                         }
