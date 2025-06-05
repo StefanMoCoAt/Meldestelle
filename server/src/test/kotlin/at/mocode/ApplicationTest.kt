@@ -14,11 +14,9 @@ class ApplicationTest {
     fun testRootRouteShowsTournamentList() {
         // Erstelle ein Beispiel-Turnier, das in der Datenbank sein würde
         val mockTurnier = Turnier(
-            id = "dummy-01",
             name = "Erstes DB Turnier",
             datum = "19.04.2025",
-            logoUrl = null,
-            ausschreibungUrl = "/pdfs/ausschreibung_dummy.pdf"
+            number = 1
         )
 
         // Erstelle eine Liste von Turnieren, wie sie aus der Datenbank kommen würde
@@ -45,13 +43,7 @@ class ApplicationTest {
                                     strong { +turnier.name }
                                     +" (${turnier.datum})"
                                     +" "
-                                    if (turnier.ausschreibungUrl != null) {
-                                        a(href = turnier.ausschreibungUrl, target = "_blank") {
-                                            button { +"Ausschreibung" }
-                                        }
-                                        +" "
-                                    }
-                                    a(href = "/nennung/${turnier.id}") {
+                                    a(href = "/nennung/${turnier.number}") {
                                         button { +"Online Nennen" }
                                     }
                                 }
@@ -82,7 +74,7 @@ class ApplicationTest {
             htmlContent.contains("(19.04.2025)"),
             "Dummy tournament date missing or incorrect"
         )
-        assertTrue(htmlContent.contains("/nennung/dummy-01"), "Link to dummy tournament '/nennung/dummy-01' missing")
+        assertTrue(htmlContent.contains("/nennung/1"), "Link to dummy tournament '/nennung/1' missing")
         assertFalse(
             htmlContent.contains("Keine Turniere in der Datenbank gefunden."),
             "'No tournaments' message should not be present if dummy was inserted"

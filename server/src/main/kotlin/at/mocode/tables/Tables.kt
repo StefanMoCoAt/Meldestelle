@@ -3,30 +3,142 @@ package at.mocode.tables
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.Column
 
-// Definiert die Struktur der Tabelle "turniere" in der Datenbank
-object TurniereTable : Table("turniere") { // "turniere" ist der Name der Tabelle in PostgreSQL
+/**
+ * Defines the structure of the "turniere" (tournaments) table in the database.
+ */
+object TurniereTable : Table("turniere") {
+    /**
+     * Unique number for the tournament, used as primary key.
+     */
+    val number: Column<Int> = integer("number").uniqueIndex()
 
-    // Spaltendefinitionen - wir mappen die Felder unserer data class Turnier
-    // wir wählen hier passende SQL-Datentypen aus.
-
-    // id: Wir nehmen VARCHAR(36) an, falls wir UUIDs als Strings speichern.
-    // uniqueIndex() sorgt für Eindeutigkeit und ist gut für Primärschlüssel.
-    val id: Column<String> = varchar("id", 36).uniqueIndex()
-
-    // name: Ein Textfeld, max. 255 Zeichen
+    /**
+     * Name of the tournament, max 255 characters.
+     */
     val name: Column<String> = varchar("name", 255)
 
-    // datum: Vorerst einfacher Text, max. 100 Zeichen
+    /**
+     * Date of the tournament as text, max 100 characters.
+     */
     val datum: Column<String> = varchar("datum", 100)
 
-    // logoUrl: Textfeld, max. 500 Zeichen, kann NULL sein (.nullable())
-    val logoUrl: Column<String?> = varchar("logo_url", 500).nullable()
+    // Define the 'number' column as the primary key for this table
+    override val primaryKey = PrimaryKey(number)
+}
 
-    // ausschreibungUrl: Textfeld, max. 500 Zeichen, kann NULL sein
-    val ausschreibungUrl: Column<String?> = varchar("ausschreibung_url", 500).nullable()
+/**
+ * Defines the structure of the "bewerbe" (competitions) table in the database.
+ */
+object BewerbeTable : Table("bewerbe") {
+    /**
+     * Auto-generated ID for the competition.
+     */
+    val id: Column<Int> = integer("id").autoIncrement()
 
-    // Definiert die Spalte 'id' als Primärschlüssel für diese Tabelle
+    /**
+     * Number of the competition.
+     */
+    val nummer: Column<Int> = integer("nummer")
+
+    /**
+     * Title of the competition.
+     */
+    val titel: Column<String> = varchar("titel", 255)
+
+    /**
+     * Class/level of the competition.
+     */
+    val klasse: Column<String> = varchar("klasse", 100)
+
+    /**
+     * Optional task identifier.
+     */
+    val task: Column<String?> = varchar("task", 100).nullable()
+
+    /**
+     * Foreign key to the tournament table.
+     */
+    val turnierNumber: Column<Int> = integer("turnier_number")
+
+    init {
+        foreignKey(turnierNumber to TurniereTable.number)
+    }
+
+    // Define the 'id' column as the primary key for this table
     override val primaryKey = PrimaryKey(id)
 }
 
-// Hier können später weitere Table-Objekte für Nennung, Prüfung etc. hinzukommen.
+/**
+ * Defines the structure of the "nennungen" (registrations) table in the database.
+ */
+object NennungenTable : Table("nennungen") {
+    /**
+     * Auto-generated ID for the registration.
+     */
+    val id: Column<Int> = integer("id").autoIncrement()
+
+    /**
+     * Name of the rider.
+     */
+    val riderName: Column<String> = varchar("rider_name", 255)
+
+    /**
+     * Name of the horse.
+     */
+    val horseName: Column<String> = varchar("horse_name", 255)
+
+    /**
+     * Email address for contact.
+     */
+    val email: Column<String> = varchar("email", 255)
+
+    /**
+     * Phone number for contact.
+     */
+    val phone: Column<String> = varchar("phone", 100)
+
+    /**
+     * Additional comments or wishes.
+     */
+    val comments: Column<String> = text("comments")
+
+    /**
+     * Foreign key to the tournament table.
+     */
+    val turnierNumber: Column<Int> = integer("turnier_number")
+
+    init {
+        foreignKey(turnierNumber to TurniereTable.number)
+    }
+
+    // Define the 'id' column as the primary key for this table
+    override val primaryKey = PrimaryKey(id)
+}
+
+/**
+ * Defines the structure of the "nennung_events" table in the database.
+ * This table stores the selected competitions for each registration.
+ */
+object NennungEventsTable : Table("nennung_events") {
+    /**
+     * Auto-generated ID for the entry.
+     */
+    val id: Column<Int> = integer("id").autoIncrement()
+
+    /**
+     * Foreign key to the registration table.
+     */
+    val nennungId: Column<Int> = integer("nennung_id")
+
+    /**
+     * Number of the selected competition.
+     */
+    val eventNumber: Column<String> = varchar("event_number", 100)
+
+    init {
+        foreignKey(nennungId to NennungenTable.id)
+    }
+
+    // Define the 'id' column as the primary key for this table
+    override val primaryKey = PrimaryKey(id)
+}

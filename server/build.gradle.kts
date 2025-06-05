@@ -34,10 +34,17 @@ dependencies {
     // JDBC Treiber für PostgreSQL (nur zur Laufzeit benötigt)
     runtimeOnly(libs.postgresql.driver)
 
-    // H2 Datenbank für Tests und lokale Entwicklung
+    // H2 Datenbank für Tests und lokale Entwicklung (legacy)
     runtimeOnly(libs.h2.driver)
+
+    // SQLite Datenbank für Tests und lokale Entwicklung
+    runtimeOnly("org.xerial:sqlite-jdbc:3.43.0.0")
 
     // HikariCP für Connection Pooling
     implementation(libs.hikari.cp)
 
+    // Jakarta Mail für E-Mail-Funktionalität
+    implementation("com.sun.mail:jakarta.mail:2.0.1")
+    implementation("jakarta.activation:jakarta.activation-api:2.1.2")
+    implementation("org.eclipse.angus:angus-activation:2.0.1")
 }
