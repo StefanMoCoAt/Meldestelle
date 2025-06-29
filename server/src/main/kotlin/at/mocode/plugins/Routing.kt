@@ -1,5 +1,8 @@
 package at.mocode.plugins
 
+import at.mocode.routes.artikelRoutes
+import at.mocode.routes.personRoutes
+import at.mocode.routes.vereinRoutes
 import io.ktor.server.application.Application
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.application
@@ -26,7 +29,9 @@ fun Application.configureRouting() {
             call.respondText("$appName v$appVersion - Running in $appEnv mode")
         }
 
-        // API routes can be organized in separate files and included here
-        // Example: registerUserRoutes()
+        // API routes
+        personRoutes()
+        vereinRoutes()
+        artikelRoutes()
     }
 }
