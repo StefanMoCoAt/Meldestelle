@@ -1,4 +1,4 @@
-package at.mocode.server.tables
+package at.mocode.tables
 
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date // Für kotlinx-datetime LocalDate

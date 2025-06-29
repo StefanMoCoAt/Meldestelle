@@ -51,14 +51,5 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-
-//        val jvmMain by getting {
-//            dependsOn(commonMain)
-//        }
-//
-//        val wasmJsMain by getting {
-//            dependsOn(commonMain)
-//        }
-
     }
 }

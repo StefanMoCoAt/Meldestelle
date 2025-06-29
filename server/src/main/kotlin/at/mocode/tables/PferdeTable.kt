@@ -1,6 +1,6 @@
-package at.mocode.server.tables
+package at.mocode.tables
 
-import at.mocode.shared.model.enums.GeschlechtPferd
+import at.mocode.shared.enums.GeschlechtPferdE
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
@@ -11,7 +11,7 @@ object PferdeTable : Table("pferde") {
     val name = varchar("name", 255)
     val lebensnummer = varchar("lebensnummer", 20).nullable()
     val feiPassNr = varchar("fei_pass_nr", 20).nullable()
-    val geschlecht = enumerationByName("geschlecht", 10, GeschlechtPferd::class).nullable()
+    val geschlecht = enumerationByName("geschlecht", 10, GeschlechtPferdE::class).nullable()
     val geburtsjahr = integer("geburtsjahr").nullable()
     val rasse = varchar("rasse", 100).nullable()
     val farbe = varchar("farbe", 50).nullable()

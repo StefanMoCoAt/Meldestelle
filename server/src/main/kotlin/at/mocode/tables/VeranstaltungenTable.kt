@@ -1,6 +1,6 @@
-package at.mocode.server.tables
+package at.mocode.tables
 
-import at.mocode.shared.model.enums.VeranstalterTyp
+import at.mocode.shared.enums.VeranstalterTypE
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
@@ -13,8 +13,8 @@ object VeranstaltungenTable : Table("veranstaltungen") {
     val veranstalterName = varchar("veranstalter_name", 255)
     val veranstalterOepsNummer = varchar("veranstalter_oeps_nr", 10).nullable()
     val veranstalterTyp =
-        enumerationByName("veranstalter_typ", 20, VeranstalterTyp::class).default(
-            VeranstalterTyp.UNBEKANNT
+        enumerationByName("veranstalter_typ", 20, VeranstalterTypE::class).default(
+            VeranstalterTypE.UNBEKANNT
         )
     val veranstaltungsortName = varchar("veranstaltungsort_name", 255)
     val veranstaltungsortAdresse = varchar("veranstaltungsort_adresse", 500)

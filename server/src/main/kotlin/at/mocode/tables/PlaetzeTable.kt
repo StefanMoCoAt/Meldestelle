@@ -1,6 +1,6 @@
-package at.mocode.server.tables
+package at.mocode.tables
 
-import at.mocode.shared.model.enums.PlatzTyp
+import at.mocode.shared.enums.PlatzTypE
 import org.jetbrains.exposed.sql.Table
 
 object PlaetzeTable : Table("plaetze") {
@@ -9,7 +9,7 @@ object PlaetzeTable : Table("plaetze") {
     val name = varchar("name", 100)
     val dimension = varchar("dimension", 50).nullable()
     val boden = varchar("boden", 100).nullable()
-    val typ = enumerationByName("typ", 20, PlatzTyp::class)
+    val typ = enumerationByName("typ", 20, PlatzTypE::class)
 
     override val primaryKey = PrimaryKey(id)
 

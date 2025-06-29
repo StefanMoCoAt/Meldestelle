@@ -2,7 +2,7 @@
 ktor:
   deployment:
     # Server port configuration
-    port: 8081
+    port: 8080
     # Connection timeout in seconds
     connectionTimeout: 30
     # Maximum number of concurrent connections
@@ -13,7 +13,7 @@ ktor:
       - resources
   application:
     modules:
-      - at.mocode.server.ApplicationKt.module
+      - at.mocode.ApplicationKt.module
 
 # Database Configuration
 database:
@@ -40,8 +40,8 @@ security:
     issuer: "meldestelle-server"
     audience: "meldestelle-clients"
     realm: "meldestelle"
-    # Secret should be set via environment variable in production
-    secret: "${JWT_SECRET:dev-secret-key-change-in-production"
+    # Secret should be set via an environment variable in production
+    secret: "${JWT_SECRET:dev-secret-key-change-in-production}"
     # Token validity duration in milliseconds (24 hours)
     validity: 86400000
 
@@ -52,13 +52,6 @@ cors:
     - "localhost:3000"
     - "127.0.0.1:3000"
     - "meldestelle.mocode.at"
-  # Allow these HTTP methods
-  allowedMethods:
-    - GET
-    - POST
-    - PUT
-    - DELETE
-    - OPTIONS
   # Allow credentials (cookies, auth headers)
   allowCredentials: true
 

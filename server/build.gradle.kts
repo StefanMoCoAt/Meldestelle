@@ -22,7 +22,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 
 // Configure application
 application {
-    mainClass.set("at.mocode.server.ApplicationKt")
+    mainClass.set("at.mocode.ApplicationKt")
     applicationDefaultJvmArgs = listOf(
         "-Dio.ktor.development=${extra["io.ktor.development"] ?: "false"}",
         "-XX:+UseG1GC", // Use G1 Garbage Collector
@@ -75,7 +75,7 @@ dependencies {
 
     // Testing
     testImplementation(libs.ktor.server.tests)
-    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.kotlin.test)
     testImplementation(libs.junitJupiter)
 
 }

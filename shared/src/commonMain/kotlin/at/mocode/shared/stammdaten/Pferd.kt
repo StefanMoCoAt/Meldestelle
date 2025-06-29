@@ -1,6 +1,6 @@
 package at.mocode.shared.stammdaten
 
-import at.mocode.shared.enums.GeschlechtPferd
+import at.mocode.shared.enums.GeschlechtPferdE
 import at.mocode.shared.serializers.KotlinInstantSerializer
 import at.mocode.shared.serializers.UuidSerializer
 import com.benasher44.uuid.Uuid
@@ -18,7 +18,7 @@ data class Pferd(
     var name: String,
     var lebensnummer: String?,
     var feiPassNr: String?,
-    var geschlecht: GeschlechtPferd?,
+    var geschlecht: GeschlechtPferdE?,
     var geburtsjahr: Int?,
     var rasse: String?,
     var farbe: String?,

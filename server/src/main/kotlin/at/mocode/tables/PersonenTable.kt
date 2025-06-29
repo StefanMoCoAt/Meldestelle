@@ -1,6 +1,6 @@
-package at.mocode.server.tables
+package at.mocode.tables
 
-import at.mocode.shared.model.enums.Geschlecht
+import at.mocode.shared.enums.GeschlechtE
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
@@ -12,7 +12,7 @@ object PersonenTable : Table("personen") {
     val vorname = varchar("vorname", 100)
     val titel = varchar("titel", 50).nullable()
     val geburtsdatum = date("geburtsdatum").nullable()
-    val geschlecht = enumerationByName("geschlecht", 10, Geschlecht::class).nullable()
+    val geschlecht = enumerationByName("geschlecht", 10, GeschlechtE::class).nullable()
     val nationalitaet = varchar("nationalitaet", 3).nullable()
     val email = varchar("email", 255).nullable()
     val telefon = varchar("telefon", 50).nullable()

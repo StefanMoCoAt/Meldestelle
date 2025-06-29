@@ -1,6 +1,5 @@
-package at.mocode.server.plugins
+package at.mocode.plugins
 
-import at.mocode.server.tables.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
@@ -175,14 +174,14 @@ private fun initializeSchema(log: Logger, isTestEnvironment: Boolean, isIdeaEnvi
         try {
             // Create all tables if they don't exist
             SchemaUtils.create(
-                VereineTable,
-                PersonenTable,
-                PferdeTable,
-                VeranstaltungenTable,
-                TurniereTable,
-                ArtikelTable,
-                PlaetzeTable,
-                LizenzenTable
+                _root_ide_package_.at.mocode.tables.VereineTable,
+                _root_ide_package_.at.mocode.tables.PersonenTable,
+                _root_ide_package_.at.mocode.tables.PferdeTable,
+                _root_ide_package_.at.mocode.tables.VeranstaltungenTable,
+                _root_ide_package_.at.mocode.tables.TurniereTable,
+                _root_ide_package_.at.mocode.tables.ArtikelTable,
+                _root_ide_package_.at.mocode.tables.PlaetzeTable,
+                _root_ide_package_.at.mocode.tables.LizenzenTable
                 // Add more tables here if needed
             )
             log.info("Database schema initialized successfully.")

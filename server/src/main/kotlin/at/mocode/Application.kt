@@ -1,6 +1,7 @@
-package at.mocode.server
+package at.mocode
 
-import at.mocode.server.plugins.configureDatabase
+import at.mocode.plugins.configureDatabase
+import at.mocode.plugins.configureRouting
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -11,7 +12,6 @@ import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
@@ -22,18 +22,10 @@ fun main(args: Array<String>) {
 
 fun Application.module() {
     val log = LoggerFactory.getLogger("Application")
-
     log.info("Initializing application...")
-
-    // Configure database
     configureDatabase()
-
-    // Configure plugins
     configurePlugins()
-
-    // Configure routing
     configureRouting()
-
     log.info("Application initialized successfully")
 }
 
@@ -93,7 +85,7 @@ private fun Application.configurePlugins() {
                 }
             }
         } catch (e: Exception) {
-            // Log the error but continue with default configuration
+            // Log the error but continue with the default configuration
             this@configurePlugins.log.warn("Failed to configure CORS from config, using defaults: ${e.message}")
         }
     }
@@ -113,30 +105,5 @@ private fun Application.configurePlugins() {
                 status = HttpStatusCode.NotFound
             )
         }
-    }
-}
-
-/**
- * Configures all routes for the application
- */
-private fun Application.configureRouting() {
-    routing {
-        // Health check endpoint
-        get("/health") {
-            call.respondText("OK")
-        }
-
-        // Root endpoint with basic information
-        get("/") {
-            // Read application info from config if available
-            val appName = application.environment.config.propertyOrNull("application.name")?.getString() ?: "Meldestelle API Server"
-            val appVersion = application.environment.config.propertyOrNull("application.version")?.getString() ?: "1.0.0"
-            val appEnv = application.environment.config.propertyOrNull("application.environment")?.getString() ?: "development"
-
-            call.respondText("$appName v$appVersion - Running in $appEnv mode")
-        }
-
-        // API routes can be organized in separate files and included here
-        // Example: registerUserRoutes()
     }
 }

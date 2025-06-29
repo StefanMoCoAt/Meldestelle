@@ -1,7 +1,6 @@
 package at.mocode.shared.model
 
-import at.mocode.shared.model.Artikel
-import at.mocode.shared.enums.NennungsArt
+import at.mocode.shared.enums.NennungsArtE
 import at.mocode.shared.serializers.BigDecimalSerializer
 import at.mocode.shared.serializers.KotlinInstantSerializer
 import at.mocode.shared.serializers.KotlinLocalDateSerializer

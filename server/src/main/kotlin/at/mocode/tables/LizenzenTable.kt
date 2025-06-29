@@ -1,16 +1,17 @@
-package at.mocode.server.tables
+package at.mocode.tables
 
-import at.mocode.shared.model.enums.LizenzTyp
-import at.mocode.shared.model.enums.Sparte
+
+import at.mocode.shared.enums.LizenzTypE
+import at.mocode.shared.enums.SparteE
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 
 object LizenzenTable : Table("lizenzen") {
     val id = uuid("id")
     val personId = uuid("person_id").references(PersonenTable.id)
-    val lizenzTyp = enumerationByName("lizenz_typ", 50, LizenzTyp::class)
+    val lizenzTyp = enumerationByName("lizenz_typ", 50, LizenzTypE::class)
     val stufe = varchar("stufe", 20).nullable()
-    val sparte = enumerationByName("sparte", 50, Sparte::class).nullable()
+    val sparte = enumerationByName("sparte", 50, SparteE::class).nullable()
     val gueltigBisJahr = integer("gueltig_bis_jahr").nullable()
     val ausgestelltAm = date("ausgestellt_am").nullable()
 
