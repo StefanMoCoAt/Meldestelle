@@ -63,7 +63,22 @@ class ApplicationTest {
         client.get("/").apply {
             assertEquals(HttpStatusCode.OK, status)
             val responseText = bodyAsText()
-            // The response format is: "Meldestelle API Server v1.0.0 - Running in development mode"
+            // The root endpoint now serves the static HTML start page
+            assertTrue(responseText.contains("<!DOCTYPE html>"), "Response should contain HTML doctype, but was: ${responseText.take(100)}...")
+            assertTrue(responseText.contains("Meldestelle"), "Response should contain 'Meldestelle', but was: ${responseText.take(100)}...")
+            assertTrue(responseText.contains("Österreichisches Pferdesport Management System"), "Response should contain system description")
+        }
+    }
+
+    @Test
+    fun testApiInfoEndpoint() = testApplication {
+        application {
+            module()
+        }
+        client.get("/api").apply {
+            assertEquals(HttpStatusCode.OK, status)
+            val responseText = bodyAsText()
+            // The API info endpoint format is: "Meldestelle API Server v1.0.0 - Running in development mode"
             assertTrue(responseText.contains("Meldestelle API Server"), "Response should contain 'Meldestelle API Server', but was: $responseText")
             assertTrue(responseText.contains("v1.0.0"), "Response should contain 'v1.0.0', but was: $responseText")
             assertTrue(responseText.contains("development"), "Response should contain 'development', but was: $responseText")

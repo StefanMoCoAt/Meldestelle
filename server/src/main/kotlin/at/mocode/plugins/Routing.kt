@@ -4,6 +4,7 @@ import at.mocode.routes.artikelRoutes
 import at.mocode.routes.personRoutes
 import at.mocode.routes.vereinRoutes
 import io.ktor.server.application.Application
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
@@ -19,8 +20,11 @@ fun Application.configureRouting() {
             call.respondText("OK")
         }
 
-        // Root endpoint with basic information
-        get("/") {
+        // Serve static content (HTML, CSS, JS, images, etc.)
+        staticResources("/", "static")
+
+        // Root endpoint with basic information (API info endpoint)
+        get("/api") {
             // Read application info from config if available
             val appName = application.environment.config.propertyOrNull("application.name")?.getString() ?: "Meldestelle API Server"
             val appVersion = application.environment.config.propertyOrNull("application.version")?.getString() ?: "1.0.0"
