@@ -1,5 +1,6 @@
-package at.mocode.model
+package at.mocode.repositories
 
+import at.mocode.model.Artikel
 import com.benasher44.uuid.Uuid
 
 interface ArtikelRepository {

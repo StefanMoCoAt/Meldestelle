@@ -1,8 +1,8 @@
-package at.mocode.model
+package at.mocode.repositories
 
 import at.mocode.enums.FunktionaerRolle
 import at.mocode.stammdaten.Person
-import at.mocode.tables.PersonenTable
+import at.mocode.tables.stammdaten.PersonenTable
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*

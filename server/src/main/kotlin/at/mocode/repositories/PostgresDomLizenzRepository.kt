@@ -1,9 +1,8 @@
-package at.mocode.model
+package at.mocode.repositories
 
 import at.mocode.model.domaene.DomLizenz
-import at.mocode.tables.DomLizenzTable
+import at.mocode.tables.domaene.DomLizenzTable
 import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuidFrom
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq

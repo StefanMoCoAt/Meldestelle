@@ -1,42 +1,41 @@
 package at.mocode.routes
 
-import at.mocode.model.Artikel
-import at.mocode.repositories.ArtikelRepository
+import at.mocode.model.Veranstaltung
+import at.mocode.repositories.VeranstaltungRepository
 import at.mocode.services.ServiceLocator
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlin.collections.mapOf
 
-fun Route.artikelRoutes() {
-    val artikelRepository: ArtikelRepository = ServiceLocator.artikelRepository
+fun Route.veranstaltungRoutes() {
+    val veranstaltungRepository: VeranstaltungRepository = ServiceLocator.veranstaltungRepository
 
-    route("/artikel") {
-        // GET /api/artikel - Get all articles
+    route("/veranstaltungen") {
+        // GET /api/veranstaltungen - Get all veranstaltungen
         get {
             try {
-                val artikel = artikelRepository.findAll()
-                call.respond(HttpStatusCode.OK, artikel)
+                val veranstaltungen = veranstaltungRepository.findAll()
+                call.respond(HttpStatusCode.OK, veranstaltungen)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
             }
         }
 
-        // GET /api/artikel/{id} - Get article by ID
+        // GET /api/veranstaltungen/{id} - Get veranstaltung by ID
         get("/{id}") {
             try {
                 val id = call.parameters["id"] ?: return@get call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing artikel ID")
+                    mapOf("error" to "Missing veranstaltung ID")
                 )
                 val uuid = uuidFrom(id)
-                val artikel = artikelRepository.findById(uuid)
-                if (artikel != null) {
-                    call.respond(HttpStatusCode.OK, artikel)
+                val veranstaltung = veranstaltungRepository.findById(uuid)
+                if (veranstaltung != null) {
+                    call.respond(HttpStatusCode.OK, veranstaltung)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Artikel not found"))
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Veranstaltung not found"))
                 }
             } catch (_: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
@@ -45,59 +44,45 @@ fun Route.artikelRoutes() {
             }
         }
 
-        // GET /api/artikel/search?q={query} - Search articles
+        // GET /api/veranstaltungen/search?q={query} - Search veranstaltungen
         get("/search") {
             try {
                 val query = call.request.queryParameters["q"] ?: return@get call.respond(
                     HttpStatusCode.BadRequest,
                     mapOf("error" to "Missing search query parameter 'q'")
                 )
-                val artikel = artikelRepository.search(query)
-                call.respond(HttpStatusCode.OK, artikel)
+                val veranstaltungen = veranstaltungRepository.search(query)
+                call.respond(HttpStatusCode.OK, veranstaltungen)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
             }
         }
 
-        // GET /api/artikel/verbandsabgabe/{istVerbandsabgabe} - Get articles by association fee status
-        get("/verbandsabgabe/{istVerbandsabgabe}") {
-            try {
-                val istVerbandsabgabe = call.parameters["istVerbandsabgabe"]?.toBoolean() ?: return@get call.respond(
-                    HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing or invalid verbandsabgabe parameter")
-                )
-                val artikel = artikelRepository.findByVerbandsabgabe(istVerbandsabgabe)
-                call.respond(HttpStatusCode.OK, artikel)
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
-            }
-        }
-
-        // POST /api/artikel - Create new article
+        // POST /api/veranstaltungen - Create new veranstaltung
         post {
             try {
-                val artikel = call.receive<Artikel>()
-                val createdArtikel = artikelRepository.create(artikel)
-                call.respond(HttpStatusCode.Created, createdArtikel)
+                val veranstaltung = call.receive<Veranstaltung>()
+                val createdVeranstaltung = veranstaltungRepository.create(veranstaltung)
+                call.respond(HttpStatusCode.Created, createdVeranstaltung)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
             }
         }
 
-        // PUT /api/artikel/{id} - Update article
+        // PUT /api/veranstaltungen/{id} - Update veranstaltung
         put("/{id}") {
             try {
                 val id = call.parameters["id"] ?: return@put call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing artikel ID")
+                    mapOf("error" to "Missing veranstaltung ID")
                 )
                 val uuid = uuidFrom(id)
-                val artikel = call.receive<Artikel>()
-                val updatedArtikel = artikelRepository.update(uuid, artikel)
-                if (updatedArtikel != null) {
-                    call.respond(HttpStatusCode.OK, updatedArtikel)
+                val veranstaltung = call.receive<Veranstaltung>()
+                val updatedVeranstaltung = veranstaltungRepository.update(uuid, veranstaltung)
+                if (updatedVeranstaltung != null) {
+                    call.respond(HttpStatusCode.OK, updatedVeranstaltung)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Artikel not found"))
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Veranstaltung not found"))
                 }
             } catch (_: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
@@ -106,19 +91,19 @@ fun Route.artikelRoutes() {
             }
         }
 
-        // DELETE /api/artikel/{id} - Delete article
+        // DELETE /api/veranstaltungen/{id} - Delete veranstaltung
         delete("/{id}") {
             try {
                 val id = call.parameters["id"] ?: return@delete call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing artikel ID")
+                    mapOf("error" to "Missing veranstaltung ID")
                 )
                 val uuid = uuidFrom(id)
-                val deleted = artikelRepository.delete(uuid)
+                val deleted = veranstaltungRepository.delete(uuid)
                 if (deleted) {
                     call.respond(HttpStatusCode.NoContent)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Artikel not found"))
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Veranstaltung not found"))
                 }
             } catch (_: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))

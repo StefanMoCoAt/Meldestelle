@@ -1,7 +1,7 @@
-package at.mocode.model
+package at.mocode.repositories
 
 import at.mocode.stammdaten.Verein
-import at.mocode.tables.VereineTable
+import at.mocode.tables.stammdaten.VereineTable
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*

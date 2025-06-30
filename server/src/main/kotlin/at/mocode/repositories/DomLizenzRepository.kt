@@ -1,4 +1,4 @@
-package at.mocode.model
+package at.mocode.repositories
 
 import at.mocode.model.domaene.DomLizenz
 import com.benasher44.uuid.Uuid

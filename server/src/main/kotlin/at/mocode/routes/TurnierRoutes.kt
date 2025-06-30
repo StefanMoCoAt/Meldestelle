@@ -1,42 +1,41 @@
 package at.mocode.routes
 
-import at.mocode.model.Artikel
-import at.mocode.repositories.ArtikelRepository
-import at.mocode.services.ServiceLocator
+import at.mocode.model.Turnier
+import at.mocode.repositories.TurnierRepository
+import at.mocode.repositories.PostgresTurnierRepository
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlin.collections.mapOf
 
-fun Route.artikelRoutes() {
-    val artikelRepository: ArtikelRepository = ServiceLocator.artikelRepository
+fun Route.turnierRoutes() {
+    val turnierRepository: TurnierRepository = PostgresTurnierRepository()
 
-    route("/artikel") {
-        // GET /api/artikel - Get all articles
+    route("/api/turniere") {
+        // GET /api/turniere - Get all turniere
         get {
             try {
-                val artikel = artikelRepository.findAll()
-                call.respond(HttpStatusCode.OK, artikel)
+                val turniere = turnierRepository.findAll()
+                call.respond(HttpStatusCode.OK, turniere)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
             }
         }
 
-        // GET /api/artikel/{id} - Get article by ID
+        // GET /api/turniere/{id} - Get turnier by ID
         get("/{id}") {
             try {
                 val id = call.parameters["id"] ?: return@get call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing artikel ID")
+                    mapOf("error" to "Missing turnier ID")
                 )
                 val uuid = uuidFrom(id)
-                val artikel = artikelRepository.findById(uuid)
-                if (artikel != null) {
-                    call.respond(HttpStatusCode.OK, artikel)
+                val turnier = turnierRepository.findById(uuid)
+                if (turnier != null) {
+                    call.respond(HttpStatusCode.OK, turnier)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Artikel not found"))
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Turnier not found"))
                 }
             } catch (_: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
@@ -45,59 +44,62 @@ fun Route.artikelRoutes() {
             }
         }
 
-        // GET /api/artikel/search?q={query} - Search articles
+        // GET /api/turniere/search?q={query} - Search turniere
         get("/search") {
             try {
                 val query = call.request.queryParameters["q"] ?: return@get call.respond(
                     HttpStatusCode.BadRequest,
                     mapOf("error" to "Missing search query parameter 'q'")
                 )
-                val artikel = artikelRepository.search(query)
-                call.respond(HttpStatusCode.OK, artikel)
+                val turniere = turnierRepository.search(query)
+                call.respond(HttpStatusCode.OK, turniere)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
             }
         }
 
-        // GET /api/artikel/verbandsabgabe/{istVerbandsabgabe} - Get articles by association fee status
-        get("/verbandsabgabe/{istVerbandsabgabe}") {
+        // GET /api/turniere/veranstaltung/{veranstaltungId} - Get turniere by veranstaltung ID
+        get("/veranstaltung/{veranstaltungId}") {
             try {
-                val istVerbandsabgabe = call.parameters["istVerbandsabgabe"]?.toBoolean() ?: return@get call.respond(
+                val veranstaltungId = call.parameters["veranstaltungId"] ?: return@get call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing or invalid verbandsabgabe parameter")
+                    mapOf("error" to "Missing veranstaltung ID")
                 )
-                val artikel = artikelRepository.findByVerbandsabgabe(istVerbandsabgabe)
-                call.respond(HttpStatusCode.OK, artikel)
+                val uuid = uuidFrom(veranstaltungId)
+                val turniere = turnierRepository.findByVeranstaltungId(uuid)
+                call.respond(HttpStatusCode.OK, turniere)
+            } catch (_: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
             }
         }
 
-        // POST /api/artikel - Create new article
+        // POST /api/turniere - Create new turnier
         post {
             try {
-                val artikel = call.receive<Artikel>()
-                val createdArtikel = artikelRepository.create(artikel)
-                call.respond(HttpStatusCode.Created, createdArtikel)
+                val turnier = call.receive<Turnier>()
+                val createdTurnier = turnierRepository.create(turnier)
+                call.respond(HttpStatusCode.Created, createdTurnier)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
             }
         }
 
-        // PUT /api/artikel/{id} - Update article
+        // PUT /api/turniere/{id} - Update turnier
         put("/{id}") {
             try {
                 val id = call.parameters["id"] ?: return@put call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing artikel ID")
+                    mapOf("error" to "Missing turnier ID")
                 )
                 val uuid = uuidFrom(id)
-                val artikel = call.receive<Artikel>()
-                val updatedArtikel = artikelRepository.update(uuid, artikel)
-                if (updatedArtikel != null) {
-                    call.respond(HttpStatusCode.OK, updatedArtikel)
+                val turnier = call.receive<Turnier>()
+                val updatedTurnier = turnierRepository.update(uuid, turnier)
+                if (updatedTurnier != null) {
+                    call.respond(HttpStatusCode.OK, updatedTurnier)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Artikel not found"))
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Turnier not found"))
                 }
             } catch (_: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
@@ -106,19 +108,19 @@ fun Route.artikelRoutes() {
             }
         }
 
-        // DELETE /api/artikel/{id} - Delete article
+        // DELETE /api/turniere/{id} - Delete turnier
         delete("/{id}") {
             try {
                 val id = call.parameters["id"] ?: return@delete call.respond(
                     HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing artikel ID")
+                    mapOf("error" to "Missing turnier ID")
                 )
                 val uuid = uuidFrom(id)
-                val deleted = artikelRepository.delete(uuid)
+                val deleted = turnierRepository.delete(uuid)
                 if (deleted) {
                     call.respond(HttpStatusCode.NoContent)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Artikel not found"))
+                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Turnier not found"))
                 }
             } catch (_: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))

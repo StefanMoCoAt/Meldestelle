@@ -2,8 +2,8 @@ package at.mocode.tables.domaene
 
 import at.mocode.enums.DatenQuelleE
 import at.mocode.enums.PferdeGeschlechtE
-import at.mocode.tables.PersonenTable
-import at.mocode.tables.VereineTable
+import at.mocode.tables.stammdaten.PersonenTable
+import at.mocode.tables.stammdaten.VereineTable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 

@@ -1,4 +1,4 @@
-package at.mocode.model
+package at.mocode.repositories
 
 import at.mocode.stammdaten.Person
 import com.benasher44.uuid.Uuid

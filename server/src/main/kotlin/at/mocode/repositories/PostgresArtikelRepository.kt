@@ -1,5 +1,6 @@
-package at.mocode.model
+package at.mocode.repositories
 
+import at.mocode.model.Artikel
 import at.mocode.tables.ArtikelTable
 import com.benasher44.uuid.Uuid
 import com.ionspin.kotlin.bignum.decimal.BigDecimal

@@ -1,7 +1,7 @@
 package at.mocode.routes
 
-import at.mocode.model.PostgresVereinRepository
-import at.mocode.model.VereinRepository
+import at.mocode.repositories.PostgresVereinRepository
+import at.mocode.repositories.VereinRepository
 import at.mocode.stammdaten.Verein
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*

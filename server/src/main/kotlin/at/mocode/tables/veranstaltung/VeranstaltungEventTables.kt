@@ -6,7 +6,6 @@ import at.mocode.tables.TurniereTable
 import at.mocode.tables.VeranstaltungenTable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
-import org.jetbrains.exposed.sql.kotlin.datetime.time
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
 // Event models tables

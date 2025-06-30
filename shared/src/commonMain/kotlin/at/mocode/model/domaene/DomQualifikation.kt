@@ -1,3 +1,5 @@
+package at.mocode.model.domaene
+
 import at.mocode.serializers.KotlinInstantSerializer
 import at.mocode.serializers.KotlinLocalDateSerializer
 import at.mocode.serializers.UuidSerializer

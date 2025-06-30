@@ -1,7 +1,7 @@
 package at.mocode.routes
 
-import at.mocode.model.PersonRepository
-import at.mocode.model.PostgresPersonRepository
+import at.mocode.repositories.PersonRepository
+import at.mocode.repositories.PostgresPersonRepository
 import at.mocode.stammdaten.Person
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*

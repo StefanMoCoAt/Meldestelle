@@ -1,5 +1,14 @@
 package at.mocode.plugins
 
+import at.mocode.tables.ArtikelTable
+import at.mocode.tables.PlaetzeTable
+import at.mocode.tables.TurniereTable
+import at.mocode.tables.VeranstaltungenTable
+import at.mocode.tables.domaene.DomQualifikationTable
+import at.mocode.tables.stammdaten.LizenzenTable
+import at.mocode.tables.stammdaten.PersonenTable
+import at.mocode.tables.stammdaten.PferdeTable
+import at.mocode.tables.stammdaten.VereineTable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.*
@@ -22,7 +31,7 @@ import java.util.concurrent.TimeUnit
  */
 fun Application.configureDatabase() {
     val log = LoggerFactory.getLogger("DatabaseInitialization")
-    var connectionSuccessful = false
+    var connectionSuccessful: Boolean
 
     // Environment detection
     val isTestEnvironment = System.getProperty("isTestEnvironment")?.toBoolean() ?: false
@@ -32,7 +41,7 @@ fun Application.configureDatabase() {
     // Get database configuration from application.yaml if available
     val dbConfig = try {
         environment.config.config("database")
-    } catch (e: ApplicationConfigurationException) {
+    } catch (_: ApplicationConfigurationException) {
         log.warn("No database configuration found in application.yaml, using environment variables")
         null
     }
@@ -51,7 +60,7 @@ fun Application.configureDatabase() {
         }
     }
 
-    // Initialize schema if connection was successful
+    // Initialize schema if the connection was successful
     if (connectionSuccessful) {
         initializeSchema(log, isTestEnvironment, isIdeaEnvironment)
     } else {
@@ -174,14 +183,15 @@ private fun initializeSchema(log: Logger, isTestEnvironment: Boolean, isIdeaEnvi
         try {
             // Create all tables if they don't exist
             SchemaUtils.create(
-                _root_ide_package_.at.mocode.tables.VereineTable,
-                _root_ide_package_.at.mocode.tables.PersonenTable,
-                _root_ide_package_.at.mocode.tables.PferdeTable,
-                _root_ide_package_.at.mocode.tables.VeranstaltungenTable,
-                _root_ide_package_.at.mocode.tables.TurniereTable,
-                _root_ide_package_.at.mocode.tables.ArtikelTable,
-                _root_ide_package_.at.mocode.tables.PlaetzeTable,
-                _root_ide_package_.at.mocode.tables.LizenzenTable
+                VereineTable,
+                PersonenTable,
+                PferdeTable,
+                VeranstaltungenTable,
+                TurniereTable,
+                ArtikelTable,
+                PlaetzeTable,
+                LizenzenTable,
+                DomQualifikationTable
                 // Add more tables here if needed
             )
             log.info("Database schema initialized successfully.")

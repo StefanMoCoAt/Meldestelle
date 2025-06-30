@@ -1,12 +1,11 @@
-package at.mocode.model
+package at.mocode.repositories
 
 import at.mocode.model.domaene.DomPferd
-import at.mocode.tables.DomPferdTable
+import at.mocode.tables.domaene.DomPferdTable
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class PostgresDomPferdRepository : DomPferdRepository {

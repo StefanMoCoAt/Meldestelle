@@ -1,5 +1,6 @@
 package at.mocode.tables
 
+import at.mocode.tables.stammdaten.PersonenTable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date // Für kotlinx-datetime LocalDate
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime // Für kotlinx-datetime LocalDateTime

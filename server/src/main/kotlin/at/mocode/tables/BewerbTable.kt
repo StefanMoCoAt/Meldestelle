@@ -44,7 +44,7 @@ object BewerbTable : Table("bewerbe") {
     val geldpreisVorlageId = uuid("geldpreis_vorlage_id").nullable()
 
     // Ort/Zeit (Default-Werte)
-    val standardPlatzId = uuid("standard_platz_id").nullable().references(PlaetzeTable.id)
+    val standardPlatzId = uuid("standard_platz_id").references(PlaetzeTable.id)
     val standardDatum = date("standard_datum").nullable()
     val standardBeginnzeitTypE = varchar("standard_beginnzeit_typ", 50).default("ANSCHLIESSEND")
     val standardBeginnzeitFix = time("standard_beginnzeit_fix").nullable()

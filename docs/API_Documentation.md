@@ -300,6 +300,152 @@ Delete an article.
 
 ---
 
+## Horses (Pferde) API
+
+### GET /api/horses
+Get all horses.
+
+**Response:**
+```json
+[
+  {
+    "pferdId": "uuid",
+    "oepsSatzNrPferd": "string",
+    "oepsKopfNr": "string",
+    "name": "string",
+    "lebensnummer": "string",
+    "feiPassNr": "string",
+    "geburtsjahr": 2015,
+    "geschlecht": "WALLACH|STUTE|HENGST",
+    "farbe": "string",
+    "rasse": "string",
+    "abstammungVaterName": "string",
+    "abstammungMutterName": "string",
+    "abstammungMutterVaterName": "string",
+    "abstammungZusatzInfo": "string",
+    "besitzerPersonId": "uuid",
+    "verantwortlichePersonId": "uuid",
+    "heimatVereinId": "uuid",
+    "letzteZahlungPferdegebuehrJahrOeps": 2023,
+    "stockmassCm": 165,
+    "datenQuelle": "MANUELL|ZNS_IMPORT",
+    "istAktiv": true,
+    "notizenIntern": "string",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "updatedAt": "2023-01-01T00:00:00Z"
+  }
+]
+```
+
+### GET /api/horses/{id}
+Get horse by ID.
+
+**Parameters:**
+- `id` (path) - UUID of the horse
+
+### GET /api/horses/oeps/{oepsSatzNr}
+Get horse by OEPS registration number.
+
+**Parameters:**
+- `oepsSatzNr` (path) - OEPS registration number
+
+### GET /api/horses/lebensnummer/{lebensnummer}
+Get horse by life number (UELN).
+
+**Parameters:**
+- `lebensnummer` (path) - Horse life number
+
+### GET /api/horses/search?q={query}
+Search horses by name or other attributes.
+
+**Parameters:**
+- `q` (query) - Search query string
+
+### GET /api/horses/name/{name}
+Get horses by name.
+
+**Parameters:**
+- `name` (path) - Horse name
+
+### GET /api/horses/owner/{ownerId}
+Get horses by owner ID.
+
+**Parameters:**
+- `ownerId` (path) - UUID of the owner person
+
+### GET /api/horses/responsible/{personId}
+Get horses by responsible person ID.
+
+**Parameters:**
+- `personId` (path) - UUID of the responsible person
+
+### GET /api/horses/club/{clubId}
+Get horses by home club ID.
+
+**Parameters:**
+- `clubId` (path) - UUID of the home club
+
+### GET /api/horses/breed/{breed}
+Get horses by breed.
+
+**Parameters:**
+- `breed` (path) - Horse breed
+
+### GET /api/horses/birth-year/{year}
+Get horses by birth year.
+
+**Parameters:**
+- `year` (path) - Birth year (integer)
+
+### GET /api/horses/active
+Get only active horses.
+
+### POST /api/horses
+Create a new horse.
+
+**Request Body:**
+```json
+{
+  "oepsSatzNrPferd": "string",
+  "oepsKopfNr": "string",
+  "name": "string",
+  "lebensnummer": "string",
+  "feiPassNr": "string",
+  "geburtsjahr": 2015,
+  "geschlecht": "WALLACH",
+  "farbe": "string",
+  "rasse": "string",
+  "abstammungVaterName": "string",
+  "abstammungMutterName": "string",
+  "abstammungMutterVaterName": "string",
+  "abstammungZusatzInfo": "string",
+  "besitzerPersonId": "uuid",
+  "verantwortlichePersonId": "uuid",
+  "heimatVereinId": "uuid",
+  "letzteZahlungPferdegebuehrJahrOeps": 2023,
+  "stockmassCm": 165,
+  "datenQuelle": "MANUELL",
+  "istAktiv": true,
+  "notizenIntern": "string"
+}
+```
+
+### PUT /api/horses/{id}
+Update an existing horse.
+
+**Parameters:**
+- `id` (path) - UUID of the horse
+
+**Request Body:** Same as POST
+
+### DELETE /api/horses/{id}
+Delete a horse.
+
+**Parameters:**
+- `id` (path) - UUID of the horse
+
+---
+
 ## Data Models
 
 ### Person

@@ -1,4 +1,4 @@
-package at.mocode.model
+package at.mocode.repositories
 
 class PostgresEventRepository {
 }
