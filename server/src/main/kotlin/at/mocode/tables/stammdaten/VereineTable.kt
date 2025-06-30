@@ -1,4 +1,4 @@
-package at.mocode.tables
+package at.mocode.tables.stammdaten
 
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp

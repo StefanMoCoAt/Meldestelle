@@ -1,3 +1,5 @@
+package at.mocode.model.domaene
+
 import at.mocode.enums.DatenQuelleE
 import at.mocode.enums.PferdeGeschlechtE // NEUES ENUM
 import at.mocode.serializers.KotlinInstantSerializer

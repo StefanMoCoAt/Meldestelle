@@ -1,6 +1,9 @@
 package at.mocode.model
 
 import at.mocode.enums.SparteE
+import at.mocode.enums.PruefungsaufgabeNationE
+import at.mocode.enums.PruefungsaufgabeRichtverfahrenModusE
+import at.mocode.enums.PruefungsaufgabeViereckE
 import at.mocode.serializers.KotlinInstantSerializer
 import at.mocode.serializers.UuidSerializer
 import com.benasher44.uuid.Uuid
@@ -17,9 +20,9 @@ data class Pruefungsaufgabe(
     var nameLang: String, // Vollständiger Name, z.B. "Dressuraufgabe A1 (GM, 20x40m)"
     var kategorieText: String?, // Übergeordnete Kategorie, z.B. "Dressuraufgaben Klasse A", "FEI Grand Prix Serie"
     var sparteE: SparteE, // Primär DRESSUR, aber auch für Vielseitigkeit etc.
-    var nation: PruefungsaufgabeNationEnum = PruefungsaufgabeNationEnum.NATIONAL,
-    var richtverfahrenModusDefault: PruefungsaufgabeRichtverfahrenModusEnum?, // GM, GT - als Default für diese Aufgabe
-    var viereckGroesseDefault: PruefungsaufgabeViereckEnum?, // VIERECK_20x40, VIERECK_20x60 - als Default
+    var nation: PruefungsaufgabeNationE = PruefungsaufgabeNationE.NATIONAL,
+    var richtverfahrenModusDefault: PruefungsaufgabeRichtverfahrenModusE?, // GM, GT - als Default für diese Aufgabe
+    var viereckGroesseDefault: PruefungsaufgabeViereckE?, // VIERECK_20x40, VIERECK_20x60 - als Default
     var schwierigkeitsgradText: String?, // z.B. "A", "L", "M", "S", "Grand Prix"
     var aufgabenNummerInSammlung: String?, // z.B. die "1" bei "Aufgabe A1" oder spezifische FEI Nummer
     var jahrgangVersion: String?, // z.B. "2011", "FEI 2023"
@@ -34,11 +37,3 @@ data class Pruefungsaufgabe(
     @Serializable(with = KotlinInstantSerializer::class)
     var updatedAt: Instant = Clock.System.now()
 )
-
-enum class PruefungsaufgabeNationEnum { NATIONAL, FEI, SONSTIGE }
-enum class PruefungsaufgabeRichtverfahrenModusEnum { GM, GT, NICHT_SPEZIFIZIERT } // Gemeinsam, Getrennt
-enum class PruefungsaufgabeViereckEnum { VIERECK_20x40, VIERECK_20x60, ANDERE, UNBEKANNT }
-
-// Shared Serializers (Beispiel, falls noch nicht vorhanden)
-// object UuidSerializer // ...
-// object KotlinInstantSerializer // ...

@@ -1,6 +1,7 @@
 package at.mocode.plugins
 
 import at.mocode.routes.artikelRoutes
+import at.mocode.routes.domLizenzRoutes
 import at.mocode.routes.personRoutes
 import at.mocode.routes.vereinRoutes
 import io.ktor.server.application.Application
@@ -37,5 +38,6 @@ fun Application.configureRouting() {
         personRoutes()
         vereinRoutes()
         artikelRoutes()
+        domLizenzRoutes()
     }
 }

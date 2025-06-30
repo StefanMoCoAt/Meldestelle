@@ -1,5 +1,4 @@
-package at.mocode.tables
-
+package at.mocode.tables.stammdaten
 
 import at.mocode.enums.LizenzTypE
 import at.mocode.enums.SparteE

@@ -1,4 +1,4 @@
-package at.mocode.tables
+package at.mocode.tables.stammdaten
 
 import at.mocode.enums.GeschlechtE
 import org.jetbrains.exposed.sql.Table
