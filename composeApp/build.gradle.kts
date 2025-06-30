@@ -14,15 +14,6 @@ kotlin {
     jvm("desktop")
 
     wasmJs {
-
-        var isMpp: Boolean = false // Beispiel: Deine aktuelle Zuweisung
-
-        @Deprecated("Use getMpp() instead", ReplaceWith("getMpp()"))
-        fun isMpp(): Boolean = isMpp
-
-        fun getMpp(): Boolean = isMpp
-
-
         outputModuleName = "composeApp"
         browser {
             val rootDirPath = project.rootDir.path

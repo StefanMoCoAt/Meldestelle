@@ -7,3 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.compose.compiler) apply false
 }
+
+// Wrapper task configuration for the root project
+tasks.wrapper {
+    gradleVersion = "8.14"
+    distributionType = Wrapper.DistributionType.BIN
+}

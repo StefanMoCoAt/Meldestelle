@@ -12,14 +12,6 @@ kotlin {
     jvm()
 
     wasmJs {
-
-        var isMpp: Boolean = false // Beispiel: Deine aktuelle Zuweisung
-
-        @Deprecated("Use getMpp() instead", ReplaceWith("getMpp()"))
-        fun isMpp(): Boolean = isMpp
-
-        fun getMpp(): Boolean = isMpp
-
         browser {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
