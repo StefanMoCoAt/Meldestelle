@@ -5,6 +5,7 @@ import at.mocode.repositories.PostgresPersonRepository
 import at.mocode.stammdaten.Person
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
+import io.ktor.server.plugins.openapi.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -12,7 +13,7 @@ import io.ktor.server.routing.*
 fun Route.personRoutes() {
     val personRepository: PersonRepository = PostgresPersonRepository()
 
-    route("/api/persons") {
+    route("/persons") {
         // GET /api/persons - Get all persons
         get {
             try {

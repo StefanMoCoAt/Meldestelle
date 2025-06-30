@@ -3,148 +3,16 @@ package at.mocode.repositories
 import at.mocode.model.domaene.DomPferd
 import at.mocode.tables.domaene.DomPferdTable
 import com.benasher44.uuid.Uuid
-import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class PostgresDomPferdRepository : DomPferdRepository {
+class PostgresDomPferdRepository : BaseRepository<DomPferd, DomPferdTable>(DomPferdTable), DomPferdRepository {
 
-    override suspend fun findAll(): List<DomPferd> = transaction {
-        DomPferdTable.selectAll().map { rowToDomPferd(it) }
-    }
-
-    override suspend fun findById(id: Uuid): DomPferd? = transaction {
-        DomPferdTable.select { DomPferdTable.pferdId eq id }
-            .map { rowToDomPferd(it) }
-            .singleOrNull()
-    }
-
-    override suspend fun findByOepsSatzNr(oepsSatzNr: String): DomPferd? = transaction {
-        DomPferdTable.select { DomPferdTable.oepsSatzNrPferd eq oepsSatzNr }
-            .map { rowToDomPferd(it) }
-            .singleOrNull()
-    }
-
-    override suspend fun findByName(name: String): List<DomPferd> = transaction {
-        DomPferdTable.select { DomPferdTable.name like "%$name%" }
-            .map { rowToDomPferd(it) }
-    }
-
-    override suspend fun findByLebensnummer(lebensnummer: String): DomPferd? = transaction {
-        DomPferdTable.select { DomPferdTable.lebensnummer eq lebensnummer }
-            .map { rowToDomPferd(it) }
-            .singleOrNull()
-    }
-
-    override suspend fun findByBesitzerId(besitzerId: Uuid): List<DomPferd> = transaction {
-        DomPferdTable.select { DomPferdTable.besitzerPersonId eq besitzerId }
-            .map { rowToDomPferd(it) }
-    }
-
-    override suspend fun findByVerantwortlichePersonId(personId: Uuid): List<DomPferd> = transaction {
-        DomPferdTable.select { DomPferdTable.verantwortlichePersonId eq personId }
-            .map { rowToDomPferd(it) }
-    }
-
-    override suspend fun findByHeimatVereinId(vereinId: Uuid): List<DomPferd> = transaction {
-        DomPferdTable.select { DomPferdTable.heimatVereinId eq vereinId }
-            .map { rowToDomPferd(it) }
-    }
-
-    override suspend fun findByRasse(rasse: String): List<DomPferd> = transaction {
-        DomPferdTable.select { DomPferdTable.rasse like "%$rasse%" }
-            .map { rowToDomPferd(it) }
-    }
-
-    override suspend fun findByGeburtsjahr(geburtsjahr: Int): List<DomPferd> = transaction {
-        DomPferdTable.select { DomPferdTable.geburtsjahr eq geburtsjahr }
-            .map { rowToDomPferd(it) }
-    }
-
-    override suspend fun findActiveHorses(): List<DomPferd> = transaction {
-        DomPferdTable.select { DomPferdTable.istAktiv eq true }
-            .map { rowToDomPferd(it) }
-    }
-
-    override suspend fun create(domPferd: DomPferd): DomPferd = transaction {
-        val now = Clock.System.now()
-        DomPferdTable.insert {
-            it[pferdId] = domPferd.pferdId
-            it[oepsSatzNrPferd] = domPferd.oepsSatzNrPferd
-            it[oepsKopfNr] = domPferd.oepsKopfNr
-            it[name] = domPferd.name
-            it[lebensnummer] = domPferd.lebensnummer
-            it[feiPassNr] = domPferd.feiPassNr
-            it[geburtsjahr] = domPferd.geburtsjahr
-            it[geschlecht] = domPferd.geschlecht
-            it[farbe] = domPferd.farbe
-            it[rasse] = domPferd.rasse
-            it[abstammungVaterName] = domPferd.abstammungVaterName
-            it[abstammungMutterName] = domPferd.abstammungMutterName
-            it[abstammungMutterVaterName] = domPferd.abstammungMutterVaterName
-            it[abstammungZusatzInfo] = domPferd.abstammungZusatzInfo
-            it[besitzerPersonId] = domPferd.besitzerPersonId
-            it[verantwortlichePersonId] = domPferd.verantwortlichePersonId
-            it[heimatVereinId] = domPferd.heimatVereinId
-            it[letzteZahlungPferdegebuehrJahrOeps] = domPferd.letzteZahlungPferdegebuehrJahrOeps
-            it[stockmassCm] = domPferd.stockmassCm
-            it[datenQuelle] = domPferd.datenQuelle
-            it[istAktiv] = domPferd.istAktiv
-            it[notizenIntern] = domPferd.notizenIntern
-            it[createdAt] = domPferd.createdAt
-            it[updatedAt] = now
-        }
-        domPferd.copy(updatedAt = now)
-    }
-
-    override suspend fun update(id: Uuid, domPferd: DomPferd): DomPferd? = transaction {
-        val now = Clock.System.now()
-        val updateCount = DomPferdTable.update({ DomPferdTable.pferdId eq id }) {
-            it[oepsSatzNrPferd] = domPferd.oepsSatzNrPferd
-            it[oepsKopfNr] = domPferd.oepsKopfNr
-            it[name] = domPferd.name
-            it[lebensnummer] = domPferd.lebensnummer
-            it[feiPassNr] = domPferd.feiPassNr
-            it[geburtsjahr] = domPferd.geburtsjahr
-            it[geschlecht] = domPferd.geschlecht
-            it[farbe] = domPferd.farbe
-            it[rasse] = domPferd.rasse
-            it[abstammungVaterName] = domPferd.abstammungVaterName
-            it[abstammungMutterName] = domPferd.abstammungMutterName
-            it[abstammungMutterVaterName] = domPferd.abstammungMutterVaterName
-            it[abstammungZusatzInfo] = domPferd.abstammungZusatzInfo
-            it[besitzerPersonId] = domPferd.besitzerPersonId
-            it[verantwortlichePersonId] = domPferd.verantwortlichePersonId
-            it[heimatVereinId] = domPferd.heimatVereinId
-            it[letzteZahlungPferdegebuehrJahrOeps] = domPferd.letzteZahlungPferdegebuehrJahrOeps
-            it[stockmassCm] = domPferd.stockmassCm
-            it[datenQuelle] = domPferd.datenQuelle
-            it[istAktiv] = domPferd.istAktiv
-            it[notizenIntern] = domPferd.notizenIntern
-            it[updatedAt] = now
-        }
-        if (updateCount > 0) {
-            domPferd.copy(pferdId = id, updatedAt = now)
-        } else {
-            null
-        }
-    }
-
-    override suspend fun delete(id: Uuid): Boolean = transaction {
-        DomPferdTable.deleteWhere { pferdId eq id } > 0
-    }
-
-    override suspend fun search(query: String): List<DomPferd> = transaction {
-        DomPferdTable.select {
-            (DomPferdTable.name like "%$query%") or
-            (DomPferdTable.lebensnummer like "%$query%") or
-            (DomPferdTable.rasse like "%$query%") or
-            (DomPferdTable.notizenIntern like "%$query%")
-        }.map { rowToDomPferd(it) }
-    }
-
-    private fun rowToDomPferd(row: ResultRow): DomPferd {
+    // Implement abstract methods from BaseRepository
+    override fun rowToModel(row: ResultRow): DomPferd {
         return DomPferd(
             pferdId = row[DomPferdTable.pferdId],
             oepsSatzNrPferd = row[DomPferdTable.oepsSatzNrPferd],
@@ -171,5 +39,115 @@ class PostgresDomPferdRepository : DomPferdRepository {
             createdAt = row[DomPferdTable.createdAt],
             updatedAt = row[DomPferdTable.updatedAt]
         )
+    }
+
+    override fun getIdColumn(): Column<Uuid> = DomPferdTable.pferdId
+
+    override fun populateInsert(statement: UpdateBuilder<Number>, model: DomPferd, now: Instant) {
+        statement[DomPferdTable.pferdId] = model.pferdId
+        statement[DomPferdTable.oepsSatzNrPferd] = model.oepsSatzNrPferd
+        statement[DomPferdTable.oepsKopfNr] = model.oepsKopfNr
+        statement[DomPferdTable.name] = model.name
+        statement[DomPferdTable.lebensnummer] = model.lebensnummer
+        statement[DomPferdTable.feiPassNr] = model.feiPassNr
+        statement[DomPferdTable.geburtsjahr] = model.geburtsjahr
+        statement[DomPferdTable.geschlecht] = model.geschlecht
+        statement[DomPferdTable.farbe] = model.farbe
+        statement[DomPferdTable.rasse] = model.rasse
+        statement[DomPferdTable.abstammungVaterName] = model.abstammungVaterName
+        statement[DomPferdTable.abstammungMutterName] = model.abstammungMutterName
+        statement[DomPferdTable.abstammungMutterVaterName] = model.abstammungMutterVaterName
+        statement[DomPferdTable.abstammungZusatzInfo] = model.abstammungZusatzInfo
+        statement[DomPferdTable.besitzerPersonId] = model.besitzerPersonId
+        statement[DomPferdTable.verantwortlichePersonId] = model.verantwortlichePersonId
+        statement[DomPferdTable.heimatVereinId] = model.heimatVereinId
+        statement[DomPferdTable.letzteZahlungPferdegebuehrJahrOeps] = model.letzteZahlungPferdegebuehrJahrOeps
+        statement[DomPferdTable.stockmassCm] = model.stockmassCm
+        statement[DomPferdTable.datenQuelle] = model.datenQuelle
+        statement[DomPferdTable.istAktiv] = model.istAktiv
+        statement[DomPferdTable.notizenIntern] = model.notizenIntern
+        statement[DomPferdTable.createdAt] = model.createdAt
+        statement[DomPferdTable.updatedAt] = now
+    }
+
+    override fun populateUpdate(statement: UpdateBuilder<Int>, model: DomPferd, now: Instant) {
+        statement[DomPferdTable.oepsSatzNrPferd] = model.oepsSatzNrPferd
+        statement[DomPferdTable.oepsKopfNr] = model.oepsKopfNr
+        statement[DomPferdTable.name] = model.name
+        statement[DomPferdTable.lebensnummer] = model.lebensnummer
+        statement[DomPferdTable.feiPassNr] = model.feiPassNr
+        statement[DomPferdTable.geburtsjahr] = model.geburtsjahr
+        statement[DomPferdTable.geschlecht] = model.geschlecht
+        statement[DomPferdTable.farbe] = model.farbe
+        statement[DomPferdTable.rasse] = model.rasse
+        statement[DomPferdTable.abstammungVaterName] = model.abstammungVaterName
+        statement[DomPferdTable.abstammungMutterName] = model.abstammungMutterName
+        statement[DomPferdTable.abstammungMutterVaterName] = model.abstammungMutterVaterName
+        statement[DomPferdTable.abstammungZusatzInfo] = model.abstammungZusatzInfo
+        statement[DomPferdTable.besitzerPersonId] = model.besitzerPersonId
+        statement[DomPferdTable.verantwortlichePersonId] = model.verantwortlichePersonId
+        statement[DomPferdTable.heimatVereinId] = model.heimatVereinId
+        statement[DomPferdTable.letzteZahlungPferdegebuehrJahrOeps] = model.letzteZahlungPferdegebuehrJahrOeps
+        statement[DomPferdTable.stockmassCm] = model.stockmassCm
+        statement[DomPferdTable.datenQuelle] = model.datenQuelle
+        statement[DomPferdTable.istAktiv] = model.istAktiv
+        statement[DomPferdTable.notizenIntern] = model.notizenIntern
+        statement[DomPferdTable.updatedAt] = now
+    }
+
+    override fun updateModelTimestamp(model: DomPferd, timestamp: Instant): DomPferd {
+        return model.copy(updatedAt = timestamp)
+    }
+
+    override fun updateModelIdAndTimestamp(model: DomPferd, id: Uuid, timestamp: Instant): DomPferd {
+        return model.copy(pferdId = id, updatedAt = timestamp)
+    }
+
+    // Interface implementation using optimized base methods
+    override suspend fun findAll(): List<DomPferd> = super.findAll()
+
+    override suspend fun findById(id: Uuid): DomPferd? = super.findById(id)
+
+    override suspend fun findByOepsSatzNr(oepsSatzNr: String): DomPferd? =
+        findByColumn(DomPferdTable.oepsSatzNrPferd, oepsSatzNr)
+
+    override suspend fun findByName(name: String): List<DomPferd> =
+        findByLikeSearchNonNull(DomPferdTable.name, name)
+
+    override suspend fun findByLebensnummer(lebensnummer: String): DomPferd? =
+        findByColumn(DomPferdTable.lebensnummer, lebensnummer)
+
+    override suspend fun findByBesitzerId(besitzerId: Uuid): List<DomPferd> =
+        findByColumnList(DomPferdTable.besitzerPersonId, besitzerId)
+
+    override suspend fun findByVerantwortlichePersonId(personId: Uuid): List<DomPferd> =
+        findByColumnList(DomPferdTable.verantwortlichePersonId, personId)
+
+    override suspend fun findByHeimatVereinId(vereinId: Uuid): List<DomPferd> =
+        findByColumnList(DomPferdTable.heimatVereinId, vereinId)
+
+    override suspend fun findByRasse(rasse: String): List<DomPferd> =
+        findByLikeSearch(DomPferdTable.rasse, rasse)
+
+    override suspend fun findByGeburtsjahr(geburtsjahr: Int): List<DomPferd> =
+        findByNullableIntColumn(DomPferdTable.geburtsjahr, geburtsjahr)
+
+    override suspend fun findActiveHorses(): List<DomPferd> =
+        findByBooleanColumn(DomPferdTable.istAktiv, true)
+
+    override suspend fun create(domPferd: DomPferd): DomPferd = super.create(domPferd)
+
+    override suspend fun update(id: Uuid, domPferd: DomPferd): DomPferd? = super.update(id, domPferd)
+
+    override suspend fun delete(id: Uuid): Boolean = super.delete(id)
+
+    override suspend fun search(query: String): List<DomPferd> = transaction {
+        val sanitizedTerm = query.replace("%", "\\%").replace("_", "\\_")
+        table.select {
+            (DomPferdTable.name like "%$sanitizedTerm%") or
+            (DomPferdTable.lebensnummer like "%$sanitizedTerm%") or
+            (DomPferdTable.rasse like "%$sanitizedTerm%") or
+            (DomPferdTable.notizenIntern like "%$sanitizedTerm%")
+        }.map { rowToModel(it) }
     }
 }

@@ -12,7 +12,7 @@ import io.ktor.server.routing.*
 fun Route.abteilungRoutes() {
     val abteilungRepository: AbteilungRepository = PostgresAbteilungRepository()
 
-    route("/api/abteilungen") {
+    route("/abteilungen") {
         // GET /api/abteilungen - Get all abteilungen
         get {
             try {

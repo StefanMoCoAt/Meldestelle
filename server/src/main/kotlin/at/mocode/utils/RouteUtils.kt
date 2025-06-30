@@ -2,113 +2,247 @@ package at.mocode.utils
 
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
+import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.request.*
-import io.ktor.server.routing.*
-import at.mocode.utils.ResponseUtils.respondValidationError
+import io.ktor.server.response.*
 
 /**
- * Utility functions for common route operations
+ * Utility functions to reduce code duplication in route handlers
  */
-object RouteUtils {
 
-    /**
-     * Extract and validate UUID parameter from route
-     */
-    suspend fun RoutingCall.getUuidParameter(
-        paramName: String,
-        resourceName: String = paramName
-    ): Uuid? {
-        val paramValue = parameters[paramName]
-        if (paramValue == null) {
-            respondValidationError("Missing $resourceName ID")
-            return null
-        }
+/**
+ * Safely executes a block and handles common exceptions with appropriate HTTP responses
+ */
+suspend inline fun ApplicationCall.safeExecute(block: () -> Unit) {
+    try {
+        block()
+    } catch (e: IllegalArgumentException) {
+        respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
+    } catch (e: Exception) {
+        respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+    }
+}
 
-        return try {
-            uuidFrom(paramValue)
-        } catch (e: IllegalArgumentException) {
-            respondValidationError("Invalid UUID format for $resourceName ID")
-            null
-        }
+/**
+ * Extracts and validates a UUID parameter from the route
+ */
+suspend fun ApplicationCall.getUuidParameter(paramName: String): Uuid? {
+    val paramValue = parameters[paramName]
+    if (paramValue == null) {
+        respond(HttpStatusCode.BadRequest, mapOf("error" to "Missing $paramName"))
+        return null
     }
 
-    /**
-     * Extract and validate required string parameter from route
-     */
-    suspend fun RoutingCall.getStringParameter(
-        paramName: String,
-        resourceName: String = paramName
-    ): String? {
-        val paramValue = parameters[paramName]
-        if (paramValue.isNullOrBlank()) {
-            respondValidationError("Missing or empty $resourceName parameter")
-            return null
-        }
-        return paramValue
+    return try {
+        uuidFrom(paramValue)
+    } catch (e: IllegalArgumentException) {
+        respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format for $paramName"))
+        null
+    }
+}
+
+/**
+ * Extracts and validates a string parameter from the route
+ */
+suspend fun ApplicationCall.getStringParameter(paramName: String): String? {
+    val paramValue = parameters[paramName]
+    if (paramValue == null) {
+        respond(HttpStatusCode.BadRequest, mapOf("error" to "Missing $paramName"))
+        return null
+    }
+    return paramValue
+}
+
+/**
+ * Extracts and validates an integer parameter from the route
+ */
+suspend fun ApplicationCall.getIntParameter(paramName: String): Int? {
+    val paramValue = parameters[paramName]
+    if (paramValue == null) {
+        respond(HttpStatusCode.BadRequest, mapOf("error" to "Missing $paramName"))
+        return null
     }
 
-    /**
-     * Extract and validate boolean parameter from route
-     */
-    suspend fun RoutingCall.getBooleanParameter(
-        paramName: String,
-        resourceName: String = paramName
-    ): Boolean? {
-        val paramValue = parameters[paramName]
-        if (paramValue == null) {
-            respondValidationError("Missing $resourceName parameter")
-            return null
-        }
-
-        return try {
-            paramValue.toBoolean()
-        } catch (e: Exception) {
-            respondValidationError("Invalid boolean format for $resourceName parameter")
-            null
-        }
+    val intValue = paramValue.toIntOrNull()
+    if (intValue == null) {
+        respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid integer format for $paramName"))
+        return null
     }
+    return intValue
+}
 
-    /**
-     * Extract and validate required query parameter
-     */
-    suspend fun RoutingCall.getQueryParameter(
-        paramName: String,
-        resourceName: String = paramName
-    ): String? {
-        val paramValue = request.queryParameters[paramName]
-        if (paramValue.isNullOrBlank()) {
-            respondValidationError("Missing search query parameter '$paramName'")
-            return null
-        }
-        return paramValue
+/**
+ * Extracts and validates a query parameter
+ */
+suspend fun ApplicationCall.getQueryParameter(paramName: String): String? {
+    val paramValue = request.queryParameters[paramName]
+    if (paramValue == null) {
+        respond(HttpStatusCode.BadRequest, mapOf("error" to "Missing query parameter '$paramName'"))
+        return null
     }
+    return paramValue
+}
 
-    /**
-     * Safe receive with error handling
-     */
-    suspend inline fun <reified T : Any> RoutingCall.safeReceive(
-        resourceName: String = "request body"
-    ): T? {
-        return try {
-            receive<T>()
-        } catch (e: Exception) {
-            respondValidationError("Invalid $resourceName format", e.message)
-            null
-        }
+/**
+ * Responds with a single entity or 404 if null
+ */
+suspend inline fun <reified T : Any> ApplicationCall.respondWithEntityOrNotFound(
+    entity: T?,
+    notFoundMessage: String = "Entity not found"
+) {
+    if (entity != null) {
+        respond(HttpStatusCode.OK, entity)
+    } else {
+        respond(HttpStatusCode.NotFound, mapOf("error" to notFoundMessage))
     }
+}
 
-    /**
-     * Execute repository operation with standardized error handling
-     */
-    suspend inline fun <T> RoutingCall.executeRepositoryOperation(
-        operation: String,
-        block: () -> T
-    ): T? {
-        return try {
-            block()
-        } catch (e: Exception) {
-            ResponseUtils.run { handleException(e, operation) }
-            null
+/**
+ * Responds with a list of entities
+ */
+suspend inline fun <reified T : Any> ApplicationCall.respondWithList(entities: List<T>) {
+    respond(HttpStatusCode.OK, entities)
+}
+
+/**
+ * Safely receives and processes a request body
+ */
+suspend inline fun <reified T : Any> ApplicationCall.safeReceive(): T? {
+    return try {
+        receive<T>()
+    } catch (e: Exception) {
+        respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid request body: ${e.message}"))
+        null
+    }
+}
+
+/**
+ * Generic handler for find by ID operations
+ */
+suspend inline fun <reified T : Any> ApplicationCall.handleFindById(
+    paramName: String = "id",
+    notFoundMessage: String = "Entity not found",
+    crossinline findFunction: suspend (Uuid) -> T?
+) {
+    safeExecute {
+        val id = getUuidParameter(paramName) ?: return@safeExecute
+        val entity = findFunction(id)
+        respondWithEntityOrNotFound(entity, notFoundMessage)
+    }
+}
+
+/**
+ * Generic handler for find by string parameter operations
+ */
+suspend inline fun <reified T : Any> ApplicationCall.handleFindByStringParam(
+    paramName: String,
+    notFoundMessage: String = "Entity not found",
+    crossinline findFunction: suspend (String) -> T?
+) {
+    safeExecute {
+        val param = getStringParameter(paramName) ?: return@safeExecute
+        val entity = findFunction(param)
+        respondWithEntityOrNotFound(entity, notFoundMessage)
+    }
+}
+
+/**
+ * Generic handler for find by UUID parameter operations that return lists
+ */
+suspend inline fun <reified T : Any> ApplicationCall.handleFindByUuidParamList(
+    paramName: String,
+    crossinline findFunction: suspend (Uuid) -> List<T>
+) {
+    safeExecute {
+        val param = getUuidParameter(paramName) ?: return@safeExecute
+        val entities = findFunction(param)
+        respondWithList(entities)
+    }
+}
+
+/**
+ * Generic handler for find by string parameter operations that return lists
+ */
+suspend inline fun <reified T : Any> ApplicationCall.handleFindByStringParamList(
+    paramName: String,
+    crossinline findFunction: suspend (String) -> List<T>
+) {
+    safeExecute {
+        val param = getStringParameter(paramName) ?: return@safeExecute
+        val entities = findFunction(param)
+        respondWithList(entities)
+    }
+}
+
+/**
+ * Generic handler for search operations
+ */
+suspend inline fun <reified T : Any> ApplicationCall.handleSearch(
+    queryParamName: String = "q",
+    crossinline searchFunction: suspend (String) -> List<T>
+) {
+    safeExecute {
+        val query = getQueryParameter(queryParamName) ?: return@safeExecute
+        val entities = searchFunction(query)
+        respondWithList(entities)
+    }
+}
+
+/**
+ * Generic handler for find all operations
+ */
+suspend inline fun <reified T : Any> ApplicationCall.handleFindAll(
+    crossinline findAllFunction: suspend () -> List<T>
+) {
+    safeExecute {
+        val entities = findAllFunction()
+        respondWithList(entities)
+    }
+}
+
+/**
+ * Generic handler for create operations
+ */
+suspend inline fun <reified T : Any> ApplicationCall.handleCreate(
+    crossinline createFunction: suspend (T) -> T
+) {
+    safeExecute {
+        val entity = safeReceive<T>() ?: return@safeExecute
+        val createdEntity = createFunction(entity)
+        respond(HttpStatusCode.Created, createdEntity)
+    }
+}
+
+/**
+ * Generic handler for update operations
+ */
+suspend inline fun <reified T : Any> ApplicationCall.handleUpdate(
+    paramName: String = "id",
+    crossinline updateFunction: suspend (Uuid, T) -> T?
+) {
+    safeExecute {
+        val id = getUuidParameter(paramName) ?: return@safeExecute
+        val entity = safeReceive<T>() ?: return@safeExecute
+        val updatedEntity = updateFunction(id, entity)
+        respondWithEntityOrNotFound(updatedEntity, "Entity not found or update failed")
+    }
+}
+
+/**
+ * Generic handler for delete operations
+ */
+suspend inline fun ApplicationCall.handleDelete(
+    paramName: String = "id",
+    crossinline deleteFunction: suspend (Uuid) -> Boolean
+) {
+    safeExecute {
+        val id = getUuidParameter(paramName) ?: return@safeExecute
+        val deleted = deleteFunction(id)
+        if (deleted) {
+            respond(HttpStatusCode.NoContent)
+        } else {
+            respond(HttpStatusCode.NotFound, mapOf("error" to "Entity not found"))
         }
     }
 }

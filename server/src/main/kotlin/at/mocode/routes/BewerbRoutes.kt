@@ -12,7 +12,7 @@ import io.ktor.server.routing.*
 fun Route.bewerbRoutes() {
     val bewerbRepository: BewerbRepository = PostgresBewerbRepository()
 
-    route("/api/bewerbe") {
+    route("/bewerbe") {
         // GET /api/bewerbe - Get all bewerbe
         get {
             try {

@@ -12,7 +12,7 @@ import io.ktor.server.routing.*
 fun Route.turnierRoutes() {
     val turnierRepository: TurnierRepository = PostgresTurnierRepository()
 
-    route("/api/turniere") {
+    route("/turniere") {
         // GET /api/turniere - Get all turniere
         get {
             try {

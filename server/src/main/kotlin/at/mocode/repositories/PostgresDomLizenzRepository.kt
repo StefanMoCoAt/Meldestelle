@@ -15,29 +15,29 @@ class PostgresDomLizenzRepository : DomLizenzRepository {
     }
 
     override suspend fun findById(id: Uuid): DomLizenz? = transaction {
-        DomLizenzTable.select { DomLizenzTable.lizenzId eq id }
+        DomLizenzTable.selectAll().where { DomLizenzTable.lizenzId eq id }
             .map { rowToDomLizenz(it) }
             .singleOrNull()
     }
 
     override suspend fun findByPersonId(personId: Uuid): List<DomLizenz> = transaction {
-        DomLizenzTable.select { DomLizenzTable.personId eq personId }
+        DomLizenzTable.selectAll().where { DomLizenzTable.personId eq personId }
             .map { rowToDomLizenz(it) }
     }
 
     override suspend fun findByLizenzTypGlobalId(lizenzTypGlobalId: Uuid): List<DomLizenz> = transaction {
-        DomLizenzTable.select { DomLizenzTable.lizenzTypGlobalId eq lizenzTypGlobalId }
+        DomLizenzTable.selectAll().where { DomLizenzTable.lizenzTypGlobalId eq lizenzTypGlobalId }
             .map { rowToDomLizenz(it) }
     }
 
     override suspend fun findActiveByPersonId(personId: Uuid): List<DomLizenz> = transaction {
-        DomLizenzTable.select {
-            (DomLizenzTable.personId eq personId) and (DomLizenzTable.istAktivBezahltOeps eq true)
-        }.map { rowToDomLizenz(it) }
+        DomLizenzTable.selectAll()
+            .where { (DomLizenzTable.personId eq personId) and (DomLizenzTable.istAktivBezahltOeps eq true) }
+            .map { rowToDomLizenz(it) }
     }
 
     override suspend fun findByValidityYear(year: Int): List<DomLizenz> = transaction {
-        DomLizenzTable.select { DomLizenzTable.gueltigBisJahr eq year }
+        DomLizenzTable.selectAll().where { DomLizenzTable.gueltigBisJahr eq year }
             .map { rowToDomLizenz(it) }
     }
 
@@ -80,9 +80,7 @@ class PostgresDomLizenzRepository : DomLizenzRepository {
     }
 
     override suspend fun search(query: String): List<DomLizenz> = transaction {
-        DomLizenzTable.select {
-            DomLizenzTable.notiz like "%$query%"
-        }.map { rowToDomLizenz(it) }
+        DomLizenzTable.selectAll().where { DomLizenzTable.notiz like "%$query%" }.map { rowToDomLizenz(it) }
     }
 
     private fun rowToDomLizenz(row: ResultRow): DomLizenz {

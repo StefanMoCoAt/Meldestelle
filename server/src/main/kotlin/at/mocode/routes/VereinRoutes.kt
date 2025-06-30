@@ -11,7 +11,7 @@ import io.ktor.server.routing.*
 fun Route.vereinRoutes() {
     val vereinService = ServiceLocator.vereinService
 
-    route("/api/vereine") {
+    route("/vereine") {
         // GET /api/vereine - Get all clubs
         get {
             try {

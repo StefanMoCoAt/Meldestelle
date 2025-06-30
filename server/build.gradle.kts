@@ -42,6 +42,8 @@ dependencies {
     implementation(libs.ktor.server.callLogging)
     implementation(libs.ktor.server.defaultHeaders)
     implementation(libs.ktor.server.statusPages)
+    implementation(libs.ktor.server.openapi)
+    implementation(libs.ktor.server.swagger)
 
     // === DATENBANK - EXPOSED ORM ===
     implementation(libs.exposed.core)

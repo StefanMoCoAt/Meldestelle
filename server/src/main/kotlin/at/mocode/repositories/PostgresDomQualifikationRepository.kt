@@ -16,25 +16,25 @@ class PostgresDomQualifikationRepository : DomQualifikationRepository {
     }
 
     override suspend fun findById(id: Uuid): DomQualifikation? = transaction {
-        DomQualifikationTable.select { DomQualifikationTable.qualifikationId eq id }
+        DomQualifikationTable.selectAll().where { DomQualifikationTable.qualifikationId eq id }
             .map { rowToDomQualifikation(it) }
             .singleOrNull()
     }
 
     override suspend fun findByPersonId(personId: Uuid): List<DomQualifikation> = transaction {
-        DomQualifikationTable.select { DomQualifikationTable.personId eq personId }
+        DomQualifikationTable.selectAll().where { DomQualifikationTable.personId eq personId }
             .map { rowToDomQualifikation(it) }
     }
 
     override suspend fun findByQualTypId(qualTypId: Uuid): List<DomQualifikation> = transaction {
-        DomQualifikationTable.select { DomQualifikationTable.qualTypId eq qualTypId }
+        DomQualifikationTable.selectAll().where { DomQualifikationTable.qualTypId eq qualTypId }
             .map { rowToDomQualifikation(it) }
     }
 
     override suspend fun findActiveByPersonId(personId: Uuid): List<DomQualifikation> = transaction {
-        DomQualifikationTable.select {
-            (DomQualifikationTable.personId eq personId) and (DomQualifikationTable.istAktiv eq true)
-        }.map { rowToDomQualifikation(it) }
+        DomQualifikationTable.selectAll()
+            .where { (DomQualifikationTable.personId eq personId) and (DomQualifikationTable.istAktiv eq true) }
+            .map { rowToDomQualifikation(it) }
     }
 
     override suspend fun findByValidityPeriod(fromDate: LocalDate?, toDate: LocalDate?): List<DomQualifikation> = transaction {
@@ -94,9 +94,7 @@ class PostgresDomQualifikationRepository : DomQualifikationRepository {
     }
 
     override suspend fun search(query: String): List<DomQualifikation> = transaction {
-        DomQualifikationTable.select {
-            DomQualifikationTable.bemerkung like "%$query%"
-        }.map { rowToDomQualifikation(it) }
+        DomQualifikationTable.selectAll().where { DomQualifikationTable.bemerkung like "%$query%" }.map { rowToDomQualifikation(it) }
     }
 
     private fun rowToDomQualifikation(row: ResultRow): DomQualifikation {

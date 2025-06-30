@@ -12,7 +12,7 @@ import io.ktor.server.routing.*
 fun Route.domPferdRoutes() {
     val domPferdRepository: DomPferdRepository = PostgresDomPferdRepository()
 
-    route("/api/horses") {
+    route("/horses") {
         // GET /api/horses - Get all horses
         get {
             try {

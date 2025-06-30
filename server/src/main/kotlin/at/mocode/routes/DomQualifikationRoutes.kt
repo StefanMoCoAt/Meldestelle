@@ -13,7 +13,7 @@ import kotlinx.datetime.LocalDate
 fun Route.domQualifikationRoutes() {
     val domQualifikationRepository: DomQualifikationRepository = PostgresDomQualifikationRepository()
 
-    route("/api/dom-qualifikationen") {
+    route("/dom-qualifikationen") {
         // GET /api/dom-qualifikationen - Get all qualifications
         get {
             try {

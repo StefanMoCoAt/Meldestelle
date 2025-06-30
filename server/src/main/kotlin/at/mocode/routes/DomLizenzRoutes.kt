@@ -12,7 +12,7 @@ import io.ktor.server.routing.*
 fun Route.domLizenzRoutes() {
     val domLizenzRepository: DomLizenzRepository = PostgresDomLizenzRepository()
 
-    route("/api/dom-lizenzen") {
+    route("/dom-lizenzen") {
         // GET /api/dom-lizenzen - Get all licenses
         get {
             try {
