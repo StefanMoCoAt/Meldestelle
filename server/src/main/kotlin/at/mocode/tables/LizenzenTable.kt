@@ -1,8 +1,8 @@
 package at.mocode.tables
 
 
-import at.mocode.shared.enums.LizenzTypE
-import at.mocode.shared.enums.SparteE
+import at.mocode.enums.LizenzTypE
+import at.mocode.enums.SparteE
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 

@@ -1,6 +1,6 @@
 package at.mocode.tables
 
-import at.mocode.shared.enums.VeranstalterTypE
+import at.mocode.enums.VeranstalterTypE
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp

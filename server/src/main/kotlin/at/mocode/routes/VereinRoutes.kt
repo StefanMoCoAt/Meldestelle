@@ -2,10 +2,9 @@ package at.mocode.routes
 
 import at.mocode.model.PostgresVereinRepository
 import at.mocode.model.VereinRepository
-import at.mocode.shared.stammdaten.Verein
+import at.mocode.stammdaten.Verein
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -38,7 +37,7 @@ fun Route.vereinRoutes() {
                 } else {
                     call.respond(HttpStatusCode.NotFound, mapOf("error" to "Verein not found"))
                 }
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
@@ -117,7 +116,7 @@ fun Route.vereinRoutes() {
                 } else {
                     call.respond(HttpStatusCode.NotFound, mapOf("error" to "Verein not found"))
                 }
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
@@ -138,7 +137,7 @@ fun Route.vereinRoutes() {
                 } else {
                     call.respond(HttpStatusCode.NotFound, mapOf("error" to "Verein not found"))
                 }
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))

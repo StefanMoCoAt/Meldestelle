@@ -1,6 +1,6 @@
 package at.mocode.model
 
-import at.mocode.shared.stammdaten.Verein
+import at.mocode.stammdaten.Verein
 import com.benasher44.uuid.Uuid
 
 interface VereinRepository {

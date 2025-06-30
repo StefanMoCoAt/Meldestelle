@@ -1,6 +1,5 @@
 package at.mocode.model
 
-import at.mocode.shared.model.Artikel
 import com.benasher44.uuid.Uuid
 
 interface ArtikelRepository {

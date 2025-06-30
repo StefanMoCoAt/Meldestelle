@@ -1,6 +1,6 @@
 package at.mocode.model
 
-import at.mocode.shared.stammdaten.Verein
+import at.mocode.stammdaten.Verein
 import at.mocode.tables.VereineTable
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
@@ -15,13 +15,13 @@ class PostgresVereinRepository : VereinRepository {
     }
 
     override suspend fun findById(id: Uuid): Verein? = transaction {
-        VereineTable.select { VereineTable.id eq id }
+        VereineTable.selectAll().where { VereineTable.id eq id }
             .map { rowToVerein(it) }
             .singleOrNull()
     }
 
     override suspend fun findByOepsVereinsNr(oepsVereinsNr: String): Verein? = transaction {
-        VereineTable.select { VereineTable.oepsVereinsNr eq oepsVereinsNr }
+        VereineTable.selectAll().where { VereineTable.oepsVereinsNr eq oepsVereinsNr }
             .map { rowToVerein(it) }
             .singleOrNull()
     }
@@ -62,7 +62,7 @@ class PostgresVereinRepository : VereinRepository {
             it[updatedAt] = Clock.System.now()
         }
         if (updateCount > 0) {
-            VereineTable.select { VereineTable.id eq id }
+            VereineTable.selectAll().where { VereineTable.id eq id }
                 .map { rowToVerein(it) }
                 .singleOrNull()
         } else null
@@ -73,15 +73,15 @@ class PostgresVereinRepository : VereinRepository {
     }
 
     override suspend fun findByBundesland(bundesland: String): List<Verein> = transaction {
-        VereineTable.select { VereineTable.bundesland eq bundesland }
+        VereineTable.selectAll().where { VereineTable.bundesland eq bundesland }
             .map { rowToVerein(it) }
     }
 
     override suspend fun search(query: String): List<Verein> = transaction {
-        VereineTable.select {
+        VereineTable.selectAll().where {
             (VereineTable.name.lowerCase() like "%${query.lowercase()}%") or
-            (VereineTable.kuerzel?.lowerCase()?.like("%${query.lowercase()}%") ?: Op.FALSE) or
-            (VereineTable.ort?.lowerCase()?.like("%${query.lowercase()}%") ?: Op.FALSE)
+                VereineTable.kuerzel.lowerCase().like("%${query.lowercase()}%") or
+                VereineTable.ort.lowerCase().like("%${query.lowercase()}%")
         }.map { rowToVerein(it) }
     }
 

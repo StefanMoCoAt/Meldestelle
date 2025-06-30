@@ -1,41 +1,64 @@
 package at.mocode.model
 
-//import kotlinx.serialization.Serializable
-//
-///**
-// * Represents a tournament (Turnier) with its details and associated competitions (Bewerbe).
-// * Each tournament can have one or more competitions.
-// */
-//@Serializable
-//data class Turnier(
-//    /** The name of the tournament, e.g. "CSN-C NEU CSNP-C NEU NEUMARKT/M., OÖ" */
-//    val name: String,
-//
-//    /** The date of the tournament as a formatted string, e.g. "7.JUNI 2025" */
-//    val datum: String,
-//
-//    /** Unique identifier for the tournament */
-//    val number: Int,
-//
-//    /** List of competitions (Bewerbe) associated with this tournament */
-//    var bewerbe: List<Bewerb>
-//)
-//
-///**
-// * Represents a competition (Bewerb) within a tournament.
-// * A competition has specific details like number, title, class, and optional task.
-// */
-//@Serializable
-//data class Bewerb(
-//    /** Competition number, e.g. 1, 2, etc. */
-//    val nummer: Int,
-//
-//    /** Title of the competition, e.g. "Stilspringprüfung" or "Dressurprüfung" */
-//    val titel: String,
-//
-//    /** Class/level of the competition, e.g. "60 cm" or "Kl. A" */
-//    val klasse: String,
-//
-//    /** Optional task identifier, e.g. "DRA 1" */
-//    val task: String?
-//)
+import at.mocode.enums.NennungsArtE
+import at.mocode.serializers.BigDecimalSerializer
+import at.mocode.serializers.KotlinInstantSerializer
+import at.mocode.serializers.KotlinLocalDateSerializer
+import at.mocode.serializers.KotlinLocalDateTimeSerializer
+import at.mocode.serializers.UuidSerializer
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Turnier(
+    @Serializable(with = UuidSerializer::class)
+    val id: Uuid = uuid4(),
+    @Serializable(with = UuidSerializer::class)
+    var veranstaltungId: Uuid,
+    var oepsTurnierNr: String,
+    var titel: String,
+    var untertitel: String?,
+    @Serializable(with = KotlinLocalDateSerializer::class)
+    var datumVon: LocalDate,
+    @Serializable(with = KotlinLocalDateSerializer::class)
+    var datumBis: LocalDate,
+    @Serializable(with = KotlinLocalDateTimeSerializer::class) // Beispiel
+    var nennungsschluss: LocalDateTime?,
+    var nennungsArt: List<NennungsArtE> = emptyList(),
+    var nennungsHinweis: String?,
+    var eigenesNennsystemUrl: String?,
+    @Serializable(with = BigDecimalSerializer::class)
+    var nenngeld: BigDecimal?,
+    @Serializable(with = BigDecimalSerializer::class)
+    var startgeldStandard: BigDecimal?,
+    var austragungsplaetze: List<Platz> = emptyList(),
+    var vorbereitungsplaetze: List<Platz> = emptyList(),
+    @Serializable(with = UuidSerializer::class)
+    var turnierleiterId: Uuid?, // FK zu Person
+    @Serializable(with = UuidSerializer::class)
+    var turnierbeauftragterId: Uuid?, // FK zu Person
+    var richterIds: List<@Serializable(with = UuidSerializer::class) Uuid> = emptyList(), // Pool Richtern
+    var parcoursbauerIds: List<@Serializable(with = UuidSerializer::class) Uuid> = emptyList(), // FKs zu Person
+    var parcoursAssistentIds: List<@Serializable(with = UuidSerializer::class) Uuid> = emptyList(), // FKs zu Person
+    var tierarztInfos: String?,
+    var hufschmiedInfo: String?,
+    @Serializable(with = UuidSerializer::class)
+    var meldestelleVerantwortlicherId: Uuid?, // FK zu Person
+    var meldestelleTelefon: String?,
+    var meldestelleOeffnungszeiten: String?,
+    var ergebnislistenUrl: String?, // Wird später meist system-generiert
+    var verfuegbareArtikel: List<Artikel> = emptyList(), // Zur Auswahl für die Kassa
+    var meisterschaftRefs: List<MeisterschaftReferenz> = emptyList(),
+    // var cupRefs: List<CupReferenz> = emptyList(),
+    // var sonderpruefungRefs: List<SonderpruefungReferenz> = emptyList(),
+    @Serializable(with = KotlinInstantSerializer::class)
+    val createdAt: Instant = Clock.System.now(),
+    @Serializable(with = KotlinInstantSerializer::class)
+    var updatedAt: Instant = Clock.System.now()
+)

@@ -1,6 +1,6 @@
 package at.mocode.tables
 
-import at.mocode.shared.enums.GeschlechtE
+import at.mocode.enums.GeschlechtE
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp

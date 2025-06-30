@@ -1,6 +1,6 @@
 package at.mocode.tables
 
-import at.mocode.shared.enums.PlatzTypE
+import at.mocode.enums.PlatzTypE
 import org.jetbrains.exposed.sql.Table
 
 object PlaetzeTable : Table("plaetze") {

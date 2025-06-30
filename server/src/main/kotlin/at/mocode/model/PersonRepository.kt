@@ -1,6 +1,6 @@
 package at.mocode.model
 
-import at.mocode.shared.stammdaten.Person
+import at.mocode.stammdaten.Person
 import com.benasher44.uuid.Uuid
 
 interface PersonRepository {

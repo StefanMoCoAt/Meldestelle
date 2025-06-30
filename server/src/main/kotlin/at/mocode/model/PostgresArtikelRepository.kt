@@ -1,6 +1,5 @@
 package at.mocode.model
 
-import at.mocode.shared.model.Artikel
 import at.mocode.tables.ArtikelTable
 import com.benasher44.uuid.Uuid
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
@@ -16,7 +15,7 @@ class PostgresArtikelRepository : ArtikelRepository {
     }
 
     override suspend fun findById(id: Uuid): Artikel? = transaction {
-        ArtikelTable.select { ArtikelTable.id eq id }
+        ArtikelTable.selectAll().where { ArtikelTable.id eq id }
             .map { rowToArtikel(it) }
             .singleOrNull()
     }
@@ -44,7 +43,7 @@ class PostgresArtikelRepository : ArtikelRepository {
             it[updatedAt] = Clock.System.now()
         }
         if (updateCount > 0) {
-            ArtikelTable.select { ArtikelTable.id eq id }
+            ArtikelTable.selectAll().where { ArtikelTable.id eq id }
                 .map { rowToArtikel(it) }
                 .singleOrNull()
         } else null
@@ -55,14 +54,14 @@ class PostgresArtikelRepository : ArtikelRepository {
     }
 
     override suspend fun findByVerbandsabgabe(istVerbandsabgabe: Boolean): List<Artikel> = transaction {
-        ArtikelTable.select { ArtikelTable.istVerbandsabgabe eq istVerbandsabgabe }
+        ArtikelTable.selectAll().where { ArtikelTable.istVerbandsabgabe eq istVerbandsabgabe }
             .map { rowToArtikel(it) }
     }
 
     override suspend fun search(query: String): List<Artikel> = transaction {
-        ArtikelTable.select {
+        ArtikelTable.selectAll().where {
             (ArtikelTable.bezeichnung.lowerCase() like "%${query.lowercase()}%") or
-            (ArtikelTable.einheit.lowerCase() like "%${query.lowercase()}%")
+                (ArtikelTable.einheit.lowerCase() like "%${query.lowercase()}%")
         }.map { rowToArtikel(it) }
     }
 
@@ -72,7 +71,7 @@ class PostgresArtikelRepository : ArtikelRepository {
             bezeichnung = row[ArtikelTable.bezeichnung],
             preis = try {
                 BigDecimal.parseString(row[ArtikelTable.preis])
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 BigDecimal.ZERO
             },
             einheit = row[ArtikelTable.einheit],

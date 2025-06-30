@@ -1,11 +1,9 @@
 package at.mocode.model
 
-import at.mocode.shared.enums.FunktionaerRolle
-import at.mocode.shared.stammdaten.LizenzInfo
-import at.mocode.shared.stammdaten.Person
+import at.mocode.enums.FunktionaerRolle
+import at.mocode.stammdaten.Person
 import at.mocode.tables.PersonenTable
 import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuidFrom
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -18,13 +16,13 @@ class PostgresPersonRepository : PersonRepository {
     }
 
     override suspend fun findById(id: Uuid): Person? = transaction {
-        PersonenTable.select { PersonenTable.id eq id }
+        PersonenTable.selectAll().where { PersonenTable.id eq id }
             .map { rowToPerson(it) }
             .singleOrNull()
     }
 
     override suspend fun findByOepsSatzNr(oepsSatzNr: String): Person? = transaction {
-        PersonenTable.select { PersonenTable.oepsSatzNr eq oepsSatzNr }
+        PersonenTable.selectAll().where { PersonenTable.oepsSatzNr eq oepsSatzNr }
             .map { rowToPerson(it) }
             .singleOrNull()
     }
@@ -87,7 +85,7 @@ class PostgresPersonRepository : PersonRepository {
             it[updatedAt] = Clock.System.now()
         }
         if (updateCount > 0) {
-            PersonenTable.select { PersonenTable.id eq id }
+            PersonenTable.selectAll().where { PersonenTable.id eq id }
                 .map { rowToPerson(it) }
                 .singleOrNull()
         } else null
@@ -98,15 +96,15 @@ class PostgresPersonRepository : PersonRepository {
     }
 
     override suspend fun findByVereinId(vereinId: Uuid): List<Person> = transaction {
-        PersonenTable.select { PersonenTable.stammVereinId eq vereinId }
+        PersonenTable.selectAll().where { PersonenTable.stammVereinId eq vereinId }
             .map { rowToPerson(it) }
     }
 
     override suspend fun search(query: String): List<Person> = transaction {
-        PersonenTable.select {
+        PersonenTable.selectAll().where {
             (PersonenTable.nachname.lowerCase() like "%${query.lowercase()}%") or
-            (PersonenTable.vorname.lowerCase() like "%${query.lowercase()}%") or
-            (PersonenTable.email?.lowerCase()?.like("%${query.lowercase()}%") ?: Op.FALSE)
+                (PersonenTable.vorname.lowerCase() like "%${query.lowercase()}%") or
+                PersonenTable.email.lowerCase().like("%${query.lowercase()}%")
         }.map { rowToPerson(it) }
     }
 
@@ -149,7 +147,7 @@ class PostgresPersonRepository : PersonRepository {
                 .mapNotNull { roleName ->
                     try {
                         FunktionaerRolle.valueOf(roleName.trim())
-                    } catch (e: IllegalArgumentException) {
+                    } catch (_: IllegalArgumentException) {
                         null
                     }
                 }
