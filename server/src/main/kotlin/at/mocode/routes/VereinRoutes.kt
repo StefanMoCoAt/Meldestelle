@@ -1,7 +1,6 @@
 package at.mocode.routes
 
-import at.mocode.repositories.PostgresVereinRepository
-import at.mocode.repositories.VereinRepository
+import at.mocode.services.ServiceLocator
 import at.mocode.stammdaten.Verein
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
@@ -10,13 +9,13 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.vereinRoutes() {
-    val vereinRepository: VereinRepository = PostgresVereinRepository()
+    val vereinService = ServiceLocator.vereinService
 
     route("/api/vereine") {
         // GET /api/vereine - Get all clubs
         get {
             try {
-                val vereine = vereinRepository.findAll()
+                val vereine = vereinService.getAllVereine()
                 call.respond(HttpStatusCode.OK, vereine)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
@@ -31,7 +30,7 @@ fun Route.vereinRoutes() {
                     mapOf("error" to "Missing verein ID")
                 )
                 val uuid = uuidFrom(id)
-                val verein = vereinRepository.findById(uuid)
+                val verein = vereinService.getVereinById(uuid)
                 if (verein != null) {
                     call.respond(HttpStatusCode.OK, verein)
                 } else {
@@ -51,7 +50,7 @@ fun Route.vereinRoutes() {
                     HttpStatusCode.BadRequest,
                     mapOf("error" to "Missing OEPS Vereins number")
                 )
-                val verein = vereinRepository.findByOepsVereinsNr(oepsVereinsNr)
+                val verein = vereinService.getVereinByOepsNr(oepsVereinsNr)
                 if (verein != null) {
                     call.respond(HttpStatusCode.OK, verein)
                 } else {
@@ -69,7 +68,7 @@ fun Route.vereinRoutes() {
                     HttpStatusCode.BadRequest,
                     mapOf("error" to "Missing search query parameter 'q'")
                 )
-                val vereine = vereinRepository.search(query)
+                val vereine = vereinService.searchVereine(query)
                 call.respond(HttpStatusCode.OK, vereine)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
@@ -83,7 +82,7 @@ fun Route.vereinRoutes() {
                     HttpStatusCode.BadRequest,
                     mapOf("error" to "Missing bundesland")
                 )
-                val vereine = vereinRepository.findByBundesland(bundesland)
+                val vereine = vereinService.getVereineByBundesland(bundesland)
                 call.respond(HttpStatusCode.OK, vereine)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
@@ -94,7 +93,7 @@ fun Route.vereinRoutes() {
         post {
             try {
                 val verein = call.receive<Verein>()
-                val createdVerein = vereinRepository.create(verein)
+                val createdVerein = vereinService.createVerein(verein)
                 call.respond(HttpStatusCode.Created, createdVerein)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
@@ -110,7 +109,7 @@ fun Route.vereinRoutes() {
                 )
                 val uuid = uuidFrom(id)
                 val verein = call.receive<Verein>()
-                val updatedVerein = vereinRepository.update(uuid, verein)
+                val updatedVerein = vereinService.updateVerein(uuid, verein)
                 if (updatedVerein != null) {
                     call.respond(HttpStatusCode.OK, updatedVerein)
                 } else {
@@ -131,7 +130,7 @@ fun Route.vereinRoutes() {
                     mapOf("error" to "Missing verein ID")
                 )
                 val uuid = uuidFrom(id)
-                val deleted = vereinRepository.delete(uuid)
+                val deleted = vereinService.deleteVerein(uuid)
                 if (deleted) {
                     call.respond(HttpStatusCode.NoContent)
                 } else {

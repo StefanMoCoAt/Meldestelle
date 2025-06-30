@@ -3,8 +3,8 @@ package at.mocode.services
 import at.mocode.repositories.*
 
 /**
- * Service locator pattern for managing repository instances.
- * This provides a centralized way to access repository implementations
+ * Service locator pattern for managing repository and service instances.
+ * This provides a centralized way to access repository and service implementations
  * and makes it easier to switch implementations or add caching/decorators.
  */
 object ServiceLocator {
@@ -21,10 +21,23 @@ object ServiceLocator {
     val turnierRepository: TurnierRepository by lazy { PostgresTurnierRepository() }
     val veranstaltungRepository: VeranstaltungRepository by lazy { PostgresVeranstaltungRepository() }
 
+    // Service instances - lazy initialization with dependency injection
+    val artikelService: ArtikelService by lazy { ArtikelService(artikelRepository) }
+    val vereinService: VereinService by lazy { VereinService(vereinRepository) }
+    val personService: PersonService by lazy { PersonService(personRepository) }
+    val domLizenzService: DomLizenzService by lazy { DomLizenzService(domLizenzRepository) }
+    val domPferdService: DomPferdService by lazy { DomPferdService(domPferdRepository) }
+    val domQualifikationService: DomQualifikationService by lazy { DomQualifikationService(domQualifikationRepository) }
+    val abteilungService: AbteilungService by lazy { AbteilungService(abteilungRepository) }
+    val bewerbService: BewerbService by lazy { BewerbService(bewerbRepository) }
+    val turnierService: TurnierService by lazy { TurnierService(turnierRepository) }
+    val veranstaltungService: VeranstaltungService by lazy { VeranstaltungService(veranstaltungRepository) }
+
     /**
-     * Initialize all repositories - useful for eager loading or validation
+     * Initialize all repositories and services - useful for eager loading or validation
      */
     fun initializeAll() {
+        // Initialize repositories
         artikelRepository
         vereinRepository
         personRepository
@@ -35,5 +48,17 @@ object ServiceLocator {
         bewerbRepository
         turnierRepository
         veranstaltungRepository
+
+        // Initialize services
+        artikelService
+        vereinService
+        personService
+        domLizenzService
+        domPferdService
+        domQualifikationService
+        abteilungService
+        bewerbService
+        turnierService
+        veranstaltungService
     }
 }
