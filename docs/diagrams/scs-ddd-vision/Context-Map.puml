@@ -1,0 +1,56 @@
+@startuml
+title "Context Map: ÖTO Meldestellen-System"
+
+!theme vibrant
+
+' Definition der Bounded Contexts
+package "Personen & Vereine" as PersonenContext {
+  [Personenstamm]
+  [Vereinsstamm]
+}
+
+package "Lizenzen & Qualifikationen" as LizenzContext {
+  [Lizenznehmer]
+  [Qualifikationen]
+}
+
+package "Veranstaltungsplanung" as VeranstaltungsContext {
+  [VeranstaltungsRahmen]
+  [Turnier]
+  [Prüfung (Bewerb)]
+}
+
+package "Nennungsabwicklung" as NennungsContext {
+  [Nennung]
+  [Startliste]
+}
+
+package "Ergebnisdienst" as ErgebnisContext {
+  [Ergebnis]
+  [Rangliste]
+}
+
+package "ZNS-Import (ACL)" as ZNS_ACL {
+  [ZNS Datentransfer]
+}
+
+
+' Beziehungen (Upstream/Downstream) und Kommunikationsmuster
+' Der Pfeil zeigt in Richtung des Downstream-Partners (Konsument)
+
+' ZNS ist der Upstream-Partner für Personen- und Vereinsdaten
+ZNS_ACL ..> PersonenContext : Upstream/Downstream (Anti-Corruption Layer)
+
+' Personen- und Veranstaltungsdaten sind Upstream für Nennungen
+PersonenContext ..> NennungsContext : "Reiter-, Pferdebesitzerdaten" (Consumer)
+VeranstaltungsContext ..> NennungsContext : "Verfügbare Prüfungen" (Consumer)
+LizenzContext ..> NennungsContext : "Lizenz- & Qualifikationsstatus" (Consumer)
+
+' Nennungen sind Upstream für Ergebnisse
+NennungsContext ..> ErgebnisContext : "Angenommene Starter" (Consumer)
+
+' Ergebnisdaten können wieder andere Kontexte beeinflussen (z.B. durch Events)
+ErgebnisContext ..> LizenzContext : Event: "Erfolg für Lizenz-Upgrade erzielt"
+ErgebnisContext ..> VeranstaltungsContext : Event: "Ergebnis für Siegerehrung verfügbar"
+
+@enduml

@@ -1,0 +1,59 @@
+@startuml
+title "Prozess & Event-Flow: Nennung wird abgegeben"
+
+!theme vibrant
+
+actor Reiter
+
+' Die Teilnehmer sind unsere Bounded Contexts (Services) und ein Message Bus für Events.
+participant "API Gateway / Frontend" as Gateway
+participant "Nennungs_Context" as Nenn
+participant "Veranstaltungs_Context" as Veranst
+participant "Lizenzen_und_Qualifikationen_Context" as Lizenz
+queue "Message Bus" as Bus
+participant "Benachrichtigungs_Service" as Notify
+
+Reiter -> Gateway : POST /nennungen\n(reiterId, pferdId, pruefungAbteilungId)
+
+' 1. Command wird an den zuständigen Context gesendet
+Gateway -> Nenn : **Command:** NennungAbgeben(daten)
+activate Nenn
+note right of Nenn: Empfängt den Befehl,\neine neue Nennung zu erstellen.
+
+' 2. Synchrone Queries zur Validierung
+Nenn -> Veranst : **Query:** getPruefungsAnforderungen(pruefungAbteilungId)
+activate Veranst
+Veranst --> Nenn : anforderungen {erf. Lizenzen, erf. Alter, ...}
+deactivate Veranst
+note left of Nenn: Holt die aktuellen Anforderungen\nfür die genannte Prüfung.
+
+Nenn -> Lizenz : **Query:** hatStartberechtigung(reiterId, anforderungen)
+activate Lizenz
+Lizenz --> Nenn : {istBerechtigt: true}
+deactivate Lizenz
+note left of Nenn: Prüft die Startberechtigung des Reiters\ngegen die Anforderungen.
+
+' 3. Interne Verarbeitung und Zustandsänderung
+alt Startberechtigung erteilt
+    Nenn -> Nenn : Nennungs-Aggregat erstellen\n(Status: EINGEGANGEN)
+    note right of Nenn: Die Nennung wird intern gespeichert.\nDie Transaktion ist hier abgeschlossen.
+
+    ' 4. Asynchrones Event wird veröffentlicht
+    Nenn ->> Bus : **Event:** NennungWurdeEingereicht {nennungId, reiterId, ...}
+    note left of Bus: Das Event wird auf den Bus gelegt.\nDer Nennungs-Context ist nun fertig\nund muss nicht auf die Verarbeitung\ndes Events warten.
+
+    Gateway --> Reiter : HTTP 202 Accepted (Nennung wird verarbeitet)
+
+    ' 5. Andere Services reagieren auf das Event
+    Bus ->> Notify : **Event:** NennungWurdeEingereicht
+    activate Notify
+    Notify -> Notify : Sende Bestätigungs-E-Mail an Reiter
+    deactivate Notify
+
+else Startberechtigung nicht erteilt
+    Nenn -> Gateway : Fehler: Startberechtigung fehlt (z.B. HTTP 400)
+    Gateway --> Reiter : Fehlermeldung
+end
+deactivate Nenn
+
+@enduml

@@ -1,0 +1,114 @@
+@startuml
+title "Detailliertes Datenmodell: Nennungs_Context (inkl. Startliste)"
+
+!theme vibrant
+
+package "Nennungsabwicklung" as NennungsContext {
+
+    ' #################### Aggregat 1: Nennung ####################
+    ' (Bekannt aus dem vorherigen Schritt, hier zur Veranschaulichung der Beziehung)
+    class Nennung <<(A,blue) Aggregate Root>> {
+        + nennungId : UUID <<PK>>
+        --
+        + pruefung : PruefungsReferenzVO
+        + reiter : ReiterReferenzVO
+        + pferd : PferdeReferenzVO
+        + status : NennungsStatusVO
+        ' ... weitere Attribute
+    }
+
+    ' #################### Aggregat 2: Startliste ####################
+    class Startliste <<(A,green) Aggregate Root>> {
+        + startlisteId : UUID <<PK>>
+        --
+        ' Referenz auf die Prüfung/Abteilung, für die diese Liste gilt
+        + pruefung : PruefungsReferenzVO
+        ' Zeitstempel der Erstellung und letzten Änderung
+        + erstellungsZeitpunkt : timestamp
+        + letzteAenderung : timestamp
+        ' Version zur Nachverfolgung von Änderungen
+        + version : integer
+        ' Status der Liste
+        + status : StartlistenStatusVO
+    }
+
+    ' Eine Entität innerhalb des Startlisten-Aggregates
+    entity Starter {
+        + starterId : UUID <<PK>>
+        --
+        ' Die zugewiesene Startnummer, muss innerhalb der Liste eindeutig sein
+        + startnummer : integer
+        ' Die zugewiesene Startzeit (optional)
+        + startzeit : time
+        ' Status des Starters (z.B. falls jemand nach der Erstellung zurückzieht)
+        + status : StarterStatusVO
+        ' Snapshot der Nennungsdaten, die für die Liste relevant sind
+        + nennungsdaten : NennungsReferenzVO
+    }
+
+
+    ' #################### Value Objects (VOs) für Snapshots und Beschreibungen ####################
+
+    ' Enum für den Lebenszyklus einer Startliste
+    enum StartlistenStatusVO {
+        VORLAEUFIG
+        FINAL
+        GEAENDERT
+        STORNIERT
+    }
+
+    ' Enum für den Status eines einzelnen Starters auf der Liste
+    enum StarterStatusVO {
+        GELISTET
+        ZURUECKGEZOGEN
+        NACHGERUECKT
+        DISQUALIFIZIERT_VOR_START
+    }
+
+    ' Ein Snapshot der wichtigsten Nennungsdaten für einen Starter
+    class NennungsReferenzVO <<VO>> {
+        ' Referenz zur originalen Nennung
+        + nennungDbId : UUID
+        ' Relevante Daten für die Anzeige auf der Startliste
+        + reiterName : string
+        + pferdName : string
+        + kopfnummer : string
+        + vereinName : string
+        + nationCode : string
+    }
+
+    ' Referenz auf die Prüfung (bekannt aus Nennung, hier wiederverwendet)
+    class PruefungsReferenzVO <<VO>> {
+        + pruefungAbteilungDbId : UUID
+        + bewerbBezeichnung : string
+        + abteilungBezeichnung : string
+    }
+
+
+    ' #################### Beziehungen ####################
+    ' Eine Startliste besteht aus einer geordneten Liste von Startern (Komposition)
+    Startliste "1" *-- "1..*" Starter : "enthält geordnet"
+
+    ' Ein Starter-Eintrag enthält einen Snapshot der ursprünglichen Nennungsdaten
+    Starter "1" o-- "1" NennungsReferenzVO : "basiert auf"
+
+    ' Eine Startliste gehört zu genau einer Prüfung/Abteilung
+    Startliste "1" o-- "1" PruefungsReferenzVO : "für"
+
+    ' Status-Beziehungen
+    Startliste "1" -- "1" StartlistenStatusVO
+    Starter "1" -- "1" StarterStatusVO
+}
+
+note top of Startliste
+  **Aggregate Root: Startliste**
+  * **Verantwortung:** Dieses Aggregat garantiert die Integrität der Startreihenfolge. Geschäftslogik wie `aendereStartnummer()` oder `zieheStarterZurueck()` wird hier implementiert, um sicherzustellen, dass die Liste konsistent bleibt (z.B. keine doppelten Startnummern).
+  * **Lebenszyklus:** Eine Startliste wird typischerweise als `VORLAEUFIG` erstellt, kann dann `FINAL` gesetzt und bei Bedarf (z.B. durch Ausfälle) `GEAENDERT` werden.
+end note
+
+note right of Starter
+  **Entität: Starter**
+  Ein `Starter`-Objekt ist kein Aggregat, da es nicht ohne seine `Startliste` existieren kann. Es repräsentiert eine Zeile auf der Startliste. Es enthält mit der `NennungsReferenzVO` alle Informationen, die für die Anzeige oder den Ausdruck der Liste benötigt werden, ohne dass die ursprüngliche `Nennung` oder andere Services erneut abgefragt werden müssen.
+end note
+
+@enduml

@@ -1,0 +1,134 @@
+@startuml
+title "Bounded Context: ZNS-Import als Anti-Corruption Layer (ACL)"
+
+!theme vibrant
+
+' Der Bounded Context wird als Paket mit dem Stereotyp <<ACL>> dargestellt
+package "ZNS_Import_ACL" <<ACL>> {
+
+    ' Eine Komponente, die die Übersetzungslogik kapselt
+    component ZNS_Daten_Uebersetzer [
+        + importiere_zns_zip()
+        + uebersetze_Personen()
+        + uebersetze_Pferde()
+        + uebersetze_Vereine()
+    ]
+
+    ' Die folgenden Entitäten repräsentieren die 1:1 Abbildung der Zeilen aus den ZNS .dat-Dateien.
+    ' Sie sind "anämisch" und enthalten keine Geschäftslogik.
+
+    package "Rohdaten-Struktur aus ZNS-Dateien" {
+        ' Basierend auf VEREIN01.DAT
+        entity ZNS_VEREIN01_dat_Satz {
+            ' VEREIN (Nummer), Stelle 1-4 [cite: 177]
+            + verein_nummer : VARCHAR(4)
+            ' VEREINSNAME, Stelle 5-54 [cite: 177]
+            + vereinsname : VARCHAR(50)
+        }
+
+        ' Basierend auf PFERDE01.DAT
+        entity ZNS_PFERDE01_dat_Satz {
+            ' SATZNUMMER DES PFERDES, Stelle 202-211 [cite: 164]
+            + satznummer_des_pferdes : VARCHAR(10)
+            ' PFERDENAME, Stelle 5-34 [cite: 164]
+            + pferdename : VARCHAR(30)
+            ' LEBENSNUMMER, Stelle 35-43 [cite: 164]
+            + lebensnummer : VARCHAR(9)
+            ' GEB.JAHR, Stelle 45-48 [cite: 164]
+            + geb_jahr : VARCHAR(4)
+            ' ... (weitere Felder gemäß Pflichtenheft S.8)
+        }
+
+        ' Basierend auf RICHT01.DAT
+        entity ZNS_RICHT01_dat_Satz {
+            ' ID, Stelle 1 ('X' oder 'Y') [cite: 154, 162]
+            + id_satzart : CHAR(1)
+            ' SATZNUMMER, Stelle 2-7 [cite: 154, 162]
+            + satznummer : VARCHAR(6)
+            ' NAME, Stelle 8-82 [cite: 154, 162]
+            + name_komplett : VARCHAR(75)
+            ' QUALIFIKATIONEN, Stelle 83-112 [cite: 154, 162]
+            + qualifikationen_text : VARCHAR(30)
+        }
+
+        ' Basierend auf LIZENZ01.DAT
+        entity ZNS_LIZENZ01_dat_Satz {
+            ' SATZNUMMER DES REITERS, Stelle 1-6
+            + satznummer_des_reiters : VARCHAR(6)
+            ' FAMILIENNAME, Stelle 7-56
+            + familienname : VARCHAR(50)
+            ' VORNAME, Stelle 57-81
+            + vorname : VARCHAR(25)
+            ' VEREINSNAME, Stelle 84-133
+            + vereinsname_text : VARCHAR(50)
+            ' REITERLIZENZ, Stelle 137-140
+            + reiterlizenz_code : VARCHAR(4)
+            ' FAHRLIZENZ, Stelle 142-143
+            + fahrlizenz_code : VARCHAR(2)
+            ' LIZENZINFO, Stelle 201-210
+            + lizenzinfo_text : VARCHAR(10)
+            ' GEBURTSDATUM, Stelle 182-189
+            + geburtsdatum_text : VARCHAR(8)
+            ' ... (weitere Felder gemäß Pflichtenheft S.8)
+        }
+    }
+
+    ' Die Pfeile zeigen den Datenfluss: Der Übersetzer konsumiert die Rohdaten-Sätze.
+    ZNS_Daten_Uebersetzer ..> ZNS_VEREIN01_dat_Satz : "liest"
+    ZNS_Daten_Uebersetzer ..> ZNS_PFERDE01_dat_Satz : "liest"
+    ZNS_Daten_Uebersetzer ..> ZNS_RICHT01_dat_Satz : "liest"
+    ZNS_Daten_Uebersetzer ..> ZNS_LIZENZ01_dat_Satz : "liest"
+}
+
+' Außerhalb des ACLs liegt unser sauberes, internes Domänenmodell.
+' Der ACL übersetzt die Rohdaten in diese Ziel-Strukturen (oder Events, die diese erzeugen).
+package "Internes Domänenmodell (Ziel)" {
+    ' Beispielhaft: das Ziel-Objekt im Personen-Context
+    class Personenstamm <<Aggregate Root>> {
+      + oepsSatzNrPerson : VARCHAR(6)
+      --
+      + name : FamiliennameVO
+      + geburtsdatum : Date
+      + hauptverein : VereinsReferenz
+      + hatLizenz(lizenzTyp) : boolean
+    }
+
+    ' Beispielhaft: das Ziel-Objekt im Lizenz-Context
+    class Lizenznehmer <<Aggregate Root>> {
+      + oepsSatzNrPerson : VARCHAR(6)
+      --
+      + lizenzen : List<Lizenz>
+      + qualifikationen: List<Qualifikation>
+    }
+}
+
+' Der Übersetzer im ACL erzeugt/aktualisiert die internen Domänenobjekte.
+' Dies geschieht oft über Events oder direkte Service-Aufrufe.
+ZNS_Daten_Uebersetzer ..> Personenstamm : "erzeugt/aktualisiert"
+ZNS_Daten_Uebersetzer ..> Lizenznehmer : "erzeugt/aktualisiert"
+
+note right of ZNS_Import_ACL
+  **Anti-Corruption Layer (ACL)**
+
+  Dieser Bounded Context hat eine einzige
+  Verantwortlichkeit: Er schützt das
+  System vor den Details und der
+  Komplexität der externen ZNS-Schnittstelle.
+
+  1.  **Einlesen:** Die `.dat`-Dateien werden 1:1 in die
+      `ZNS_*_dat_Satz`-Entitäten eingelesen.
+  2.  **Übersetzen:** Die Komponente `ZNS_Daten_Uebersetzer`
+      transformiert diese Rohdaten. Sie löst
+      Codes auf (z.B. Bundesland), normalisiert
+      Daten (z.B. kommaseparierte Lizenzen)
+      und validiert die Daten.
+  3.  **Veröffentlichen:** Das Ergebnis der Übersetzung
+      wird an die zuständigen internen Bounded
+      Contexts weitergegeben, z.B. durch das
+      Auslösen von Domänen-Events wie
+      `PersonenStammdatenAktualisiert` oder
+      `NeueLizenzInformationVerfügbar`.
+end note
+
+
+@enduml
