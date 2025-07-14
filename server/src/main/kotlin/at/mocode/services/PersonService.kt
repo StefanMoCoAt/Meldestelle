@@ -2,6 +2,8 @@ package at.mocode.services
 
 import at.mocode.stammdaten.Person
 import at.mocode.repositories.PersonRepository
+import at.mocode.validation.PersonValidator
+import at.mocode.validation.ValidationException
 import com.benasher44.uuid.Uuid
 
 /**
@@ -55,7 +57,8 @@ class PersonService(private val personRepository: PersonRepository) {
      * Create a new person with business validation
      */
     suspend fun createPerson(person: Person): Person {
-        validatePerson(person)
+        // Use comprehensive validation
+        PersonValidator.validateAndThrow(person)
 
         // Check if OEPS Satz number already exists
         person.oepsSatzNr?.let { oepsNr ->
@@ -72,7 +75,8 @@ class PersonService(private val personRepository: PersonRepository) {
      * Update an existing person
      */
     suspend fun updatePerson(id: Uuid, person: Person): Person? {
-        validatePerson(person)
+        // Use comprehensive validation
+        PersonValidator.validateAndThrow(person)
 
         // Check if OEPS Satz number conflicts with another person
         person.oepsSatzNr?.let { oepsNr ->
@@ -92,31 +96,4 @@ class PersonService(private val personRepository: PersonRepository) {
         return personRepository.delete(id)
     }
 
-    /**
-     * Validate person data according to business rules
-     */
-    private fun validatePerson(person: Person) {
-        if (person.vorname.isBlank()) {
-            throw IllegalArgumentException("Person first name cannot be blank")
-        }
-
-        if (person.nachname.isBlank()) {
-            throw IllegalArgumentException("Person last name cannot be blank")
-        }
-
-        if (person.vorname.length > 100) {
-            throw IllegalArgumentException("Person first name cannot exceed 100 characters")
-        }
-
-        if (person.nachname.length > 100) {
-            throw IllegalArgumentException("Person last name cannot exceed 100 characters")
-        }
-
-        // Additional validation rules can be added here
-        person.oepsSatzNr?.let { oepsNr ->
-            if (oepsNr.isBlank()) {
-                throw IllegalArgumentException("OEPS Satz number cannot be blank if provided")
-            }
-        }
-    }
 }

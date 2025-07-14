@@ -12,7 +12,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class Bewerb(
     @Serializable(with = UuidSerializer::class)
@@ -20,12 +19,12 @@ data class Bewerb(
     @Serializable(with = UuidSerializer::class)
     val turnierId: Uuid,
 
-    // Allgemeine Infos
+    // Allgemeine Informationen
     var nummer: String,                     // Offizielle Nummer aus Ausschreibung, z.B. "12"
-    var bezeichnungOffiziell: String,       // z.B. "Dressurprüfung Kl. L", "Standardspringprüfung 115cm"
+    var bezeichnungOffiziell: String,       // z.B. "Dressurprüfung Kl. L", "Standardspringprüfung 115 cm"
     var internerName: String?,              // Für Listen, falls abweichend/kürzer
     var sparteE: SparteE,
-    var klasse: String?,                    // z.B. "L", "115cm", "Reiterpass"
+    var klasse: String?,                    // z.B. "L", "115 cm", "Reiterpass"
     var kategorieOetoDesBewerbs: String?, // ÖTO Kategorie, z.B. "CDN-C Neu". Kann vom Turnier abweichen/spezifischer sein.
     // Wird für die Gültigkeit von Regeln/Lizenzen herangezogen.
     var teilnahmebedingungenText: String? = null, // Freitext für spezielle Teilnahmebedingungen

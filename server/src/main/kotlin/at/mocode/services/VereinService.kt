@@ -61,7 +61,7 @@ class VereinService(private val vereinRepository: VereinRepository) {
         validateVerein(verein)
 
         // Check if OEPS number already exists
-        verein.oepsVereinsNr?.let { oepsNr ->
+        verein.oepsVereinsNr.let { oepsNr ->
             val existing = vereinRepository.findByOepsVereinsNr(oepsNr)
             if (existing != null) {
                 throw IllegalArgumentException("A club with OEPS number '$oepsNr' already exists")
@@ -77,8 +77,8 @@ class VereinService(private val vereinRepository: VereinRepository) {
     suspend fun updateVerein(id: Uuid, verein: Verein): Verein? {
         validateVerein(verein)
 
-        // Check if OEPS number conflicts with another club
-        verein.oepsVereinsNr?.let { oepsNr ->
+        // Check if the OEPS number conflicts with another club
+        verein.oepsVereinsNr.let { oepsNr ->
             val existing = vereinRepository.findByOepsVereinsNr(oepsNr)
             if (existing != null && existing.id != id) {
                 throw IllegalArgumentException("A club with OEPS number '$oepsNr' already exists")
@@ -108,7 +108,7 @@ class VereinService(private val vereinRepository: VereinRepository) {
         }
 
         // Additional validation rules can be added here
-        verein.oepsVereinsNr?.let { oepsNr ->
+        verein.oepsVereinsNr.let { oepsNr ->
             if (oepsNr.isBlank()) {
                 throw IllegalArgumentException("OEPS Vereins number cannot be blank if provided")
             }

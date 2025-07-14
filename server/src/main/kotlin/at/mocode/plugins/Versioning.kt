@@ -56,12 +56,12 @@ val VersioningPlugin = createApplicationPlugin(name = "VersioningPlugin") {
 }
 
 /**
- * Key for storing client version in call attributes
+ * Key for storing a client version in call attributes
  */
 val ClientVersionKey = AttributeKey<String>("ClientVersion")
 
 /**
- * Extension function to get client version from call
+ * Extension function to get a client version from call
  */
 fun ApplicationCall.getClientVersion(): String {
     return attributes.getOrNull(ClientVersionKey) ?: VersionManager.CURRENT_API_VERSION

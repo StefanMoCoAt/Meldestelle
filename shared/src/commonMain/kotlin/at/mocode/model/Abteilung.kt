@@ -14,7 +14,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Serializable
 
-
 @Serializable
 data class Abteilung(
     @Serializable(with = UuidSerializer::class)

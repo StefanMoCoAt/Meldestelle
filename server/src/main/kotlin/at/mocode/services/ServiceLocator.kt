@@ -11,6 +11,7 @@ object ServiceLocator {
 
     // Repository instances - lazy initialization
     val artikelRepository: ArtikelRepository by lazy { PostgresArtikelRepository() }
+    val platzRepository: PlatzRepository by lazy { PostgresPlatzRepository() }
     val vereinRepository: VereinRepository by lazy { PostgresVereinRepository() }
     val personRepository: PersonRepository by lazy { PostgresPersonRepository() }
     val domLizenzRepository: DomLizenzRepository by lazy { PostgresDomLizenzRepository() }
@@ -23,6 +24,7 @@ object ServiceLocator {
 
     // Service instances - lazy initialization with dependency injection
     val artikelService: ArtikelService by lazy { ArtikelService(artikelRepository) }
+    val platzService: PlatzService by lazy { PlatzService(platzRepository) }
     val vereinService: VereinService by lazy { VereinService(vereinRepository) }
     val personService: PersonService by lazy { PersonService(personRepository) }
     val domLizenzService: DomLizenzService by lazy { DomLizenzService(domLizenzRepository) }
@@ -39,6 +41,7 @@ object ServiceLocator {
     fun initializeAll() {
         // Initialize repositories
         artikelRepository
+        platzRepository
         vereinRepository
         personRepository
         domLizenzRepository
@@ -51,6 +54,7 @@ object ServiceLocator {
 
         // Initialize services
         artikelService
+        platzService
         vereinService
         personService
         domLizenzService

@@ -54,7 +54,7 @@ data class DomPerson(
     var oepsSatzNr: String?, // Wird aus Person_ZNS_Staging.oepsSatzNrPerson befüllt, UNIQUE
     var nachname: String,    // Wird aus Person_ZNS_Staging.familiennameRoh befüllt
     var vorname: String,     // Wird aus Person_ZNS_Staging.vornameRoh befüllt
-    var titel: String? = null, // Manuelle Eingabe oder ggf. später aus ZNS falls vorhanden
+    var titel: String? = null, // Manuelle Eingabe ggf. später ZNS, falls vorhanden
 
     @Serializable(with = KotlinLocalDateSerializer::class)
     var geburtsdatum: LocalDate? = null, // Konvertiert aus Person_ZNS_Staging.geburtsdatumTextRoh

@@ -12,20 +12,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import at.mocode.config.AppServiceConfiguration
+import at.mocode.config.ThemeService
+import at.mocode.di.ServiceRegistry
+import at.mocode.di.resolve
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
 fun App() {
-    MaterialTheme(
-        colors = lightColors(
-            primary = Color(0xFF2E7D32),
-            primaryVariant = Color(0xFF1B5E20),
-            secondary = Color(0xFF8BC34A),
-            background = Color(0xFFF1F8E9)
-        )
-    ) {
-        HomePage()
+    // State to track if services are initialized
+    var servicesInitialized by remember { mutableStateOf(false) }
+
+    // Initialize services when the app starts
+    LaunchedEffect(Unit) {
+        AppServiceConfiguration.configureAppServices()
+        servicesInitialized = true
+    }
+
+    // Only show the app content after services are initialized
+    if (servicesInitialized) {
+        // Get theme service to demonstrate ServiceLocator usage
+        val themeService: ThemeService = ServiceRegistry.serviceLocator.resolve()
+        val currentTheme by remember { mutableStateOf(themeService.getCurrentTheme()) }
+
+        MaterialTheme(
+            colors = lightColors(
+                primary = Color(0xFF2E7D32),
+                primaryVariant = Color(0xFF1B5E20),
+                secondary = Color(0xFF8BC34A),
+                background = Color(0xFFF1F8E9)
+            )
+        ) {
+            HomePage()
+        }
+    } else {
+        // Show loading state while services are being initialized
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -44,7 +72,7 @@ fun HomePage() {
         }
 
         item {
-            // Welcome Card
+            // Welcome, Card
             WelcomeCard()
         }
 

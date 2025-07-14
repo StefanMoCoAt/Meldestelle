@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  * @property pruefungAbteilungDbId Fremdschlüssel zur `Pruefung_Abteilung`. Teil des zusammengesetzten Primärschlüssels.
  * @property faktorFuerWertung Ein optionaler Faktor, mit dem das Ergebnis dieser Wertungsprüfung
  * in die Gesamtwertung des Cups/der Meisterschaft einfließt (Default ist 1.0).
- * @property bemerkung Optionale Bemerkung zu dieser spezifischen Wertungsprüfung im Kontext des Cups
+ * @property bemerkung Optionale Bemerkungen zu dieser spezifischen Wertungsprüfung im Kontext des Cups
  * (z.B. "1. Vorrunde", "Finale", "Qualifikation West").
  * @property istPflichttermin Gibt an, ob die Teilnahme an dieser Wertungsprüfung für die Cup-Gesamtwertung verpflichtend ist.
  * @property mindestErgebnisNotwendig Optionales Mindestergebnis, das in dieser Prüfung erzielt werden muss,

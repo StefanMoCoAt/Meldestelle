@@ -6,6 +6,7 @@ import kotlinx.datetime.Instant
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -58,7 +59,7 @@ abstract class BaseRepository<T, TTable : Table>(
      * Optimized findById - uses select with where clause directly
      */
     protected open suspend fun findById(id: Uuid): T? = transaction {
-        table.select { getIdColumn() eq id }
+        table.selectAll().where { getIdColumn() eq id }
             .map { rowToModel(it) }
             .singleOrNull()
     }
@@ -67,7 +68,7 @@ abstract class BaseRepository<T, TTable : Table>(
      * Generic find by column with single result
      */
     protected suspend fun <V> findByColumn(column: Column<V>, value: V): T? = transaction {
-        table.select { column eq value }
+        table.selectAll().where { column eq value }
             .map { rowToModel(it) }
             .singleOrNull()
     }
@@ -76,7 +77,7 @@ abstract class BaseRepository<T, TTable : Table>(
      * Generic find by column with multiple results
      */
     protected suspend fun <V> findByColumnList(column: Column<V>, value: V): List<T> = transaction {
-        table.select { column eq value }
+        table.selectAll().where { column eq value }
             .map { rowToModel(it) }
     }
 
@@ -85,7 +86,7 @@ abstract class BaseRepository<T, TTable : Table>(
      */
     protected suspend fun findByLikeSearch(column: Column<String?>, searchTerm: String): List<T> = transaction {
         val sanitizedTerm = searchTerm.replace("%", "\\%").replace("_", "\\_")
-        table.select { column like "%$sanitizedTerm%" }
+        table.selectAll().where { column like "%$sanitizedTerm%" }
             .map { rowToModel(it) }
     }
 
@@ -94,7 +95,7 @@ abstract class BaseRepository<T, TTable : Table>(
      */
     protected suspend fun findByLikeSearchNonNull(column: Column<String>, searchTerm: String): List<T> = transaction {
         val sanitizedTerm = searchTerm.replace("%", "\\%").replace("_", "\\_")
-        table.select { column like "%$sanitizedTerm%" }
+        table.selectAll().where { column like "%$sanitizedTerm%" }
             .map { rowToModel(it) }
     }
 
@@ -117,7 +118,7 @@ abstract class BaseRepository<T, TTable : Table>(
             }
         }
 
-        table.select { combinedCondition!! }
+        table.selectAll().where { combinedCondition!! }
             .map { rowToModel(it) }
     }
 
@@ -158,7 +159,7 @@ abstract class BaseRepository<T, TTable : Table>(
      * Find by boolean column (e.g., active status)
      */
     protected suspend fun findByBooleanColumn(column: Column<Boolean>, value: Boolean): List<T> = transaction {
-        table.select { column eq value }
+        table.selectAll().where { column eq value }
             .map { rowToModel(it) }
     }
 
@@ -166,7 +167,7 @@ abstract class BaseRepository<T, TTable : Table>(
      * Find by integer column
      */
     protected suspend fun findByIntColumn(column: Column<Int>, value: Int): List<T> = transaction {
-        table.select { column eq value }
+        table.selectAll().where { column eq value }
             .map { rowToModel(it) }
     }
 
@@ -174,7 +175,7 @@ abstract class BaseRepository<T, TTable : Table>(
      * Find by nullable integer column
      */
     protected suspend fun findByNullableIntColumn(column: Column<Int?>, value: Int): List<T> = transaction {
-        table.select { column eq value }
+        table.selectAll().where { column eq value }
             .map { rowToModel(it) }
     }
 }

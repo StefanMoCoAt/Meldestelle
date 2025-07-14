@@ -102,8 +102,8 @@ class PostgresAbteilungRepository : AbteilungRepository {
     override suspend fun search(query: String): List<Abteilung> = transaction {
         AbteilungTable.selectAll().where {
             (AbteilungTable.abteilungsKennzeichen.lowerCase() like "%${query.lowercase()}%") or
-            (AbteilungTable.bezeichnungIntern?.lowerCase()?.like("%${query.lowercase()}%") ?: Op.FALSE) or
-            (AbteilungTable.bezeichnungAufStartliste?.lowerCase()?.like("%${query.lowercase()}%") ?: Op.FALSE)
+                AbteilungTable.bezeichnungIntern.lowerCase().like("%${query.lowercase()}%") or
+                AbteilungTable.bezeichnungAufStartliste.lowerCase().like("%${query.lowercase()}%")
         }.map { rowToAbteilung(it) }
     }
 

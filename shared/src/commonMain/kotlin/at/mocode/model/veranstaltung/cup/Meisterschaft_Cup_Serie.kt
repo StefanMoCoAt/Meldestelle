@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
  *
  * @property mcsId Eindeutiger interner Identifikator für diese Meisterschaft/Cup/Serie (UUID).
  * @property name Der offizielle Name der Meisterschaft, des Cups oder der Serie
- * (z.B. "EQUIVERON Cup 2025", "NÖ Landesmeisterschaft Dressur Allgemeine Klasse").
+ * (z.B. "EQUIVERON Cup 2025", "NÖ Landesmeisterschaft Dressur allgemeine Klasse").
  * @property typ Die Art des übergreifenden Wettbewerbs (siehe `CupSerieTypE`).
  * @property jahr Das Jahr, in dem diese Meisterschaft/Cup/Serie stattfindet oder gewertet wird.
  * @property sparte Die Pferdesportsparte, für die dieser Wettbewerb primär ausgeschrieben ist.

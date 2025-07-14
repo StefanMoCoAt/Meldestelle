@@ -1,6 +1,6 @@
 package at.mocode.dto
 
-import at.mocode.enums.FunktionaerRolle
+import at.mocode.enums.FunktionaerRolleE
 import at.mocode.enums.GeschlechtE
 import at.mocode.stammdaten.LizenzInfo
 import at.mocode.serializers.KotlinInstantSerializer
@@ -36,7 +36,7 @@ data class PersonDto(
     val feiId: String?,
     val istGesperrt: Boolean,
     val sperrGrund: String?,
-    val rollen: Set<FunktionaerRolle>,
+    val rollen: Set<FunktionaerRolleE>,
     val lizenzen: List<LizenzInfo>,
     val qualifikationenRichter: List<String>,
     val qualifikationenParcoursbauer: List<String>,
@@ -69,7 +69,7 @@ data class CreatePersonDto(
     val feiId: String? = null,
     val istGesperrt: Boolean = false,
     val sperrGrund: String? = null,
-    val rollen: Set<FunktionaerRolle> = emptySet(),
+    val rollen: Set<FunktionaerRolleE> = emptySet(),
     val lizenzen: List<LizenzInfo> = emptyList(),
     val qualifikationenRichter: List<String> = emptyList(),
     val qualifikationenParcoursbauer: List<String> = emptyList(),
@@ -98,7 +98,7 @@ data class UpdatePersonDto(
     val feiId: String? = null,
     val istGesperrt: Boolean = false,
     val sperrGrund: String? = null,
-    val rollen: Set<FunktionaerRolle> = emptySet(),
+    val rollen: Set<FunktionaerRolleE> = emptySet(),
     val lizenzen: List<LizenzInfo> = emptyList(),
     val qualifikationenRichter: List<String> = emptyList(),
     val qualifikationenParcoursbauer: List<String> = emptyList(),

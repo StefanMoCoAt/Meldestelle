@@ -1,7 +1,5 @@
 package at.mocode.dto.base
 
-import kotlinx.serialization.Serializable
-
 /**
  * Manages API and DTO versioning across the application.
  */

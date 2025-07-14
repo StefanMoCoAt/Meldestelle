@@ -33,7 +33,7 @@ data class LandDefinition(
     @Serializable(with = UuidSerializer::class)
     val landId: Uuid = uuid4(),
 
-    var isoAlpha2Code: String, // z.B. "AT" -> Fachlicher PK oder Unique Constraint
+    var isoAlpha2Code: String, // z.B. "AT" → Fachlicher PK oder Unique Constraint
     var isoAlpha3Code: String, // z.B. "AUT" -> Unique Constraint
     var isoNumerischerCode: String? = null, // z.B. "040"
     var nameDeutsch: String,    // z.B. "Österreich"

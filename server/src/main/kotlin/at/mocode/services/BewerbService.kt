@@ -126,7 +126,7 @@ class BewerbService(private val bewerbRepository: BewerbRepository) {
     }
 
     /**
-     * Finalize result list for a competition
+     * Finalize the result list for a competition
      */
     suspend fun finalizeErgebnisliste(id: Uuid): Bewerb? {
         val bewerb = getBewerbById(id)
@@ -139,7 +139,7 @@ class BewerbService(private val bewerbRepository: BewerbRepository) {
     }
 
     /**
-     * Reopen start list for a competition
+     * Reopen the start list for a competition
      */
     suspend fun reopenStartliste(id: Uuid): Bewerb? {
         val bewerb = getBewerbById(id)
@@ -152,7 +152,7 @@ class BewerbService(private val bewerbRepository: BewerbRepository) {
     }
 
     /**
-     * Reopen result list for a competition
+     * Reopen the result list for a competition
      */
     suspend fun reopenErgebnisliste(id: Uuid): Bewerb? {
         val bewerb = getBewerbById(id)

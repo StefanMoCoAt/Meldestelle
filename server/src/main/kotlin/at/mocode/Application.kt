@@ -1,7 +1,10 @@
 package at.mocode
 
+import at.mocode.config.ServiceConfiguration
 import at.mocode.plugins.configureDatabase
 import at.mocode.plugins.configureRouting
+import at.mocode.utils.ApiResponse
+import at.mocode.validation.ValidationException
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -25,6 +28,11 @@ fun main(args: Array<String>) {
 fun Application.module() {
     val log = LoggerFactory.getLogger("Application")
     log.info("Initializing application...")
+
+    // Configure dependency injection
+    ServiceConfiguration.configureServices()
+    log.info("Services configured")
+
     configureDatabase()
     configurePlugins()
     configureRouting()
@@ -94,17 +102,61 @@ private fun Application.configurePlugins() {
 
     // Configure status pages for error handling
     install(StatusPages) {
-        exception<Throwable> { call, cause ->
-            call.respondText(
-                text = "500: ${cause.message ?: "Internal Server Error"}",
-                status = HttpStatusCode.InternalServerError
+        // Handle validation exceptions with detailed error information
+        exception<ValidationException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ApiResponse<Nothing>(
+                    success = false,
+                    error = "VALIDATION_ERROR",
+                    message = "Validation failed: ${cause.validationResult.errors.joinToString(", ") { "${it.field}: ${it.message}" }}"
+                )
             )
         }
 
+        // Handle illegal argument exceptions (typically validation-related)
+        exception<IllegalArgumentException> { call, cause ->
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ApiResponse<Nothing>(
+                    success = false,
+                    error = "INVALID_INPUT",
+                    message = cause.message ?: "Invalid input provided"
+                )
+            )
+        }
+
+        // Handle not found exceptions
+        exception<NoSuchElementException> { call, cause ->
+            call.respond(
+                HttpStatusCode.NotFound,
+                ApiResponse<Nothing>(
+                    success = false,
+                    error = "NOT_FOUND",
+                    message = cause.message ?: "Resource not found"
+                )
+            )
+        }
+
+        // Handle all other exceptions
+        exception<Throwable> { call, cause ->
+            this@configurePlugins.log.error("Unhandled exception", cause)
+            call.respond(
+                HttpStatusCode.InternalServerError,
+                ApiResponse<Nothing>(
+                    success = false,
+                    error = "INTERNAL_ERROR",
+                    message = "An internal server error occurred"
+                )
+            )
+        }
+
+        // Handle 404 status
         status(HttpStatusCode.NotFound) { call, _ ->
             call.respondText(
-                text = "404: Page Not Found",
-                status = HttpStatusCode.NotFound
+                "404: Page Not Found",
+                ContentType.Text.Plain,
+                HttpStatusCode.NotFound
             )
         }
     }

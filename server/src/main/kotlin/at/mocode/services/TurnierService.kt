@@ -74,7 +74,7 @@ class TurnierService(private val turnierRepository: TurnierRepository) {
     suspend fun updateTurnier(id: Uuid, turnier: Turnier): Turnier? {
         validateTurnier(turnier)
 
-        // Check if OEPS tournament number conflicts with another tournament
+        // Check if the OEPS tournament number conflicts with another tournament
         turnier.oepsTurnierNr?.let { oepsNr ->
             val existing = turnierRepository.findByOepsTurnierNr(oepsNr)
             if (existing != null && existing.id != id) {

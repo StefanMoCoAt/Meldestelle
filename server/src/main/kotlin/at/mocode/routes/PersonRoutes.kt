@@ -1,8 +1,16 @@
 package at.mocode.routes
 
-import at.mocode.repositories.PersonRepository
-import at.mocode.repositories.PostgresPersonRepository
+import at.mocode.di.ServiceRegistry
+import at.mocode.di.resolve
+import at.mocode.services.PersonService
 import at.mocode.stammdaten.Person
+import at.mocode.utils.ResponseUtils.handleException
+import at.mocode.utils.ResponseUtils.respondCreated
+import at.mocode.utils.ResponseUtils.respondNoContent
+import at.mocode.utils.ResponseUtils.respondNotFound
+import at.mocode.utils.ResponseUtils.respondSuccess
+import at.mocode.utils.ResponseUtils.respondValidationError
+import at.mocode.validation.ValidationException
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
 import io.ktor.server.plugins.openapi.*
@@ -11,86 +19,70 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.personRoutes() {
-    val personRepository: PersonRepository = PostgresPersonRepository()
+    val personService: PersonService = ServiceRegistry.serviceLocator.resolve()
 
     route("/persons") {
         // GET /api/persons - Get all persons
         get {
             try {
-                val persons = personRepository.findAll()
-                call.respond(HttpStatusCode.OK, persons)
+                val persons = personService.getAllPersons()
+                call.respondSuccess(persons)
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+                call.handleException(e, "getting all persons")
             }
         }
 
         // GET /api/persons/{id} - Get person by ID
         get("/{id}") {
             try {
-                val id = call.parameters["id"] ?: return@get call.respond(
-                    HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing person ID")
-                )
+                val id = call.parameters["id"] ?: return@get call.respondValidationError("Missing person ID")
                 val uuid = uuidFrom(id)
-                val person = personRepository.findById(uuid)
+                val person = personService.getPersonById(uuid)
                 if (person != null) {
-                    call.respond(HttpStatusCode.OK, person)
+                    call.respondSuccess(person)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Person not found"))
+                    call.respondNotFound("Person")
                 }
-            } catch (_: IllegalArgumentException) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+                call.handleException(e, "getting person by ID")
             }
         }
 
         // GET /api/persons/oeps/{oepsSatzNr} - Get person by OEPS number
         get("/oeps/{oepsSatzNr}") {
             try {
-                val oepsSatzNr = call.parameters["oepsSatzNr"] ?: return@get call.respond(
-                    HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing OEPS Satz number")
-                )
-                val person = personRepository.findByOepsSatzNr(oepsSatzNr)
+                val oepsSatzNr = call.parameters["oepsSatzNr"] ?: return@get call.respondValidationError("Missing OEPS Satz number")
+                val person = personService.getPersonByOepsSatzNr(oepsSatzNr)
                 if (person != null) {
-                    call.respond(HttpStatusCode.OK, person)
+                    call.respondSuccess(person)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Person not found"))
+                    call.respondNotFound("Person")
                 }
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+                call.handleException(e, "getting person by OEPS number")
             }
         }
 
         // GET /api/persons/search?q={query} - Search persons
         get("/search") {
             try {
-                val query = call.request.queryParameters["q"] ?: return@get call.respond(
-                    HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing search query parameter 'q'")
-                )
-                val persons = personRepository.search(query)
-                call.respond(HttpStatusCode.OK, persons)
+                val query = call.request.queryParameters["q"] ?: return@get call.respondValidationError("Missing search query parameter 'q'")
+                val persons = personService.searchPersons(query)
+                call.respondSuccess(persons)
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+                call.handleException(e, "searching persons")
             }
         }
 
         // GET /api/persons/verein/{vereinId} - Get persons by club ID
         get("/verein/{vereinId}") {
             try {
-                val vereinId = call.parameters["vereinId"] ?: return@get call.respond(
-                    HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing verein ID")
-                )
+                val vereinId = call.parameters["vereinId"] ?: return@get call.respondValidationError("Missing verein ID")
                 val uuid = uuidFrom(vereinId)
-                val persons = personRepository.findByVereinId(uuid)
-                call.respond(HttpStatusCode.OK, persons)
-            } catch (_: IllegalArgumentException) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
+                val persons = personService.getPersonsByVereinId(uuid)
+                call.respondSuccess(persons)
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+                call.handleException(e, "getting persons by verein ID")
             }
         }
 
@@ -98,53 +90,53 @@ fun Route.personRoutes() {
         post {
             try {
                 val person = call.receive<Person>()
-                val createdPerson = personRepository.create(person)
-                call.respond(HttpStatusCode.Created, createdPerson)
+                val createdPerson = personService.createPerson(person)
+                call.respondCreated(createdPerson)
+            } catch (e: ValidationException) {
+                call.respondValidationError(
+                    "Person validation failed",
+                    e.validationResult.errors.joinToString("; ") { "${it.field}: ${it.message}" }
+                )
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+                call.handleException(e, "creating person")
             }
         }
 
         // PUT /api/persons/{id} - Update person
         put("/{id}") {
             try {
-                val id = call.parameters["id"] ?: return@put call.respond(
-                    HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing person ID")
-                )
+                val id = call.parameters["id"] ?: return@put call.respondValidationError("Missing person ID")
                 val uuid = uuidFrom(id)
                 val person = call.receive<Person>()
-                val updatedPerson = personRepository.update(uuid, person)
+                val updatedPerson = personService.updatePerson(uuid, person)
                 if (updatedPerson != null) {
-                    call.respond(HttpStatusCode.OK, updatedPerson)
+                    call.respondSuccess(updatedPerson)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Person not found"))
+                    call.respondNotFound("Person")
                 }
-            } catch (_: IllegalArgumentException) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
+            } catch (e: ValidationException) {
+                call.respondValidationError(
+                    "Person validation failed",
+                    e.validationResult.errors.joinToString("; ") { "${it.field}: ${it.message}" }
+                )
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+                call.handleException(e, "updating person")
             }
         }
 
         // DELETE /api/persons/{id} - Delete person
         delete("/{id}") {
             try {
-                val id = call.parameters["id"] ?: return@delete call.respond(
-                    HttpStatusCode.BadRequest,
-                    mapOf("error" to "Missing person ID")
-                )
+                val id = call.parameters["id"] ?: return@delete call.respondValidationError("Missing person ID")
                 val uuid = uuidFrom(id)
-                val deleted = personRepository.delete(uuid)
+                val deleted = personService.deletePerson(uuid)
                 if (deleted) {
-                    call.respond(HttpStatusCode.NoContent)
+                    call.respondNoContent()
                 } else {
-                    call.respond(HttpStatusCode.NotFound, mapOf("error" to "Person not found"))
+                    call.respondNotFound("Person")
                 }
-            } catch (_: IllegalArgumentException) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid UUID format"))
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+                call.handleException(e, "deleting person")
             }
         }
     }

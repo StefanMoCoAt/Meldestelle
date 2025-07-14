@@ -1,6 +1,6 @@
 package at.mocode.stammdaten
 
-import at.mocode.enums.FunktionaerRolle
+import at.mocode.enums.FunktionaerRolleE
 import at.mocode.enums.GeschlechtE
 import at.mocode.serializers.KotlinInstantSerializer
 import at.mocode.serializers.KotlinLocalDateSerializer
@@ -36,7 +36,7 @@ data class Person(
     var feiId: String?,
     var istGesperrt: Boolean = false,
     var sperrGrund: String?,
-    var rollen: Set<FunktionaerRolle> = emptySet(),
+    var rollen: Set<FunktionaerRolleE> = emptySet(),
     var lizenzen: List<LizenzInfo> = emptyList(),
     var qualifikationenRichter: List<String> = emptyList(),
     var qualifikationenParcoursbauer: List<String> = emptyList(),

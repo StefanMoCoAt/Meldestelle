@@ -1,6 +1,6 @@
 package at.mocode.repositories
 
-import at.mocode.enums.FunktionaerRolle
+import at.mocode.enums.FunktionaerRolleE
 import at.mocode.stammdaten.Person
 import at.mocode.tables.stammdaten.PersonenTable
 import com.benasher44.uuid.Uuid
@@ -139,14 +139,14 @@ class PostgresPersonRepository : PersonRepository {
         )
     }
 
-    private fun parseRollen(rollenCsv: String?): Set<FunktionaerRolle> {
+    private fun parseRollen(rollenCsv: String?): Set<FunktionaerRolleE> {
         return if (rollenCsv.isNullOrBlank()) {
             emptySet()
         } else {
             rollenCsv.split(",")
                 .mapNotNull { roleName ->
                     try {
-                        FunktionaerRolle.valueOf(roleName.trim())
+                        FunktionaerRolleE.valueOf(roleName.trim())
                     } catch (_: IllegalArgumentException) {
                         null
                     }

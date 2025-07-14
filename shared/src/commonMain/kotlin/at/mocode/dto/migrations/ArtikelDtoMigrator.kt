@@ -29,7 +29,7 @@ class ArtikelDtoMigrator : VersionMigrator<ArtikelDto> {
         }
     }
 
-    // Example of future migration method
+    // Example of a future migration method
     // private fun migrateFrom1_0To1_1(dto: ArtikelDto): ArtikelDto {
     //     return dto.copy(
     //         schemaVersion = "1.1",

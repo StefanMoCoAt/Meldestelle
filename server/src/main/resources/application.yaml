@@ -1,7 +1,7 @@
 # Meldestelle Server Configuration
 ktor:
   deployment:
-    # Server port configuration
+    # Server port configuration - can be overridden with SERVER_PORT environment variable
     port: 8080
     # Connection timeout in seconds
     connectionTimeout: 30

@@ -57,6 +57,9 @@ object RouteConfiguration {
             turnierRoutes()
             bewerbRoutes()
             abteilungRoutes()
+
+            // Places/Venues for events
+            platzRoutes()
         }
     }
 

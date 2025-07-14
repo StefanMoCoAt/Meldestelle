@@ -126,7 +126,7 @@ class DomLizenzService(private val domLizenzRepository: DomLizenzRepository) {
             }
         }
 
-        // Additional validation rules can be added here
-        // For example, checking if the license type is valid, person exists, etc.
+        // Additional validation rules can be added here,
+        // For example, checking if the license type is valid, a person exists, etc.
     }
 }

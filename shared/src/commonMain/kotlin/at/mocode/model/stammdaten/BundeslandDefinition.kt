@@ -36,7 +36,7 @@ data class BundeslandDefinition(
     @Serializable(with = UuidSerializer::class)
     var landId: Uuid, // FK zu LandDefinition.landId
 
-    var oepsCode: String?,    // z.B. "01", "02", ... für Österreich; Eindeutig pro landId = Österreich
+    var oepsCode: String?,    // z.B. "01", "02", ... für Österreich; eindeutig pro landId = Österreich
     var iso3166_2_Code: String?, // z.B. "AT-1", "DE-BY"; Eindeutig global oder pro Land?
     var name: String,         // z.B. "Niederösterreich", "Bayern"
     var kuerzel: String? = null,     // z.B. "NÖ", "BY"
