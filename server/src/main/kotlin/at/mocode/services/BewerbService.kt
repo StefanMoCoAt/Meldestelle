@@ -2,6 +2,7 @@ package at.mocode.services
 
 import at.mocode.model.Bewerb
 import at.mocode.repositories.BewerbRepository
+import at.mocode.utils.TransactionManager
 import com.benasher44.uuid.Uuid
 
 /**
@@ -115,9 +116,9 @@ class BewerbService(private val bewerbRepository: BewerbRepository) {
     /**
      * Finalize start list for a competition
      */
-    suspend fun finalizeStartliste(id: Uuid): Bewerb? {
+    suspend fun finalizeStartliste(id: Uuid): Bewerb? = TransactionManager.withTransaction {
         val bewerb = getBewerbById(id)
-        return if (bewerb != null) {
+        return@withTransaction if (bewerb != null) {
             val updatedBewerb = bewerb.copy(istStartlisteFinal = true)
             updateBewerb(id, updatedBewerb)
         } else {
@@ -128,9 +129,9 @@ class BewerbService(private val bewerbRepository: BewerbRepository) {
     /**
      * Finalize the result list for a competition
      */
-    suspend fun finalizeErgebnisliste(id: Uuid): Bewerb? {
+    suspend fun finalizeErgebnisliste(id: Uuid): Bewerb? = TransactionManager.withTransaction {
         val bewerb = getBewerbById(id)
-        return if (bewerb != null) {
+        return@withTransaction if (bewerb != null) {
             val updatedBewerb = bewerb.copy(istErgebnislisteFinal = true)
             updateBewerb(id, updatedBewerb)
         } else {
@@ -141,9 +142,9 @@ class BewerbService(private val bewerbRepository: BewerbRepository) {
     /**
      * Reopen the start list for a competition
      */
-    suspend fun reopenStartliste(id: Uuid): Bewerb? {
+    suspend fun reopenStartliste(id: Uuid): Bewerb? = TransactionManager.withTransaction {
         val bewerb = getBewerbById(id)
-        return if (bewerb != null) {
+        return@withTransaction if (bewerb != null) {
             val updatedBewerb = bewerb.copy(istStartlisteFinal = false)
             updateBewerb(id, updatedBewerb)
         } else {
@@ -154,9 +155,9 @@ class BewerbService(private val bewerbRepository: BewerbRepository) {
     /**
      * Reopen the result list for a competition
      */
-    suspend fun reopenErgebnisliste(id: Uuid): Bewerb? {
+    suspend fun reopenErgebnisliste(id: Uuid): Bewerb? = TransactionManager.withTransaction {
         val bewerb = getBewerbById(id)
-        return if (bewerb != null) {
+        return@withTransaction if (bewerb != null) {
             val updatedBewerb = bewerb.copy(istErgebnislisteFinal = false)
             updateBewerb(id, updatedBewerb)
         } else {

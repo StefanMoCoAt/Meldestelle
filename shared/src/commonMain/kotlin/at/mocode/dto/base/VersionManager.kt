@@ -6,13 +6,13 @@ package at.mocode.dto.base
 object VersionManager {
 
     // Current API version
-    const val CURRENT_API_VERSION = "1.0"
+    const val CURRENT_API_VERSION = "1.1"
 
     // Supported API versions (newest first)
-    val SUPPORTED_VERSIONS = listOf("1.0")
+    val SUPPORTED_VERSIONS = listOf("1.1", "1.0")
 
     // Deprecated versions (still supported but discouraged)
-    val DEPRECATED_VERSIONS = emptyList<String>()
+    val DEPRECATED_VERSIONS = listOf("1.0")
 
     // Minimum client version required
     const val MINIMUM_CLIENT_VERSION = "1.0"

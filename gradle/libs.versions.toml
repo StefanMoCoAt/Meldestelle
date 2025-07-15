@@ -19,6 +19,7 @@ h2 = "2.2.224"
 
 # Logging
 logback = "1.5.18"
+logbackJsonEncoder = "8.0"
 
 # Testing
 junit = "4.13.2"
@@ -63,6 +64,7 @@ h2-driver = { module = "com.h2database:h2", version.ref = "h2" }
 
 # Logging
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logback-json-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logbackJsonEncoder" }
 
 # Testing
 junitJupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }

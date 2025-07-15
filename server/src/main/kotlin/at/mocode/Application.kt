@@ -1,9 +1,14 @@
 package at.mocode
 
 import at.mocode.config.ServiceConfiguration
+import at.mocode.events.EventConfiguration
 import at.mocode.plugins.configureDatabase
 import at.mocode.plugins.configureRouting
+import at.mocode.plugins.configureVersioning
 import at.mocode.utils.ApiResponse
+import at.mocode.utils.StructuredLogger
+import at.mocode.utils.structuredLogger
+import at.mocode.utils.measureAndLog
 import at.mocode.validation.ValidationException
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -26,21 +31,46 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
-    val log = LoggerFactory.getLogger("Application")
-    log.info("Initializing application...")
+    val log = structuredLogger()
+    log.info("Initializing application", mapOf(
+        "component" to "application",
+        "phase" to "startup"
+    ))
 
     // Configure dependency injection
-    ServiceConfiguration.configureServices()
-    log.info("Services configured")
+    log.measureAndLog("configure_services") {
+        ServiceConfiguration.configureServices()
+    }
 
-    configureDatabase()
-    configurePlugins()
-    configureRouting()
-    log.info("Application initialized successfully")
+    // Configure event-driven architecture
+    log.measureAndLog("configure_event_handlers") {
+        EventConfiguration.configureEventHandlers()
+    }
+
+    log.measureAndLog("configure_database") {
+        configureDatabase()
+    }
+
+    log.measureAndLog("configure_plugins") {
+        configurePlugins()
+    }
+
+    log.measureAndLog("configure_versioning") {
+        configureVersioning()
+    }
+
+    log.measureAndLog("configure_routing") {
+        configureRouting()
+    }
+
+    log.info("Application initialized successfully", mapOf(
+        "component" to "application",
+        "phase" to "startup_complete"
+    ))
 }
 
 private fun Application.configurePlugins() {
-    val log = LoggerFactory.getLogger("ApplicationPlugins")
+    val log = StructuredLogger.getLogger("ApplicationPlugins")
     // Add default headers to all responses
     install(DefaultHeaders) {
         header("X-Engine", "Ktor")
@@ -126,7 +156,7 @@ private fun Application.configurePlugins() {
             )
         }
 
-        // Handle not found exceptions
+        // Handle didn't find exceptions
         exception<NoSuchElementException> { call, cause ->
             call.respond(
                 HttpStatusCode.NotFound,
@@ -140,7 +170,10 @@ private fun Application.configurePlugins() {
 
         // Handle all other exceptions
         exception<Throwable> { call, cause ->
-            this@configurePlugins.log.error("Unhandled exception", cause)
+            log.error("Unhandled exception", cause, mapOf(
+                "error_type" to "unhandled_exception",
+                "exception_class" to cause::class.simpleName
+            ))
             call.respond(
                 HttpStatusCode.InternalServerError,
                 ApiResponse<Nothing>(

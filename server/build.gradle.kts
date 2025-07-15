@@ -56,6 +56,7 @@ dependencies {
 
     // === LOGGING ===
     implementation(libs.logback)
+    implementation(libs.logback.json.encoder)
 
     // === DATENBANKTREIBER ===
     runtimeOnly(libs.postgresql.driver)    // PostgreSQL für Produktion

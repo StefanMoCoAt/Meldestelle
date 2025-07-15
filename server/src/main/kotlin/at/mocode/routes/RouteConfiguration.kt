@@ -13,14 +13,24 @@ object RouteConfiguration {
      */
     fun Route.configureApiRoutes() {
         route("/api") {
-            // Core domain routes
+            // Version-agnostic routes (always use latest version)
             configureCoreRoutes()
-
-            // Domain-specific routes
             configureDomainRoutes()
-
-            // Event/Tournament management routes
             configureEventRoutes()
+            configureDomainEventRoutes()
+
+            // Versioned API routes
+            route("/v1") {
+                configureCoreRoutes()
+                configureDomainRoutes()
+                configureEventRoutes()
+                configureDomainEventRoutes()
+            }
+
+            // Future versions can be added here
+            // route("/v2") {
+            //     configureV2Routes()
+            // }
         }
     }
 
@@ -61,6 +71,14 @@ object RouteConfiguration {
             // Places/Venues for events
             platzRoutes()
         }
+    }
+
+    /**
+     * Configure domain event routes (event sourcing)
+     */
+    private fun Route.configureDomainEventRoutes() {
+        // Domain events API for event sourcing
+        eventRoutes()
     }
 
     /**

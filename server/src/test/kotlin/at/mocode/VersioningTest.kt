@@ -17,10 +17,15 @@ class VersioningTest {
 
     @Test
     fun testVersionManagerValidation() {
-        // Test valid version
-        val validResult = VersionManager.validateClientVersion("1.0")
+        // Test current version (1.1)
+        val validResult = VersionManager.validateClientVersion("1.1")
         assertIs<VersionValidationResult.Valid>(validResult)
-        assertEquals("1.0", validResult.version)
+        assertEquals("1.1", validResult.version)
+
+        // Test the deprecated version (1.0)
+        val deprecatedResult = VersionManager.validateClientVersion("1.0")
+        assertIs<VersionValidationResult.DeprecatedVersion>(deprecatedResult)
+        assertEquals("1.0", deprecatedResult.version)
 
         // Test unsupported version
         val unsupportedResult = VersionManager.validateClientVersion("2.0")
@@ -35,7 +40,8 @@ class VersioningTest {
     @Test
     fun testVersionManagerInfo() {
         val versionInfo = VersionManager.getVersionInfo()
-        assertEquals("1.0", versionInfo.apiVersion)
+        assertEquals("1.1", versionInfo.apiVersion)
+        assertTrue(versionInfo.supportedVersions.contains("1.1"))
         assertTrue(versionInfo.supportedVersions.contains("1.0"))
         assertEquals("1.0", versionInfo.minimumClientVersion)
     }
@@ -110,7 +116,9 @@ class VersioningTest {
     @Test
     fun testVersionSupport() {
         assertTrue(VersionManager.isVersionSupported("1.0"))
+        assertTrue(VersionManager.isVersionSupported("1.1"))
         assertTrue(!VersionManager.isVersionSupported("2.0"))
-        assertTrue(!VersionManager.isVersionDeprecated("1.0"))
+        assertTrue(VersionManager.isVersionDeprecated("1.0"))
+        assertTrue(!VersionManager.isVersionDeprecated("1.1"))
     }
 }

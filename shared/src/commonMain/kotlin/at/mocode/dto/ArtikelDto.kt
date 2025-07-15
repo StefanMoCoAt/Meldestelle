@@ -20,11 +20,13 @@ data class ArtikelDto(
     val preis: BigDecimal,
     val einheit: String,
     val istVerbandsabgabe: Boolean,
+    @Since("1.1")
+    val kategorie: String? = null, // New field in version 1.1
     @Serializable(with = KotlinInstantSerializer::class)
     val createdAt: Instant,
     @Serializable(with = KotlinInstantSerializer::class)
     val updatedAt: Instant,
-    override val schemaVersion: String = "1.0",
+    override val schemaVersion: String = "1.1",
     override val dataVersion: Long? = null
 ) : VersionedDto
 
@@ -36,7 +38,9 @@ data class CreateArtikelDto(
     val preis: BigDecimal,
     val einheit: String,
     val istVerbandsabgabe: Boolean = false,
-    override val schemaVersion: String = "1.0",
+    @Since("1.1")
+    val kategorie: String? = null, // New field in version 1.1
+    override val schemaVersion: String = "1.1",
     override val dataVersion: Long? = null
 ) : VersionedDto
 
@@ -48,6 +52,8 @@ data class UpdateArtikelDto(
     val preis: BigDecimal,
     val einheit: String,
     val istVerbandsabgabe: Boolean = false,
-    override val schemaVersion: String = "1.0",
+    @Since("1.1")
+    val kategorie: String? = null, // New field in version 1.1
+    override val schemaVersion: String = "1.1",
     override val dataVersion: Long? = null
 ) : VersionedDto

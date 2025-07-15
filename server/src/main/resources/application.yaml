@@ -2,7 +2,7 @@
 ktor:
   deployment:
     # Server port configuration - can be overridden with SERVER_PORT environment variable
-    port: 8080
+    port: 8081
     # Connection timeout in seconds
     connectionTimeout: 30
     # Maximum number of concurrent connections

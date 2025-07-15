@@ -19,6 +19,7 @@ data class Artikel(
     var preis: BigDecimal,
     var einheit: String,
     var istVerbandsabgabe: Boolean = false,
+    var kategorie: String? = null, // New field for version 1.1
     @Serializable(with = KotlinInstantSerializer::class)
     val createdAt: Instant = Clock.System.now(),
     @Serializable(with = KotlinInstantSerializer::class)

@@ -1,14 +1,22 @@
 package at.mocode.services
 
+import at.mocode.events.EventPublisher
+import at.mocode.events.TurnierCreatedEvent
+import at.mocode.events.TurnierDeletedEvent
+import at.mocode.events.TurnierUpdatedEvent
 import at.mocode.model.Turnier
 import at.mocode.repositories.TurnierRepository
+import at.mocode.utils.TransactionManager
 import com.benasher44.uuid.Uuid
 
 /**
  * Service layer for Turnier (Tournament) business logic.
  * Handles business rules, validation, and coordinates with the repository layer.
  */
-class TurnierService(private val turnierRepository: TurnierRepository) {
+class TurnierService(
+    private val turnierRepository: TurnierRepository,
+    private val eventPublisher: EventPublisher = EventPublisher.getInstance()
+) {
 
     /**
      * Retrieve all tournaments
@@ -54,7 +62,7 @@ class TurnierService(private val turnierRepository: TurnierRepository) {
     /**
      * Create a new tournament with business validation
      */
-    suspend fun createTurnier(turnier: Turnier): Turnier {
+    suspend fun createTurnier(turnier: Turnier): Turnier = TransactionManager.withTransaction {
         validateTurnier(turnier)
 
         // Check if OEPS tournament number already exists
@@ -65,14 +73,28 @@ class TurnierService(private val turnierRepository: TurnierRepository) {
             }
         }
 
-        return turnierRepository.create(turnier)
+        val createdTurnier = turnierRepository.create(turnier)
+
+        // Publish tournament created event
+        eventPublisher.publish(
+            TurnierCreatedEvent(
+                aggregateId = createdTurnier.id,
+                turnier = createdTurnier
+            )
+        )
+
+        return@withTransaction createdTurnier
     }
 
     /**
      * Update an existing tournament
      */
-    suspend fun updateTurnier(id: Uuid, turnier: Turnier): Turnier? {
+    suspend fun updateTurnier(id: Uuid, turnier: Turnier): Turnier? = TransactionManager.withTransaction {
         validateTurnier(turnier)
+
+        // Get the previous tournament for the event
+        val previousTurnier = turnierRepository.findById(id)
+            ?: throw IllegalArgumentException("Tournament with ID $id not found")
 
         // Check if the OEPS tournament number conflicts with another tournament
         turnier.oepsTurnierNr?.let { oepsNr ->
@@ -82,14 +104,42 @@ class TurnierService(private val turnierRepository: TurnierRepository) {
             }
         }
 
-        return turnierRepository.update(id, turnier)
+        val updatedTurnier = turnierRepository.update(id, turnier)
+
+        if (updatedTurnier != null) {
+            // Publish tournament updated event
+            eventPublisher.publish(
+                TurnierUpdatedEvent(
+                    aggregateId = updatedTurnier.id,
+                    previousTurnier = previousTurnier,
+                    updatedTurnier = updatedTurnier
+                )
+            )
+        }
+
+        return@withTransaction updatedTurnier
     }
 
     /**
      * Delete a tournament by ID
      */
     suspend fun deleteTurnier(id: Uuid): Boolean {
-        return turnierRepository.delete(id)
+        // Get the tournament before deletion for the event
+        val tournamentToDelete = turnierRepository.findById(id)
+
+        val deleted = turnierRepository.delete(id)
+
+        if (deleted && tournamentToDelete != null) {
+            // Publish tournament deleted event
+            eventPublisher.publish(
+                TurnierDeletedEvent(
+                    aggregateId = tournamentToDelete.id,
+                    deletedTurnier = tournamentToDelete
+                )
+            )
+        }
+
+        return deleted
     }
 
     /**
