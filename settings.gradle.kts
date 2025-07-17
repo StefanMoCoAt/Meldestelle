@@ -28,6 +28,10 @@ dependencyResolutionManagement {
     }
 }
 
-include(":composeApp")
-include(":server")
-include(":shared")
+// Self-Contained Systems modules
+include(":shared-kernel")
+include(":master-data")
+include(":member-management")
+include(":horse-registry")
+include(":event-management")
+include(":api-gateway")

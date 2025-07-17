@@ -1,23 +1,65 @@
-This is a Kotlin Multiplatform project targeting Web, Desktop, Server.
+# Meldestelle - Self-Contained Systems Architecture
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+This is a Kotlin JVM backend project implementing a Self-Contained Systems (SCS) architecture for an equestrian sport management system.
 
-* `/server` is for the Ktor server application.
+## Architecture Overview
 
-* `/shared` is for the code that will be shared between all targets in the project.
-  The most important subfolder is `commonMain`. If preferred, you can add code to the platform-specific folders here too.
+The project follows Domain-Driven Design (DDD) principles with clearly separated bounded contexts:
 
+### Implemented Modules
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+* **`shared-kernel`** - Common domain types, enums, serializers, validation utilities, and base DTOs
+* **`master-data`** - Master data management (countries, regions, age classes, venues)
+* **`member-management`** - Person and club/association management
+* **`horse-registry`** - Horse registration and management
+* **`api-gateway`** - Central API gateway aggregating all services
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [GitHub](https://github.com/JetBrains/compose-multiplatform/issues).
+### Module Dependencies
 
-You can open the web application by running the `:composeApp:wasmJsBrowserDevelopmentRun` Gradle task.
+```
+api-gateway
+├── shared-kernel
+├── master-data
+├── member-management
+└── horse-registry
+
+horse-registry
+├── shared-kernel
+└── member-management
+
+member-management
+├── shared-kernel
+└── master-data
+
+master-data
+└── shared-kernel
+```
+
+## Technology Stack
+
+- **Kotlin JVM** - Primary programming language
+- **Ktor** - Web framework for REST APIs
+- **Exposed** - Database ORM
+- **PostgreSQL** - Database
+- **Kotlinx Serialization** - JSON serialization
+- **Gradle** - Build system
+
+## Getting Started
+
+### Prerequisites
+- JDK 17 or higher
+- PostgreSQL database
+
+### Building the Project
+```bash
+./gradlew build
+```
+
+### Running the API Gateway
+```bash
+./gradlew :api-gateway:run
+```
+
+## Documentation
+
+See the `docs/` directory for detailed architecture documentation and diagrams.
