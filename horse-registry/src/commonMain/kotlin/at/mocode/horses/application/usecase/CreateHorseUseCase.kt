@@ -4,8 +4,13 @@ import at.mocode.horses.domain.model.DomPferd
 import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.enums.PferdeGeschlechtE
 import at.mocode.enums.DatenQuelleE
+import at.mocode.dto.base.ApiResponse
+import at.mocode.dto.base.ErrorDto
+import at.mocode.validation.ValidationResult
+import at.mocode.validation.ValidationError
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.todayIn
 
 /**
  * Use case for creating a new horse in the registry.
@@ -40,25 +45,17 @@ class CreateHorseUseCase(
         val mutterVaterName: String? = null,
         val stockmass: Int? = null,
         val bemerkungen: String? = null,
-        val datenQuelle: DatenQuelleE = DatenQuelleE.MANUAL
+        val datenQuelle: DatenQuelleE = DatenQuelleE.MANUELL
     )
 
-    /**
-     * Response data for horse creation.
-     */
-    data class CreateHorseResponse(
-        val horse: DomPferd,
-        val success: Boolean,
-        val errors: List<String> = emptyList()
-    )
 
     /**
      * Executes the horse creation use case.
      *
      * @param request The horse creation request data
-     * @return CreateHorseResponse with the created horse or validation errors
+     * @return ApiResponse with the created horse or validation errors
      */
-    suspend fun execute(request: CreateHorseRequest): CreateHorseResponse {
+    suspend fun execute(request: CreateHorseRequest): ApiResponse<DomPferd> {
         // Create domain object
         val horse = DomPferd(
             pferdeName = request.pferdeName,
@@ -84,102 +81,126 @@ class CreateHorseUseCase(
         )
 
         // Validate the horse
-        val validationErrors = validateHorse(horse)
-        if (validationErrors.isNotEmpty()) {
-            return CreateHorseResponse(
-                horse = horse,
+        val validationResult = validateHorse(horse)
+        if (!validationResult.isValid()) {
+            val errors = (validationResult as ValidationResult.Invalid).errors
+            return ApiResponse(
                 success = false,
-                errors = validationErrors
+                data = null,
+                error = ErrorDto(
+                    code = "VALIDATION_ERROR",
+                    message = "Horse validation failed",
+                    details = errors.associate { it.field to it.message }
+                )
             )
         }
 
         // Check for uniqueness constraints
-        val uniquenessErrors = checkUniquenessConstraints(horse)
-        if (uniquenessErrors.isNotEmpty()) {
-            return CreateHorseResponse(
-                horse = horse,
+        val uniquenessResult = checkUniquenessConstraints(horse)
+        if (!uniquenessResult.isValid()) {
+            val errors = (uniquenessResult as ValidationResult.Invalid).errors
+            return ApiResponse(
                 success = false,
-                errors = uniquenessErrors
+                data = null,
+                error = ErrorDto(
+                    code = "UNIQUENESS_ERROR",
+                    message = "Horse uniqueness validation failed",
+                    details = errors.associate { it.field to it.message }
+                )
             )
         }
 
         // Save the horse
         val savedHorse = horseRepository.save(horse)
 
-        return CreateHorseResponse(
-            horse = savedHorse,
-            success = true
+        return ApiResponse(
+            success = true,
+            data = savedHorse,
+            message = "Horse created successfully"
         )
     }
 
     /**
      * Validates the horse data according to business rules.
      */
-    private fun validateHorse(horse: DomPferd): List<String> {
-        val errors = mutableListOf<String>()
+    private fun validateHorse(horse: DomPferd): ValidationResult {
+        val errors = mutableListOf<ValidationError>()
 
         // Use domain validation
-        errors.addAll(horse.validateForRegistration())
+        val domainErrors = horse.validateForRegistration()
+        domainErrors.forEach { errorMessage ->
+            errors.add(ValidationError("horse", errorMessage, "DOMAIN_VALIDATION"))
+        }
 
         // Additional business validations
-        if (horse.stockmass != null && (horse.stockmass!! < 50 || horse.stockmass!! > 220)) {
-            errors.add("Horse height must be between 50 and 220 cm")
+        horse.stockmass?.let { height ->
+            if (height < 50 || height > 220) {
+                errors.add(ValidationError("stockmass", "Horse height must be between 50 and 220 cm", "INVALID_RANGE"))
+            }
         }
 
-        if (horse.geburtsdatum != null) {
+        horse.geburtsdatum?.let { birthDate ->
             val currentYear = kotlinx.datetime.Clock.System.todayIn(kotlinx.datetime.TimeZone.currentSystemDefault()).year
-            if (horse.geburtsdatum!!.year > currentYear) {
-                errors.add("Birth date cannot be in the future")
+            if (birthDate.year > currentYear) {
+                errors.add(ValidationError("geburtsdatum", "Birth date cannot be in the future", "FUTURE_DATE"))
             }
-            if (horse.geburtsdatum!!.year < (currentYear - 50)) {
-                errors.add("Birth date cannot be more than 50 years ago")
+            if (birthDate.year < (currentYear - 50)) {
+                errors.add(ValidationError("geburtsdatum", "Birth date cannot be more than 50 years ago", "TOO_OLD"))
             }
         }
 
-        return errors
+        return if (errors.isEmpty()) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(errors)
+        }
     }
 
     /**
      * Checks uniqueness constraints for identification numbers.
      */
-    private suspend fun checkUniquenessConstraints(horse: DomPferd): List<String> {
-        val errors = mutableListOf<String>()
+    private suspend fun checkUniquenessConstraints(horse: DomPferd): ValidationResult {
+        val errors = mutableListOf<ValidationError>()
 
         // Check lebensnummer uniqueness
         horse.lebensnummer?.let { lebensnummer ->
             if (lebensnummer.isNotBlank() && horseRepository.existsByLebensnummer(lebensnummer)) {
-                errors.add("A horse with this life number already exists")
+                errors.add(ValidationError("lebensnummer", "A horse with this life number already exists", "DUPLICATE"))
             }
         }
 
         // Check chip number uniqueness
         horse.chipNummer?.let { chipNummer ->
             if (chipNummer.isNotBlank() && horseRepository.existsByChipNummer(chipNummer)) {
-                errors.add("A horse with this chip number already exists")
+                errors.add(ValidationError("chipNummer", "A horse with this chip number already exists", "DUPLICATE"))
             }
         }
 
         // Check passport number uniqueness
         horse.passNummer?.let { passNummer ->
             if (passNummer.isNotBlank() && horseRepository.existsByPassNummer(passNummer)) {
-                errors.add("A horse with this passport number already exists")
+                errors.add(ValidationError("passNummer", "A horse with this passport number already exists", "DUPLICATE"))
             }
         }
 
         // Check OEPS number uniqueness
         horse.oepsNummer?.let { oepsNummer ->
             if (oepsNummer.isNotBlank() && horseRepository.existsByOepsNummer(oepsNummer)) {
-                errors.add("A horse with this OEPS number already exists")
+                errors.add(ValidationError("oepsNummer", "A horse with this OEPS number already exists", "DUPLICATE"))
             }
         }
 
         // Check FEI number uniqueness
         horse.feiNummer?.let { feiNummer ->
             if (feiNummer.isNotBlank() && horseRepository.existsByFeiNummer(feiNummer)) {
-                errors.add("A horse with this FEI number already exists")
+                errors.add(ValidationError("feiNummer", "A horse with this FEI number already exists", "DUPLICATE"))
             }
         }
 
-        return errors
+        return if (errors.isEmpty()) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(errors)
+        }
     }
 }

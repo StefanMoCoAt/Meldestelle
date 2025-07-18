@@ -7,6 +7,11 @@ import at.mocode.masterdata.application.usecase.CreateCountryUseCase
 import at.mocode.masterdata.application.usecase.GetCountryUseCase
 import at.mocode.masterdata.infrastructure.api.CountryController
 import at.mocode.masterdata.infrastructure.repository.LandRepositoryImpl
+import at.mocode.members.domain.service.AuthenticationService
+import at.mocode.members.domain.service.JwtService
+import at.mocode.members.domain.service.UserAuthorizationService
+import at.mocode.members.domain.service.PasswordService
+import at.mocode.members.infrastructure.repository.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -24,6 +29,29 @@ fun Application.configureRouting() {
     // Initialize repository implementations for each context
     val landRepository = LandRepositoryImpl()
     val horseRepository = HorseRepositoryImpl()
+
+    // Initialize authentication repositories
+    val userRepository = UserRepositoryImpl()
+    val personRolleRepository = PersonRolleRepositoryImpl()
+    val rolleRepository = RolleRepositoryImpl()
+    val rolleBerechtigungRepository = RolleBerechtigungRepositoryImpl()
+    val berechtigungRepository = BerechtigungRepositoryImpl()
+
+    // Initialize authentication services
+    val passwordService = PasswordService()
+    val userAuthorizationService = UserAuthorizationService(
+        userRepository,
+        personRolleRepository,
+        rolleRepository,
+        rolleBerechtigungRepository,
+        berechtigungRepository
+    )
+    val jwtService = JwtService(userAuthorizationService)
+    val authenticationService = AuthenticationService(
+        userRepository,
+        passwordService,
+        jwtService
+    )
 
     // Initialize use cases
     val getCountryUseCase = GetCountryUseCase(landRepository)
@@ -43,10 +71,12 @@ fun Application.configureRouting() {
                     version = "1.0.0",
                     description = "Self-Contained Systems API Gateway for Austrian Equestrian Federation",
                     availableContexts = listOf(
+                        "authentication",
                         "master-data",
                         "horse-registry"
                     ),
                     endpoints = mapOf(
+                        "authentication" to "/auth/*",
                         "master-data" to "/api/masterdata/*",
                         "horse-registry" to "/api/horses/*"
                     )
@@ -60,6 +90,7 @@ fun Application.configureRouting() {
                 HealthStatus(
                     status = "UP",
                     contexts = mapOf(
+                        "authentication" to "UP",
                         "master-data" to "UP",
                         "horse-registry" to "UP"
                     )
@@ -74,6 +105,11 @@ fun Application.configureRouting() {
                     title = "Meldestelle Self-Contained Systems API",
                     description = "Unified API Gateway for all bounded contexts",
                     contexts = listOf(
+                        ContextInfo(
+                            name = "Authentication Context",
+                            path = "/auth",
+                            description = "User authentication, registration, and profile management"
+                        ),
                         ContextInfo(
                             name = "Master Data Context",
                             path = "/api/masterdata",
@@ -90,6 +126,9 @@ fun Application.configureRouting() {
         }
 
         // Configure routes for each bounded context
+
+        // Authentication Routes
+        authRoutes(authenticationService, jwtService)
 
         // Master Data Context Routes
         countryController.configureRoutes(this)

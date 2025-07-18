@@ -6,6 +6,9 @@ import at.mocode.members.domain.model.DomPerson
 import at.mocode.members.domain.repository.PersonRepository
 import at.mocode.members.domain.repository.VereinRepository
 import at.mocode.members.domain.service.MasterDataService
+import at.mocode.validation.ValidationUtils
+import at.mocode.validation.ValidationResult
+import at.mocode.validation.ValidationError
 import kotlinx.datetime.Clock
 
 /**
@@ -68,14 +71,15 @@ class CreatePersonUseCase(
     suspend fun execute(request: CreatePersonRequest): ApiResponse<CreatePersonResponse> {
         try {
             // Validate required fields
-            val validationErrors = validateRequest(request)
-            if (validationErrors.isNotEmpty()) {
+            val validationResult = validateRequest(request)
+            if (!validationResult.isValid()) {
+                val errors = (validationResult as ValidationResult.Invalid).errors
                 return ApiResponse(
                     success = false,
                     error = ErrorDto(
                         code = "VALIDATION_ERROR",
                         message = "Invalid input data",
-                        details = validationErrors
+                        details = errors.associate { it.field to it.message }
                     )
                 )
             }
@@ -94,14 +98,15 @@ class CreatePersonUseCase(
             }
 
             // Validate referenced entities
-            val entityValidationErrors = validateReferencedEntities(request)
-            if (entityValidationErrors.isNotEmpty()) {
+            val entityValidationResult = validateReferencedEntities(request)
+            if (!entityValidationResult.isValid()) {
+                val errors = (entityValidationResult as ValidationResult.Invalid).errors
                 return ApiResponse(
                     success = false,
                     error = ErrorDto(
                         code = "INVALID_REFERENCES",
                         message = "Referenced entities not found",
-                        details = entityValidationErrors
+                        details = errors.associate { it.field to it.message }
                     )
                 )
             }
@@ -154,50 +159,73 @@ class CreatePersonUseCase(
         }
     }
 
-    private fun validateRequest(request: CreatePersonRequest): Map<String, String> {
-        val errors = mutableMapOf<String, String>()
+    private fun validateRequest(request: CreatePersonRequest): ValidationResult {
+        val errors = mutableListOf<ValidationError>()
 
-        if (request.nachname.isBlank()) {
-            errors["nachname"] = "Last name is required"
+        // Validate required fields using ValidationUtils
+        ValidationUtils.validateNotBlank(request.nachname, "nachname")?.let { error ->
+            errors.add(error)
         }
 
-        if (request.vorname.isBlank()) {
-            errors["vorname"] = "First name is required"
+        ValidationUtils.validateNotBlank(request.vorname, "vorname")?.let { error ->
+            errors.add(error)
         }
 
-        if (request.oepsSatzNr != null && request.oepsSatzNr.length != 6) {
-            errors["oepsSatzNr"] = "OEPS Satznummer must be exactly 6 digits"
+        // Validate OEPS Satz number using ValidationUtils
+        ValidationUtils.validateOepsSatzNr(request.oepsSatzNr, "oepsSatzNr")?.let { error ->
+            errors.add(error)
         }
 
-        if (request.email != null && !isValidEmail(request.email)) {
-            errors["email"] = "Invalid email format"
+        // Validate email using ValidationUtils
+        ValidationUtils.validateEmail(request.email, "email")?.let { error ->
+            errors.add(error)
         }
 
-        return errors
+        // Validate phone number using ValidationUtils
+        ValidationUtils.validatePhoneNumber(request.telefon, "telefon")?.let { error ->
+            errors.add(error)
+        }
+
+        // Validate postal code using ValidationUtils
+        ValidationUtils.validatePostalCode(request.plz, "plz")?.let { error ->
+            errors.add(error)
+        }
+
+        // Validate birth date using ValidationUtils
+        ValidationUtils.validateBirthDate(request.geburtsdatum, "geburtsdatum")?.let { error ->
+            errors.add(error)
+        }
+
+        return if (errors.isEmpty()) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(errors)
+        }
     }
 
-    private suspend fun validateReferencedEntities(request: CreatePersonRequest): Map<String, String> {
-        val errors = mutableMapOf<String, String>()
+    private suspend fun validateReferencedEntities(request: CreatePersonRequest): ValidationResult {
+        val errors = mutableListOf<ValidationError>()
 
         // Validate club reference
         if (request.stammVereinId != null) {
             val verein = vereinRepository.findById(request.stammVereinId)
             if (verein == null) {
-                errors["stammVereinId"] = "Referenced club not found"
+                errors.add(ValidationError("stammVereinId", "Referenced club not found", "NOT_FOUND"))
             }
         }
 
         // Validate country reference
         if (request.nationalitaetLandId != null) {
             if (!masterDataService.countryExists(request.nationalitaetLandId)) {
-                errors["nationalitaetLandId"] = "Referenced country not found"
+                errors.add(ValidationError("nationalitaetLandId", "Referenced country not found", "NOT_FOUND"))
             }
         }
 
-        return errors
+        return if (errors.isEmpty()) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(errors)
+        }
     }
 
-    private fun isValidEmail(email: String): Boolean {
-        return email.contains("@") && email.contains(".")
-    }
 }

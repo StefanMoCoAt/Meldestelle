@@ -6,6 +6,7 @@ import at.mocode.enums.PferdeGeschlechtE
 import at.mocode.enums.DatenQuelleE
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.todayIn
 
 /**
  * Use case for updating an existing horse in the registry.
@@ -42,7 +43,7 @@ class UpdateHorseUseCase(
         val stockmass: Int? = null,
         val istAktiv: Boolean = true,
         val bemerkungen: String? = null,
-        val datenQuelle: DatenQuelleE = DatenQuelleE.MANUAL
+        val datenQuelle: DatenQuelleE = DatenQuelleE.MANUELL
     )
 
     /**
@@ -135,17 +136,19 @@ class UpdateHorseUseCase(
         }
 
         // Height validation
-        if (horse.stockmass != null && (horse.stockmass!! < 50 || horse.stockmass!! > 220)) {
-            errors.add("Horse height must be between 50 and 220 cm")
+        horse.stockmass?.let { height ->
+            if (height < 50 || height > 220) {
+                errors.add("Horse height must be between 50 and 220 cm")
+            }
         }
 
         // Birth date validation
-        if (horse.geburtsdatum != null) {
+        horse.geburtsdatum?.let { birthDate ->
             val currentYear = kotlinx.datetime.Clock.System.todayIn(kotlinx.datetime.TimeZone.currentSystemDefault()).year
-            if (horse.geburtsdatum!!.year > currentYear) {
+            if (birthDate.year > currentYear) {
                 errors.add("Birth date cannot be in the future")
             }
-            if (horse.geburtsdatum!!.year < (currentYear - 50)) {
+            if (birthDate.year < (currentYear - 50)) {
                 errors.add("Birth date cannot be more than 50 years ago")
             }
         }

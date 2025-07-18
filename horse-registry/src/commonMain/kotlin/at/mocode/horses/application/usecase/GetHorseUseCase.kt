@@ -4,6 +4,7 @@ import at.mocode.horses.domain.model.DomPferd
 import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.enums.PferdeGeschlechtE
 import com.benasher44.uuid.Uuid
+import kotlinx.datetime.todayIn
 
 /**
  * Use case for retrieving horse information.

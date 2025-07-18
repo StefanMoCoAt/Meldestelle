@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.slf4j.LoggerFactory
 
 /**
  * Database configuration for the API Gateway.
@@ -11,6 +12,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
  * Sets up database connections and schema initialization for all bounded contexts.
  */
 fun Application.configureDatabase() {
+    val log = LoggerFactory.getLogger("DatabaseConfig")
     val databaseUrl = environment.config.propertyOrNull("database.url")?.getString()
         ?: "jdbc:postgresql://localhost:5432/meldestelle"
     val databaseUser = environment.config.propertyOrNull("database.user")?.getString()
@@ -44,6 +46,11 @@ fun Application.configureDatabase() {
             // Horse Registry Context tables
             SchemaUtils.createMissingTablesAndColumns(
                 at.mocode.horses.infrastructure.repository.HorseTable
+            )
+
+            // Event Management Context tables
+            SchemaUtils.createMissingTablesAndColumns(
+                at.mocode.events.infrastructure.repository.VeranstaltungTable
             )
 
             log.info("Database schemas initialized successfully")

@@ -47,7 +47,7 @@ object HorseTable : UUIDTable("horses") {
     // Status and Administrative
     val istAktiv = bool("ist_aktiv").default(true)
     val bemerkungen = text("bemerkungen").nullable()
-    val datenQuelle = enumerationByName<DatenQuelleE>("daten_quelle", 20).default(DatenQuelleE.MANUAL)
+    val datenQuelle = enumerationByName<DatenQuelleE>("daten_quelle", 20).default(DatenQuelleE.MANUELL)
 
     // Audit Fields
     val createdAt = timestamp("created_at")

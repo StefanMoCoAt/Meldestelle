@@ -4,6 +4,8 @@ import at.mocode.gateway.config.configureDatabase
 import at.mocode.gateway.config.configureSerialization
 import at.mocode.gateway.config.configureMonitoring
 import at.mocode.gateway.config.configureSecurity
+import at.mocode.gateway.config.configureOpenApi
+import at.mocode.gateway.config.configureSwagger
 import at.mocode.gateway.routing.configureRouting
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -36,6 +38,10 @@ fun Application.module() {
     configureSerialization()
     configureMonitoring()
     configureSecurity()
+
+    // Configure API documentation
+    configureOpenApi()
+    configureSwagger()
 
     // Configure routing - aggregates all bounded context routes
     configureRouting()

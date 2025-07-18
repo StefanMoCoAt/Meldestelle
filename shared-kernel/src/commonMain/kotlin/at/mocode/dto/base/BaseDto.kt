@@ -35,7 +35,34 @@ data class ApiResponse<T>(
     val data: T? = null,
     val error: ErrorDto? = null,
     val message: String? = null
-) : BaseDto
+) : BaseDto {
+    companion object {
+        /**
+         * Creates a successful API response with data
+         */
+        fun <T> success(data: T, message: String? = null): ApiResponse<T> {
+            return ApiResponse(
+                success = true,
+                data = data,
+                message = message
+            )
+        }
+
+        /**
+         * Creates an error API response
+         */
+        fun <T> error(message: String, code: String = "ERROR", details: Map<String, String>? = null): ApiResponse<T> {
+            return ApiResponse(
+                success = false,
+                error = ErrorDto(
+                    code = code,
+                    message = message,
+                    details = details
+                )
+            )
+        }
+    }
+}
 
 /**
  * Error information DTO
@@ -66,3 +93,4 @@ data class PagedResponse<T>(
     val data: List<T>,
     val pagination: PaginationDto
 ) : BaseDto
+

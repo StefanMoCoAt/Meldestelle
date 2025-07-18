@@ -9,6 +9,7 @@ import com.benasher44.uuid.uuid4
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.todayIn
 import kotlinx.serialization.Serializable
 
 /**
@@ -83,7 +84,7 @@ data class DomPferd(
     // Status and Administrative
     var istAktiv: Boolean = true,
     var bemerkungen: String? = null,
-    var datenQuelle: DatenQuelleE = DatenQuelleE.MANUAL,
+    var datenQuelle: DatenQuelleE = DatenQuelleE.MANUELL,
 
     // Audit Fields
     @Serializable(with = KotlinInstantSerializer::class)
@@ -95,11 +96,9 @@ data class DomPferd(
      * Returns the display name for the horse, combining name and birth year if available.
      */
     fun getDisplayName(): String {
-        return if (geburtsdatum != null) {
-            "$pferdeName (${geburtsdatum!!.year})"
-        } else {
-            pferdeName
-        }
+        return geburtsdatum?.let { birthDate ->
+            "$pferdeName (${birthDate.year})"
+        } ?: pferdeName
     }
 
     /**
@@ -131,7 +130,15 @@ data class DomPferd(
     fun getAge(): Int? {
         return geburtsdatum?.let { birthDate ->
             val today = kotlinx.datetime.Clock.System.todayIn(kotlinx.datetime.TimeZone.currentSystemDefault())
-            today.year - birthDate.year - if (today.dayOfYear < birthDate.dayOfYear) 1 else 0
+            var age = today.year - birthDate.year
+
+            // Check if birthday has occurred this year
+            if (today.monthNumber < birthDate.monthNumber ||
+                (today.monthNumber == birthDate.monthNumber && today.dayOfMonth < birthDate.dayOfMonth)) {
+                age--
+            }
+
+            age
         }
     }
 

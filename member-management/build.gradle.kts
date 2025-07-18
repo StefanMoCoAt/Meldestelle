@@ -18,6 +18,10 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.uuid)
+            implementation(libs.exposed.core)
+            implementation(libs.exposed.dao)
+            implementation(libs.exposed.jdbc)
+            implementation(libs.exposed.kotlinDatetime)
         }
 
         commonTest.dependencies {

@@ -39,6 +39,8 @@ kotlin {
             implementation(libs.ktor.server.callLogging)
             implementation(libs.ktor.server.statusPages)
             implementation(libs.ktor.server.serializationKotlinxJson)
+            implementation(libs.ktor.server.openapi)
+            implementation(libs.ktor.server.swagger)
             implementation(libs.logback)
         }
 

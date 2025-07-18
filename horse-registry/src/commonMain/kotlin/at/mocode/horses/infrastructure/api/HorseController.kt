@@ -292,7 +292,7 @@ class HorseController(
         val stockmass: Int? = null,
         val istAktiv: Boolean = true,
         val bemerkungen: String? = null,
-        val datenQuelle: at.mocode.enums.DatenQuelleE = at.mocode.enums.DatenQuelleE.MANUAL
+        val datenQuelle: at.mocode.enums.DatenQuelleE = at.mocode.enums.DatenQuelleE.MANUELL
     )
 
     /**

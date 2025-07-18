@@ -6,7 +6,7 @@ kotlinxSerialization = "1.8.1"
 kotlinxDatetime = "0.6.1"
 
 # Kotlin Wrappers for JS
-kotlinWrappers = "2025.3.26-19.1.0"
+kotlinWrappers = "1.0.0-pre.761"
 
 # Compose
 composeMultiplatform = "1.8.0" #"1.7.3"
