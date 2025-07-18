@@ -1,0 +1,212 @@
+package at.mocode.ui.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import at.mocode.members.domain.model.DomPerson
+import at.mocode.enums.GeschlechtE
+import at.mocode.enums.DatenQuelleE
+import at.mocode.ui.viewmodel.PersonListViewModel
+import kotlinx.datetime.LocalDate
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PersonListScreen(
+    viewModel: PersonListViewModel,
+    onNavigateToCreatePerson: () -> Unit
+) {
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToCreatePerson
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Person hinzufügen")
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Personen",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            // Error handling
+            viewModel.errorMessage?.let { error ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = error,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(
+                            onClick = { viewModel.clearError() }
+                        ) {
+                            Text("OK")
+                        }
+                    }
+                }
+            }
+
+            // Loading indicator
+            if (viewModel.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            if (!viewModel.isLoading && viewModel.persons.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Keine Personen vorhanden",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(viewModel.persons) { person ->
+                        PersonCard(person = person)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PersonCard(person: DomPerson) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "${person.titel?.let { "$it " } ?: ""}${person.vorname} ${person.nachname}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    person.oepsSatzNr?.let { oepsNr ->
+                        Text(
+                            text = "OEPS: $oepsNr",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    person.geburtsdatum?.let { birthDate ->
+                        Text(
+                            text = "Geboren: $birthDate",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Surface(
+                    color = when (person.datenQuelle) {
+                        DatenQuelleE.OEPS_ZNS -> MaterialTheme.colorScheme.primaryContainer
+                        DatenQuelleE.MANUELL -> MaterialTheme.colorScheme.secondaryContainer
+                    },
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text(
+                        text = when (person.datenQuelle) {
+                            DatenQuelleE.OEPS_ZNS -> "OEPS"
+                            DatenQuelleE.MANUELL -> "Manuell"
+                        },
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = when (person.datenQuelle) {
+                            DatenQuelleE.OEPS_ZNS -> MaterialTheme.colorScheme.onPrimaryContainer
+                            DatenQuelleE.MANUELL -> MaterialTheme.colorScheme.onSecondaryContainer
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            person.email?.let { email ->
+                Text(
+                    text = "📧 $email",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            person.telefon?.let { phone ->
+                Text(
+                    text = "📞 $phone",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (person.strasse != null && person.plz != null && person.ort != null) {
+                Text(
+                    text = "📍 ${person.strasse}, ${person.plz} ${person.ort}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}

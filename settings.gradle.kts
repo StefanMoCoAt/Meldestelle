@@ -35,3 +35,6 @@ include(":member-management")
 include(":horse-registry")
 include(":event-management")
 include(":api-gateway")
+
+// Frontend module
+include(":composeApp")
