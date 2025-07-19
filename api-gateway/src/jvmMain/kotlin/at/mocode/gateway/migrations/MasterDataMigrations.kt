@@ -1,8 +1,9 @@
 package at.mocode.gateway.migrations
 
 import at.mocode.shared.database.Migration
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.kotlin.datetime.datetime
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.batchInsert
 
 /**
  * Migration zur Erstellung der Stammdaten-Tabellen.
