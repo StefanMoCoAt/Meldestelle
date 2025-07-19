@@ -3,12 +3,9 @@ package at.mocode.horses.infrastructure.repository
 import at.mocode.enums.PferdeGeschlechtE
 import at.mocode.horses.domain.model.DomPferd
 import at.mocode.horses.domain.repository.HorseRepository
-import at.mocode.horses.infrastructure.repository.HorseTable
 import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.statements.UpdateBuilder

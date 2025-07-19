@@ -7,9 +7,9 @@ import at.mocode.members.infrastructure.table.RolleTable
 import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.TimeZone
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
@@ -67,24 +67,24 @@ class RolleRepositoryImpl : RolleRepository {
     }
 
     override suspend fun findById(rolleId: Uuid): DomRolle? = DatabaseFactory.dbQuery {
-        RolleTable.select { RolleTable.id eq rolleId }
+        RolleTable.selectAll().where { RolleTable.id eq rolleId }
             .map(::rowToDomRolle)
             .singleOrNull()
     }
 
     override suspend fun findByTyp(rolleTyp: RolleE): DomRolle? = DatabaseFactory.dbQuery {
-        RolleTable.select { RolleTable.rolleTyp eq rolleTyp }
+        RolleTable.selectAll().where { RolleTable.rolleTyp eq rolleTyp }
             .map(::rowToDomRolle)
             .singleOrNull()
     }
 
     override suspend fun findByName(name: String): List<DomRolle> = DatabaseFactory.dbQuery {
-        RolleTable.select { RolleTable.name like "%$name%" }
+        RolleTable.selectAll().where { RolleTable.name like "%$name%" }
             .map(::rowToDomRolle)
     }
 
     override suspend fun findAllActive(): List<DomRolle> = DatabaseFactory.dbQuery {
-        RolleTable.select { RolleTable.istAktiv eq true }
+        RolleTable.selectAll().where { RolleTable.istAktiv eq true }
             .map(::rowToDomRolle)
     }
 
@@ -122,7 +122,7 @@ class RolleRepositoryImpl : RolleRepository {
     }
 
     override suspend fun existsByTyp(rolleTyp: RolleE): Boolean = DatabaseFactory.dbQuery {
-        RolleTable.select { RolleTable.rolleTyp eq rolleTyp }
+        RolleTable.selectAll().where { RolleTable.rolleTyp eq rolleTyp }
             .count() > 0
     }
 }

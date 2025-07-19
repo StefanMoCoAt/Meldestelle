@@ -3,7 +3,6 @@ package at.mocode.events.infrastructure.repository
 import at.mocode.enums.SparteE
 import at.mocode.events.domain.model.Veranstaltung
 import at.mocode.events.domain.repository.VeranstaltungRepository
-import at.mocode.events.infrastructure.repository.VeranstaltungTable
 import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
@@ -143,7 +142,7 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
         val sparten = if (spartenJson.isNotBlank()) {
             try {
                 Json.decodeFromString<List<SparteE>>(spartenJson)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 emptyList()
             }
         } else {

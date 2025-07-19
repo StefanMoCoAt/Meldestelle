@@ -7,9 +7,9 @@ import at.mocode.members.infrastructure.table.BerechtigungTable
 import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.TimeZone
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
@@ -73,34 +73,34 @@ class BerechtigungRepositoryImpl : BerechtigungRepository {
     }
 
     override suspend fun findById(berechtigungId: Uuid): DomBerechtigung? = DatabaseFactory.dbQuery {
-        BerechtigungTable.select { BerechtigungTable.id eq berechtigungId }
+        BerechtigungTable.selectAll().where { BerechtigungTable.id eq berechtigungId }
             .map(::rowToDomBerechtigung)
             .singleOrNull()
     }
 
     override suspend fun findByTyp(berechtigungTyp: BerechtigungE): DomBerechtigung? = DatabaseFactory.dbQuery {
-        BerechtigungTable.select { BerechtigungTable.berechtigungTyp eq berechtigungTyp }
+        BerechtigungTable.selectAll().where { BerechtigungTable.berechtigungTyp eq berechtigungTyp }
             .map(::rowToDomBerechtigung)
             .singleOrNull()
     }
 
     override suspend fun findByName(name: String): List<DomBerechtigung> = DatabaseFactory.dbQuery {
-        BerechtigungTable.select { BerechtigungTable.name like "%$name%" }
+        BerechtigungTable.selectAll().where { BerechtigungTable.name like "%$name%" }
             .map(::rowToDomBerechtigung)
     }
 
     override suspend fun findByRessource(ressource: String): List<DomBerechtigung> = DatabaseFactory.dbQuery {
-        BerechtigungTable.select { BerechtigungTable.ressource eq ressource }
+        BerechtigungTable.selectAll().where { BerechtigungTable.ressource eq ressource }
             .map(::rowToDomBerechtigung)
     }
 
     override suspend fun findByAktion(aktion: String): List<DomBerechtigung> = DatabaseFactory.dbQuery {
-        BerechtigungTable.select { BerechtigungTable.aktion eq aktion }
+        BerechtigungTable.selectAll().where { BerechtigungTable.aktion eq aktion }
             .map(::rowToDomBerechtigung)
     }
 
     override suspend fun findAllActive(): List<DomBerechtigung> = DatabaseFactory.dbQuery {
-        BerechtigungTable.select { BerechtigungTable.istAktiv eq true }
+        BerechtigungTable.selectAll().where { BerechtigungTable.istAktiv eq true }
             .map(::rowToDomBerechtigung)
     }
 
@@ -138,7 +138,7 @@ class BerechtigungRepositoryImpl : BerechtigungRepository {
     }
 
     override suspend fun existsByTyp(berechtigungTyp: BerechtigungE): Boolean = DatabaseFactory.dbQuery {
-        BerechtigungTable.select { BerechtigungTable.berechtigungTyp eq berechtigungTyp }
+        BerechtigungTable.selectAll().where { BerechtigungTable.berechtigungTyp eq berechtigungTyp }
             .count() > 0
     }
 }

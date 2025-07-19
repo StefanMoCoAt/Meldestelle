@@ -1,6 +1,5 @@
 package at.mocode.members.domain.repository
 
-import at.mocode.members.domain.model.DomBerechtigung
 import at.mocode.members.domain.model.DomRolleBerechtigung
 import com.benasher44.uuid.Uuid
 

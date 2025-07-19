@@ -71,7 +71,7 @@ actual class JwtService(private val userAuthorizationService: UserAuthorizationS
             val permissions = permissionStrings.mapNotNull { permString ->
                 try {
                     BerechtigungE.valueOf(permString)
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     null
                 }
             }
@@ -84,7 +84,7 @@ actual class JwtService(private val userAuthorizationService: UserAuthorizationS
                 issuedAt = Instant.fromEpochMilliseconds(jwt.issuedAt.time),
                 expiresAt = Instant.fromEpochMilliseconds(jwt.expiresAt.time)
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }

@@ -78,17 +78,17 @@ class AuthenticationService(
      * @return RegisterResult mit dem Ergebnis der Registrierung
      */
     suspend fun registerUser(username: String, email: String, password: String, personId: Uuid): RegisterResult {
-        // Prüfen, ob Benutzername bereits existiert
+        // Prüfen, ob der Benutzername bereits existiert
         if (userRepository.findByUsername(username) != null) {
             return RegisterResult.Failure("Benutzername wird bereits verwendet")
         }
 
-        // Prüfen, ob E-Mail bereits existiert
+        // Prüfen, ob eine E-Mail bereits existiert
         if (userRepository.findByEmail(email) != null) {
             return RegisterResult.Failure("E-Mail-Adresse wird bereits verwendet")
         }
 
-        // Prüfen, ob Person bereits einen Benutzer hat
+        // Prüfen, ob eine Person bereits einen Benutzer hat
         if (userRepository.findByPersonId(personId) != null) {
             return RegisterResult.Failure("Diese Person hat bereits einen Benutzeraccount")
         }

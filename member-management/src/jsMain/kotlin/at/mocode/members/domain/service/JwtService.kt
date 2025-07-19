@@ -8,8 +8,6 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 
 /**
  * Service für die Erstellung und Validierung von JWT-Tokens.
@@ -114,7 +112,7 @@ actual class JwtService(private val userAuthorizationService: UserAuthorizationS
             val permissions = payload.permissions.mapNotNull { permString ->
                 try {
                     BerechtigungE.valueOf(permString)
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     null
                 }
             }
@@ -127,7 +125,7 @@ actual class JwtService(private val userAuthorizationService: UserAuthorizationS
                 issuedAt = Instant.fromEpochSeconds(payload.iat),
                 expiresAt = Instant.fromEpochSeconds(payload.exp)
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -162,6 +160,6 @@ actual class JwtService(private val userAuthorizationService: UserAuthorizationS
             bytes[i] = hexPair.toInt(16).toByte()
         }
 
-        return Uuid(bytes)
+        return uuidOf(bytes)
     }
 }

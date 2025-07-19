@@ -1,6 +1,5 @@
 package at.mocode.validation
 
-import at.mocode.dto.base.ApiResponse
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import kotlinx.datetime.LocalDate
@@ -19,7 +18,7 @@ object ApiValidationUtils {
 
         return try {
             uuidFrom(uuidString)
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             null
         }
     }
@@ -44,7 +43,7 @@ object ApiValidationUtils {
                 if (limitValue < 1 || limitValue > 1000) {
                     errors.add(ValidationError("limit", "Limit must be between 1 and 1000", "INVALID_RANGE"))
                 }
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 errors.add(ValidationError("limit", "Limit must be a valid integer", "INVALID_FORMAT"))
             }
         }
@@ -56,7 +55,7 @@ object ApiValidationUtils {
                 if (offsetValue < 0) {
                     errors.add(ValidationError("offset", "Offset must be non-negative", "INVALID_RANGE"))
                 }
-            } catch (e: NumberFormatException) {
+            } catch (_: NumberFormatException) {
                 errors.add(ValidationError("offset", "Offset must be a valid integer", "INVALID_FORMAT"))
             }
         }
@@ -65,7 +64,7 @@ object ApiValidationUtils {
         startDate?.let { dateStr ->
             try {
                 LocalDate.parse(dateStr)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 errors.add(ValidationError("startDate", "Invalid date format. Use YYYY-MM-DD", "INVALID_FORMAT"))
             }
         }
@@ -73,7 +72,7 @@ object ApiValidationUtils {
         endDate?.let { dateStr ->
             try {
                 LocalDate.parse(dateStr)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 errors.add(ValidationError("endDate", "Invalid date format. Use YYYY-MM-DD", "INVALID_FORMAT"))
             }
         }

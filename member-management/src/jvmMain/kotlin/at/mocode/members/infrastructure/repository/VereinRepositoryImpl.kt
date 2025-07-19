@@ -2,7 +2,6 @@ package at.mocode.members.infrastructure.repository
 
 import at.mocode.members.domain.model.DomVerein
 import at.mocode.members.domain.repository.VereinRepository
-import at.mocode.members.infrastructure.repository.VereinTable
 import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
@@ -21,20 +20,20 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 class VereinRepositoryImpl : VereinRepository {
 
     override suspend fun findById(id: Uuid): DomVerein? = DatabaseFactory.dbQuery {
-        VereinTable.select { VereinTable.id eq id }
+        VereinTable.selectAll().where { VereinTable.id eq id }
             .map { rowToDomVerein(it) }
             .singleOrNull()
     }
 
     override suspend fun findByOepsVereinsNr(oepsVereinsNr: String): DomVerein? = DatabaseFactory.dbQuery {
-        VereinTable.select { VereinTable.oepsVereinsNr eq oepsVereinsNr }
+        VereinTable.selectAll().where { VereinTable.oepsVereinsNr eq oepsVereinsNr }
             .map { rowToDomVerein(it) }
             .singleOrNull()
     }
 
     override suspend fun findByName(searchTerm: String, limit: Int): List<DomVerein> = DatabaseFactory.dbQuery {
         val searchPattern = "%$searchTerm%"
-        VereinTable.select {
+        VereinTable.selectAll().where {
             (VereinTable.name like searchPattern) or
                 (VereinTable.kuerzel like searchPattern)
         }
@@ -43,24 +42,24 @@ class VereinRepositoryImpl : VereinRepository {
     }
 
     override suspend fun findByBundeslandId(bundeslandId: Uuid): List<DomVerein> = DatabaseFactory.dbQuery {
-        VereinTable.select { VereinTable.bundeslandId eq bundeslandId }
+        VereinTable.selectAll().where { VereinTable.bundeslandId eq bundeslandId }
             .map { rowToDomVerein(it) }
     }
 
     override suspend fun findByLandId(landId: Uuid): List<DomVerein> = DatabaseFactory.dbQuery {
-        VereinTable.select { VereinTable.landId eq landId }
+        VereinTable.selectAll().where { VereinTable.landId eq landId }
             .map { rowToDomVerein(it) }
     }
 
     override suspend fun findAllActive(limit: Int, offset: Int): List<DomVerein> = DatabaseFactory.dbQuery {
-        VereinTable.select { VereinTable.istAktiv eq true }
+        VereinTable.selectAll().where { VereinTable.istAktiv eq true }
             .limit(limit, offset.toLong())
             .map { rowToDomVerein(it) }
     }
 
     override suspend fun findByLocation(searchTerm: String, limit: Int): List<DomVerein> = DatabaseFactory.dbQuery {
         val searchPattern = "%$searchTerm%"
-        VereinTable.select {
+        VereinTable.selectAll().where {
             (VereinTable.ort like searchPattern) or
                 (VereinTable.plz like searchPattern)
         }
@@ -123,19 +122,17 @@ class VereinRepositoryImpl : VereinRepository {
     }
 
     override suspend fun existsByOepsVereinsNr(oepsVereinsNr: String): Boolean = DatabaseFactory.dbQuery {
-        VereinTable.select { VereinTable.oepsVereinsNr eq oepsVereinsNr }
+        VereinTable.selectAll().where { VereinTable.oepsVereinsNr eq oepsVereinsNr }
             .count() > 0
     }
 
     override suspend fun countActive(): Long = DatabaseFactory.dbQuery {
-        VereinTable.select { VereinTable.istAktiv eq true }
+        VereinTable.selectAll().where { VereinTable.istAktiv eq true }
             .count()
     }
 
     override suspend fun countActiveByBundeslandId(bundeslandId: Uuid): Long = DatabaseFactory.dbQuery {
-        VereinTable.select {
-            (VereinTable.istAktiv eq true) and (VereinTable.bundeslandId eq bundeslandId)
-        }.count()
+        VereinTable.selectAll().where { (VereinTable.istAktiv eq true) and (VereinTable.bundeslandId eq bundeslandId) }.count()
     }
 
     /**

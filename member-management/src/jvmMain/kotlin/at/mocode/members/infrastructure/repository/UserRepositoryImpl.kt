@@ -67,25 +67,25 @@ class UserRepositoryImpl : UserRepository {
     }
 
     override suspend fun findById(userId: Uuid): DomUser? = DatabaseFactory.dbQuery {
-        UserTable.select { UserTable.id eq userId }
+        UserTable.selectAll().where { UserTable.id eq userId }
             .map(::rowToDomUser)
             .singleOrNull()
     }
 
     override suspend fun findByUsername(username: String): DomUser? = DatabaseFactory.dbQuery {
-        UserTable.select { UserTable.username eq username }
+        UserTable.selectAll().where { UserTable.username eq username }
             .map(::rowToDomUser)
             .singleOrNull()
     }
 
     override suspend fun findByEmail(email: String): DomUser? = DatabaseFactory.dbQuery {
-        UserTable.select { UserTable.email eq email }
+        UserTable.selectAll().where { UserTable.email eq email }
             .map(::rowToDomUser)
             .singleOrNull()
     }
 
     override suspend fun findByPersonId(personId: Uuid): DomUser? = DatabaseFactory.dbQuery {
-        UserTable.select { UserTable.personId eq personId }
+        UserTable.selectAll().where { UserTable.personId eq personId }
             .map(::rowToDomUser)
             .singleOrNull()
     }
@@ -201,7 +201,7 @@ class UserRepositoryImpl : UserRepository {
     }
 
     override suspend fun getActiveUsers(): List<DomUser> = DatabaseFactory.dbQuery {
-        UserTable.select { UserTable.isActive eq true }
+        UserTable.selectAll().where { UserTable.isActive eq true }
             .map(::rowToDomUser)
     }
 }

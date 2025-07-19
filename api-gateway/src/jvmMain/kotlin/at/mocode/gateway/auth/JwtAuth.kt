@@ -3,8 +3,6 @@ package at.mocode.gateway.auth
 import at.mocode.enums.BerechtigungE
 import at.mocode.members.domain.service.JwtService
 import at.mocode.shared.config.AppConfig
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -47,7 +45,7 @@ fun Application.configureJwtAuth(jwtService: JwtService) {
 
 /**
  * Prüft, ob der aktuelle Benutzer die angegebene Berechtigung hat.
- * Muss innerhalb einer authenticate("jwt")-Block verwendet werden.
+ * Muss innerhalb eines authenticate("jwt")-Block verwendet werden.
  *
  * @param permission Die erforderliche Berechtigung
  * @param onFailure Funktion, die bei fehlender Berechtigung aufgerufen wird
@@ -64,9 +62,13 @@ suspend fun ApplicationCall.requirePermission(
         return
     }
 
-    val permissions = principal.getClaim("permissions", Array<String>::class)
-        ?.map { try { BerechtigungE.valueOf(it) } catch (e: Exception) { null } }
-        ?.filterNotNull() ?: emptyList()
+    val permissions = principal.getClaim("permissions", Array<String>::class)?.mapNotNull {
+        try {
+            BerechtigungE.valueOf(it)
+        } catch (e: Exception) {
+            null
+        }
+    } ?: emptyList()
 
     if (permissions.contains(permission) || permissions.contains(BerechtigungE.SYSTEM_ADMIN)) {
         onSuccess()
@@ -77,7 +79,7 @@ suspend fun ApplicationCall.requirePermission(
 
 /**
  * Prüft, ob der aktuelle Benutzer eine der angegebenen Berechtigungen hat.
- * Muss innerhalb einer authenticate("jwt")-Block verwendet werden.
+ * Muss innerhalb eines authenticate("jwt")-Block verwendet werden.
  *
  * @param permissions Die erforderlichen Berechtigungen (eine davon ist ausreichend)
  * @param onFailure Funktion, die bei fehlender Berechtigung aufgerufen wird
@@ -94,9 +96,13 @@ suspend fun ApplicationCall.requireAnyPermission(
         return
     }
 
-    val userPermissions = principal.getClaim("permissions", Array<String>::class)
-        ?.map { try { BerechtigungE.valueOf(it) } catch (e: Exception) { null } }
-        ?.filterNotNull() ?: emptyList()
+    val userPermissions = principal.getClaim("permissions", Array<String>::class)?.mapNotNull {
+        try {
+            BerechtigungE.valueOf(it)
+        } catch (_: Exception) {
+            null
+        }
+    } ?: emptyList()
 
     if (userPermissions.contains(BerechtigungE.SYSTEM_ADMIN) ||
         permissions.any { userPermissions.contains(it) }) {

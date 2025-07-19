@@ -39,4 +39,4 @@ fun Application.configureApiKeyAuth() {
 /**
  * Principal für die API-Key-Authentifizierung.
  */
-class ApiKeyPrincipal(val apiKey: String) : Principal
+class ApiKeyPrincipal(val apiKey: String)

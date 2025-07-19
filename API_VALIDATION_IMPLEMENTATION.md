@@ -86,7 +86,7 @@ Alle Endpunkte verwenden das gleiche Pattern:
 
 ```kotlin
 // Validierung durchführen
-val validationErrors = ApiValidationUtils.validateXxx(...)
+val validationErrors = ApiValidationUtils.validateXxx('...')
 
 if (!ApiValidationUtils.isValid(validationErrors)) {
     call.respond(

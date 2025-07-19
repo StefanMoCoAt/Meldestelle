@@ -1,21 +1,21 @@
 package at.mocode.events.infrastructure.api
 
 import at.mocode.dto.base.ApiResponse
-import at.mocode.events.application.usecase.*
-import at.mocode.events.domain.repository.VeranstaltungRepository
 import at.mocode.enums.SparteE
+import at.mocode.events.application.usecase.CreateVeranstaltungUseCase
+import at.mocode.events.application.usecase.DeleteVeranstaltungUseCase
+import at.mocode.events.application.usecase.GetVeranstaltungUseCase
+import at.mocode.events.application.usecase.UpdateVeranstaltungUseCase
+import at.mocode.events.domain.repository.VeranstaltungRepository
 import at.mocode.serializers.UuidSerializer
 import at.mocode.validation.ApiValidationUtils
-import at.mocode.validation.ValidationError
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 /**
@@ -100,7 +100,7 @@ class VeranstaltungController(
                     } else {
                         call.respond(HttpStatusCode.NotFound, ApiResponse.error<Any>("Event not found"))
                     }
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid event ID format"))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to retrieve event: ${e.message}"))
@@ -228,7 +228,7 @@ class VeranstaltungController(
                         }
                         call.respond(statusCode, ApiResponse.error<Any>(response.error?.message ?: "Failed to update event"))
                     }
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid event ID format"))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid request data: ${e.message}"))
@@ -249,7 +249,7 @@ class VeranstaltungController(
                     val forceDelete = if (forceParam != null) {
                         try {
                             forceParam.toBoolean()
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             return@delete call.respond(
                                 HttpStatusCode.BadRequest,
                                 ApiResponse.error<Any>("Invalid force parameter. Must be true or false")
@@ -275,7 +275,7 @@ class VeranstaltungController(
                         }
                         call.respond(statusCode, ApiResponse.error<Any>(response.error?.message ?: "Failed to delete event"))
                     }
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid event ID format"))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to delete event: ${e.message}"))

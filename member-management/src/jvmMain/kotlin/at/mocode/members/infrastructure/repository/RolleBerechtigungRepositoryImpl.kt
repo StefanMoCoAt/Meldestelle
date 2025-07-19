@@ -1,6 +1,5 @@
 package at.mocode.members.infrastructure.repository
 
-import at.mocode.enums.BerechtigungE
 import at.mocode.members.domain.model.DomBerechtigung
 import at.mocode.members.domain.model.DomRolleBerechtigung
 import at.mocode.members.domain.repository.RolleBerechtigungRepository
@@ -9,9 +8,9 @@ import at.mocode.members.infrastructure.table.RolleBerechtigungTable
 import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.TimeZone
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
@@ -91,41 +90,39 @@ class RolleBerechtigungRepositoryImpl : RolleBerechtigungRepository {
     }
 
     override suspend fun findById(rolleBerechtigungId: Uuid): DomRolleBerechtigung? = DatabaseFactory.dbQuery {
-        RolleBerechtigungTable.select { RolleBerechtigungTable.id eq rolleBerechtigungId }
+        RolleBerechtigungTable.selectAll().where { RolleBerechtigungTable.id eq rolleBerechtigungId }
             .map(::rowToDomRolleBerechtigung)
             .singleOrNull()
     }
 
     override suspend fun findByRolleId(rolleId: Uuid, nurAktive: Boolean): List<DomRolleBerechtigung> = DatabaseFactory.dbQuery {
         val query = if (nurAktive) {
-            RolleBerechtigungTable.select {
-                (RolleBerechtigungTable.rolleId eq rolleId) and (RolleBerechtigungTable.istAktiv eq true)
-            }
+            RolleBerechtigungTable.selectAll()
+                .where { (RolleBerechtigungTable.rolleId eq rolleId) and (RolleBerechtigungTable.istAktiv eq true) }
         } else {
-            RolleBerechtigungTable.select { RolleBerechtigungTable.rolleId eq rolleId }
+            RolleBerechtigungTable.selectAll().where { RolleBerechtigungTable.rolleId eq rolleId }
         }
         query.map(::rowToDomRolleBerechtigung)
     }
 
     override suspend fun findByBerechtigungId(berechtigungId: Uuid, nurAktive: Boolean): List<DomRolleBerechtigung> = DatabaseFactory.dbQuery {
         val query = if (nurAktive) {
-            RolleBerechtigungTable.select {
-                (RolleBerechtigungTable.berechtigungId eq berechtigungId) and (RolleBerechtigungTable.istAktiv eq true)
-            }
+            RolleBerechtigungTable.selectAll()
+                .where { (RolleBerechtigungTable.berechtigungId eq berechtigungId) and (RolleBerechtigungTable.istAktiv eq true) }
         } else {
-            RolleBerechtigungTable.select { RolleBerechtigungTable.berechtigungId eq berechtigungId }
+            RolleBerechtigungTable.selectAll().where { RolleBerechtigungTable.berechtigungId eq berechtigungId }
         }
         query.map(::rowToDomRolleBerechtigung)
     }
 
     override suspend fun findByRolleAndBerechtigung(rolleId: Uuid, berechtigungId: Uuid): DomRolleBerechtigung? = DatabaseFactory.dbQuery {
-        RolleBerechtigungTable.select {
-            (RolleBerechtigungTable.rolleId eq rolleId) and (RolleBerechtigungTable.berechtigungId eq berechtigungId)
-        }.map(::rowToDomRolleBerechtigung).singleOrNull()
+        RolleBerechtigungTable.selectAll()
+            .where { (RolleBerechtigungTable.rolleId eq rolleId) and (RolleBerechtigungTable.berechtigungId eq berechtigungId) }
+            .map(::rowToDomRolleBerechtigung).singleOrNull()
     }
 
     override suspend fun findAllActive(): List<DomRolleBerechtigung> = DatabaseFactory.dbQuery {
-        RolleBerechtigungTable.select { RolleBerechtigungTable.istAktiv eq true }
+        RolleBerechtigungTable.selectAll().where { RolleBerechtigungTable.istAktiv eq true }
             .map(::rowToDomRolleBerechtigung)
     }
 
@@ -148,22 +145,22 @@ class RolleBerechtigungRepositoryImpl : RolleBerechtigungRepository {
     }
 
     override suspend fun hasRolleBerechtigung(rolleId: Uuid, berechtigungId: Uuid): Boolean = DatabaseFactory.dbQuery {
-        RolleBerechtigungTable.select {
+        RolleBerechtigungTable.selectAll().where {
             (RolleBerechtigungTable.rolleId eq rolleId) and
-            (RolleBerechtigungTable.berechtigungId eq berechtigungId) and
-            (RolleBerechtigungTable.istAktiv eq true)
+                (RolleBerechtigungTable.berechtigungId eq berechtigungId) and
+                (RolleBerechtigungTable.istAktiv eq true)
         }.count() > 0
     }
 
     override suspend fun assignBerechtigungToRolle(rolleId: Uuid, berechtigungId: Uuid, zugewiesenVon: Uuid?): DomRolleBerechtigung = DatabaseFactory.dbQuery {
-        // Check if assignment already exists
+        // Check if the assignment already exists
         val existing = findByRolleAndBerechtigung(rolleId, berechtigungId)
         if (existing != null) {
             // Relationship already exists, return it
             return@dbQuery existing
         }
 
-        // Create new assignment
+        // Create a new assignment
         val newAssignment = DomRolleBerechtigung(
             rolleId = rolleId,
             berechtigungId = berechtigungId,

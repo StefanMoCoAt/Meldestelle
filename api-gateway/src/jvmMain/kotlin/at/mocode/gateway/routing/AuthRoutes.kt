@@ -5,7 +5,6 @@ import at.mocode.members.domain.service.AuthenticationService
 import at.mocode.members.domain.service.JwtService
 import at.mocode.validation.ApiValidationUtils
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*

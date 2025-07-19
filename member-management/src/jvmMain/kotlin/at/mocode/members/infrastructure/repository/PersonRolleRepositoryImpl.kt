@@ -74,65 +74,62 @@ class PersonRolleRepositoryImpl : PersonRolleRepository {
     }
 
     override suspend fun findById(personRolleId: Uuid): DomPersonRolle? = DatabaseFactory.dbQuery {
-        PersonRolleTable.select { PersonRolleTable.id eq personRolleId }
+        PersonRolleTable.selectAll().where { PersonRolleTable.id eq personRolleId }
             .map(::rowToDomPersonRolle)
             .singleOrNull()
     }
 
     override suspend fun findByPersonId(personId: Uuid, nurAktive: Boolean): List<DomPersonRolle> = DatabaseFactory.dbQuery {
         val query = if (nurAktive) {
-            PersonRolleTable.select {
-                (PersonRolleTable.personId eq personId) and (PersonRolleTable.istAktiv eq true)
-            }
+            PersonRolleTable.selectAll()
+                .where { (PersonRolleTable.personId eq personId) and (PersonRolleTable.istAktiv eq true) }
         } else {
-            PersonRolleTable.select { PersonRolleTable.personId eq personId }
+            PersonRolleTable.selectAll().where { PersonRolleTable.personId eq personId }
         }
         query.map(::rowToDomPersonRolle)
     }
 
     override suspend fun findByRolleId(rolleId: Uuid, nurAktive: Boolean): List<DomPersonRolle> = DatabaseFactory.dbQuery {
         val query = if (nurAktive) {
-            PersonRolleTable.select {
-                (PersonRolleTable.rolleId eq rolleId) and (PersonRolleTable.istAktiv eq true)
-            }
+            PersonRolleTable.selectAll()
+                .where { (PersonRolleTable.rolleId eq rolleId) and (PersonRolleTable.istAktiv eq true) }
         } else {
-            PersonRolleTable.select { PersonRolleTable.rolleId eq rolleId }
+            PersonRolleTable.selectAll().where { PersonRolleTable.rolleId eq rolleId }
         }
         query.map(::rowToDomPersonRolle)
     }
 
     override suspend fun findByVereinId(vereinId: Uuid, nurAktive: Boolean): List<DomPersonRolle> = DatabaseFactory.dbQuery {
         val query = if (nurAktive) {
-            PersonRolleTable.select {
-                (PersonRolleTable.vereinId eq vereinId) and (PersonRolleTable.istAktiv eq true)
-            }
+            PersonRolleTable.selectAll()
+                .where { (PersonRolleTable.vereinId eq vereinId) and (PersonRolleTable.istAktiv eq true) }
         } else {
-            PersonRolleTable.select { PersonRolleTable.vereinId eq vereinId }
+            PersonRolleTable.selectAll().where { PersonRolleTable.vereinId eq vereinId }
         }
         query.map(::rowToDomPersonRolle)
     }
 
     override suspend fun findByPersonAndRolle(personId: Uuid, rolleId: Uuid, vereinId: Uuid?): DomPersonRolle? = DatabaseFactory.dbQuery {
         val query = if (vereinId != null) {
-            PersonRolleTable.select {
+            PersonRolleTable.selectAll().where {
                 (PersonRolleTable.personId eq personId) and
-                (PersonRolleTable.rolleId eq rolleId) and
-                (PersonRolleTable.vereinId eq vereinId)
+                    (PersonRolleTable.rolleId eq rolleId) and
+                    (PersonRolleTable.vereinId eq vereinId)
             }
         } else {
-            PersonRolleTable.select {
+            PersonRolleTable.selectAll().where {
                 (PersonRolleTable.personId eq personId) and
-                (PersonRolleTable.rolleId eq rolleId) and
-                PersonRolleTable.vereinId.isNull()
+                    (PersonRolleTable.rolleId eq rolleId) and
+                    PersonRolleTable.vereinId.isNull()
             }
         }
         query.map(::rowToDomPersonRolle).singleOrNull()
     }
 
     override suspend fun findValidAt(stichtag: LocalDate, nurAktive: Boolean): List<DomPersonRolle> = DatabaseFactory.dbQuery {
-        val baseQuery = PersonRolleTable.select {
+        val baseQuery = PersonRolleTable.selectAll().where {
             (PersonRolleTable.gueltigVon lessEq stichtag) and
-            (PersonRolleTable.gueltigBis.isNull() or (PersonRolleTable.gueltigBis greaterEq stichtag))
+                (PersonRolleTable.gueltigBis.isNull() or (PersonRolleTable.gueltigBis greaterEq stichtag))
         }
 
         val query = if (nurAktive) {
@@ -145,10 +142,10 @@ class PersonRolleRepositoryImpl : PersonRolleRepository {
     }
 
     override suspend fun findByPersonValidAt(personId: Uuid, stichtag: LocalDate, nurAktive: Boolean): List<DomPersonRolle> = DatabaseFactory.dbQuery {
-        val baseQuery = PersonRolleTable.select {
+        val baseQuery = PersonRolleTable.selectAll().where {
             (PersonRolleTable.personId eq personId) and
-            (PersonRolleTable.gueltigVon lessEq stichtag) and
-            (PersonRolleTable.gueltigBis.isNull() or (PersonRolleTable.gueltigBis greaterEq stichtag))
+                (PersonRolleTable.gueltigVon lessEq stichtag) and
+                (PersonRolleTable.gueltigBis.isNull() or (PersonRolleTable.gueltigBis greaterEq stichtag))
         }
 
         val query = if (nurAktive) {
@@ -177,12 +174,12 @@ class PersonRolleRepositoryImpl : PersonRolleRepository {
     override suspend fun hasPersonRolle(personId: Uuid, rolleId: Uuid, vereinId: Uuid?, stichtag: LocalDate?): Boolean = DatabaseFactory.dbQuery {
         val checkDate = stichtag ?: Clock.System.todayIn(TimeZone.currentSystemDefault())
 
-        val baseQuery = PersonRolleTable.select {
+        val baseQuery = PersonRolleTable.selectAll().where {
             (PersonRolleTable.personId eq personId) and
-            (PersonRolleTable.rolleId eq rolleId) and
-            (PersonRolleTable.istAktiv eq true) and
-            (PersonRolleTable.gueltigVon lessEq checkDate) and
-            (PersonRolleTable.gueltigBis.isNull() or (PersonRolleTable.gueltigBis greaterEq checkDate))
+                (PersonRolleTable.rolleId eq rolleId) and
+                (PersonRolleTable.istAktiv eq true) and
+                (PersonRolleTable.gueltigVon lessEq checkDate) and
+                (PersonRolleTable.gueltigBis.isNull() or (PersonRolleTable.gueltigBis greaterEq checkDate))
         }
 
         val query = if (vereinId != null) {

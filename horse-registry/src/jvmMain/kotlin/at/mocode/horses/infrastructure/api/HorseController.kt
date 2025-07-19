@@ -1,21 +1,21 @@
 package at.mocode.horses.infrastructure.api
 
-import at.mocode.horses.application.usecase.*
-import at.mocode.horses.domain.repository.HorseRepository
-import at.mocode.dto.base.BaseDto
 import at.mocode.dto.base.ApiResponse
 import at.mocode.enums.PferdeGeschlechtE
+import at.mocode.horses.application.usecase.CreateHorseUseCase
+import at.mocode.horses.application.usecase.DeleteHorseUseCase
+import at.mocode.horses.application.usecase.GetHorseUseCase
+import at.mocode.horses.application.usecase.UpdateHorseUseCase
+import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.validation.ApiValidationUtils
-import at.mocode.validation.ValidationError
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * REST API controller for horse registry operations.
@@ -66,10 +66,10 @@ class HorseController(
                     val geschlecht = call.request.queryParameters["geschlecht"]?.let {
                         try {
                             PferdeGeschlechtE.valueOf(it)
-                        } catch (e: IllegalArgumentException) {
+                        } catch (_: IllegalArgumentException) {
                             return@get call.respond(
                                 HttpStatusCode.BadRequest,
-                                ApiResponse.error<Any>("Invalid geschlecht value. Valid values: ${PferdeGeschlechtE.values().joinToString(", ")}")
+                                ApiResponse.error<Any>("Invalid geschlecht value. Valid values: ${PferdeGeschlechtE.entries.joinToString(", ")}")
                             )
                         }
                     }
@@ -101,7 +101,7 @@ class HorseController(
                     } else {
                         call.respond(HttpStatusCode.NotFound, ApiResponse.error<Any>("Horse not found"))
                     }
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid horse ID format"))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to retrieve horse: ${e.message}"))
@@ -270,7 +270,7 @@ class HorseController(
                     } else {
                         call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Update failed: ${response.errors.joinToString(", ")}"))
                     }
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid horse ID format"))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to update horse: ${e.message}"))
@@ -296,7 +296,7 @@ class HorseController(
                     } else {
                         call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Delete failed: ${response.errors.joinToString(", ")}"))
                     }
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid horse ID format"))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to delete horse: ${e.message}"))
@@ -319,7 +319,7 @@ class HorseController(
                     } else {
                         call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Soft delete failed: ${response.errors.joinToString(", ")}"))
                     }
-                } catch (e: IllegalArgumentException) {
+                } catch (_: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid horse ID format"))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to soft delete horse: ${e.message}"))

@@ -2,7 +2,6 @@ package at.mocode.members.infrastructure.repository
 
 import at.mocode.members.domain.model.DomPerson
 import at.mocode.members.domain.repository.PersonRepository
-import at.mocode.members.infrastructure.repository.PersonTable
 import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
@@ -21,25 +20,25 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 class PersonRepositoryImpl : PersonRepository {
 
     override suspend fun findById(id: Uuid): DomPerson? = DatabaseFactory.dbQuery {
-        PersonTable.select { PersonTable.id eq id }
+        PersonTable.selectAll().where { PersonTable.id eq id }
             .map { rowToDomPerson(it) }
             .singleOrNull()
     }
 
     override suspend fun findByOepsSatzNr(oepsSatzNr: String): DomPerson? = DatabaseFactory.dbQuery {
-        PersonTable.select { PersonTable.oepsSatzNr eq oepsSatzNr }
+        PersonTable.selectAll().where { PersonTable.oepsSatzNr eq oepsSatzNr }
             .map { rowToDomPerson(it) }
             .singleOrNull()
     }
 
     override suspend fun findByStammVereinId(vereinId: Uuid): List<DomPerson> = DatabaseFactory.dbQuery {
-        PersonTable.select { PersonTable.stammVereinId eq vereinId }
+        PersonTable.selectAll().where { PersonTable.stammVereinId eq vereinId }
             .map { rowToDomPerson(it) }
     }
 
     override suspend fun findByName(searchTerm: String, limit: Int): List<DomPerson> = DatabaseFactory.dbQuery {
         val searchPattern = "%$searchTerm%"
-        PersonTable.select {
+        PersonTable.selectAll().where {
             (PersonTable.nachname like searchPattern) or
                 (PersonTable.vorname like searchPattern)
         }
@@ -48,7 +47,7 @@ class PersonRepositoryImpl : PersonRepository {
     }
 
     override suspend fun findAllActive(limit: Int, offset: Int): List<DomPerson> = DatabaseFactory.dbQuery {
-        PersonTable.select { PersonTable.istAktiv eq true }
+        PersonTable.selectAll().where { PersonTable.istAktiv eq true }
             .limit(limit, offset.toLong())
             .map { rowToDomPerson(it) }
     }
@@ -58,7 +57,7 @@ class PersonRepositoryImpl : PersonRepository {
         val existingPerson = findById(person.personId)
 
         if (existingPerson == null) {
-            // Insert new person
+            // Insert a new person
             PersonTable.insert { stmt ->
                 stmt[PersonTable.id] = person.personId
                 stmt[PersonTable.oepsSatzNr] = person.oepsSatzNr
@@ -128,12 +127,12 @@ class PersonRepositoryImpl : PersonRepository {
     }
 
     override suspend fun existsByOepsSatzNr(oepsSatzNr: String): Boolean = DatabaseFactory.dbQuery {
-        PersonTable.select { PersonTable.oepsSatzNr eq oepsSatzNr }
+        PersonTable.selectAll().where { PersonTable.oepsSatzNr eq oepsSatzNr }
             .count() > 0
     }
 
     override suspend fun countActive(): Long = DatabaseFactory.dbQuery {
-        PersonTable.select { PersonTable.istAktiv eq true }
+        PersonTable.selectAll().where { PersonTable.istAktiv eq true }
             .count()
     }
 

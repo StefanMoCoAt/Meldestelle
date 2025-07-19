@@ -1,6 +1,5 @@
 package at.mocode.members.infrastructure.table
 
-import at.mocode.members.infrastructure.table.RolleTable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp

@@ -1,16 +1,12 @@
 package at.mocode.masterdata.infrastructure.api
 
-import at.mocode.dto.base.BaseDto
 import at.mocode.dto.base.ApiResponse
 import at.mocode.masterdata.application.usecase.CreateCountryUseCase
 import at.mocode.masterdata.application.usecase.GetCountryUseCase
 import at.mocode.masterdata.domain.model.LandDefinition
 import at.mocode.validation.ApiValidationUtils
-import at.mocode.validation.ValidationError
-import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -95,7 +91,7 @@ class CountryController(
                     val orderBySortierung = if (orderBySortierungParam != null) {
                         try {
                             orderBySortierungParam.toBoolean()
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             return@get call.respond(
                                 HttpStatusCode.BadRequest,
                                 ApiResponse.error<List<CountryDto>>("Invalid orderBySortierung parameter. Must be true or false")
