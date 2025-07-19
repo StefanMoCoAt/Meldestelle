@@ -1,14 +1,13 @@
 package at.mocode.ui.viewmodel
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import at.mocode.members.application.usecase.CreatePersonUseCase
-import at.mocode.members.domain.repository.PersonRepository
-import at.mocode.members.domain.repository.VereinRepository
-import at.mocode.members.domain.service.MasterDataService
-import at.mocode.enums.GeschlechtE
 import at.mocode.enums.DatenQuelleE
+import at.mocode.enums.GeschlechtE
+import at.mocode.members.application.usecase.CreatePersonUseCase
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
@@ -113,7 +112,7 @@ class CreatePersonViewModel(
                             isSuccess = false
                             return@launch
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         errorMessage = "Ungültiges Datumsformat. Verwenden Sie YYYY-MM-DD"
                         isLoading = false
                         isSuccess = false
