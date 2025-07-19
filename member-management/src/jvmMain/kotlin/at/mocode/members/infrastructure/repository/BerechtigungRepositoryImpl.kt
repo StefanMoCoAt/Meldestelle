@@ -10,6 +10,12 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 
+// Import table definition and extension functions
+import at.mocode.members.infrastructure.repository.BerechtigungTable
+import at.mocode.members.infrastructure.repository.insertOrUpdate
+import at.mocode.members.infrastructure.repository.toLocalDateTime
+import at.mocode.members.infrastructure.repository.toInstant
+
 /**
  * Exposed-based implementation of BerechtigungRepository.
  *
@@ -31,8 +37,8 @@ class BerechtigungRepositoryImpl : BerechtigungRepository {
             it[aktion] = berechtigung.aktion
             it[istAktiv] = berechtigung.istAktiv
             it[istSystemBerechtigung] = berechtigung.istSystemBerechtigung
-            it[createdAt] = berechtigung.createdAt.toJavaInstant()
-            it[updatedAt] = updatedBerechtigung.updatedAt.toJavaInstant()
+            it[createdAt] = berechtigung.createdAt.toLocalDateTime()
+            it[updatedAt] = updatedBerechtigung.updatedAt.toLocalDateTime()
         }
 
         return updatedBerechtigung
@@ -80,7 +86,7 @@ class BerechtigungRepositoryImpl : BerechtigungRepository {
         val now = Clock.System.now()
         val updatedRows = BerechtigungTable.update({ BerechtigungTable.id eq berechtigungId }) {
             it[istAktiv] = false
-            it[updatedAt] = now.toJavaInstant()
+            it[updatedAt] = now.toLocalDateTime()
         }
         return updatedRows > 0
     }
@@ -114,8 +120,8 @@ class BerechtigungRepositoryImpl : BerechtigungRepository {
             aktion = row[BerechtigungTable.aktion],
             istAktiv = row[BerechtigungTable.istAktiv],
             istSystemBerechtigung = row[BerechtigungTable.istSystemBerechtigung],
-            createdAt = row[BerechtigungTable.createdAt].toKotlinInstant(),
-            updatedAt = row[BerechtigungTable.updatedAt].toKotlinInstant()
+            createdAt = row[BerechtigungTable.createdAt].toInstant(),
+            updatedAt = row[BerechtigungTable.updatedAt].toInstant()
         )
     }
 }

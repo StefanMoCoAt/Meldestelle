@@ -1,13 +1,12 @@
 package at.mocode.horses.infrastructure.repository
 
+import at.mocode.enums.PferdeGeschlechtE
 import at.mocode.horses.domain.model.DomPferd
 import at.mocode.horses.domain.repository.HorseRepository
-import at.mocode.enums.PferdeGeschlechtE
 import com.benasher44.uuid.Uuid
-import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.statements.UpdateBuilder
 
 /**
  * PostgreSQL implementation of the HorseRepository using Exposed ORM.
@@ -18,25 +17,25 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 class HorseRepositoryImpl : HorseRepository {
 
     override suspend fun findById(id: Uuid): DomPferd? {
-        return HorseTable.select { HorseTable.id eq id }
+        return HorseTable.selectAll().where { HorseTable.id eq id }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
     override suspend fun findByLebensnummer(lebensnummer: String): DomPferd? {
-        return HorseTable.select { HorseTable.lebensnummer eq lebensnummer }
+        return HorseTable.selectAll().where { HorseTable.lebensnummer eq lebensnummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
     override suspend fun findByChipNummer(chipNummer: String): DomPferd? {
-        return HorseTable.select { HorseTable.chipNummer eq chipNummer }
+        return HorseTable.selectAll().where { HorseTable.chipNummer eq chipNummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
     override suspend fun findByPassNummer(passNummer: String): DomPferd? {
-        return HorseTable.select { HorseTable.passNummer eq passNummer }
+        return HorseTable.selectAll().where { HorseTable.passNummer eq passNummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
@@ -48,83 +47,98 @@ class HorseRepositoryImpl : HorseRepository {
     }
 
     override suspend fun findByFeiNummer(feiNummer: String): DomPferd? {
-        return HorseTable.select { HorseTable.feiNummer eq feiNummer }
+        return HorseTable.selectAll().where { HorseTable.feiNummer eq feiNummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
     override suspend fun findByName(searchTerm: String, limit: Int): List<DomPferd> {
-        return HorseTable.select { HorseTable.pferdeName like "%$searchTerm%" }
-            .orderBy(HorseTable.pferdeName)
+        return HorseTable.selectAll().where { HorseTable.pferdeName like "%$searchTerm%" }
+            .orderBy(HorseTable.pferdeName to SortOrder.ASC)
             .limit(limit)
             .map { rowToDomPferd(it) }
     }
 
     override suspend fun findByOwnerId(ownerId: Uuid, activeOnly: Boolean): List<DomPferd> {
-        val query = HorseTable.select { HorseTable.besitzerId eq ownerId }
+        val query = HorseTable.selectAll().where { HorseTable.besitzerId eq ownerId }
 
         return if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
-        }.orderBy(HorseTable.pferdeName)
+        }.orderBy(HorseTable.pferdeName to SortOrder.ASC)
          .map { rowToDomPferd(it) }
     }
 
     override suspend fun findByResponsiblePersonId(responsiblePersonId: Uuid, activeOnly: Boolean): List<DomPferd> {
-        val query = HorseTable.select { HorseTable.verantwortlichePersonId eq responsiblePersonId }
+        val query = HorseTable.selectAll().where { HorseTable.verantwortlichePersonId eq responsiblePersonId }
 
         return if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
-        }.orderBy(HorseTable.pferdeName)
+        }.orderBy(HorseTable.pferdeName to SortOrder.ASC)
          .map { rowToDomPferd(it) }
     }
 
     override suspend fun findByGeschlecht(geschlecht: PferdeGeschlechtE, activeOnly: Boolean, limit: Int): List<DomPferd> {
-        val query = HorseTable.select { HorseTable.geschlecht eq geschlecht }
+        val query = HorseTable.selectAll().where { HorseTable.geschlecht eq geschlecht }
 
         return if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
-        }.orderBy(HorseTable.pferdeName)
+        }.orderBy(HorseTable.pferdeName to SortOrder.ASC)
          .limit(limit)
          .map { rowToDomPferd(it) }
     }
 
     override suspend fun findByRasse(rasse: String, activeOnly: Boolean, limit: Int): List<DomPferd> {
-        val query = HorseTable.select { HorseTable.rasse eq rasse }
+        val query = HorseTable.selectAll().where { HorseTable.rasse eq rasse }
 
         return if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
-        }.orderBy(HorseTable.pferdeName)
+        }.orderBy(HorseTable.pferdeName to SortOrder.ASC)
          .limit(limit)
          .map { rowToDomPferd(it) }
     }
 
     override suspend fun findByBirthYear(birthYear: Int, activeOnly: Boolean): List<DomPferd> {
-        val query = HorseTable.select {
+        val query = HorseTable.selectAll().where {
             HorseTable.geburtsdatum.isNotNull() and
-            HorseTable.geburtsdatum.year() eq birthYear
+                (CustomFunction(
+                    "EXTRACT",
+                    IntegerColumnType(),
+                    stringLiteral("YEAR FROM "),
+                    HorseTable.geburtsdatum
+                ) eq birthYear)
         }
 
         return if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
-        }.orderBy(HorseTable.pferdeName)
+        }.orderBy(HorseTable.pferdeName to SortOrder.ASC)
          .map { rowToDomPferd(it) }
     }
 
     override suspend fun findByBirthYearRange(fromYear: Int, toYear: Int, activeOnly: Boolean): List<DomPferd> {
-        val query = HorseTable.select {
+        val query = HorseTable.selectAll().where {
             HorseTable.geburtsdatum.isNotNull() and
-            (HorseTable.geburtsdatum.year() greaterEq fromYear) and
-            (HorseTable.geburtsdatum.year() lessEq toYear)
+                (CustomFunction(
+                    "EXTRACT",
+                    IntegerColumnType(),
+                    stringLiteral("YEAR FROM "),
+                    HorseTable.geburtsdatum
+                ) greaterEq fromYear) and
+                (CustomFunction(
+                    "EXTRACT",
+                    IntegerColumnType(),
+                    stringLiteral("YEAR FROM "),
+                    HorseTable.geburtsdatum
+                ) lessEq toYear)
         }
 
         return if (activeOnly) {
@@ -136,31 +150,31 @@ class HorseRepositoryImpl : HorseRepository {
     }
 
     override suspend fun findAllActive(limit: Int): List<DomPferd> {
-        return HorseTable.select { HorseTable.istAktiv eq true }
-            .orderBy(HorseTable.pferdeName)
+        return HorseTable.selectAll().where { HorseTable.istAktiv eq true }
+            .orderBy(HorseTable.pferdeName to SortOrder.ASC)
             .limit(limit)
             .map { rowToDomPferd(it) }
     }
 
     override suspend fun findOepsRegistered(activeOnly: Boolean): List<DomPferd> {
-        val query = HorseTable.select { HorseTable.oepsNummer.isNotNull() }
+        val query = HorseTable.selectAll().where { HorseTable.oepsNummer.isNotNull() }
 
         return if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
-        }.orderBy(HorseTable.pferdeName)
+        }.orderBy(HorseTable.pferdeName to SortOrder.ASC)
          .map { rowToDomPferd(it) }
     }
 
     override suspend fun findFeiRegistered(activeOnly: Boolean): List<DomPferd> {
-        val query = HorseTable.select { HorseTable.feiNummer.isNotNull() }
+        val query = HorseTable.selectAll().where { HorseTable.feiNummer.isNotNull() }
 
         return if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
-        }.orderBy(HorseTable.pferdeName)
+        }.orderBy(HorseTable.pferdeName to SortOrder.ASC)
          .map { rowToDomPferd(it) }
     }
 
@@ -175,7 +189,7 @@ class HorseRepositoryImpl : HorseRepository {
             }
             updatedHorse
         } else {
-            // Insert new horse
+            // Insert a new horse
             HorseTable.insert {
                 it[id] = horse.pferdId
                 domPferdToStatement(it, horse)
@@ -190,22 +204,22 @@ class HorseRepositoryImpl : HorseRepository {
     }
 
     override suspend fun existsByLebensnummer(lebensnummer: String): Boolean {
-        return HorseTable.select { HorseTable.lebensnummer eq lebensnummer }
+        return HorseTable.selectAll().where { HorseTable.lebensnummer eq lebensnummer }
             .count() > 0
     }
 
     override suspend fun existsByChipNummer(chipNummer: String): Boolean {
-        return HorseTable.select { HorseTable.chipNummer eq chipNummer }
+        return HorseTable.selectAll().where { HorseTable.chipNummer eq chipNummer }
             .count() > 0
     }
 
     override suspend fun existsByPassNummer(passNummer: String): Boolean {
-        return HorseTable.select { HorseTable.passNummer eq passNummer }
+        return HorseTable.selectAll().where { HorseTable.passNummer eq passNummer }
             .count() > 0
     }
 
     override suspend fun existsByOepsNummer(oepsNummer: String): Boolean {
-        return HorseTable.select { HorseTable.oepsNummer eq oepsNummer }
+        return HorseTable.selectAll().where { HorseTable.oepsNummer eq oepsNummer }
             .count() > 0
     }
 

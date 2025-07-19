@@ -18,7 +18,7 @@ object AppDependencies {
     private val mockPersonRepository = object : PersonRepository {
         override suspend fun save(person: at.mocode.members.domain.model.DomPerson): at.mocode.members.domain.model.DomPerson {
             // Mock implementation - just return the person with an ID
-            return person.copy(id = com.benasher44.uuid.uuid4())
+            return person.copy(personId = com.benasher44.uuid.uuid4())
         }
 
         override suspend fun findById(id: com.benasher44.uuid.Uuid): at.mocode.members.domain.model.DomPerson? {
@@ -29,16 +29,28 @@ object AppDependencies {
             return null // Mock implementation
         }
 
+        override suspend fun findByStammVereinId(vereinId: com.benasher44.uuid.Uuid): List<at.mocode.members.domain.model.DomPerson> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findByName(searchTerm: String, limit: Int): List<at.mocode.members.domain.model.DomPerson> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findAllActive(limit: Int, offset: Int): List<at.mocode.members.domain.model.DomPerson> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun countActive(): Long {
+            return 0L // Mock implementation
+        }
+
         override suspend fun existsByOepsSatzNr(oepsSatzNr: String): Boolean {
             return false // Mock implementation - no duplicates for demo
         }
 
-        override suspend fun findAll(): List<at.mocode.members.domain.model.DomPerson> {
-            return emptyList() // Mock implementation
-        }
-
-        override suspend fun delete(id: com.benasher44.uuid.Uuid) {
-            // Mock implementation
+        override suspend fun delete(id: com.benasher44.uuid.Uuid): Boolean {
+            return true // Mock implementation
         }
     }
 
@@ -47,18 +59,74 @@ object AppDependencies {
             return null // Mock implementation
         }
 
-        override suspend fun existsById(id: com.benasher44.uuid.Uuid): Boolean {
-            return true // Mock implementation - assume all clubs exist
+        override suspend fun findByOepsVereinsNr(oepsVereinsNr: String): at.mocode.members.domain.model.DomVerein? {
+            return null // Mock implementation
         }
 
-        override suspend fun findAll(): List<at.mocode.members.domain.model.DomVerein> {
+        override suspend fun findByName(searchTerm: String, limit: Int): List<at.mocode.members.domain.model.DomVerein> {
             return emptyList() // Mock implementation
+        }
+
+        override suspend fun findByBundeslandId(bundeslandId: com.benasher44.uuid.Uuid): List<at.mocode.members.domain.model.DomVerein> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findByLandId(landId: com.benasher44.uuid.Uuid): List<at.mocode.members.domain.model.DomVerein> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findAllActive(limit: Int, offset: Int): List<at.mocode.members.domain.model.DomVerein> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findByLocation(searchTerm: String, limit: Int): List<at.mocode.members.domain.model.DomVerein> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun save(verein: at.mocode.members.domain.model.DomVerein): at.mocode.members.domain.model.DomVerein {
+            return verein.copy(vereinId = com.benasher44.uuid.uuid4()) // Mock implementation
+        }
+
+        override suspend fun delete(id: com.benasher44.uuid.Uuid): Boolean {
+            return true // Mock implementation
+        }
+
+        override suspend fun existsByOepsVereinsNr(oepsVereinsNr: String): Boolean {
+            return false // Mock implementation
+        }
+
+        override suspend fun countActive(): Long {
+            return 0L // Mock implementation
+        }
+
+        override suspend fun countActiveByBundeslandId(bundeslandId: com.benasher44.uuid.Uuid): Long {
+            return 0L // Mock implementation
         }
     }
 
     private val mockMasterDataService = object : MasterDataService {
         override suspend fun countryExists(countryId: com.benasher44.uuid.Uuid): Boolean {
             return true // Mock implementation - assume all countries exist
+        }
+
+        override suspend fun stateExists(stateId: com.benasher44.uuid.Uuid): Boolean {
+            return true // Mock implementation - assume all states exist
+        }
+
+        override suspend fun getCountryById(countryId: com.benasher44.uuid.Uuid): MasterDataService.CountryInfo? {
+            return null // Mock implementation
+        }
+
+        override suspend fun getStateById(stateId: com.benasher44.uuid.Uuid): MasterDataService.StateInfo? {
+            return null // Mock implementation
+        }
+
+        override suspend fun getAllCountries(): List<MasterDataService.CountryInfo> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun getStatesByCountry(countryId: com.benasher44.uuid.Uuid): List<MasterDataService.StateInfo> {
+            return emptyList() // Mock implementation
         }
     }
 

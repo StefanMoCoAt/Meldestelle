@@ -18,10 +18,6 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.uuid)
-            implementation(libs.exposed.core)
-            implementation(libs.exposed.dao)
-            implementation(libs.exposed.jdbc)
-            implementation(libs.exposed.kotlinDatetime)
         }
 
         commonTest.dependencies {
@@ -39,14 +35,13 @@ kotlin {
         }
 
         jsMain.dependencies {
-            // Kotlin React dependencies with explicit versions
-            implementation("org.jetbrains.kotlin-wrappers:kotlin-react:${libs.versions.kotlinWrappers.get()}")
-            implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion:${libs.versions.kotlinWrappers.get()}")
+            // Kotlin React dependencies with explicit stable versions
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.467")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion:11.10.5-pre.467")
 
             // NPM dependencies
             implementation(npm("react", "18.2.0"))
             implementation(npm("react-dom", "18.2.0"))
-            implementation(npm("react-to-web-component", "2.0.2"))
         }
     }
 }

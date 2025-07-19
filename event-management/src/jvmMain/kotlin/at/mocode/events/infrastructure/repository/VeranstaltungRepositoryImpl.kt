@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.statements.UpdateBuilder
 
 /**
  * Exposed-based implementation of VeranstaltungRepository.

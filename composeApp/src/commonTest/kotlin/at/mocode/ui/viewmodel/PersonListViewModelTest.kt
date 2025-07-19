@@ -26,29 +26,44 @@ class PersonListViewModelTest {
             private val persons = mutableListOf<DomPerson>()
 
             override suspend fun save(person: DomPerson): DomPerson {
-                val savedPerson = person.copy(id = uuid4())
+                val savedPerson = person.copy(personId = uuid4())
                 persons.add(savedPerson)
                 return savedPerson
             }
 
             override suspend fun findById(id: com.benasher44.uuid.Uuid): DomPerson? {
-                return persons.find { it.id == id }
+                return persons.find { it.personId == id }
             }
 
             override suspend fun findByOepsSatzNr(oepsSatzNr: String): DomPerson? {
                 return persons.find { it.oepsSatzNr == oepsSatzNr }
             }
 
+            override suspend fun findByStammVereinId(vereinId: com.benasher44.uuid.Uuid): List<DomPerson> {
+                return persons.filter { it.stammVereinId == vereinId }
+            }
+
+            override suspend fun findByName(searchTerm: String, limit: Int): List<DomPerson> {
+                return persons.filter {
+                    it.nachname.contains(searchTerm, ignoreCase = true) ||
+                    it.vorname.contains(searchTerm, ignoreCase = true)
+                }.take(limit)
+            }
+
+            override suspend fun findAllActive(limit: Int, offset: Int): List<DomPerson> {
+                return persons.filter { it.istAktiv }.drop(offset).take(limit)
+            }
+
+            override suspend fun countActive(): Long {
+                return persons.count { it.istAktiv }.toLong()
+            }
+
             override suspend fun existsByOepsSatzNr(oepsSatzNr: String): Boolean {
                 return persons.any { it.oepsSatzNr == oepsSatzNr }
             }
 
-            override suspend fun findAll(): List<DomPerson> {
-                return persons.toList()
-            }
-
-            override suspend fun delete(id: com.benasher44.uuid.Uuid) {
-                persons.removeAll { it.id == id }
+            override suspend fun delete(id: com.benasher44.uuid.Uuid): Boolean {
+                return persons.removeAll { it.personId == id }
             }
         }
     }
@@ -71,6 +86,7 @@ class PersonListViewModelTest {
     fun `loadPersons should update persons list`() = runTest {
         // Given
         val testPerson = DomPerson(
+            oepsSatzNr = "123456",
             nachname = "Test",
             vorname = "User",
             geschlechtE = GeschlechtE.M,
@@ -100,6 +116,7 @@ class PersonListViewModelTest {
 
         // Add a new person to repository
         val newPerson = DomPerson(
+            oepsSatzNr = "789012",
             nachname = "New",
             vorname = "Person",
             geschlechtE = GeschlechtE.W,

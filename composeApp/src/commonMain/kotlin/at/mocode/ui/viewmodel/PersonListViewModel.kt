@@ -29,7 +29,7 @@ class PersonListViewModel(
             errorMessage = null
 
             try {
-                persons = personRepository.findAll()
+                persons = personRepository.findAllActive(limit = 100, offset = 0)
             } catch (e: Exception) {
                 errorMessage = "Fehler beim Laden der Personen: ${e.message}"
             } finally {

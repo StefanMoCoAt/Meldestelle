@@ -18,7 +18,7 @@ object LandTable : UUIDTable("land_definition") {
 
     // Names
     val nameGerman = varchar("name_german", 100)
-    val nameEnglish = varchar("name_english", 100)
+    val nameEnglish = varchar("name_english", 100).nullable()
     val nameLocal = varchar("name_local", 100).nullable()
 
     // Status and Membership

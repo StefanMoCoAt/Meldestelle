@@ -1,4 +1,4 @@
-package at.mocode.events.ui
+package at.mocode.events.ui.utils
 
 import at.mocode.events.domain.model.Veranstaltung
 
@@ -42,10 +42,3 @@ object EventUIUtils {
     }
 }
 
-/**
- * Main entry point for the JS application
- */
-fun main() {
-    console.log("Event Management JS module loaded successfully!")
-    console.log("React dependencies are available for UI development")
-}

@@ -55,14 +55,21 @@ kotlin {
         }
 
         jsMain.dependencies {
-            // Kotlin React dependencies with explicit versions
-            implementation("org.jetbrains.kotlin-wrappers:kotlin-react:${libs.versions.kotlinWrappers.get()}")
-            implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion:${libs.versions.kotlinWrappers.get()}")
+            // Kotlin React dependencies with explicit stable versions
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.467")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.467")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion:11.10.5-pre.467")
+
+            // Ktor client for data loading
+            implementation("io.ktor:ktor-client-core:3.1.2")
+            implementation("io.ktor:ktor-client-js:3.1.2")
+            implementation("io.ktor:ktor-client-content-negotiation:3.1.2")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.2")
 
             // NPM dependencies
             implementation(npm("react", "18.2.0"))
             implementation(npm("react-dom", "18.2.0"))
-            implementation(npm("react-to-web-component", "2.0.2"))
+            implementation(npm("@r2wc/react-to-web-component", "2.0.4"))
         }
     }
 }

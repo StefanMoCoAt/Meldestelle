@@ -123,6 +123,10 @@ class CreateBerechtigungUseCase(
             errors.add(ValidationError("aktion", "Aktion must not exceed 50 characters"))
         }
 
-        return ValidationResult(errors)
+        return if (errors.isEmpty()) {
+            ValidationResult.Valid
+        } else {
+            ValidationResult.Invalid(errors)
+        }
     }
 }

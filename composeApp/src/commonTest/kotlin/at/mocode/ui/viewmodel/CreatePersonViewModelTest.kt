@@ -1,18 +1,15 @@
 package at.mocode.ui.viewmodel
 
+import at.mocode.enums.GeschlechtE
 import at.mocode.members.application.usecase.CreatePersonUseCase
 import at.mocode.members.domain.model.DomPerson
 import at.mocode.members.domain.repository.PersonRepository
 import at.mocode.members.domain.repository.VereinRepository
 import at.mocode.members.domain.service.MasterDataService
-import at.mocode.enums.GeschlechtE
-import at.mocode.enums.DatenQuelleE
-import at.mocode.validation.ValidationResult
 import com.benasher44.uuid.uuid4
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
-import kotlinx.datetime.LocalDate
 import kotlin.test.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -33,29 +30,44 @@ class CreatePersonViewModelTest {
             private val persons = mutableListOf<DomPerson>()
 
             override suspend fun save(person: DomPerson): DomPerson {
-                val savedPerson = person.copy(id = uuid4())
+                val savedPerson = person.copy(personId = uuid4())
                 persons.add(savedPerson)
                 return savedPerson
             }
 
             override suspend fun findById(id: com.benasher44.uuid.Uuid): DomPerson? {
-                return persons.find { it.id == id }
+                return persons.find { it.personId == id }
             }
 
             override suspend fun findByOepsSatzNr(oepsSatzNr: String): DomPerson? {
                 return persons.find { it.oepsSatzNr == oepsSatzNr }
             }
 
+            override suspend fun findByStammVereinId(vereinId: com.benasher44.uuid.Uuid): List<DomPerson> {
+                return persons.filter { it.stammVereinId == vereinId }
+            }
+
+            override suspend fun findByName(searchTerm: String, limit: Int): List<DomPerson> {
+                return persons.filter {
+                    it.vorname.contains(searchTerm, ignoreCase = true) ||
+                    it.nachname.contains(searchTerm, ignoreCase = true)
+                }.take(limit)
+            }
+
+            override suspend fun findAllActive(limit: Int, offset: Int): List<DomPerson> {
+                return persons.filter { !it.istGesperrt }.drop(offset).take(limit)
+            }
+
             override suspend fun existsByOepsSatzNr(oepsSatzNr: String): Boolean {
                 return persons.any { it.oepsSatzNr == oepsSatzNr }
             }
 
-            override suspend fun findAll(): List<DomPerson> {
-                return persons.toList()
+            override suspend fun countActive(): Long {
+                return persons.count { !it.istGesperrt }.toLong()
             }
 
-            override suspend fun delete(id: com.benasher44.uuid.Uuid) {
-                persons.removeAll { it.id == id }
+            override suspend fun delete(id: com.benasher44.uuid.Uuid): Boolean {
+                return persons.removeAll { it.personId == id }
             }
         }
 
@@ -64,18 +76,74 @@ class CreatePersonViewModelTest {
                 return null
             }
 
-            override suspend fun existsById(id: com.benasher44.uuid.Uuid): Boolean {
+            override suspend fun findByOepsVereinsNr(oepsVereinsNr: String): at.mocode.members.domain.model.DomVerein? {
+                return null
+            }
+
+            override suspend fun findByName(searchTerm: String, limit: Int): List<at.mocode.members.domain.model.DomVerein> {
+                return emptyList()
+            }
+
+            override suspend fun findByBundeslandId(bundeslandId: com.benasher44.uuid.Uuid): List<at.mocode.members.domain.model.DomVerein> {
+                return emptyList()
+            }
+
+            override suspend fun findByLandId(landId: com.benasher44.uuid.Uuid): List<at.mocode.members.domain.model.DomVerein> {
+                return emptyList()
+            }
+
+            override suspend fun findAllActive(limit: Int, offset: Int): List<at.mocode.members.domain.model.DomVerein> {
+                return emptyList()
+            }
+
+            override suspend fun findByLocation(searchTerm: String, limit: Int): List<at.mocode.members.domain.model.DomVerein> {
+                return emptyList()
+            }
+
+            override suspend fun save(verein: at.mocode.members.domain.model.DomVerein): at.mocode.members.domain.model.DomVerein {
+                return verein
+            }
+
+            override suspend fun delete(id: com.benasher44.uuid.Uuid): Boolean {
                 return true
             }
 
-            override suspend fun findAll(): List<at.mocode.members.domain.model.DomVerein> {
-                return emptyList()
+            override suspend fun existsByOepsVereinsNr(oepsVereinsNr: String): Boolean {
+                return false
+            }
+
+            override suspend fun countActive(): Long {
+                return 0L
+            }
+
+            override suspend fun countActiveByBundeslandId(bundeslandId: com.benasher44.uuid.Uuid): Long {
+                return 0L
             }
         }
 
         mockMasterDataService = object : MasterDataService {
             override suspend fun countryExists(countryId: com.benasher44.uuid.Uuid): Boolean {
                 return true
+            }
+
+            override suspend fun stateExists(stateId: com.benasher44.uuid.Uuid): Boolean {
+                return true
+            }
+
+            override suspend fun getCountryById(countryId: com.benasher44.uuid.Uuid): MasterDataService.CountryInfo? {
+                return null
+            }
+
+            override suspend fun getStateById(stateId: com.benasher44.uuid.Uuid): MasterDataService.StateInfo? {
+                return null
+            }
+
+            override suspend fun getAllCountries(): List<MasterDataService.CountryInfo> {
+                return emptyList()
+            }
+
+            override suspend fun getStatesByCountry(countryId: com.benasher44.uuid.Uuid): List<MasterDataService.StateInfo> {
+                return emptyList()
             }
         }
 

@@ -3,6 +3,7 @@ package at.mocode.horses.infrastructure.api
 import at.mocode.horses.application.usecase.*
 import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.dto.base.BaseDto
+import at.mocode.dto.base.ApiResponse
 import at.mocode.enums.PferdeGeschlechtE
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
@@ -12,6 +13,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Contextual
 
 /**
  * REST API controller for horse registry operations.
@@ -54,9 +56,9 @@ class HorseController(
                         else -> horseRepository.findAllActive(limit)
                     }
 
-                    call.respond(HttpStatusCode.OK, BaseDto.success(horses))
+                    call.respond(HttpStatusCode.OK, ApiResponse.success(horses))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to retrieve horses: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to retrieve horses: ${e.message}"))
                 }
             }
 
@@ -64,18 +66,17 @@ class HorseController(
             get("/{id}") {
                 try {
                     val horseId = uuidFrom(call.parameters["id"]!!)
-                    val request = GetHorseUseCase.GetHorseRequest(horseId)
-                    val response = getHorseUseCase.execute(request)
+                    val horse = getHorseUseCase.getById(horseId)
 
-                    if (response.success && response.horse != null) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success(response.horse))
+                    if (horse != null) {
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(horse))
                     } else {
-                        call.respond(HttpStatusCode.NotFound, BaseDto.error<Any>("Horse not found"))
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<Any>("Horse not found"))
                     }
                 } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.BadRequest, BaseDto.error<Any>("Invalid horse ID format"))
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid horse ID format"))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to retrieve horse: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to retrieve horse: ${e.message}"))
                 }
             }
 
@@ -86,12 +87,12 @@ class HorseController(
                     val horse = horseRepository.findByLebensnummer(lebensnummer)
 
                     if (horse != null) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success(horse))
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(horse))
                     } else {
-                        call.respond(HttpStatusCode.NotFound, BaseDto.error<Any>("Horse with life number '$lebensnummer' not found"))
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<Any>("Horse with life number '$lebensnummer' not found"))
                     }
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to search horse: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to search horse: ${e.message}"))
                 }
             }
 
@@ -102,12 +103,12 @@ class HorseController(
                     val horse = horseRepository.findByChipNummer(chipNummer)
 
                     if (horse != null) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success(horse))
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(horse))
                     } else {
-                        call.respond(HttpStatusCode.NotFound, BaseDto.error<Any>("Horse with chip number '$chipNummer' not found"))
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<Any>("Horse with chip number '$chipNummer' not found"))
                     }
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to search horse: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to search horse: ${e.message}"))
                 }
             }
 
@@ -116,9 +117,9 @@ class HorseController(
                 try {
                     val activeOnly = call.request.queryParameters["activeOnly"]?.toBoolean() ?: true
                     val horses = horseRepository.findOepsRegistered(activeOnly)
-                    call.respond(HttpStatusCode.OK, BaseDto.success(horses))
+                    call.respond(HttpStatusCode.OK, ApiResponse.success(horses))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to retrieve OEPS horses: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to retrieve OEPS horses: ${e.message}"))
                 }
             }
 
@@ -127,9 +128,9 @@ class HorseController(
                 try {
                     val activeOnly = call.request.queryParameters["activeOnly"]?.toBoolean() ?: true
                     val horses = horseRepository.findFeiRegistered(activeOnly)
-                    call.respond(HttpStatusCode.OK, BaseDto.success(horses))
+                    call.respond(HttpStatusCode.OK, ApiResponse.success(horses))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to retrieve FEI horses: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to retrieve FEI horses: ${e.message}"))
                 }
             }
 
@@ -146,9 +147,9 @@ class HorseController(
                         feiRegistered = feiCount.toLong()
                     )
 
-                    call.respond(HttpStatusCode.OK, BaseDto.success(stats))
+                    call.respond(HttpStatusCode.OK, ApiResponse.success(stats))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to retrieve statistics: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to retrieve statistics: ${e.message}"))
                 }
             }
 
@@ -159,12 +160,12 @@ class HorseController(
                     val response = createHorseUseCase.execute(createRequest)
 
                     if (response.success) {
-                        call.respond(HttpStatusCode.Created, BaseDto.success(response.horse))
+                        call.respond(HttpStatusCode.Created, ApiResponse.success(response.data!!))
                     } else {
-                        call.respond(HttpStatusCode.BadRequest, BaseDto.error<Any>("Validation failed", response.errors))
+                        call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Validation failed"))
                     }
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to create horse: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to create horse: ${e.message}"))
                 }
             }
 
@@ -202,14 +203,14 @@ class HorseController(
                     val response = updateHorseUseCase.execute(updateRequest)
 
                     if (response.success && response.horse != null) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success(response.horse))
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(response.horse))
                     } else {
-                        call.respond(HttpStatusCode.BadRequest, BaseDto.error<Any>("Update failed", response.errors))
+                        call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Update failed: ${response.errors.joinToString(", ")}"))
                     }
                 } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.BadRequest, BaseDto.error<Any>("Invalid horse ID format"))
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid horse ID format"))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to update horse: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to update horse: ${e.message}"))
                 }
             }
 
@@ -223,14 +224,19 @@ class HorseController(
                     val response = deleteHorseUseCase.execute(deleteRequest)
 
                     if (response.success) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success("Horse deleted successfully", response.warnings))
+                        val message = if (response.warnings.isNotEmpty()) {
+                            "Horse deleted successfully. Warnings: ${response.warnings.joinToString(", ")}"
+                        } else {
+                            "Horse deleted successfully"
+                        }
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(message))
                     } else {
-                        call.respond(HttpStatusCode.BadRequest, BaseDto.error<Any>("Delete failed", response.errors))
+                        call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Delete failed: ${response.errors.joinToString(", ")}"))
                     }
                 } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.BadRequest, BaseDto.error<Any>("Invalid horse ID format"))
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid horse ID format"))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to delete horse: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to delete horse: ${e.message}"))
                 }
             }
 
@@ -241,14 +247,19 @@ class HorseController(
                     val response = deleteHorseUseCase.softDelete(horseId)
 
                     if (response.success) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success("Horse marked as inactive", response.warnings))
+                        val message = if (response.warnings.isNotEmpty()) {
+                            "Horse marked as inactive. Warnings: ${response.warnings.joinToString(", ")}"
+                        } else {
+                            "Horse marked as inactive"
+                        }
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(message))
                     } else {
-                        call.respond(HttpStatusCode.BadRequest, BaseDto.error<Any>("Soft delete failed", response.errors))
+                        call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Soft delete failed: ${response.errors.joinToString(", ")}"))
                     }
                 } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.BadRequest, BaseDto.error<Any>("Invalid horse ID format"))
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Any>("Invalid horse ID format"))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to soft delete horse: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to soft delete horse: ${e.message}"))
                 }
             }
 
@@ -259,9 +270,9 @@ class HorseController(
                     val response = deleteHorseUseCase.batchDelete(batchRequest.horseIds, batchRequest.forceDelete)
 
                     val statusCode = if (response.overallSuccess) HttpStatusCode.OK else HttpStatusCode.PartialContent
-                    call.respond(statusCode, BaseDto.success(response))
+                    call.respond(statusCode, ApiResponse.success(response))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Any>("Failed to batch delete horses: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to batch delete horses: ${e.message}"))
                 }
             }
         }
@@ -277,8 +288,8 @@ class HorseController(
         val geburtsdatum: kotlinx.datetime.LocalDate? = null,
         val rasse: String? = null,
         val farbe: String? = null,
-        val besitzerId: Uuid? = null,
-        val verantwortlichePersonId: Uuid? = null,
+        @Contextual val besitzerId: Uuid? = null,
+        @Contextual val verantwortlichePersonId: Uuid? = null,
         val zuechterName: String? = null,
         val zuchtbuchNummer: String? = null,
         val lebensnummer: String? = null,
@@ -300,7 +311,7 @@ class HorseController(
      */
     @Serializable
     data class BatchDeleteRequest(
-        val horseIds: List<Uuid>,
+        val horseIds: List<@Contextual Uuid>,
         val forceDelete: Boolean = false
     )
 

@@ -1,6 +1,7 @@
 package at.mocode.masterdata.infrastructure.api
 
 import at.mocode.dto.base.BaseDto
+import at.mocode.dto.base.ApiResponse
 import at.mocode.masterdata.application.usecase.CreateCountryUseCase
 import at.mocode.masterdata.application.usecase.GetCountryUseCase
 import at.mocode.masterdata.domain.model.LandDefinition
@@ -90,9 +91,9 @@ class CountryController(
                     val orderBySortierung = call.request.queryParameters["orderBySortierung"]?.toBoolean() ?: true
                     val countries = getCountryUseCase.getAllActive(orderBySortierung)
                     val countryDtos = countries.map { it.toDto() }
-                    call.respond(HttpStatusCode.OK, BaseDto.success(countryDtos))
+                    call.respond(HttpStatusCode.OK, ApiResponse.success(countryDtos))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<List<CountryDto>>("Failed to retrieve countries: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<List<CountryDto>>("Failed to retrieve countries: ${e.message}"))
                 }
             }
 
@@ -100,16 +101,16 @@ class CountryController(
             get("/{id}") {
                 try {
                     val countryId = call.parameters["id"]?.let { uuidFrom(it) }
-                        ?: return@get call.respond(HttpStatusCode.BadRequest, BaseDto.error<CountryDto>("Invalid country ID"))
+                        ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>("Invalid country ID"))
 
                     val country = getCountryUseCase.getById(countryId)
                     if (country != null) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success(country.toDto()))
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(country.toDto()))
                     } else {
-                        call.respond(HttpStatusCode.NotFound, BaseDto.error<CountryDto>("Country not found"))
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<CountryDto>("Country not found"))
                     }
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<CountryDto>("Failed to retrieve country: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<CountryDto>("Failed to retrieve country: ${e.message}"))
                 }
             }
 
@@ -117,18 +118,18 @@ class CountryController(
             get("/iso2/{code}") {
                 try {
                     val isoCode = call.parameters["code"]
-                        ?: return@get call.respond(HttpStatusCode.BadRequest, BaseDto.error<CountryDto>("ISO code is required"))
+                        ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>("ISO code is required"))
 
                     val country = getCountryUseCase.getByIsoAlpha2Code(isoCode)
                     if (country != null) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success(country.toDto()))
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(country.toDto()))
                     } else {
-                        call.respond(HttpStatusCode.NotFound, BaseDto.error<CountryDto>("Country not found"))
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<CountryDto>("Country not found"))
                     }
                 } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.BadRequest, BaseDto.error<CountryDto>(e.message ?: "Invalid ISO code"))
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>(e.message ?: "Invalid ISO code"))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<CountryDto>("Failed to retrieve country: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<CountryDto>("Failed to retrieve country: ${e.message}"))
                 }
             }
 
@@ -136,18 +137,18 @@ class CountryController(
             get("/iso3/{code}") {
                 try {
                     val isoCode = call.parameters["code"]
-                        ?: return@get call.respond(HttpStatusCode.BadRequest, BaseDto.error<CountryDto>("ISO code is required"))
+                        ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>("ISO code is required"))
 
                     val country = getCountryUseCase.getByIsoAlpha3Code(isoCode)
                     if (country != null) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success(country.toDto()))
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(country.toDto()))
                     } else {
-                        call.respond(HttpStatusCode.NotFound, BaseDto.error<CountryDto>("Country not found"))
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<CountryDto>("Country not found"))
                     }
                 } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.BadRequest, BaseDto.error<CountryDto>(e.message ?: "Invalid ISO code"))
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>(e.message ?: "Invalid ISO code"))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<CountryDto>("Failed to retrieve country: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<CountryDto>("Failed to retrieve country: ${e.message}"))
                 }
             }
 
@@ -155,17 +156,17 @@ class CountryController(
             get("/search") {
                 try {
                     val searchTerm = call.request.queryParameters["q"]
-                        ?: return@get call.respond(HttpStatusCode.BadRequest, BaseDto.error<List<CountryDto>>("Search term 'q' is required"))
+                        ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<List<CountryDto>>("Search term 'q' is required"))
 
                     val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
 
                     val countries = getCountryUseCase.searchByName(searchTerm, limit)
                     val countryDtos = countries.map { it.toDto() }
-                    call.respond(HttpStatusCode.OK, BaseDto.success(countryDtos))
+                    call.respond(HttpStatusCode.OK, ApiResponse.success(countryDtos))
                 } catch (e: IllegalArgumentException) {
-                    call.respond(HttpStatusCode.BadRequest, BaseDto.error<List<CountryDto>>(e.message ?: "Invalid search parameters"))
+                    call.respond(HttpStatusCode.BadRequest, ApiResponse.error<List<CountryDto>>(e.message ?: "Invalid search parameters"))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<List<CountryDto>>("Failed to search countries: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<List<CountryDto>>("Failed to search countries: ${e.message}"))
                 }
             }
 
@@ -174,9 +175,9 @@ class CountryController(
                 try {
                     val countries = getCountryUseCase.getEuMembers()
                     val countryDtos = countries.map { it.toDto() }
-                    call.respond(HttpStatusCode.OK, BaseDto.success(countryDtos))
+                    call.respond(HttpStatusCode.OK, ApiResponse.success(countryDtos))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<List<CountryDto>>("Failed to retrieve EU countries: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<List<CountryDto>>("Failed to retrieve EU countries: ${e.message}"))
                 }
             }
 
@@ -185,9 +186,9 @@ class CountryController(
                 try {
                     val countries = getCountryUseCase.getEwrMembers()
                     val countryDtos = countries.map { it.toDto() }
-                    call.respond(HttpStatusCode.OK, BaseDto.success(countryDtos))
+                    call.respond(HttpStatusCode.OK, ApiResponse.success(countryDtos))
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<List<CountryDto>>("Failed to retrieve EWR countries: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<List<CountryDto>>("Failed to retrieve EWR countries: ${e.message}"))
                 }
             }
 
@@ -209,13 +210,13 @@ class CountryController(
                     )
 
                     val result = createCountryUseCase.createCountry(request)
-                    if (result.isValid) {
-                        call.respond(HttpStatusCode.Created, BaseDto.success(result.data!!.toDto()))
+                    if (result.success) {
+                        call.respond(HttpStatusCode.Created, ApiResponse.success(result.country!!.toDto()))
                     } else {
-                        call.respond(HttpStatusCode.BadRequest, BaseDto.error<CountryDto>("Validation failed", result.errors))
+                        call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>("Validation failed: ${result.errors.joinToString(", ")}"))
                     }
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<CountryDto>("Failed to create country: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<CountryDto>("Failed to create country: ${e.message}"))
                 }
             }
 
@@ -223,7 +224,7 @@ class CountryController(
             put("/{id}") {
                 try {
                     val countryId = call.parameters["id"]?.let { uuidFrom(it) }
-                        ?: return@put call.respond(HttpStatusCode.BadRequest, BaseDto.error<CountryDto>("Invalid country ID"))
+                        ?: return@put call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>("Invalid country ID"))
 
                     val updateDto = call.receive<UpdateCountryDto>()
                     val request = CreateCountryUseCase.UpdateCountryRequest(
@@ -241,13 +242,13 @@ class CountryController(
                     )
 
                     val result = createCountryUseCase.updateCountry(request)
-                    if (result.isValid) {
-                        call.respond(HttpStatusCode.OK, BaseDto.success(result.data!!.toDto()))
+                    if (result.success) {
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(result.country!!.toDto()))
                     } else {
-                        call.respond(HttpStatusCode.BadRequest, BaseDto.error<CountryDto>("Validation failed", result.errors))
+                        call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>("Validation failed: ${result.errors.joinToString(", ")}"))
                     }
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<CountryDto>("Failed to update country: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<CountryDto>("Failed to update country: ${e.message}"))
                 }
             }
 
@@ -255,16 +256,16 @@ class CountryController(
             delete("/{id}") {
                 try {
                     val countryId = call.parameters["id"]?.let { uuidFrom(it) }
-                        ?: return@delete call.respond(HttpStatusCode.BadRequest, BaseDto.error<Unit>("Invalid country ID"))
+                        ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Unit>("Invalid country ID"))
 
                     val result = createCountryUseCase.deleteCountry(countryId)
-                    if (result.isValid) {
+                    if (result.success) {
                         call.respond(HttpStatusCode.NoContent)
                     } else {
-                        call.respond(HttpStatusCode.NotFound, BaseDto.error<Unit>("Country not found", result.errors))
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<Unit>("Country not found: ${result.errors.joinToString(", ")}"))
                     }
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, BaseDto.error<Unit>("Failed to delete country: ${e.message}"))
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Unit>("Failed to delete country: ${e.message}"))
                 }
             }
         }

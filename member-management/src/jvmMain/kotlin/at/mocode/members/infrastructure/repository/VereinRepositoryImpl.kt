@@ -9,6 +9,12 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 
+// Import table definition and extension functions
+import at.mocode.members.infrastructure.repository.VereinTable
+import at.mocode.members.infrastructure.repository.insertOrUpdate
+import at.mocode.members.infrastructure.repository.toLocalDateTime
+import at.mocode.members.infrastructure.repository.toInstant
+
 /**
  * Exposed-based implementation of VereinRepository.
  *
@@ -85,8 +91,8 @@ class VereinRepositoryImpl : VereinRepository {
             it[datenQuelle] = verein.datenQuelle
             it[istAktiv] = verein.istAktiv
             it[notizenIntern] = verein.notizenIntern
-            it[createdAt] = verein.createdAt.toJavaInstant()
-            it[updatedAt] = updatedVerein.updatedAt.toJavaInstant()
+            it[createdAt] = verein.createdAt.toLocalDateTime()
+            it[updatedAt] = updatedVerein.updatedAt.toLocalDateTime()
         }
 
         return updatedVerein
@@ -134,8 +140,8 @@ class VereinRepositoryImpl : VereinRepository {
             datenQuelle = row[VereinTable.datenQuelle],
             istAktiv = row[VereinTable.istAktiv],
             notizenIntern = row[VereinTable.notizenIntern],
-            createdAt = row[VereinTable.createdAt].toKotlinInstant(),
-            updatedAt = row[VereinTable.updatedAt].toKotlinInstant()
+            createdAt = row[VereinTable.createdAt].toInstant(),
+            updatedAt = row[VereinTable.updatedAt].toInstant()
         )
     }
 }

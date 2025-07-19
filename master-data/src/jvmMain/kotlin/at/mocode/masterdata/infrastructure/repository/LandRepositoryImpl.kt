@@ -7,6 +7,7 @@ import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.SortOrder
 
 /**
  * PostgreSQL implementation of LandRepository using Exposed ORM.
@@ -50,9 +51,9 @@ class LandRepositoryImpl : LandRepository {
         val query = LandTable.select { LandTable.isActive eq true }
 
         return if (orderBySortierung) {
-            query.orderBy(LandTable.sortierReihenfolge, LandTable.nameGerman)
+            query.orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameGerman to SortOrder.ASC)
         } else {
-            query.orderBy(LandTable.nameGerman)
+            query.orderBy(LandTable.nameGerman to SortOrder.ASC)
         }.map { it.toLandDefinition() }
     }
 
@@ -60,7 +61,7 @@ class LandRepositoryImpl : LandRepository {
         return LandTable.select {
             (LandTable.isActive eq true) and (LandTable.isEuMember eq true)
         }
-        .orderBy(LandTable.sortierReihenfolge, LandTable.nameGerman)
+        .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameGerman to SortOrder.ASC)
         .map { it.toLandDefinition() }
     }
 
@@ -68,7 +69,7 @@ class LandRepositoryImpl : LandRepository {
         return LandTable.select {
             (LandTable.isActive eq true) and (LandTable.isEwrMember eq true)
         }
-        .orderBy(LandTable.sortierReihenfolge, LandTable.nameGerman)
+        .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameGerman to SortOrder.ASC)
         .map { it.toLandDefinition() }
     }
 
@@ -81,39 +82,39 @@ class LandRepositoryImpl : LandRepository {
         return if (existingRecord != null) {
             // Update existing record
             LandTable.update({ LandTable.id eq land.landId }) {
-                it[isoAlpha2Code] = land.isoAlpha2Code
-                it[isoAlpha3Code] = land.isoAlpha3Code
-                it[isoNumericCode] = land.isoNumerischerCode
-                it[nameGerman] = land.nameDeutsch
-                it[nameEnglish] = land.nameEnglisch
-                it[nameLocal] = land.nameEnglisch // Using English as local fallback
-                it[isActive] = land.istAktiv
-                it[isEuMember] = land.istEuMitglied ?: false
-                it[isEwrMember] = land.istEwrMitglied ?: false
-                it[sortierReihenfolge] = land.sortierReihenfolge ?: 999
-                it[flagIcon] = land.wappenUrl
-                it[updatedAt] = now
-                it[notes] = null // Could be extended later
+                it[LandTable.isoAlpha2Code] = land.isoAlpha2Code
+                it[LandTable.isoAlpha3Code] = land.isoAlpha3Code
+                it[LandTable.isoNumericCode] = land.isoNumerischerCode
+                it[LandTable.nameGerman] = land.nameDeutsch
+                it[LandTable.nameEnglish] = land.nameEnglisch
+                it[LandTable.nameLocal] = land.nameEnglisch // Using English as local fallback
+                it[LandTable.isActive] = land.istAktiv
+                it[LandTable.isEuMember] = land.istEuMitglied ?: false
+                it[LandTable.isEwrMember] = land.istEwrMitglied ?: false
+                it[LandTable.sortierReihenfolge] = land.sortierReihenfolge ?: 999
+                it[LandTable.flagIcon] = land.wappenUrl
+                it[LandTable.updatedAt] = now
+                it[LandTable.notes] = null // Could be extended later
             }
             land.copy(updatedAt = now)
         } else {
             // Insert new record
             LandTable.insert {
-                it[id] = land.landId
-                it[isoAlpha2Code] = land.isoAlpha2Code
-                it[isoAlpha3Code] = land.isoAlpha3Code
-                it[isoNumericCode] = land.isoNumerischerCode
-                it[nameGerman] = land.nameDeutsch
-                it[nameEnglish] = land.nameEnglisch
-                it[nameLocal] = land.nameEnglisch // Using English as local fallback
-                it[isActive] = land.istAktiv
-                it[isEuMember] = land.istEuMitglied ?: false
-                it[isEwrMember] = land.istEwrMitglied ?: false
-                it[sortierReihenfolge] = land.sortierReihenfolge ?: 999
-                it[flagIcon] = land.wappenUrl
-                it[createdAt] = land.createdAt
-                it[updatedAt] = now
-                it[notes] = null
+                it[LandTable.id] = land.landId
+                it[LandTable.isoAlpha2Code] = land.isoAlpha2Code
+                it[LandTable.isoAlpha3Code] = land.isoAlpha3Code
+                it[LandTable.isoNumericCode] = land.isoNumerischerCode
+                it[LandTable.nameGerman] = land.nameDeutsch
+                it[LandTable.nameEnglish] = land.nameEnglisch
+                it[LandTable.nameLocal] = land.nameEnglisch // Using English as local fallback
+                it[LandTable.isActive] = land.istAktiv
+                it[LandTable.isEuMember] = land.istEuMitglied ?: false
+                it[LandTable.isEwrMember] = land.istEwrMitglied ?: false
+                it[LandTable.sortierReihenfolge] = land.sortierReihenfolge ?: 999
+                it[LandTable.flagIcon] = land.wappenUrl
+                it[LandTable.createdAt] = land.createdAt
+                it[LandTable.updatedAt] = now
+                it[LandTable.notes] = null
             }
             land.copy(updatedAt = now)
         }

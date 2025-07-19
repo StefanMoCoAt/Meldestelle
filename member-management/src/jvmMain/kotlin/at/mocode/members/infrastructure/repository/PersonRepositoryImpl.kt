@@ -10,6 +10,12 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 
+// Import table definition and extension functions
+import at.mocode.members.infrastructure.repository.PersonTable
+import at.mocode.members.infrastructure.repository.insertOrUpdate
+import at.mocode.members.infrastructure.repository.toLocalDateTime
+import at.mocode.members.infrastructure.repository.toInstant
+
 /**
  * Exposed-based implementation of PersonRepository.
  *
@@ -81,8 +87,8 @@ class PersonRepositoryImpl : PersonRepository {
             it[datenQuelle] = person.datenQuelle
             it[istAktiv] = person.istAktiv
             it[notizenIntern] = person.notizenIntern
-            it[createdAt] = person.createdAt.toJavaInstant()
-            it[updatedAt] = updatedPerson.updatedAt.toJavaInstant()
+            it[createdAt] = person.createdAt.toLocalDateTime()
+            it[updatedAt] = updatedPerson.updatedAt.toLocalDateTime()
         }
 
         return updatedPerson
@@ -133,8 +139,8 @@ class PersonRepositoryImpl : PersonRepository {
             datenQuelle = row[PersonTable.datenQuelle],
             istAktiv = row[PersonTable.istAktiv],
             notizenIntern = row[PersonTable.notizenIntern],
-            createdAt = row[PersonTable.createdAt].toKotlinInstant(),
-            updatedAt = row[PersonTable.updatedAt].toKotlinInstant()
+            createdAt = row[PersonTable.createdAt].toInstant(),
+            updatedAt = row[PersonTable.updatedAt].toInstant()
         )
     }
 }
