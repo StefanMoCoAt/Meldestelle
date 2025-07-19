@@ -100,7 +100,7 @@ class CreatePersonViewModel(
             errorMessage = null
 
             try {
-                // Parse birth date if provided
+                // Parse birthdate if provided
                 val parsedGeburtsdatum = if (geburtsdatum.isNotBlank()) {
                     try {
                         val parts = geburtsdatum.split("-")
