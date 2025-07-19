@@ -42,6 +42,14 @@ kotlin {
             implementation(libs.ktor.server.openapi)
             implementation(libs.ktor.server.swagger)
             implementation(libs.logback)
+
+            // Datenbankabhängigkeiten für Migrationen
+            implementation("com.zaxxer:HikariCP:5.0.1")
+            implementation(libs.exposed.core)
+            implementation(libs.exposed.dao)
+            implementation(libs.exposed.jdbc)
+            implementation(libs.exposed.kotlinDatetime)
+            implementation(libs.postgresql.driver)
         }
 
         jvmTest.dependencies {
