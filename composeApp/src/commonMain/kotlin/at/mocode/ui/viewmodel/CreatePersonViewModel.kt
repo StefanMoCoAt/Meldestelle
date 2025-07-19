@@ -107,10 +107,16 @@ class CreatePersonViewModel(
                         val parts = geburtsdatum.split("-")
                         if (parts.size == 3) {
                             LocalDate(parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
-                        } else null
+                        } else {
+                            errorMessage = "Ungültiges Datumsformat. Verwenden Sie YYYY-MM-DD"
+                            isLoading = false
+                            isSuccess = false
+                            return@launch
+                        }
                     } catch (e: Exception) {
                         errorMessage = "Ungültiges Datumsformat. Verwenden Sie YYYY-MM-DD"
                         isLoading = false
+                        isSuccess = false
                         return@launch
                     }
                 } else null

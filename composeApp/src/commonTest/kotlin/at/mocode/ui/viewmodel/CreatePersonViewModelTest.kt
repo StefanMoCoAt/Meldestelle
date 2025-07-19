@@ -306,22 +306,22 @@ class CreatePersonViewModelTest {
     }
 
     @Test
-    fun `clearError should reset error message`() {
+    fun `clearError should reset error message`() = runTest {
         // Given - simulate an error
         viewModel.updateNachname("") // This will cause validation error
         viewModel.updateVorname("Max")
 
-        runTest {
-            viewModel.createPerson()
-            testDispatcher.scheduler.advanceUntilIdle()
-        }
+        // When
+        viewModel.createPerson()
+        testDispatcher.scheduler.advanceUntilIdle()
 
+        // Then - verify error message exists
         assertNotNull(viewModel.errorMessage)
 
-        // When
+        // When - clear the error
         viewModel.clearError()
 
-        // Then
+        // Then - verify error message is cleared
         assertNull(viewModel.errorMessage)
     }
 }
