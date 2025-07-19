@@ -3,6 +3,8 @@ package at.mocode.events.infrastructure.repository
 import at.mocode.enums.SparteE
 import at.mocode.events.domain.model.Veranstaltung
 import at.mocode.events.domain.repository.VeranstaltungRepository
+import at.mocode.events.infrastructure.repository.VeranstaltungTable
+import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -19,24 +21,24 @@ import org.jetbrains.exposed.sql.statements.UpdateBuilder
  */
 class VeranstaltungRepositoryImpl : VeranstaltungRepository {
 
-    override suspend fun findById(id: Uuid): Veranstaltung? {
-        return VeranstaltungTable.selectAll().where { VeranstaltungTable.id eq id }
+    override suspend fun findById(id: Uuid): Veranstaltung? = DatabaseFactory.dbQuery {
+        VeranstaltungTable.selectAll().where { VeranstaltungTable.id eq id }
             .map { rowToVeranstaltung(it) }
             .singleOrNull()
     }
 
-    override suspend fun findByName(searchTerm: String, limit: Int): List<Veranstaltung> {
+    override suspend fun findByName(searchTerm: String, limit: Int): List<Veranstaltung> = DatabaseFactory.dbQuery {
         val searchPattern = "%$searchTerm%"
-        return VeranstaltungTable.selectAll().where { VeranstaltungTable.name like searchPattern }
+        VeranstaltungTable.selectAll().where { VeranstaltungTable.name like searchPattern }
             .orderBy(VeranstaltungTable.startDatum, SortOrder.DESC)
             .limit(limit)
             .map { rowToVeranstaltung(it) }
     }
 
-    override suspend fun findByVeranstalterVereinId(vereinId: Uuid, activeOnly: Boolean): List<Veranstaltung> {
+    override suspend fun findByVeranstalterVereinId(vereinId: Uuid, activeOnly: Boolean): List<Veranstaltung> = DatabaseFactory.dbQuery {
         val query = VeranstaltungTable.selectAll().where { VeranstaltungTable.veranstalterVereinId eq vereinId }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { VeranstaltungTable.istAktiv eq true }
         } else {
             query
@@ -44,13 +46,13 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
          .map { rowToVeranstaltung(it) }
     }
 
-    override suspend fun findByDateRange(startDate: LocalDate, endDate: LocalDate, activeOnly: Boolean): List<Veranstaltung> {
+    override suspend fun findByDateRange(startDate: LocalDate, endDate: LocalDate, activeOnly: Boolean): List<Veranstaltung> = DatabaseFactory.dbQuery {
         val query = VeranstaltungTable.selectAll().where {
             (VeranstaltungTable.startDatum greaterEq startDate) and
                 (VeranstaltungTable.endDatum lessEq endDate)
         }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { VeranstaltungTable.istAktiv eq true }
         } else {
             query
@@ -58,10 +60,10 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
          .map { rowToVeranstaltung(it) }
     }
 
-    override suspend fun findByStartDate(date: LocalDate, activeOnly: Boolean): List<Veranstaltung> {
+    override suspend fun findByStartDate(date: LocalDate, activeOnly: Boolean): List<Veranstaltung> = DatabaseFactory.dbQuery {
         val query = VeranstaltungTable.selectAll().where { VeranstaltungTable.startDatum eq date }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { VeranstaltungTable.istAktiv eq true }
         } else {
             query
@@ -69,17 +71,17 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
          .map { rowToVeranstaltung(it) }
     }
 
-    override suspend fun findAllActive(limit: Int, offset: Int): List<Veranstaltung> {
-        return VeranstaltungTable.selectAll().where { VeranstaltungTable.istAktiv eq true }
+    override suspend fun findAllActive(limit: Int, offset: Int): List<Veranstaltung> = DatabaseFactory.dbQuery {
+        VeranstaltungTable.selectAll().where { VeranstaltungTable.istAktiv eq true }
             .orderBy(VeranstaltungTable.startDatum, SortOrder.DESC)
             .limit(limit, offset.toLong())
             .map { rowToVeranstaltung(it) }
     }
 
-    override suspend fun findPublicEvents(activeOnly: Boolean): List<Veranstaltung> {
+    override suspend fun findPublicEvents(activeOnly: Boolean): List<Veranstaltung> = DatabaseFactory.dbQuery {
         val query = VeranstaltungTable.selectAll().where { VeranstaltungTable.istOeffentlich eq true }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { VeranstaltungTable.istAktiv eq true }
         } else {
             query
@@ -87,7 +89,7 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
          .map { rowToVeranstaltung(it) }
     }
 
-    override suspend fun save(veranstaltung: Veranstaltung): Veranstaltung {
+    override suspend fun save(veranstaltung: Veranstaltung): Veranstaltung = DatabaseFactory.dbQuery {
         val now = Clock.System.now()
         val updatedVeranstaltung = veranstaltung.copy(updatedAt = now)
 
@@ -96,7 +98,7 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
             .where { VeranstaltungTable.id eq veranstaltung.veranstaltungId }
             .singleOrNull()
 
-        return if (existingRecord != null) {
+        if (existingRecord != null) {
             // Update existing record
             VeranstaltungTable.update({ VeranstaltungTable.id eq veranstaltung.veranstaltungId }) {
                 veranstaltungToStatement(it, updatedVeranstaltung)
@@ -112,20 +114,20 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
         }
     }
 
-    override suspend fun delete(id: Uuid): Boolean {
+    override suspend fun delete(id: Uuid): Boolean = DatabaseFactory.dbQuery {
         val deletedRows = VeranstaltungTable.deleteWhere { VeranstaltungTable.id eq id }
-        return deletedRows > 0
+        deletedRows > 0
     }
 
-    override suspend fun countActive(): Long {
-        return VeranstaltungTable.selectAll().where { VeranstaltungTable.istAktiv eq true }
+    override suspend fun countActive(): Long = DatabaseFactory.dbQuery {
+        VeranstaltungTable.selectAll().where { VeranstaltungTable.istAktiv eq true }
             .count()
     }
 
-    override suspend fun countByVeranstalterVereinId(vereinId: Uuid, activeOnly: Boolean): Long {
+    override suspend fun countByVeranstalterVereinId(vereinId: Uuid, activeOnly: Boolean): Long = DatabaseFactory.dbQuery {
         val query = VeranstaltungTable.selectAll().where { VeranstaltungTable.veranstalterVereinId eq vereinId }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { VeranstaltungTable.istAktiv eq true }
         } else {
             query

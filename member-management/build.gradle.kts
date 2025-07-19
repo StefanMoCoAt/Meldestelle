@@ -32,6 +32,7 @@ kotlin {
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.contentNegotiation)
             implementation(libs.ktor.server.serializationKotlinxJson)
+            implementation("com.auth0:java-jwt:4.4.0")
         }
 
         jsMain.dependencies {

@@ -5,6 +5,8 @@ import at.mocode.dto.base.ApiResponse
 import at.mocode.masterdata.application.usecase.CreateCountryUseCase
 import at.mocode.masterdata.application.usecase.GetCountryUseCase
 import at.mocode.masterdata.domain.model.LandDefinition
+import at.mocode.validation.ApiValidationUtils
+import at.mocode.validation.ValidationError
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
@@ -88,7 +90,20 @@ class CountryController(
             // GET /api/masterdata/countries - Get all active countries
             get {
                 try {
-                    val orderBySortierung = call.request.queryParameters["orderBySortierung"]?.toBoolean() ?: true
+                    // Validate orderBySortierung parameter if provided
+                    val orderBySortierungParam = call.request.queryParameters["orderBySortierung"]
+                    val orderBySortierung = if (orderBySortierungParam != null) {
+                        try {
+                            orderBySortierungParam.toBoolean()
+                        } catch (e: Exception) {
+                            return@get call.respond(
+                                HttpStatusCode.BadRequest,
+                                ApiResponse.error<List<CountryDto>>("Invalid orderBySortierung parameter. Must be true or false")
+                            )
+                        }
+                    } else {
+                        true
+                    }
                     val countries = getCountryUseCase.getAllActive(orderBySortierung)
                     val countryDtos = countries.map { it.toDto() }
                     call.respond(HttpStatusCode.OK, ApiResponse.success(countryDtos))
@@ -155,6 +170,20 @@ class CountryController(
             // GET /api/masterdata/countries/search - Search countries by name
             get("/search") {
                 try {
+                    // Validate query parameters
+                    val validationErrors = ApiValidationUtils.validateQueryParameters(
+                        limit = call.request.queryParameters["limit"],
+                        q = call.request.queryParameters["q"]
+                    )
+
+                    if (!ApiValidationUtils.isValid(validationErrors)) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<List<CountryDto>>(ApiValidationUtils.createErrorMessage(validationErrors))
+                        )
+                        return@get
+                    }
+
                     val searchTerm = call.request.queryParameters["q"]
                         ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<List<CountryDto>>("Search term 'q' is required"))
 
@@ -196,6 +225,23 @@ class CountryController(
             post {
                 try {
                     val createDto = call.receive<CreateCountryDto>()
+
+                    // Validate input using shared validation utilities
+                    val validationErrors = ApiValidationUtils.validateCountryRequest(
+                        isoAlpha2Code = createDto.isoAlpha2Code,
+                        isoAlpha3Code = createDto.isoAlpha3Code,
+                        nameDeutsch = createDto.nameDeutsch,
+                        nameEnglisch = createDto.nameEnglisch
+                    )
+
+                    if (!ApiValidationUtils.isValid(validationErrors)) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<CountryDto>(ApiValidationUtils.createErrorMessage(validationErrors))
+                        )
+                        return@post
+                    }
+
                     val request = CreateCountryUseCase.CreateCountryRequest(
                         isoAlpha2Code = createDto.isoAlpha2Code,
                         isoAlpha3Code = createDto.isoAlpha3Code,
@@ -227,6 +273,23 @@ class CountryController(
                         ?: return@put call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>("Invalid country ID"))
 
                     val updateDto = call.receive<UpdateCountryDto>()
+
+                    // Validate input using shared validation utilities
+                    val validationErrors = ApiValidationUtils.validateCountryRequest(
+                        isoAlpha2Code = updateDto.isoAlpha2Code,
+                        isoAlpha3Code = updateDto.isoAlpha3Code,
+                        nameDeutsch = updateDto.nameDeutsch,
+                        nameEnglisch = updateDto.nameEnglisch
+                    )
+
+                    if (!ApiValidationUtils.isValid(validationErrors)) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<CountryDto>(ApiValidationUtils.createErrorMessage(validationErrors))
+                        )
+                        return@put
+                    }
+
                     val request = CreateCountryUseCase.UpdateCountryRequest(
                         landId = countryId,
                         isoAlpha2Code = updateDto.isoAlpha2Code,

@@ -5,6 +5,8 @@ import at.mocode.events.application.usecase.*
 import at.mocode.events.domain.repository.VeranstaltungRepository
 import at.mocode.enums.SparteE
 import at.mocode.serializers.UuidSerializer
+import at.mocode.validation.ApiValidationUtils
+import at.mocode.validation.ValidationError
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
@@ -40,10 +42,32 @@ class VeranstaltungController(
             // GET /api/events - Get all events with optional filtering
             get {
                 try {
+                    // Validate query parameters
+                    val validationErrors = ApiValidationUtils.validateQueryParameters(
+                        limit = call.request.queryParameters["limit"],
+                        offset = call.request.queryParameters["offset"],
+                        startDate = call.request.queryParameters["startDate"],
+                        endDate = call.request.queryParameters["endDate"],
+                        search = call.request.queryParameters["search"]
+                    )
+
+                    if (!ApiValidationUtils.isValid(validationErrors)) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<Any>(ApiValidationUtils.createErrorMessage(validationErrors))
+                        )
+                        return@get
+                    }
+
                     val activeOnly = call.request.queryParameters["activeOnly"]?.toBoolean() ?: true
                     val limit = call.request.queryParameters["limit"]?.toInt() ?: 100
                     val offset = call.request.queryParameters["offset"]?.toInt() ?: 0
-                    val organizerId = call.request.queryParameters["organizerId"]?.let { uuidFrom(it) }
+                    val organizerId = call.request.queryParameters["organizerId"]?.let {
+                        ApiValidationUtils.validateUuidString(it) ?: return@get call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<Any>("Invalid organizerId format")
+                        )
+                    }
                     val searchTerm = call.request.queryParameters["search"]
                     val publicOnly = call.request.queryParameters["publicOnly"]?.toBoolean() ?: false
                     val startDate = call.request.queryParameters["startDate"]?.let { LocalDate.parse(it) }
@@ -104,6 +128,24 @@ class VeranstaltungController(
             post {
                 try {
                     val createRequest = call.receive<CreateEventRequest>()
+
+                    // Validate input using shared validation utilities
+                    val validationErrors = ApiValidationUtils.validateEventRequest(
+                        name = createRequest.name,
+                        ort = createRequest.ort,
+                        startDatum = createRequest.startDatum,
+                        endDatum = createRequest.endDatum,
+                        maxTeilnehmer = createRequest.maxTeilnehmer
+                    )
+
+                    if (!ApiValidationUtils.isValid(validationErrors)) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<Any>(ApiValidationUtils.createErrorMessage(validationErrors))
+                        )
+                        return@post
+                    }
+
                     val useCaseRequest = CreateVeranstaltungUseCase.CreateVeranstaltungRequest(
                         name = createRequest.name,
                         beschreibung = createRequest.beschreibung,
@@ -140,6 +182,24 @@ class VeranstaltungController(
                 try {
                     val eventId = uuidFrom(call.parameters["id"]!!)
                     val updateRequest = call.receive<UpdateEventRequest>()
+
+                    // Validate input using shared validation utilities
+                    val validationErrors = ApiValidationUtils.validateEventRequest(
+                        name = updateRequest.name,
+                        ort = updateRequest.ort,
+                        startDatum = updateRequest.startDatum,
+                        endDatum = updateRequest.endDatum,
+                        maxTeilnehmer = updateRequest.maxTeilnehmer
+                    )
+
+                    if (!ApiValidationUtils.isValid(validationErrors)) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<Any>(ApiValidationUtils.createErrorMessage(validationErrors))
+                        )
+                        return@put
+                    }
+
                     val useCaseRequest = UpdateVeranstaltungUseCase.UpdateVeranstaltungRequest(
                         veranstaltungId = eventId,
                         name = updateRequest.name,
@@ -178,8 +238,26 @@ class VeranstaltungController(
             // DELETE /api/events/{id} - Delete event
             delete("/{id}") {
                 try {
-                    val eventId = uuidFrom(call.parameters["id"]!!)
-                    val forceDelete = call.request.queryParameters["force"]?.toBoolean() ?: false
+                    val eventId = ApiValidationUtils.validateUuidString(call.parameters["id"])
+                        ?: return@delete call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<Any>("Invalid event ID format")
+                        )
+
+                    // Validate force parameter if provided
+                    val forceParam = call.request.queryParameters["force"]
+                    val forceDelete = if (forceParam != null) {
+                        try {
+                            forceParam.toBoolean()
+                        } catch (e: Exception) {
+                            return@delete call.respond(
+                                HttpStatusCode.BadRequest,
+                                ApiResponse.error<Any>("Invalid force parameter. Must be true or false")
+                            )
+                        }
+                    } else {
+                        false
+                    }
                     val useCaseRequest = DeleteVeranstaltungUseCase.DeleteVeranstaltungRequest(
                         veranstaltungId = eventId,
                         forceDelete = forceDelete

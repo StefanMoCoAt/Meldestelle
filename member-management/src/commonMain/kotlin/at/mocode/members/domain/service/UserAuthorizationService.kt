@@ -164,4 +164,15 @@ class UserAuthorizationService(
         val authInfo = getUserAuthInfo(userId) ?: return false
         return authInfo.permissions.contains(permission)
     }
+
+    /**
+     * Gets all permissions for a person (used by JwtService).
+     *
+     * @param personId The person ID
+     * @return List of permissions for the person
+     */
+    suspend fun getUserPermissions(personId: Uuid): List<BerechtigungE> {
+        val roles = getUserRoles(personId)
+        return getPermissionsForRoles(roles)
+    }
 }

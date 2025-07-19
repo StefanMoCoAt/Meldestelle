@@ -1,15 +1,16 @@
 package at.mocode.members.infrastructure.repository
 
-// Import table definition and extension functions
 import at.mocode.members.domain.model.DomPerson
 import at.mocode.members.domain.repository.PersonRepository
+import at.mocode.members.infrastructure.repository.PersonTable
+import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
-import org.jetbrains.exposed.sql.ResultRow
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.or
-import org.jetbrains.exposed.sql.selectAll
 
 /**
  * Exposed-based implementation of PersonRepository.
@@ -19,26 +20,26 @@ import org.jetbrains.exposed.sql.selectAll
  */
 class PersonRepositoryImpl : PersonRepository {
 
-    override suspend fun findById(id: Uuid): DomPerson? {
-        return PersonTable.selectAll().where { PersonTable.id eq id }
+    override suspend fun findById(id: Uuid): DomPerson? = DatabaseFactory.dbQuery {
+        PersonTable.select { PersonTable.id eq id }
             .map { rowToDomPerson(it) }
             .singleOrNull()
     }
 
-    override suspend fun findByOepsSatzNr(oepsSatzNr: String): DomPerson? {
-        return PersonTable.selectAll().where { PersonTable.oepsSatzNr eq oepsSatzNr }
+    override suspend fun findByOepsSatzNr(oepsSatzNr: String): DomPerson? = DatabaseFactory.dbQuery {
+        PersonTable.select { PersonTable.oepsSatzNr eq oepsSatzNr }
             .map { rowToDomPerson(it) }
             .singleOrNull()
     }
 
-    override suspend fun findByStammVereinId(vereinId: Uuid): List<DomPerson> {
-        return PersonTable.selectAll().where { PersonTable.stammVereinId eq vereinId }
+    override suspend fun findByStammVereinId(vereinId: Uuid): List<DomPerson> = DatabaseFactory.dbQuery {
+        PersonTable.select { PersonTable.stammVereinId eq vereinId }
             .map { rowToDomPerson(it) }
     }
 
-    override suspend fun findByName(searchTerm: String, limit: Int): List<DomPerson> {
+    override suspend fun findByName(searchTerm: String, limit: Int): List<DomPerson> = DatabaseFactory.dbQuery {
         val searchPattern = "%$searchTerm%"
-        return PersonTable.selectAll().where {
+        PersonTable.select {
             (PersonTable.nachname like searchPattern) or
                 (PersonTable.vorname like searchPattern)
         }
@@ -46,61 +47,93 @@ class PersonRepositoryImpl : PersonRepository {
         .map { rowToDomPerson(it) }
     }
 
-    override suspend fun findAllActive(limit: Int, offset: Int): List<DomPerson> {
-        return PersonTable.selectAll().where { PersonTable.istAktiv eq true }
+    override suspend fun findAllActive(limit: Int, offset: Int): List<DomPerson> = DatabaseFactory.dbQuery {
+        PersonTable.select { PersonTable.istAktiv eq true }
             .limit(limit, offset.toLong())
             .map { rowToDomPerson(it) }
     }
 
-    override suspend fun save(person: DomPerson): DomPerson {
+    override suspend fun save(person: DomPerson): DomPerson = DatabaseFactory.dbQuery {
         val now = Clock.System.now()
-        val updatedPerson = person.copy(updatedAt = now)
+        val existingPerson = findById(person.personId)
 
-        PersonTable.insertOrUpdate(PersonTable.id) {
-            it[id] = person.personId
-            it[oepsSatzNr] = person.oepsSatzNr
-            it[nachname] = person.nachname
-            it[vorname] = person.vorname
-            it[titel] = person.titel
-            it[geburtsdatum] = person.geburtsdatum
-            it[geschlecht] = person.geschlechtE
-            it[nationalitaetLandId] = person.nationalitaetLandId
-            it[feiId] = person.feiId
-            it[telefon] = person.telefon
-            it[email] = person.email
-            it[strasse] = person.strasse
-            it[plz] = person.plz
-            it[ort] = person.ort
-            it[adresszusatzZusatzinfo] = person.adresszusatzZusatzinfo
-            it[stammVereinId] = person.stammVereinId
-            it[mitgliedsNummerBeiStammVerein] = person.mitgliedsNummerBeiStammVerein
-            it[istGesperrt] = person.istGesperrt
-            it[sperrGrund] = person.sperrGrund
-            it[altersklasseOepsCodeRaw] = person.altersklasseOepsCodeRaw
-            it[istJungerReiterOepsFlag] = person.istJungerReiterOepsFlag
-            it[kaderStatusOepsRaw] = person.kaderStatusOepsRaw
-            it[datenQuelle] = person.datenQuelle
-            it[istAktiv] = person.istAktiv
-            it[notizenIntern] = person.notizenIntern
-            it[createdAt] = person.createdAt.toLocalDateTime()
-            it[updatedAt] = updatedPerson.updatedAt.toLocalDateTime()
+        if (existingPerson == null) {
+            // Insert new person
+            PersonTable.insert { stmt ->
+                stmt[PersonTable.id] = person.personId
+                stmt[PersonTable.oepsSatzNr] = person.oepsSatzNr
+                stmt[PersonTable.nachname] = person.nachname
+                stmt[PersonTable.vorname] = person.vorname
+                stmt[PersonTable.titel] = person.titel
+                stmt[PersonTable.geburtsdatum] = person.geburtsdatum
+                stmt[PersonTable.geschlecht] = person.geschlechtE
+                stmt[PersonTable.nationalitaetLandId] = person.nationalitaetLandId
+                stmt[PersonTable.feiId] = person.feiId
+                stmt[PersonTable.telefon] = person.telefon
+                stmt[PersonTable.email] = person.email
+                stmt[PersonTable.strasse] = person.strasse
+                stmt[PersonTable.plz] = person.plz
+                stmt[PersonTable.ort] = person.ort
+                stmt[PersonTable.adresszusatzZusatzinfo] = person.adresszusatzZusatzinfo
+                stmt[PersonTable.stammVereinId] = person.stammVereinId
+                stmt[PersonTable.mitgliedsNummerBeiStammVerein] = person.mitgliedsNummerBeiStammVerein
+                stmt[PersonTable.istGesperrt] = person.istGesperrt
+                stmt[PersonTable.sperrGrund] = person.sperrGrund
+                stmt[PersonTable.altersklasseOepsCodeRaw] = person.altersklasseOepsCodeRaw
+                stmt[PersonTable.istJungerReiterOepsFlag] = person.istJungerReiterOepsFlag
+                stmt[PersonTable.kaderStatusOepsRaw] = person.kaderStatusOepsRaw
+                stmt[PersonTable.datenQuelle] = person.datenQuelle
+                stmt[PersonTable.istAktiv] = person.istAktiv
+                stmt[PersonTable.notizenIntern] = person.notizenIntern
+                stmt[PersonTable.createdAt] = person.createdAt.toLocalDateTime(TimeZone.UTC)
+                stmt[PersonTable.updatedAt] = now.toLocalDateTime(TimeZone.UTC)
+            }
+        } else {
+            // Update existing person
+            PersonTable.update({ PersonTable.id eq person.personId }) { stmt ->
+                stmt[PersonTable.oepsSatzNr] = person.oepsSatzNr
+                stmt[PersonTable.nachname] = person.nachname
+                stmt[PersonTable.vorname] = person.vorname
+                stmt[PersonTable.titel] = person.titel
+                stmt[PersonTable.geburtsdatum] = person.geburtsdatum
+                stmt[PersonTable.geschlecht] = person.geschlechtE
+                stmt[PersonTable.nationalitaetLandId] = person.nationalitaetLandId
+                stmt[PersonTable.feiId] = person.feiId
+                stmt[PersonTable.telefon] = person.telefon
+                stmt[PersonTable.email] = person.email
+                stmt[PersonTable.strasse] = person.strasse
+                stmt[PersonTable.plz] = person.plz
+                stmt[PersonTable.ort] = person.ort
+                stmt[PersonTable.adresszusatzZusatzinfo] = person.adresszusatzZusatzinfo
+                stmt[PersonTable.stammVereinId] = person.stammVereinId
+                stmt[PersonTable.mitgliedsNummerBeiStammVerein] = person.mitgliedsNummerBeiStammVerein
+                stmt[PersonTable.istGesperrt] = person.istGesperrt
+                stmt[PersonTable.sperrGrund] = person.sperrGrund
+                stmt[PersonTable.altersklasseOepsCodeRaw] = person.altersklasseOepsCodeRaw
+                stmt[PersonTable.istJungerReiterOepsFlag] = person.istJungerReiterOepsFlag
+                stmt[PersonTable.kaderStatusOepsRaw] = person.kaderStatusOepsRaw
+                stmt[PersonTable.datenQuelle] = person.datenQuelle
+                stmt[PersonTable.istAktiv] = person.istAktiv
+                stmt[PersonTable.notizenIntern] = person.notizenIntern
+                stmt[PersonTable.updatedAt] = now.toLocalDateTime(TimeZone.UTC)
+            }
         }
 
-        return updatedPerson
+        person.copy(updatedAt = now)
     }
 
-    override suspend fun delete(id: Uuid): Boolean {
+    override suspend fun delete(id: Uuid): Boolean = DatabaseFactory.dbQuery {
         val deletedRows = PersonTable.deleteWhere { PersonTable.id eq id }
-        return deletedRows > 0
+        deletedRows > 0
     }
 
-    override suspend fun existsByOepsSatzNr(oepsSatzNr: String): Boolean {
-        return PersonTable.selectAll().where { PersonTable.oepsSatzNr eq oepsSatzNr }
+    override suspend fun existsByOepsSatzNr(oepsSatzNr: String): Boolean = DatabaseFactory.dbQuery {
+        PersonTable.select { PersonTable.oepsSatzNr eq oepsSatzNr }
             .count() > 0
     }
 
-    override suspend fun countActive(): Long {
-        return PersonTable.selectAll().where { PersonTable.istAktiv eq true }
+    override suspend fun countActive(): Long = DatabaseFactory.dbQuery {
+        PersonTable.select { PersonTable.istAktiv eq true }
             .count()
     }
 
@@ -134,8 +167,8 @@ class PersonRepositoryImpl : PersonRepository {
             datenQuelle = row[PersonTable.datenQuelle],
             istAktiv = row[PersonTable.istAktiv],
             notizenIntern = row[PersonTable.notizenIntern],
-            createdAt = row[PersonTable.createdAt].toInstant(),
-            updatedAt = row[PersonTable.updatedAt].toInstant()
+            createdAt = row[PersonTable.createdAt].toInstant(TimeZone.UTC),
+            updatedAt = row[PersonTable.updatedAt].toInstant(TimeZone.UTC)
         )
     }
 }

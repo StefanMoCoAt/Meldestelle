@@ -2,155 +2,141 @@ package at.mocode.masterdata.infrastructure.repository
 
 import at.mocode.masterdata.domain.model.LandDefinition
 import at.mocode.masterdata.domain.repository.LandRepository
+import at.mocode.masterdata.infrastructure.table.LandTable
+import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 /**
- * PostgreSQL implementation of LandRepository using Exposed ORM.
- *
- * This implementation provides data access operations for country data,
- * mapping between the domain model (LandDefinition) and the database table (LandTable).
+ * Implementierung des LandRepository für die Datenbankzugriffe.
  */
 class LandRepositoryImpl : LandRepository {
 
-    override suspend fun findById(id: Uuid): LandDefinition? {
-        return LandTable.selectAll().where { LandTable.id eq id }
-            .singleOrNull()
-            ?.toLandDefinition()
-    }
-
-    override suspend fun findByIsoAlpha2Code(isoAlpha2Code: String): LandDefinition? {
-        return LandTable.selectAll().where { LandTable.isoAlpha2Code eq isoAlpha2Code }
-            .singleOrNull()
-            ?.toLandDefinition()
-    }
-
-    override suspend fun findByIsoAlpha3Code(isoAlpha3Code: String): LandDefinition? {
-        return LandTable.selectAll().where { LandTable.isoAlpha3Code eq isoAlpha3Code }
-            .singleOrNull()
-            ?.toLandDefinition()
-    }
-
-    override suspend fun findByName(searchTerm: String, limit: Int): List<LandDefinition> {
-        val searchPattern = "%$searchTerm%"
-        return LandTable.selectAll().where {
-            (LandTable.nameGerman like searchPattern) or
-                (LandTable.nameEnglish like searchPattern) or
-                (LandTable.nameLocal like searchPattern)
-        }
-        .orderBy(LandTable.sortierReihenfolge)
-        .limit(limit)
-        .map { it.toLandDefinition() }
-    }
-
-    override suspend fun findAllActive(orderBySortierung: Boolean): List<LandDefinition> {
-        val query = LandTable.selectAll().where { LandTable.isActive eq true }
-
-        return if (orderBySortierung) {
-            query.orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameGerman to SortOrder.ASC)
-        } else {
-            query.orderBy(LandTable.nameGerman to SortOrder.ASC)
-        }.map { it.toLandDefinition() }
-    }
-
-    override suspend fun findEuMembers(): List<LandDefinition> {
-        return LandTable.selectAll().where { (LandTable.isActive eq true) and (LandTable.isEuMember eq true) }
-        .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameGerman to SortOrder.ASC)
-        .map { it.toLandDefinition() }
-    }
-
-    override suspend fun findEwrMembers(): List<LandDefinition> {
-        return LandTable.selectAll().where { (LandTable.isActive eq true) and (LandTable.isEwrMember eq true) }
-        .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameGerman to SortOrder.ASC)
-        .map { it.toLandDefinition() }
-    }
-
-    override suspend fun save(land: LandDefinition): LandDefinition {
-        val now = Clock.System.now()
-
-        // Check if record exists
-        val existingRecord = LandTable.selectAll().where { LandTable.id eq land.landId }.singleOrNull()
-
-        return if (existingRecord != null) {
-            // Update existing record
-            LandTable.update({ LandTable.id eq land.landId }) {
-                it[LandTable.isoAlpha2Code] = land.isoAlpha2Code
-                it[LandTable.isoAlpha3Code] = land.isoAlpha3Code
-                it[LandTable.isoNumericCode] = land.isoNumerischerCode
-                it[LandTable.nameGerman] = land.nameDeutsch
-                it[LandTable.nameEnglish] = land.nameEnglisch
-                it[LandTable.nameLocal] = land.nameEnglisch // Using English as local fallback
-                it[LandTable.isActive] = land.istAktiv
-                it[LandTable.isEuMember] = land.istEuMitglied ?: false
-                it[LandTable.isEwrMember] = land.istEwrMitglied ?: false
-                it[LandTable.sortierReihenfolge] = land.sortierReihenfolge ?: 999
-                it[LandTable.flagIcon] = land.wappenUrl
-                it[LandTable.updatedAt] = now
-                it[LandTable.notes] = null // Could be extended later
-            }
-            land.copy(updatedAt = now)
-        } else {
-            // Insert new record
-            LandTable.insert {
-                it[LandTable.id] = land.landId
-                it[LandTable.isoAlpha2Code] = land.isoAlpha2Code
-                it[LandTable.isoAlpha3Code] = land.isoAlpha3Code
-                it[LandTable.isoNumericCode] = land.isoNumerischerCode
-                it[LandTable.nameGerman] = land.nameDeutsch
-                it[LandTable.nameEnglish] = land.nameEnglisch
-                it[LandTable.nameLocal] = land.nameEnglisch // Using English as local fallback
-                it[LandTable.isActive] = land.istAktiv
-                it[LandTable.isEuMember] = land.istEuMitglied ?: false
-                it[LandTable.isEwrMember] = land.istEwrMitglied ?: false
-                it[LandTable.sortierReihenfolge] = land.sortierReihenfolge ?: 999
-                it[LandTable.flagIcon] = land.wappenUrl
-                it[LandTable.createdAt] = land.createdAt
-                it[LandTable.updatedAt] = now
-                it[LandTable.notes] = null
-            }
-            land.copy(updatedAt = now)
-        }
-    }
-
-    override suspend fun delete(id: Uuid): Boolean {
-        val deletedRows = LandTable.deleteWhere { LandTable.id eq id }
-        return deletedRows > 0
-    }
-
-    override suspend fun existsByIsoAlpha2Code(isoAlpha2Code: String): Boolean {
-        return LandTable.selectAll().where { LandTable.isoAlpha2Code eq isoAlpha2Code }
-            .count() > 0
-    }
-
-    override suspend fun existsByIsoAlpha3Code(isoAlpha3Code: String): Boolean {
-        return LandTable.selectAll().where { LandTable.isoAlpha3Code eq isoAlpha3Code }
-            .count() > 0
-    }
-
-    override suspend fun countActive(): Long {
-        return LandTable.selectAll().where { LandTable.isActive eq true }.count()
-    }
-
     /**
-     * Extension function to convert a database ResultRow to a LandDefinition domain object.
+     * Konvertiert eine Datenbankzeile in ein Domain-Objekt.
      */
-    private fun ResultRow.toLandDefinition(): LandDefinition {
+    private fun rowToLandDefinition(row: ResultRow): LandDefinition {
         return LandDefinition(
-            landId = this[LandTable.id].value,
-            isoAlpha2Code = this[LandTable.isoAlpha2Code],
-            isoAlpha3Code = this[LandTable.isoAlpha3Code],
-            isoNumerischerCode = this[LandTable.isoNumericCode],
-            nameDeutsch = this[LandTable.nameGerman],
-            nameEnglisch = this[LandTable.nameEnglish],
-            wappenUrl = this[LandTable.flagIcon],
-            istEuMitglied = this[LandTable.isEuMember],
-            istEwrMitglied = this[LandTable.isEwrMember],
-            istAktiv = this[LandTable.isActive],
-            sortierReihenfolge = this[LandTable.sortierReihenfolge],
-            createdAt = this[LandTable.createdAt],
-            updatedAt = this[LandTable.updatedAt]
+            landId = row[LandTable.id],
+            isoAlpha2Code = row[LandTable.isoAlpha2Code],
+            isoAlpha3Code = row[LandTable.isoAlpha3Code],
+            nameDeutsch = row[LandTable.nameDe],
+            nameEnglisch = row[LandTable.nameEn],
+            istEuMitglied = row[LandTable.istEuMitglied],
+            istEwrMitglied = row[LandTable.istEwrMitglied],
+            sortierReihenfolge = row[LandTable.sortierReihenfolge],
+            istAktiv = row[LandTable.istAktiv],
+            createdAt = row[LandTable.erstelltAm].toInstant(TimeZone.UTC),
+            updatedAt = row[LandTable.geaendertAm].toInstant(TimeZone.UTC)
         )
+    }
+
+    override suspend fun findById(id: Uuid): LandDefinition? = DatabaseFactory.dbQuery {
+        LandTable.selectAll().where { LandTable.id eq id }
+            .map(::rowToLandDefinition)
+            .singleOrNull()
+    }
+
+    override suspend fun findByIsoAlpha2Code(isoAlpha2Code: String): LandDefinition? = DatabaseFactory.dbQuery {
+        LandTable.selectAll().where { LandTable.isoAlpha2Code eq isoAlpha2Code }
+            .map(::rowToLandDefinition)
+            .singleOrNull()
+    }
+
+    override suspend fun findByIsoAlpha3Code(isoAlpha3Code: String): LandDefinition? = DatabaseFactory.dbQuery {
+        LandTable.selectAll().where { LandTable.isoAlpha3Code eq isoAlpha3Code }
+            .map(::rowToLandDefinition)
+            .singleOrNull()
+    }
+
+    override suspend fun findByName(searchTerm: String, limit: Int): List<LandDefinition> = DatabaseFactory.dbQuery {
+        val pattern = "%$searchTerm%"
+        LandTable.selectAll().where { (LandTable.nameDe like pattern) or (LandTable.nameEn like pattern) }
+        .limit(limit)
+        .map(::rowToLandDefinition)
+    }
+
+    override suspend fun findAllActive(orderBySortierung: Boolean): List<LandDefinition> = DatabaseFactory.dbQuery {
+        val query = LandTable.selectAll().where { LandTable.istAktiv eq true }
+
+        if (orderBySortierung) {
+            query.orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameDe to SortOrder.ASC)
+        } else {
+            query.orderBy(LandTable.nameDe to SortOrder.ASC)
+        }
+
+        query.map(::rowToLandDefinition)
+    }
+
+    override suspend fun findEuMembers(): List<LandDefinition> = DatabaseFactory.dbQuery {
+        LandTable.selectAll().where { (LandTable.istEuMitglied eq true) and (LandTable.istAktiv eq true) }
+            .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameDe to SortOrder.ASC)
+            .map(::rowToLandDefinition)
+    }
+
+    override suspend fun findEwrMembers(): List<LandDefinition> = DatabaseFactory.dbQuery {
+        LandTable.selectAll().where { (LandTable.istEwrMitglied eq true) and (LandTable.istAktiv eq true) }
+            .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameDe to SortOrder.ASC)
+            .map(::rowToLandDefinition)
+    }
+
+    override suspend fun save(land: LandDefinition): LandDefinition = DatabaseFactory.dbQuery {
+        val now = Clock.System.now()
+        val existingLand = LandTable.selectAll().where { LandTable.id eq land.landId }.singleOrNull()
+
+        if (existingLand == null) {
+            // Insert a new country
+            LandTable.insert { stmt ->
+                stmt[id] = land.landId
+                stmt[isoAlpha2Code] = land.isoAlpha2Code
+                stmt[isoAlpha3Code] = land.isoAlpha3Code
+                stmt[nameDe] = land.nameDeutsch
+                stmt[nameEn] = land.nameEnglisch ?: ""
+                stmt[istEuMitglied] = land.istEuMitglied ?: false
+                stmt[istEwrMitglied] = land.istEwrMitglied ?: false
+                stmt[sortierReihenfolge] = land.sortierReihenfolge ?: 999
+                stmt[istAktiv] = land.istAktiv
+                stmt[erstelltAm] = land.createdAt.toLocalDateTime(TimeZone.UTC)
+                stmt[geaendertAm] = now.toLocalDateTime(TimeZone.UTC)
+            }
+        } else {
+            // Update existing country
+            LandTable.update({ LandTable.id eq land.landId }) { stmt ->
+                stmt[isoAlpha2Code] = land.isoAlpha2Code
+                stmt[isoAlpha3Code] = land.isoAlpha3Code
+                stmt[nameDe] = land.nameDeutsch
+                stmt[nameEn] = land.nameEnglisch ?: ""
+                stmt[istEuMitglied] = land.istEuMitglied ?: false
+                stmt[istEwrMitglied] = land.istEwrMitglied ?: false
+                stmt[sortierReihenfolge] = land.sortierReihenfolge ?: 999
+                stmt[istAktiv] = land.istAktiv
+                stmt[geaendertAm] = now.toLocalDateTime(TimeZone.UTC)
+            }
+        }
+
+        land.copy(updatedAt = now)
+    }
+
+    override suspend fun delete(id: Uuid): Boolean = DatabaseFactory.dbQuery {
+        LandTable.deleteWhere { LandTable.id eq id } > 0
+    }
+
+    override suspend fun existsByIsoAlpha2Code(isoAlpha2Code: String): Boolean = DatabaseFactory.dbQuery {
+        LandTable.selectAll().where { LandTable.isoAlpha2Code eq isoAlpha2Code }
+            .count() > 0
+    }
+
+    override suspend fun existsByIsoAlpha3Code(isoAlpha3Code: String): Boolean = DatabaseFactory.dbQuery {
+        LandTable.selectAll().where { LandTable.isoAlpha3Code eq isoAlpha3Code }
+            .count() > 0
+    }
+
+    override suspend fun countActive(): Long = DatabaseFactory.dbQuery {
+        LandTable.selectAll().where { LandTable.istAktiv eq true }.count()
     }
 }

@@ -7,11 +7,14 @@ import at.mocode.masterdata.application.usecase.CreateCountryUseCase
 import at.mocode.masterdata.application.usecase.GetCountryUseCase
 import at.mocode.masterdata.infrastructure.api.CountryController
 import at.mocode.masterdata.infrastructure.repository.LandRepositoryImpl
+import at.mocode.events.infrastructure.api.VeranstaltungController
+import at.mocode.events.infrastructure.repository.VeranstaltungRepositoryImpl
 import at.mocode.members.domain.service.AuthenticationService
 import at.mocode.members.domain.service.JwtService
 import at.mocode.members.domain.service.UserAuthorizationService
 import at.mocode.members.domain.service.PasswordService
 import at.mocode.members.infrastructure.repository.*
+import at.mocode.gateway.auth.AuthorizationHelper
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -29,6 +32,7 @@ fun Application.configureRouting() {
     // Initialize repository implementations for each context
     val landRepository = LandRepositoryImpl()
     val horseRepository = HorseRepositoryImpl()
+    val veranstaltungRepository = VeranstaltungRepositoryImpl()
 
     // Initialize authentication repositories
     val userRepository = UserRepositoryImpl()
@@ -53,6 +57,9 @@ fun Application.configureRouting() {
         jwtService
     )
 
+    // Initialize authorization helper
+    val authorizationHelper = AuthorizationHelper(jwtService, userAuthorizationService)
+
     // Initialize use cases
     val getCountryUseCase = GetCountryUseCase(landRepository)
     val createCountryUseCase = CreateCountryUseCase(landRepository)
@@ -60,6 +67,7 @@ fun Application.configureRouting() {
     // Initialize controllers for each bounded context
     val countryController = CountryController(getCountryUseCase, createCountryUseCase)
     val horseController = HorseController(horseRepository)
+    val veranstaltungController = VeranstaltungController(veranstaltungRepository)
 
     routing {
 
@@ -73,12 +81,14 @@ fun Application.configureRouting() {
                     availableContexts = listOf(
                         "authentication",
                         "master-data",
-                        "horse-registry"
+                        "horse-registry",
+                        "event-management"
                     ),
                     endpoints = mapOf(
                         "authentication" to "/auth/*",
                         "master-data" to "/api/masterdata/*",
-                        "horse-registry" to "/api/horses/*"
+                        "horse-registry" to "/api/horses/*",
+                        "event-management" to "/api/events/*"
                     )
                 )
             ))
@@ -92,7 +102,8 @@ fun Application.configureRouting() {
                     contexts = mapOf(
                         "authentication" to "UP",
                         "master-data" to "UP",
-                        "horse-registry" to "UP"
+                        "horse-registry" to "UP",
+                        "event-management" to "UP"
                     )
                 )
             ))
@@ -119,6 +130,11 @@ fun Application.configureRouting() {
                             name = "Horse Registry Context",
                             path = "/api/horses",
                             description = "Horse registration, ownership, and pedigree management"
+                        ),
+                        ContextInfo(
+                            name = "Event Management Context",
+                            path = "/api/events",
+                            description = "Event creation, management, and participant registration"
                         )
                     )
                 )
@@ -135,6 +151,9 @@ fun Application.configureRouting() {
 
         // Horse Registry Context Routes
         horseController.configureRoutes(this)
+
+        // Event Management Context Routes
+        veranstaltungController.configureRoutes(this)
 
         // Catch-all for undefined routes
         route("{...}") {

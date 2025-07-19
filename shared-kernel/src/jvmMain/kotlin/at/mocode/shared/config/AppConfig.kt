@@ -149,6 +149,7 @@ class ServerConfig {
  */
 class SecurityConfig {
     var jwt = JwtConfig()
+    var apiKey: String? = null
 
     fun configure(props: Properties) {
         // JWT Konfiguration
@@ -160,6 +161,9 @@ class SecurityConfig {
         props.getProperty("security.jwt.expirationInMinutes")?.toLongOrNull()?.let {
             jwt.expirationInMinutes = it
         }
+
+        // API Key Konfiguration
+        apiKey = System.getenv("API_KEY") ?: props.getProperty("security.apiKey")
     }
 
     class JwtConfig {

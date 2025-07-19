@@ -9,24 +9,21 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 /**
- * Repräsentiert einen Benutzer für die Authentifizierung im System.
+ * Repräsentiert einen Benutzer im System.
  *
- * Diese Entität verwaltet die Anmeldedaten und ist mit einer Person verknüpft.
- * Ein Benutzer kann sich am System anmelden und erhält basierend auf seinen
- * zugewiesenen Rollen entsprechende Berechtigungen.
+ * Ein Benutzer ist mit einer Person verknüpft und hat Anmeldedaten für den Zugriff auf das System.
  *
  * @property userId Eindeutiger interner Identifikator für diesen Benutzer (UUID).
- * @property personId Fremdschlüssel zur verknüpften Person (DomPerson.personId).
- * @property username Eindeutiger Benutzername für die Anmeldung.
- * @property email E-Mail-Adresse des Benutzers (kann auch als Login verwendet werden).
- * @property passwordHash Gehashtes Passwort des Benutzers.
- * @property salt Salt für das Passwort-Hashing.
- * @property istAktiv Gibt an, ob dieser Benutzer aktuell aktiv ist und sich anmelden kann.
+ * @property personId ID der zugehörigen Person.
+ * @property username Benutzername für die Anmeldung.
+ * @property email E-Mail-Adresse des Benutzers.
+ * @property passwordHash Hash des Passworts.
+ * @property salt Salt für das Password-Hashing.
+ * @property istAktiv Gibt an, ob dieser Benutzer aktiv ist.
  * @property istEmailVerifiziert Gibt an, ob die E-Mail-Adresse verifiziert wurde.
- * @property letzteAnmeldung Zeitstempel der letzten erfolgreichen Anmeldung.
- * @property fehlgeschlageneAnmeldungen Anzahl der fehlgeschlagenen Anmeldeversuche.
- * @property gesperrtBis Optionaler Zeitstempel bis wann der Benutzer gesperrt ist.
- * @property passwortAendernErforderlich Gibt an, ob der Benutzer sein Passwort ändern muss.
+ * @property fehlgeschlageneAnmeldungen Anzahl fehlgeschlagener Anmeldeversuche.
+ * @property gesperrtBis Zeitpunkt, bis zu dem der Account gesperrt ist (null, wenn nicht gesperrt).
+ * @property letzteAnmeldung Zeitpunkt der letzten erfolgreichen Anmeldung.
  * @property createdAt Zeitstempel der Erstellung dieses Benutzers.
  * @property updatedAt Zeitstempel der letzten Aktualisierung dieses Benutzers.
  */
@@ -45,19 +42,36 @@ data class DomUser(
 
     var istAktiv: Boolean = true,
     var istEmailVerifiziert: Boolean = false,
-
-    @Serializable(with = KotlinInstantSerializer::class)
-    var letzteAnmeldung: Instant? = null,
-
     var fehlgeschlageneAnmeldungen: Int = 0,
 
     @Serializable(with = KotlinInstantSerializer::class)
     var gesperrtBis: Instant? = null,
 
-    var passwortAendernErforderlich: Boolean = false,
+    @Serializable(with = KotlinInstantSerializer::class)
+    var letzteAnmeldung: Instant? = null,
 
     @Serializable(with = KotlinInstantSerializer::class)
     val createdAt: Instant = Clock.System.now(),
+
     @Serializable(with = KotlinInstantSerializer::class)
     var updatedAt: Instant = Clock.System.now()
-)
+) {
+    /**
+     * Prüft, ob der Benutzeraccount gesperrt ist.
+     *
+     * @return true, wenn der Account gesperrt ist, false sonst.
+     */
+    fun isLocked(): Boolean {
+        val now = Clock.System.now()
+        return gesperrtBis != null && now < gesperrtBis!!
+    }
+
+    /**
+     * Prüft, ob der Benutzer anmelden kann (aktiv und nicht gesperrt).
+     *
+     * @return true, wenn der Benutzer sich anmelden kann, false sonst.
+     */
+    fun canLogin(): Boolean {
+        return istAktiv && !isLocked()
+    }
+}

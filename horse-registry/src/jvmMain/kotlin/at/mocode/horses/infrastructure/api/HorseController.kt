@@ -5,6 +5,8 @@ import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.dto.base.BaseDto
 import at.mocode.dto.base.ApiResponse
 import at.mocode.enums.PferdeGeschlechtE
+import at.mocode.validation.ApiValidationUtils
+import at.mocode.validation.ValidationError
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 import io.ktor.http.*
@@ -39,11 +41,37 @@ class HorseController(
             // GET /api/horses - Get all horses with optional filtering
             get {
                 try {
+                    // Validate query parameters
+                    val validationErrors = ApiValidationUtils.validateQueryParameters(
+                        limit = call.request.queryParameters["limit"],
+                        search = call.request.queryParameters["search"]
+                    )
+
+                    if (!ApiValidationUtils.isValid(validationErrors)) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<Any>(ApiValidationUtils.createErrorMessage(validationErrors))
+                        )
+                        return@get
+                    }
+
                     val activeOnly = call.request.queryParameters["activeOnly"]?.toBoolean() ?: true
                     val limit = call.request.queryParameters["limit"]?.toInt() ?: 100
-                    val ownerId = call.request.queryParameters["ownerId"]?.let { uuidFrom(it) }
+                    val ownerId = call.request.queryParameters["ownerId"]?.let {
+                        ApiValidationUtils.validateUuidString(it) ?: return@get call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<Any>("Invalid ownerId format")
+                        )
+                    }
                     val geschlecht = call.request.queryParameters["geschlecht"]?.let {
-                        PferdeGeschlechtE.valueOf(it)
+                        try {
+                            PferdeGeschlechtE.valueOf(it)
+                        } catch (e: IllegalArgumentException) {
+                            return@get call.respond(
+                                HttpStatusCode.BadRequest,
+                                ApiResponse.error<Any>("Invalid geschlecht value. Valid values: ${PferdeGeschlechtE.values().joinToString(", ")}")
+                            )
+                        }
                     }
                     val rasse = call.request.queryParameters["rasse"]
                     val searchTerm = call.request.queryParameters["search"]
@@ -157,6 +185,24 @@ class HorseController(
             post {
                 try {
                     val createRequest = call.receive<CreateHorseUseCase.CreateHorseRequest>()
+
+                    // Validate input using shared validation utilities
+                    val validationErrors = ApiValidationUtils.validateHorseRequest(
+                        pferdeName = createRequest.pferdeName,
+                        lebensnummer = createRequest.lebensnummer,
+                        chipNummer = createRequest.chipNummer,
+                        oepsNummer = createRequest.oepsNummer,
+                        feiNummer = createRequest.feiNummer
+                    )
+
+                    if (!ApiValidationUtils.isValid(validationErrors)) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<Any>(ApiValidationUtils.createErrorMessage(validationErrors))
+                        )
+                        return@post
+                    }
+
                     val response = createHorseUseCase.execute(createRequest)
 
                     if (response.success) {
@@ -174,6 +220,23 @@ class HorseController(
                 try {
                     val horseId = uuidFrom(call.parameters["id"]!!)
                     val updateData = call.receive<UpdateHorseRequest>()
+
+                    // Validate input using shared validation utilities
+                    val validationErrors = ApiValidationUtils.validateHorseRequest(
+                        pferdeName = updateData.pferdeName,
+                        lebensnummer = updateData.lebensnummer,
+                        chipNummer = updateData.chipNummer,
+                        oepsNummer = updateData.oepsNummer,
+                        feiNummer = updateData.feiNummer
+                    )
+
+                    if (!ApiValidationUtils.isValid(validationErrors)) {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            ApiResponse.error<Any>(ApiValidationUtils.createErrorMessage(validationErrors))
+                        )
+                        return@put
+                    }
 
                     val updateRequest = UpdateHorseUseCase.UpdateHorseRequest(
                         pferdId = horseId,

@@ -111,34 +111,43 @@ fun Route.authRoutes(
                     loginRequest.password
                 )
 
-                if (authResult.isSuccess) {
-                    val user = authResult.user!!
-                    val tokenInfo = authResult.tokenInfo!!
-
-                    call.respond(
-                        HttpStatusCode.OK,
-                        LoginResponse(
-                            success = true,
-                            token = tokenInfo.token,
-                            message = "Login successful",
-                            user = UserProfileResponse(
-                                userId = user.userId.toString(),
-                                username = user.username,
-                                email = user.email,
-                                isActive = user.istAktiv,
-                                isEmailVerified = user.istEmailVerifiziert,
-                                lastLogin = user.letzteAnmeldung?.toString()
+                when (authResult) {
+                    is at.mocode.members.domain.service.AuthenticationService.AuthResult.Success -> {
+                        call.respond(
+                            HttpStatusCode.OK,
+                            LoginResponse(
+                                success = true,
+                                token = authResult.token,
+                                message = "Login successful",
+                                user = UserProfileResponse(
+                                    userId = authResult.user.userId.toString(),
+                                    username = authResult.user.username,
+                                    email = authResult.user.email,
+                                    isActive = authResult.user.istAktiv,
+                                    isEmailVerified = authResult.user.istEmailVerifiziert,
+                                    lastLogin = authResult.user.letzteAnmeldung?.toString()
+                                )
                             )
                         )
-                    )
-                } else {
-                    call.respond(
-                        HttpStatusCode.Unauthorized,
-                        LoginResponse(
-                            success = false,
-                            message = authResult.errorMessage ?: "Invalid credentials"
+                    }
+                    is at.mocode.members.domain.service.AuthenticationService.AuthResult.Failure -> {
+                        call.respond(
+                            HttpStatusCode.Unauthorized,
+                            LoginResponse(
+                                success = false,
+                                message = authResult.reason
+                            )
                         )
-                    )
+                    }
+                    is at.mocode.members.domain.service.AuthenticationService.AuthResult.Locked -> {
+                        call.respond(
+                            HttpStatusCode.Unauthorized,
+                            LoginResponse(
+                                success = false,
+                                message = "Account ist gesperrt bis ${authResult.lockedUntil}"
+                            )
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 call.respond(
@@ -156,39 +165,22 @@ fun Route.authRoutes(
             try {
                 val registerRequest = call.receive<RegisterRequest>()
 
-                // TODO: Implement actual registration logic
-                // For now, return a mock response
-                if (registerRequest.username.isNotEmpty() &&
-                    registerRequest.email.isNotEmpty() &&
-                    registerRequest.password.length >= 8) {
+                // Validate input
+                val errors = mutableListOf<ValidationErrorResponse>()
+                if (registerRequest.username.isEmpty()) {
+                    errors.add(ValidationErrorResponse("username", "Username is required"))
+                }
+                if (registerRequest.email.isEmpty()) {
+                    errors.add(ValidationErrorResponse("email", "Email is required"))
+                }
+                if (registerRequest.password.length < 8) {
+                    errors.add(ValidationErrorResponse("password", "Password must be at least 8 characters"))
+                }
+                if (registerRequest.personId.isEmpty()) {
+                    errors.add(ValidationErrorResponse("personId", "Person ID is required"))
+                }
 
-                    call.respond(
-                        HttpStatusCode.Created,
-                        RegisterResponse(
-                            success = true,
-                            message = "User registered successfully",
-                            user = UserProfileResponse(
-                                userId = "mock-user-id-${System.currentTimeMillis()}",
-                                username = registerRequest.username,
-                                email = registerRequest.email,
-                                isActive = true,
-                                isEmailVerified = false,
-                                lastLogin = null
-                            )
-                        )
-                    )
-                } else {
-                    val errors = mutableListOf<ValidationErrorResponse>()
-                    if (registerRequest.username.isEmpty()) {
-                        errors.add(ValidationErrorResponse("username", "Username is required"))
-                    }
-                    if (registerRequest.email.isEmpty()) {
-                        errors.add(ValidationErrorResponse("email", "Email is required"))
-                    }
-                    if (registerRequest.password.length < 8) {
-                        errors.add(ValidationErrorResponse("password", "Password must be at least 8 characters"))
-                    }
-
+                if (errors.isNotEmpty()) {
                     call.respond(
                         HttpStatusCode.BadRequest,
                         RegisterResponse(
@@ -197,6 +189,71 @@ fun Route.authRoutes(
                             errors = errors
                         )
                     )
+                    return@post
+                }
+
+                // Parse personId
+                val personId = try {
+                    com.benasher44.uuid.Uuid.fromString(registerRequest.personId)
+                } catch (e: Exception) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        RegisterResponse(
+                            success = false,
+                            message = "Invalid person ID format",
+                            errors = listOf(ValidationErrorResponse("personId", "Invalid UUID format"))
+                        )
+                    )
+                    return@post
+                }
+
+                // Register user
+                val registerResult = authenticationService.registerUser(
+                    registerRequest.username,
+                    registerRequest.email,
+                    registerRequest.password,
+                    personId
+                )
+
+                when (registerResult) {
+                    is at.mocode.members.domain.service.AuthenticationService.RegisterResult.Success -> {
+                        call.respond(
+                            HttpStatusCode.Created,
+                            RegisterResponse(
+                                success = true,
+                                message = "User registered successfully",
+                                user = UserProfileResponse(
+                                    userId = registerResult.user.userId.toString(),
+                                    username = registerResult.user.username,
+                                    email = registerResult.user.email,
+                                    isActive = registerResult.user.istAktiv,
+                                    isEmailVerified = registerResult.user.istEmailVerifiziert,
+                                    lastLogin = registerResult.user.letzteAnmeldung?.toString()
+                                )
+                            )
+                        )
+                    }
+                    is at.mocode.members.domain.service.AuthenticationService.RegisterResult.Failure -> {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            RegisterResponse(
+                                success = false,
+                                message = registerResult.reason
+                            )
+                        )
+                    }
+                    is at.mocode.members.domain.service.AuthenticationService.RegisterResult.WeakPassword -> {
+                        call.respond(
+                            HttpStatusCode.BadRequest,
+                            RegisterResponse(
+                                success = false,
+                                message = "Password is too weak",
+                                errors = registerResult.issues.map {
+                                    ValidationErrorResponse("password", it)
+                                }
+                            )
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 call.respond(
@@ -216,21 +273,35 @@ fun Route.authRoutes(
             get("/profile") {
                 try {
                     val principal = call.principal<JWTPrincipal>()
-                    val userId = principal?.getClaim("userId", String::class)
+                    val userIdString = principal?.subject
 
-                    if (userId != null) {
-                        // TODO: Fetch actual user data from database
-                        call.respond(
-                            HttpStatusCode.OK,
-                            UserProfileResponse(
-                                userId = userId,
-                                username = "mock_user",
-                                email = "mock@example.com",
-                                isActive = true,
-                                isEmailVerified = true,
-                                lastLogin = null
+                    if (userIdString != null) {
+                        val userId = try {
+                            com.benasher44.uuid.Uuid.fromString(userIdString)
+                        } catch (e: Exception) {
+                            call.respond(HttpStatusCode.Unauthorized, "Invalid token format")
+                            return@get
+                        }
+
+                        // Fetch actual user data from database
+                        val userRepository = at.mocode.members.infrastructure.repository.UserRepositoryImpl()
+                        val user = userRepository.findById(userId)
+
+                        if (user != null) {
+                            call.respond(
+                                HttpStatusCode.OK,
+                                UserProfileResponse(
+                                    userId = user.userId.toString(),
+                                    username = user.username,
+                                    email = user.email,
+                                    isActive = user.istAktiv,
+                                    isEmailVerified = user.istEmailVerifiziert,
+                                    lastLogin = user.letzteAnmeldung?.toString()
+                                )
                             )
-                        )
+                        } else {
+                            call.respond(HttpStatusCode.NotFound, "User not found")
+                        }
                     } else {
                         call.respond(HttpStatusCode.Unauthorized, "Invalid token")
                     }
@@ -243,31 +314,81 @@ fun Route.authRoutes(
             post("/change-password") {
                 try {
                     val principal = call.principal<JWTPrincipal>()
-                    val userId = principal?.getClaim("userId", String::class)
+                    val userIdString = principal?.subject
 
-                    if (userId != null) {
+                    if (userIdString != null) {
+                        val userId = try {
+                            com.benasher44.uuid.Uuid.fromString(userIdString)
+                        } catch (e: Exception) {
+                            call.respond(HttpStatusCode.Unauthorized, "Invalid token format")
+                            return@post
+                        }
+
                         val changePasswordRequest = call.receive<ChangePasswordRequest>()
 
-                        // TODO: Implement actual password change logic
-                        if (changePasswordRequest.newPassword.length >= 8) {
-                            call.respond(
-                                HttpStatusCode.OK,
-                                ChangePasswordResponse(
-                                    success = true,
-                                    message = "Password changed successfully"
-                                )
-                            )
-                        } else {
+                        // Validate input
+                        if (changePasswordRequest.currentPassword.isEmpty()) {
                             call.respond(
                                 HttpStatusCode.BadRequest,
                                 ChangePasswordResponse(
                                     success = false,
-                                    message = "Password change failed",
-                                    errors = listOf(
-                                        ValidationErrorResponse("newPassword", "Password must be at least 8 characters")
-                                    )
+                                    message = "Current password is required",
+                                    errors = listOf(ValidationErrorResponse("currentPassword", "Current password is required"))
                                 )
                             )
+                            return@post
+                        }
+
+                        if (changePasswordRequest.newPassword.length < 8) {
+                            call.respond(
+                                HttpStatusCode.BadRequest,
+                                ChangePasswordResponse(
+                                    success = false,
+                                    message = "New password must be at least 8 characters",
+                                    errors = listOf(ValidationErrorResponse("newPassword", "Password must be at least 8 characters"))
+                                )
+                            )
+                            return@post
+                        }
+
+                        // Change password using AuthenticationService
+                        val changeResult = authenticationService.changePassword(
+                            userId,
+                            changePasswordRequest.currentPassword,
+                            changePasswordRequest.newPassword
+                        )
+
+                        when (changeResult) {
+                            is at.mocode.members.domain.service.AuthenticationService.PasswordChangeResult.Success -> {
+                                call.respond(
+                                    HttpStatusCode.OK,
+                                    ChangePasswordResponse(
+                                        success = true,
+                                        message = "Password changed successfully"
+                                    )
+                                )
+                            }
+                            is at.mocode.members.domain.service.AuthenticationService.PasswordChangeResult.Failure -> {
+                                call.respond(
+                                    HttpStatusCode.BadRequest,
+                                    ChangePasswordResponse(
+                                        success = false,
+                                        message = changeResult.reason
+                                    )
+                                )
+                            }
+                            is at.mocode.members.domain.service.AuthenticationService.PasswordChangeResult.WeakPassword -> {
+                                call.respond(
+                                    HttpStatusCode.BadRequest,
+                                    ChangePasswordResponse(
+                                        success = false,
+                                        message = "Password is too weak",
+                                        errors = changeResult.issues.map {
+                                            ValidationErrorResponse("newPassword", it)
+                                        }
+                                    )
+                                )
+                            }
                         }
                     } else {
                         call.respond(HttpStatusCode.Unauthorized, "Invalid token")
@@ -288,19 +409,41 @@ fun Route.authRoutes(
                 try {
                     val token = call.request.header("Authorization")?.removePrefix("Bearer ")
                     if (token != null) {
-                        // TODO: Implement actual token refresh logic
-                        call.respond(
-                            HttpStatusCode.OK,
-                            mapOf(
-                                "token" to "refreshed_mock_jwt_token_${System.currentTimeMillis()}",
-                                "message" to "Token refreshed successfully"
+                        // Validate the current token
+                        val tokenInfo = jwtService.validateToken(token)
+                        if (tokenInfo != null) {
+                            // Get user from database to ensure they're still active
+                            val userRepository = at.mocode.members.infrastructure.repository.UserRepositoryImpl()
+                            val user = userRepository.findById(tokenInfo.userId)
+
+                            if (user != null && user.canLogin()) {
+                                // Create a new token
+                                val newToken = jwtService.createToken(user)
+
+                                call.respond(
+                                    HttpStatusCode.OK,
+                                    mapOf(
+                                        "token" to newToken,
+                                        "message" to "Token refreshed successfully"
+                                    )
+                                )
+                            } else {
+                                call.respond(
+                                    HttpStatusCode.Unauthorized,
+                                    mapOf("message" to "User is no longer active or account is locked")
+                                )
+                            }
+                        } else {
+                            call.respond(
+                                HttpStatusCode.Unauthorized,
+                                mapOf("message" to "Invalid or expired token")
                             )
-                        )
+                        }
                     } else {
-                        call.respond(HttpStatusCode.BadRequest, "No token provided")
+                        call.respond(HttpStatusCode.BadRequest, mapOf("message" to "No token provided"))
                     }
                 } catch (e: Exception) {
-                    call.respond(HttpStatusCode.InternalServerError, "Error refreshing token: ${e.message}")
+                    call.respond(HttpStatusCode.InternalServerError, mapOf("message" to "Error refreshing token: ${e.message}"))
                 }
             }
 

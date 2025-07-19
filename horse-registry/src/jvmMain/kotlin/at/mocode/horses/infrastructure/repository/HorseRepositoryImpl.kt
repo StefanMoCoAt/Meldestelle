@@ -3,7 +3,12 @@ package at.mocode.horses.infrastructure.repository
 import at.mocode.enums.PferdeGeschlechtE
 import at.mocode.horses.domain.model.DomPferd
 import at.mocode.horses.domain.repository.HorseRepository
+import at.mocode.horses.infrastructure.repository.HorseTable
+import at.mocode.shared.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
@@ -16,53 +21,53 @@ import org.jetbrains.exposed.sql.statements.UpdateBuilder
  */
 class HorseRepositoryImpl : HorseRepository {
 
-    override suspend fun findById(id: Uuid): DomPferd? {
-        return HorseTable.selectAll().where { HorseTable.id eq id }
+    override suspend fun findById(id: Uuid): DomPferd? = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.id eq id }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
-    override suspend fun findByLebensnummer(lebensnummer: String): DomPferd? {
-        return HorseTable.selectAll().where { HorseTable.lebensnummer eq lebensnummer }
+    override suspend fun findByLebensnummer(lebensnummer: String): DomPferd? = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.lebensnummer eq lebensnummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
-    override suspend fun findByChipNummer(chipNummer: String): DomPferd? {
-        return HorseTable.selectAll().where { HorseTable.chipNummer eq chipNummer }
+    override suspend fun findByChipNummer(chipNummer: String): DomPferd? = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.chipNummer eq chipNummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
-    override suspend fun findByPassNummer(passNummer: String): DomPferd? {
-        return HorseTable.selectAll().where { HorseTable.passNummer eq passNummer }
+    override suspend fun findByPassNummer(passNummer: String): DomPferd? = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.passNummer eq passNummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
-    override suspend fun findByOepsNummer(oepsNummer: String): DomPferd? {
-        return HorseTable.selectAll().where { HorseTable.oepsNummer eq oepsNummer }
+    override suspend fun findByOepsNummer(oepsNummer: String): DomPferd? = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.oepsNummer eq oepsNummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
-    override suspend fun findByFeiNummer(feiNummer: String): DomPferd? {
-        return HorseTable.selectAll().where { HorseTable.feiNummer eq feiNummer }
+    override suspend fun findByFeiNummer(feiNummer: String): DomPferd? = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.feiNummer eq feiNummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
 
-    override suspend fun findByName(searchTerm: String, limit: Int): List<DomPferd> {
-        return HorseTable.selectAll().where { HorseTable.pferdeName like "%$searchTerm%" }
+    override suspend fun findByName(searchTerm: String, limit: Int): List<DomPferd> = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.pferdeName like "%$searchTerm%" }
             .orderBy(HorseTable.pferdeName to SortOrder.ASC)
             .limit(limit)
             .map { rowToDomPferd(it) }
     }
 
-    override suspend fun findByOwnerId(ownerId: Uuid, activeOnly: Boolean): List<DomPferd> {
+    override suspend fun findByOwnerId(ownerId: Uuid, activeOnly: Boolean): List<DomPferd> = DatabaseFactory.dbQuery {
         val query = HorseTable.selectAll().where { HorseTable.besitzerId eq ownerId }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
@@ -70,10 +75,10 @@ class HorseRepositoryImpl : HorseRepository {
          .map { rowToDomPferd(it) }
     }
 
-    override suspend fun findByResponsiblePersonId(responsiblePersonId: Uuid, activeOnly: Boolean): List<DomPferd> {
+    override suspend fun findByResponsiblePersonId(responsiblePersonId: Uuid, activeOnly: Boolean): List<DomPferd> = DatabaseFactory.dbQuery {
         val query = HorseTable.selectAll().where { HorseTable.verantwortlichePersonId eq responsiblePersonId }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
@@ -81,10 +86,10 @@ class HorseRepositoryImpl : HorseRepository {
          .map { rowToDomPferd(it) }
     }
 
-    override suspend fun findByGeschlecht(geschlecht: PferdeGeschlechtE, activeOnly: Boolean, limit: Int): List<DomPferd> {
+    override suspend fun findByGeschlecht(geschlecht: PferdeGeschlechtE, activeOnly: Boolean, limit: Int): List<DomPferd> = DatabaseFactory.dbQuery {
         val query = HorseTable.selectAll().where { HorseTable.geschlecht eq geschlecht }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
@@ -93,10 +98,10 @@ class HorseRepositoryImpl : HorseRepository {
          .map { rowToDomPferd(it) }
     }
 
-    override suspend fun findByRasse(rasse: String, activeOnly: Boolean, limit: Int): List<DomPferd> {
+    override suspend fun findByRasse(rasse: String, activeOnly: Boolean, limit: Int): List<DomPferd> = DatabaseFactory.dbQuery {
         val query = HorseTable.selectAll().where { HorseTable.rasse eq rasse }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
@@ -105,7 +110,7 @@ class HorseRepositoryImpl : HorseRepository {
          .map { rowToDomPferd(it) }
     }
 
-    override suspend fun findByBirthYear(birthYear: Int, activeOnly: Boolean): List<DomPferd> {
+    override suspend fun findByBirthYear(birthYear: Int, activeOnly: Boolean): List<DomPferd> = DatabaseFactory.dbQuery {
         val query = HorseTable.selectAll().where {
             HorseTable.geburtsdatum.isNotNull() and
                 (CustomFunction(
@@ -116,7 +121,7 @@ class HorseRepositoryImpl : HorseRepository {
                 ) eq birthYear)
         }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
@@ -124,7 +129,7 @@ class HorseRepositoryImpl : HorseRepository {
          .map { rowToDomPferd(it) }
     }
 
-    override suspend fun findByBirthYearRange(fromYear: Int, toYear: Int, activeOnly: Boolean): List<DomPferd> {
+    override suspend fun findByBirthYearRange(fromYear: Int, toYear: Int, activeOnly: Boolean): List<DomPferd> = DatabaseFactory.dbQuery {
         val query = HorseTable.selectAll().where {
             HorseTable.geburtsdatum.isNotNull() and
                 (CustomFunction(
@@ -141,7 +146,7 @@ class HorseRepositoryImpl : HorseRepository {
                 ) lessEq toYear)
         }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
@@ -149,17 +154,17 @@ class HorseRepositoryImpl : HorseRepository {
          .map { rowToDomPferd(it) }
     }
 
-    override suspend fun findAllActive(limit: Int): List<DomPferd> {
-        return HorseTable.selectAll().where { HorseTable.istAktiv eq true }
+    override suspend fun findAllActive(limit: Int): List<DomPferd> = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.istAktiv eq true }
             .orderBy(HorseTable.pferdeName to SortOrder.ASC)
             .limit(limit)
             .map { rowToDomPferd(it) }
     }
 
-    override suspend fun findOepsRegistered(activeOnly: Boolean): List<DomPferd> {
+    override suspend fun findOepsRegistered(activeOnly: Boolean): List<DomPferd> = DatabaseFactory.dbQuery {
         val query = HorseTable.selectAll().where { HorseTable.oepsNummer.isNotNull() }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
@@ -167,10 +172,10 @@ class HorseRepositoryImpl : HorseRepository {
          .map { rowToDomPferd(it) }
     }
 
-    override suspend fun findFeiRegistered(activeOnly: Boolean): List<DomPferd> {
+    override suspend fun findFeiRegistered(activeOnly: Boolean): List<DomPferd> = DatabaseFactory.dbQuery {
         val query = HorseTable.selectAll().where { HorseTable.feiNummer.isNotNull() }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
@@ -178,12 +183,13 @@ class HorseRepositoryImpl : HorseRepository {
          .map { rowToDomPferd(it) }
     }
 
-    override suspend fun save(horse: DomPferd): DomPferd {
+    override suspend fun save(horse: DomPferd): DomPferd = DatabaseFactory.dbQuery {
+        val now = Clock.System.now()
         val existingHorse = findById(horse.pferdId)
 
-        return if (existingHorse != null) {
+        if (existingHorse != null) {
             // Update existing horse
-            val updatedHorse = horse.withUpdatedTimestamp()
+            val updatedHorse = horse.copy(updatedAt = now)
             HorseTable.update({ HorseTable.id eq horse.pferdId }) {
                 domPferdToStatement(it, updatedHorse)
             }
@@ -192,51 +198,51 @@ class HorseRepositoryImpl : HorseRepository {
             // Insert a new horse
             HorseTable.insert {
                 it[id] = horse.pferdId
-                domPferdToStatement(it, horse)
+                domPferdToStatement(it, horse.copy(updatedAt = now))
             }
-            horse
+            horse.copy(updatedAt = now)
         }
     }
 
-    override suspend fun delete(id: Uuid): Boolean {
+    override suspend fun delete(id: Uuid): Boolean = DatabaseFactory.dbQuery {
         val deletedRows = HorseTable.deleteWhere { HorseTable.id eq id }
-        return deletedRows > 0
+        deletedRows > 0
     }
 
-    override suspend fun existsByLebensnummer(lebensnummer: String): Boolean {
-        return HorseTable.selectAll().where { HorseTable.lebensnummer eq lebensnummer }
+    override suspend fun existsByLebensnummer(lebensnummer: String): Boolean = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.lebensnummer eq lebensnummer }
             .count() > 0
     }
 
-    override suspend fun existsByChipNummer(chipNummer: String): Boolean {
-        return HorseTable.selectAll().where { HorseTable.chipNummer eq chipNummer }
+    override suspend fun existsByChipNummer(chipNummer: String): Boolean = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.chipNummer eq chipNummer }
             .count() > 0
     }
 
-    override suspend fun existsByPassNummer(passNummer: String): Boolean {
-        return HorseTable.selectAll().where { HorseTable.passNummer eq passNummer }
+    override suspend fun existsByPassNummer(passNummer: String): Boolean = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.passNummer eq passNummer }
             .count() > 0
     }
 
-    override suspend fun existsByOepsNummer(oepsNummer: String): Boolean {
-        return HorseTable.selectAll().where { HorseTable.oepsNummer eq oepsNummer }
+    override suspend fun existsByOepsNummer(oepsNummer: String): Boolean = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.oepsNummer eq oepsNummer }
             .count() > 0
     }
 
-    override suspend fun existsByFeiNummer(feiNummer: String): Boolean {
-        return HorseTable.selectAll().where { HorseTable.feiNummer eq feiNummer }
+    override suspend fun existsByFeiNummer(feiNummer: String): Boolean = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.feiNummer eq feiNummer }
             .count() > 0
     }
 
-    override suspend fun countActive(): Long {
-        return HorseTable.selectAll().where { HorseTable.istAktiv eq true }
+    override suspend fun countActive(): Long = DatabaseFactory.dbQuery {
+        HorseTable.selectAll().where { HorseTable.istAktiv eq true }
             .count()
     }
 
-    override suspend fun countByOwnerId(ownerId: Uuid, activeOnly: Boolean): Long {
+    override suspend fun countByOwnerId(ownerId: Uuid, activeOnly: Boolean): Long = DatabaseFactory.dbQuery {
         val query = HorseTable.selectAll().where { HorseTable.besitzerId eq ownerId }
 
-        return if (activeOnly) {
+        if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
         } else {
             query
