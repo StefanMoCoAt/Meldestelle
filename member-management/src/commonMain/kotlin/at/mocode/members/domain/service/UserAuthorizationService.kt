@@ -1,15 +1,9 @@
 package at.mocode.members.domain.service
 
-import at.mocode.members.domain.model.DomUser
-import at.mocode.members.domain.repository.UserRepository
-import at.mocode.members.domain.repository.PersonRolleRepository
-import at.mocode.members.domain.repository.RolleRepository
-import at.mocode.members.domain.repository.RolleBerechtigungRepository
-import at.mocode.members.domain.repository.BerechtigungRepository
-import at.mocode.enums.RolleE
 import at.mocode.enums.BerechtigungE
+import at.mocode.enums.RolleE
+import at.mocode.members.domain.repository.*
 import com.benasher44.uuid.Uuid
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -44,16 +38,16 @@ class UserAuthorizationService(
      * Fetches complete authorization information for a user.
      *
      * @param userId The user ID
-     * @return UserAuthInfo if user exists and is active, null otherwise
+     * @return UserAuthInfo if the user exists and is active, null otherwise
      */
     suspend fun getUserAuthInfo(userId: Uuid): UserAuthInfo? {
         // Get user
         val user = userRepository.findById(userId) ?: return null
 
-        // Check if user is active
+        // Check if the user is active
         if (!user.istAktiv) return null
 
-        // Check if user is locked
+        // Check if the user is locked
         val now = Clock.System.now()
         if (user.gesperrtBis != null && user.gesperrtBis!! > now) return null
 
@@ -77,10 +71,10 @@ class UserAuthorizationService(
      * Fetches authorization information for a user by username or email.
      *
      * @param usernameOrEmail The username or email
-     * @return UserAuthInfo if user exists and is active, null otherwise
+     * @return UserAuthInfo if the user exists and is active, null otherwise
      */
     suspend fun getUserAuthInfoByUsernameOrEmail(usernameOrEmail: String): UserAuthInfo? {
-        // Try to find user by username first
+        // Try to find the user by username first
         val user = userRepository.findByUsername(usernameOrEmail)
             ?: userRepository.findByEmail(usernameOrEmail)
             ?: return null
@@ -152,7 +146,7 @@ class UserAuthorizationService(
      *
      * @param userId The user ID
      * @param role The role to check
-     * @return true if user has the role, false otherwise
+     * @return true if the user has the role, false otherwise
      */
     suspend fun hasRole(userId: Uuid, role: RolleE): Boolean {
         val authInfo = getUserAuthInfo(userId) ?: return false
@@ -164,7 +158,7 @@ class UserAuthorizationService(
      *
      * @param userId The user ID
      * @param permission The permission to check
-     * @return true if user has the permission, false otherwise
+     * @return true if the user has the permission, false otherwise
      */
     suspend fun hasPermission(userId: Uuid, permission: BerechtigungE): Boolean {
         val authInfo = getUserAuthInfo(userId) ?: return false

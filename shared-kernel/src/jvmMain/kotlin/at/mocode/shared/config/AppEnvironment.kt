@@ -19,7 +19,7 @@ enum class AppEnvironment {
             val envName = System.getenv("APP_ENV")?.uppercase() ?: "DEVELOPMENT"
             return try {
                 valueOf(envName)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 println("Warnung: Unbekannte Umgebung '$envName', verwende DEVELOPMENT")
                 DEVELOPMENT
             }

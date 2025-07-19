@@ -91,7 +91,7 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
         val now = Clock.System.now()
         val updatedVeranstaltung = veranstaltung.copy(updatedAt = now)
 
-        // Check if record exists
+        // Check if a record exists
         val existingRecord = VeranstaltungTable.selectAll()
             .where { VeranstaltungTable.id eq veranstaltung.veranstaltungId }
             .singleOrNull()
@@ -103,7 +103,7 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
             }
             updatedVeranstaltung
         } else {
-            // Insert new record
+            // Insert a new record
             VeranstaltungTable.insert {
                 it[id] = veranstaltung.veranstaltungId
                 veranstaltungToStatement(it, updatedVeranstaltung)

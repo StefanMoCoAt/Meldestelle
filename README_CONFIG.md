@@ -124,7 +124,7 @@ logging.responses=false
 Die Konfiguration wird über die zentrale `AppConfig`-Klasse bereitgestellt:
 
 ```kotlin
-import at.mocode.shared.config.AppConfig
+'import at.mocode.shared.config.AppConfig'
 
 // Verwendung der Konfiguration
 fun example() {
