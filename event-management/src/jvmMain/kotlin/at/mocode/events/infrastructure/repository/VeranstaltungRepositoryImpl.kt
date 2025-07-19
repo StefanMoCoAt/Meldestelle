@@ -1,16 +1,14 @@
 package at.mocode.events.infrastructure.repository
 
+import at.mocode.enums.SparteE
 import at.mocode.events.domain.model.Veranstaltung
 import at.mocode.events.domain.repository.VeranstaltungRepository
-import at.mocode.enums.SparteE
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 
 /**
@@ -22,21 +20,21 @@ import org.jetbrains.exposed.sql.statements.UpdateBuilder
 class VeranstaltungRepositoryImpl : VeranstaltungRepository {
 
     override suspend fun findById(id: Uuid): Veranstaltung? {
-        return VeranstaltungTable.select { VeranstaltungTable.id eq id }
+        return VeranstaltungTable.selectAll().where { VeranstaltungTable.id eq id }
             .map { rowToVeranstaltung(it) }
             .singleOrNull()
     }
 
     override suspend fun findByName(searchTerm: String, limit: Int): List<Veranstaltung> {
         val searchPattern = "%$searchTerm%"
-        return VeranstaltungTable.select { VeranstaltungTable.name like searchPattern }
+        return VeranstaltungTable.selectAll().where { VeranstaltungTable.name like searchPattern }
             .orderBy(VeranstaltungTable.startDatum, SortOrder.DESC)
             .limit(limit)
             .map { rowToVeranstaltung(it) }
     }
 
     override suspend fun findByVeranstalterVereinId(vereinId: Uuid, activeOnly: Boolean): List<Veranstaltung> {
-        val query = VeranstaltungTable.select { VeranstaltungTable.veranstalterVereinId eq vereinId }
+        val query = VeranstaltungTable.selectAll().where { VeranstaltungTable.veranstalterVereinId eq vereinId }
 
         return if (activeOnly) {
             query.andWhere { VeranstaltungTable.istAktiv eq true }
@@ -47,9 +45,9 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
     }
 
     override suspend fun findByDateRange(startDate: LocalDate, endDate: LocalDate, activeOnly: Boolean): List<Veranstaltung> {
-        val query = VeranstaltungTable.select {
+        val query = VeranstaltungTable.selectAll().where {
             (VeranstaltungTable.startDatum greaterEq startDate) and
-            (VeranstaltungTable.endDatum lessEq endDate)
+                (VeranstaltungTable.endDatum lessEq endDate)
         }
 
         return if (activeOnly) {
@@ -61,7 +59,7 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
     }
 
     override suspend fun findByStartDate(date: LocalDate, activeOnly: Boolean): List<Veranstaltung> {
-        val query = VeranstaltungTable.select { VeranstaltungTable.startDatum eq date }
+        val query = VeranstaltungTable.selectAll().where { VeranstaltungTable.startDatum eq date }
 
         return if (activeOnly) {
             query.andWhere { VeranstaltungTable.istAktiv eq true }
@@ -72,14 +70,14 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
     }
 
     override suspend fun findAllActive(limit: Int, offset: Int): List<Veranstaltung> {
-        return VeranstaltungTable.select { VeranstaltungTable.istAktiv eq true }
+        return VeranstaltungTable.selectAll().where { VeranstaltungTable.istAktiv eq true }
             .orderBy(VeranstaltungTable.startDatum, SortOrder.DESC)
             .limit(limit, offset.toLong())
             .map { rowToVeranstaltung(it) }
     }
 
     override suspend fun findPublicEvents(activeOnly: Boolean): List<Veranstaltung> {
-        val query = VeranstaltungTable.select { VeranstaltungTable.istOeffentlich eq true }
+        val query = VeranstaltungTable.selectAll().where { VeranstaltungTable.istOeffentlich eq true }
 
         return if (activeOnly) {
             query.andWhere { VeranstaltungTable.istAktiv eq true }
@@ -94,7 +92,9 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
         val updatedVeranstaltung = veranstaltung.copy(updatedAt = now)
 
         // Check if record exists
-        val existingRecord = VeranstaltungTable.select { VeranstaltungTable.id eq veranstaltung.veranstaltungId }.singleOrNull()
+        val existingRecord = VeranstaltungTable.selectAll()
+            .where { VeranstaltungTable.id eq veranstaltung.veranstaltungId }
+            .singleOrNull()
 
         return if (existingRecord != null) {
             // Update existing record
@@ -118,12 +118,12 @@ class VeranstaltungRepositoryImpl : VeranstaltungRepository {
     }
 
     override suspend fun countActive(): Long {
-        return VeranstaltungTable.select { VeranstaltungTable.istAktiv eq true }
+        return VeranstaltungTable.selectAll().where { VeranstaltungTable.istAktiv eq true }
             .count()
     }
 
     override suspend fun countByVeranstalterVereinId(vereinId: Uuid, activeOnly: Boolean): Long {
-        val query = VeranstaltungTable.select { VeranstaltungTable.veranstalterVereinId eq vereinId }
+        val query = VeranstaltungTable.selectAll().where { VeranstaltungTable.veranstalterVereinId eq vereinId }
 
         return if (activeOnly) {
             query.andWhere { VeranstaltungTable.istAktiv eq true }

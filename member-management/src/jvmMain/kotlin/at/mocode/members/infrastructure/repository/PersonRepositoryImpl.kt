@@ -1,20 +1,15 @@
 package at.mocode.members.infrastructure.repository
 
+// Import table definition and extension functions
 import at.mocode.members.domain.model.DomPerson
 import at.mocode.members.domain.repository.PersonRepository
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
-import kotlinx.datetime.toKotlinInstant
-import kotlinx.datetime.toKotlinLocalDate
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-
-// Import table definition and extension functions
-import at.mocode.members.infrastructure.repository.PersonTable
-import at.mocode.members.infrastructure.repository.insertOrUpdate
-import at.mocode.members.infrastructure.repository.toLocalDateTime
-import at.mocode.members.infrastructure.repository.toInstant
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.sql.selectAll
 
 /**
  * Exposed-based implementation of PersonRepository.
@@ -25,34 +20,34 @@ import at.mocode.members.infrastructure.repository.toInstant
 class PersonRepositoryImpl : PersonRepository {
 
     override suspend fun findById(id: Uuid): DomPerson? {
-        return PersonTable.select { PersonTable.id eq id }
+        return PersonTable.selectAll().where { PersonTable.id eq id }
             .map { rowToDomPerson(it) }
             .singleOrNull()
     }
 
     override suspend fun findByOepsSatzNr(oepsSatzNr: String): DomPerson? {
-        return PersonTable.select { PersonTable.oepsSatzNr eq oepsSatzNr }
+        return PersonTable.selectAll().where { PersonTable.oepsSatzNr eq oepsSatzNr }
             .map { rowToDomPerson(it) }
             .singleOrNull()
     }
 
     override suspend fun findByStammVereinId(vereinId: Uuid): List<DomPerson> {
-        return PersonTable.select { PersonTable.stammVereinId eq vereinId }
+        return PersonTable.selectAll().where { PersonTable.stammVereinId eq vereinId }
             .map { rowToDomPerson(it) }
     }
 
     override suspend fun findByName(searchTerm: String, limit: Int): List<DomPerson> {
         val searchPattern = "%$searchTerm%"
-        return PersonTable.select {
+        return PersonTable.selectAll().where {
             (PersonTable.nachname like searchPattern) or
-            (PersonTable.vorname like searchPattern)
+                (PersonTable.vorname like searchPattern)
         }
         .limit(limit)
         .map { rowToDomPerson(it) }
     }
 
     override suspend fun findAllActive(limit: Int, offset: Int): List<DomPerson> {
-        return PersonTable.select { PersonTable.istAktiv eq true }
+        return PersonTable.selectAll().where { PersonTable.istAktiv eq true }
             .limit(limit, offset.toLong())
             .map { rowToDomPerson(it) }
     }
@@ -100,12 +95,12 @@ class PersonRepositoryImpl : PersonRepository {
     }
 
     override suspend fun existsByOepsSatzNr(oepsSatzNr: String): Boolean {
-        return PersonTable.select { PersonTable.oepsSatzNr eq oepsSatzNr }
+        return PersonTable.selectAll().where { PersonTable.oepsSatzNr eq oepsSatzNr }
             .count() > 0
     }
 
     override suspend fun countActive(): Long {
-        return PersonTable.select { PersonTable.istAktiv eq true }
+        return PersonTable.selectAll().where { PersonTable.istAktiv eq true }
             .count()
     }
 

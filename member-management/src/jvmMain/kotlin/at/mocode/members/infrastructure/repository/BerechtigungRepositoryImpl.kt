@@ -1,20 +1,16 @@
 package at.mocode.members.infrastructure.repository
 
+// Import table definition and extension functions
 import at.mocode.enums.BerechtigungE
 import at.mocode.members.domain.model.DomBerechtigung
 import at.mocode.members.domain.repository.BerechtigungRepository
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
-import kotlinx.datetime.toKotlinInstant
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-
-// Import table definition and extension functions
-import at.mocode.members.infrastructure.repository.BerechtigungTable
-import at.mocode.members.infrastructure.repository.insertOrUpdate
-import at.mocode.members.infrastructure.repository.toLocalDateTime
-import at.mocode.members.infrastructure.repository.toInstant
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 
 /**
  * Exposed-based implementation of BerechtigungRepository.
@@ -45,35 +41,35 @@ class BerechtigungRepositoryImpl : BerechtigungRepository {
     }
 
     override suspend fun findById(berechtigungId: Uuid): DomBerechtigung? {
-        return BerechtigungTable.select { BerechtigungTable.id eq berechtigungId }
+        return BerechtigungTable.selectAll().where { BerechtigungTable.id eq berechtigungId }
             .map { rowToDomBerechtigung(it) }
             .singleOrNull()
     }
 
     override suspend fun findByTyp(berechtigungTyp: BerechtigungE): DomBerechtigung? {
-        return BerechtigungTable.select { BerechtigungTable.berechtigungTyp eq berechtigungTyp }
+        return BerechtigungTable.selectAll().where { BerechtigungTable.berechtigungTyp eq berechtigungTyp }
             .map { rowToDomBerechtigung(it) }
             .singleOrNull()
     }
 
     override suspend fun findByName(name: String): List<DomBerechtigung> {
         val searchPattern = "%$name%"
-        return BerechtigungTable.select { BerechtigungTable.name like searchPattern }
+        return BerechtigungTable.selectAll().where { BerechtigungTable.name like searchPattern }
             .map { rowToDomBerechtigung(it) }
     }
 
     override suspend fun findByRessource(ressource: String): List<DomBerechtigung> {
-        return BerechtigungTable.select { BerechtigungTable.ressource eq ressource }
+        return BerechtigungTable.selectAll().where { BerechtigungTable.ressource eq ressource }
             .map { rowToDomBerechtigung(it) }
     }
 
     override suspend fun findByAktion(aktion: String): List<DomBerechtigung> {
-        return BerechtigungTable.select { BerechtigungTable.aktion eq aktion }
+        return BerechtigungTable.selectAll().where { BerechtigungTable.aktion eq aktion }
             .map { rowToDomBerechtigung(it) }
     }
 
     override suspend fun findAllActive(): List<DomBerechtigung> {
-        return BerechtigungTable.select { BerechtigungTable.istAktiv eq true }
+        return BerechtigungTable.selectAll().where { BerechtigungTable.istAktiv eq true }
             .map { rowToDomBerechtigung(it) }
     }
 
@@ -103,7 +99,7 @@ class BerechtigungRepositoryImpl : BerechtigungRepository {
     }
 
     override suspend fun existsByTyp(berechtigungTyp: BerechtigungE): Boolean {
-        return BerechtigungTable.select { BerechtigungTable.berechtigungTyp eq berechtigungTyp }
+        return BerechtigungTable.selectAll().where { BerechtigungTable.berechtigungTyp eq berechtigungTyp }
             .count() > 0
     }
 

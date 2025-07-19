@@ -129,7 +129,7 @@ class UserAuthorizationService(
         for (roleType in roles) {
             // Find the role by type
             val rolle = rolleRepository.findByTyp(roleType)
-            if (rolle != null && rolle.rolleId != null) {
+            if (rolle != null) {
                 // Get role permissions
                 val rolleBerechtigungen = rolleBerechtigungRepository.findByRolleId(rolle.rolleId)
                     .filter { it.istAktiv }

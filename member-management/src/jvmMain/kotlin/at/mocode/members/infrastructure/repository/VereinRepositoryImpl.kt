@@ -1,19 +1,12 @@
 package at.mocode.members.infrastructure.repository
 
+// Import table definition and extension functions
 import at.mocode.members.domain.model.DomVerein
 import at.mocode.members.domain.repository.VereinRepository
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
-import kotlinx.datetime.toKotlinInstant
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-
-// Import table definition and extension functions
-import at.mocode.members.infrastructure.repository.VereinTable
-import at.mocode.members.infrastructure.repository.insertOrUpdate
-import at.mocode.members.infrastructure.repository.toLocalDateTime
-import at.mocode.members.infrastructure.repository.toInstant
 
 /**
  * Exposed-based implementation of VereinRepository.
@@ -24,48 +17,48 @@ import at.mocode.members.infrastructure.repository.toInstant
 class VereinRepositoryImpl : VereinRepository {
 
     override suspend fun findById(id: Uuid): DomVerein? {
-        return VereinTable.select { VereinTable.id eq id }
+        return VereinTable.selectAll().where { VereinTable.id eq id }
             .map { rowToDomVerein(it) }
             .singleOrNull()
     }
 
     override suspend fun findByOepsVereinsNr(oepsVereinsNr: String): DomVerein? {
-        return VereinTable.select { VereinTable.oepsVereinsNr eq oepsVereinsNr }
+        return VereinTable.selectAll().where { VereinTable.oepsVereinsNr eq oepsVereinsNr }
             .map { rowToDomVerein(it) }
             .singleOrNull()
     }
 
     override suspend fun findByName(searchTerm: String, limit: Int): List<DomVerein> {
         val searchPattern = "%$searchTerm%"
-        return VereinTable.select {
+        return VereinTable.selectAll().where {
             (VereinTable.name like searchPattern) or
-            (VereinTable.kuerzel like searchPattern)
+                (VereinTable.kuerzel like searchPattern)
         }
         .limit(limit)
         .map { rowToDomVerein(it) }
     }
 
     override suspend fun findByBundeslandId(bundeslandId: Uuid): List<DomVerein> {
-        return VereinTable.select { VereinTable.bundeslandId eq bundeslandId }
+        return VereinTable.selectAll().where { VereinTable.bundeslandId eq bundeslandId }
             .map { rowToDomVerein(it) }
     }
 
     override suspend fun findByLandId(landId: Uuid): List<DomVerein> {
-        return VereinTable.select { VereinTable.landId eq landId }
+        return VereinTable.selectAll().where { VereinTable.landId eq landId }
             .map { rowToDomVerein(it) }
     }
 
     override suspend fun findAllActive(limit: Int, offset: Int): List<DomVerein> {
-        return VereinTable.select { VereinTable.istAktiv eq true }
+        return VereinTable.selectAll().where { VereinTable.istAktiv eq true }
             .limit(limit, offset.toLong())
             .map { rowToDomVerein(it) }
     }
 
     override suspend fun findByLocation(searchTerm: String, limit: Int): List<DomVerein> {
         val searchPattern = "%$searchTerm%"
-        return VereinTable.select {
+        return VereinTable.selectAll().where {
             (VereinTable.ort like searchPattern) or
-            (VereinTable.plz like searchPattern)
+                (VereinTable.plz like searchPattern)
         }
         .limit(limit)
         .map { rowToDomVerein(it) }
@@ -104,19 +97,18 @@ class VereinRepositoryImpl : VereinRepository {
     }
 
     override suspend fun existsByOepsVereinsNr(oepsVereinsNr: String): Boolean {
-        return VereinTable.select { VereinTable.oepsVereinsNr eq oepsVereinsNr }
+        return VereinTable.selectAll().where { VereinTable.oepsVereinsNr eq oepsVereinsNr }
             .count() > 0
     }
 
     override suspend fun countActive(): Long {
-        return VereinTable.select { VereinTable.istAktiv eq true }
+        return VereinTable.selectAll().where { VereinTable.istAktiv eq true }
             .count()
     }
 
     override suspend fun countActiveByBundeslandId(bundeslandId: Uuid): Long {
-        return VereinTable.select {
-            (VereinTable.istAktiv eq true) and (VereinTable.bundeslandId eq bundeslandId)
-        }
+        return VereinTable.selectAll()
+            .where { (VereinTable.istAktiv eq true) and (VereinTable.bundeslandId eq bundeslandId) }
         .count()
     }
 

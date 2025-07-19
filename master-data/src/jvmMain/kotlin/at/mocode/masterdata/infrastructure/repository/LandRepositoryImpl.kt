@@ -6,8 +6,6 @@ import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.SortOrder
 
 /**
  * PostgreSQL implementation of LandRepository using Exposed ORM.
@@ -18,29 +16,29 @@ import org.jetbrains.exposed.sql.SortOrder
 class LandRepositoryImpl : LandRepository {
 
     override suspend fun findById(id: Uuid): LandDefinition? {
-        return LandTable.select { LandTable.id eq id }
+        return LandTable.selectAll().where { LandTable.id eq id }
             .singleOrNull()
             ?.toLandDefinition()
     }
 
     override suspend fun findByIsoAlpha2Code(isoAlpha2Code: String): LandDefinition? {
-        return LandTable.select { LandTable.isoAlpha2Code eq isoAlpha2Code }
+        return LandTable.selectAll().where { LandTable.isoAlpha2Code eq isoAlpha2Code }
             .singleOrNull()
             ?.toLandDefinition()
     }
 
     override suspend fun findByIsoAlpha3Code(isoAlpha3Code: String): LandDefinition? {
-        return LandTable.select { LandTable.isoAlpha3Code eq isoAlpha3Code }
+        return LandTable.selectAll().where { LandTable.isoAlpha3Code eq isoAlpha3Code }
             .singleOrNull()
             ?.toLandDefinition()
     }
 
     override suspend fun findByName(searchTerm: String, limit: Int): List<LandDefinition> {
         val searchPattern = "%$searchTerm%"
-        return LandTable.select {
+        return LandTable.selectAll().where {
             (LandTable.nameGerman like searchPattern) or
-            (LandTable.nameEnglish like searchPattern) or
-            (LandTable.nameLocal like searchPattern)
+                (LandTable.nameEnglish like searchPattern) or
+                (LandTable.nameLocal like searchPattern)
         }
         .orderBy(LandTable.sortierReihenfolge)
         .limit(limit)
@@ -48,7 +46,7 @@ class LandRepositoryImpl : LandRepository {
     }
 
     override suspend fun findAllActive(orderBySortierung: Boolean): List<LandDefinition> {
-        val query = LandTable.select { LandTable.isActive eq true }
+        val query = LandTable.selectAll().where { LandTable.isActive eq true }
 
         return if (orderBySortierung) {
             query.orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameGerman to SortOrder.ASC)
@@ -58,17 +56,13 @@ class LandRepositoryImpl : LandRepository {
     }
 
     override suspend fun findEuMembers(): List<LandDefinition> {
-        return LandTable.select {
-            (LandTable.isActive eq true) and (LandTable.isEuMember eq true)
-        }
+        return LandTable.selectAll().where { (LandTable.isActive eq true) and (LandTable.isEuMember eq true) }
         .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameGerman to SortOrder.ASC)
         .map { it.toLandDefinition() }
     }
 
     override suspend fun findEwrMembers(): List<LandDefinition> {
-        return LandTable.select {
-            (LandTable.isActive eq true) and (LandTable.isEwrMember eq true)
-        }
+        return LandTable.selectAll().where { (LandTable.isActive eq true) and (LandTable.isEwrMember eq true) }
         .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameGerman to SortOrder.ASC)
         .map { it.toLandDefinition() }
     }
@@ -77,7 +71,7 @@ class LandRepositoryImpl : LandRepository {
         val now = Clock.System.now()
 
         // Check if record exists
-        val existingRecord = LandTable.select { LandTable.id eq land.landId }.singleOrNull()
+        val existingRecord = LandTable.selectAll().where { LandTable.id eq land.landId }.singleOrNull()
 
         return if (existingRecord != null) {
             // Update existing record
@@ -126,17 +120,17 @@ class LandRepositoryImpl : LandRepository {
     }
 
     override suspend fun existsByIsoAlpha2Code(isoAlpha2Code: String): Boolean {
-        return LandTable.select { LandTable.isoAlpha2Code eq isoAlpha2Code }
+        return LandTable.selectAll().where { LandTable.isoAlpha2Code eq isoAlpha2Code }
             .count() > 0
     }
 
     override suspend fun existsByIsoAlpha3Code(isoAlpha3Code: String): Boolean {
-        return LandTable.select { LandTable.isoAlpha3Code eq isoAlpha3Code }
+        return LandTable.selectAll().where { LandTable.isoAlpha3Code eq isoAlpha3Code }
             .count() > 0
     }
 
     override suspend fun countActive(): Long {
-        return LandTable.select { LandTable.isActive eq true }.count()
+        return LandTable.selectAll().where { LandTable.isActive eq true }.count()
     }
 
     /**

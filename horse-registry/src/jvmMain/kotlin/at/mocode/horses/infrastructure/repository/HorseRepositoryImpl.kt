@@ -41,7 +41,7 @@ class HorseRepositoryImpl : HorseRepository {
     }
 
     override suspend fun findByOepsNummer(oepsNummer: String): DomPferd? {
-        return HorseTable.select { HorseTable.oepsNummer eq oepsNummer }
+        return HorseTable.selectAll().where { HorseTable.oepsNummer eq oepsNummer }
             .map { rowToDomPferd(it) }
             .singleOrNull()
     }
@@ -224,17 +224,17 @@ class HorseRepositoryImpl : HorseRepository {
     }
 
     override suspend fun existsByFeiNummer(feiNummer: String): Boolean {
-        return HorseTable.select { HorseTable.feiNummer eq feiNummer }
+        return HorseTable.selectAll().where { HorseTable.feiNummer eq feiNummer }
             .count() > 0
     }
 
     override suspend fun countActive(): Long {
-        return HorseTable.select { HorseTable.istAktiv eq true }
+        return HorseTable.selectAll().where { HorseTable.istAktiv eq true }
             .count()
     }
 
     override suspend fun countByOwnerId(ownerId: Uuid, activeOnly: Boolean): Long {
-        val query = HorseTable.select { HorseTable.besitzerId eq ownerId }
+        val query = HorseTable.selectAll().where { HorseTable.besitzerId eq ownerId }
 
         return if (activeOnly) {
             query.andWhere { HorseTable.istAktiv eq true }
