@@ -231,7 +231,7 @@ private fun generateRequestId(): String {
     val uuid = UUID.randomUUID().toString()
     val timestamp = System.currentTimeMillis()
 
-    // Get environment prefix safely (first 4 chars or less)
+    // Get environment prefix safely (first 4 chars or fewer)
     val environment = AppConfig.environment.toString().let { env ->
         if (env.length > 4) env.substring(0, 4) else env
     }.lowercase()

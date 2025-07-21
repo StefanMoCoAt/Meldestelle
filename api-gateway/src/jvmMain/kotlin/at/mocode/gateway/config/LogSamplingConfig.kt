@@ -1,16 +1,11 @@
 package at.mocode.gateway.config
 
-import at.mocode.gateway.config.REQUEST_ID_KEY
-import at.mocode.gateway.config.REQUEST_START_TIME_KEY
 import at.mocode.shared.config.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
 import io.ktor.util.*
 import org.slf4j.LoggerFactory
-import org.slf4j.event.Level
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -158,7 +153,7 @@ private fun extractBasePath(path: String): String {
     if (parts.isEmpty()) return "/"
 
     // For API paths, include up to the resource name (typically 3 parts: api, version, resource)
-    if (parts.size >= 1 && parts[0] == "api") {
+    if (parts[0] == "api") {
         val depth = minOf(3, parts.size)
         return "/" + parts.take(depth).joinToString("/")
     }

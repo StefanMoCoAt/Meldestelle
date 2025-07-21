@@ -38,7 +38,7 @@ private val cacheCleanupScheduler = java.util.Timer("token-cache-cleanup").apply
     schedule(object : java.util.TimerTask() {
         override fun run() {
             if (tokenCache.size > TOKEN_CACHE_MAX_SIZE) {
-                // If cache exceeds max size, remove oldest entries (simple approach)
+                // If the cache exceeds max size, remove the oldest entries (simple approach)
                 val keysToRemove = tokenCache.keys.take(tokenCache.size - TOKEN_CACHE_MAX_SIZE / 2)
                 keysToRemove.forEach { tokenCache.remove(it) }
             }
@@ -56,15 +56,15 @@ private object AdaptiveRateLimiting {
 
     // Thresholds for CPU usage (percentage)
     const val CPU_MEDIUM_LOAD_THRESHOLD = 60.0 // Medium load threshold (60%)
-    const val CPU_HIGH_LOAD_THRESHOLD = 80.0   // High load threshold (80%)
+    const val CPU_HIGH_LOAD_THRESHOLD = 80.0   // High-load threshold (80%)
 
     // Thresholds for memory usage (percentage)
     const val MEMORY_MEDIUM_LOAD_THRESHOLD = 70.0 // Medium load threshold (70%)
-    const val MEMORY_HIGH_LOAD_THRESHOLD = 85.0   // High load threshold (85%)
+    const val MEMORY_HIGH_LOAD_THRESHOLD = 85.0   // High-load threshold (85%)
 
     // Rate limit adjustment factors
-    const val MEDIUM_LOAD_FACTOR = 0.7 // Reduce limits to 70% under medium load
-    const val HIGH_LOAD_FACTOR = 0.4   // Reduce limits to 40% under high load
+    const val MEDIUM_LOAD_FACTOR = 0.7 // Reduce limits to 70% under a medium load
+    const val HIGH_LOAD_FACTOR = 0.4   // Reduce limits to 40% under a high load
 
     // Monitoring interval in milliseconds
     const val MONITORING_INTERVAL_MS = 5000L // Check every 5 seconds
@@ -415,18 +415,18 @@ private fun extractUserIdFromToken(authHeader: String): String? {
         // Get the user ID
         val userId = matchResult?.groupValues?.get(1) ?: token.hashCode().toString()
 
-        // Store in cache for future use
+        // Store in a cache for future use
         tokenCache[tokenHash] = Pair(userId, userType)
 
         return userId
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         // If any error occurs during parsing, fall back to using the token hash
         return authHeader.hashCode().toString()
     }
 }
 
 /**
- * Determine user type from JWT token.
+ * Determine a user type from a JWT token.
  * Parses the JWT token to extract the user role from the claims.
  * Uses caching to avoid repeated parsing of the same token.
  */
@@ -467,24 +467,24 @@ private fun determineUserType(authHeader: String): String {
         val matchResult = subjectRegex.find(payload)
         val userId = matchResult?.groupValues?.get(1) ?: token.hashCode().toString()
 
-        // Store in cache for future use
+        // Store in a cache for future use
         tokenCache[tokenHash] = Pair(userId, userType)
 
         return userType
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         // If any error occurs during parsing, default to authenticated
         return "authenticated"
     }
 }
 
 /**
- * Helper function to determine user type from JWT payload.
+ * Helper function to determine a user type from JWT payload.
  * Extracted to avoid code duplication between extractUserIdFromToken and determineUserType.
  */
 private fun determineUserTypeFromPayload(payload: String): String {
     try {
         // Extract the role using a simple regex
-        // Look for role, roles, or authorities claims
+        // Look for role, roles, or authority claims
         val roleRegex = "\"(role|roles|authorities)\"\\s*:\\s*\"([^\"]+)\"".toRegex()
         val matchResult = roleRegex.find(payload)
 
@@ -508,9 +508,9 @@ private fun determineUserTypeFromPayload(payload: String): String {
             }
         }
 
-        // Default to authenticated if no role information found
+        // Default to authenticate if no role information found
         return "authenticated"
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         // If any error occurs during parsing, default to authenticated
         return "authenticated"
     }

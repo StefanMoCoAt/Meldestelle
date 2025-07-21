@@ -1,17 +1,12 @@
 package at.mocode.gateway
 
-import at.mocode.gateway.config.configureMonitoring
-import at.mocode.gateway.config.configureOpenApi
-import at.mocode.gateway.config.configureRateLimiting
-import at.mocode.gateway.config.configureRequestTracing
-import at.mocode.gateway.config.configureSwagger
+import at.mocode.gateway.config.*
 import at.mocode.gateway.routing.docRoutes
 import at.mocode.shared.config.AppConfig
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
-import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.response.*

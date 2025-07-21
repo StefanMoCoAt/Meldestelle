@@ -1,8 +1,6 @@
 package at.mocode.gateway.config
 
 import at.mocode.dto.base.ApiResponse
-import at.mocode.gateway.config.REQUEST_ID_KEY
-import at.mocode.gateway.config.REQUEST_START_TIME_KEY
 import at.mocode.shared.config.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -14,9 +12,9 @@ import org.slf4j.event.Level
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
 
 /**
@@ -104,7 +102,7 @@ private fun extractBasePath(path: String): String {
     if (parts.isEmpty()) return "/"
 
     // For API paths, include up to the resource name (typically 3 parts: api, version, resource)
-    if (parts.size >= 1 && parts[0] == "api") {
+    if (parts[0] == "api") {
         val depth = minOf(3, parts.size)
         return "/" + parts.take(depth).joinToString("/")
     }
