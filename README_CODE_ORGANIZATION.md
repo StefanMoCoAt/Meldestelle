@@ -127,10 +127,10 @@ val data = call.safeReceive<Artikel>() ?: return
 2. **Update Route Paths**:
    ```kotlin
    // Before
-   route("/api/artikel") { ... }
+   route("/api/artikel") { '...' }
 
    // After
-   route("/artikel") { ... }  // /api prefix handled by RouteConfiguration
+   route("/artikel") { '...' }  // /api prefix handled by RouteConfiguration
    ```
 
 3. **Use Response Utilities**:
@@ -145,7 +145,7 @@ val data = call.safeReceive<Artikel>() ?: return
 4. **Use Route Utilities**:
    ```kotlin
    // Before
-   val id = call.parameters["id"] ?: return@get call.respond(...)
+   val id = call.parameters["id"] ?: return@get call.respond('...')
    val uuid = uuidFrom(id)
 
    // After

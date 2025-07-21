@@ -47,13 +47,6 @@ When converting the standalone scripts to proper unit tests, the following guide
 1. Create the target directory if it doesn't exist
 2. Create a new file AuthenticationTest.kt with the following structure:
    ```kotlin
-   package at.mocode.members.test
-
-   import at.mocode.members.domain.service.UserAuthorizationService
-   import at.mocode.members.domain.service.JwtService
-   import at.mocode.members.domain.service.AuthenticationService
-   import at.mocode.members.infrastructure.repository.*
-   import kotlin.test.*
 
    class AuthenticationTest {
        private lateinit var userRepository: UserRepositoryImpl
@@ -134,24 +127,6 @@ When converting the standalone scripts to proper unit tests, the following guide
 1. Create the target directory if it doesn't exist
 2. Create a new file DatabaseIntegrationTest.kt with the following structure:
    ```kotlin
-   package at.mocode.shared.database.test
-
-   import at.mocode.gateway.config.configureDatabase
-   import at.mocode.masterdata.domain.model.LandDefinition
-   import at.mocode.masterdata.infrastructure.repository.LandRepositoryImpl
-   import at.mocode.events.domain.model.Veranstaltung
-   import at.mocode.events.infrastructure.repository.VeranstaltungRepositoryImpl
-   import at.mocode.enums.SparteE
-   import com.benasher44.uuid.uuid4
-   import io.ktor.server.application.*
-   import io.ktor.server.engine.*
-   import io.ktor.server.netty.*
-   import kotlinx.coroutines.runBlocking
-   import kotlinx.datetime.Clock
-   import kotlinx.datetime.LocalDate
-   import org.jetbrains.exposed.sql.transactions.transaction
-   import kotlin.test.*
-
    class DatabaseIntegrationTest {
        private lateinit var application: Application
        private lateinit var landRepository: LandRepositoryImpl
