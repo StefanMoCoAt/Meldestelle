@@ -17,6 +17,7 @@ kotlin {
             implementation(project(":master-data"))
             implementation(project(":member-management"))
             implementation(project(":horse-registry"))
+            implementation(project(":event-management"))
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)

@@ -158,6 +158,11 @@ services:
       - DB_NAME=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
+
+  pgadmin:
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD:-admin_password_change_me}
 ```
 
 ## Beste Praktiken
@@ -171,3 +176,7 @@ services:
 4. **Validierung**: Validieren Sie kritische Konfigurationen beim Anwendungsstart, um Fehler frühzeitig zu erkennen.
 
 5. **Dokumentation**: Halten Sie die Dokumentation der Konfigurationsparameter aktuell, damit neue Teammitglieder die Anwendung leicht konfigurieren können.
+
+## Letztes Update
+
+2025-07-21

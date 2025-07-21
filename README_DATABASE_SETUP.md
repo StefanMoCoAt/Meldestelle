@@ -28,6 +28,11 @@ POSTGRES_USER=meldestelle_user
 POSTGRES_PASSWORD=secure_password_change_me
 POSTGRES_DB=meldestelle_db
 
+# PgAdmin Konfiguration
+PGADMIN_DEFAULT_EMAIL=admin@example.com
+PGADMIN_DEFAULT_PASSWORD=admin_password_change_me
+PGADMIN_PORT=5050
+
 # API Gateway Konfiguration
 API_PORT=8081
 ```
@@ -77,6 +82,33 @@ Die Datenbankstruktur ist in verschiedene Bereiche unterteilt, die den Modulen d
 2. Führen Sie `docker-compose up -d db` aus, um nur die Datenbank zu starten
 3. Alternativ `docker-compose up -d` für das gesamte System
 
+### PgAdmin verwenden
+
+Das Projekt enthält einen PgAdmin-Service für die einfache Verwaltung der Datenbank über eine Web-Oberfläche.
+
+1. Starten Sie die Anwendung mit Docker Compose:
+   ```
+   docker-compose up -d
+   ```
+
+2. Zugriff auf PgAdmin:
+   - Öffnen Sie http://localhost:5050 im Browser
+   - Melden Sie sich mit den Zugangsdaten aus der .env-Datei an:
+     - E-Mail: admin@example.com (oder Wert von PGADMIN_DEFAULT_EMAIL)
+     - Passwort: admin_password_change_me (oder Wert von PGADMIN_DEFAULT_PASSWORD)
+
+3. Verbindung zur Datenbank in PgAdmin einrichten:
+   - Rechtsklick auf "Servers" > "Create" > "Server..."
+   - Name: Meldestelle
+   - Connection-Tab:
+     - Host: db
+     - Port: 5432
+     - Maintenance database: meldestelle_db
+     - Username: meldestelle_user
+     - Password: secure_password_change_me (oder Wert von DB_PASSWORD)
+
+4. Überprüfen Sie, ob die Tabellen korrekt erstellt wurden, einschließlich der _migrations-Tabelle.
+
 ### Manuell
 
 1. Installieren Sie PostgreSQL auf Ihrem System
@@ -97,3 +129,7 @@ Die Datenbankstruktur ist in verschiedene Bereiche unterteilt, die den Modulen d
 - Prüfen Sie die Logs auf detaillierte Fehlermeldungen
 - Migrationen werden nur einmal ausgeführt - Änderungen an bestehenden Migrationen haben keine Auswirkung
 - Bei schwerwiegenden Problemen kann die `_migrations`-Tabelle manuell bearbeitet werden (nur für Fortgeschrittene)
+
+## Letztes Update
+
+2025-07-21

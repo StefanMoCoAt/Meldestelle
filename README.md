@@ -12,6 +12,7 @@ The project follows Domain-Driven Design (DDD) principles with clearly separated
 * **`master-data`** - Master data management (countries, regions, age classes, venues)
 * **`member-management`** - Person and club/association management
 * **`horse-registry`** - Horse registration and management
+* **`event-management`** - Event and tournament management
 * **`api-gateway`** - Central API gateway aggregating all services
 
 ### Module Dependencies
@@ -21,6 +22,11 @@ api-gateway
 ├── shared-kernel
 ├── master-data
 ├── member-management
+├── horse-registry
+└── event-management
+
+event-management
+├── shared-kernel
 └── horse-registry
 
 horse-registry
@@ -63,3 +69,7 @@ master-data
 ## Documentation
 
 See the `docs/` directory for detailed architecture documentation and diagrams.
+
+## Last Updated
+
+2025-07-21

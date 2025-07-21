@@ -37,11 +37,22 @@ kotlin {
         jsMain.dependencies {
             // Kotlin React dependencies with explicit stable versions
             implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.467")
+            implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.467")
             implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion:11.10.5-pre.467")
+
+            // Ktor client dependencies for API calls
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.js)
+            implementation(libs.ktor.client.contentNegotiation)
+            implementation(libs.ktor.client.serializationKotlinxJson)
+
+            // Coroutines for async operations
+            implementation(libs.kotlinx.coroutines.core)
 
             // NPM dependencies
             implementation(npm("react", "18.2.0"))
             implementation(npm("react-dom", "18.2.0"))
+            implementation(npm("@r2wc/react-to-web-component", "2.0.4"))
         }
     }
 }

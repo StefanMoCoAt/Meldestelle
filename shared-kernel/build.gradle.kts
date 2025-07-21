@@ -32,6 +32,24 @@ kotlin {
             implementation(libs.postgresql.driver)
         }
 
+        jvmTest.dependencies {
+            // Ktor server dependencies
+            implementation(libs.ktor.server.core)
+            implementation(libs.ktor.server.netty)
+            implementation(libs.ktor.server.tests)
+
+            // H2 database for testing
+            implementation(libs.h2.driver)
+
+            // Dependencies on other modules
+            implementation(project(":api-gateway"))
+            implementation(project(":master-data"))
+            implementation(project(":event-management"))
+
+            // Coroutines testing
+            implementation(libs.kotlinx.coroutines.test)
+        }
+
         jsMain.dependencies {
             // Kotlin React dependencies with explicit stable versions (for shared components)
             implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.467")
