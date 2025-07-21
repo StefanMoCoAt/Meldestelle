@@ -1,10 +1,13 @@
 package at.mocode.gateway.config
 
+import at.mocode.gateway.config.REQUEST_ID_KEY
+import at.mocode.gateway.config.REQUEST_START_TIME_KEY
 import at.mocode.shared.config.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.util.*
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
@@ -96,20 +99,9 @@ fun Application.configureLogSampling() {
         }
     }
 
-    // Modify the CallLogging plugin to respect the sampling decision
-    environment.monitor.subscribe(CallLogging.LoggingConfig) { loggingConfig ->
-        // Add a filter to the CallLogging plugin
-        loggingConfig.filter { call ->
-            // Check if the request should be logged based on sampling
-            val shouldLog = call.attributes.getOrNull(SHOULD_LOG_REQUEST_KEY) ?: true
-
-            // Apply the original filter as well (exclude paths)
-            val originalFilter = !AppConfig.logging.excludePaths.any { call.request.path().startsWith(it) }
-
-            // Only log if both filters pass
-            shouldLog && originalFilter
-        }
-    }
+    // Instead of trying to modify CallLogging after installation,
+    // we'll use the interceptor to decide if logging should happen
+    // The CallLogging plugin will be configured in MonitoringConfig.kt
 }
 
 /**

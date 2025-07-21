@@ -1,10 +1,12 @@
 package at.mocode.gateway.config
 
 import at.mocode.dto.base.ApiResponse
+import at.mocode.gateway.config.REQUEST_ID_KEY
+import at.mocode.gateway.config.REQUEST_START_TIME_KEY
 import at.mocode.shared.config.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -125,13 +127,13 @@ fun Application.configureMonitoring() {
         }
 
         // Filtere Pfade, die vom Logging ausgeschlossen werden sollen
-        filter { call ->
+        filter { call: ApplicationCall ->
             val path = call.request.path()
             !loggingConfig.excludePaths.any { path.startsWith(it) }
         }
 
         // Formatiere Log-Einträge mit erweitertem Format
-        format { call ->
+        format { call: ApplicationCall ->
             val status = call.response.status()
             val httpMethod = call.request.httpMethod.value
             val path = call.request.path()
@@ -140,7 +142,7 @@ fun Application.configureMonitoring() {
             val timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
             // Get the request ID from the call attributes (set by RequestTracingConfig)
-            val requestId = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
+            val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             if (loggingConfig.useStructuredLogging) {
                 // Strukturiertes Logging-Format
@@ -167,11 +169,11 @@ fun Application.configureMonitoring() {
                         // Log all headers if in debug mode, filtering sensitive data
                         if (loggingConfig.level.equals("DEBUG", ignoreCase = true)) {
                             append("headers={")
-                            call.request.headers.entries().joinTo(this, ", ") {
-                                if (isSensitiveHeader(it.key)) {
-                                    "${it.key}=*****"
+                            call.request.headers.entries().joinTo(this, ", ") { entry ->
+                                if (isSensitiveHeader(entry.key)) {
+                                    "${entry.key}=*****"
                                 } else {
-                                    "${it.key}=${it.value.joinToString(",")}"
+                                    "${entry.key}=${entry.value.joinToString(",")}"
                                 }
                             }
                             append("} ")
@@ -181,22 +183,24 @@ fun Application.configureMonitoring() {
                     // Log Query-Parameter wenn konfiguriert
                     if (loggingConfig.logRequestParameters && call.request.queryParameters.entries().isNotEmpty()) {
                         append("params={")
-                        call.request.queryParameters.entries().joinTo(this, ", ") {
-                            if (isSensitiveParameter(it.key)) {
-                                "${it.key}=*****"
+                        call.request.queryParameters.entries().joinTo(this, ", ") { entry ->
+                            if (isSensitiveParameter(entry.key)) {
+                                "${entry.key}=*****"
                             } else {
-                                "${it.key}=${it.value.joinToString(",")}"
+                                "${entry.key}=${entry.value.joinToString(",")}"
                             }
                         }
                         append("} ")
                     }
 
                     if (userAgent != null) {
-                        append("userAgent=\"${userAgent.replace("\"", "\\\"")}\" ")
+                        // Use a simpler approach to avoid escape sequence issues
+                        val escapedUserAgent = userAgent.replace("\"", "\\\"")
+                        append("userAgent=\"$escapedUserAgent\" ")
                     }
 
                     // Log response time if available from RequestTracingConfig
-                    call.attributes.getOrNull(REQUEST_START_TIME_KEY)?.let { startTime ->
+                    call.attributes.getOrNull(REQUEST_START_TIME_KEY)?.let { startTime: Long ->
                         val duration = System.currentTimeMillis() - startTime
                         append("duration=${duration}ms ")
                     }
@@ -215,8 +219,8 @@ fun Application.configureMonitoring() {
                 }
             } else {
                 // Einfaches Logging-Format
-                val duration = call.attributes.getOrNull(REQUEST_START_TIME_KEY)?.let {
-                    " - Duration: ${System.currentTimeMillis() - it}ms"
+                val duration = call.attributes.getOrNull(REQUEST_START_TIME_KEY)?.let { startTime: Long ->
+                    " - Duration: ${System.currentTimeMillis() - startTime}ms"
                 } ?: ""
 
                 "$timestamp - $status: $httpMethod $path - RequestID: $requestId - $clientIp - $userAgent$duration"
@@ -235,9 +239,9 @@ fun Application.configureMonitoring() {
             "propagateRequestId=${loggingConfig.propagateRequestId}")
 
     install(StatusPages) {
-        exception<Throwable> { call, cause ->
+        exception<Throwable> { call: ApplicationCall, cause: Throwable ->
             // Get the request ID for error logging
-            val requestId = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
+            val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.error("Unhandled exception - RequestID: $requestId", cause)
             call.respond(
@@ -246,9 +250,9 @@ fun Application.configureMonitoring() {
             )
         }
 
-        status(HttpStatusCode.NotFound) { call, status ->
+        status(HttpStatusCode.NotFound) { call: ApplicationCall, status: HttpStatusCode ->
             // Get the request ID for error logging
-            val requestId = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
+            val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.warn("Not found - Path: ${call.request.path()} - RequestID: $requestId")
             call.respond(
@@ -257,9 +261,9 @@ fun Application.configureMonitoring() {
             )
         }
 
-        status(HttpStatusCode.Unauthorized) { call, status ->
+        status(HttpStatusCode.Unauthorized) { call: ApplicationCall, status: HttpStatusCode ->
             // Get the request ID for error logging
-            val requestId = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
+            val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.warn("Unauthorized access - Path: ${call.request.path()} - RequestID: $requestId")
             call.respond(
@@ -268,9 +272,9 @@ fun Application.configureMonitoring() {
             )
         }
 
-        status(HttpStatusCode.Forbidden) { call, status ->
+        status(HttpStatusCode.Forbidden) { call: ApplicationCall, status: HttpStatusCode ->
             // Get the request ID for error logging
-            val requestId = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
+            val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.warn("Forbidden access - Path: ${call.request.path()} - RequestID: $requestId")
             call.respond(
@@ -280,9 +284,9 @@ fun Application.configureMonitoring() {
         }
 
         // Rate limit exceeded
-        status(HttpStatusCode.TooManyRequests) { call, status ->
+        status(HttpStatusCode.TooManyRequests) { call: ApplicationCall, status: HttpStatusCode ->
             // Get the request ID for error logging
-            val requestId = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
+            val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.warn("Rate limit exceeded - Path: ${call.request.path()} - RequestID: $requestId")
             call.respond(
