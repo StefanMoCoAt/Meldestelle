@@ -206,6 +206,18 @@ class LoggingConfig {
     var useStructuredLogging: Boolean = true
     var includeCorrelationId: Boolean = true
 
+    // Log Sampling für hohe Traffic-Volumen
+    var enableLogSampling: Boolean = AppEnvironment.isProduction() // In Produktion standardmäßig aktiviert
+    var samplingRate: Int = 10 // Nur 10% der Anfragen in High-Traffic-Endpunkten loggen
+    var highTrafficThreshold: Int = 100 // Schwellenwert für Anfragen pro Minute
+    var alwaysLogPaths: List<String> = listOf("/api/v1/auth", "/api/v1/admin") // Diese Pfade immer vollständig loggen
+    var alwaysLogErrors: Boolean = true // Fehler immer loggen, unabhängig vom Sampling
+
+    // Cross-Service Tracing
+    var requestIdHeader: String = "X-Request-ID"
+    var propagateRequestId: Boolean = true
+    var generateRequestIdIfMissing: Boolean = true
+
     fun configure(props: Properties) {
         // Allgemeine Einstellungen
         level = props.getProperty("logging.level") ?: level
@@ -231,6 +243,22 @@ class LoggingConfig {
         // Strukturiertes Logging
         useStructuredLogging = props.getProperty("logging.structured")?.toBoolean() ?: useStructuredLogging
         includeCorrelationId = props.getProperty("logging.correlationId")?.toBoolean() ?: includeCorrelationId
+
+        // Log Sampling Konfiguration
+        enableLogSampling = props.getProperty("logging.sampling.enabled")?.toBoolean() ?: enableLogSampling
+        samplingRate = props.getProperty("logging.sampling.rate")?.toIntOrNull() ?: samplingRate
+        highTrafficThreshold = props.getProperty("logging.sampling.highTrafficThreshold")?.toIntOrNull() ?: highTrafficThreshold
+        alwaysLogErrors = props.getProperty("logging.sampling.alwaysLogErrors")?.toBoolean() ?: alwaysLogErrors
+
+        // Pfade, die immer geloggt werden sollen
+        props.getProperty("logging.sampling.alwaysLogPaths")?.split(",")?.map { it.trim() }?.let {
+            alwaysLogPaths = it
+        }
+
+        // Cross-Service Tracing
+        requestIdHeader = props.getProperty("logging.requestIdHeader") ?: requestIdHeader
+        propagateRequestId = props.getProperty("logging.propagateRequestId")?.toBoolean() ?: propagateRequestId
+        generateRequestIdIfMissing = props.getProperty("logging.generateRequestIdIfMissing")?.toBoolean() ?: generateRequestIdIfMissing
     }
 }
 

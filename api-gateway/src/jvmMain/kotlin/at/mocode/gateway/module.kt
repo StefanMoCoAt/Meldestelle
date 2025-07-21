@@ -1,6 +1,9 @@
 package at.mocode.gateway
 
+import at.mocode.gateway.config.configureMonitoring
 import at.mocode.gateway.config.configureOpenApi
+import at.mocode.gateway.config.configureRateLimiting
+import at.mocode.gateway.config.configureRequestTracing
 import at.mocode.gateway.config.configureSwagger
 import at.mocode.gateway.routing.docRoutes
 import at.mocode.shared.config.AppConfig
@@ -11,10 +14,8 @@ import io.ktor.server.http.content.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
-import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlin.time.Duration.Companion.minutes
 
 fun Application.module() {
     val config = AppConfig
@@ -34,6 +35,8 @@ fun Application.module() {
             }
             allowHeader(HttpHeaders.ContentType)
             allowHeader(HttpHeaders.Authorization)
+            // Add request ID header to allowed headers
+            allowHeader(config.logging.requestIdHeader)
             allowMethod(HttpMethod.Options)
             allowMethod(HttpMethod.Get)
             allowMethod(HttpMethod.Post)
@@ -42,39 +45,18 @@ fun Application.module() {
         }
     }
 
-    // Call-Logging installieren
-    if (config.logging.logRequests) {
-        install(CallLogging)
-    }
+    // Erweiterte Monitoring- und Logging-Konfiguration
+    configureMonitoring()
+
+    // Request Tracing für Cross-Service Tracing konfigurieren
+    configureRequestTracing()
+
+    // Enhanced Rate Limiting konfigurieren
+    configureRateLimiting()
 
     // OpenAPI und Swagger UI konfigurieren
     configureOpenApi()
     configureSwagger()
-
-    // Rate Limiting konfigurieren
-    if (config.rateLimit.enabled) {
-        install(RateLimit) {
-            // Globale Rate Limiting Konfiguration
-            global {
-                // Limit basierend auf Konfiguration
-                rateLimiter(
-                    limit = config.rateLimit.globalLimit,
-                    refillPeriod = config.rateLimit.globalPeriodMinutes.minutes
-                )
-                // Request-Key basierend auf IP-Adresse
-                requestKey { call -> call.request.local.remoteHost }
-            }
-
-            // Konfiguriere Rate Limiting für spezifische Routen
-            // Wir verwenden hier einen Interceptor, um die Response-Header hinzuzufügen
-            if (config.rateLimit.includeHeaders) {
-                this@module.intercept(ApplicationCallPipeline.Plugins) {
-                    call.response.header("X-RateLimit-Enabled", "true")
-                    call.response.header("X-RateLimit-Limit", config.rateLimit.globalLimit.toString())
-                }
-            }
-        }
-    }
 
     routing {
         // Hauptrouten
