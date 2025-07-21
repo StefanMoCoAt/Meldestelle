@@ -95,23 +95,23 @@ class CachingConfig(
     }
 
     /**
-     * Put a value in cache with TTL in minutes
+     * Put a value in a cache with TTL in minutes
      */
     fun <T> put(cacheName: String, key: String, value: T, ttlMinutes: Long = defaultTtlMinutes) {
         val stats = cacheStats.computeIfAbsent(cacheName) { CacheStats() }
         stats.puts++
 
-        // Store in local cache
+        // Store in a local cache
         val expiresAt = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(ttlMinutes)
         val entry = CacheEntry(value as Any, expiresAt)
         getCacheMap(cacheName)[key] = entry
     }
 
     /**
-     * Remove a value from cache
+     * Remove a value from the cache
      */
     fun remove(cacheName: String, key: String) {
-        // Remove from local cache
+        // Remove from the local cache
         getCacheMap(cacheName).remove(key)
     }
 
@@ -136,7 +136,7 @@ class CachingConfig(
     }
 
     /**
-     * Get the appropriate cache map based on cache name
+     * Get the appropriate cache map based on the cache name
      */
     private fun getCacheMap(cacheName: String): ConcurrentHashMap<String, CacheEntry<Any>> {
         return when (cacheName) {

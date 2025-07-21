@@ -131,7 +131,7 @@ class ServiceDiscovery(
      * @return The complete URL
      */
     fun buildServiceUrl(instance: ServiceInstance, path: String): String {
-        val baseUrl = "http://${instance.host}:${instance.port}"
+        val baseUrl = "https://${instance.host}:${instance.port}"
         return URI(baseUrl).resolve(path).toString()
     }
 
@@ -143,7 +143,7 @@ class ServiceDiscovery(
      */
     suspend fun isServiceHealthy(serviceName: String): Boolean {
         try {
-            val response = httpClient.get("http://$consulHost:$consulPort/v1/health/service/$serviceName?passing=true")
+            val response = httpClient.get("https://$consulHost:$consulPort/v1/health/service/$serviceName?passing=true")
             val responseBody = response.bodyAsText()
             val healthyServices = Json.decodeFromString<List<Any>>(responseBody)
             return healthyServices.isNotEmpty()

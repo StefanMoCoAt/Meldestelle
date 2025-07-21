@@ -1,6 +1,5 @@
 package at.mocode.gateway.plugins
 
-import at.mocode.gateway.config.CachingConfig
 import at.mocode.gateway.config.getCachingConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -10,7 +9,6 @@ import io.ktor.util.pipeline.*
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.text.Charsets
 
 /**
  * Configures enhanced HTTP caching headers for the application.
@@ -190,7 +188,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.checkLastModifiedAndRespond(t
                 call.respond(HttpStatusCode.NotModified)
                 return true
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // If we can't parse the date, ignore it
         }
     }
@@ -217,7 +215,7 @@ suspend fun <T> PipelineContext<Unit, ApplicationCall>.checkCacheAndRespond(
     val application = call.application
     val cachingConfig = try {
         application.getCachingConfig()
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         return false
     }
 

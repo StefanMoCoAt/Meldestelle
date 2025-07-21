@@ -1,18 +1,13 @@
 package at.mocode.gateway.config
 
 import io.ktor.server.application.*
-import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import io.ktor.util.*
 import io.micrometer.core.instrument.Counter
-import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
-import io.micrometer.core.instrument.binder.MeterBinder
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 
 /**
  * Custom application metrics configuration.

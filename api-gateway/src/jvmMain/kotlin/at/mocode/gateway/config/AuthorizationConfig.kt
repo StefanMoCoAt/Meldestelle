@@ -157,7 +157,7 @@ private fun getRolePermissions(roles: List<UserRole>): List<Permission> {
     roles.forEach { role ->
         when (role) {
             UserRole.ADMIN -> {
-                permissions.addAll(Permission.values())
+                permissions.addAll(Permission.entries.toTypedArray())
             }
             UserRole.VEREINS_ADMIN -> {
                 permissions.addAll(listOf(
@@ -354,7 +354,7 @@ val PipelineContext<Unit, ApplicationCall>.userAuthContext: UserAuthContext?
     get() = call.principal<JWTPrincipal>()?.getUserAuthContext()
 
 /**
- * Application call extension to check if user has specific role.
+ * Application call extension to check if the user has a specific role.
  */
 fun ApplicationCall.hasRole(role: UserRole): Boolean {
     val authContext = principal<JWTPrincipal>()?.getUserAuthContext()
@@ -362,7 +362,7 @@ fun ApplicationCall.hasRole(role: UserRole): Boolean {
 }
 
 /**
- * Application call extension to check if user has specific permission.
+ * Application call extension to check if the user has specific permission.
  */
 fun ApplicationCall.hasPermission(permission: Permission): Boolean {
     val authContext = principal<JWTPrincipal>()?.getUserAuthContext()

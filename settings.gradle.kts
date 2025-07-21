@@ -25,7 +25,7 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
-        // Add JCenter repository (archive)
+        // Add a JCenter repository (archive)
         maven {
             url = uri("https://jcenter.bintray.com")
         }

@@ -62,20 +62,6 @@ implementation("io.ktor:ktor-client-cio:${libs.versions.ktor.get()}")
 Create a service registration component in the shared-kernel module:
 
 ```kotlin
-package at.mocode.shared.discovery
-
-import at.mocode.shared.config.AppConfig
-import com.orbitz.consul.Consul
-import com.orbitz.consul.model.agent.ImmutableRegistration
-import com.orbitz.consul.model.agent.Registration
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.net.InetAddress
-import java.util.*
-import kotlin.time.Duration.Companion.seconds
-
 class ServiceRegistration(
     private val serviceName: String,
     private val servicePort: Int,
@@ -222,17 +208,6 @@ implementation("io.ktor:ktor-serialization-kotlinx-json:${libs.versions.ktor.get
 Create a service discovery component in the API Gateway:
 
 ```kotlin
-package at.mocode.gateway.discovery
-
-import com.orbitz.consul.Consul
-import com.orbitz.consul.model.health.ServiceHealth
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import java.net.URI
-import java.util.concurrent.ConcurrentHashMap
-
 class ServiceDiscovery(
     private val consulHost: String = "consul",
     private val consulPort: Int = 8500
