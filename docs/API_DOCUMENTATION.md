@@ -7,10 +7,10 @@ This document provides comprehensive documentation for the Meldestelle API Gatew
 ## Features Implemented
 
 ### ✅ OpenAPI/Swagger Integration
-- **OpenAPI 3.0 specification** generation
+- **OpenAPI 3.0 specification** using static YAML file
 - **Swagger UI** interactive documentation
-- **Automatic API documentation** from code annotations
-- **Multiple server environments** (development, production)
+- **Comprehensive API documentation** for all bounded contexts
+- **Multiple server environments** (development, staging, production)
 
 ### ✅ Postman Collections
 - **Comprehensive API collection** covering all endpoints
@@ -31,8 +31,11 @@ The API Gateway aggregates the following bounded contexts:
 ### 1. System Information
 - `GET /` - API Gateway information
 - `GET /health` - Health check for all contexts
-- `GET /api` - API documentation overview
+- `GET /docs` - Central API documentation page
+- `GET /api` - Redirects to central API documentation page
+- `GET /api/json` - API documentation overview in JSON format
 - `GET /swagger` - Interactive Swagger UI
+- `GET /openapi` - Raw OpenAPI specification
 
 ### 2. Authentication Context (`/auth/*`)
 - `POST /auth/register` - User registration
@@ -61,6 +64,16 @@ The API Gateway aggregates the following bounded contexts:
 - `DELETE /api/horses/{id}` - Delete horse
 - `DELETE /api/horses/batch` - Batch delete horses
 - `GET /api/horses/stats` - Get horse statistics
+
+### 5. Event Management Context (`/api/events/*`)
+- `GET /api/events` - Get all events
+- `GET /api/events/stats` - Get event statistics
+- `POST /api/events` - Create event
+- `GET /api/events/{id}` - Get event by ID
+- `PUT /api/events/{id}` - Update event
+- `DELETE /api/events/{id}` - Delete event
+- `GET /api/events/search` - Search events
+- `GET /api/events/organizer/{organizerId}` - Get events by organizer
 
 ## Getting Started
 
@@ -199,22 +212,37 @@ The test suite covers:
 4. **Add integration tests** for the new functionality
 5. **Update this documentation**
 
-### OpenAPI Annotations
+### OpenAPI Documentation
 
-Use OpenAPI annotations to enhance documentation:
+The API documentation is maintained in a static OpenAPI YAML file:
 
-```kotlin
-@OpenAPITag(name = "Horses", description = "Horse registry operations")
-fun Route.horseRoutes() {
-    route("/api/horses") {
-        @OpenAPIResponse("200", [OpenAPIContent(HorseDto::class)])
-        @OpenAPIResponse("404", [OpenAPIContent(ErrorDto::class)])
-        get {
-            // Implementation
-        }
-    }
-}
+```yaml
+# Location: api-gateway/src/jvmMain/resources/openapi/documentation.yaml
+
+paths:
+  /api/horses:
+    get:
+      tags:
+        - Horse Registry
+      summary: Get All Horses
+      description: Returns a list of all horses
+      operationId: getAllHorses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorsesResponse'
 ```
+
+To update the API documentation:
+
+1. Edit the `documentation.yaml` file in `api-gateway/src/jvmMain/resources/openapi/`
+2. Follow the OpenAPI 3.0.3 specification format
+3. Restart the application to see changes in Swagger UI
 
 ## Configuration
 

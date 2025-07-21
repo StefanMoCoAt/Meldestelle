@@ -10,9 +10,12 @@ import io.ktor.server.routing.*
  *
  * This module configures the OpenAPI specification generation and Swagger UI
  * for the API Gateway, providing comprehensive API documentation.
+ *
+ * The OpenAPI specification is loaded from a static YAML file located at:
+ * resources/openapi/documentation.yaml
  */
 fun Application.configureOpenApi() {
-    // Configure OpenAPI using a static file
+    // Configure OpenAPI endpoint using the static YAML file
     routing {
         // Serve the OpenAPI specification from a file
         openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml") {

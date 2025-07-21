@@ -1,0 +1,1650 @@
+openapi: 3.0.3
+info:
+  title: Meldestelle API
+  description: |
+    Self-Contained Systems API Gateway for Austrian Equestrian Federation.
+    This API provides access to various bounded contexts including authentication,
+    master data management, horse registry, and event management.
+  version: 1.0.0
+  contact:
+    name: Meldestelle Support
+    email: support@meldestelle.at
+    url: https://meldestelle.at/support
+  license:
+    name: Internal Use Only
+
+servers:
+  - url: https://api.meldestelle.at
+    description: Production Server
+  - url: https://staging-api.meldestelle.at
+    description: Staging Server
+  - url: http://localhost:8080
+    description: Local Development Server
+
+tags:
+  - name: Authentication
+    description: User authentication, registration, and profile management
+  - name: Master Data
+    description: Reference data management (countries, states, age classes, venues)
+  - name: Horse Registry
+    description: Horse registration, ownership, and pedigree management
+  - name: Event Management
+    description: Event creation, management, and participant registration
+
+paths:
+  /:
+    get:
+      summary: API Gateway Information
+      description: Returns basic information about the API Gateway
+      operationId: getApiGatewayInfo
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiGatewayInfoResponse'
+
+  /health:
+    get:
+      summary: Health Check
+      description: Returns the health status of all bounded contexts
+      operationId: getHealthStatus
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatusResponse'
+
+  /api:
+    get:
+      summary: API Documentation
+      description: Returns information about available API endpoints
+      operationId: getApiDocumentation
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiDocumentationResponse'
+
+  # Authentication Context
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User Login
+      description: Authenticates a user and returns a JWT token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: User Registration
+      description: Registers a new user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Invalid registration data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/profile:
+    get:
+      tags:
+        - Authentication
+      summary: Get User Profile
+      description: Returns the profile of the authenticated user
+      operationId: getUserProfile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Master Data Context
+  /api/masterdata/countries:
+    get:
+      tags:
+        - Master Data
+      summary: Get All Countries
+      description: Returns a list of all countries
+      operationId: getAllCountries
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountriesResponse'
+
+    post:
+      tags:
+        - Master Data
+      summary: Create Country
+      description: Creates a new country
+      operationId: createCountry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCountryRequest'
+      responses:
+        '201':
+          description: Country successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryResponse'
+        '400':
+          description: Invalid country data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/masterdata/countries/{id}:
+    get:
+      tags:
+        - Master Data
+      summary: Get Country by ID
+      description: Returns a country by its ID
+      operationId: getCountryById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryResponse'
+        '404':
+          description: Country not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Horse Registry Context
+  /api/horses:
+    get:
+      tags:
+        - Horse Registry
+      summary: Get All Horses
+      description: Returns a list of all horses
+      operationId: getAllHorses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: activeOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+          description: Filter to only return active horses
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+          description: Maximum number of horses to return
+        - name: ownerId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filter horses by owner ID
+        - name: geschlecht
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [STALLION, MARE, GELDING]
+          description: Filter horses by gender
+        - name: rasse
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter horses by breed
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search term to filter horses by name
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorsesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/horses/search/lebensnummer/{nummer}:
+    get:
+      tags:
+        - Horse Registry
+      summary: Find Horse by Life Number
+      description: Returns a horse by its life number
+      operationId: getHorseByLifeNumber
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nummer
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Life number of the horse
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorseResponse'
+        '404':
+          description: Horse not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/horses/search/chip/{nummer}:
+    get:
+      tags:
+        - Horse Registry
+      summary: Find Horse by Chip Number
+      description: Returns a horse by its chip number
+      operationId: getHorseByChipNumber
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: nummer
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Chip number of the horse
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorseResponse'
+        '404':
+          description: Horse not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/horses/oeps-registered:
+    get:
+      tags:
+        - Horse Registry
+      summary: Get OEPS Registered Horses
+      description: Returns a list of horses registered with the Austrian Equestrian Federation (OEPS)
+      operationId: getOepsRegisteredHorses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: activeOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+          description: Filter to only return active horses
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorsesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/horses/fei-registered:
+    get:
+      tags:
+        - Horse Registry
+      summary: Get FEI Registered Horses
+      description: Returns a list of horses registered with the International Federation for Equestrian Sports (FEI)
+      operationId: getFeiRegisteredHorses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: activeOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+          description: Filter to only return active horses
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorsesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/horses/stats:
+    get:
+      tags:
+        - Horse Registry
+      summary: Get Horse Statistics
+      description: Returns statistics about horses in the registry
+      operationId: getHorseStats
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorseStatsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Horse Registry
+      summary: Register Horse
+      description: Registers a new horse
+      operationId: registerHorse
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterHorseRequest'
+      responses:
+        '201':
+          description: Horse successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorseResponse'
+        '400':
+          description: Invalid horse data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/horses/{id}:
+    get:
+      tags:
+        - Horse Registry
+      summary: Get Horse by ID
+      description: Returns a horse by its ID
+      operationId: getHorseById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorseResponse'
+        '404':
+          description: Horse not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Horse Registry
+      summary: Update Horse
+      description: Updates an existing horse
+      operationId: updateHorse
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHorseRequest'
+      responses:
+        '200':
+          description: Horse successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HorseResponse'
+        '400':
+          description: Invalid horse data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Horse not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Horse Registry
+      summary: Delete Horse
+      description: Deletes a horse
+      operationId: deleteHorse
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: force
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Force delete even if the horse has dependencies
+      responses:
+        '200':
+          description: Horse successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Horse not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/horses/{id}/soft-delete:
+    post:
+      tags:
+        - Horse Registry
+      summary: Soft Delete Horse
+      description: Marks a horse as inactive instead of permanently deleting it
+      operationId: softDeleteHorse
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Horse successfully marked as inactive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Horse not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/horses/batch-delete:
+    post:
+      tags:
+        - Horse Registry
+      summary: Batch Delete Horses
+      description: Deletes multiple horses in a single operation
+      operationId: batchDeleteHorses
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDeleteRequest'
+      responses:
+        '200':
+          description: Horses successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchDeleteResponse'
+        '206':
+          description: Partial content - some horses could not be deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchDeleteResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Event Management Context
+  /api/events:
+    get:
+      tags:
+        - Event Management
+      summary: Get All Events
+      description: Returns a list of all events
+      operationId: getAllEvents
+      parameters:
+        - name: activeOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+          description: Filter to only return active events
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+          description: Maximum number of events to return
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+          description: Number of events to skip
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search term to filter events by name
+        - name: organizerId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Filter events by organizer ID
+        - name: publicOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Filter to only return public events
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Filter events starting on or after this date
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Filter events ending on or before this date
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsResponse'
+
+  /api/events/stats:
+    get:
+      tags:
+        - Event Management
+      summary: Get Event Statistics
+      description: Returns statistics about events
+      operationId: getEventStats
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStatsResponse'
+
+    post:
+      tags:
+        - Event Management
+      summary: Create Event
+      description: Creates a new event
+      operationId: createEvent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Event successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '400':
+          description: Invalid event data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/events/{id}:
+    get:
+      tags:
+        - Event Management
+      summary: Get Event by ID
+      description: Returns an event by its ID
+      operationId: getEventById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '404':
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Event Management
+      summary: Update Event
+      description: Updates an existing event
+      operationId: updateEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '200':
+          description: Event successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '400':
+          description: Invalid event data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Event Management
+      summary: Delete Event
+      description: Deletes an event
+      operationId: deleteEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: force
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Force delete even if the event has dependencies
+      responses:
+        '200':
+          description: Event successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Cannot delete active event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication
+
+  schemas:
+    BaseResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+        message:
+          type: string
+          description: A message describing the result of the operation
+        data:
+          type: object
+          description: The response data (if any)
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+        - error
+      properties:
+        success:
+          type: boolean
+          default: false
+          description: Indicates that the operation failed
+        message:
+          type: string
+          description: A message describing the error
+        error:
+          type: string
+          description: The error code or type
+
+    ApiGatewayInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Meldestelle API Gateway
+                version:
+                  type: string
+                  example: 1.0.0
+                description:
+                  type: string
+                  example: Self-Contained Systems API Gateway for Austrian Equestrian Federation
+                availableContexts:
+                  type: array
+                  items:
+                    type: string
+                  example: [authentication, master-data, horse-registry, event-management]
+                endpoints:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  example:
+                    authentication: /auth/*
+                    master-data: /api/masterdata/*
+                    horse-registry: /api/horses/*
+                    event-management: /api/events/*
+
+    HealthStatusResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: UP
+                contexts:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  example:
+                    authentication: UP
+                    master-data: UP
+                    horse-registry: UP
+                    event-management: UP
+
+    ApiDocumentationResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: Meldestelle Self-Contained Systems API
+                description:
+                  type: string
+                  example: Unified API Gateway for all bounded contexts
+                contexts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      path:
+                        type: string
+                      description:
+                        type: string
+                  example:
+                    - name: Authentication Context
+                      path: /auth
+                      description: User authentication, registration, and profile management
+                    - name: Master Data Context
+                      path: /api/masterdata
+                      description: Reference data management (countries, states, age classes, venues)
+
+    # Authentication Models
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: Password123
+
+    LoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: JWT token for authentication
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                user:
+                  $ref: '#/components/schemas/User'
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          type: string
+          format: password
+          example: Password123
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        phone:
+          type: string
+          example: +43 123 456789
+
+    RegisterResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                user:
+                  $ref: '#/components/schemas/User'
+
+    UserProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        phone:
+          type: string
+          example: +43 123 456789
+        roles:
+          type: array
+          items:
+            type: string
+          example: [USER, ADMIN]
+
+    # Master Data Models
+    CountriesResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Country'
+
+    CountryResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Country'
+
+    CreateCountryRequest:
+      type: object
+      required:
+        - name
+        - code
+      properties:
+        name:
+          type: string
+          example: Austria
+        code:
+          type: string
+          example: AT
+        flagUrl:
+          type: string
+          format: uri
+          example: https://example.com/flags/at.png
+
+    Country:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: Austria
+        code:
+          type: string
+          example: AT
+        flagUrl:
+          type: string
+          format: uri
+          example: https://example.com/flags/at.png
+
+    # Horse Registry Models
+    HorsesResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Horse'
+
+    HorseResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Horse'
+
+    RegisterHorseRequest:
+      type: object
+      required:
+        - name
+        - birthDate
+        - breed
+        - color
+        - gender
+      properties:
+        name:
+          type: string
+          example: Maestoso
+        birthDate:
+          type: string
+          format: date
+          example: 2015-05-15
+        breed:
+          type: string
+          example: Lipizzaner
+        color:
+          type: string
+          example: White
+        gender:
+          type: string
+          enum: [STALLION, MARE, GELDING]
+          example: STALLION
+        fatherId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        motherId:
+          type: string
+          format: uuid
+          example: 223e4567-e89b-12d3-a456-426614174000
+        ownerId:
+          type: string
+          format: uuid
+          example: 323e4567-e89b-12d3-a456-426614174000
+        registrationNumber:
+          type: string
+          example: AT-LIP-2015-123
+
+    UpdateHorseRequest:
+      type: object
+      required:
+        - name
+        - gender
+      properties:
+        name:
+          type: string
+          example: Maestoso
+        gender:
+          type: string
+          enum: [STALLION, MARE, GELDING]
+          example: STALLION
+        birthDate:
+          type: string
+          format: date
+          example: 2015-05-15
+        breed:
+          type: string
+          example: Lipizzaner
+        color:
+          type: string
+          example: White
+        ownerId:
+          type: string
+          format: uuid
+          example: 323e4567-e89b-12d3-a456-426614174000
+        responsiblePersonId:
+          type: string
+          format: uuid
+          example: 423e4567-e89b-12d3-a456-426614174000
+        breederName:
+          type: string
+          example: Austrian Federal Stud Piber
+        studBookNumber:
+          type: string
+          example: LIP-2015-123
+        lifeNumber:
+          type: string
+          example: AT-LIP-2015-123
+        chipNumber:
+          type: string
+          example: 040123456789012
+        passportNumber:
+          type: string
+          example: AT-P-2015-123
+        oepsNumber:
+          type: string
+          example: AT-OEPS-2015-123
+        feiNumber:
+          type: string
+          example: AT-FEI-2015-123
+        fatherName:
+          type: string
+          example: Neapolitano
+        motherName:
+          type: string
+          example: Presciana
+        motherFatherName:
+          type: string
+          example: Conversano
+        height:
+          type: integer
+          example: 165
+        isActive:
+          type: boolean
+          default: true
+        notes:
+          type: string
+          example: Champion at Vienna Horse Show 2022
+
+    Horse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: Maestoso
+        birthDate:
+          type: string
+          format: date
+          example: 2015-05-15
+        breed:
+          type: string
+          example: Lipizzaner
+        color:
+          type: string
+          example: White
+        gender:
+          type: string
+          enum: [STALLION, MARE, GELDING]
+          example: STALLION
+        father:
+          $ref: '#/components/schemas/HorseReference'
+        mother:
+          $ref: '#/components/schemas/HorseReference'
+        owner:
+          $ref: '#/components/schemas/UserReference'
+        registrationNumber:
+          type: string
+          example: AT-LIP-2015-123
+        registrationDate:
+          type: string
+          format: date
+          example: 2015-06-15
+
+    HorseReference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: Maestoso
+        registrationNumber:
+          type: string
+          example: AT-LIP-2015-123
+
+    UserReference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+
+    # Event Management Models
+    EventsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/Event'
+
+    EventResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Event'
+
+    CreateEventRequest:
+      type: object
+      required:
+        - name
+        - startDate
+        - endDate
+        - venueId
+        - eventType
+      properties:
+        name:
+          type: string
+          example: Vienna International Horse Show
+        startDate:
+          type: string
+          format: date
+          example: 2025-09-15
+        endDate:
+          type: string
+          format: date
+          example: 2025-09-20
+        venueId:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        eventType:
+          type: string
+          enum: [DRESSAGE, JUMPING, EVENTING, COMBINED]
+          example: JUMPING
+        description:
+          type: string
+          example: International jumping competition
+        registrationDeadline:
+          type: string
+          format: date
+          example: 2025-09-01
+        maxParticipants:
+          type: integer
+          example: 100
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: Vienna International Horse Show
+        startDate:
+          type: string
+          format: date
+          example: 2025-09-15
+        endDate:
+          type: string
+          format: date
+          example: 2025-09-20
+        venue:
+          $ref: '#/components/schemas/Venue'
+        eventType:
+          type: string
+          enum: [DRESSAGE, JUMPING, EVENTING, COMBINED]
+          example: JUMPING
+        description:
+          type: string
+          example: International jumping competition
+        registrationDeadline:
+          type: string
+          format: date
+          example: 2025-09-01
+        maxParticipants:
+          type: integer
+          example: 100
+        currentParticipants:
+          type: integer
+          example: 45
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, REGISTRATION_OPEN, REGISTRATION_CLOSED, IN_PROGRESS, COMPLETED, CANCELLED]
+          example: REGISTRATION_OPEN
+        createdBy:
+          $ref: '#/components/schemas/UserReference'
+        createdAt:
+          type: string
+          format: date-time
+          example: 2025-05-15T10:30:00Z
+
+    EventStats:
+      type: object
+      properties:
+        totalActive:
+          type: integer
+          format: int64
+          description: Total number of active events
+          example: 42
+        totalPublic:
+          type: integer
+          format: int64
+          description: Total number of public events
+          example: 35
+
+    EventStatsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/EventStats'
+
+    HorseStats:
+      type: object
+      properties:
+        totalActive:
+          type: integer
+          format: int64
+          description: Total number of active horses
+          example: 250
+        oepsRegistered:
+          type: integer
+          format: int64
+          description: Number of horses registered with OEPS
+          example: 180
+        feiRegistered:
+          type: integer
+          format: int64
+          description: Number of horses registered with FEI
+          example: 75
+
+    HorseStatsResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/HorseStats'
+
+    BatchDeleteRequest:
+      type: object
+      required:
+        - horseIds
+      properties:
+        horseIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: List of horse IDs to delete
+          example: ["123e4567-e89b-12d3-a456-426614174000", "223e4567-e89b-12d3-a456-426614174000"]
+        forceDelete:
+          type: boolean
+          default: false
+          description: Force delete even if horses have dependencies
+
+    BatchDeleteResult:
+      type: object
+      properties:
+        successful:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: List of successfully deleted horse IDs
+        failed:
+          type: object
+          additionalProperties:
+            type: string
+          description: Map of failed horse IDs to error messages
+        overallSuccess:
+          type: boolean
+          description: True if all horses were deleted successfully
+
+    BatchDeleteResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BatchDeleteResult'
+
+    Venue:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: Vienna Riding Club
+        address:
+          type: string
+          example: Trabrennstraße 5, 1020 Wien
+        country:
+          $ref: '#/components/schemas/Country'
+        facilities:
+          type: array
+          items:
+            type: string
+          example: [Indoor Arena, Outdoor Arena, Stables]

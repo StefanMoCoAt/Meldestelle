@@ -70,6 +70,43 @@ master-data
 
 See the `docs/` directory for detailed architecture documentation and diagrams.
 
+### API Documentation
+
+The project includes comprehensive API documentation for all endpoints:
+
+- **Central API Documentation**: Access the central API documentation page at `/docs` (or `/api` which redirects to `/docs`)
+- **Swagger UI**: Access the interactive API documentation at `/swagger` when the application is running
+- **OpenAPI Specification**: The OpenAPI specification is available at `/openapi`
+- **JSON API Overview**: A JSON representation of the API structure is available at `/api/json`
+- **Developer Guidelines**: Guidelines for documenting APIs are available in [docs/API_DOCUMENTATION_GUIDELINES.md](docs/API_DOCUMENTATION_GUIDELINES.md)
+
+The API documentation covers all bounded contexts:
+- Authentication API
+- Master Data API
+- Member Management API
+- Horse Registry API
+- Event Management API
+
+### How to Use the API Documentation
+
+1. Start the application with `./gradlew :api-gateway:run`
+2. For a comprehensive documentation portal, navigate to `http://localhost:8080/docs`
+3. For detailed interactive documentation, navigate to `http://localhost:8080/swagger`
+4. For the raw OpenAPI specification, navigate to `http://localhost:8080/openapi`
+5. Explore the available endpoints, request/response models, and authentication requirements
+6. Test API calls directly from the Swagger UI interface
+
+The central documentation page provides:
+- Overview of the API architecture
+- Details about all API contexts and their endpoints
+- Links to additional documentation resources
+- Authentication instructions
+- Response format examples
+
+### For Developers
+
+When adding or modifying API endpoints, please follow the [API Documentation Guidelines](docs/API_DOCUMENTATION_GUIDELINES.md). These guidelines ensure consistency across all API documentation and make it easier for developers, testers, and API consumers to understand and use our APIs.
+
 ## Last Updated
 
 2025-07-21

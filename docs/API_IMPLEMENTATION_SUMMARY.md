@@ -23,7 +23,38 @@ This document summarizes the successful implementation of API documentation feat
   - Added `configureOpenApi()` and `configureSwagger()` calls
   - Swagger UI accessible at `/swagger` endpoint
 
-### 2. Postman Collections
+### 2. CI/CD Pipeline for Automatic API Documentation Generation
+**Status: ✅ COMPLETED**
+
+- **Added OpenAPI Generator plugin** to `api-gateway/build.gradle.kts`:
+  - Updated to latest version (7.3.0) for improved functionality
+  - Configured to generate HTML documentation from OpenAPI specification
+  - Created enhanced `generateApiDocs` Gradle task with error handling
+  - Added OpenAPI specification validation before generation
+  - Implemented documentation versioning based on project version
+  - Configured to copy all generated documentation assets, not just index.html
+
+- **Enhanced GitHub Actions workflow** in `.github/workflows/api-docs.yml`:
+  - Updated to use latest GitHub Actions versions (checkout@v4, setup-java@v4)
+  - Added dedicated OpenAPI specification validation step
+  - Automatically triggers on changes to OpenAPI-related files
+  - Runs weekly on a schedule to ensure documentation is up-to-date
+  - Generates up-to-date API documentation
+  - Commits and pushes updated documentation to the repository
+  - Deploys documentation to GitHub Pages for better accessibility
+  - Includes notification steps for documentation updates
+  - Can be manually triggered via GitHub Actions UI
+
+- **Benefits**:
+  - Documentation is always in sync with the API implementation
+  - No manual steps required to update documentation
+  - Changes to API are automatically reflected in the documentation
+  - Documentation is validated before generation to prevent errors
+  - Historical versions of documentation are preserved
+  - Documentation is accessible via GitHub Pages for better user experience
+  - Team is notified when documentation is updated
+
+### 3. Postman Collections
 **Status: ✅ COMPLETED**
 
 - **Created comprehensive Postman collection** at `docs/postman/Meldestelle_API_Collection.json`:
@@ -70,8 +101,9 @@ This document summarizes the successful implementation of API documentation feat
 5. `docs/API_IMPLEMENTATION_SUMMARY.md` - This summary document
 
 ### Files Modified:
-1. `api-gateway/build.gradle.kts` - Added OpenAPI/Swagger dependencies
+1. `api-gateway/build.gradle.kts` - Added OpenAPI/Swagger dependencies, OpenAPI Generator plugin, and enhanced documentation generation tasks
 2. `api-gateway/src/main/kotlin/at/mocode/gateway/Application.kt` - Integrated OpenAPI configuration
+3. `.github/workflows/api-docs.yml` - Enhanced CI/CD workflow for API documentation generation and deployment
 
 ## 🚀 How to Use
 
@@ -82,15 +114,38 @@ This document summarizes the successful implementation of API documentation feat
 
 # Access Swagger UI
 open http://localhost:8080/swagger
+
+# Access static HTML documentation
+open http://localhost:8080/docs
 ```
 
-### 2. Postman Collection
+### 2. Generate API Documentation Locally
+```bash
+# Generate API documentation
+./gradlew :api-gateway:generateApiDocs
+
+# Validate OpenAPI specification
+./gradlew :api-gateway:validateOpenApi
+```
+
+### 3. Access Documentation on GitHub Pages
+The API documentation is automatically deployed to GitHub Pages and can be accessed at:
+```
+https://{organization}.github.io/{repository}/
+```
+
+Different versions of the documentation are available at:
+```
+https://{organization}.github.io/{repository}/v{version}/
+```
+
+### 4. Postman Collection
 1. Import `docs/postman/Meldestelle_API_Collection.json` into Postman
 2. Set `baseUrl` variable to `http://localhost:8080`
 3. Use the collection to test all API endpoints
 4. Authentication tokens are automatically managed
 
-### 3. API Tests
+### 5. API Tests
 ```bash
 # Run API tests (when compilation issues are resolved)
 ./gradlew :api-gateway:jvmTest
@@ -174,6 +229,7 @@ open http://localhost:8080/swagger
 | Requirement | Status | Implementation |
 |-------------|--------|----------------|
 | **OpenAPI/Swagger Integration** | ✅ COMPLETED | Full OpenAPI 3.0 spec with Swagger UI |
+| **CI/CD-Pipeline um automatische API-Dokumentationsgenerierung erweitern** | ✅ COMPLETED | GitHub Actions workflow with OpenAPI Generator |
 | **Postman Collections erstellen** | ✅ COMPLETED | Comprehensive collection with 576 lines |
 | **API-Tests schreiben** | ✅ COMPLETED | Integration test suite with 234 lines |
 

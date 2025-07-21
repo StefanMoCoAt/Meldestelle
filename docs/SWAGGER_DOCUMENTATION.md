@@ -23,60 +23,176 @@ Die Meldestelle API verfügt jetzt über eine vollständige Swagger/OpenAPI-Doku
 ## Dokumentierte Endpunkte
 
 ### Basis-Endpunkte
+- `GET /` - API Gateway Information
 - `GET /health` - Gesundheitsprüfung des Services
-- `GET /api` - API-Informationen
+- `GET /docs` - Zentrale API-Dokumentationsseite
+- `GET /api` - Weiterleitung zur zentralen API-Dokumentationsseite
+- `GET /api/json` - API-Informationen im JSON-Format
 
-### Person Management (`/api/persons`)
-- `GET /api/persons` - Alle Personen abrufen
-- `POST /api/persons` - Neue Person erstellen
-- `GET /api/persons/{id}` - Person nach UUID abrufen
-- `PUT /api/persons/{id}` - Person aktualisieren
-- `DELETE /api/persons/{id}` - Person löschen
-- `GET /api/persons/oeps/{oepsSatzNr}` - Person nach OEPS-Nummer abrufen
-- `GET /api/persons/search?q={query}` - Personen suchen
-- `GET /api/persons/verein/{vereinId}` - Personen nach Verein-ID abrufen
+### Authentication Context (`/auth/*`)
+- `POST /auth/login` - Benutzeranmeldung
+- `POST /auth/register` - Benutzerregistrierung
+- `GET /auth/profile` - Benutzerprofil abrufen
+
+### Master Data Context (`/api/masterdata/*`)
+- `GET /api/masterdata/countries` - Alle Länder abrufen
+- `POST /api/masterdata/countries` - Neues Land erstellen
+- `GET /api/masterdata/countries/{id}` - Land nach ID abrufen
+- `PUT /api/masterdata/countries/{id}` - Land aktualisieren
+- `DELETE /api/masterdata/countries/{id}` - Land löschen
+
+### Horse Registry Context (`/api/horses/*`)
+- `GET /api/horses` - Alle Pferde abrufen
+- `GET /api/horses/fei-registered` - FEI-registrierte Pferde abrufen
+- `GET /api/horses/stats` - Pferdestatistiken abrufen
+- `POST /api/horses/stats` - Neues Pferd registrieren
+- `GET /api/horses/{id}` - Pferd nach ID abrufen
+
+### Event Management Context (`/api/events/*`)
+- `GET /api/events` - Alle Veranstaltungen abrufen
+- `GET /api/events/stats` - Veranstaltungsstatistiken abrufen
+- `POST /api/events/stats` - Neue Veranstaltung erstellen
 
 ## Schema-Definitionen
 
-### Person
+### LoginRequest
 ```yaml
-Person:
+LoginRequest:
+  type: object
+  properties:
+    email:
+      type: string
+      format: email
+    password:
+      type: string
+      format: password
+  required:
+    - email
+    - password
+```
+
+### UserProfileResponse
+```yaml
+UserProfileResponse:
   type: object
   properties:
     id:
       type: string
       format: uuid
-    vorname:
-      type: string
-    nachname:
-      type: string
-    geburtsdatum:
-      type: string
-      format: date
-    oepsSatzNr:
-      type: string
-    vereinId:
-      type: string
-      format: uuid
     email:
       type: string
       format: email
-    telefon:
+    firstName:
       type: string
-  required:
-    - vorname
-    - nachname
+    lastName:
+      type: string
+    phoneNumber:
+      type: string
+    roles:
+      type: array
+      items:
+        type: string
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
 ```
 
-### Error
+### CountryResponse
 ```yaml
-Error:
+CountryResponse:
   type: object
   properties:
-    error:
+    id:
       type: string
-  required:
-    - error
+      format: uuid
+    name:
+      type: string
+    isoCode:
+      type: string
+    active:
+      type: boolean
+```
+
+### HorseResponse
+```yaml
+HorseResponse:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+    birthYear:
+      type: integer
+    breed:
+      type: string
+    color:
+      type: string
+    gender:
+      type: string
+      enum: [STALLION, MARE, GELDING]
+    feiRegistered:
+      type: boolean
+    ownerId:
+      type: string
+      format: uuid
+    active:
+      type: boolean
+```
+
+### EventResponse
+```yaml
+EventResponse:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+    startDate:
+      type: string
+      format: date
+    endDate:
+      type: string
+      format: date
+    location:
+      type: string
+    organizerId:
+      type: string
+      format: uuid
+    description:
+      type: string
+    status:
+      type: string
+      enum: [DRAFT, PUBLISHED, CANCELLED, COMPLETED]
+```
+
+### ErrorResponse
+```yaml
+ErrorResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+    message:
+      type: string
+    errors:
+      type: array
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+          message:
+            type: string
+    timestamp:
+      type: string
+      format: date-time
 ```
 
 ## Verwendung
@@ -101,25 +217,26 @@ Besuchen Sie `http://localhost:8080/openapi` um die vollständige OpenAPI-Spezif
 
 ### Neue Endpunkte hinzufügen
 Um neue API-Endpunkte zu dokumentieren, erweitern Sie die Datei:
-`server/src/main/resources/openapi.yaml`
+`api-gateway/src/jvmMain/resources/openapi/documentation.yaml`
 
 ### Beispiel für neuen Endpunkt:
 ```yaml
-/api/vereine:
+/api/events/categories:
   get:
-    summary: Get all clubs
-    description: Retrieve a list of all clubs
     tags:
-      - Clubs
+      - Event Management
+    summary: Get Event Categories
+    description: Returns a list of all event categories
+    operationId: getEventCategories
     responses:
       '200':
-        description: List of clubs
+        description: Successful operation
         content:
           application/json:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Verein'
+                $ref: '#/components/schemas/EventCategoryResponse'
 ```
 
 ## Technische Details
@@ -130,19 +247,26 @@ Um neue API-Endpunkte zu dokumentieren, erweitern Sie die Datei:
 
 ### Konfiguration
 Die Swagger/OpenAPI-Konfiguration befindet sich in:
-- `server/src/main/kotlin/at/mocode/plugins/Routing.kt`
-- `server/src/main/resources/openapi.yaml`
+- `api-gateway/src/jvmMain/kotlin/at/mocode/gateway/config/OpenApiConfig.kt` - Konfiguration der OpenAPI und Swagger UI Endpunkte
+- `api-gateway/src/jvmMain/kotlin/at/mocode/gateway/module.kt` - Integration der OpenAPI-Konfiguration in die Anwendung
+- `api-gateway/src/jvmMain/resources/openapi/documentation.yaml` - OpenAPI-Spezifikation im YAML-Format
 
-### Tests
-Automatisierte Tests für die Swagger-Funktionalität:
-- `server/src/test/kotlin/at/mocode/SwaggerTest.kt`
+### Implementierte Funktionen
+- Vollständige OpenAPI 3.0.3 Spezifikation
+- Interaktive Swagger UI für API-Exploration
+- Dokumentation aller API-Endpunkte aus allen Bounded Contexts
+- Authentifizierung mit JWT-Token
+- Beispiel-Requests und -Responses für alle Endpunkte
+- Schema-Definitionen für alle Datenmodelle
 
-## Nächste Schritte
+## Aktueller Status
 
-1. **Erweitern Sie die Dokumentation** für weitere API-Endpunkte (Vereine, Turniere, etc.)
-2. **Fügen Sie Authentifizierung hinzu** zur OpenAPI-Spezifikation wenn implementiert
-3. **Konfigurieren Sie Produktions-URLs** in der OpenAPI-Spezifikation
-4. **Implementieren Sie API-Versionierung** in der Dokumentation
+✅ **Implementiert**:
+- OpenAPI-Spezifikation für alle Bounded Contexts
+- Swagger UI für interaktive API-Exploration
+- JWT-Authentifizierung in der OpenAPI-Spezifikation
+- Produktions- und Entwicklungs-URLs in der Spezifikation
+- Vollständige Dokumentation aller Endpunkte und Datenmodelle
 
 ## Troubleshooting
 
