@@ -124,7 +124,7 @@ private object AdaptiveRateLimiting {
                                 "(CPU: ${String.format("%.1f", cpuLoad)}%, Memory: ${String.format("%.1f", memoryUsage)}%)")
                     }
                 } catch (e: Exception) {
-                    // If any error occurs, reset to normal load
+                    // If any error occurs, reset to a normal load
                     currentLoadFactor.set(100)
                     println("[AdaptiveRateLimiting] Error monitoring system load: ${e.message}")
                 }
@@ -168,7 +168,7 @@ private fun generateRequestKey(vararg inputs: String?): String {
 
     for (input in inputs) {
         if (input != null && input.isNotEmpty()) {
-            // Combine hashes using XOR and bit rotation for better distribution
+            // Combine hashes using XOR and a bit of rotation for better distribution
             val inputHash = efficientHash(input)
             combinedHash = (combinedHash xor inputHash) + ((combinedHash shl 5) + (combinedHash shr 2))
         }
@@ -214,7 +214,7 @@ fun Application.configureRateLimiting() {
                 // Using efficient hashing for better performance
                 requestKey { call ->
                     val ip = call.request.local.remoteHost
-                    val requestId = call.attributes.getOrNull(REQUEST_ID_KEY)?.toString() ?: ""
+                    val requestId = call.attributes.getOrNull(REQUEST_ID_KEY) ?: ""
                     val endpoint = endpoint // Include endpoint in the key for better separation
                     // Use efficient hashing to generate request key
                     generateRequestKey(ip, requestId, endpoint)
@@ -497,7 +497,7 @@ private fun determineUserTypeFromPayload(payload: String): String {
         }
 
         // Check for an array of roles
-        val rolesArrayRegex = "\"(role|roles|authorities)\"\\s*:\\s*\\[([^\\]]+)\\]".toRegex()
+        val rolesArrayRegex = "\"(role|roles|authorities)\"\\s*:\\s*\\[([^]]+)]".toRegex()
         val arrayMatchResult = rolesArrayRegex.find(payload)
 
         if (arrayMatchResult != null) {
