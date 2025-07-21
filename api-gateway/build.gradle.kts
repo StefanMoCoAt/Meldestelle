@@ -137,6 +137,7 @@ kotlin {
             implementation(libs.ktor.server.serializationKotlinxJson)
             implementation(libs.ktor.server.openapi)
             implementation(libs.ktor.server.swagger)
+            implementation(libs.ktor.server.rateLimit)
             implementation(libs.logback)
 
             // Datenbankabhängigkeiten für Migrationen

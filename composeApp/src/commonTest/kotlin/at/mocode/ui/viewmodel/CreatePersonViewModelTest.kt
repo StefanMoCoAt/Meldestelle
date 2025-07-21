@@ -12,6 +12,17 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import kotlin.test.*
 
+/**
+ * Comprehensive test suite for the CreatePersonViewModel.
+ *
+ * Tests cover:
+ * - Initial state verification
+ * - Field update operations
+ * - Form validation
+ * - Person creation with various inputs
+ * - Form reset functionality
+ * - Error handling
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class CreatePersonViewModelTest {
 
@@ -26,6 +37,25 @@ class CreatePersonViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
+        // Initialize mock repositories and services
+        setupMockRepositories()
+
+        // Create the use case with mocks
+        createPersonUseCase = CreatePersonUseCase(
+            personRepository = mockPersonRepository,
+            vereinRepository = mockVereinRepository,
+            masterDataService = mockMasterDataService
+        )
+
+        // Initialize the view model
+        viewModel = CreatePersonViewModel(createPersonUseCase)
+    }
+
+    /**
+     * Sets up all mock repositories and services needed for testing
+     */
+    private fun setupMockRepositories() {
+        // Mock person repository with in-memory storage
         mockPersonRepository = object : PersonRepository {
             private val persons = mutableListOf<DomPerson>()
 
@@ -71,6 +101,7 @@ class CreatePersonViewModelTest {
             }
         }
 
+        // Mock verein repository (minimal implementation)
         mockVereinRepository = object : VereinRepository {
             override suspend fun findById(id: com.benasher44.uuid.Uuid): at.mocode.members.domain.model.DomVerein? {
                 return null
@@ -121,6 +152,7 @@ class CreatePersonViewModelTest {
             }
         }
 
+        // Mock master data service (minimal implementation)
         mockMasterDataService = object : MasterDataService {
             override suspend fun countryExists(countryId: com.benasher44.uuid.Uuid): Boolean {
                 return true
@@ -146,14 +178,6 @@ class CreatePersonViewModelTest {
                 return emptyList()
             }
         }
-
-        createPersonUseCase = CreatePersonUseCase(
-            personRepository = mockPersonRepository,
-            vereinRepository = mockVereinRepository,
-            masterDataService = mockMasterDataService
-        )
-
-        viewModel = CreatePersonViewModel(createPersonUseCase)
     }
 
     @AfterTest
@@ -161,46 +185,83 @@ class CreatePersonViewModelTest {
         Dispatchers.resetMain()
     }
 
+    //region Initial State Tests
+
     @Test
     fun `initial state should be correct`() {
-        assertEquals("", viewModel.nachname)
-        assertEquals("", viewModel.vorname)
-        assertEquals("", viewModel.titel)
-        assertEquals("", viewModel.oepsSatzNr)
-        assertEquals("", viewModel.geburtsdatum)
-        assertNull(viewModel.geschlecht)
-        assertEquals("", viewModel.telefon)
-        assertEquals("", viewModel.email)
-        assertEquals("", viewModel.strasse)
-        assertEquals("", viewModel.plz)
-        assertEquals("", viewModel.ort)
-        assertEquals("", viewModel.adresszusatz)
-        assertEquals("", viewModel.feiId)
-        assertEquals("", viewModel.mitgliedsNummer)
-        assertEquals("", viewModel.notizen)
-        assertFalse(viewModel.istGesperrt)
-        assertEquals("", viewModel.sperrGrund)
-        assertFalse(viewModel.isLoading)
-        assertNull(viewModel.errorMessage)
-        assertFalse(viewModel.isSuccess)
+        // Verify all fields are initialized to empty values
+        assertEquals("", viewModel.nachname, "Nachname should be empty initially")
+        assertEquals("", viewModel.vorname, "Vorname should be empty initially")
+        assertEquals("", viewModel.titel, "Titel should be empty initially")
+        assertEquals("", viewModel.oepsSatzNr, "OepsSatzNr should be empty initially")
+        assertEquals("", viewModel.geburtsdatum, "Geburtsdatum should be empty initially")
+        assertNull(viewModel.geschlecht, "Geschlecht should be null initially")
+        assertEquals("", viewModel.telefon, "Telefon should be empty initially")
+        assertEquals("", viewModel.email, "Email should be empty initially")
+        assertEquals("", viewModel.strasse, "Strasse should be empty initially")
+        assertEquals("", viewModel.plz, "PLZ should be empty initially")
+        assertEquals("", viewModel.ort, "Ort should be empty initially")
+        assertEquals("", viewModel.adresszusatz, "Adresszusatz should be empty initially")
+        assertEquals("", viewModel.feiId, "FeiId should be empty initially")
+        assertEquals("", viewModel.mitgliedsNummer, "MitgliedsNummer should be empty initially")
+        assertEquals("", viewModel.notizen, "Notizen should be empty initially")
+
+        // Verify flags are initialized correctly
+        assertFalse(viewModel.istGesperrt, "IstGesperrt should be false initially")
+        assertEquals("", viewModel.sperrGrund, "SperrGrund should be empty initially")
+        assertFalse(viewModel.isLoading, "IsLoading should be false initially")
+        assertNull(viewModel.errorMessage, "ErrorMessage should be null initially")
+        assertFalse(viewModel.isSuccess, "IsSuccess should be false initially")
     }
+
+    //endregion
+
+    //region Update Method Tests
 
     @Test
     fun `update methods should change state correctly`() {
+        // When - update multiple fields
         viewModel.updateNachname("Mustermann")
         viewModel.updateVorname("Max")
         viewModel.updateTitel("Dr.")
         viewModel.updateGeschlecht(GeschlechtE.M)
         viewModel.updateEmail("max@example.com")
         viewModel.updateIstGesperrt(true)
+        viewModel.updateSperrGrund("Test Sperrgrund")
 
-        assertEquals("Mustermann", viewModel.nachname)
-        assertEquals("Max", viewModel.vorname)
-        assertEquals("Dr.", viewModel.titel)
-        assertEquals(GeschlechtE.M, viewModel.geschlecht)
-        assertEquals("max@example.com", viewModel.email)
-        assertTrue(viewModel.istGesperrt)
+        // Then - verify all fields were updated correctly
+        assertEquals("Mustermann", viewModel.nachname, "Nachname should be updated")
+        assertEquals("Max", viewModel.vorname, "Vorname should be updated")
+        assertEquals("Dr.", viewModel.titel, "Titel should be updated")
+        assertEquals(GeschlechtE.M, viewModel.geschlecht, "Geschlecht should be updated")
+        assertEquals("max@example.com", viewModel.email, "Email should be updated")
+        assertTrue(viewModel.istGesperrt, "IstGesperrt should be updated")
+        assertEquals("Test Sperrgrund", viewModel.sperrGrund, "SperrGrund should be updated")
     }
+
+    @Test
+    fun `update methods should handle special characters`() {
+        // When - update with special characters
+        val nameWithSpecialChars = "Müller-Höß"
+        viewModel.updateNachname(nameWithSpecialChars)
+
+        // Then - verify special characters are preserved
+        assertEquals(nameWithSpecialChars, viewModel.nachname, "Special characters should be preserved")
+    }
+
+    @Test
+    fun `update methods should handle very long inputs`() {
+        // When - update with very long input
+        val longText = "A".repeat(500)
+        viewModel.updateNotizen(longText)
+
+        // Then - verify long text is preserved
+        assertEquals(longText, viewModel.notizen, "Long text should be preserved")
+    }
+
+    //endregion
+
+    //region Validation Tests
 
     @Test
     fun `createPerson should fail with empty nachname`() = runTest {
@@ -212,9 +273,9 @@ class CreatePersonViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        assertEquals("Nachname ist erforderlich", viewModel.errorMessage)
-        assertFalse(viewModel.isSuccess)
-        assertFalse(viewModel.isLoading)
+        assertEquals("Nachname ist erforderlich", viewModel.errorMessage, "Should show error for empty nachname")
+        assertFalse(viewModel.isSuccess, "Should not be successful with validation error")
+        assertFalse(viewModel.isLoading, "Loading state should be reset after validation")
     }
 
     @Test
@@ -227,14 +288,36 @@ class CreatePersonViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        assertEquals("Vorname ist erforderlich", viewModel.errorMessage)
-        assertFalse(viewModel.isSuccess)
-        assertFalse(viewModel.isLoading)
+        assertEquals("Vorname ist erforderlich", viewModel.errorMessage, "Should show error for empty vorname")
+        assertFalse(viewModel.isSuccess, "Should not be successful with validation error")
+        assertFalse(viewModel.isLoading, "Loading state should be reset after validation")
     }
 
     @Test
+    fun `createPerson should handle invalid date format`() = runTest {
+        // Given - invalid date format
+        viewModel.updateNachname("Mustermann")
+        viewModel.updateVorname("Max")
+        viewModel.updateGeburtsdatum("invalid-date")
+
+        // When
+        viewModel.createPerson()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        assertEquals("Ungültiges Datumsformat. Verwenden Sie YYYY-MM-DD", viewModel.errorMessage,
+            "Should show error for invalid date format")
+        assertFalse(viewModel.isSuccess, "Should not be successful with validation error")
+        assertFalse(viewModel.isLoading, "Loading state should be reset after validation")
+    }
+
+    //endregion
+
+    //region Success Tests
+
+    @Test
     fun `createPerson should succeed with valid data`() = runTest {
-        // Given
+        // Given - valid data
         viewModel.updateNachname("Mustermann")
         viewModel.updateVorname("Max")
         viewModel.updateGeschlecht(GeschlechtE.M)
@@ -245,31 +328,14 @@ class CreatePersonViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        assertTrue(viewModel.isSuccess)
-        assertNull(viewModel.errorMessage)
-        assertFalse(viewModel.isLoading)
-    }
-
-    @Test
-    fun `createPerson should handle invalid date format`() = runTest {
-        // Given
-        viewModel.updateNachname("Mustermann")
-        viewModel.updateVorname("Max")
-        viewModel.updateGeburtsdatum("invalid-date")
-
-        // When
-        viewModel.createPerson()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        assertEquals("Ungültiges Datumsformat. Verwenden Sie YYYY-MM-DD", viewModel.errorMessage)
-        assertFalse(viewModel.isSuccess)
-        assertFalse(viewModel.isLoading)
+        assertTrue(viewModel.isSuccess, "Should be successful with valid data")
+        assertNull(viewModel.errorMessage, "Should not have error message")
+        assertFalse(viewModel.isLoading, "Loading state should be reset after success")
     }
 
     @Test
     fun `createPerson should handle valid date format`() = runTest {
-        // Given
+        // Given - valid date format
         viewModel.updateNachname("Mustermann")
         viewModel.updateVorname("Max")
         viewModel.updateGeburtsdatum("1990-05-15")
@@ -279,10 +345,30 @@ class CreatePersonViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        assertTrue(viewModel.isSuccess)
-        assertNull(viewModel.errorMessage)
-        assertFalse(viewModel.isLoading)
+        assertTrue(viewModel.isSuccess, "Should be successful with valid date")
+        assertNull(viewModel.errorMessage, "Should not have error message")
+        assertFalse(viewModel.isLoading, "Loading state should be reset after success")
     }
+
+    @Test
+    fun `createPerson should succeed with minimal required data`() = runTest {
+        // Given - only required fields
+        viewModel.updateNachname("Mustermann")
+        viewModel.updateVorname("Max")
+
+        // When
+        viewModel.createPerson()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        assertTrue(viewModel.isSuccess, "Should be successful with minimal required data")
+        assertNull(viewModel.errorMessage, "Should not have error message")
+        assertFalse(viewModel.isLoading, "Loading state should be reset after success")
+    }
+
+    //endregion
+
+    //region Form Management Tests
 
     @Test
     fun `resetForm should clear all fields`() {
@@ -291,18 +377,22 @@ class CreatePersonViewModelTest {
         viewModel.updateVorname("Max")
         viewModel.updateEmail("max@example.com")
         viewModel.updateIstGesperrt(true)
+        viewModel.updateSperrGrund("Test Sperrgrund")
 
         // When
         viewModel.resetForm()
 
-        // Then
-        assertEquals("", viewModel.nachname)
-        assertEquals("", viewModel.vorname)
-        assertEquals("", viewModel.email)
-        assertFalse(viewModel.istGesperrt)
-        assertFalse(viewModel.isLoading)
-        assertNull(viewModel.errorMessage)
-        assertFalse(viewModel.isSuccess)
+        // Then - verify all fields are reset
+        assertEquals("", viewModel.nachname, "Nachname should be reset")
+        assertEquals("", viewModel.vorname, "Vorname should be reset")
+        assertEquals("", viewModel.email, "Email should be reset")
+        assertFalse(viewModel.istGesperrt, "IstGesperrt should be reset")
+        assertEquals("", viewModel.sperrGrund, "SperrGrund should be reset")
+
+        // Verify state flags are reset
+        assertFalse(viewModel.isLoading, "IsLoading should be reset")
+        assertNull(viewModel.errorMessage, "ErrorMessage should be reset")
+        assertFalse(viewModel.isSuccess, "IsSuccess should be reset")
     }
 
     @Test
@@ -310,18 +400,33 @@ class CreatePersonViewModelTest {
         // Given - simulate an error
         viewModel.updateNachname("") // This will cause validation error
         viewModel.updateVorname("Max")
-
-        // When
         viewModel.createPerson()
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then - verify error message exists
-        assertNotNull(viewModel.errorMessage)
+        assertNotNull(viewModel.errorMessage, "Should have error message")
 
         // When - clear the error
         viewModel.clearError()
 
         // Then - verify error message is cleared
-        assertNull(viewModel.errorMessage)
+        assertNull(viewModel.errorMessage, "Error message should be cleared")
     }
+
+    @Test
+    fun `loading state should be reset after createPerson completes`() = runTest {
+        // Given
+        viewModel.updateNachname("Mustermann")
+        viewModel.updateVorname("Max")
+
+        // When - start creation and complete the operation
+        viewModel.createPerson()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - verify loading state is reset after completion
+        assertFalse(viewModel.isLoading, "Loading state should be reset after operation completes")
+        assertTrue(viewModel.isSuccess, "Operation should complete successfully")
+    }
+
+    //endregion
 }

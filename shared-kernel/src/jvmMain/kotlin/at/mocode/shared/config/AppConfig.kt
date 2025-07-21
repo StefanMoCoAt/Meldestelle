@@ -24,6 +24,9 @@ object AppConfig {
     // Logging-Konfiguration
     val logging = LoggingConfig()
 
+    // Rate Limiting-Konfiguration
+    val rateLimit = RateLimitConfig()
+
     // Datenbank-Konfiguration (wird nach dem Laden der Properties initialisiert)
     val database: DatabaseConfig
 
@@ -36,6 +39,7 @@ object AppConfig {
         server.configure(props)
         security.configure(props)
         logging.configure(props)
+        rateLimit.configure(props)
 
         // Datenbank-Konfiguration mit Properties initialisieren
         database = DatabaseConfig.fromEnv(props)
@@ -179,13 +183,96 @@ class SecurityConfig {
  * Konfiguration für das Logging.
  */
 class LoggingConfig {
+    // Allgemeine Logging-Einstellungen
     var level: String = if (AppEnvironment.isProduction()) "INFO" else "DEBUG"
     var logRequests: Boolean = true
     var logResponses: Boolean = !AppEnvironment.isProduction()
 
+    // Erweiterte Request-Logging-Einstellungen
+    var logRequestHeaders: Boolean = !AppEnvironment.isProduction()
+    var logRequestBody: Boolean = !AppEnvironment.isProduction()
+    var logRequestParameters: Boolean = true
+
+    // Erweiterte Response-Logging-Einstellungen
+    var logResponseHeaders: Boolean = !AppEnvironment.isProduction()
+    var logResponseBody: Boolean = !AppEnvironment.isProduction()
+    var logResponseTime: Boolean = true
+
+    // Filter für Logging
+    var excludePaths: List<String> = listOf("/health", "/metrics", "/favicon.ico")
+    var maxBodyLogSize: Int = 1000  // Maximale Größe des Body-Logs in Zeichen
+
+    // Strukturiertes Logging
+    var useStructuredLogging: Boolean = true
+    var includeCorrelationId: Boolean = true
+
     fun configure(props: Properties) {
+        // Allgemeine Einstellungen
         level = props.getProperty("logging.level") ?: level
         logRequests = props.getProperty("logging.requests")?.toBoolean() ?: logRequests
         logResponses = props.getProperty("logging.responses")?.toBoolean() ?: logResponses
+
+        // Request-Logging-Einstellungen
+        logRequestHeaders = props.getProperty("logging.request.headers")?.toBoolean() ?: logRequestHeaders
+        logRequestBody = props.getProperty("logging.request.body")?.toBoolean() ?: logRequestBody
+        logRequestParameters = props.getProperty("logging.request.parameters")?.toBoolean() ?: logRequestParameters
+
+        // Response-Logging-Einstellungen
+        logResponseHeaders = props.getProperty("logging.response.headers")?.toBoolean() ?: logResponseHeaders
+        logResponseBody = props.getProperty("logging.response.body")?.toBoolean() ?: logResponseBody
+        logResponseTime = props.getProperty("logging.response.time")?.toBoolean() ?: logResponseTime
+
+        // Filter-Einstellungen
+        props.getProperty("logging.exclude.paths")?.split(",")?.map { it.trim() }?.let {
+            excludePaths = it
+        }
+        maxBodyLogSize = props.getProperty("logging.maxBodyLogSize")?.toIntOrNull() ?: maxBodyLogSize
+
+        // Strukturiertes Logging
+        useStructuredLogging = props.getProperty("logging.structured")?.toBoolean() ?: useStructuredLogging
+        includeCorrelationId = props.getProperty("logging.correlationId")?.toBoolean() ?: includeCorrelationId
     }
+}
+
+/**
+ * Konfiguration für Rate Limiting.
+ */
+class RateLimitConfig {
+    // Globale Rate Limiting Konfiguration
+    var enabled: Boolean = true
+    var globalLimit: Int = 100
+    var globalPeriodMinutes: Int = 1
+    var includeHeaders: Boolean = true
+
+    // Spezifische Rate Limits für verschiedene Endpunkte oder Benutzertypen
+    var endpointLimits: Map<String, EndpointLimit> = mapOf(
+        "api/v1/events" to EndpointLimit(200, 1),
+        "api/v1/auth" to EndpointLimit(20, 1)
+    )
+
+    // Rate Limits für verschiedene Benutzertypen
+    var userTypeLimits: Map<String, EndpointLimit> = mapOf(
+        "anonymous" to EndpointLimit(50, 1),
+        "authenticated" to EndpointLimit(200, 1),
+        "admin" to EndpointLimit(500, 1)
+    )
+
+    fun configure(props: Properties) {
+        enabled = props.getProperty("ratelimit.enabled")?.toBoolean() ?: enabled
+        globalLimit = props.getProperty("ratelimit.global.limit")?.toIntOrNull() ?: globalLimit
+        globalPeriodMinutes = props.getProperty("ratelimit.global.periodMinutes")?.toIntOrNull() ?: globalPeriodMinutes
+        includeHeaders = props.getProperty("ratelimit.includeHeaders")?.toBoolean() ?: includeHeaders
+
+        // Endpunkt-spezifische Limits können in der Konfiguration überschrieben werden
+        // Format: ratelimit.endpoint.api/v1/events.limit=200
+        // Format: ratelimit.endpoint.api/v1/events.periodMinutes=1
+    }
+
+    /**
+     * Repräsentiert ein Rate Limit für einen spezifischen Endpunkt oder Benutzertyp.
+     */
+    data class EndpointLimit(
+        val limit: Int,
+        val periodMinutes: Int
+    )
 }

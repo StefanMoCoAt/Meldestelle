@@ -6,8 +6,12 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.http.*
 import io.ktor.server.response.*
+import io.ktor.util.*
 import at.mocode.dto.base.ApiResponse
+import at.mocode.shared.config.AppConfig
+import org.slf4j.MDC
 import org.slf4j.event.Level
+import java.util.UUID
 
 /**
  * Monitoring and logging configuration for the API Gateway.
@@ -15,16 +19,91 @@ import org.slf4j.event.Level
  * Configures request logging, error handling, and status pages.
  */
 fun Application.configureMonitoring() {
+    val loggingConfig = AppConfig.logging
+
+    // Erweiterte Call-Logging-Konfiguration
     install(CallLogging) {
-        level = Level.INFO
-        filter { call -> call.request.path().startsWith("/api") }
+        level = when (loggingConfig.level.uppercase()) {
+            "DEBUG" -> Level.DEBUG
+            "TRACE" -> Level.TRACE
+            "WARN" -> Level.WARN
+            "ERROR" -> Level.ERROR
+            else -> Level.INFO
+        }
+
+        // Filtere Pfade, die vom Logging ausgeschlossen werden sollen
+        filter { call ->
+            val path = call.request.path()
+            !loggingConfig.excludePaths.any { path.startsWith(it) }
+        }
+
+        // Formatiere Log-Einträge mit erweitertem Format
         format { call ->
             val status = call.response.status()
             val httpMethod = call.request.httpMethod.value
+            val path = call.request.path()
             val userAgent = call.request.headers["User-Agent"]
-            "$status: $httpMethod ${call.request.path()} - $userAgent"
+            val clientIp = call.request.local.remoteHost
+
+            // Generiere eine Correlation-ID für das Request-Tracking
+            val correlationId = UUID.randomUUID().toString()
+
+            // Füge Correlation-ID als Response-Header hinzu
+            if (loggingConfig.includeCorrelationId) {
+                call.response.header("X-Correlation-ID", correlationId)
+            }
+
+            if (loggingConfig.useStructuredLogging) {
+                // Strukturiertes Logging-Format
+                buildString {
+                    append("method=$httpMethod ")
+                    append("path=$path ")
+                    append("status=$status ")
+                    append("client=$clientIp ")
+
+                    // Log Headers wenn konfiguriert
+                    if (loggingConfig.logRequestHeaders) {
+                        val authHeader = call.request.headers["Authorization"]
+                        if (authHeader != null) {
+                            append("auth=true ")
+                        }
+
+                        val contentType = call.request.headers["Content-Type"]
+                        if (contentType != null) {
+                            append("contentType=$contentType ")
+                        }
+                    }
+
+                    // Log Query-Parameter wenn konfiguriert
+                    if (loggingConfig.logRequestParameters && call.request.queryParameters.entries().isNotEmpty()) {
+                        append("params={")
+                        call.request.queryParameters.entries().joinTo(this, ", ") { "${it.key}=${it.value.joinToString(",")}" }
+                        append("} ")
+                    }
+
+                    if (userAgent != null) {
+                        append("userAgent=\"${userAgent.replace("\"", "\\\"")}\" ")
+                    }
+
+                    // Füge Correlation-ID hinzu, wenn konfiguriert
+                    if (loggingConfig.includeCorrelationId) {
+                        append("correlationId=$correlationId ")
+                    }
+                }
+            } else {
+                // Einfaches Logging-Format
+                "$status: $httpMethod $path - $clientIp - $userAgent"
+            }
         }
     }
+
+    // Erweiterte Logging-Konfiguration für den API-Gateway
+    log.info("API Gateway konfiguriert mit erweitertem Logging")
+    log.info("Logging-Konfiguration: level=${loggingConfig.level}, " +
+            "logRequests=${loggingConfig.logRequests}, " +
+            "logResponses=${loggingConfig.logResponses}, " +
+            "logRequestHeaders=${loggingConfig.logRequestHeaders}, " +
+            "logRequestParameters=${loggingConfig.logRequestParameters}")
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->

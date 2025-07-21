@@ -5,6 +5,43 @@ info:
     Self-Contained Systems API Gateway for Austrian Equestrian Federation.
     This API provides access to various bounded contexts including authentication,
     master data management, horse registry, and event management.
+
+    ## Rate Limiting
+    This API implements rate limiting to ensure fair usage and system stability.
+
+    ### Global Rate Limits
+    - Default limit: 100 requests per minute per IP address
+    - When the limit is exceeded, the API will respond with a 429 Too Many Requests status code
+
+    ### User-Based Rate Limits
+    Different rate limits apply based on user authentication status:
+    - Anonymous users: 50 requests per minute
+    - Authenticated users: 200 requests per minute
+    - Admin users: 500 requests per minute
+
+    ### Endpoint-Specific Rate Limits
+    Some endpoints have specific rate limits:
+    - Authentication endpoints: 20 requests per minute
+    - Event management endpoints: 200 requests per minute
+
+    ### Rate Limit Headers
+    The API includes rate limit information in response headers:
+    - `X-RateLimit-Enabled`: Indicates if rate limiting is enabled
+    - `X-RateLimit-Limit`: The rate limit ceiling for the given endpoint
+    - `X-Correlation-ID`: A unique identifier for request tracking
+
+    ### Best Practices
+    - Implement exponential backoff when receiving 429 responses
+    - Cache responses when appropriate to reduce API calls
+    - Please design your applications to handle rate limiting gracefully
+
+    ## Enhanced Logging
+    The API Gateway implements enhanced request/response logging for better monitoring and debugging:
+
+    - Structured logging format for machine readability
+    - Correlation IDs for request tracking across services
+    - Configurable logging of request headers, parameters, and bodies
+    - Response time tracking for performance monitoring
   version: 1.0.0
   contact:
     name: Meldestelle Support
