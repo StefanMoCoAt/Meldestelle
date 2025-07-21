@@ -59,9 +59,8 @@ fun Application.module() {
         }
 
         // Static resources for documentation
-        static("/docs") {
-            resources("static/docs")
-            defaultResource("static/docs/index.html")
+        staticResources("/docs", "static/docs") {
+            default("index.html")
         }
 
         // API Documentation routes

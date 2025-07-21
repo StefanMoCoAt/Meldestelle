@@ -49,10 +49,22 @@ info:
   # Additional info fields...
 
 servers:
-  # Server configurations...
+  - url: https://api.meldestelle.at
+    description: Production server
+  - url: https://staging-api.meldestelle.at
+    description: Staging server
+  - url: http://localhost:8080
+    description: Local development server
 
 tags:
-  # API tags for grouping endpoints...
+  - name: Authentication
+    description: Authentication and authorization endpoints
+  - name: Horse Registry
+    description: Horse registration and management
+  - name: Events
+    description: Event management endpoints
+  - name: Master Data
+    description: Master data management
 
 paths:
   # API endpoints...
