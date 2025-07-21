@@ -1,17 +1,15 @@
 package at.mocode.gateway.config
 
+import at.mocode.dto.base.ApiResponse
+import at.mocode.shared.config.AppConfig
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
-import io.ktor.http.*
 import io.ktor.server.response.*
-import io.ktor.util.*
-import at.mocode.dto.base.ApiResponse
-import at.mocode.shared.config.AppConfig
-import org.slf4j.MDC
 import org.slf4j.event.Level
-import java.util.UUID
+import java.util.*
 
 /**
  * Monitoring and logging configuration for the API Gateway.

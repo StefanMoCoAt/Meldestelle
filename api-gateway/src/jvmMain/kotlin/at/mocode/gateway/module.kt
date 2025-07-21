@@ -4,11 +4,9 @@ import at.mocode.gateway.config.configureOpenApi
 import at.mocode.gateway.config.configureSwagger
 import at.mocode.gateway.routing.docRoutes
 import at.mocode.shared.config.AppConfig
-import at.mocode.shared.config.RateLimitConfig
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
-import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.http.content.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.contentnegotiation.*
