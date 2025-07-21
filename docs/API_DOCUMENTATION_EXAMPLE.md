@@ -52,133 +52,133 @@ Following our API documentation guidelines, we would add the following to the Op
 
 ```yaml
 /api/horses/advanced-search:
-  get:
-    tags:
-      - Horse Registry
-    summary: Advanced Horse Search
-    description: |
-      Searches for horses using multiple optional criteria.
-      Returns a list of horses matching the specified criteria.
-      If no criteria are provided, returns all horses (subject to pagination).
-    operationId: advancedSearchHorses
-    parameters:
-      - name: name
-        in: query
-        description: Full or partial horse name to search for
-        required: false
-        schema:
-          type: string
-          example: "Maestoso"
-      - name: breed
-        in: query
-        description: Horse breed
-        required: false
-        schema:
-          type: string
-          example: "Lipizzaner"
-      - name: minAge
-        in: query
-        description: Minimum age in years
-        required: false
-        schema:
-          type: integer
-          format: int32
-          minimum: 0
-          example: 3
-      - name: maxAge
-        in: query
-        description: Maximum age in years
-        required: false
-        schema:
-          type: integer
-          format: int32
-          minimum: 0
-          example: 15
-      - name: gender
-        in: query
-        description: Horse gender
-        required: false
-        schema:
-          type: string
-          enum: [STALLION, MARE, GELDING]
-          example: "MARE"
-      - name: ownerName
-        in: query
-        description: Full or partial name of the horse's owner
-        required: false
-        schema:
-          type: string
-          example: "Schmidt"
-    security:
-      - bearerAuth: []
-    responses:
-      '200':
-        description: Successful operation
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                success:
-                  type: boolean
-                  example: true
-                data:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/HorseResponse'
-                message:
-                  type: string
-                  example: "Horses retrieved successfully"
-                timestamp:
-                  type: string
-                  format: date-time
-                  example: "2024-07-21T13:35:00Z"
-            example:
-              success: true
-              data: [
-                {
-                  "id": "550e8400-e29b-41d4-a716-446655440000",
-                  "name": "Maestoso Mara",
-                  "birthYear": 2015,
-                  "breed": "Lipizzaner",
-                  "color": "Grey",
-                  "gender": "MARE",
-                  "feiRegistered": true,
-                  "ownerId": "550e8400-e29b-41d4-a716-446655440001",
-                  "active": true
-                },
-                {
-                  "id": "550e8400-e29b-41d4-a716-446655440002",
-                  "name": "Maestoso Belvedere",
-                  "birthYear": 2018,
-                  "breed": "Lipizzaner",
-                  "color": "Grey",
-                  "gender": "STALLION",
-                  "feiRegistered": false,
-                  "ownerId": "550e8400-e29b-41d4-a716-446655440001",
-                  "active": true
-                }
-              ]
-              message: "Horses retrieved successfully"
-              timestamp: "2024-07-21T13:35:00Z"
-      '400':
-        description: Invalid parameters
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ErrorResponse'
-      '401':
-        description: Unauthorized - Authentication required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ErrorResponse'
-      '403':
-        description: Forbidden - Insufficient permissions
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ErrorResponse'
+    get:
+        tags:
+            - Horse Registry
+        summary: Advanced Horse Search
+        description: |
+            Searches for horses using multiple optional criteria.
+            Returns a list of horses matching the specified criteria.
+            If no criteria are provided, returns all horses (subject to pagination).
+        operationId: advancedSearchHorses
+        parameters:
+            -   name: name
+                in: query
+                description: Full or partial horse name to search for
+                required: false
+                schema:
+                    type: string
+                    example: "Maestoso"
+            -   name: breed
+                in: query
+                description: Horse breed
+                required: false
+                schema:
+                    type: string
+                    example: "Lipizzaner"
+            -   name: minAge
+                in: query
+                description: Minimum age in years
+                required: false
+                schema:
+                    type: integer
+                    format: int32
+                    minimum: 0
+                    example: "3"
+            -   name: maxAge
+                in: query
+                description: Maximum age in years
+                required: false
+                schema:
+                    type: integer
+                    format: int32
+                    minimum: 0
+                    example: "15"
+            -   name: gender
+                in: query
+                description: Horse gender
+                required: false
+                schema:
+                    type: string
+                    enum: [ STALLION, MARE, GELDING ]
+                    example: "MARE"
+            -   name: ownerName
+                in: query
+                description: Full or partial name of the horse's owner
+                required: false
+                schema:
+                    type: string
+                    example: "Schmidt"
+        security:
+            -   bearerAuth: [ ]
+        responses:
+            '200':
+                description: Successful operation
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                success:
+                                    type: boolean
+                                    example: true
+                                data:
+                                    type: array
+                                    items:
+                                        $ref: '#/components/schemas/HorseResponse'
+                                message:
+                                    type: string
+                                    example: "Horses retrieved successfully"
+                                timestamp:
+                                    type: string
+                                    format: date-time
+                                    example: "2024-07-21T13:35:00Z"
+                        example:
+                            success: true
+                            data: [
+                                {
+                                    "id": "550e8400-e29b-41d4-a716-446655440000",
+                                    "name": "Maestoso Mara",
+                                    "birthYear": 2015,
+                                    "breed": "Lipizzaner",
+                                    "color": "Grey",
+                                    "gender": "MARE",
+                                    "feiRegistered": true,
+                                    "ownerId": "550e8400-e29b-41d4-a716-446655440001",
+                                    "active": true
+                                },
+                                {
+                                    "id": "550e8400-e29b-41d4-a716-446655440002",
+                                    "name": "Maestoso Belvedere",
+                                    "birthYear": 2018,
+                                    "breed": "Lipizzaner",
+                                    "color": "Grey",
+                                    "gender": "STALLION",
+                                    "feiRegistered": false,
+                                    "ownerId": "550e8400-e29b-41d4-a716-446655440001",
+                                    "active": true
+                                }
+                            ]
+                            message: "Horses retrieved successfully"
+                            timestamp: "2024-07-21T13:35:00Z"
+            '400':
+                description: Invalid parameters
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ErrorResponse'
+            '401':
+                description: Unauthorized - Authentication required
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ErrorResponse'
+            '403':
+                description: Forbidden - Insufficient permissions
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ErrorResponse'
 ```
 
 ## Step 3: Generate and Validate Documentation
