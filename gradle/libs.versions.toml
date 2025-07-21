@@ -14,11 +14,22 @@ composeMultiplatform = "1.8.0" #"1.7.3"
 # Ktor
 ktor = "3.1.2"
 
+# Monitoring
+micrometer = "1.12.2"
+
 # Database
 exposed = "0.52.0"
 postgresql = "42.7.3"
 hikari = "5.1.0"
 h2 = "2.2.224"
+
+# Caching
+redisson = "3.27.1"
+caffeine = "3.1.8"
+
+# Service Discovery
+consul = "2.2.10"
+orbitz-consul = "1.5.3"
 
 # Logging
 logback = "1.5.18"
@@ -80,6 +91,9 @@ h2-driver = { module = "com.h2database:h2", version.ref = "h2" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-json-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logbackJsonEncoder" }
 
+# Monitoring
+micrometer-prometheus = { group = "io.micrometer", name = "micrometer-registry-prometheus", version.ref = "micrometer" }
+ktor-server-metrics-micrometer = { group = "io.ktor", name = "ktor-server-metrics-micrometer", version.ref = "ktor" }
 
 # Testing
 junitJupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
@@ -87,6 +101,15 @@ junitJupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.re
 # Utilities
 uuid = { group = "com.benasher44", name = "uuid", version.ref = "uuid" }
 bignum = { group = "com.ionspin.kotlin", name = "bignum", version.ref = "bignum" }
+
+# Caching
+redisson = { group = "org.redisson", name = "redisson", version.ref = "redisson" }
+caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
+
+# Service Discovery
+consul-client = { module = "com.orbitz.consul:consul-client", version.ref = "orbitz-consul" }
+consul-api = { module = "com.ecwid.consul:consul-api", version.ref = "consul" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 
 # Kotlin Wrappers for JS/React
 kotlin-wrappers-bom = { group = "org.jetbrains.kotlin-wrappers", name = "kotlin-wrappers-bom", version.ref = "kotlinWrappers" }

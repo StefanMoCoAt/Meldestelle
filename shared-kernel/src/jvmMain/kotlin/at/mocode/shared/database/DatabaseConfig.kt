@@ -12,6 +12,7 @@ data class DatabaseConfig(
     val password: String,
     val driverClassName: String = "org.postgresql.Driver",
     val maxPoolSize: Int = 10,
+    val minPoolSize: Int = 5,
     val autoMigrate: Boolean = true
 ) {
     companion object {
@@ -29,6 +30,9 @@ data class DatabaseConfig(
             val maxPoolSize = System.getenv("DB_MAX_POOL_SIZE")?.toIntOrNull()
                 ?: props.getProperty("database.maxPoolSize")?.toIntOrNull()
                 ?: 10
+            val minPoolSize = System.getenv("DB_MIN_POOL_SIZE")?.toIntOrNull()
+                ?: props.getProperty("database.minPoolSize")?.toIntOrNull()
+                ?: 5
             val autoMigrate = System.getenv("DB_AUTO_MIGRATE")?.toBoolean()
                 ?: props.getProperty("database.autoMigrate")?.toBoolean()
                 ?: true
@@ -39,6 +43,7 @@ data class DatabaseConfig(
                 password = password,
                 driverClassName = "org.postgresql.Driver",
                 maxPoolSize = maxPoolSize,
+                minPoolSize = minPoolSize,
                 autoMigrate = autoMigrate
             )
         }

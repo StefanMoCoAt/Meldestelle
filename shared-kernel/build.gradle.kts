@@ -30,6 +30,14 @@ kotlin {
             implementation(libs.exposed.jdbc)
             implementation(libs.exposed.kotlinDatetime)
             implementation(libs.postgresql.driver)
+
+            // Service Discovery dependencies
+            implementation("com.orbitz.consul:consul-client:1.5.3")
+            implementation("com.ecwid.consul:consul-api:1.4.5") // Downgraded from 2.2.10 to 1.4.5 which is available on Maven Central
+            implementation("io.ktor:ktor-client-core:${libs.versions.ktor.get()}")
+            implementation("io.ktor:ktor-client-cio:${libs.versions.ktor.get()}")
+            implementation("io.ktor:ktor-client-content-negotiation:${libs.versions.ktor.get()}")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:${libs.versions.ktor.get()}")
         }
 
         jvmTest.dependencies {

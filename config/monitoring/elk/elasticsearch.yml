@@ -1,0 +1,13 @@
+---
+## Default Elasticsearch configuration
+cluster.name: "meldestelle-elk"
+network.host: 0.0.0.0
+
+# Minimum memory requirements
+discovery.type: single-node
+
+# X-Pack security disabled for development
+xpack.security.enabled: false
+
+# Enable monitoring
+xpack.monitoring.collection.enabled: true

@@ -3,6 +3,7 @@ package at.mocode.gateway
 import at.mocode.gateway.config.MigrationSetup
 import at.mocode.shared.config.AppConfig
 import at.mocode.shared.database.DatabaseFactory
+import at.mocode.shared.discovery.ServiceRegistrationFactory
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 
@@ -15,6 +16,25 @@ fun main() {
 
     // Migrationen ausführen
     MigrationSetup.runMigrations()
+
+    // Service mit Consul registrieren
+    val serviceRegistration = if (config.serviceDiscovery.enabled && config.serviceDiscovery.registerServices) {
+        ServiceRegistrationFactory.createServiceRegistration(
+            serviceName = "api-gateway",
+            servicePort = config.server.port,
+            healthCheckPath = "/health",
+            tags = listOf("api", "gateway"),
+            meta = mapOf(
+                "version" to config.appInfo.version,
+                "environment" to config.environment.toString()
+            )
+        ).also { it.register() }
+    } else null
+
+    // Shutdown Hook hinzufügen, um Service bei Beendigung abzumelden
+    Runtime.getRuntime().addShutdownHook(Thread {
+        serviceRegistration?.deregister()
+    })
 
     // Server starten
     embeddedServer(Netty, port = config.server.port, host = config.server.host) {

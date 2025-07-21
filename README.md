@@ -47,6 +47,7 @@ master-data
 - **Ktor** - Web framework for REST APIs
 - **Exposed** - Database ORM
 - **PostgreSQL** - Database
+- **Consul** - Service discovery and registry
 - **Kotlinx Serialization** - JSON serialization
 - **Gradle** - Build system
 
@@ -63,7 +64,7 @@ master-data
 
 ### Running the API Gateway
 ```bash
-./gradlew :api-gateway:run
+./gradlew :api-gateway:jvmRun
 ```
 
 ## Documentation
@@ -89,7 +90,7 @@ The API documentation covers all bounded contexts:
 
 ### How to Use the API Documentation
 
-1. Start the application with `./gradlew :api-gateway:run`
+1. Start the application with `./gradlew :api-gateway:jvmRun`
 2. For a comprehensive documentation portal, navigate to `http://localhost:8080/docs`
 3. For detailed interactive documentation, navigate to `http://localhost:8080/swagger`
 4. For the raw OpenAPI specification, navigate to `http://localhost:8080/openapi`
@@ -106,6 +107,26 @@ The central documentation page provides:
 ### For Developers
 
 When adding or modifying API endpoints, please follow the [API Documentation Guidelines](docs/API_DOCUMENTATION_GUIDELINES.md). These guidelines ensure consistency across all API documentation and make it easier for developers, testers, and API consumers to understand and use our APIs.
+
+## Service Discovery
+
+The project uses Consul for service discovery, allowing services to dynamically discover and communicate with each other without hardcoded endpoints. This makes the system more resilient and scalable.
+
+### Architecture
+
+The service discovery implementation consists of three main components:
+
+1. **Consul Service Registry**: A central registry where services register themselves and discover other services.
+2. **Service Registration**: Each service registers itself with Consul on startup.
+3. **Service Discovery**: The API Gateway uses Consul to discover services and route requests to them.
+
+### Using Service Discovery
+
+- **Consul UI**: Access the Consul UI at http://localhost:8500 when the system is running.
+- **Service Registration**: Services automatically register with Consul on startup.
+- **Dynamic Routing**: The API Gateway dynamically routes requests to services based on the service registry.
+
+For detailed implementation instructions, see [SERVICE_DISCOVERY_IMPLEMENTATION.md](SERVICE_DISCOVERY_IMPLEMENTATION.md).
 
 ## Last Updated
 

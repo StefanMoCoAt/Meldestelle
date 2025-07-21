@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
     id("org.openapi.generator") version "7.3.0" // Updated to latest version
+    id("com.github.johnrengelman.shadow") version "8.1.1" // Shadow plugin for creating fat JARs
 }
 
 // Get project version for documentation versioning
@@ -140,8 +141,22 @@ kotlin {
             implementation(libs.ktor.server.rateLimit)
             implementation(libs.logback)
 
-            // Datenbankabhängigkeiten für Migrationen
-            implementation("com.zaxxer:HikariCP:5.0.1")
+            // Ktor client dependencies for service discovery
+            implementation("io.ktor:ktor-client-core:${libs.versions.ktor.get()}")
+            implementation("io.ktor:ktor-client-cio:${libs.versions.ktor.get()}")
+            implementation("io.ktor:ktor-client-content-negotiation:${libs.versions.ktor.get()}")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:${libs.versions.ktor.get()}")
+
+            // Monitoring dependencies
+            implementation("io.ktor:ktor-server-metrics-micrometer:${libs.versions.ktor.get()}")
+            implementation("io.micrometer:micrometer-registry-prometheus:${libs.versions.micrometer.get()}")
+
+            // Caching dependencies
+            implementation("org.redisson:redisson:${libs.versions.redisson.get()}")
+            implementation("com.github.ben-manes.caffeine:caffeine:${libs.versions.caffeine.get()}")
+
+            // Database dependencies
+            implementation("com.zaxxer:HikariCP:${libs.versions.hikari.get()}")
             implementation(libs.exposed.core)
             implementation(libs.exposed.dao)
             implementation(libs.exposed.jdbc)
@@ -153,4 +168,41 @@ kotlin {
             implementation(libs.ktor.server.tests)
         }
     }
+}
+
+/**
+ * Configure the shadowJar task to create a fat JAR with all dependencies included.
+ * This is required for the Docker build process, which uses this JAR to create the runtime image.
+ * The Dockerfile expects this task to be available with the name 'shadowJar'.
+ *
+ * The Shadow plugin is used to create a single JAR file that includes all dependencies,
+ * making it easier to distribute and run the application in a containerized environment.
+ */
+tasks {
+    val shadowJar = register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+        // Set the main class for the executable JAR
+        manifest {
+            attributes(mapOf(
+                "Main-Class" to "at.mocode.gateway.ApplicationKt"
+            ))
+        }
+
+        // Configure the JAR base name and classifier
+        archiveBaseName.set("api-gateway")
+        archiveClassifier.set("")
+
+        // Configure the Shadow plugin
+        mergeServiceFiles()
+        exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+
+        // Set the configurations to be included in the fat JAR
+        val jvmMain = kotlin.jvm().compilations.getByName("main")
+        from(jvmMain.output)
+        configurations = listOf(jvmMain.compileDependencyFiles as Configuration)
+    }
+}
+
+// Make the build task depend on shadowJar
+tasks.named("build") {
+    dependsOn("shadowJar")
 }

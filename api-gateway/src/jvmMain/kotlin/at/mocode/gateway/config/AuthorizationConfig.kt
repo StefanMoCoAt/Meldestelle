@@ -228,6 +228,45 @@ private fun getRolePermissions(roles: List<UserRole>): List<Permission> {
 }
 
 /**
+ * Create a route scoped plugin for role-based authorization
+ */
+private val RoleAuthorizationPlugin = createRouteScopedPlugin(
+    name = "RoleAuthorization",
+    createConfiguration = {
+        // Define the configuration class for the plugin
+        class Configuration {
+            val requiredRoles = mutableListOf<UserRole>()
+        }
+        Configuration()
+    }
+) {
+    // Plugin configuration
+    val pluginConfig = pluginConfig
+
+    onCall { call ->
+        val principal = call.principal<JWTPrincipal>()
+        val authContext = principal?.getUserAuthContext()
+
+        if (authContext == null) {
+            call.respond(HttpStatusCode.Unauthorized, "Authentication required")
+            return@onCall
+        }
+
+        val hasRequiredRole = pluginConfig.requiredRoles.any { requiredRole ->
+            authContext.roles.contains(requiredRole)
+        }
+
+        if (!hasRequiredRole) {
+            call.respond(
+                HttpStatusCode.Forbidden,
+                "Access denied. Required roles: ${pluginConfig.requiredRoles.joinToString()}"
+            )
+            return@onCall
+        }
+    }
+}
+
+/**
  * Route extension function to require specific roles.
  */
 fun Route.requireRoles(vararg roles: UserRole, build: Route.() -> Unit): Route {
@@ -239,32 +278,52 @@ fun Route.requireRoles(vararg roles: UserRole, build: Route.() -> Unit): Route {
         override fun toString(): String = "requireRoles(${roles.joinToString()})"
     })
 
-    route.intercept(ApplicationCallPipeline.Call) {
+    // Install the role authorization plugin with the specified roles
+    route.install(RoleAuthorizationPlugin) {
+        requiredRoles.addAll(roles)
+    }
+
+    route.build()
+    return route
+}
+
+/**
+ * Create a route scoped plugin for permission-based authorization
+ */
+private val PermissionAuthorizationPlugin = createRouteScopedPlugin(
+    name = "PermissionAuthorization",
+    createConfiguration = {
+        // Define the configuration class for the plugin
+        class Configuration {
+            val requiredPermissions = mutableListOf<Permission>()
+        }
+        Configuration()
+    }
+) {
+    // Plugin configuration
+    val pluginConfig = pluginConfig
+
+    onCall { call ->
         val principal = call.principal<JWTPrincipal>()
         val authContext = principal?.getUserAuthContext()
 
         if (authContext == null) {
             call.respond(HttpStatusCode.Unauthorized, "Authentication required")
-            finish()
-            return@intercept
+            return@onCall
         }
 
-        val hasRequiredRole = roles.any { requiredRole ->
-            authContext.roles.contains(requiredRole)
+        val hasAllPermissions = pluginConfig.requiredPermissions.all { requiredPermission ->
+            authContext.permissions.contains(requiredPermission)
         }
 
-        if (!hasRequiredRole) {
+        if (!hasAllPermissions) {
             call.respond(
                 HttpStatusCode.Forbidden,
-                "Access denied. Required roles: ${roles.joinToString()}"
+                "Access denied. Required permissions: ${pluginConfig.requiredPermissions.joinToString()}"
             )
-            finish()
-            return@intercept
+            return@onCall
         }
     }
-
-    route.build()
-    return route
 }
 
 /**
@@ -279,28 +338,9 @@ fun Route.requirePermissions(vararg permissions: Permission, build: Route.() -> 
         override fun toString(): String = "requirePermissions(${permissions.joinToString()})"
     })
 
-    route.intercept(ApplicationCallPipeline.Call) {
-        val principal = call.principal<JWTPrincipal>()
-        val authContext = principal?.getUserAuthContext()
-
-        if (authContext == null) {
-            call.respond(HttpStatusCode.Unauthorized, "Authentication required")
-            finish()
-            return@intercept
-        }
-
-        val hasAllPermissions = permissions.all { requiredPermission ->
-            authContext.permissions.contains(requiredPermission)
-        }
-
-        if (!hasAllPermissions) {
-            call.respond(
-                HttpStatusCode.Forbidden,
-                "Access denied. Required permissions: ${permissions.joinToString()}"
-            )
-            finish()
-            return@intercept
-        }
+    // Install the permission authorization plugin with the specified permissions
+    route.install(PermissionAuthorizationPlugin) {
+        requiredPermissions.addAll(permissions)
     }
 
     route.build()

@@ -27,6 +27,9 @@ object AppConfig {
     // Rate Limiting-Konfiguration
     val rateLimit = RateLimitConfig()
 
+    // Service Discovery-Konfiguration
+    val serviceDiscovery = ServiceDiscoveryConfig()
+
     // Datenbank-Konfiguration (wird nach dem Laden der Properties initialisiert)
     val database: DatabaseConfig
 
@@ -40,6 +43,7 @@ object AppConfig {
         security.configure(props)
         logging.configure(props)
         rateLimit.configure(props)
+        serviceDiscovery.configure(props)
 
         // Datenbank-Konfiguration mit Properties initialisieren
         database = DatabaseConfig.fromEnv(props)
@@ -303,4 +307,29 @@ class RateLimitConfig {
         val limit: Int,
         val periodMinutes: Int
     )
-}
+    }
+
+    /**
+     * Konfiguration für Service Discovery.
+     */
+    class ServiceDiscoveryConfig {
+        // Consul Konfiguration
+        var enabled: Boolean = true
+        var consulHost: String = System.getenv("CONSUL_HOST") ?: "consul"
+        var consulPort: Int = System.getenv("CONSUL_PORT")?.toIntOrNull() ?: 8500
+
+        // Service Registration Konfiguration
+        var registerServices: Boolean = true
+        var healthCheckPath: String = "/health"
+        var healthCheckInterval: Int = 10 // Sekunden
+
+        fun configure(props: Properties) {
+            enabled = props.getProperty("service-discovery.enabled")?.toBoolean() ?: enabled
+            consulHost = props.getProperty("service-discovery.consul.host") ?: consulHost
+            consulPort = props.getProperty("service-discovery.consul.port")?.toIntOrNull() ?: consulPort
+
+            registerServices = props.getProperty("service-discovery.register-services")?.toBoolean() ?: registerServices
+            healthCheckPath = props.getProperty("service-discovery.health-check.path") ?: healthCheckPath
+            healthCheckInterval = props.getProperty("service-discovery.health-check.interval")?.toIntOrNull() ?: healthCheckInterval
+        }
+    }

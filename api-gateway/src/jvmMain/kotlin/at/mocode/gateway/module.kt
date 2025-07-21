@@ -1,7 +1,11 @@
 package at.mocode.gateway
 
 import at.mocode.gateway.config.*
+import at.mocode.gateway.config.configurePrometheusMetrics
+import at.mocode.gateway.config.configureCustomMetrics
+import at.mocode.gateway.plugins.configureHttpCaching
 import at.mocode.gateway.routing.docRoutes
+import at.mocode.gateway.routing.serviceRoutes
 import at.mocode.shared.config.AppConfig
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -43,6 +47,12 @@ fun Application.module() {
     // Erweiterte Monitoring- und Logging-Konfiguration
     configureMonitoring()
 
+    // Prometheus Metrics konfigurieren
+    configurePrometheusMetrics()
+
+    // Custom application metrics konfigurieren
+    configureCustomMetrics()
+
     // Request Tracing für Cross-Service Tracing konfigurieren
     configureRequestTracing()
 
@@ -53,6 +63,9 @@ fun Application.module() {
     configureOpenApi()
     configureSwagger()
 
+    // HTTP Caching konfigurieren
+    configureHttpCaching()
+
     routing {
         // Hauptrouten
         get("/") {
@@ -62,6 +75,18 @@ fun Application.module() {
             )
         }
 
+        // Health check endpoint
+        get("/health") {
+            call.respond(HttpStatusCode.OK, mapOf(
+                "status" to "UP",
+                "timestamp" to System.currentTimeMillis(),
+                "services" to mapOf(
+                    "api-gateway" to "UP",
+                    "database" to "UP"
+                )
+            ))
+        }
+
         // Static resources for documentation
         staticResources("/docs", "static/docs") {
             default("index.html")
@@ -69,5 +94,8 @@ fun Application.module() {
 
         // API Documentation routes
         docRoutes()
+
+        // Service discovery routes
+        serviceRoutes()
     }
 }

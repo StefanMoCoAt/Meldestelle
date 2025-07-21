@@ -58,6 +58,22 @@ fun Application.configureSecurity() {
                 call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
             }
         }
+
+        // Basic authentication for metrics endpoint
+        basic("metrics-auth") {
+            realm = "Metrics"
+            validate { credentials ->
+                // Get credentials from environment variables or use defaults
+                val metricsUser = System.getenv("METRICS_USER") ?: "metrics"
+                val metricsPassword = System.getenv("METRICS_PASSWORD") ?: "metrics-password-change-in-production"
+
+                if (credentials.name == metricsUser && credentials.password == metricsPassword) {
+                    UserIdPrincipal(credentials.name)
+                } else {
+                    null
+                }
+            }
+        }
     }
 }
 

@@ -4,10 +4,19 @@ import at.mocode.dto.base.ApiResponse
 import at.mocode.shared.config.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import org.slf4j.event.Level
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -26,30 +35,66 @@ import kotlin.random.Random
  */
 
 // Map to track request counts by path for log sampling
-private val requestCountsByPath = ConcurrentHashMap<String, AtomicInteger>()
+// Using a more efficient ConcurrentHashMap with initial capacity and load factor
+private val requestCountsByPath = ConcurrentHashMap<String, AtomicInteger>(32, 0.75f)
 
 // Map to track high-traffic paths that are being sampled
-private val sampledPaths = ConcurrentHashMap<String, Boolean>()
+private val sampledPaths = ConcurrentHashMap<String, Boolean>(16, 0.75f)
 
 // Scheduler to reset request counts periodically
-private val requestCountResetScheduler = Executors.newSingleThreadScheduledExecutor().apply {
-    scheduleAtFixedRate({
-        // Reset all counters every minute
-        requestCountsByPath.clear()
+private val requestCountResetScheduler = Executors.newSingleThreadScheduledExecutor { r ->
+    val thread = Thread(r, "log-sampling-reset-thread")
+    thread.isDaemon = true // Make it a daemon thread so it doesn't prevent JVM shutdown
+    thread
+}
 
-        // Log which paths are being sampled
-        if (sampledPaths.isNotEmpty()) {
-            val sampledPathsList = sampledPaths.keys.joinToString(", ")
-            println("[LogSampling] Currently sampling high-traffic paths: $sampledPathsList")
+// Schedule the task with proper lifecycle management
+private fun scheduleRequestCountReset() {
+    // Reset counters every 5 minutes instead of every minute to reduce overhead
+    requestCountResetScheduler.scheduleAtFixedRate({
+        try {
+            // Reset all counters
+            requestCountsByPath.clear()
+
+            // Log which paths are being sampled (only if there are any)
+            if (sampledPaths.isNotEmpty()) {
+                // More efficient string building for logging
+                val sampledPathsCount = sampledPaths.size
+                if (sampledPathsCount <= 5) {
+                    // For a small number of paths, log them all
+                    val sampledPathsList = sampledPaths.keys.joinToString(", ")
+                    println("[LogSampling] Currently sampling $sampledPathsCount high-traffic paths: $sampledPathsList")
+                } else {
+                    // For many paths, just log the count to avoid excessive logging
+                    println("[LogSampling] Currently sampling $sampledPathsCount high-traffic paths")
+                }
+            }
+
+            // Clear sampled paths to re-evaluate in the next period
+            sampledPaths.clear()
+        } catch (e: Exception) {
+            // Catch any exceptions to prevent the scheduler from stopping
+            println("[LogSampling] Error in reset task: ${e.message}")
         }
+    }, 5, 5, TimeUnit.MINUTES)
+}
 
-        // Clear sampled paths to re-evaluate in the next period
-        sampledPaths.clear()
-    }, 1, 1, TimeUnit.MINUTES)
+// Shutdown hook to clean up resources
+private fun shutdownRequestCountResetScheduler() {
+    requestCountResetScheduler.shutdown()
+    try {
+        if (!requestCountResetScheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+            requestCountResetScheduler.shutdownNow()
+        }
+    } catch (e: InterruptedException) {
+        requestCountResetScheduler.shutdownNow()
+        Thread.currentThread().interrupt()
+    }
 }
 
 /**
  * Determines if a request should be logged based on sampling configuration.
+ * Optimized for performance with early returns and cached path normalization.
  *
  * @param path The request path
  * @param statusCode The response status code
@@ -57,24 +102,38 @@ private val requestCountResetScheduler = Executors.newSingleThreadScheduledExecu
  * @return True if the request should be logged, false otherwise
  */
 private fun shouldLogRequest(path: String, statusCode: HttpStatusCode?, loggingConfig: at.mocode.shared.config.LoggingConfig): Boolean {
-    // If sampling is disabled, always log
+    // Fast path: If sampling is disabled, always log
     if (!loggingConfig.enableLogSampling) {
         return true
     }
 
-    // Always log errors if configured
-    if (loggingConfig.alwaysLogErrors && statusCode != null && statusCode.value >= 400) {
+    // Fast path: Always log errors if configured
+    if (statusCode != null && statusCode.value >= 400 && loggingConfig.alwaysLogErrors) {
         return true
     }
 
-    // Always log specific paths if configured
-    val normalizedPath = path.trimStart('/')
-    if (loggingConfig.alwaysLogPaths.any { normalizedPath.startsWith(it.trimStart('/')) }) {
-        return true
+    // Check if this is a path that should always be logged
+    // Only normalize the path if we have paths to check against
+    if (loggingConfig.alwaysLogPaths.isNotEmpty()) {
+        val normalizedPath = path.trimStart('/')
+        // Use any with early return for better performance
+        for (alwaysLogPath in loggingConfig.alwaysLogPaths) {
+            if (normalizedPath.startsWith(alwaysLogPath.trimStart('/'))) {
+                return true
+            }
+        }
+    }
+
+    // Get the base path for traffic counting
+    val basePath = extractBasePath(path)
+
+    // Check if this path is already known to be high-traffic
+    if (sampledPaths.containsKey(basePath)) {
+        // Already identified as high-traffic, apply sampling
+        return Random.nextInt(100) < loggingConfig.samplingRate
     }
 
     // Get or create counter for this path
-    val basePath = extractBasePath(path)
     val counter = requestCountsByPath.computeIfAbsent(basePath) { AtomicInteger(0) }
     val count = counter.incrementAndGet()
 
@@ -114,6 +173,17 @@ private fun extractBasePath(path: String): String {
 fun Application.configureMonitoring() {
     val loggingConfig = AppConfig.logging
 
+    // Note: Prometheus metrics configuration has been moved to PrometheusConfig.kt
+
+    // Start the request count reset scheduler
+    scheduleRequestCountReset()
+
+    // Register shutdown hook for application lifecycle
+    this.monitor.subscribe(ApplicationStopPreparing) {
+        log.info("Application stopping, shutting down schedulers...")
+        shutdownRequestCountResetScheduler()
+    }
+
     // Erweiterte Call-Logging-Konfiguration
     install(CallLogging) {
         level = when (loggingConfig.level.uppercase()) {
@@ -143,78 +213,97 @@ fun Application.configureMonitoring() {
             val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             if (loggingConfig.useStructuredLogging) {
-                // Strukturiertes Logging-Format
-                buildString {
-                    append("timestamp=$timestamp ")
-                    append("method=$httpMethod ")
-                    append("path=$path ")
-                    append("status=$status ")
-                    append("client=$clientIp ")
-                    append("requestId=$requestId ")
+                // Optimized structured logging format using StringBuilder with initial capacity
+                // Estimate the initial capacity based on typical log entry size
+                val initialCapacity = 256 +
+                    (if (loggingConfig.logRequestHeaders) 128 else 0) +
+                    (if (loggingConfig.logRequestParameters) 128 else 0)
 
-                    // Log Headers wenn konfiguriert
-                    if (loggingConfig.logRequestHeaders) {
-                        val authHeader = call.request.headers["Authorization"]
-                        if (authHeader != null) {
-                            append("auth=true ")
-                        }
+                val sb = StringBuilder(initialCapacity)
 
-                        val contentType = call.request.headers["Content-Type"]
-                        if (contentType != null) {
-                            append("contentType=$contentType ")
-                        }
+                // Basic request information - always included
+                sb.append("timestamp=").append(timestamp).append(' ')
+                  .append("method=").append(httpMethod).append(' ')
+                  .append("path=").append(path).append(' ')
+                  .append("status=").append(status).append(' ')
+                  .append("client=").append(clientIp).append(' ')
+                  .append("requestId=").append(requestId).append(' ')
 
-                        // Log all headers if in debug mode, filtering sensitive data
-                        if (loggingConfig.level.equals("DEBUG", ignoreCase = true)) {
-                            append("headers={")
-                            call.request.headers.entries().joinTo(this, ", ") { entry ->
-                                if (isSensitiveHeader(entry.key)) {
-                                    "${entry.key}=*****"
-                                } else {
-                                    "${entry.key}=${entry.value.joinToString(",")}"
-                                }
-                            }
-                            append("} ")
-                        }
+                // Log Headers wenn konfiguriert
+                if (loggingConfig.logRequestHeaders) {
+                    val authHeader = call.request.headers["Authorization"]
+                    if (authHeader != null) {
+                        sb.append("auth=true ")
                     }
 
-                    // Log Query-Parameter wenn konfiguriert
-                    if (loggingConfig.logRequestParameters && call.request.queryParameters.entries().isNotEmpty()) {
-                        append("params={")
-                        call.request.queryParameters.entries().joinTo(this, ", ") { entry ->
-                            if (isSensitiveParameter(entry.key)) {
-                                "${entry.key}=*****"
+                    val contentType = call.request.headers["Content-Type"]
+                    if (contentType != null) {
+                        sb.append("contentType=").append(contentType).append(' ')
+                    }
+
+                    // Log all headers if in debug mode, filtering sensitive data
+                    if (loggingConfig.level.equals("DEBUG", ignoreCase = true)) {
+                        sb.append("headers={")
+                        var first = true
+                        for (entry in call.request.headers.entries()) {
+                            if (!first) sb.append(", ")
+                            first = false
+
+                            if (isSensitiveHeader(entry.key)) {
+                                sb.append(entry.key).append("=*****")
                             } else {
-                                "${entry.key}=${entry.value.joinToString(",")}"
+                                sb.append(entry.key).append('=').append(entry.value.joinToString(","))
                             }
                         }
-                        append("} ")
+                        sb.append("} ")
                     }
+                }
 
-                    if (userAgent != null) {
-                        // Use a simpler approach to avoid escape sequence issues
-                        val escapedUserAgent = userAgent.replace("\"", "\\\"")
-                        append("userAgent=\"$escapedUserAgent\" ")
+                // Log Query-Parameter wenn konfiguriert
+                if (loggingConfig.logRequestParameters && call.request.queryParameters.entries().isNotEmpty()) {
+                    sb.append("params={")
+                    var first = true
+                    for (entry in call.request.queryParameters.entries()) {
+                        if (!first) sb.append(", ")
+                        first = false
+
+                        if (isSensitiveParameter(entry.key)) {
+                            sb.append(entry.key).append("=*****")
+                        } else {
+                            sb.append(entry.key).append('=').append(entry.value.joinToString(","))
+                        }
                     }
+                    sb.append("} ")
+                }
 
-                    // Log response time if available from RequestTracingConfig
-                    call.attributes.getOrNull(REQUEST_START_TIME_KEY)?.let { startTime: Long ->
-                        val duration = System.currentTimeMillis() - startTime
-                        append("duration=${duration}ms ")
-                    }
+                if (userAgent != null) {
+                    // Use a simpler approach to avoid escape sequence issues
+                    val escapedUserAgent = userAgent.replace("\"", "\\\"")
+                    sb.append("userAgent=\"").append(escapedUserAgent).append("\" ")
+                }
 
-                    // Add performance metrics
+                // Log response time if available from RequestTracingConfig
+                call.attributes.getOrNull(REQUEST_START_TIME_KEY)?.let { startTime: Long ->
+                    val duration = System.currentTimeMillis() - startTime
+                    sb.append("duration=").append(duration).append("ms ")
+                }
+
+                // Add performance metrics - only calculate memory usage if needed
+                // Only include memory metrics in every 10th log entry to reduce overhead
+                if (Random.nextInt(10) == 0) {
                     val memoryUsage = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
-                    append("memoryUsage=${memoryUsage}b ")
+                    sb.append("memoryUsage=").append(memoryUsage).append("b ")
 
                     // Add additional performance metrics in debug mode
                     if (loggingConfig.level.equals("DEBUG", ignoreCase = true)) {
                         val availableProcessors = Runtime.getRuntime().availableProcessors()
                         val maxMemory = Runtime.getRuntime().maxMemory()
-                        append("processors=$availableProcessors ")
-                        append("maxMemory=${maxMemory}b ")
+                        sb.append("processors=").append(availableProcessors).append(' ')
+                          .append("maxMemory=").append(maxMemory).append("b ")
                     }
                 }
+
+                sb.toString()
             } else {
                 // Einfaches Logging-Format
                 val duration = call.attributes.getOrNull(REQUEST_START_TIME_KEY)?.let { startTime: Long ->

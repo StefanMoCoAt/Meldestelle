@@ -1,0 +1,54 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - "/etc/prometheus/rules/alerts.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Scrape configuration for the Meldestelle application
+  - job_name: "meldestelle-server"
+    metrics_path: /metrics
+    scrape_interval: 10s
+    basic_auth:
+      username: ${METRICS_USER:-metrics}
+      password: ${METRICS_PASSWORD:-metrics-password-change-in-production}
+    static_configs:
+      - targets: ["server:8081"]
+        labels:
+          application: "meldestelle"
+          service: "api-gateway"
+
+  # JVM metrics for the Meldestelle application
+  - job_name: "meldestelle-jvm"
+    metrics_path: /metrics
+    scrape_interval: 10s
+    basic_auth:
+      username: ${METRICS_USER:-metrics}
+      password: ${METRICS_PASSWORD:-metrics-password-change-in-production}
+    static_configs:
+      - targets: ["server:8081"]
+        labels:
+          application: "meldestelle"
+          service: "jvm"
+
+  # Node exporter for host metrics (if added later)
+  # - job_name: "node-exporter"
+  #   static_configs:
+  #     - targets: ["node-exporter:9100"]
