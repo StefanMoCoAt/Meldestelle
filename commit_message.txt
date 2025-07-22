@@ -1,0 +1,9 @@
+refactor: Migrate from monolithic to modular architecture
+
+- Restructure project into domain-specific modules (core, masterdata, members, horses, events, infrastructure)
+- Create shared client components in common-ui module
+- Implement CI/CD workflows with GitHub Actions
+- Consolidate documentation in docs directory
+- Remove deprecated modules and documentation files
+- Add cleanup and migration scripts for transition
+- Update README with new project structure and setup instructions

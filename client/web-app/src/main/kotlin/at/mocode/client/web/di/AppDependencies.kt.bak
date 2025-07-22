@@ -1,0 +1,148 @@
+package at.mocode.client.web.di
+
+import at.mocode.members.application.usecase.CreatePersonUseCase
+import at.mocode.members.domain.repository.PersonRepository
+import at.mocode.members.domain.repository.VereinRepository
+import at.mocode.members.domain.service.MasterDataService
+import at.mocode.client.web.viewmodel.CreatePersonViewModel
+import at.mocode.client.web.viewmodel.PersonListViewModel
+
+/**
+ * Simple dependency injection container for the application.
+ * In a real application, you might want to use a proper DI framework like Koin.
+ */
+object AppDependencies {
+
+    // Mock implementations for demonstration
+    // In a real application, these would be proper implementations
+    private val mockPersonRepository = object : PersonRepository {
+        override suspend fun save(person: at.mocode.members.domain.model.DomPerson): at.mocode.members.domain.model.DomPerson {
+            // Mock implementation - just return the person with an ID
+            return person.copy(personId = com.benasher44.uuid.uuid4())
+        }
+
+        override suspend fun findById(id: com.benasher44.uuid.Uuid): at.mocode.members.domain.model.DomPerson? {
+            return null // Mock implementation
+        }
+
+        override suspend fun findByOepsSatzNr(oepsSatzNr: String): at.mocode.members.domain.model.DomPerson? {
+            return null // Mock implementation
+        }
+
+        override suspend fun findByStammVereinId(vereinId: com.benasher44.uuid.Uuid): List<at.mocode.members.domain.model.DomPerson> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findByName(searchTerm: String, limit: Int): List<at.mocode.members.domain.model.DomPerson> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findAllActive(limit: Int, offset: Int): List<at.mocode.members.domain.model.DomPerson> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun countActive(): Long {
+            return 0L // Mock implementation
+        }
+
+        override suspend fun existsByOepsSatzNr(oepsSatzNr: String): Boolean {
+            return false // Mock implementation - no duplicates for demo
+        }
+
+        override suspend fun delete(id: com.benasher44.uuid.Uuid): Boolean {
+            return true // Mock implementation
+        }
+    }
+
+    private val mockVereinRepository = object : VereinRepository {
+        override suspend fun findById(id: com.benasher44.uuid.Uuid): at.mocode.members.domain.model.DomVerein? {
+            return null // Mock implementation
+        }
+
+        override suspend fun findByOepsVereinsNr(oepsVereinsNr: String): at.mocode.members.domain.model.DomVerein? {
+            return null // Mock implementation
+        }
+
+        override suspend fun findByName(searchTerm: String, limit: Int): List<at.mocode.members.domain.model.DomVerein> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findByBundeslandId(bundeslandId: com.benasher44.uuid.Uuid): List<at.mocode.members.domain.model.DomVerein> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findByLandId(landId: com.benasher44.uuid.Uuid): List<at.mocode.members.domain.model.DomVerein> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findAllActive(limit: Int, offset: Int): List<at.mocode.members.domain.model.DomVerein> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun findByLocation(searchTerm: String, limit: Int): List<at.mocode.members.domain.model.DomVerein> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun save(verein: at.mocode.members.domain.model.DomVerein): at.mocode.members.domain.model.DomVerein {
+            return verein.copy(vereinId = com.benasher44.uuid.uuid4()) // Mock implementation
+        }
+
+        override suspend fun delete(id: com.benasher44.uuid.Uuid): Boolean {
+            return true // Mock implementation
+        }
+
+        override suspend fun existsByOepsVereinsNr(oepsVereinsNr: String): Boolean {
+            return false // Mock implementation
+        }
+
+        override suspend fun countActive(): Long {
+            return 0L // Mock implementation
+        }
+
+        override suspend fun countActiveByBundeslandId(bundeslandId: com.benasher44.uuid.Uuid): Long {
+            return 0L // Mock implementation
+        }
+    }
+
+    private val mockMasterDataService = object : MasterDataService {
+        override suspend fun countryExists(countryId: com.benasher44.uuid.Uuid): Boolean {
+            return true // Mock implementation - assume all countries exist
+        }
+
+        override suspend fun stateExists(stateId: com.benasher44.uuid.Uuid): Boolean {
+            return true // Mock implementation - assume all states exist
+        }
+
+        override suspend fun getCountryById(countryId: com.benasher44.uuid.Uuid): MasterDataService.CountryInfo? {
+            return null // Mock implementation
+        }
+
+        override suspend fun getStateById(stateId: com.benasher44.uuid.Uuid): MasterDataService.StateInfo? {
+            return null // Mock implementation
+        }
+
+        override suspend fun getAllCountries(): List<MasterDataService.CountryInfo> {
+            return emptyList() // Mock implementation
+        }
+
+        override suspend fun getStatesByCountry(countryId: com.benasher44.uuid.Uuid): List<MasterDataService.StateInfo> {
+            return emptyList() // Mock implementation
+        }
+    }
+
+    // Use case instances
+    private val createPersonUseCase = CreatePersonUseCase(
+        personRepository = mockPersonRepository,
+        vereinRepository = mockVereinRepository,
+        masterDataService = mockMasterDataService
+    )
+
+    // ViewModel factory methods
+    fun createPersonViewModel(): CreatePersonViewModel {
+        return CreatePersonViewModel(createPersonUseCase)
+    }
+
+    fun personListViewModel(): PersonListViewModel {
+        return PersonListViewModel(mockPersonRepository)
+    }
+}

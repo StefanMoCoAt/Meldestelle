@@ -1,17 +1,21 @@
-// root/build.gradle.kts
 plugins {
-    // Apply base plugin to provide lifecycle tasks like assemble, build, clean
+    kotlin("jvm") version "2.1.20" apply false
+    kotlin("plugin.spring") version "2.1.20" apply false
+    id("org.springframework.boot") version "3.2.0" apply false
+    id("io.spring.dependency-management") version "1.1.4" apply false
     base
-    // Dies ist notwendig, um zu verhindern, dass die Plugins mehrfach geladen werden
-    // im Classloader jedes Subprojekts
-    alias(libs.plugins.kotlin.multiplatform) apply false
-    alias(libs.plugins.compose.multiplatform) apply false
-    alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.compose.compiler) apply false
 }
 
-// Apply dependency locking to all subprojects
+allprojects {
+    group = "at.mocode.meldestelle"
+    version = "0.1.0-SNAPSHOT"
+}
+
 subprojects {
+    repositories {
+        mavenCentral()
+    }
+
     // Enable dependency locking for all configurations
     dependencyLocking {
         lockAllConfigurations()
@@ -33,16 +37,16 @@ subprojects {
     // Configure Kotlin compiler options
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         kotlinOptions {
-            // Add any compiler arguments here if needed
-            // The -Xbuild-cache-if-possible flag has been removed as it's not supported in Kotlin 2.1.x
+            jvmTarget = "21"
+            freeCompilerArgs = listOf("-Xjsr305=strict")
         }
     }
 
     // Configure parallel test execution
     tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
         // Enable parallel test execution
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
-
         // Optimize JVM args for tests
         jvmArgs = listOf("-Xmx512m", "-XX:+UseG1GC")
     }

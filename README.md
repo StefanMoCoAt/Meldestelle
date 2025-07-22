@@ -1,133 +1,170 @@
-# Meldestelle - Self-Contained Systems Architecture
+# Meldestelle
 
-This is a Kotlin JVM backend project implementing a Self-Contained Systems (SCS) architecture for an equestrian sport management system.
+## Überblick
 
-## Architecture Overview
+Meldestelle ist ein modulares System zur Verwaltung von Pferdesportveranstaltungen. Das System ermöglicht die Registrierung von Pferden, Mitgliedern und Veranstaltungen sowie die Verwaltung von Stammdaten.
 
-The project follows Domain-Driven Design (DDD) principles with clearly separated bounded contexts:
+Das Projekt wurde kürzlich auf eine modulare Architektur migriert, um die Wartbarkeit und Erweiterbarkeit zu verbessern.
 
-### Implemented Modules
+## Systemanforderungen
 
-* **`shared-kernel`** - Common domain types, enums, serializers, validation utilities, and base DTOs
-* **`master-data`** - Master data management (countries, regions, age classes, venues)
-* **`member-management`** - Person and club/association management
-* **`horse-registry`** - Horse registration and management
-* **`event-management`** - Event and tournament management
-* **`api-gateway`** - Central API gateway aggregating all services
+- Java 21
+- Kotlin 2.1.20
+- Gradle 8.14
+- Docker und Docker Compose
 
-### Module Dependencies
+## Infrastruktur
 
+Das System nutzt folgende Dienste:
+
+- **PostgreSQL 16**: Primäre Datenbank
+- **Redis 7**: Caching
+- **Keycloak 23.0**: Authentifizierung und Autorisierung
+- **Kafka 7.5.0**: Messaging und Event-Streaming
+- **Zipkin**: Distributed Tracing
+- **Prometheus & Grafana**: Monitoring (optional)
+
+## Projektstruktur
+
+Das Projekt ist in folgende Hauptmodule unterteilt:
+
+- **core**: Gemeinsame Kernkomponenten
+  - core-domain: Domänenmodelle und Geschäftslogik
+  - core-utils: Allgemeine Hilfsfunktionen
+
+- **masterdata**: Verwaltung von Stammdaten
+  - masterdata-api: API-Definitionen
+  - masterdata-application: Anwendungslogik
+  - masterdata-domain: Domänenmodelle
+  - masterdata-infrastructure: Infrastrukturkomponenten
+  - masterdata-service: Service-Implementierung
+
+- **members**: Mitgliederverwaltung
+  - members-api: API-Definitionen
+  - members-application: Anwendungslogik
+  - members-domain: Domänenmodelle
+  - members-infrastructure: Infrastrukturkomponenten
+  - members-service: Service-Implementierung
+
+- **horses**: Pferderegistrierung
+  - horses-api: API-Definitionen
+  - horses-application: Anwendungslogik
+  - horses-domain: Domänenmodelle
+  - horses-infrastructure: Infrastrukturkomponenten
+  - horses-service: Service-Implementierung
+
+- **events**: Veranstaltungsverwaltung
+  - events-api: API-Definitionen
+  - events-application: Anwendungslogik
+  - events-domain: Domänenmodelle
+  - events-infrastructure: Infrastrukturkomponenten
+  - events-service: Service-Implementierung
+
+- **infrastructure**: Gemeinsame Infrastrukturkomponenten
+  - auth: Authentifizierung
+  - cache: Caching
+  - event-store: Event-Speicher
+  - gateway: API-Gateway
+  - messaging: Messaging-Infrastruktur
+  - monitoring: Monitoring-Komponenten
+
+- **client**: Client-Anwendungen
+  - common-ui: Gemeinsame UI-Komponenten
+  - desktop-app: Desktop-Anwendung
+  - web-app: Web-Anwendung
+
+## Installation und Setup
+
+### Voraussetzungen
+
+Stellen Sie sicher, dass Java 21, Docker und Docker Compose installiert sind.
+
+### Infrastruktur starten
+
+```bash
+docker-compose up -d
 ```
-api-gateway
-├── shared-kernel
-├── master-data
-├── member-management
-├── horse-registry
-└── event-management
 
-event-management
-├── shared-kernel
-└── horse-registry
+Dies startet alle erforderlichen Dienste wie PostgreSQL, Redis, Keycloak, Kafka, Zipkin und optional Prometheus und Grafana.
 
-horse-registry
-├── shared-kernel
-└── member-management
+### Projekt bauen
 
-member-management
-├── shared-kernel
-└── master-data
-
-master-data
-└── shared-kernel
-```
-
-## Technology Stack
-
-- **Kotlin JVM** - Primary programming language
-- **Ktor** - Web framework for REST APIs
-- **Exposed** - Database ORM
-- **PostgreSQL** - Database
-- **Consul** - Service discovery and registry
-- **Kotlinx Serialization** - JSON serialization
-- **Gradle** - Build system
-
-## Getting Started
-
-### Prerequisites
-- JDK 17 or higher
-- PostgreSQL database
-
-### Building the Project
 ```bash
 ./gradlew build
 ```
 
-### Running the API Gateway
+### Dienste starten
+
 ```bash
-./gradlew :api-gateway:jvmRun
+# Gateway starten
+./gradlew :infrastructure:gateway:bootRun
+
+# Masterdata-Service starten
+./gradlew :masterdata:masterdata-service:bootRun
+
+# Members-Service starten
+./gradlew :members:members-service:bootRun
+
+# Horses-Service starten
+./gradlew :horses:horses-service:bootRun
+
+# Events-Service starten
+./gradlew :events:events-service:bootRun
 ```
 
-## Documentation
+### Client-Anwendungen starten
 
-See the `docs/` directory for detailed architecture documentation and diagrams.
+```bash
+# Desktop-Anwendung starten
+./gradlew :client:desktop-app:run
 
-### API Documentation
+# Web-Anwendung bauen
+./gradlew :client:web-app:build
+```
 
-The project includes comprehensive API documentation for all endpoints:
+## Entwicklung
 
-- **Central API Documentation**: Access the central API documentation page at `/docs` (or `/api` which redirects to `/docs`)
-- **Swagger UI**: Access the interactive API documentation at `/swagger` when the application is running
-- **OpenAPI Specification**: The OpenAPI specification is available at `/openapi`
-- **JSON API Overview**: A JSON representation of the API structure is available at `/api/json`
-- **Developer Guidelines**: Guidelines for documenting APIs are available in [docs/API_DOCUMENTATION_GUIDELINES.md](docs/API_DOCUMENTATION_GUIDELINES.md)
+### Aktuelle Migrationshinweise
 
-The API documentation covers all bounded contexts:
-- Authentication API
-- Master Data API
-- Member Management API
-- Horse Registry API
-- Event Management API
+Das Projekt wurde kürzlich von einer monolithischen Struktur zu einer modularen Architektur migriert. Die Migration umfasste:
 
-### How to Use the API Documentation
+- Umzug von `:shared-kernel` zu `core`-Modulen
+- Umzug von `:master-data` zu `masterdata`-Modulen
+- Umzug von `:member-management` zu `members`-Modulen
+- Umzug von `:horse-registry` zu `horses`-Modulen
+- Umzug von `:event-management` zu `events`-Modulen
+- Umzug von `:api-gateway` zu `infrastructure/gateway`
+- Umzug von `:composeApp` zu `client`-Modulen
 
-1. Start the application with `./gradlew :api-gateway:jvmRun`
-2. For a comprehensive documentation portal, navigate to `http://localhost:8080/docs`
-3. For detailed interactive documentation, navigate to `http://localhost:8080/swagger`
-4. For the raw OpenAPI specification, navigate to `http://localhost:8080/openapi`
-5. Explore the available endpoints, request/response models, and authentication requirements
-6. Test API calls directly from the Swagger UI interface
+Es gibt noch einige offene Probleme, insbesondere bei den Client-Modulen, die Kotlin Multiplatform und Compose Multiplatform verwenden.
 
-The central documentation page provides:
-- Overview of the API architecture
-- Details about all API contexts and their endpoints
-- Links to additional documentation resources
-- Authentication instructions
-- Response format examples
+### Entwicklungsrichtlinien
 
-### For Developers
+- Verwenden Sie die in der Projektstruktur definierten Module
+- Folgen Sie den Architekturentscheidungen (ADRs) im Verzeichnis `docs/architecture/adr`
+- Verwenden Sie die Datenmodelle aus `docs/architecture/data-model`
 
-When adding or modifying API endpoints, please follow the [API Documentation Guidelines](docs/API_DOCUMENTATION_GUIDELINES.md). These guidelines ensure consistency across all API documentation and make it easier for developers, testers, and API consumers to understand and use our APIs.
+### Tests ausführen
 
-## Service Discovery
+```bash
+./gradlew test
+```
 
-The project uses Consul for service discovery, allowing services to dynamically discover and communicate with each other without hardcoded endpoints. This makes the system more resilient and scalable.
+## Dokumentation
 
-### Architecture
+Weitere Dokumentation finden Sie im `docs`-Verzeichnis:
 
-The service discovery implementation consists of three main components:
+- API-Dokumentation: `docs/api`
+- Architektur: `docs/architecture`
+- Entwicklungsrichtlinien: `docs/development`
+- Diagramme: `docs/diagrams`
+- Betriebsanleitung: `docs/operations`
+- Postman-Sammlungen: `docs/postman`
 
-1. **Consul Service Registry**: A central registry where services register themselves and discover other services.
-2. **Service Registration**: Each service registers itself with Consul on startup.
-3. **Service Discovery**: The API Gateway uses Consul to discover services and route requests to them.
+## Lizenz
 
-### Using Service Discovery
+Siehe [LICENSE](LICENSE) Datei.
 
-- **Consul UI**: Access the Consul UI at http://localhost:8500 when the system is running.
-- **Service Registration**: Services automatically register with Consul on startup.
-- **Dynamic Routing**: The API Gateway dynamically routes requests to services based on the service registry.
+## Stand
 
-For detailed implementation instructions, see [SERVICE_DISCOVERY_IMPLEMENTATION.md](SERVICE_DISCOVERY_IMPLEMENTATION.md).
-
-## Last Updated
-
-2025-07-21
+Letzte Aktualisierung: 22. Juli 2025

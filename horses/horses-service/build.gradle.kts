@@ -1,0 +1,32 @@
+plugins {
+    kotlin("jvm")
+    kotlin("plugin.spring")
+    id("org.springframework.boot")
+}
+
+springBoot {
+    mainClass.set("at.mocode.horses.service.HorsesServiceApplicationKt")
+}
+
+dependencies {
+    implementation(projects.platform.platformDependencies)
+
+    implementation(projects.horses.horsesDomain)
+    implementation(projects.horses.horsesApplication)
+    implementation(projects.horses.horsesInfrastructure)
+    implementation(projects.horses.horsesApi)
+
+    implementation(projects.infrastructure.auth.authClient)
+    implementation(projects.infrastructure.cache.redisCache)
+    implementation(projects.infrastructure.messaging.messagingClient)
+    implementation(projects.infrastructure.monitoring.monitoringClient)
+
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")
+
+    runtimeOnly("org.postgresql:postgresql")
+
+    testImplementation(projects.platform.platformTesting)
+}
