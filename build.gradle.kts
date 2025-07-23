@@ -50,6 +50,37 @@ subprojects {
         // Optimize JVM args for tests
         jvmArgs = listOf("-Xmx512m", "-XX:+UseG1GC")
     }
+
+    // Define a custom integrationTest task
+    tasks.register<Test>("integrationTest") {
+        description = "Runs integration tests."
+        group = "verification"
+
+        // Use the same configuration as the test task
+        useJUnitPlatform()
+        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
+        jvmArgs = listOf("-Xmx512m", "-XX:+UseG1GC")
+
+        // Include all tests that have "Integration" in their name
+        include("**/*Integration*Test.kt")
+
+        // Exclude tests that are not integration tests
+        exclude("**/*Test.kt")
+
+        // Set system properties for integration tests
+        systemProperty("spring.profiles.active", "integration-test")
+        systemProperty("redis.host", "localhost")
+        systemProperty("redis.port", "6379")
+
+        // Generate reports in a separate directory
+        reports {
+            html.required.set(true)
+            junitXml.required.set(true)
+        }
+
+        // This task should run after the regular test task
+        // We don't use mustRunAfter here to avoid reference issues
+    }
 }
 
 // Wrapper task configuration for the root project

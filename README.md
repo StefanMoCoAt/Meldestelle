@@ -141,7 +141,8 @@ Es gibt noch einige offene Probleme, insbesondere bei den Client-Modulen, die Ko
 ### Entwicklungsrichtlinien
 
 - Verwenden Sie die in der Projektstruktur definierten Module
-- Folgen Sie den Architekturentscheidungen (ADRs) im Verzeichnis `docs/architecture/adr`
+- Folgen Sie den Architekturentscheidungen (ADRs) im Verzeichnis `docs/architecture/adr` (verfügbar in Deutsch mit Dateiendung `-de.md`)
+- Verwenden Sie die C4-Diagramme im Verzeichnis `docs/architecture/c4` für einen Überblick über die Systemarchitektur (verfügbar in Deutsch mit Dateiendung `-de.puml`)
 - Verwenden Sie die Datenmodelle aus `docs/architecture/data-model`
 
 ### Tests ausführen

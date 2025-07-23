@@ -1,0 +1,26 @@
+@startuml C4_Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title Systemkontext-Diagramm für Meldestelle
+
+Person(eventOrganizer, "Veranstaltungsorganisator", "Organisiert und verwaltet Reitsportveranstaltungen")
+Person(administrator, "Administrator", "Verwaltet Systemkonfiguration und Stammdaten")
+Person(member, "Mitglied", "Meldet sich für Veranstaltungen an und verwaltet persönliche Informationen")
+Person(horseOwner, "Pferdebesitzer", "Registriert und verwaltet Pferdeinformationen")
+
+System(meldestelle, "Meldestelle", "Modulares System zur Verwaltung von Pferdesportveranstaltungen, einschließlich Registrierung von Pferden, Mitgliedern und Veranstaltungen")
+
+System_Ext(paymentProvider, "Zahlungsanbieter", "Verarbeitet Zahlungen für Veranstaltungsanmeldungen")
+System_Ext(emailSystem, "E-Mail-System", "Sendet Benachrichtigungen und Bestätigungen")
+System_Ext(federationSystem, "Reitsportverband-System", "Bietet Validierung von Mitgliedschaften und Pferden")
+
+Rel(eventOrganizer, meldestelle, "Erstellt und verwaltet Veranstaltungen mit")
+Rel(administrator, meldestelle, "Konfiguriert und administriert")
+Rel(member, meldestelle, "Meldet sich für Veranstaltungen an und aktualisiert persönliche Informationen mit")
+Rel(horseOwner, meldestelle, "Registriert und verwaltet Pferde mit")
+
+Rel(meldestelle, paymentProvider, "Verarbeitet Zahlungen über")
+Rel(meldestelle, emailSystem, "Sendet Benachrichtigungen über")
+Rel(meldestelle, federationSystem, "Validiert Mitgliedschaften und Pferde mit")
+
+@enduml

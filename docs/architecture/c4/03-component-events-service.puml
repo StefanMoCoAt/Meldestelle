@@ -1,0 +1,63 @@
+@startuml C4_Component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component diagram for Events Service
+
+Container_Boundary(apiGateway, "API Gateway") {
+    Component(apiGatewayRouting, "Routing Component", "Ktor Routing", "Routes requests to appropriate services")
+    Component(apiGatewayAuth, "Authentication Component", "Ktor Auth", "Handles authentication and authorization")
+}
+
+Container_Boundary(eventsService, "Events Service") {
+    Component(eventsApi, "Events API", "Kotlin, Spring Web", "Defines the REST API endpoints for event management")
+
+    Component(eventsApplication, "Events Application", "Kotlin, Spring", "Contains application services and use cases")
+    Component(eventCommandHandlers, "Event Command Handlers", "Kotlin", "Handles commands for creating and modifying events")
+    Component(eventQueryHandlers, "Event Query Handlers", "Kotlin", "Handles queries for retrieving event information")
+
+    Component(eventsDomain, "Events Domain", "Kotlin", "Contains domain models and business logic")
+    Component(eventAggregate, "Event Aggregate", "Kotlin", "Core domain entity representing an event")
+    Component(participantAggregate, "Participant Aggregate", "Kotlin", "Core domain entity representing a participant")
+    Component(eventDomainServices, "Event Domain Services", "Kotlin", "Domain services for complex business logic")
+
+    Component(eventsInfrastructure, "Events Infrastructure", "Kotlin, Spring Data", "Contains infrastructure implementations")
+    Component(eventRepository, "Event Repository", "Kotlin, Spring Data JPA", "Persists and retrieves event data")
+    Component(eventMessagePublisher, "Event Message Publisher", "Kotlin, Spring Kafka", "Publishes domain events to Kafka")
+    Component(externalServiceClients, "External Service Clients", "Kotlin, WebClient", "Clients for external services")
+}
+
+ContainerDb(postgresql, "PostgreSQL", "Database", "Stores all persistent data")
+Container(kafka, "Kafka", "Message Broker", "Handles event-driven communication between services")
+Container(redis, "Redis", "Cache", "Provides caching for frequently accessed data")
+
+System_Ext(paymentProvider, "Payment Provider", "Processes payments for event registrations")
+System_Ext(emailSystem, "Email System", "Sends notifications and confirmations")
+
+Rel(apiGatewayRouting, eventsApi, "Routes requests to", "HTTPS/JSON")
+Rel(apiGatewayAuth, eventsApi, "Provides authentication context to")
+
+Rel(eventsApi, eventsApplication, "Uses")
+Rel(eventsApplication, eventCommandHandlers, "Uses")
+Rel(eventsApplication, eventQueryHandlers, "Uses")
+
+Rel(eventCommandHandlers, eventsDomain, "Uses")
+Rel(eventQueryHandlers, eventsDomain, "Uses")
+Rel(eventCommandHandlers, eventsInfrastructure, "Uses")
+Rel(eventQueryHandlers, eventsInfrastructure, "Uses")
+
+Rel(eventsDomain, eventAggregate, "Contains")
+Rel(eventsDomain, participantAggregate, "Contains")
+Rel(eventsDomain, eventDomainServices, "Contains")
+
+Rel(eventsInfrastructure, eventRepository, "Contains")
+Rel(eventsInfrastructure, eventMessagePublisher, "Contains")
+Rel(eventsInfrastructure, externalServiceClients, "Contains")
+
+Rel(eventRepository, postgresql, "Reads from and writes to")
+Rel(eventMessagePublisher, kafka, "Publishes messages to")
+Rel(eventQueryHandlers, redis, "Caches results in")
+
+Rel(externalServiceClients, paymentProvider, "Makes API calls to", "HTTPS/JSON")
+Rel(externalServiceClients, emailSystem, "Sends emails via", "SMTP")
+
+@enduml

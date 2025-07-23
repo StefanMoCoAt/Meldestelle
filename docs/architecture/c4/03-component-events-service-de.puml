@@ -1,0 +1,63 @@
+@startuml C4_Component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Komponenten-Diagramm für Veranstaltungs-Dienst
+
+Container_Boundary(apiGateway, "API-Gateway") {
+    Component(apiGatewayRouting, "Routing-Komponente", "Ktor Routing", "Leitet Anfragen an entsprechende Dienste weiter")
+    Component(apiGatewayAuth, "Authentifizierungs-Komponente", "Ktor Auth", "Verwaltet Authentifizierung und Autorisierung")
+}
+
+Container_Boundary(eventsService, "Veranstaltungs-Dienst") {
+    Component(eventsApi, "Veranstaltungs-API", "Kotlin, Spring Web", "Definiert die REST-API-Endpunkte für die Veranstaltungsverwaltung")
+
+    Component(eventsApplication, "Veranstaltungs-Anwendung", "Kotlin, Spring", "Enthält Anwendungsdienste und Anwendungsfälle")
+    Component(eventCommandHandlers, "Veranstaltungs-Befehlshandler", "Kotlin", "Verarbeitet Befehle zum Erstellen und Ändern von Veranstaltungen")
+    Component(eventQueryHandlers, "Veranstaltungs-Abfragehandler", "Kotlin", "Verarbeitet Abfragen zum Abrufen von Veranstaltungsinformationen")
+
+    Component(eventsDomain, "Veranstaltungs-Domäne", "Kotlin", "Enthält Domänenmodelle und Geschäftslogik")
+    Component(eventAggregate, "Veranstaltungs-Aggregat", "Kotlin", "Kern-Domänenentität, die eine Veranstaltung repräsentiert")
+    Component(participantAggregate, "Teilnehmer-Aggregat", "Kotlin", "Kern-Domänenentität, die einen Teilnehmer repräsentiert")
+    Component(eventDomainServices, "Veranstaltungs-Domänendienste", "Kotlin", "Domänendienste für komplexe Geschäftslogik")
+
+    Component(eventsInfrastructure, "Veranstaltungs-Infrastruktur", "Kotlin, Spring Data", "Enthält Infrastrukturimplementierungen")
+    Component(eventRepository, "Veranstaltungs-Repository", "Kotlin, Spring Data JPA", "Speichert und ruft Veranstaltungsdaten ab")
+    Component(eventMessagePublisher, "Veranstaltungs-Nachrichtenveröffentlicher", "Kotlin, Spring Kafka", "Veröffentlicht Domänenereignisse an Kafka")
+    Component(externalServiceClients, "Externe Dienst-Clients", "Kotlin, WebClient", "Clients für externe Dienste")
+}
+
+ContainerDb(postgresql, "PostgreSQL", "Datenbank", "Speichert alle persistenten Daten")
+Container(kafka, "Kafka", "Message Broker", "Verarbeitet ereignisgesteuerte Kommunikation zwischen Diensten")
+Container(redis, "Redis", "Cache", "Bietet Caching für häufig abgerufene Daten")
+
+System_Ext(paymentProvider, "Zahlungsanbieter", "Verarbeitet Zahlungen für Veranstaltungsanmeldungen")
+System_Ext(emailSystem, "E-Mail-System", "Sendet Benachrichtigungen und Bestätigungen")
+
+Rel(apiGatewayRouting, eventsApi, "Leitet Anfragen weiter an", "HTTPS/JSON")
+Rel(apiGatewayAuth, eventsApi, "Stellt Authentifizierungskontext bereit für")
+
+Rel(eventsApi, eventsApplication, "Verwendet")
+Rel(eventsApplication, eventCommandHandlers, "Verwendet")
+Rel(eventsApplication, eventQueryHandlers, "Verwendet")
+
+Rel(eventCommandHandlers, eventsDomain, "Verwendet")
+Rel(eventQueryHandlers, eventsDomain, "Verwendet")
+Rel(eventCommandHandlers, eventsInfrastructure, "Verwendet")
+Rel(eventQueryHandlers, eventsInfrastructure, "Verwendet")
+
+Rel(eventsDomain, eventAggregate, "Enthält")
+Rel(eventsDomain, participantAggregate, "Enthält")
+Rel(eventsDomain, eventDomainServices, "Enthält")
+
+Rel(eventsInfrastructure, eventRepository, "Enthält")
+Rel(eventsInfrastructure, eventMessagePublisher, "Enthält")
+Rel(eventsInfrastructure, externalServiceClients, "Enthält")
+
+Rel(eventRepository, postgresql, "Liest von und schreibt in")
+Rel(eventMessagePublisher, kafka, "Veröffentlicht Nachrichten an")
+Rel(eventQueryHandlers, redis, "Speichert Ergebnisse im Cache")
+
+Rel(externalServiceClients, paymentProvider, "Stellt API-Aufrufe an", "HTTPS/JSON")
+Rel(externalServiceClients, emailSystem, "Sendet E-Mails über", "SMTP")
+
+@enduml

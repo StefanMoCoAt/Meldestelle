@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    api(platform(projects.platform.platformBom))
     implementation(projects.infrastructure.cache.cacheApi)
 
     implementation("org.springframework.boot:spring-boot-starter-data-redis")

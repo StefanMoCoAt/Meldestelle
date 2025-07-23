@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: meldestelle
+
+# Redis configuration for cache
+redis:
+  host: localhost
+  port: 6379
+  password: # Leave empty for no password
+  database: 0
+  connection-timeout: 2000
+  read-timeout: 2000
+  use-pooling: true
+  max-pool-size: 8
+  min-pool-size: 2
+  connection-check-interval: 10000 # 10 seconds
+  local-cache-cleanup-interval: 60000 # 1 minute
+  sync-interval: 300000 # 5 minutes
+
+  # Redis configuration for event store
+  event-store:
+    host: localhost
+    port: 6379
+    password: # Leave empty for no password
+    database: 1 # Use a different database for event store
+    connection-timeout: 2000
+    read-timeout: 2000
+    use-pooling: true
+    max-pool-size: 8
+    min-pool-size: 2
+    consumer-group: event-processors
+    consumer-name:
+      "${spring.application.name}-${random.uuid}"
+    stream-prefix:
+      "event-stream:"
+    all-events-stream:
+      "all-events"
+    claim-idle-timeout: 60000 # 1 minute
+    poll-timeout: 100 # 100 milliseconds
+    poll-interval: 100 # 100 milliseconds
+    max-batch-size: 100
+    create-consumer-group-if-not-exists: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    at.mocode: DEBUG
+    org.springframework.data.redis: INFO
+
+# Server configuration
+server:
+  port: 8080

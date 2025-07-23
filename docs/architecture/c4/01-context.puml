@@ -1,0 +1,26 @@
+@startuml C4_Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context diagram for Meldestelle
+
+Person(eventOrganizer, "Event Organizer", "Organizes and manages equestrian events")
+Person(administrator, "Administrator", "Manages system configuration and master data")
+Person(member, "Member", "Registers for events and manages personal information")
+Person(horseOwner, "Horse Owner", "Registers and manages horse information")
+
+System(meldestelle, "Meldestelle", "Modular system for managing equestrian sports events, including registration of horses, members, and events")
+
+System_Ext(paymentProvider, "Payment Provider", "Processes payments for event registrations")
+System_Ext(emailSystem, "Email System", "Sends notifications and confirmations")
+System_Ext(federationSystem, "Equestrian Federation System", "Provides validation of memberships and horses")
+
+Rel(eventOrganizer, meldestelle, "Creates and manages events using")
+Rel(administrator, meldestelle, "Configures and administers")
+Rel(member, meldestelle, "Registers for events and updates personal information using")
+Rel(horseOwner, meldestelle, "Registers and manages horses using")
+
+Rel(meldestelle, paymentProvider, "Processes payments through")
+Rel(meldestelle, emailSystem, "Sends notifications via")
+Rel(meldestelle, federationSystem, "Validates memberships and horses with")
+
+@enduml

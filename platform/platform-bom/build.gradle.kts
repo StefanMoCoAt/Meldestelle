@@ -33,6 +33,18 @@ dependencies {
         api("com.benasher44:uuid:0.8.2")
         api("com.ionspin.kotlin:bignum:0.3.8")
         api("com.orbitz.consul:consul-client:1.5.3")
+
+        // Jackson modules
+        api("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
+        api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1")
+
+        // Testcontainers
+        api("org.testcontainers:testcontainers:1.19.5")
+        api("org.testcontainers:junit-jupiter:1.19.5")
+        api("org.testcontainers:postgresql:1.19.5")
+
+        // Java EE / Jakarta EE APIs
+        api("javax.annotation:javax.annotation-api:1.3.2")
     }
 }
 

@@ -1,0 +1,75 @@
+@startuml C4_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container-Diagramm für Meldestelle
+
+Person(eventOrganizer, "Veranstaltungsorganisator", "Organisiert und verwaltet Reitsportveranstaltungen")
+Person(administrator, "Administrator", "Verwaltet Systemkonfiguration und Stammdaten")
+Person(member, "Mitglied", "Meldet sich für Veranstaltungen an und verwaltet persönliche Informationen")
+Person(horseOwner, "Pferdebesitzer", "Registriert und verwaltet Pferdeinformationen")
+
+System_Boundary(meldestelle, "Meldestelle") {
+    Container(desktopApp, "Desktop-Anwendung", "Kotlin, Compose Multiplatform", "Bietet eine umfangreiche Benutzeroberfläche für Administratoren und Veranstaltungsorganisatoren")
+    Container(webApp, "Web-Anwendung", "Kotlin, Compose Multiplatform", "Bietet eine Weboberfläche für Mitglieder und Pferdebesitzer")
+
+    Container(apiGateway, "API-Gateway", "Kotlin, Ktor", "Leitet Anfragen an entsprechende Dienste weiter, verwaltet Authentifizierung und Autorisierung")
+
+    Container(masterdataService, "Stammdaten-Dienst", "Kotlin, Spring Boot", "Verwaltet Stammdaten wie Standorte, Disziplinen usw.")
+    Container(membersService, "Mitglieder-Dienst", "Kotlin, Spring Boot", "Verwaltet Mitgliederregistrierung und -profile")
+    Container(horsesService, "Pferde-Dienst", "Kotlin, Spring Boot", "Verwaltet Pferderegistrierung und -informationen")
+    Container(eventsService, "Veranstaltungs-Dienst", "Kotlin, Spring Boot", "Verwaltet Veranstaltungserstellung, -planung und -anmeldungen")
+
+    ContainerDb(postgresql, "PostgreSQL", "Datenbank", "Speichert alle persistenten Daten")
+    ContainerDb(redis, "Redis", "Cache", "Bietet Caching für häufig abgerufene Daten")
+    Container(kafka, "Kafka", "Message Broker", "Verarbeitet ereignisgesteuerte Kommunikation zwischen Diensten")
+    Container(keycloak, "Keycloak", "Authentifizierungsserver", "Verwaltet Benutzerauthentifizierung und -autorisierung")
+
+    Container(monitoring, "Monitoring", "Prometheus, Grafana, Zipkin", "Bietet Überwachung, Metriken und verteiltes Tracing")
+}
+
+System_Ext(paymentProvider, "Zahlungsanbieter", "Verarbeitet Zahlungen für Veranstaltungsanmeldungen")
+System_Ext(emailSystem, "E-Mail-System", "Sendet Benachrichtigungen und Bestätigungen")
+System_Ext(federationSystem, "Reitsportverband-System", "Bietet Validierung von Mitgliedschaften und Pferden")
+
+Rel(eventOrganizer, desktopApp, "Verwendet")
+Rel(administrator, desktopApp, "Verwendet")
+Rel(member, webApp, "Verwendet")
+Rel(horseOwner, webApp, "Verwendet")
+
+Rel(desktopApp, apiGateway, "Stellt API-Aufrufe an", "HTTPS/JSON")
+Rel(webApp, apiGateway, "Stellt API-Aufrufe an", "HTTPS/JSON")
+
+Rel(apiGateway, masterdataService, "Leitet Anfragen weiter an", "HTTPS/JSON")
+Rel(apiGateway, membersService, "Leitet Anfragen weiter an", "HTTPS/JSON")
+Rel(apiGateway, horsesService, "Leitet Anfragen weiter an", "HTTPS/JSON")
+Rel(apiGateway, eventsService, "Leitet Anfragen weiter an", "HTTPS/JSON")
+Rel(apiGateway, keycloak, "Authentifiziert mit", "HTTPS/JSON")
+
+Rel(masterdataService, postgresql, "Liest von und schreibt in")
+Rel(membersService, postgresql, "Liest von und schreibt in")
+Rel(horsesService, postgresql, "Liest von und schreibt in")
+Rel(eventsService, postgresql, "Liest von und schreibt in")
+
+Rel(masterdataService, redis, "Speichert Daten im Cache")
+Rel(membersService, redis, "Speichert Daten im Cache")
+Rel(horsesService, redis, "Speichert Daten im Cache")
+Rel(eventsService, redis, "Speichert Daten im Cache")
+
+Rel(masterdataService, kafka, "Veröffentlicht und abonniert Ereignisse")
+Rel(membersService, kafka, "Veröffentlicht und abonniert Ereignisse")
+Rel(horsesService, kafka, "Veröffentlicht und abonniert Ereignisse")
+Rel(eventsService, kafka, "Veröffentlicht und abonniert Ereignisse")
+
+Rel(masterdataService, monitoring, "Sendet Metriken und Traces an")
+Rel(membersService, monitoring, "Sendet Metriken und Traces an")
+Rel(horsesService, monitoring, "Sendet Metriken und Traces an")
+Rel(eventsService, monitoring, "Sendet Metriken und Traces an")
+Rel(apiGateway, monitoring, "Sendet Metriken und Traces an")
+
+Rel(eventsService, paymentProvider, "Verarbeitet Zahlungen über", "HTTPS/JSON")
+Rel(membersService, emailSystem, "Sendet Benachrichtigungen über", "SMTP")
+Rel(eventsService, emailSystem, "Sendet Benachrichtigungen über", "SMTP")
+Rel(membersService, federationSystem, "Validiert Mitgliedschaften mit", "HTTPS/JSON")
+Rel(horsesService, federationSystem, "Validiert Pferde mit", "HTTPS/JSON")
+
+@enduml
