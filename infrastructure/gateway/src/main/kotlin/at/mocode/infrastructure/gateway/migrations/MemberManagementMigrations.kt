@@ -1,6 +1,7 @@
 package at.mocode.infrastructure.gateway.migrations
 
 import at.mocode.core.utils.database.Migration
+import at.mocode.members.infrastructure.persistence.MemberTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
@@ -11,8 +12,8 @@ import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestamp
  */
 class MemberManagementTablesCreation : Migration(2, "Create member management tables") {
     override fun up() {
-        // Person-Tabelle
-        SchemaUtils.create(PersonTable)
+        // Member-Tabelle
+        SchemaUtils.create(MemberTable)
 
         // Verein-Tabelle
         SchemaUtils.create(VereinTable)

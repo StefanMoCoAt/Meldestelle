@@ -2,10 +2,18 @@ package at.mocode.infrastructure.gateway.routing
 
 import at.mocode.infrastructure.gateway.discovery.ServiceDiscovery
 import at.mocode.core.utils.config.AppConfig
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.*
 import kotlinx.serialization.Serializable
 
 /**
@@ -61,40 +69,56 @@ fun Routing.serviceRoutes() {
         }
     } else null
 
-    // Define service routes
+    // Define service routes with all HTTP methods
     // Master Data Service Routes
     route("/api/masterdata") {
-        handle {
-            handleServiceRequest(call, "master-data", serviceDiscovery)
-        }
+        get("{...}") { handleServiceRequest(call, "master-data", serviceDiscovery) }
+        post("{...}") { handleServiceRequest(call, "master-data", serviceDiscovery) }
+        put("{...}") { handleServiceRequest(call, "master-data", serviceDiscovery) }
+        delete("{...}") { handleServiceRequest(call, "master-data", serviceDiscovery) }
+        patch("{...}") { handleServiceRequest(call, "master-data", serviceDiscovery) }
     }
 
     // Horse Registry Service Routes
     route("/api/horses") {
-        handle {
-            handleServiceRequest(call, "horse-registry", serviceDiscovery)
-        }
+        get("{...}") { handleServiceRequest(call, "horse-registry", serviceDiscovery) }
+        post("{...}") { handleServiceRequest(call, "horse-registry", serviceDiscovery) }
+        put("{...}") { handleServiceRequest(call, "horse-registry", serviceDiscovery) }
+        delete("{...}") { handleServiceRequest(call, "horse-registry", serviceDiscovery) }
+        patch("{...}") { handleServiceRequest(call, "horse-registry", serviceDiscovery) }
     }
 
     // Event Management Service Routes
     route("/api/events") {
-        handle {
-            handleServiceRequest(call, "event-management", serviceDiscovery)
-        }
+        get("{...}") { handleServiceRequest(call, "event-management", serviceDiscovery) }
+        post("{...}") { handleServiceRequest(call, "event-management", serviceDiscovery) }
+        put("{...}") { handleServiceRequest(call, "event-management", serviceDiscovery) }
+        delete("{...}") { handleServiceRequest(call, "event-management", serviceDiscovery) }
+        patch("{...}") { handleServiceRequest(call, "event-management", serviceDiscovery) }
     }
 
     // Member Management Service Routes
     route("/api/members") {
-        handle {
-            handleServiceRequest(call, "member-management", serviceDiscovery)
-        }
+        get("{...}") { handleServiceRequest(call, "member-management", serviceDiscovery) }
+        post("{...}") { handleServiceRequest(call, "member-management", serviceDiscovery) }
+        put("{...}") { handleServiceRequest(call, "member-management", serviceDiscovery) }
+        delete("{...}") { handleServiceRequest(call, "member-management", serviceDiscovery) }
+        patch("{...}") { handleServiceRequest(call, "member-management", serviceDiscovery) }
+    }
+}
+
+/**
+ * HTTP client for forwarding requests to backend services
+ */
+private val httpClient = HttpClient(CIO) {
+    install(ContentNegotiation) {
+        json()
     }
 }
 
 /**
  * Handle a service request by discovering the service and forwarding the request.
- * This is a simplified implementation that just returns service information.
- * In a production environment, this would forward the request to the service.
+ * This implementation forwards the complete HTTP request to the backend service.
  */
 private suspend fun handleServiceRequest(
     call: ApplicationCall,
@@ -125,18 +149,47 @@ private suspend fun handleServiceRequest(
             return
         }
 
-        // Respond with service information
-        val successResponse = ServiceSuccessResponse(
-            message = "Service discovery working",
-            service = serviceName,
-            instance = ServiceInstanceInfo(
-                id = serviceInstance.id,
-                name = serviceInstance.name,
-                host = serviceInstance.host,
-                port = serviceInstance.port
-            )
-        )
-        call.respond(HttpStatusCode.OK, successResponse)
+        // Build target URL
+        val targetUrl = "http://${serviceInstance.host}:${serviceInstance.port}${call.request.uri}"
+
+        // Forward the request to the backend service
+        val response = httpClient.request(targetUrl) {
+            method = call.request.httpMethod
+
+            // Copy all headers except Host and Content-Length (handled automatically)
+            call.request.headers.forEach { name, values ->
+                if (name.lowercase() !in listOf("host", "content-length")) {
+                    values.forEach { value ->
+                        header(name, value)
+                    }
+                }
+            }
+
+            // Copy request body if present
+            if (call.request.httpMethod in listOf(HttpMethod.Post, HttpMethod.Put, HttpMethod.Patch)) {
+                val requestBody = call.receiveText()
+                if (requestBody.isNotEmpty()) {
+                    setBody(requestBody)
+                }
+            }
+        }
+
+        // Forward the response back to the client
+        call.response.status(response.status)
+
+        // Copy response headers
+        response.headers.forEach { name, values ->
+            if (name.lowercase() !in listOf("content-length", "transfer-encoding")) {
+                values.forEach { value ->
+                    call.response.header(name, value)
+                }
+            }
+        }
+
+        // Copy response body
+        val responseBody = response.bodyAsText()
+        call.respondText(responseBody, response.contentType())
+
     } catch (e: Exception) {
         val errorResponse = ServiceErrorResponse(
             error = "Error routing request to service $serviceName: ${e.message}",

@@ -11,6 +11,7 @@ springBoot {
 dependencies {
     implementation(projects.platform.platformDependencies)
 
+    implementation(projects.core.coreDomain)
     implementation(projects.horses.horsesDomain)
     implementation(projects.horses.horsesApplication)
     implementation(projects.horses.horsesInfrastructure)

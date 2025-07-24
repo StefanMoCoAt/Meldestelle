@@ -9,6 +9,7 @@ import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
+import org.springframework.stereotype.Repository
 
 /**
  * PostgreSQL implementation of the HorseRepository using Exposed ORM.
@@ -16,6 +17,7 @@ import org.jetbrains.exposed.sql.statements.UpdateBuilder
  * This implementation provides database operations for horse entities,
  * mapping between the domain model (DomPferd) and the database table (HorseTable).
  */
+@Repository
 class HorseRepositoryImpl : HorseRepository {
 
     override suspend fun findById(id: Uuid): DomPferd? = DatabaseFactory.dbQuery {

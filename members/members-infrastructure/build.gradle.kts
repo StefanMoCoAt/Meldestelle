@@ -9,6 +9,8 @@ dependencies {
 
     implementation(projects.members.membersDomain)
     implementation(projects.members.membersApplication)
+    implementation(projects.core.coreDomain)
+    implementation(projects.core.coreUtils)
     implementation(projects.infrastructure.cache.cacheApi)
     implementation(projects.infrastructure.eventStore.eventStoreApi)
     implementation(projects.infrastructure.messaging.messagingClient)

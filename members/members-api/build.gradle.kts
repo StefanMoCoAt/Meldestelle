@@ -8,6 +8,8 @@ dependencies {
 
     implementation(projects.members.membersDomain)
     implementation(projects.members.membersApplication)
+    implementation(projects.core.coreDomain)
+    implementation(projects.core.coreUtils)
 
     implementation("org.springframework:spring-web")
     implementation("org.springdoc:springdoc-openapi-starter-common")
