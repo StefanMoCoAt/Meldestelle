@@ -112,7 +112,7 @@ class RedisDistributedCache(
             if (ttl != null) {
                 redisTemplate.expire(prefixedKey, ttl)
             } else if (config.defaultTtl != null) {
-                val defaultTtl: Duration? = config.defaultTtl
+                val defaultTtl: Duration = config.defaultTtl!!
                 redisTemplate.expire(prefixedKey, defaultTtl)
             }
         } catch (e: RedisConnectionFailureException) {

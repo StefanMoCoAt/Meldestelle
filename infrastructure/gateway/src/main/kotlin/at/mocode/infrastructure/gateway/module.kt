@@ -6,7 +6,10 @@ import at.mocode.infrastructure.gateway.config.configureCustomMetrics
 import at.mocode.infrastructure.gateway.plugins.configureHttpCaching
 import at.mocode.infrastructure.gateway.routing.docRoutes
 import at.mocode.infrastructure.gateway.routing.serviceRoutes
+import at.mocode.infrastructure.gateway.routing.ApiGatewayInfo
+import at.mocode.infrastructure.gateway.routing.HealthStatus
 import at.mocode.core.utils.config.AppConfig
+import at.mocode.core.domain.model.ApiResponse
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -15,6 +18,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.auth.*
 
 fun Application.module() {
     val config = AppConfig
@@ -44,6 +48,19 @@ fun Application.module() {
         }
     }
 
+    // Authentication installieren (für Metrics-Endpoint)
+    install(Authentication) {
+        basic("metrics-auth") {
+            realm = "Metrics Access"
+            validate { credentials ->
+                // Simple validation for metrics endpoint
+                if (credentials.name == "admin" && credentials.password == "metrics") {
+                    UserIdPrincipal(credentials.name)
+                } else null
+            }
+        }
+    }
+
     // Erweiterte Monitoring- und Logging-Konfiguration
     configureMonitoring()
 
@@ -69,22 +86,33 @@ fun Application.module() {
     routing {
         // Hauptrouten
         get("/") {
-            call.respondText(
-                "${config.appInfo.name} API v${config.appInfo.version} (${config.environment})",
-                ContentType.Text.Plain
+            val gatewayInfo = ApiGatewayInfo(
+                name = "Meldestelle API Gateway",
+                version = "1.0.0",
+                description = "API Gateway for Meldestelle Self-Contained Systems",
+                availableContexts = listOf("authentication", "master-data", "horse-registry"),
+                endpoints = mapOf(
+                    "health" to "/health",
+                    "metrics" to "/metrics",
+                    "docs" to "/docs",
+                    "api" to "/api",
+                    "swagger" to "/swagger"
+                )
             )
+            call.respond(ApiResponse.success(gatewayInfo, "API Gateway information retrieved successfully"))
         }
 
         // Health check endpoint
         get("/health") {
-            call.respond(HttpStatusCode.OK, mapOf(
-                "status" to "UP",
-                "timestamp" to System.currentTimeMillis(),
-                "services" to mapOf(
-                    "api-gateway" to "UP",
-                    "database" to "UP"
+            val healthStatus = HealthStatus(
+                status = "UP",
+                contexts = mapOf(
+                    "authentication" to "UP",
+                    "master-data" to "UP",
+                    "horse-registry" to "UP"
                 )
-            ))
+            )
+            call.respond(ApiResponse.success(healthStatus, "Health check completed successfully"))
         }
 
         // Static resources for documentation

@@ -8,8 +8,8 @@ javaPlatform {
 }
 
 dependencies {
-    api(platform("org.springframework.boot:spring-boot-dependencies:3.2.0"))
-    api(platform("org.jetbrains.kotlin:kotlin-bom:2.1.20"))
+    api(platform("org.springframework.boot:spring-boot-dependencies:3.2.3"))
+    api(platform("org.jetbrains.kotlin:kotlin-bom:2.1.21"))
     api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.1"))
 
     constraints {
@@ -18,7 +18,7 @@ dependencies {
         api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
         api("org.springdoc:springdoc-openapi-starter-webflux-ui:2.3.0")
         api("org.springdoc:springdoc-openapi-starter-common:2.3.0")
-        api("org.redisson:redisson:3.27.1")
+        api("org.redisson:redisson:3.27.2")
         api("io.lettuce:lettuce-core:6.3.1.RELEASE")
         api("io.github.microutils:kotlin-logging-jvm:3.0.5")
         api("org.jetbrains.exposed:exposed-core:0.52.0")
@@ -35,16 +35,16 @@ dependencies {
         api("com.orbitz.consul:consul-client:1.5.3")
 
         // Jackson modules
-        api("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
-        api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1")
+        api("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
+        api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.0")
 
         // Testcontainers
-        api("org.testcontainers:testcontainers:1.19.5")
-        api("org.testcontainers:junit-jupiter:1.19.5")
-        api("org.testcontainers:postgresql:1.19.5")
+        api("org.testcontainers:testcontainers:1.19.6")
+        api("org.testcontainers:junit-jupiter:1.19.6")
+        api("org.testcontainers:postgresql:1.19.6")
 
-        // Java EE / Jakarta EE APIs
-        api("javax.annotation:javax.annotation-api:1.3.2")
+        // Jakarta EE APIs
+        api("jakarta.annotation:jakarta.annotation-api:2.1.1")
     }
 }
 

@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.1.20" apply false
-    kotlin("plugin.spring") version "2.1.20" apply false
-    id("org.springframework.boot") version "3.2.0" apply false
+    kotlin("jvm") version "2.1.21" apply false
+    kotlin("plugin.spring") version "2.1.21" apply false
+    id("org.springframework.boot") version "3.2.3" apply false
     id("io.spring.dependency-management") version "1.1.4" apply false
     base
 }
@@ -36,9 +36,9 @@ subprojects {
 
     // Configure Kotlin compiler options
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "21"
-            freeCompilerArgs = listOf("-Xjsr305=strict")
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+            freeCompilerArgs.add("-Xjsr305=strict")
         }
     }
 

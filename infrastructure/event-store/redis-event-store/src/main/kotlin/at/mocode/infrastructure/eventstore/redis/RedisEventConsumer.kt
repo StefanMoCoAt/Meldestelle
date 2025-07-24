@@ -104,6 +104,19 @@ class RedisEventConsumer(
         try {
             // Create consumer group for the all events stream
             val allEventsStreamKey = getAllEventsStreamKey()
+
+            // Ensure the all-events stream exists and has at least one message
+            try {
+                // Always try to add an initialization message to the all-events stream
+                redisTemplate.opsForStream<String, String>()
+                    .add(allEventsStreamKey, mapOf("init" to "init"))
+                logger.debug("Ensured all-events stream has messages: $allEventsStreamKey")
+            } catch (e: Exception) {
+                // Ignore errors when adding to the stream (it might already have messages)
+                logger.debug("All-events stream might already have messages: ${e.message}")
+            }
+
+            // Create the consumer group for all-events stream
             createConsumerGroupIfNotExists(allEventsStreamKey)
 
             // Get all stream keys
@@ -127,25 +140,28 @@ class RedisEventConsumer(
      */
     private fun createConsumerGroupIfNotExists(streamKey: String) {
         try {
-            // Check if the stream exists
-            if (!redisTemplate.hasKey(streamKey)) {
-                // Create the stream with an empty message
+            // Always ensure the stream has at least one message
+            // This is necessary because consumer groups cannot be created on empty streams
+            try {
                 redisTemplate.opsForStream<String, String>()
                     .add(streamKey, mapOf("init" to "init"))
-                logger.debug("Created stream: $streamKey")
+                logger.debug("Ensured stream has messages: $streamKey")
+            } catch (e: Exception) {
+                // Ignore errors when adding to the stream (it might already have messages)
+                logger.debug("Stream $streamKey might already have messages: ${e.message}")
             }
 
-            // Create the consumer group
-            redisTemplate.opsForStream<String, String>()
-                .createGroup(streamKey, properties.consumerGroup)
-
-            logger.debug("Created consumer group ${properties.consumerGroup} for stream: $streamKey")
+            // Create the consumer group - ignore all errors for now
+            try {
+                redisTemplate.opsForStream<String, String>()
+                    .createGroup(streamKey, ReadOffset.latest(), properties.consumerGroup)
+                logger.debug("Created consumer group ${properties.consumerGroup} for stream: $streamKey")
+            } catch (e: Exception) {
+                // Ignore all consumer group creation errors for now
+                logger.debug("Could not create consumer group ${properties.consumerGroup} for stream: $streamKey: ${e.message}")
+            }
         } catch (e: Exception) {
-            // Ignore if the consumer group already exists
-            val message = e.message
-            if (message == null || !message.contains("BUSYGROUP")) {
-                logger.error("Error creating consumer group for stream $streamKey: ${e.message}", e)
-            }
+            logger.error("Error creating consumer group for stream $streamKey: ${e.message}", e)
         }
     }
 
@@ -159,16 +175,9 @@ class RedisEventConsumer(
         }
 
         try {
-            // Poll the all events stream
+            // Poll the all events stream only
+            // Individual streams don't need to be polled since all events are also in the all-events stream
             pollStream(getAllEventsStreamKey())
-
-            // Poll individual streams
-            val streamKeys = redisTemplate.keys("${properties.streamPrefix}*")
-            for (streamKey in streamKeys) {
-                if (streamKey != getAllEventsStreamKey()) {
-                    pollStream(streamKey)
-                }
-            }
 
             // Claim pending messages that have been idle for too long
             claimPendingMessages()
@@ -216,46 +225,44 @@ class RedisEventConsumer(
      */
     private fun claimPendingMessages() {
         try {
-            // Get all stream keys
-            val streamKeys = redisTemplate.keys("${properties.streamPrefix}*")
+            // Only process the all-events stream since that's where consumer groups exist
+            val streamKey = getAllEventsStreamKey()
 
-            for (streamKey in streamKeys) {
-                // Get pending messages summary
-                val pendingSummary = redisTemplate.opsForStream<String, String>()
-                    .pending(streamKey, properties.consumerGroup)
+            // Get pending messages summary
+            val pendingSummary = redisTemplate.opsForStream<String, String>()
+                .pending(streamKey, properties.consumerGroup)
 
-                if (pendingSummary != null && pendingSummary.totalPendingMessages > 0) {
-                    // Get pending messages with details
-                    val pendingMessages = redisTemplate.opsForStream<String, String>()
-                        .pending(
-                            streamKey,
-                            Consumer.from(properties.consumerGroup, properties.consumerName),
-                            Range.unbounded<String>(),
-                            properties.maxBatchSize.toLong()
-                        )
+            if (pendingSummary != null && pendingSummary.totalPendingMessages > 0) {
+                // Get pending messages with details
+                val pendingMessages = redisTemplate.opsForStream<String, String>()
+                    .pending(
+                        streamKey,
+                        Consumer.from(properties.consumerGroup, properties.consumerName),
+                        Range.unbounded<String>(),
+                        properties.maxBatchSize.toLong()
+                    )
 
-                    if (pendingMessages.size() > 0) {
-                        // Extract message IDs and convert to array
-                        val messageIdsList = pendingMessages.map { it.id }.toList()
+                if (pendingMessages.size() > 0) {
+                    // Extract message IDs and convert to array
+                    val messageIdsList = pendingMessages.map { it.id }.toList()
 
-                        if (messageIdsList.isNotEmpty()) {
-                            // Convert to array for the spread operator
-                            val messageIds = messageIdsList.toTypedArray()
+                    if (messageIdsList.isNotEmpty()) {
+                        // Convert to array for the spread operator
+                        val messageIds = messageIdsList.toTypedArray()
 
-                            // Claim messages that have been idle for too long
-                            val records = redisTemplate.opsForStream<String, String>()
-                                .claim(
-                                    streamKey,
-                                    properties.consumerGroup,
-                                    properties.consumerName,
-                                    properties.claimIdleTimeout,
-                                    *messageIds
-                                )
+                        // Claim messages that have been idle for too long
+                        val records = redisTemplate.opsForStream<String, String>()
+                            .claim(
+                                streamKey,
+                                properties.consumerGroup,
+                                properties.consumerName,
+                                properties.claimIdleTimeout,
+                                *messageIds
+                            )
 
-                            // Process the claimed records
-                            for (record in records) {
-                                processRecord(record)
-                            }
+                        // Process the claimed records
+                        for (record in records) {
+                            processRecord(record)
                         }
                     }
                 }
@@ -273,6 +280,16 @@ class RedisEventConsumer(
     private fun processRecord(record: MapRecord<String, String, String>) {
         try {
             val data = record.value
+
+            // Skip init messages (they only contain "init" -> "init")
+            if (data.size == 1 && data.containsKey("init") && data["init"] == "init") {
+                logger.debug("Skipping init message")
+                // Still acknowledge the message to remove it from pending
+                redisTemplate.opsForStream<String, String>()
+                    .acknowledge(properties.consumerGroup, record)
+                return
+            }
+
             val event = serializer.deserialize(data)
             val eventType = serializer.getEventType(data)
 

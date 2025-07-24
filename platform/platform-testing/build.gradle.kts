@@ -14,6 +14,7 @@ dependencies {
     api("org.junit.jupiter:junit-jupiter-api")
     api("org.junit.jupiter:junit-jupiter-engine")
     api("org.junit.jupiter:junit-jupiter-params")
+    api("org.junit.platform:junit-platform-launcher")
 
     // Mocking and Assertions
     api("io.mockk:mockk:1.13.8")

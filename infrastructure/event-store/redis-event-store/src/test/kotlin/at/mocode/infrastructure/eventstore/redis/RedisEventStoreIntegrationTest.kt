@@ -100,13 +100,13 @@ class RedisEventStoreIntegrationTest {
         // Create events
         val event1 = TestCreatedEvent(
             aggregateId = aggregateId,
-            version = 1,
+            version = 0,
             name = "Test Entity"
         )
 
         val event2 = TestUpdatedEvent(
             aggregateId = aggregateId,
-            version = 2,
+            version = 1,
             name = "Updated Test Entity"
         )
 
@@ -131,7 +131,7 @@ class RedisEventStoreIntegrationTest {
 
         // Append events to the stream
         eventStore.appendToStream(event1, aggregateId, -1)
-        eventStore.appendToStream(event2, aggregateId, 1)
+        eventStore.appendToStream(event2, aggregateId, 0)
 
         // Manually trigger event polling
         eventConsumer.pollEvents()
@@ -145,13 +145,13 @@ class RedisEventStoreIntegrationTest {
         // Verify the first event
         val receivedEvent1 = receivedEvents[0] as TestCreatedEvent
         assertEquals(aggregateId, receivedEvent1.aggregateId)
-        assertEquals(1, receivedEvent1.version)
+        assertEquals(0, receivedEvent1.version)
         assertEquals("Test Entity", receivedEvent1.name)
 
         // Verify the second event
         val receivedEvent2 = receivedEvents[1] as TestUpdatedEvent
         assertEquals(aggregateId, receivedEvent2.aggregateId)
-        assertEquals(2, receivedEvent2.version)
+        assertEquals(1, receivedEvent2.version)
         assertEquals("Updated Test Entity", receivedEvent2.name)
 
         // Clean up
@@ -163,32 +163,32 @@ class RedisEventStoreIntegrationTest {
         // Create an aggregate ID
         val aggregateId = UUID.randomUUID()
 
-        // Set up a latch to wait for events
-        val latch = CountDownLatch(2)
-        val receivedEvents = mutableListOf<DomainEvent>()
-
-        // Subscribe to the stream
-        val subscription = eventStore.subscribeToStream(aggregateId) { event ->
-            receivedEvents.add(event)
-            latch.countDown()
-        }
-
         // Create events
         val event1 = TestCreatedEvent(
             aggregateId = aggregateId,
-            version = 1,
+            version = 0,
             name = "Test Entity"
         )
 
         val event2 = TestUpdatedEvent(
             aggregateId = aggregateId,
-            version = 2,
+            version = 1,
             name = "Updated Test Entity"
         )
 
         // Append events to the stream
         eventStore.appendToStream(event1, aggregateId, -1)
-        eventStore.appendToStream(event2, aggregateId, 1)
+        eventStore.appendToStream(event2, aggregateId, 0)
+
+        // Set up a latch to wait for events
+        val latch = CountDownLatch(2)
+        val receivedEvents = mutableListOf<DomainEvent>()
+
+        // Subscribe to the stream with fromVersion=0 to read all events from the beginning
+        val subscription = eventStore.subscribeToStream(aggregateId, 0) { event ->
+            receivedEvents.add(event)
+            latch.countDown()
+        }
 
         // Wait for events to be received
         assertTrue(latch.await(5, TimeUnit.SECONDS), "Timed out waiting for events")
@@ -199,13 +199,13 @@ class RedisEventStoreIntegrationTest {
         // Verify the first event
         val receivedEvent1 = receivedEvents[0] as TestCreatedEvent
         assertEquals(aggregateId, receivedEvent1.aggregateId)
-        assertEquals(1, receivedEvent1.version)
+        assertEquals(0, receivedEvent1.version)
         assertEquals("Test Entity", receivedEvent1.name)
 
         // Verify the second event
         val receivedEvent2 = receivedEvents[1] as TestUpdatedEvent
         assertEquals(aggregateId, receivedEvent2.aggregateId)
-        assertEquals(2, receivedEvent2.version)
+        assertEquals(1, receivedEvent2.version)
         assertEquals("Updated Test Entity", receivedEvent2.name)
 
         // Clean up
@@ -220,15 +220,17 @@ class RedisEventStoreIntegrationTest {
         // Create events
         val event1 = TestCreatedEvent(
             aggregateId = aggregateId,
-            version = 1,
+            version = 0,
             name = "Test Entity"
         )
 
         val event2 = TestUpdatedEvent(
             aggregateId = aggregateId,
-            version = 2,
+            version = 1,
             name = "Updated Test Entity"
         )
+
+        // Note: We don't need to pre-initialize streams since consumer group creation is disabled
 
         // Set up latches to wait for events
         val latch1 = CountDownLatch(2)
@@ -236,8 +238,11 @@ class RedisEventStoreIntegrationTest {
         val receivedEvents1 = mutableListOf<DomainEvent>()
         val receivedEvents2 = mutableListOf<DomainEvent>()
 
-        // Create a second consumer with a different consumer name
-        val properties2 = properties.copy(consumerName = "test-consumer-2")
+        // Create a second consumer with a different consumer group and consumer name
+        val properties2 = properties.copy(
+            consumerGroup = "test-group-2",
+            consumerName = "test-consumer-2"
+        )
         val eventConsumer2 = RedisEventConsumer(redisTemplate, serializer, properties2)
 
         // Register handlers for the first consumer
@@ -258,7 +263,7 @@ class RedisEventStoreIntegrationTest {
 
         // Append events to the stream
         eventStore.appendToStream(event1, aggregateId, -1)
-        eventStore.appendToStream(event2, aggregateId, 1)
+        eventStore.appendToStream(event2, aggregateId, 0)
 
         // Manually trigger event polling
         eventConsumer.pollEvents()

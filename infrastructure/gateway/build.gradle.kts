@@ -8,13 +8,9 @@ application {
     mainClass.set("at.mocode.infrastructure.gateway.ApplicationKt")
 }
 
-// Configure tests to use JUnit Platform and exclude ApiIntegrationTest
+// Configure tests to use JUnit Platform
 tasks.withType<Test> {
     useJUnitPlatform()
-    filter {
-        // Exclude ApiIntegrationTest from test execution (but not from compilation)
-        excludeTestsMatching("at.mocode.infrastructure.gateway.ApiIntegrationTest")
-    }
 }
 
 dependencies {

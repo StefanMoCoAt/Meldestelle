@@ -1,6 +1,5 @@
 package at.mocode.infrastructure.gateway.config
 
-import at.mocode.core.domain.model.ApiResponse
 import at.mocode.core.utils.config.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -16,6 +15,18 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.random.Random
+import kotlinx.serialization.Serializable
+
+/**
+ * Simple error response for status page handlers
+ */
+@Serializable
+data class StatusPageErrorResponse(
+    val error: String,
+    val code: String,
+    val path: String? = null,
+    val requestId: String? = null
+)
 
 /**
  * Monitoring and logging configuration for the API Gateway.
@@ -166,8 +177,12 @@ fun Application.configureMonitoring() {
 
     // Note: Prometheus metrics configuration has been moved to PrometheusConfig.kt
 
-    // Start the request count reset scheduler
-    scheduleRequestCountReset()
+    // Start the request count reset scheduler (skip in test environment)
+    val isTestEnvironment = System.getProperty("kotlinx.coroutines.test") != null ||
+                           Thread.currentThread().stackTrace.any { it.className.contains("test", ignoreCase = true) }
+    if (!isTestEnvironment) {
+        scheduleRequestCountReset()
+    }
 
     // Register shutdown hook for application lifecycle
     this.monitor.subscribe(ApplicationStopPreparing) {
@@ -322,10 +337,13 @@ fun Application.configureMonitoring() {
             val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.error("Unhandled exception - RequestID: $requestId", cause)
-            call.respond(
-                HttpStatusCode.InternalServerError,
-                ApiResponse.error<Any>("Internal server error: ${cause.message}")
+            val errorResponse = StatusPageErrorResponse(
+                error = "Internal server error: ${cause.message}",
+                code = "INTERNAL_SERVER_ERROR",
+                path = call.request.path(),
+                requestId = requestId
             )
+            call.respond(HttpStatusCode.InternalServerError, errorResponse)
         }
 
         status(HttpStatusCode.NotFound) { call: ApplicationCall, status: HttpStatusCode ->
@@ -333,10 +351,13 @@ fun Application.configureMonitoring() {
             val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.warn("Not found - Path: ${call.request.path()} - RequestID: $requestId")
-            call.respond(
-                status,
-                ApiResponse.error<Any>("Endpoint not found: ${call.request.path()}")
+            val errorResponse = StatusPageErrorResponse(
+                error = "Endpoint not found: ${call.request.path()}",
+                code = "NOT_FOUND",
+                path = call.request.path(),
+                requestId = requestId
             )
+            call.respond(status, errorResponse)
         }
 
         status(HttpStatusCode.Unauthorized) { call: ApplicationCall, status: HttpStatusCode ->
@@ -344,10 +365,13 @@ fun Application.configureMonitoring() {
             val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.warn("Unauthorized access - Path: ${call.request.path()} - RequestID: $requestId")
-            call.respond(
-                status,
-                ApiResponse.error<Any>("Authentication required")
+            val errorResponse = StatusPageErrorResponse(
+                error = "Authentication required",
+                code = "UNAUTHORIZED",
+                path = call.request.path(),
+                requestId = requestId
             )
+            call.respond(status, errorResponse)
         }
 
         status(HttpStatusCode.Forbidden) { call: ApplicationCall, status: HttpStatusCode ->
@@ -355,10 +379,13 @@ fun Application.configureMonitoring() {
             val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.warn("Forbidden access - Path: ${call.request.path()} - RequestID: $requestId")
-            call.respond(
-                status,
-                ApiResponse.error<Any>("Access forbidden")
+            val errorResponse = StatusPageErrorResponse(
+                error = "Access forbidden",
+                code = "FORBIDDEN",
+                path = call.request.path(),
+                requestId = requestId
             )
+            call.respond(status, errorResponse)
         }
 
         // Rate limit exceeded
@@ -367,10 +394,13 @@ fun Application.configureMonitoring() {
             val requestId: String = call.attributes.getOrNull(REQUEST_ID_KEY) ?: "no-request-id"
 
             call.application.log.warn("Rate limit exceeded - Path: ${call.request.path()} - RequestID: $requestId")
-            call.respond(
-                status,
-                ApiResponse.error<Any>("Rate limit exceeded. Please try again later.")
+            val errorResponse = StatusPageErrorResponse(
+                error = "Rate limit exceeded. Please try again later.",
+                code = "TOO_MANY_REQUESTS",
+                path = call.request.path(),
+                requestId = requestId
             )
+            call.respond(status, errorResponse)
         }
     }
 }

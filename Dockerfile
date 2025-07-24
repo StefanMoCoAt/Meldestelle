@@ -1,5 +1,5 @@
 # ----------- Stage 1: Build Stage -----------
-FROM gradle:8.13-jdk21 AS build
+FROM gradle:8.14-jdk21 AS build
 WORKDIR /home/gradle/src
 
 # Copy only the files needed for dependency resolution first

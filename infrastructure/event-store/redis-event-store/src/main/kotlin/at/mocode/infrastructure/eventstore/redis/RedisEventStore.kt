@@ -180,23 +180,39 @@ class RedisEventStore(
             return -1
         }
 
-        // Get the last event from the stream
-        val options = StreamReadOptions.empty().count(1)
+        // Read all events from the stream to find the last real event (not init messages)
+        val options = StreamReadOptions.empty()
         val records = redisTemplate.opsForStream<String, String>()
-            .read(options, StreamOffset.create(streamKey, ReadOffset.latest()))
+            .read(options, StreamOffset.create(streamKey, ReadOffset.from("0")))
 
         if (records == null || records.isEmpty()) {
             return -1
         }
 
-        // Get the version from the last event
-        val lastEvent = records.first()
-        val version = serializer.getVersion(lastEvent.value)
+        // Find the last real event (skip init messages)
+        var lastVersion = -1L
+        for (record in records.reversed()) {
+            val data = record.value
+            // Skip init messages (they only contain "init" -> "init")
+            if (data.size == 1 && data.containsKey("init") && data["init"] == "init") {
+                continue
+            }
+
+            try {
+                val version = serializer.getVersion(data)
+                lastVersion = version
+                break
+            } catch (e: Exception) {
+                // Skip records that can't be deserialized as events
+                logger.debug("Skipping record that can't be deserialized: ${e.message}")
+                continue
+            }
+        }
 
         // Update the cache
-        streamVersionCache[streamId] = version
+        streamVersionCache[streamId] = lastVersion
 
-        return version
+        return lastVersion
     }
 
     override fun subscribeToStream(
@@ -224,8 +240,8 @@ class RedisEventStore(
         val container = StreamMessageListenerContainer
             .create(redisTemplate.connectionFactory!!)
 
-        // Start from the specified version
-        val readOffset = if (fromVersion <= 0) ReadOffset.latest() else ReadOffset.from("$fromVersion")
+        // Start from the specified version or from the beginning if not specified
+        val readOffset = if (fromVersion <= 0) ReadOffset.from("0") else ReadOffset.from("$fromVersion")
 
         // Create a subscription
         val subscription = container.receive(
@@ -280,8 +296,8 @@ class RedisEventStore(
         val container = StreamMessageListenerContainer
             .create(redisTemplate.connectionFactory!!)
 
-        // Start from the specified position
-        val readOffset = if (fromPosition <= 0) ReadOffset.latest() else ReadOffset.from("$fromPosition")
+        // Start from the specified position or from the beginning if not specified
+        val readOffset = if (fromPosition <= 0) ReadOffset.from("0") else ReadOffset.from("$fromPosition")
 
         // Create a subscription
         val subscription = container.receive(

@@ -79,13 +79,55 @@ Das Projekt ist in folgende Hauptmodule unterteilt:
 
 Stellen Sie sicher, dass Java 21, Docker und Docker Compose installiert sind.
 
-### Infrastruktur starten
+### Docker-Infrastruktur
+
+Das System bietet verschiedene Docker-Konfigurationen für unterschiedliche Umgebungen:
+
+#### Entwicklungsumgebung (Schnellstart)
 
 ```bash
+# Infrastruktur starten
 docker-compose up -d
+
+# Status überprüfen
+docker-compose ps
+
+# Logs anzeigen
+docker-compose logs -f
 ```
 
 Dies startet alle erforderlichen Dienste wie PostgreSQL, Redis, Keycloak, Kafka, Zipkin und optional Prometheus und Grafana.
+
+#### Produktionsumgebung
+
+Für die Produktionsumgebung siehe **[README-PRODUCTION.md](README-PRODUCTION.md)** - enthält:
+- Umfassende Sicherheitskonfiguration
+- SSL/TLS-Setup
+- Detaillierte Troubleshooting-Anleitung
+- Backup- und Wiederherstellungsverfahren
+
+#### Umgebungsvariablen
+
+Für die Konfiguration von Umgebungsvariablen siehe **[README-ENV.md](README-ENV.md)** - enthält:
+- Vollständige Umgebungsvariablen-Dokumentation
+- Validierungsskripte
+- Konfigurationsbeispiele
+
+### Validierung und Troubleshooting
+
+```bash
+# Umgebungsvariablen validieren
+./validate-env.sh
+
+# Docker-Compose Konfiguration validieren
+./validate-docker-compose.sh
+
+# Service-Status überprüfen
+docker-compose ps
+
+# Service-Logs anzeigen
+docker-compose logs [service-name]
+```
 
 ### Projekt bauen
 
@@ -149,6 +191,137 @@ Es gibt noch einige offene Probleme, insbesondere bei den Client-Modulen, die Ko
 
 ```bash
 ./gradlew test
+```
+
+## Docker Troubleshooting (Entwicklungsumgebung)
+
+### Häufige Probleme und Lösungen
+
+#### 1. Services starten nicht
+```bash
+# Alle Services stoppen und neu starten
+docker-compose down
+docker-compose up -d
+
+# Einzelnen Service neu starten
+docker-compose restart [service-name]
+
+# Service-Logs überprüfen
+docker-compose logs [service-name]
+```
+
+#### 2. Port bereits belegt
+```bash
+# Verwendete Ports prüfen
+netstat -tulpn | grep :[port]
+# oder
+lsof -i :[port]
+
+# Ports in .env anpassen
+nano .env
+# Beispiel: API_PORT=8081 statt 8080
+```
+
+#### 3. Datenbank-Verbindungsfehler
+```bash
+# PostgreSQL-Status prüfen
+docker-compose exec postgres pg_isready -U meldestelle
+
+# Datenbank-Logs anzeigen
+docker-compose logs postgres
+
+# Verbindung manuell testen
+docker-compose exec postgres psql -U meldestelle -d meldestelle
+```
+
+#### 4. Keycloak-Authentifizierung fehlgeschlagen
+```bash
+# Keycloak-Status prüfen
+docker-compose logs keycloak
+
+# Keycloak Admin-Console öffnen
+# http://localhost:8180/admin (admin/admin)
+
+# Keycloak-Datenbank zurücksetzen
+docker-compose down
+docker volume rm meldestelle_postgres-data
+docker-compose up -d
+```
+
+#### 5. Kafka-Verbindungsprobleme
+```bash
+# Kafka-Status prüfen
+docker-compose exec kafka kafka-topics --bootstrap-server localhost:9092 --list
+
+# Zookeeper-Status prüfen
+docker-compose exec zookeeper nc -z localhost 2181
+
+# Kafka-Logs anzeigen
+docker-compose logs kafka zookeeper
+```
+
+#### 6. Speicherplatz-Probleme
+```bash
+# Docker-Speicherverbrauch prüfen
+docker system df
+
+# Ungenutzte Ressourcen bereinigen
+docker system prune -f
+
+# Volumes bereinigen (ACHTUNG: Datenverlust!)
+docker system prune -f --volumes
+```
+
+#### 7. Performance-Probleme
+```bash
+# Ressourcenverbrauch überwachen
+docker stats
+
+# Container-Limits anpassen (in docker-compose.yml)
+# deploy:
+#   resources:
+#     limits:
+#       memory: 1G
+#       cpus: '0.5'
+```
+
+### Nützliche Docker-Befehle
+
+```bash
+# Alle Services mit Logs starten
+docker-compose up
+
+# Services im Hintergrund starten
+docker-compose up -d
+
+# Bestimmte Services starten
+docker-compose up postgres redis
+
+# Services stoppen
+docker-compose stop
+
+# Services stoppen und Container entfernen
+docker-compose down
+
+# Services mit Volume-Bereinigung stoppen
+docker-compose down -v
+
+# Container-Shell öffnen
+docker-compose exec [service-name] /bin/bash
+# oder für Alpine-basierte Images:
+docker-compose exec [service-name] /bin/sh
+
+# Konfiguration validieren
+docker-compose config
+
+# Service-Status anzeigen
+docker-compose ps
+
+# Logs aller Services anzeigen
+docker-compose logs
+
+# Logs eines bestimmten Services verfolgen
+docker-compose logs -f [service-name]
 ```
 
 ## Dokumentation
