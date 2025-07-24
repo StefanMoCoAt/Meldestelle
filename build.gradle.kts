@@ -64,8 +64,9 @@ subprojects {
         // Include all tests that have "Integration" in their name
         include("**/*Integration*Test.kt")
 
-        // Exclude tests that are not integration tests
+        // Exclude unit tests (but keep integration tests)
         exclude("**/*Test.kt")
+        include("**/*IntegrationTest.kt")
 
         // Set system properties for integration tests
         systemProperty("spring.profiles.active", "integration-test")

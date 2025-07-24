@@ -9,7 +9,7 @@ Das Projekt wurde kürzlich auf eine modulare Architektur migriert, um die Wartb
 ## Systemanforderungen
 
 - Java 21
-- Kotlin 2.1.20
+- Kotlin 2.1.21
 - Gradle 8.14
 - Docker und Docker Compose
 

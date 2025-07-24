@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
-    id("org.springframework.boot") version "3.2.3"
+    id("org.springframework.boot")
     id("io.spring.dependency-management") version "1.1.4"
     id("org.jetbrains.compose") version "1.7.3"
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.21"
@@ -12,38 +12,8 @@ repositories {
     mavenCentral()
 }
 
-// Configure tests to exclude failing tests
 tasks.withType<Test> {
     useJUnitPlatform()
-    filter {
-        // Exclude all tests for now
-        excludeTestsMatching("at.mocode.client.web.*")
-    }
-}
-
-// Configure Kotlin source sets to exclude problematic files
-kotlin {
-    sourceSets {
-        main {
-            kotlin {
-                // Exclude backup directories
-                exclude("at/mocode/client/web/screens/bak/**")
-                exclude("at/mocode/client/web/viewmodel/bak/**")
-                // We're now fixing these files, so don't exclude them
-                // exclude("at/mocode/client/web/di/AppDependencies.kt")
-                // exclude("**/screens/CreatePersonScreen.kt")
-                // exclude("**/screens/PersonListScreen.kt")
-                // exclude("**/viewmodel/CreatePersonViewModel.kt")
-                // exclude("**/viewmodel/PersonListViewModel.kt")
-            }
-        }
-        test {
-            kotlin {
-                // Exclude all test files for now
-                exclude("**/*Test.kt")
-            }
-        }
-    }
 }
 
 dependencies {

@@ -1,7 +1,9 @@
 package at.mocode.core.domain.event
 
-import java.time.Instant
-import java.util.UUID
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 /**
  * Interface for all domain events in the system.
@@ -11,7 +13,7 @@ interface DomainEvent {
     /**
      * Unique identifier for this event instance.
      */
-    val eventId: UUID
+    val eventId: Uuid
 
     /**
      * Timestamp when the event occurred.
@@ -21,7 +23,7 @@ interface DomainEvent {
     /**
      * Identifier of the aggregate that the event belongs to.
      */
-    val aggregateId: UUID
+    val aggregateId: Uuid
 
     /**
      * Version of the aggregate after the event was applied.
@@ -34,8 +36,8 @@ interface DomainEvent {
  * Provides default implementations for common properties.
  */
 abstract class BaseDomainEvent(
-    override val eventId: UUID = UUID.randomUUID(),
-    override val timestamp: Instant = Instant.now(),
-    override val aggregateId: UUID,
+    override val eventId: Uuid = uuid4(),
+    override val timestamp: Instant = Clock.System.now(),
+    override val aggregateId: Uuid,
     override val version: Long
 ) : DomainEvent
