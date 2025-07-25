@@ -1,3 +1,5 @@
+import java.util.Locale
+
 plugins {
     kotlin("jvm") version "2.1.21" apply false
     kotlin("plugin.spring") version "2.1.21" apply false
@@ -113,7 +115,7 @@ tasks.register("generateOpenApiDocs") {
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "${moduleName.capitalize()} API",
+    "title": "${moduleName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }} API",
     "description": "REST API for ${moduleName} management",
     "version": "1.0.0",
     "contact": {

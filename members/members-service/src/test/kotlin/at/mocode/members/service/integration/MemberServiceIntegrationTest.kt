@@ -1,21 +1,20 @@
 package at.mocode.members.service.integration
 
+import at.mocode.infrastructure.messaging.client.EventPublisher
 import at.mocode.members.api.rest.MemberController
 import at.mocode.members.domain.model.Member
 import at.mocode.members.domain.repository.MemberRepository
-import at.mocode.members.infrastructure.persistence.MemberRepositoryImpl
-import at.mocode.infrastructure.messaging.client.EventPublisher
-import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Test
+import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue

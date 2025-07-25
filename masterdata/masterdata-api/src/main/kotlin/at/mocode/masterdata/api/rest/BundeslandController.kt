@@ -130,7 +130,7 @@ class BundeslandController(
 
                     val landId = try {
                         uuidFrom(landIdParam)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<BundeslandDto>("Invalid country ID format"))
                     }
 
@@ -235,7 +235,7 @@ class BundeslandController(
 
                     try {
                         uuidFrom(createDto.landId)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         call.respond(
                             HttpStatusCode.BadRequest,
                             ApiResponse.error<BundeslandDto>("Invalid country ID format")
@@ -284,7 +284,7 @@ class BundeslandController(
 
                     try {
                         uuidFrom(updateDto.landId)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         call.respond(
                             HttpStatusCode.BadRequest,
                             ApiResponse.error<BundeslandDto>("Invalid country ID format")

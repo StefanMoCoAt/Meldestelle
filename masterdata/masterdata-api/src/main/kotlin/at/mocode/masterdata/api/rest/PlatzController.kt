@@ -153,7 +153,7 @@ class PlatzController(
 
                     val typ = try {
                         PlatzTypE.valueOf(typParam.uppercase())
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<List<PlatzDto>>("Invalid venue type: $typParam"))
                     }
 
@@ -223,7 +223,7 @@ class PlatzController(
 
                     val requiredType = try {
                         PlatzTypE.valueOf(typParam.uppercase())
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<List<PlatzDto>>("Invalid venue type: $typParam"))
                     }
 
@@ -255,7 +255,7 @@ class PlatzController(
 
                     val turnierId = try {
                         uuidFrom(createDto.turnierId)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         return@post call.respond(
                             HttpStatusCode.BadRequest,
                             ApiResponse.error<PlatzDto>("Invalid tournament ID format")
@@ -264,7 +264,7 @@ class PlatzController(
 
                     val typ = try {
                         PlatzTypE.valueOf(createDto.typ.uppercase())
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         return@post call.respond(
                             HttpStatusCode.BadRequest,
                             ApiResponse.error<PlatzDto>("Invalid venue type: ${createDto.typ}")
@@ -311,7 +311,7 @@ class PlatzController(
 
                     val turnierId = try {
                         uuidFrom(updateDto.turnierId)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         return@put call.respond(
                             HttpStatusCode.BadRequest,
                             ApiResponse.error<PlatzDto>("Invalid tournament ID format")
@@ -320,7 +320,7 @@ class PlatzController(
 
                     val typ = try {
                         PlatzTypE.valueOf(updateDto.typ.uppercase())
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         return@put call.respond(
                             HttpStatusCode.BadRequest,
                             ApiResponse.error<PlatzDto>("Invalid venue type: ${updateDto.typ}")
@@ -387,7 +387,7 @@ class PlatzController(
 
                     val typ = try {
                         PlatzTypE.valueOf(typParam.uppercase())
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Long>("Invalid venue type: $typParam"))
                     }
 
@@ -433,7 +433,7 @@ class PlatzController(
                     val requiredType = requiredTypeParam?.let {
                         try {
                             PlatzTypE.valueOf(it.uppercase())
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Map<String, Any>>("Invalid required type: $it"))
                         }
                     }

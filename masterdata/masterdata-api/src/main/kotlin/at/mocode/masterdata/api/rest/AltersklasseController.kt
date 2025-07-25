@@ -88,7 +88,7 @@ class AltersklasseController(
                     val sparteFilter = sparteFilterParam?.let {
                         try {
                             SparteE.valueOf(it.uppercase())
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             return@get call.respond(
                                 HttpStatusCode.BadRequest,
                                 ApiResponse.error<List<AltersklasseDto>>("Invalid sparte parameter: $it")
@@ -224,7 +224,7 @@ class AltersklasseController(
 
                     val sparte = try {
                         SparteE.valueOf(sparteParam.uppercase())
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<List<AltersklasseDto>>("Invalid sport type: $sparteParam"))
                     }
 
@@ -264,7 +264,7 @@ class AltersklasseController(
                     val sparteFilter = createDto.sparteFilter?.let {
                         try {
                             SparteE.valueOf(it.uppercase())
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             return@post call.respond(
                                 HttpStatusCode.BadRequest,
                                 ApiResponse.error<AltersklasseDto>("Invalid sparte filter: $it")
@@ -286,7 +286,7 @@ class AltersklasseController(
                     val oetoRegelReferenzId = createDto.oetoRegelReferenzId?.let {
                         try {
                             uuidFrom(it)
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             return@post call.respond(
                                 HttpStatusCode.BadRequest,
                                 ApiResponse.error<AltersklasseDto>("Invalid OETO regel referenz ID format")
@@ -345,7 +345,7 @@ class AltersklasseController(
                     val sparteFilter = updateDto.sparteFilter?.let {
                         try {
                             SparteE.valueOf(it.uppercase())
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             return@put call.respond(
                                 HttpStatusCode.BadRequest,
                                 ApiResponse.error<AltersklasseDto>("Invalid sparte filter: $it")
@@ -367,7 +367,7 @@ class AltersklasseController(
                     val oetoRegelReferenzId = updateDto.oetoRegelReferenzId?.let {
                         try {
                             uuidFrom(it)
-                        } catch (e: Exception) {
+                        } catch (_: Exception) {
                             return@put call.respond(
                                 HttpStatusCode.BadRequest,
                                 ApiResponse.error<AltersklasseDto>("Invalid OETO regel referenz ID format")

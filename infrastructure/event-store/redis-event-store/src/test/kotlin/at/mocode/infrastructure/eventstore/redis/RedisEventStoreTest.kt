@@ -1,10 +1,8 @@
 package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.BaseDomainEvent
-import at.mocode.core.domain.event.DomainEvent
 import at.mocode.infrastructure.eventstore.api.ConcurrencyException
 import at.mocode.infrastructure.eventstore.api.EventSerializer
-import at.mocode.infrastructure.eventstore.api.Subscription
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.AfterEach
@@ -19,12 +17,8 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import java.time.Instant
-import java.util.UUID
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
+import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @Testcontainers
 class RedisEventStoreTest {

@@ -1,9 +1,8 @@
 package at.mocode.masterdata.infrastructure.persistence
 
+import at.mocode.core.utils.database.DatabaseFactory
 import at.mocode.masterdata.domain.model.LandDefinition
 import at.mocode.masterdata.domain.repository.LandRepository
-import at.mocode.masterdata.infrastructure.persistence.LandTable
-import at.mocode.core.utils.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
