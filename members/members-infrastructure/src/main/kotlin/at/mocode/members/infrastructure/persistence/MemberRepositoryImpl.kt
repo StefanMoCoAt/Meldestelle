@@ -1,12 +1,11 @@
 package at.mocode.members.infrastructure.persistence
 
+import at.mocode.core.utils.database.DatabaseFactory
 import at.mocode.members.domain.model.Member
 import at.mocode.members.domain.repository.MemberRepository
-import at.mocode.core.utils.database.DatabaseFactory
 import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuidFrom
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.*
@@ -20,34 +19,34 @@ import org.springframework.stereotype.Repository
 class MemberRepositoryImpl : MemberRepository {
 
     override suspend fun findById(id: Uuid): Member? = DatabaseFactory.dbQuery {
-        MemberTable.select { MemberTable.id eq id }
+        MemberTable.selectAll().where { MemberTable.id eq id }
             .map { rowToMember(it) }
             .singleOrNull()
     }
 
     override suspend fun findByMembershipNumber(membershipNumber: String): Member? = DatabaseFactory.dbQuery {
-        MemberTable.select { MemberTable.membershipNumber eq membershipNumber }
+        MemberTable.selectAll().where { MemberTable.membershipNumber eq membershipNumber }
             .map { rowToMember(it) }
             .singleOrNull()
     }
 
     override suspend fun findByEmail(email: String): Member? = DatabaseFactory.dbQuery {
-        MemberTable.select { MemberTable.email.lowerCase() eq email.lowercase() }
+        MemberTable.selectAll().where { MemberTable.email.lowerCase() eq email.lowercase() }
             .map { rowToMember(it) }
             .singleOrNull()
     }
 
     override suspend fun findByName(searchTerm: String, limit: Int): List<Member> = DatabaseFactory.dbQuery {
-        MemberTable.select {
+        MemberTable.selectAll().where {
             (MemberTable.firstName.lowerCase() like "%${searchTerm.lowercase()}%") or
-            (MemberTable.lastName.lowerCase() like "%${searchTerm.lowercase()}%")
+                (MemberTable.lastName.lowerCase() like "%${searchTerm.lowercase()}%")
         }
         .limit(limit)
         .map { rowToMember(it) }
     }
 
     override suspend fun findAllActive(limit: Int, offset: Int): List<Member> = DatabaseFactory.dbQuery {
-        MemberTable.select { MemberTable.isActive eq true }
+        MemberTable.selectAll().where { MemberTable.isActive eq true }
             .limit(limit, offset.toLong())
             .map { rowToMember(it) }
     }
@@ -59,18 +58,18 @@ class MemberRepositoryImpl : MemberRepository {
     }
 
     override suspend fun findByMembershipStartDateRange(startDate: LocalDate, endDate: LocalDate): List<Member> = DatabaseFactory.dbQuery {
-        MemberTable.select {
+        MemberTable.selectAll().where {
             (MemberTable.membershipStartDate greaterEq startDate) and
-            (MemberTable.membershipStartDate lessEq endDate)
+                (MemberTable.membershipStartDate lessEq endDate)
         }
         .map { rowToMember(it) }
     }
 
     override suspend fun findByMembershipEndDateRange(startDate: LocalDate, endDate: LocalDate): List<Member> = DatabaseFactory.dbQuery {
-        MemberTable.select {
+        MemberTable.selectAll().where {
             (MemberTable.membershipEndDate.isNotNull()) and
-            (MemberTable.membershipEndDate greaterEq startDate) and
-            (MemberTable.membershipEndDate lessEq endDate)
+                (MemberTable.membershipEndDate greaterEq startDate) and
+                (MemberTable.membershipEndDate lessEq endDate)
         }
         .map { rowToMember(it) }
     }
@@ -78,16 +77,16 @@ class MemberRepositoryImpl : MemberRepository {
     override suspend fun findMembersWithExpiringMembership(daysAhead: Int): List<Member> = DatabaseFactory.dbQuery {
         val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         val futureDate = LocalDate(currentDate.year, currentDate.month, currentDate.dayOfMonth + daysAhead)
-        MemberTable.select {
+        MemberTable.selectAll().where {
             (MemberTable.membershipEndDate.isNotNull()) and
-            (MemberTable.membershipEndDate lessEq futureDate) and
-            (MemberTable.isActive eq true)
+                (MemberTable.membershipEndDate lessEq futureDate) and
+                (MemberTable.isActive eq true)
         }
         .map { rowToMember(it) }
     }
 
     override suspend fun save(member: Member): Member = DatabaseFactory.dbQuery {
-        val existingMember = MemberTable.select { MemberTable.id eq member.memberId }.singleOrNull()
+        val existingMember = MemberTable.selectAll().where { MemberTable.id eq member.memberId }.singleOrNull()
 
         if (existingMember != null) {
             // Update existing member
@@ -130,7 +129,7 @@ class MemberRepositoryImpl : MemberRepository {
     }
 
     override suspend fun countActive(): Long = DatabaseFactory.dbQuery {
-        MemberTable.select { MemberTable.isActive eq true }.count()
+        MemberTable.selectAll().where { MemberTable.isActive eq true }.count()
     }
 
     override suspend fun countAll(): Long = DatabaseFactory.dbQuery {
@@ -139,24 +138,24 @@ class MemberRepositoryImpl : MemberRepository {
 
     override suspend fun existsByMembershipNumber(membershipNumber: String, excludeMemberId: Uuid?): Boolean = DatabaseFactory.dbQuery {
         val query = if (excludeMemberId != null) {
-            MemberTable.select {
+            MemberTable.selectAll().where {
                 (MemberTable.membershipNumber eq membershipNumber) and
-                (MemberTable.id neq excludeMemberId)
+                    (MemberTable.id neq excludeMemberId)
             }
         } else {
-            MemberTable.select { MemberTable.membershipNumber eq membershipNumber }
+            MemberTable.selectAll().where { MemberTable.membershipNumber eq membershipNumber }
         }
         query.count() > 0
     }
 
     override suspend fun existsByEmail(email: String, excludeMemberId: Uuid?): Boolean = DatabaseFactory.dbQuery {
         val query = if (excludeMemberId != null) {
-            MemberTable.select {
+            MemberTable.selectAll().where {
                 (MemberTable.email.lowerCase() eq email.lowercase()) and
-                (MemberTable.id neq excludeMemberId)
+                    (MemberTable.id neq excludeMemberId)
             }
         } else {
-            MemberTable.select { MemberTable.email.lowerCase() eq email.lowercase() }
+            MemberTable.selectAll().where { MemberTable.email.lowerCase() eq email.lowercase() }
         }
         query.count() > 0
     }

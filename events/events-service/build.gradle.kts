@@ -10,6 +10,7 @@ springBoot {
 
 dependencies {
     implementation(projects.platform.platformDependencies)
+    implementation(projects.core.coreUtils)
 
     implementation(projects.events.eventsDomain)
     implementation(projects.events.eventsApplication)

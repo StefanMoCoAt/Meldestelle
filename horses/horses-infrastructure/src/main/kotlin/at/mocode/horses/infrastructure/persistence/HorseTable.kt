@@ -57,11 +57,14 @@ object HorseTable : UUIDTable("horses") {
         // Indexes for performance
         index(false, pferdeName)
         index(false, besitzerId)
-        index(false, lebensnummer)
-        index(false, chipNummer)
-        index(false, passNummer)
-        index(false, oepsNummer)
-        index(false, feiNummer)
         index(false, istAktiv)
+
+        // Unique constraints for identification numbers
+        // These ensure database-level uniqueness even under concurrent access
+        uniqueIndex(lebensnummer)
+        uniqueIndex(chipNummer)
+        uniqueIndex(passNummer)
+        uniqueIndex(oepsNummer)
+        uniqueIndex(feiNummer)
     }
 }

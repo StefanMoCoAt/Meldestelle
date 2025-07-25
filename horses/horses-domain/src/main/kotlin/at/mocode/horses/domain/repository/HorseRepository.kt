@@ -223,4 +223,20 @@ interface HorseRepository {
      * @return The count of horses owned by the person
      */
     suspend fun countByOwnerId(ownerId: Uuid, activeOnly: Boolean = true): Long
+
+    /**
+     * Counts horses with OEPS registration.
+     *
+     * @param activeOnly Whether to count only active horses
+     * @return The count of OEPS registered horses
+     */
+    suspend fun countOepsRegistered(activeOnly: Boolean = true): Long
+
+    /**
+     * Counts horses with FEI registration.
+     *
+     * @param activeOnly Whether to count only active horses
+     * @return The count of FEI registered horses
+     */
+    suspend fun countFeiRegistered(activeOnly: Boolean = true): Long
 }

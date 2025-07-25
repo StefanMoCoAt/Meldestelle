@@ -280,4 +280,24 @@ class GetHorseUseCase(
     suspend fun countByOwnerId(ownerId: Uuid, activeOnly: Boolean = true): Long {
         return horseRepository.countByOwnerId(ownerId, activeOnly)
     }
+
+    /**
+     * Counts horses with OEPS registration.
+     *
+     * @param activeOnly Whether to count only active horses (default: true)
+     * @return The count of OEPS registered horses
+     */
+    suspend fun countOepsRegistered(activeOnly: Boolean = true): Long {
+        return horseRepository.countOepsRegistered(activeOnly)
+    }
+
+    /**
+     * Counts horses with FEI registration.
+     *
+     * @param activeOnly Whether to count only active horses (default: true)
+     * @return The count of FEI registered horses
+     */
+    suspend fun countFeiRegistered(activeOnly: Boolean = true): Long {
+        return horseRepository.countFeiRegistered(activeOnly)
+    }
 }

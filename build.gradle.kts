@@ -162,7 +162,7 @@ tasks.register("validateDocumentation") {
     doLast {
         println("🔍 Validating documentation...")
         exec {
-            commandLine("./scripts/validate-docs.sh")
+            commandLine("./scripts/validation/validate-docs.sh")
         }
     }
 }

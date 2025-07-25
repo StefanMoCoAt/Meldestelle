@@ -77,11 +77,11 @@ class HorseController(
                     val searchTerm = call.request.queryParameters["search"]
 
                     val horses = when {
-                        searchTerm != null -> horseRepository.findByName(searchTerm, limit)
-                        ownerId != null -> horseRepository.findByOwnerId(ownerId, activeOnly)
-                        geschlecht != null -> horseRepository.findByGeschlecht(geschlecht, activeOnly, limit)
-                        rasse != null -> horseRepository.findByRasse(rasse, activeOnly, limit)
-                        else -> horseRepository.findAllActive(limit)
+                        searchTerm != null -> getHorseUseCase.searchByName(searchTerm, limit)
+                        ownerId != null -> getHorseUseCase.getByOwnerId(ownerId, activeOnly)
+                        geschlecht != null -> getHorseUseCase.getByGeschlecht(geschlecht, activeOnly, limit)
+                        rasse != null -> getHorseUseCase.getByRasse(rasse, activeOnly, limit)
+                        else -> getHorseUseCase.getAllActive(limit)
                     }
 
                     call.respond(HttpStatusCode.OK, ApiResponse.success(horses))
@@ -112,7 +112,7 @@ class HorseController(
             get("/search/lebensnummer/{nummer}") {
                 try {
                     val lebensnummer = call.parameters["nummer"]!!
-                    val horse = horseRepository.findByLebensnummer(lebensnummer)
+                    val horse = getHorseUseCase.getByLebensnummer(lebensnummer)
 
                     if (horse != null) {
                         call.respond(HttpStatusCode.OK, ApiResponse.success(horse))
@@ -128,7 +128,7 @@ class HorseController(
             get("/search/chip/{nummer}") {
                 try {
                     val chipNummer = call.parameters["nummer"]!!
-                    val horse = horseRepository.findByChipNummer(chipNummer)
+                    val horse = getHorseUseCase.getByChipNummer(chipNummer)
 
                     if (horse != null) {
                         call.respond(HttpStatusCode.OK, ApiResponse.success(horse))
@@ -140,11 +140,59 @@ class HorseController(
                 }
             }
 
+            // GET /api/horses/search/passport/{nummer} - Find by passport number
+            get("/search/passport/{nummer}") {
+                try {
+                    val passNummer = call.parameters["nummer"]!!
+                    val horse = getHorseUseCase.getByPassNummer(passNummer)
+
+                    if (horse != null) {
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(horse))
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<Any>("Horse with passport number '$passNummer' not found"))
+                    }
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to search horse: ${e.message}"))
+                }
+            }
+
+            // GET /api/horses/search/oeps/{nummer} - Find by OEPS number
+            get("/search/oeps/{nummer}") {
+                try {
+                    val oepsNummer = call.parameters["nummer"]!!
+                    val horse = getHorseUseCase.getByOepsNummer(oepsNummer)
+
+                    if (horse != null) {
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(horse))
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<Any>("Horse with OEPS number '$oepsNummer' not found"))
+                    }
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to search horse: ${e.message}"))
+                }
+            }
+
+            // GET /api/horses/search/fei/{nummer} - Find by FEI number
+            get("/search/fei/{nummer}") {
+                try {
+                    val feiNummer = call.parameters["nummer"]!!
+                    val horse = getHorseUseCase.getByFeiNummer(feiNummer)
+
+                    if (horse != null) {
+                        call.respond(HttpStatusCode.OK, ApiResponse.success(horse))
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, ApiResponse.error<Any>("Horse with FEI number '$feiNummer' not found"))
+                    }
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to search horse: ${e.message}"))
+                }
+            }
+
             // GET /api/horses/oeps-registered - Get OEPS registered horses
             get("/oeps-registered") {
                 try {
                     val activeOnly = call.request.queryParameters["activeOnly"]?.toBoolean() ?: true
-                    val horses = horseRepository.findOepsRegistered(activeOnly)
+                    val horses = getHorseUseCase.getOepsRegistered(activeOnly)
                     call.respond(HttpStatusCode.OK, ApiResponse.success(horses))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to retrieve OEPS horses: ${e.message}"))
@@ -155,7 +203,7 @@ class HorseController(
             get("/fei-registered") {
                 try {
                     val activeOnly = call.request.queryParameters["activeOnly"]?.toBoolean() ?: true
-                    val horses = horseRepository.findFeiRegistered(activeOnly)
+                    val horses = getHorseUseCase.getFeiRegistered(activeOnly)
                     call.respond(HttpStatusCode.OK, ApiResponse.success(horses))
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.InternalServerError, ApiResponse.error<Any>("Failed to retrieve FEI horses: ${e.message}"))
@@ -165,14 +213,14 @@ class HorseController(
             // GET /api/horses/stats - Get horse statistics
             get("/stats") {
                 try {
-                    val activeCount = horseRepository.countActive()
-                    val oepsCount = horseRepository.findOepsRegistered(true).size
-                    val feiCount = horseRepository.findFeiRegistered(true).size
+                    val activeCount = getHorseUseCase.countActive()
+                    val oepsCount = getHorseUseCase.countOepsRegistered(true)
+                    val feiCount = getHorseUseCase.countFeiRegistered(true)
 
                     val stats = HorseStats(
                         totalActive = activeCount,
-                        oepsRegistered = oepsCount.toLong(),
-                        feiRegistered = feiCount.toLong()
+                        oepsRegistered = oepsCount,
+                        feiRegistered = feiCount
                     )
 
                     call.respond(HttpStatusCode.OK, ApiResponse.success(stats))

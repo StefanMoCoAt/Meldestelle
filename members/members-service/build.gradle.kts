@@ -11,6 +11,8 @@ springBoot {
 dependencies {
     implementation(projects.platform.platformDependencies)
 
+    implementation(projects.core.coreDomain)
+    implementation(projects.core.coreUtils)
     implementation(projects.members.membersDomain)
     implementation(projects.members.membersApplication)
     implementation(projects.members.membersInfrastructure)
@@ -26,7 +28,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")
 
+    // Database dependencies
+    implementation("org.jetbrains.exposed:exposed-core")
+    implementation("org.jetbrains.exposed:exposed-dao")
+    implementation("org.jetbrains.exposed:exposed-jdbc")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime")
+    implementation("com.zaxxer:HikariCP")
     runtimeOnly("org.postgresql:postgresql")
+    testRuntimeOnly("com.h2database:h2")
 
     testImplementation(projects.platform.platformTesting)
 }

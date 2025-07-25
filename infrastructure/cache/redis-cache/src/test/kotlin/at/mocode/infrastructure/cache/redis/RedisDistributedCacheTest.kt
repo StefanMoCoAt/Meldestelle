@@ -3,11 +3,9 @@ package at.mocode.infrastructure.cache.redis
 import at.mocode.infrastructure.cache.api.CacheConfiguration
 import at.mocode.infrastructure.cache.api.CacheSerializer
 import at.mocode.infrastructure.cache.api.ConnectionState
-import at.mocode.infrastructure.cache.api.ConnectionStateListener
 import at.mocode.infrastructure.cache.api.DefaultCacheConfiguration
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,12 +20,7 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import java.time.Duration
-import java.time.Instant
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 @Testcontainers
 class RedisDistributedCacheTest {

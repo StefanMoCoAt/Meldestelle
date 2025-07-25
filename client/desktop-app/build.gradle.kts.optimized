@@ -1,0 +1,87 @@
+plugins {
+    kotlin("jvm")
+    id("org.jetbrains.compose") version "1.7.3"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.21"
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    // Client dependencies - only what's needed for desktop app
+    implementation(projects.client.commonUi)
+    implementation(projects.client.webApp) // Only if truly needed for shared screens
+
+    // Core dependencies - minimal set
+    implementation(projects.core.coreDomain)
+    implementation(projects.core.coreUtils)
+
+    // Remove unnecessary infrastructure dependencies
+    // implementation(projects.infrastructure.auth.authClient) // Only if auth is needed
+    // implementation(projects.infrastructure.cache.redisCache) // Not needed in client
+    // implementation(projects.infrastructure.eventStore.redisEventStore) // Not needed in client
+
+    // Remove domain module dependencies - should go through API
+    // implementation(projects.events.eventsDomain) // Access through API instead
+    // implementation(projects.horses.horsesDomain) // Access through API instead
+    // implementation(projects.masterdata.masterdataDomain) // Access through API instead
+
+    // Remove Spring Boot dependencies - not needed for desktop client
+    // implementation("org.springframework.boot:spring-boot-starter")
+
+    // Remove Redis dependencies - not needed for desktop client
+    // implementation("org.redisson:redisson:3.27.2")
+    // implementation("io.lettuce:lettuce-core:6.3.2.RELEASE")
+
+    // Keep only essential Kotlinx dependencies
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.8.0") // Changed from javafx to swing
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("com.benasher44:uuid:0.8.4")
+
+    // Compose dependencies - keep as needed for desktop UI
+    implementation(compose.desktop.currentOs)
+    implementation(compose.runtime)
+    implementation(compose.foundation)
+    implementation(compose.material3)
+    implementation(compose.ui)
+    implementation(compose.components.resources)
+    implementation(compose.materialIconsExtended)
+
+    // Testing
+    testImplementation(projects.platform.platformTesting)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+}
+
+// Desktop application configuration
+compose.desktop {
+    application {
+        mainClass = "at.mocode.client.desktop.MainKt"
+
+        nativeDistributions {
+            targetFormats(
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
+            )
+            packageName = "Meldestelle Desktop"
+            packageVersion = "1.0.0"
+            description = "Meldestelle Desktop Application"
+            copyright = "© 2024 MoCode. All rights reserved."
+            vendor = "MoCode"
+
+            windows {
+                iconFile.set(project.file("src/main/resources/icon.ico"))
+            }
+            macOS {
+                iconFile.set(project.file("src/main/resources/icon.icns"))
+            }
+            linux {
+                iconFile.set(project.file("src/main/resources/icon.png"))
+            }
+        }
+    }
+}

@@ -4,15 +4,9 @@ import at.mocode.core.domain.event.DomainEvent
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Range
-import org.springframework.data.redis.connection.stream.Consumer
-import org.springframework.data.redis.connection.stream.MapRecord
-import org.springframework.data.redis.connection.stream.ReadOffset
-import org.springframework.data.redis.connection.stream.StreamOffset
-import org.springframework.data.redis.connection.stream.StreamReadOptions
+import org.springframework.data.redis.connection.stream.*
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
-import java.time.Duration
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.annotation.PostConstruct

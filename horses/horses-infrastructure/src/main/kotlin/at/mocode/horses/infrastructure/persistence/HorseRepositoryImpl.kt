@@ -248,6 +248,30 @@ class HorseRepositoryImpl : HorseRepository {
         }.count()
     }
 
+    override suspend fun countOepsRegistered(activeOnly: Boolean): Long = DatabaseFactory.dbQuery {
+        val query = HorseTable.selectAll().where {
+            HorseTable.oepsNummer.isNotNull() and (HorseTable.oepsNummer neq "")
+        }
+
+        if (activeOnly) {
+            query.andWhere { HorseTable.istAktiv eq true }
+        } else {
+            query
+        }.count()
+    }
+
+    override suspend fun countFeiRegistered(activeOnly: Boolean): Long = DatabaseFactory.dbQuery {
+        val query = HorseTable.selectAll().where {
+            HorseTable.feiNummer.isNotNull() and (HorseTable.feiNummer neq "")
+        }
+
+        if (activeOnly) {
+            query.andWhere { HorseTable.istAktiv eq true }
+        } else {
+            query
+        }.count()
+    }
+
     /**
      * Maps a database row to a DomPferd domain object.
      */

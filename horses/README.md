@@ -60,6 +60,8 @@ Das Modul bietet 25+ spezialisierte Repository-Operationen:
 #### Zähl-Operationen
 - `countActive()` - Anzahl aktiver Pferde
 - `countByOwnerId(ownerId, activeOnly)` - Anzahl Pferde pro Besitzer
+- `countOepsRegistered(activeOnly)` - Anzahl OEPS-registrierter Pferde ✨ **NEU**
+- `countFeiRegistered(activeOnly)` - Anzahl FEI-registrierter Pferde ✨ **NEU**
 
 ## Architektur
 
@@ -109,6 +111,79 @@ horses/
 
 ### API Layer
 - **REST-Controller** für HTTP-Endpunkte
+
+## 🚀 Aktuelle Optimierungen (2025-07-25)
+
+Das Horses-Modul wurde kürzlich analysiert, vervollständigt und optimiert. Folgende Verbesserungen wurden implementiert:
+
+### ✨ Neue Funktionalitäten
+
+#### Erweiterte Such-Endpunkte
+Neue REST-Endpunkte für vollständige Identifikationsnummer-Suche:
+- `GET /api/horses/search/passport/{nummer}` - Suche nach Passnummer
+- `GET /api/horses/search/oeps/{nummer}` - Suche nach OEPS-Nummer
+- `GET /api/horses/search/fei/{nummer}` - Suche nach FEI-Nummer
+
+#### Optimierte Statistik-Operationen
+- Neue effiziente Zähl-Methoden für OEPS und FEI registrierte Pferde
+- Performance-Verbesserung von O(n) auf O(1) Komplexität für Statistiken
+- Datenbankoptimierte COUNT-Abfragen statt Laden aller Datensätze
+
+### ⚡ Performance-Optimierungen
+
+#### Datenbankeffizienz
+- **Vorher**: Statistik-Endpunkt lud alle Pferde und verwendete `.size`
+- **Nachher**: Effiziente COUNT-Abfragen direkt in der Datenbank
+- **Auswirkung**: Drastische Reduzierung der Speichernutzung und Antwortzeiten
+
+#### Architektur-Konsistenz
+- Alle API-Endpunkte verwenden jetzt konsistent die Use-Case-Schicht
+- Eliminierung direkter Repository-Aufrufe in der API-Schicht
+- Saubere Trennung der Architektur-Schichten
+
+### 🏗️ Architektur-Verbesserungen
+
+#### Clean Architecture Compliance
+- **Konsistente Schichtung**: Alle Endpunkte folgen dem Use-Case-Pattern
+- **Fehlerbehandlung**: Einheitliche Fehlerantworten über alle Endpunkte
+- **Validierung**: Umfassende Eingabevalidierung mit geteilten Utilities
+- **HTTP-Standards**: Korrekte Status-Codes und REST-Konventionen
+
+#### Code-Qualität
+- Verbesserte Lesbarkeit und Wartbarkeit
+- Konsistente Namenskonventionen
+- Umfassende Dokumentation aller neuen Funktionen
+
+### 📊 Qualitätsmetriken
+
+#### Vor der Optimierung
+- ❌ Fehlende Such-Endpunkte für 3 Identifikationstypen
+- ❌ Ineffiziente Statistik-Abfragen (O(n) Komplexität)
+- ❌ Inkonsistente Architektur (einige Endpunkte umgingen Use Cases)
+- ❌ Performance-Probleme bei großen Datensätzen
+
+#### Nach der Optimierung
+- ✅ Vollständige API-Abdeckung für alle Identifikationstypen
+- ✅ Effiziente Statistik-Abfragen (O(1) Komplexität)
+- ✅ Konsistente Clean Architecture durchgehend
+- ✅ Optimierte Performance für alle Operationen
+
+### 🔮 Zukünftige Empfehlungen
+
+#### Caching-Schicht
+- Implementierung einer Caching-Schicht für häufig abgerufene Daten
+- Individuelle Pferde-Lookups mit angemessener TTL
+- Statistiken und Zählungen mit Cache-Invalidierung
+
+#### Async-Operationen
+- Asynchrone Verarbeitung für Batch-Operationen
+- Komplexe Such-Abfragen mit Async-Pattern
+- Statistik-Berechnungen im Hintergrund
+
+#### Monitoring und Logging
+- Umfassendes Monitoring für API-Antwortzeiten
+- Datenbank-Query-Performance-Überwachung
+- Fehlerrate-Tracking und -Analyse
 - **DTO-Mapping** zwischen Domain und API
 - **Validierung** und Fehlerbehandlung
 

@@ -7,19 +7,16 @@ import at.mocode.infrastructure.eventstore.api.EventStore
 import at.mocode.infrastructure.eventstore.api.Subscription
 import org.slf4j.LoggerFactory
 import org.springframework.data.redis.connection.stream.MapRecord
-import org.springframework.data.redis.connection.stream.ObjectRecord
 import org.springframework.data.redis.connection.stream.ReadOffset
-import org.springframework.data.redis.connection.stream.Record
 import org.springframework.data.redis.connection.stream.StreamOffset
 import org.springframework.data.redis.connection.stream.StreamReadOptions
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.stream.StreamListener
 import org.springframework.data.redis.stream.StreamMessageListenerContainer
-import org.springframework.data.redis.stream.Subscription as RedisSubscription
-import java.time.Duration
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
+import org.springframework.data.redis.stream.Subscription as RedisSubscription
 
 /**
  * Redis Streams implementation of EventStore.
@@ -91,7 +88,7 @@ class RedisEventStore(
             val result = redisTemplate.opsForStream<String, String>()
                 .add(streamKey, eventData)
 
-            logger.debug("Appended event ${event.eventId} to stream $streamId with ID $result")
+            logger.debug("Appended event {} to stream {} with ID {}", event.eventId, streamId, result)
 
             // Also append to the all events stream
             val allEventsStreamKey = getAllEventsStreamKey()
