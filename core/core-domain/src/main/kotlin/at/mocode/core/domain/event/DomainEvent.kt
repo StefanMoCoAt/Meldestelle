@@ -18,7 +18,7 @@ interface DomainEvent {
     /**
      * Timestamp when the event occurred.
      */
-    val timestamp: Instant
+    val timestamp: java.time.Instant
 
     /**
      * Identifier of the aggregate that the event belongs to.
@@ -37,7 +37,7 @@ interface DomainEvent {
  */
 abstract class BaseDomainEvent(
     override val eventId: Uuid = uuid4(),
-    override val timestamp: Instant = Clock.System.now(),
+    override val timestamp: java.time.Instant = java.time.Instant.now(),
     override val aggregateId: Uuid,
     override val version: Long
 ) : DomainEvent

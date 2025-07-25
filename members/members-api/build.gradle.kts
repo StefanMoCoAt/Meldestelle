@@ -10,6 +10,7 @@ dependencies {
     implementation(projects.members.membersApplication)
     implementation(projects.core.coreDomain)
     implementation(projects.core.coreUtils)
+    implementation(projects.infrastructure.messaging.messagingClient)
 
     implementation("org.springframework:spring-web")
     implementation("org.springdoc:springdoc-openapi-starter-common")

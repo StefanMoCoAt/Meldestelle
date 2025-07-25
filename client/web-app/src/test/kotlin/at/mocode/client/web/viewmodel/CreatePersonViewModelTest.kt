@@ -1,9 +1,9 @@
 package at.mocode.client.web.viewmodel
 
+import at.mocode.client.common.repository.PersonRepository
 import at.mocode.core.domain.model.GeschlechtE
 import at.mocode.members.application.usecase.CreatePersonUseCase
 import at.mocode.members.domain.model.DomPerson
-import at.mocode.members.domain.repository.PersonRepository
 import at.mocode.members.domain.repository.VereinRepository
 import at.mocode.members.domain.service.MasterDataService
 import com.benasher44.uuid.uuid4

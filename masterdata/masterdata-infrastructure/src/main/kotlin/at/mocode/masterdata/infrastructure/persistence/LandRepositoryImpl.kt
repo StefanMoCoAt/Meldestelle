@@ -14,6 +14,9 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
 /**
  * Implementierung des LandRepository für die Datenbankzugriffe.
+ *
+ * Diese Implementierung verwendet Exposed SQL für den Datenbankzugriff
+ * und mappt zwischen der LandDefinition Domain-Entität und der LandTable.
  */
 class LandRepositoryImpl : LandRepository {
 
@@ -25,14 +28,16 @@ class LandRepositoryImpl : LandRepository {
             landId = row[LandTable.id],
             isoAlpha2Code = row[LandTable.isoAlpha2Code],
             isoAlpha3Code = row[LandTable.isoAlpha3Code],
-            nameDeutsch = row[LandTable.nameDe],
-            nameEnglisch = row[LandTable.nameEn],
+            isoNumerischerCode = row[LandTable.isoNumerischerCode],
+            nameDeutsch = row[LandTable.nameDeutsch],
+            nameEnglisch = row[LandTable.nameEnglisch],
+            wappenUrl = row[LandTable.wappenUrl],
             istEuMitglied = row[LandTable.istEuMitglied],
             istEwrMitglied = row[LandTable.istEwrMitglied],
-            sortierReihenfolge = row[LandTable.sortierReihenfolge],
             istAktiv = row[LandTable.istAktiv],
-            createdAt = row[LandTable.erstelltAm].toInstant(TimeZone.UTC),
-            updatedAt = row[LandTable.geaendertAm].toInstant(TimeZone.UTC)
+            sortierReihenfolge = row[LandTable.sortierReihenfolge],
+            createdAt = row[LandTable.createdAt].toInstant(TimeZone.UTC),
+            updatedAt = row[LandTable.updatedAt].toInstant(TimeZone.UTC)
         )
     }
 
@@ -56,7 +61,10 @@ class LandRepositoryImpl : LandRepository {
 
     override suspend fun findByName(searchTerm: String, limit: Int): List<LandDefinition> = DatabaseFactory.dbQuery {
         val pattern = "%$searchTerm%"
-        LandTable.selectAll().where { (LandTable.nameDe like pattern) or (LandTable.nameEn like pattern) }
+        LandTable.selectAll().where {
+            (LandTable.nameDeutsch like pattern) or
+            (LandTable.nameEnglisch like pattern)
+        }
         .limit(limit)
         .map(::rowToLandDefinition)
     }
@@ -65,9 +73,9 @@ class LandRepositoryImpl : LandRepository {
         val query = LandTable.selectAll().where { LandTable.istAktiv eq true }
 
         if (orderBySortierung) {
-            query.orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameDe to SortOrder.ASC)
+            query.orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameDeutsch to SortOrder.ASC)
         } else {
-            query.orderBy(LandTable.nameDe to SortOrder.ASC)
+            query.orderBy(LandTable.nameDeutsch to SortOrder.ASC)
         }
 
         query.map(::rowToLandDefinition)
@@ -75,13 +83,13 @@ class LandRepositoryImpl : LandRepository {
 
     override suspend fun findEuMembers(): List<LandDefinition> = DatabaseFactory.dbQuery {
         LandTable.selectAll().where { (LandTable.istEuMitglied eq true) and (LandTable.istAktiv eq true) }
-            .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameDe to SortOrder.ASC)
+            .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameDeutsch to SortOrder.ASC)
             .map(::rowToLandDefinition)
     }
 
     override suspend fun findEwrMembers(): List<LandDefinition> = DatabaseFactory.dbQuery {
         LandTable.selectAll().where { (LandTable.istEwrMitglied eq true) and (LandTable.istAktiv eq true) }
-            .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameDe to SortOrder.ASC)
+            .orderBy(LandTable.sortierReihenfolge to SortOrder.ASC, LandTable.nameDeutsch to SortOrder.ASC)
             .map(::rowToLandDefinition)
     }
 
@@ -95,27 +103,31 @@ class LandRepositoryImpl : LandRepository {
                 stmt[id] = land.landId
                 stmt[isoAlpha2Code] = land.isoAlpha2Code
                 stmt[isoAlpha3Code] = land.isoAlpha3Code
-                stmt[nameDe] = land.nameDeutsch
-                stmt[nameEn] = land.nameEnglisch ?: ""
-                stmt[istEuMitglied] = land.istEuMitglied ?: false
-                stmt[istEwrMitglied] = land.istEwrMitglied ?: false
-                stmt[sortierReihenfolge] = land.sortierReihenfolge ?: 999
+                stmt[isoNumerischerCode] = land.isoNumerischerCode
+                stmt[nameDeutsch] = land.nameDeutsch
+                stmt[nameEnglisch] = land.nameEnglisch
+                stmt[wappenUrl] = land.wappenUrl
+                stmt[istEuMitglied] = land.istEuMitglied
+                stmt[istEwrMitglied] = land.istEwrMitglied
                 stmt[istAktiv] = land.istAktiv
-                stmt[erstelltAm] = land.createdAt.toLocalDateTime(TimeZone.UTC)
-                stmt[geaendertAm] = now.toLocalDateTime(TimeZone.UTC)
+                stmt[sortierReihenfolge] = land.sortierReihenfolge
+                stmt[createdAt] = land.createdAt.toLocalDateTime(TimeZone.UTC)
+                stmt[updatedAt] = now.toLocalDateTime(TimeZone.UTC)
             }
         } else {
             // Update existing country
             LandTable.update({ LandTable.id eq land.landId }) { stmt ->
                 stmt[isoAlpha2Code] = land.isoAlpha2Code
                 stmt[isoAlpha3Code] = land.isoAlpha3Code
-                stmt[nameDe] = land.nameDeutsch
-                stmt[nameEn] = land.nameEnglisch ?: ""
-                stmt[istEuMitglied] = land.istEuMitglied ?: false
-                stmt[istEwrMitglied] = land.istEwrMitglied ?: false
-                stmt[sortierReihenfolge] = land.sortierReihenfolge ?: 999
+                stmt[isoNumerischerCode] = land.isoNumerischerCode
+                stmt[nameDeutsch] = land.nameDeutsch
+                stmt[nameEnglisch] = land.nameEnglisch
+                stmt[wappenUrl] = land.wappenUrl
+                stmt[istEuMitglied] = land.istEuMitglied
+                stmt[istEwrMitglied] = land.istEwrMitglied
                 stmt[istAktiv] = land.istAktiv
-                stmt[geaendertAm] = now.toLocalDateTime(TimeZone.UTC)
+                stmt[sortierReihenfolge] = land.sortierReihenfolge
+                stmt[updatedAt] = now.toLocalDateTime(TimeZone.UTC)
             }
         }
 

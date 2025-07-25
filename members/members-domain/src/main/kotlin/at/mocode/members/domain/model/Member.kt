@@ -8,6 +8,8 @@ import com.benasher44.uuid.uuid4
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 
 /**
@@ -77,8 +79,12 @@ data class Member(
      * Checks if the membership is currently valid.
      */
     fun isMembershipValid(): Boolean {
-        // Simplified implementation - can be enhanced with proper date comparison
-        return isActive && membershipEndDate != null
+        if (!isActive) return false
+
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        return membershipEndDate?.let { endDate ->
+            today <= endDate
+        } ?: true // If no end date, membership is valid indefinitely
     }
 
     /**

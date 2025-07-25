@@ -32,12 +32,15 @@ Das Projekt ist in folgende Hauptmodule unterteilt:
   - core-domain: Domänenmodelle und Geschäftslogik
   - core-utils: Allgemeine Hilfsfunktionen
 
-- **masterdata**: Verwaltung von Stammdaten
-  - masterdata-api: API-Definitionen
-  - masterdata-application: Anwendungslogik
-  - masterdata-domain: Domänenmodelle
-  - masterdata-infrastructure: Infrastrukturkomponenten
-  - masterdata-service: Service-Implementierung
+- **masterdata**: Umfassende Verwaltung von Stammdaten für Pferdesportveranstaltungen
+  - **Funktionalität**: Länder (ISO-Codes, EU/EWR-Mitgliedschaft), Bundesländer (OEPS/ISO-Codes), Altersklassen (Teilnahmeberechtigung), Turnierplätze (Typ, Abmessungen, Boden)
+  - **API-Endpunkte**: 37 REST-Endpunkte mit vollständiger CRUD-Funktionalität
+  - **Geschäftslogik**: Validierung, Duplikatsprüfung, Berechtigung, Eignung für Disziplinen
+  - masterdata-api: REST-Controller und DTO-Definitionen
+  - masterdata-application: Use Cases und Geschäftslogik
+  - masterdata-domain: Domänenmodelle und Repository-Interfaces
+  - masterdata-infrastructure: Datenbankzugriff und Persistierung
+  - masterdata-service: Spring Boot Service-Implementierung
 
 - **members**: Mitgliederverwaltung
   - members-api: API-Definitionen

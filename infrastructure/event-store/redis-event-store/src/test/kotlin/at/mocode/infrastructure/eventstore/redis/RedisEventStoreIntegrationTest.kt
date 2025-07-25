@@ -78,7 +78,7 @@ class RedisEventStoreIntegrationTest {
 
         // Clear all streams
         val keys = redisTemplate.keys("${properties.streamPrefix}*")
-        if (keys != null && keys.isNotEmpty()) {
+        if (keys.isNotEmpty()) {
             redisTemplate.delete(keys)
         }
     }
@@ -87,7 +87,7 @@ class RedisEventStoreIntegrationTest {
     fun tearDown() {
         // Clear all streams
         val keys = redisTemplate.keys("${properties.streamPrefix}*")
-        if (keys != null && keys.isNotEmpty()) {
+        if (keys.isNotEmpty()) {
             redisTemplate.delete(keys)
         }
     }

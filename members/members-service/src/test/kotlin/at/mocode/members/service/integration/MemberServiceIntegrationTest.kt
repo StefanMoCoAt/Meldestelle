@@ -23,7 +23,7 @@ import kotlin.test.assertTrue
 /**
  * Integration tests for the Members Service.
  *
- * These tests verify the complete functionality including:
+ * These tests verify the complete functionality including
  * - REST API endpoints
  * - Database operations
  * - Event publishing
