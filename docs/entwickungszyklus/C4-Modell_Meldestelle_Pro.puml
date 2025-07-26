@@ -1,0 +1,205 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+' ##################################################################
+' ###                    STYLING-DEFINITIONEN                    ###
+' ##################################################################
+
+' Globale Layout-Optionen
+' LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+' LAYOUT_AS_SKETCH()
+
+' Tags für Technologien und Domänen
+!define DE_SPRING_BOOT "Spring Boot & Kotlin"
+!define DE_POSTGRES "PostgreSQL DB"
+!define DE_KAFKA "Apache Kafka"
+!define DE_REDIS "Redis"
+!define DE_COMPOSE "Compose Multiplatform"
+!define DE_KEYCLOAK "Keycloak"
+!define DE_KTOR "Ktor"
+!define DE_ZNS_FORMAT "OEPS ZNS (.dat)"
+!define DE_ERGEBNIS_FORMAT "OEPS Ergebnis (.erg, .xml)"
+
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam roundCorner 20
+skinparam shadowing false
+
+skinparam person {
+    BackgroundColor #08427b
+    BorderColor #08427b
+    FontColor #FFFFFF
+    StereotypeFontColor #FFFFFF
+}
+
+skinparam system {
+    BackgroundColor #1168bd
+    BorderColor #1168bd
+    FontColor #FFFFFF
+    StereotypeFontColor #FFFFFF
+}
+
+skinparam container {
+    BackgroundColor #4284d3
+    BorderColor #4284d3
+    FontColor #FFFFFF
+    StereotypeFontColor #FFFFFF
+}
+
+skinparam database {
+    BackgroundColor #6c757d
+    BorderColor #6c757d
+    FontColor #FFFFFF
+    StereotypeFontColor #FFFFFF
+}
+
+' ##################################################################
+' ### LEVEL 1: SYSTEMKONTEXT-DIAGRAMM                          ###
+' ##################################################################
+
+title Meldestelle_Pro - C4 Level 1: Systemkontext
+
+' --- Personen / Akteure ---
+Person(reiter, "Reiter / Pferdebesitzer", "Nennt für Turniere, verwaltet eigene Daten.")
+Person(veranstalter, "Veranstalter / Meldestelle", "Organisiert Turniere, managt Nennungen, erfasst Ergebnisse.")
+Person(admin, "Mandanten-Admin", "Interner Admin von Meldestelle_Pro, verwaltet Kunden & Lizenzen.")
+Person(parcoursbauer, "Parcours-Bauer", "Entwirft Parcours-Skizzen.")
+Person(funktionaer, "Funktionär (Richter, Zeitnehmer)", "Nutzt digitale Werkzeuge zur Bewertung und Zeitmessung.")
+
+' --- Externe Systeme ---
+System_Ext(oeps_zns, "OEPS ZNS", "Zentrales Nenn-System des OEPS.")
+System_Ext(zeitmessung, "Zeitmess-Systeme", "Professionelle Hardware (z.B. Alge, Microgate).")
+System_Ext(email, "E-Mail System", "Versendet Benachrichtigungen.")
+
+' --- Unser System ---
+System(meldestelle_pro, "Meldestelle_Pro", "Die zentrale Plattform zur Verwaltung und Durchführung von Pferdesport-Veranstaltungen.")
+
+' --- Beziehungen ---
+Rel(reiter, meldestelle_pro, "Nennt online, sieht Start- & Ergebnislisten")
+Rel(veranstalter, meldestelle_pro, "Verwaltet Turniere & Finanzen, nutzt das Live-Cockpit")
+Rel(admin, meldestelle_pro, "Richtet neue Vereine (Mandanten) ein")
+Rel(parcoursbauer, meldestelle_pro, "Nutzt das Parcours-Design-Modul (Freemium)")
+Rel(funktionaer, meldestelle_pro, "Nutzt die Schreiber-App & das Parcours-Cockpit")
+
+Rel(meldestelle_pro, oeps_zns, "Importiert Stammdaten (.dat), exportiert Ergebnisse (.erg/.xml)", DE_ZNS_FORMAT " / " DE_ERGEBNIS_FORMAT)
+Rel(meldestelle_pro, zeitmessung, "Empfängt Zeit-Signale", "Serielle Schnittstelle / USB")
+Rel(meldestelle_pro, email, "Sendet Bestätigungen & Benachrichtigungen", "SMTP")
+
+' ##################################################################
+' ### LEVEL 2: CONTAINER-DIAGRAMM                              ###
+' ##################################################################
+
+title Meldestelle_Pro - C4 Level 2: Container-Diagramm
+
+' --- Externe Systeme & Personen (aus Level 1 wiederverwenden) ---
+' Positionierung der externen Akteure
+LAYOUT_LANDSCAPE()
+reiter -- (0, 10)
+veranstalter -- (0, 10)
+admin -- (0, 10)
+parcoursbauer -- (0, 10)
+funktionaer -- (0, 10)
+
+System_Boundary(c1, "Meldestelle_Pro") {
+
+    ' --- Client-Anwendungen ---
+    Container(webapp, "Web-Anwendung", DE_COMPOSE, "Bietet Online-Nennung für Reiter und Verwaltungs-Dashboards für Admins/Veranstalter.")
+    Container(desktopapp, "Desktop-Anwendung", DE_COMPOSE, "Offline-fähige 'Pro'-Version für die Meldestelle mit Hardware-Anbindung und vollem Funktionsumfang.")
+
+    ' --- API Gateway ---
+    Container(api_gateway, "API Gateway", DE_KTOR, "Zentraler, gesicherter Eingangspunkt für alle API-Anfragen. Leitet Anfragen an die Backend-Services weiter.")
+
+    ' --- Datenbanken & Messaging ---
+    ContainerDb(postgres_db, "Relationale Datenbank", DE_POSTGRES, "Speichert die primären Geschäftsdaten (Personen, Pferde, Events etc.). Jeder Service hat ein eigenes, isoliertes Schema.")
+    ContainerDb(redis, "In-Memory Datenspeicher", DE_REDIS, "Dient als High-Performance Cache und als Event Store für das Event Sourcing.")
+    ContainerQueue(kafka, "Message Bus", DE_KAFKA, "Ermöglicht die asynchrone, ereignisgesteuerte Kommunikation zwischen den Services.")
+
+    ' --- Unterstützende Services ---
+    Container(keycloak, "Identity & Access Mgmt", DE_KEYCLOAK, "Zentraler Service für Authentifizierung und Autorisierung (Benutzer-Logins, Rollen).")
+
+    ' --- Bounded Contexts / Microservices ---
+    System_Boundary(c2, "Backend Services") {
+
+        package "Stammdaten & Import" {
+            Container(masterdata_service, "Masterdata Service", DE_SPRING_BOOT, "Verwaltet globale Regeln, Lizenzen, Qualifikationen und sportfachliche Definitionen.")
+            Container(zns_import_acl, "ZNS-Import (ACL)", DE_SPRING_BOOT, "Liest und übersetzt die OEPS .dat Dateien in Domänen-Events.")
+            Container(personen_service, "Personen/Pferde Service", DE_SPRING_BOOT, "Verwaltet die Stammdaten von Personen, Pferden und Vereinen.")
+        }
+
+        package "Planung & Abwicklung" {
+            Container(events_service, "Veranstaltungs-Service", DE_SPRING_BOOT, "Verwaltet die Struktur von Veranstaltungen (Dach-Event, Turnier, Bewerb).")
+            Container(nennungs_service, "Nennungs-Service", DE_SPRING_BOOT, "Orchestriert den Nennprozess von der Abgabe bis zur Startliste.")
+            Container(ergebnis_service, "Ergebnis-Service", DE_SPRING_BOOT, "Erfasst, berechnet und exportiert die finalen Ergebnisse.")
+        }
+
+        package "Geschäfts- & Meta-Logik" {
+            Container(tenancy_service, "Mandanten-Service", DE_SPRING_BOOT, "Verwaltet Kunden, Produkte ('Web'/'Pro') und Software-Lizenzen.")
+            Container(billing_service, "Abrechnungs-Service", DE_SPRING_BOOT, "Zentrale Kasse für Nenngelder, Preisgelder und Gebühren.")
+            Container(championship_service, "Serien-Service", DE_SPRING_BOOT, "Verwaltet übergreifende Cups und Meisterschaften.")
+        }
+    }
+}
+
+
+' --- Beziehungen Level 2 ---
+
+' Benutzer -> Frontend / Gateway
+Rel(reiter, webapp, "Nutzt")
+Rel(veranstalter, webapp, "Nutzt")
+Rel(veranstalter, desktopapp, "Nutzt")
+Rel(admin, webapp, "Nutzt")
+Rel(parcoursbauer, webapp, "Nutzt")
+Rel(funktionaer, desktopapp, "Nutzt")
+
+Rel(webapp, api_gateway, "Macht API-Aufrufe", "HTTPS/JSON")
+Rel(desktopapp, api_gateway, "Macht API-Aufrufe", "HTTPS/JSON")
+
+' Gateway -> Backend
+Rel(api_gateway, masterdata_service, "Leitet Anfragen weiter")
+Rel(api_gateway, personen_service, "Leitet Anfragen weiter")
+Rel(api_gateway, events_service, "Leitet Anfragen weiter")
+Rel(api_gateway, nennungs_service, "Leitet Anfragen weiter")
+Rel(api_gateway, ergebnis_service, "Leitet Anfragen weiter")
+Rel(api_gateway, billing_service, "Leitet Anfragen weiter")
+Rel(api_gateway, tenancy_service, "Leitet Anfragen weiter")
+Rel(api_gateway, championship_service, "Leitet Anfragen weiter")
+
+' Authentifizierung
+Rel(api_gateway, keycloak, "Validiert JWT Token")
+Rel(webapp, keycloak, "Authentifiziert Benutzer", "OAuth2")
+Rel(desktopapp, keycloak, "Authentifiziert Benutzer", "OAuth2")
+
+' Service -> Datenbanken
+Rel(masterdata_service, postgres_db, "Liest/Schreibt", "JDBC")
+Rel(personen_service, postgres_db, "Liest/Schreibt", "JDBC")
+Rel(events_service, postgres_db, "Liest/Schreibt", "JDBC")
+Rel(nennungs_service, postgres_db, "Liest/Schreibt", "JDBC")
+Rel(ergebnis_service, postgres_db, "Liest/Schreibt", "JDBC")
+Rel(billing_service, postgres_db, "Liest/Schreibt", "JDBC")
+Rel(tenancy_service, postgres_db, "Liest/Schreibt", "JDBC")
+Rel(championship_service, postgres_db, "Liest/Schreibt", "JDBC")
+Rel(zns_import_acl, postgres_db, "Liest (für Abgleich)", "JDBC")
+
+
+' Service -> Caching & Event Store
+Rel_Neighbor(nennungs_service, redis, "Nutzt für Caching & Event Sourcing")
+Rel_Neighbor(ergebnis_service, redis, "Nutzt für Caching & Event Sourcing")
+
+' Asynchrone Kommunikation via Kafka
+Rel(zns_import_acl, kafka, "Publiziert 'Stammdaten Aktualisiert' Events")
+Rel(personen_service, kafka, "Subscribed Events von ZNS-Import")
+Rel(nennungs_service, kafka, "Publiziert 'Nennung Eingereicht' & 'Startliste Finalisiert' Events")
+Rel(billing_service, kafka, "Subscribed 'Nennung Eingereicht' Event")
+Rel(ergebnis_service, kafka, "Subscribed 'Startliste Finalisiert' Event, Publiziert 'Ergebnis Finalisiert' Event")
+Rel(championship_service, kafka, "Subscribed 'Ergebnis Finalisiert' Event")
+
+' Direkte Service-zu-Service Kommunikation (Beispiele, sollte minimiert werden)
+Rel(nennungs_service, masterdata_service, "Fragt Regeln für Validierung an", "HTTPS/JSON")
+Rel(nennungs_service, personen_service, "Fragt Reiter/Pferde-Details an", "HTTPS/JSON")
+
+
+' Hardware Anbindung
+Rel(desktopapp, zeitmessung, "Empfängt Zeit-Signale", "Serielle Schnittstelle / USB")
+
+@enduml
