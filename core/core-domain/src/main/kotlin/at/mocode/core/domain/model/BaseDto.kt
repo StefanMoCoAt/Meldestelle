@@ -3,6 +3,7 @@ package at.mocode.core.domain.model
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
 import at.mocode.core.domain.serialization.UuidSerializer
 import com.benasher44.uuid.Uuid
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -27,42 +28,32 @@ abstract class EntityDto : BaseDto {
 }
 
 /**
- * Standard API response wrapper
+ * A standardized wrapper for all API responses.
+ * Provides a consistent structure for data, success status, and errors.
+ * @param T The type of the data payload.
  */
 @Serializable
 data class ApiResponse<T>(
-    val success: Boolean,
     val data: T? = null,
-    val error: ErrorDto? = null,
-    val message: String? = null
-) : BaseDto {
-    companion object {
-        /**
-         * Creates a successful API response with data
-         */
-        fun <T> success(data: T, message: String? = null): ApiResponse<T> {
-            return ApiResponse(
-                success = true,
-                data = data,
-                message = message
-            )
-        }
+    val success: Boolean = true,
+    val message: String? = null,
+    val errors: List<String> = emptyList(),
+    val timestamp: Instant = Clock.System.now()
+)
 
-        /**
-         * Creates an error API response
-         */
-        fun <T> error(message: String, code: String = "ERROR", details: Map<String, String>? = null): ApiResponse<T> {
-            return ApiResponse(
-                success = false,
-                error = ErrorDto(
-                    code = code,
-                    message = message,
-                    details = details
-                )
-            )
-        }
-    }
-}
+/**
+ * A standardized wrapper for paginated API responses.
+ * @param T The type of the content in the page.
+ */
+data class PagedResponse<T>(
+    val content: List<T>,
+    val page: Int,
+    val size: Int,
+    val totalElements: Long,
+    val totalPages: Int,
+    val hasNext: Boolean,
+    val hasPrevious: Boolean
+)
 
 /**
  * Error information DTO
@@ -85,12 +76,5 @@ data class PaginationDto(
     val totalPages: Int
 ) : BaseDto
 
-/**
- * Paginated response wrapper
- */
-@Serializable
-data class PagedResponse<T>(
-    val data: List<T>,
-    val pagination: PaginationDto
-) : BaseDto
+
 
