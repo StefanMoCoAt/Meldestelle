@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.flywaydb.core.Flyway
 
 /**
  * Factory-Klasse für die Datenbankverbindung.
@@ -64,6 +65,30 @@ object DatabaseFactory {
 
         dataSource = HikariDataSource(hikariConfig)
         Database.connect(dataSource!!)
+
+        // Flyway-Migrationen wenn aktiviert
+        if (config.autoMigrate) {
+            runFlyway(dataSource!!)
+        }
+    }
+
+    private fun runFlyway(dataSource: HikariDataSource) {
+        println("Starte Flyway-Migrationen...")
+        val flyway = Flyway.configure()
+            .dataSource(dataSource)
+            .locations("classpath:db/migration") // Sagt Flyway, wo die SQL-Dateien liegen
+            .load()
+
+        try {
+            flyway.migrate()
+            println("Flyway-Migrationen erfolgreich abgeschlossen.")
+        } catch (e: Exception) {
+            println("FEHLER: Flyway-Migration fehlgeschlagen! Repariere Schema...")
+            // Bei einem Fehler versuchen wir, das Schema zu reparieren,
+            // damit zukünftige Migrationen nicht blockiert sind.
+            flyway.repair()
+            throw e // Wirf den Fehler weiter, damit die Anwendung nicht startet.
+        }
     }
 
     /**
