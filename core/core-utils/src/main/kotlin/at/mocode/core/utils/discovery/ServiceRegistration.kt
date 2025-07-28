@@ -1,6 +1,6 @@
 package at.mocode.core.utils.discovery
 
-import at.mocode.core.utils.config.AppConfig
+import at.mocode.core.utils.config.AppConfig // Angenommen, AppConfig ist jetzt eine Klasse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -10,156 +10,87 @@ import java.util.*
 import kotlin.time.Duration.Companion.seconds
 import com.orbitz.consul.Consul
 import com.orbitz.consul.model.agent.ImmutableRegistration
-import com.orbitz.consul.model.agent.Registration
 
 /**
- * Service registration configuration.
- *
- * @property serviceName The name of the service to register
- * @property serviceId A unique ID for this service instance (defaults to serviceName + random UUID)
- * @property servicePort The port the service is running on
- * @property healthCheckPath The path for the health check endpoint (defaults to "/health")
- * @property healthCheckInterval The interval between health checks in seconds (defaults to 10 seconds)
- * @property tags Optional tags to associate with the service
- * @property meta Optional metadata to associate with the service
+ * Repräsentiert die Registrierung eines einzelnen Service-Exemplars bei Consul.
+ * Diese Klasse kümmert sich um den Lebenszyklus (Registrierung, Deregistrierung).
  */
-data class ServiceRegistrationConfig(
-    val serviceName: String,
-    val serviceId: String = "$serviceName-${UUID.randomUUID()}",
-    val servicePort: Int,
-    val healthCheckPath: String = "/health",
-    val healthCheckInterval: Int = 10,
-    val tags: List<String> = emptyList(),
-    val meta: Map<String, String> = emptyMap()
-)
-
-/**
- * Service registration component for registering services with Consul.
- */
-class ServiceRegistration(
-    private val config: ServiceRegistrationConfig,
-    private val consulHost: String = "consul",
-    private val consulPort: Int = 8500
+class ServiceRegistration internal constructor(
+    private val consul: Consul,
+    private val registration: ImmutableRegistration
 ) {
-    private val consul: Consul by lazy {
-        try {
-            Consul.builder()
-                .withUrl("http://$consulHost:$consulPort")
-                .build()
-        } catch (e: Exception) {
-            println("Failed to connect to Consul: ${e.message}")
-            throw e
-        }
-    }
+    private var isRegistered = false
 
-    private val serviceId = config.serviceId
-    private var registered = false
-
-    /**
-     * Register the service with Consul.
-     */
     fun register() {
+        if (isRegistered) return
         try {
-            val hostAddress = InetAddress.getLocalHost().hostAddress
-
-            // Create health check
-            val healthCheck = Registration.RegCheck.http(
-                "http://$hostAddress:${config.servicePort}${config.healthCheckPath}",
-                config.healthCheckInterval.toLong()
-            )
-
-            // Create service registration
-            val registration = ImmutableRegistration.builder()
-                .id(serviceId)
-                .name(config.serviceName)
-                .address(hostAddress)
-                .port(config.servicePort)
-                .tags(config.tags)
-                .meta(config.meta)
-                .check(healthCheck)
-                .build()
-
-            // Register service with Consul
             consul.agentClient().register(registration)
-            registered = true
-            println("Service $serviceId registered with Consul at $consulHost:$consulPort")
-
-            // Start heartbeat to keep service registration active
-            startHeartbeat()
+            isRegistered = true
+            println("Service '${registration.name()}' mit ID '${registration.id()}' erfolgreich bei Consul registriert.")
         } catch (e: Exception) {
-            println("Failed to register service with Consul: ${e.message}")
-            e.printStackTrace()
+            println("FEHLER: Service-Registrierung bei Consul fehlgeschlagen: ${e.message}")
+            // Optional: Fehler weiterwerfen, um den Anwendungsstart zu stoppen
         }
     }
 
-    /**
-     * Deregister the service from Consul.
-     */
     fun deregister() {
+        if (!isRegistered) return
         try {
-            if (registered) {
-                consul.agentClient().deregister(serviceId)
-                registered = false
-                println("Service $serviceId deregistered from Consul")
-            }
+            consul.agentClient().deregister(registration.id())
+            isRegistered = false
+            println("Service '${registration.name()}' mit ID '${registration.id()}' erfolgreich bei Consul deregistriert.")
         } catch (e: Exception) {
-            println("Failed to deregister service from Consul: ${e.message}")
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * Start a heartbeat to keep the service registration active.
-     */
-    private fun startHeartbeat() {
-        CoroutineScope(Dispatchers.IO).launch {
-            while (registered) {
-                try {
-                    // Send heartbeat to Consul
-                    consul.agentClient().pass(serviceId)
-                    delay(config.healthCheckInterval.seconds)
-                } catch (e: Exception) {
-                    println("Failed to send heartbeat to Consul: ${e.message}")
-                    delay(5.seconds)
-                }
-            }
+            println("FEHLER: Service-Deregistrierung bei Consul fehlgeschlagen: ${e.message}")
         }
     }
 }
 
 /**
- * Factory for creating ServiceRegistration instances.
+ * Zentraler Registrar, der beim Anwendungsstart Services registriert.
+ * Diese Klasse wird einmalig mit der Gesamt-AppConfig initialisiert.
  */
-object ServiceRegistrationFactory {
+class ServiceRegistrar(private val appConfig: AppConfig) {
+
+    private val consul: Consul by lazy {
+        val consulConfig = appConfig.serviceDiscovery
+        Consul.builder()
+            .withUrl("http://${consulConfig.consulHost}:${consulConfig.consulPort}")
+            .build()
+    }
+
     /**
-     * Create a ServiceRegistration instance for a service.
-     *
-     * @param serviceName The name of the service to register
-     * @param servicePort The port the service is running on
-     * @param healthCheckPath The path for the health check endpoint (defaults to "/health")
-     * @param tags Optional tags to associate with the service
-     * @param meta Optional metadata to associate with the service
-     * @return A ServiceRegistration instance
+     * Erstellt und registriert einen Service basierend auf der App-Konfiguration.
+     * @return Eine ServiceRegistration-Instanz zur Verwaltung des Lebenszyklus.
      */
-    fun createServiceRegistration(
-        serviceName: String,
-        servicePort: Int,
-        healthCheckPath: String = "/health",
-        tags: List<String> = emptyList(),
-        meta: Map<String, String> = emptyMap()
-    ): ServiceRegistration {
-        val config = ServiceRegistrationConfig(
-            serviceName = serviceName,
-            servicePort = servicePort,
-            healthCheckPath = healthCheckPath,
-            tags = tags,
-            meta = meta
+    fun registerCurrentService(): ServiceRegistration {
+        val serviceName = appConfig.appInfo.name
+        val servicePort = appConfig.server.port
+        val serviceId = "$serviceName-${UUID.randomUUID()}"
+        val hostAddress = InetAddress.getLocalHost().hostAddress
+
+        val healthCheck = ImmutableRegistration.RegCheck.http(
+            "http://$hostAddress:$servicePort/health", // Standard-Health-Check-Pfad
+            10L // Intervall in Sekunden
         )
 
-        // Get Consul host and port from configuration if available
-        val consulHost = AppConfig.serviceDiscovery.consulHost
-        val consulPort = AppConfig.serviceDiscovery.consulPort
+        val registration = ImmutableRegistration.builder()
+            .id(serviceId)
+            .name(serviceName)
+            .address(hostAddress)
+            .port(servicePort)
+            .check(healthCheck)
+            .tags(listOf("env:${appConfig.environment.name.lowercase()}"))
+            .meta(mapOf("version" to appConfig.appInfo.version))
+            .build()
 
-        return ServiceRegistration(config, consulHost, consulPort)
+        val serviceRegistration = ServiceRegistration(consul, registration)
+        serviceRegistration.register()
+
+        // Fügt einen Shutdown-Hook hinzu, um den Service beim Beenden sauber zu deregistrieren
+        Runtime.getRuntime().addShutdownHook(Thread {
+            serviceRegistration.deregister()
+        })
+
+        return serviceRegistration
     }
 }

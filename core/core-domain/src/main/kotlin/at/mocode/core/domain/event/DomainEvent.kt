@@ -10,28 +10,22 @@ import kotlinx.datetime.Instant
  * A domain event represents something significant that has happened in a specific domain.
  */
 interface DomainEvent {
-
-    /**
-     * Unique identifier for this event instance.
-     */
     val eventId: Uuid
-
-    /**
-     * Identifier of the aggregate that the event belongs to.
-     */
     val aggregateId: Uuid
-
     val eventType: String
-
-    /**
-     * Timestamp when the event occurred.
-     */
     val timestamp: Instant
+    val version: Long
+
+    // OPTIMIZED: Added correlation and causation IDs for distributed tracing.
+    /**
+     * Tracks a chain of events initiated by a single user action across multiple services.
+     */
+    val correlationId: Uuid?
 
     /**
-     * Version of the aggregate after the event was applied.
+     * Tracks the direct cause of this event (the ID of the preceding event or command).
      */
-    val version: Long
+    val causationId: Uuid?
 }
 
 /**
@@ -39,29 +33,20 @@ interface DomainEvent {
  */
 abstract class BaseDomainEvent(
     override val aggregateId: Uuid,
-
     override val eventType: String,
-
     override val version: Long,
-
     override val eventId: Uuid = uuid4(),
-
-    override val timestamp: Instant = Clock.System.now()
-
-
+    override val timestamp: Instant = Clock.System.now(),
+    override val correlationId: Uuid? = null,
+    override val causationId: Uuid? = null
 ) : DomainEvent
 
-/**
- * Interface for a component that can publish domain events, typically to a message bus like Kafka.
- */
+// ... (DomainEventPublisher and DomainEventHandler interfaces remain the same)
 interface DomainEventPublisher {
     suspend fun publish(event: DomainEvent)
     suspend fun publishAll(events: List<DomainEvent>)
 }
 
-/**
- * Interface for a component that can handle (react to) a specific type of domain event.
- */
 interface DomainEventHandler<T : DomainEvent> {
     suspend fun handle(event: T)
     fun canHandle(eventType: String): Boolean

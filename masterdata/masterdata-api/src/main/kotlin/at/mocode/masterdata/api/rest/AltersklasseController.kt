@@ -91,7 +91,7 @@ class AltersklasseController(
                         } catch (_: Exception) {
                             return@get call.respond(
                                 HttpStatusCode.BadRequest,
-                                ApiResponse.error<List<AltersklasseDto>>("Invalid sparte parameter: $it")
+                                ApiResponse<List<AltersklasseDto>>("Invalid sparte parameter: $it")
                             )
                         }
                     }
@@ -103,7 +103,7 @@ class AltersklasseController(
                         } else {
                             return@get call.respond(
                                 HttpStatusCode.BadRequest,
-                                ApiResponse.error<List<AltersklasseDto>>("Invalid geschlecht parameter. Must be 'M' or 'W'")
+                                ApiResponse<List<AltersklasseDto>>("Invalid geschlecht parameter. Must be 'M' or 'W'")
                             )
                         }
                     }

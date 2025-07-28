@@ -215,7 +215,7 @@ class CreateAltersklasseUseCase(
 
         // Age class code validation
         if (request.altersklasseCode.isBlank()) {
-            errors.add(ValidationError("altersklasseCode", "Age class code is required", "REQUIRED"))
+            errors.add(ValidationError("altersklasseCode", "Age class code is required", "REQUIRED")) // "REQUIRED"
         } else if (request.altersklasseCode.length > 50) {
             errors.add(ValidationError("altersklasseCode", "Age class code must not exceed 50 characters", "MAX_LENGTH"))
         } else if (!request.altersklasseCode.matches(Regex("^[A-Z0-9_]+$"))) {
