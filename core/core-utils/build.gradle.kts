@@ -19,6 +19,7 @@ dependencies {
     api("org.jetbrains.exposed:exposed-jdbc")
     api("org.jetbrains.exposed:exposed-kotlin-datetime")
     api("com.zaxxer:HikariCP")
+    api("org.flywaydb:flyway-core:9.22.3")
 
     // BigDecimal
     api("com.ionspin.kotlin:bignum:0.3.8")
