@@ -1,3 +1,4 @@
+/*
 import java.util.Locale
 
 plugins {
@@ -64,11 +65,11 @@ subprojects {
         jvmArgs = listOf("-Xmx512m", "-XX:+UseG1GC")
 
         // Include all tests that have "Integration" in their name
-        include("**/*Integration*Test.kt")
+        include("** / *Integration*Test.kt")
 
         // Exclude unit tests (but keep integration tests)
-        exclude("**/*Test.kt")
-        include("**/*IntegrationTest.kt")
+        exclude("** / *Test.kt")
+        include("** / *IntegrationTest.kt")
 
         // Set system properties for integration tests
         systemProperty("spring.profiles.active", "integration-test")
@@ -83,6 +84,43 @@ subprojects {
 
         // This task should run after the regular test task
         // We don't use mustRunAfter here to avoid reference issues
+    }
+}
+*/
+
+import java.util.Locale
+
+plugins {
+    // KORREKTUR: Wir entfernen die hartcodierten Versionen und verwenden stattdessen
+    // die Aliase aus dem Version Catalog. `apply false` bleibt, da die Plugins
+    // hier nur für die Unterprojekte deklariert werden.
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
+    alias(libs.plugins.compose.compiler) apply false
+    base
+}
+
+allprojects {
+    group = "at.mocode.meldestelle"
+    version = "0.1.0-SNAPSHOT"
+
+    repositories {
+        mavenCentral()
+        google() // Wichtig für Compose-Abhängigkeiten
+    }
+}
+
+subprojects {
+    // Konfigurationen, die für alle Untermodule gelten.
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
+    }
+
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
     }
 }
 

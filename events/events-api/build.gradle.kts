@@ -1,6 +1,7 @@
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.spring")
+    // KORREKTUR: Alle Plugins werden jetzt konsistent über den Version Catalog geladen.
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktor)
     application
@@ -11,6 +12,7 @@ application {
 }
 
 dependencies {
+    // Deine Abhängigkeiten sind hier bereits korrekt und benötigen keine Änderung.
     implementation(projects.platform.platformDependencies)
 
     implementation(projects.events.eventsDomain)
@@ -26,7 +28,7 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
     implementation(libs.ktor.server.contentNegotiation)
-    implementation(libs.ktor.server.serializationKotlinxJson)
+    implementation(libs.ktor.server.serialization.kotlinx.json)
     implementation(libs.ktor.server.statusPages)
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.server.authJwt)

@@ -1,58 +1,34 @@
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.spring")
-    id("org.springframework.boot")
-    id("io.spring.dependency-management") version "1.1.4"
-    id("org.jetbrains.compose") version "1.7.3"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.21"
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.compose.compiler)
 }
 
-repositories {
-    google()
-    mavenCentral()
-}
+kotlin {
+    js(IR) {
+        browser {
+            // Konfiguriert den Development-Server und die finalen Bundles.
+            commonWebpackConfig {
+                outputFileName = "MeldestelleWebApp.js"
+            }
+        }
+        binaries.executable()
+    }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
+    sourceSets {
+        val jsMain by getting {
+            dependencies {
+                // Greift explizit auf den JS-Teil unseres KMP-Moduls zu.
+                implementation(projects.client.commonUi)
 
-dependencies {
-    // Client dependencies
-    implementation(projects.client.commonUi)
-
-    // Core dependencies - minimal set
-    implementation(projects.core.coreDomain)
-    implementation(projects.core.coreUtils)
-
-    // Remove unnecessary infrastructure dependencies
-    // implementation(projects.infrastructure.auth.authClient) // Only if auth is needed
-
-    // Remove direct domain module dependencies - access through API instead
-    // implementation(projects.members.membersDomain) // Access through API
-    // implementation(projects.members.membersApplication) // Access through API
-    // implementation(projects.masterdata.masterdataDomain) // Access through API
-    // implementation(projects.horses.horsesDomain) // Access through API
-    // implementation(projects.events.eventsDomain) // Access through API
-
-    // Compose dependencies for Desktop
-    implementation(compose.desktop.currentOs)
-    implementation(compose.runtime)
-    implementation(compose.foundation)
-    implementation(compose.material3)
-    implementation(compose.ui)
-    implementation(compose.components.resources)
-    implementation(compose.materialIconsExtended)
-
-    // Essential Kotlinx dependencies
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.8.0")
-    implementation("com.benasher44:uuid:0.8.4")
-
-    // Testing
-    testImplementation(projects.platform.platformTesting)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
-    testImplementation("io.mockk:mockk:1.13.8")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+                // Stellt die Web-spezifischen (HTML) Teile von Jetpack Compose bereit.
+                implementation(compose.html.core)
+            }
+        }
+        val jsTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+    }
 }

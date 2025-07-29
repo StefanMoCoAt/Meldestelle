@@ -1,52 +1,64 @@
 plugins {
-    kotlin("jvm")
-    id("org.springframework.boot") apply false
-    id("io.spring.dependency-management") apply false
-    id("org.jetbrains.compose") version "1.7.3"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.20"
+    // KORREKTUR: Wir deklarieren dieses Modul als Kotlin Multiplatform Modul.
+    alias(libs.plugins.kotlin.multiplatform)
+    // KORREKTUR: Wir deklarieren, dass wir Jetpack Compose verwenden.
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.compose.compiler)
 }
 
-repositories {
-    google()
-    mavenCentral()
-}
+kotlin {
+    // Wir definieren die Zielplattformen, für die dieses Modul Code bereitstellt.
+    jvm("desktop") // Ein JVM-Target für unsere Desktop-App
+    js(IR) {       // Ein JavaScript-Target für unsere Web-App
+        browser()
+        binaries.executable()
+    }
 
-dependencies {
-    // Core dependencies
-    implementation(projects.core.coreDomain)
-    implementation(projects.core.coreUtils)
+    // Hier definieren wir die Abhängigkeiten für die jeweiligen Source Sets.
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                // --- Interne Module (für alle Plattformen verfügbar) ---
+                api(projects.core.coreDomain)
+                api(projects.core.coreUtils)
 
-    // Domain modules
-    implementation(projects.events.eventsDomain)
-    implementation(projects.horses.horsesDomain)
-    implementation(projects.masterdata.masterdataDomain)
-    implementation(projects.members.membersDomain)
+                // --- Jetpack Compose UI (für alle Plattformen verfügbar) ---
+                api(compose.runtime)
+                api(compose.foundation)
+                api(compose.material3)
+                api(compose.ui)
+                api(compose.components.resources)
+                api(compose.materialIconsExtended)
 
-    // Compose dependencies for Desktop
-    implementation(compose.desktop.currentOs)
-    implementation(compose.runtime)
-    implementation(compose.foundation)
-    implementation(compose.material3)
-    implementation(compose.ui)
-    implementation(compose.components.resources)
-    implementation(compose.materialIconsExtended)
+                // --- Ktor Client für API-Kommunikation (Kernmodul für alle) ---
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.contentNegotiation)
+                implementation(libs.ktor.client.serialization.kotlinx.json)
 
-    // AndroidX dependencies are provided by the Compose plugin
+                // --- Coroutines (für alle Plattformen verfügbar) ---
+                implementation(libs.kotlinx.coroutines.core)
+            }
+        }
 
-    // Ktor Client dependencies
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.contentNegotiation)
-    implementation(libs.ktor.client.serializationKotlinxJson)
+        val desktopMain by getting {
+            dependencies {
+                // Ktor-Engine, die nur für die Desktop (JVM) Version benötigt wird
+                implementation(libs.ktor.client.cio)
+            }
+        }
 
-    // Kotlinx dependencies
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.8.0")
-    implementation("com.benasher44:uuid:0.8.4")
+        val jsMain by getting {
+            dependencies {
+                // Ktor-Engine, die nur für die Web (JS) Version benötigt wird
+                implementation(libs.ktor.client.js)
+            }
+        }
 
-    // Testing
-    testImplementation(kotlin("test"))
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
+    }
 }

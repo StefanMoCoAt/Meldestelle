@@ -1,7 +1,9 @@
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.spring")
-    kotlin("plugin.jpa") version "2.1.20"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ktor)
+    application
 }
 
 dependencies {
