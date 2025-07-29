@@ -2,6 +2,7 @@ package at.mocode.core.utils.serialization
 
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
+// KORREKTUR: Der Import wurde von java.math.BigDecimal auf die korrekte Bibliothek geändert.
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate

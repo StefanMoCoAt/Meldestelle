@@ -1,8 +1,9 @@
 plugins {
     // Definiert dieses Modul als ein Standard Kotlin/JVM-Modul.
-    kotlin("jvm")
+//    kotlin("jvm")
     // Aktiviert das Kotlinx Serialization Plugin, da unsere DTOs und Enums
     // als @Serializable markiert sind.
+    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
 }
 

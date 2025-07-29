@@ -1,0 +1,62 @@
+groups:
+  - name: meldestelle_alerts
+    rules:
+      # Alert for high memory usage
+      - alert: HighMemoryUsage
+        expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage ({{ $value }}%)"
+          description: "JVM memory usage is above 85% for 5 minutes.\n  Instance: {{ $labels.instance }}\n  Service: {{ $labels.service }}"
+
+      # Alert for high CPU usage
+      - alert: HighCpuUsage
+        expr: process_cpu_usage > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage ({{ $value }})"
+          description: "CPU usage is above 85% for 5 minutes.\n  Instance: {{ $labels.instance }}\n  Service: {{ $labels.service }}"
+
+      # Alert for high error rate
+      - alert: HighErrorRate
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate ({{ $value }}%)"
+          description: "Error rate is above 5% for 2 minutes.\n  Instance: {{ $labels.instance }}\n  Service: {{ $labels.service }}"
+
+      # Alert for service unavailability
+      - alert: ServiceUnavailable
+        expr: up{job="meldestelle-server"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service unavailable"
+          description: "Meldestelle service is down.\n  Instance: {{ $labels.instance }}"
+
+      # Alert for slow response time
+      - alert: SlowResponseTime
+        expr: http_server_requests_seconds_sum / http_server_requests_seconds_count > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow response time ({{ $value }}s)"
+          description: "Average response time is above 1 second for 5 minutes.\n  Instance: {{ $labels.instance }}\n  Path: {{ $labels.uri }}"
+
+      # Alert for high GC pause time
+      - alert: HighGcPauseTime
+        expr: jvm_gc_pause_seconds_sum / jvm_gc_pause_seconds_count > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High GC pause time ({{ $value }}s)"
+          description: "Average GC pause time is above 0.5 seconds for 5 minutes.\n  Instance: {{ $labels.instance }}"

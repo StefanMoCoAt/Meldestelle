@@ -1,12 +1,9 @@
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 dependencies {
-    // Verwendet die zentrale Platform-BOM für konsistente Versionen
     api(projects.platform.platformDependencies)
-
-    // Explizite `api`-Abhängigkeit zum core-domain Modul.
     api(projects.core.coreDomain)
 
     // --- Coroutines & Asynchronität ---
@@ -23,6 +20,10 @@ dependencies {
 
     // --- Service Discovery ---
     api(libs.consul.client)
+
+    // --- Utilities ---
+    // KORREKTUR: Fehlende Abhängigkeit für den BigDecimalSerializer hinzugefügt.
+    api(libs.bignum)
 
     // --- Testing ---
     testImplementation(projects.platform.platformTesting)

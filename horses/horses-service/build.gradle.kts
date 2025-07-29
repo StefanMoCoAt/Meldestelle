@@ -1,16 +1,19 @@
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.spring")
-    id("org.springframework.boot")
+    // KORREKTUR: Alle Plugins werden jetzt konsistent über den Version Catalog geladen.
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependencyManagement)
 }
 
+// Der springBoot-Block konfiguriert die Anwendung, wenn sie als JAR-Datei ausgeführt wird.
 springBoot {
     mainClass.set("at.mocode.horses.service.HorsesServiceApplicationKt")
 }
 
 dependencies {
+    // Interne Module
     implementation(projects.platform.platformDependencies)
-
     implementation(projects.core.coreDomain)
     implementation(projects.core.coreUtils)
     implementation(projects.horses.horsesDomain)
@@ -18,24 +21,30 @@ dependencies {
     implementation(projects.horses.horsesInfrastructure)
     implementation(projects.horses.horsesApi)
 
+    // Infrastruktur-Clients
     implementation(projects.infrastructure.auth.authClient)
     implementation(projects.infrastructure.cache.redisCache)
     implementation(projects.infrastructure.messaging.messagingClient)
     implementation(projects.infrastructure.monitoring.monitoringClient)
 
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")
+    // KORREKTUR: Alle externen Abhängigkeiten werden jetzt über den Version Catalog bezogen.
 
-    // Database dependencies
-    implementation("org.jetbrains.exposed:exposed-core")
-    implementation("org.jetbrains.exposed:exposed-dao")
-    implementation("org.jetbrains.exposed:exposed-jdbc")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime")
-    implementation("com.zaxxer:HikariCP")
-    runtimeOnly("org.postgresql:postgresql")
-    testRuntimeOnly("com.h2database:h2")
+    // Spring Boot Starters
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.actuator)
 
+    // Datenbank-Abhängigkeiten
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.dao)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.kotlin.datetime)
+    implementation(libs.hikari.cp)
+    runtimeOnly(libs.postgresql.driver)
+    testRuntimeOnly(libs.h2.driver)
+
+
+    // Testing
     testImplementation(projects.platform.platformTesting)
+    testImplementation(libs.spring.boot.starter.test)
 }

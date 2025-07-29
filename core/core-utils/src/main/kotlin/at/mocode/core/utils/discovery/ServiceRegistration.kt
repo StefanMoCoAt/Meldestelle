@@ -1,15 +1,10 @@
 package at.mocode.core.utils.discovery
 
-import at.mocode.core.utils.config.AppConfig // Angenommen, AppConfig ist jetzt eine Klasse
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.net.InetAddress
-import java.util.*
-import kotlin.time.Duration.Companion.seconds
+import at.mocode.core.utils.config.AppConfig // AppConfig ist jetzt eine Klasse
 import com.orbitz.consul.Consul
 import com.orbitz.consul.model.agent.ImmutableRegistration
+import java.net.InetAddress
+import java.util.*
 
 /**
  * Repräsentiert die Registrierung eines einzelnen Service-Exemplars bei Consul.
@@ -29,7 +24,8 @@ class ServiceRegistration internal constructor(
             println("Service '${registration.name()}' mit ID '${registration.id()}' erfolgreich bei Consul registriert.")
         } catch (e: Exception) {
             println("FEHLER: Service-Registrierung bei Consul fehlgeschlagen: ${e.message}")
-            // Optional: Fehler weiterwerfen, um den Anwendungsstart zu stoppen
+            // Fehler weiterwerfen, um den Anwendungsstart zu stoppen
+            throw IllegalStateException("Could not register service with Consul", e)
         }
     }
 
@@ -70,7 +66,8 @@ class ServiceRegistrar(private val appConfig: AppConfig) {
 
         val healthCheck = ImmutableRegistration.RegCheck.http(
             "http://$hostAddress:$servicePort/health", // Standard-Health-Check-Pfad
-            10L // Intervall in Sekunden
+            10L, // Intervall in Sekunden
+            5L // Timeout in Sekunden
         )
 
         val registration = ImmutableRegistration.builder()
@@ -88,6 +85,7 @@ class ServiceRegistrar(private val appConfig: AppConfig) {
 
         // Fügt einen Shutdown-Hook hinzu, um den Service beim Beenden sauber zu deregistrieren
         Runtime.getRuntime().addShutdownHook(Thread {
+            println("Shutdown-Hook: Deregistriere Service ${serviceId}...")
             serviceRegistration.deregister()
         })
 

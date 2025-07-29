@@ -1,12 +1,14 @@
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.spring")
-    kotlin("plugin.jpa") version "2.1.20"
+    // KORREKTUR: Alle Plugins werden jetzt konsistent über den Version Catalog geladen.
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    // Das JPA-Plugin wird jetzt ebenfalls zentral verwaltet.
+    alias(libs.plugins.kotlin.jpa)
 }
 
 dependencies {
+    // Interne Module
     implementation(projects.platform.platformDependencies)
-
     implementation(projects.horses.horsesDomain)
     implementation(projects.horses.horsesApplication)
     implementation(projects.core.coreDomain)
@@ -15,8 +17,14 @@ dependencies {
     implementation(projects.infrastructure.eventStore.eventStoreApi)
     implementation(projects.infrastructure.messaging.messagingClient)
 
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.postgresql:postgresql")
+    // KORREKTUR: Alle externen Abhängigkeiten werden jetzt über den Version Catalog bezogen.
 
+    // Spring Data JPA
+    implementation(libs.spring.boot.starter.data.jpa)
+
+    // Datenbank-Treiber
+    runtimeOnly(libs.postgresql.driver)
+
+    // Testing
     testImplementation(projects.platform.platformTesting)
 }
