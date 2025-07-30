@@ -1,15 +1,15 @@
 plugins {
     // Definiert dieses Modul als ein Standard Kotlin/JVM-Modul.
-//    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
     // Aktiviert das Kotlinx Serialization Plugin, da unsere DTOs und Enums
     // als @Serializable markiert sind.
-    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
-    // Stellt sicher, dass dieses Modul Zugriff auf die im zentralen Katalog
-    // definierten Bibliotheken hat.
+    // Stellt sicher, dass dieses Modul die zentralen Versionen aus unserem BOM (Bill of Materials)
+    // im platform-Modul respektiert. `api` wird verwendet, damit abhängige Module
+    // diese Platform-Definitionen ebenfalls "erben".
     api(projects.platform.platformDependencies)
 
     // --- Kern-Abhängigkeiten für das Domänen-Modell ---
@@ -26,7 +26,7 @@ dependencies {
     // Stellt moderne Datums- und Zeit-Typen wie `Instant` und `LocalDate` bereit.
     api(libs.kotlinx.datetime)
 
-    // --- Test-Abhängigkeiten ---
+    // --- Testing ---
     // Stellt die notwendigen Bibliotheken für das Schreiben von Tests bereit.
     // `testImplementation` sorgt dafür, dass diese Bibliotheken nicht Teil
     // des finalen produktiven Codes werden.

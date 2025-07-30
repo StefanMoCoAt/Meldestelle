@@ -1,8 +1,10 @@
 package at.mocode.core.utils.discovery
 
-import at.mocode.core.utils.config.AppConfig // AppConfig ist jetzt eine Klasse
+import at.mocode.core.utils.config.AppConfig
 import com.orbitz.consul.Consul
 import com.orbitz.consul.model.agent.ImmutableRegistration
+// KORREKTUR: Expliziter Import für die `Registration`-Klasse, die den `RegCheck` enthält.
+import com.orbitz.consul.model.agent.Registration
 import java.net.InetAddress
 import java.util.*
 
@@ -64,7 +66,8 @@ class ServiceRegistrar(private val appConfig: AppConfig) {
         val serviceId = "$serviceName-${UUID.randomUUID()}"
         val hostAddress = InetAddress.getLocalHost().hostAddress
 
-        val healthCheck = ImmutableRegistration.RegCheck.http(
+        // KORREKTUR: Der Aufruf erfolgt über die `Registration`-Klasse, nicht `ImmutableRegistration`.
+        val healthCheck = Registration.RegCheck.http(
             "http://$hostAddress:$servicePort/health", // Standard-Health-Check-Pfad
             10L, // Intervall in Sekunden
             5L // Timeout in Sekunden
