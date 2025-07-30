@@ -5,20 +5,20 @@
 [versions]
 # --- Kotlin Ecosystem ---
 kotlin = "2.2.0"
-kotlinxCoroutines = "1.9.1"
-kotlinxSerialization = "1.7.1"
-kotlinxDatetime = "0.6.0"
+kotlinx = "1.9.0"
+kotlinxDatetime = "0.7.1"
+kotlinLogging = "3.0.5"
 
 # --- Spring Ecosystem ---
 springBoot = "3.2.5"
 springDependencyManagement = "1.1.5"
 springdoc = "2.5.0"
 
-# --- Compose UI ---
-composeMultiplatform = "1.6.10"
-
 # --- Ktor (API Layer & Client) ---
 ktor = "3.0.0-beta-2"
+
+# --- Compose UI ---
+composeMultiplatform = "1.6.10"
 
 # --- Database & Persistence ---
 exposed = "0.51.1"
@@ -26,6 +26,8 @@ postgresql = "42.7.3"
 hikari = "5.1.0"
 h2 = "2.2.224"
 flyway = "10.15.2"
+redisson = "3.27.2"
+lettuce = "6.3.1.RELEASE"
 
 # --- Service Discovery & Monitoring ---
 consulClient = "1.5.3"
@@ -33,20 +35,34 @@ micrometer = "1.12.2"
 
 # --- Testing ---
 junitJupiter = "5.10.2"
+mockk = "1.13.8"
+assertj = "3.24.2"
+testcontainers = "1.19.6"
 
 # --- Utilities ---
 uuid = "0.8.4"
 bignum = "0.3.9"
 logback = "1.5.6"
+caffeine = "3.1.8"
+reactorKafka = "1.3.22"
+jackson = "2.17.0"
+jakartaAnnotation = "2.1.1"
+auth0Jwt = "4.4.0"
 
 [libraries]
+# --- Platform BOMs (Bill of Materials) ---
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlinx-coroutines-bom = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "kotlinx" }
+spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
+
 # --- Kotlin & Coroutines ---
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
-kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinxCoroutines" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx" }
+kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx" }
+kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "kotlinx" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx" }
 
 # --- Ktor Server ---
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
@@ -78,6 +94,9 @@ spring-boot-starter-validation = { module = "org.springframework.boot:spring-boo
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
 spring-web = { module = "org.springframework:spring-web" }
 springdoc-openapi-starter-common = { module = "org.springdoc:springdoc-openapi-starter-common", version.ref = "springdoc" }
 springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
@@ -92,6 +111,8 @@ hikari-cp = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 h2-driver = { module = "com.h2database:h2", version.ref = "h2" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+redisson = { module = "org.redisson:redisson", version.ref = "redisson" }
+lettuce-core = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
 
 # --- Service Discovery & Monitoring ---
 consul-client = { module = "com.orbitz.consul:consul-client", version.ref = "consulClient" }
@@ -101,6 +122,13 @@ micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
 bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "bignum" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+kotlin-logging-jvm = { module = "io.github.microutils:kotlin-logging-jvm", version.ref = "kotlinLogging" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+reactor-kafka = { module = "io.projectreactor.kafka:reactor-kafka", version.ref = "reactorKafka" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakartaAnnotation" }
+auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "auth0Jwt" }
 
 # --- Compose UI ---
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
@@ -112,9 +140,17 @@ compose-materialIconsExtended = { module = "org.jetbrains.compose.material:mater
 compose-html-core = { module = "org.jetbrains.compose.html:html-core", version.ref = "composeMultiplatform" }
 compose-desktop-currentOs = { module = "org.jetbrains.compose.desktop:desktop", version.ref = "composeMultiplatform" }
 
-# --- Testing (JUnit 5) ---
+# --- Testinging ---
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junitJupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitJupiter" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

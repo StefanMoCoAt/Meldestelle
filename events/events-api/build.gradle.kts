@@ -1,10 +1,12 @@
 plugins {
-    // KORREKTUR: Alle Plugins werden jetzt konsistent über den Version Catalog geladen.
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktor)
     application
+
+    // KORREKTUR 1: Dieses Plugin hinzufügen, um die Spring-BOM zu aktivieren.
+    alias(libs.plugins.spring.dependencyManagement)
 }
 
 application {
@@ -12,17 +14,19 @@ application {
 }
 
 dependencies {
-    // Deine Abhängigkeiten sind hier bereits korrekt und benötigen keine Änderung.
-    implementation(projects.platform.platformDependencies)
+    // KORREKTUR 2: Die Spring-Boot-BOM hier explizit als Plattform deklarieren.
+    api(platform(libs.spring.boot.dependencies))
 
+    // Bestehende Abhängigkeiten
+    implementation(projects.platform.platformDependencies)
     implementation(projects.events.eventsDomain)
     implementation(projects.events.eventsApplication)
     implementation(projects.core.coreDomain)
     implementation(projects.core.coreUtils)
 
-    // Spring dependencies
-    implementation("org.springframework:spring-web")
-    implementation("org.springdoc:springdoc-openapi-starter-common")
+    // Spring dependencies (jetzt mit korrekter Version aus der BOM)
+    implementation(libs.spring.web)
+    implementation(libs.springdoc.openapi.starter.common)
 
     // Ktor Server
     implementation(libs.ktor.server.core)

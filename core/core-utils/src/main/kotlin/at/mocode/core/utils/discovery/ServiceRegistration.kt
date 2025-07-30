@@ -21,12 +21,13 @@ class ServiceRegistration internal constructor(
     fun register() {
         if (isRegistered) return
         try {
+            // Der `register`-Aufruf ist korrekt, da das `registration`-Objekt
+            // bereits außerhalb vollständig und korrekt gebaut wurde.
             consul.agentClient().register(registration)
             isRegistered = true
             println("Service '${registration.name()}' mit ID '${registration.id()}' erfolgreich bei Consul registriert.")
         } catch (e: Exception) {
             println("FEHLER: Service-Registrierung bei Consul fehlgeschlagen: ${e.message}")
-            // Fehler weiterwerfen, um den Anwendungsstart zu stoppen
             throw IllegalStateException("Could not register service with Consul", e)
         }
     }
@@ -34,6 +35,7 @@ class ServiceRegistration internal constructor(
     fun deregister() {
         if (!isRegistered) return
         try {
+            // Der `deregister`-Aufruf ist korrekt. Er erwartet die Service-ID als einfachen String.
             consul.agentClient().deregister(registration.id())
             isRegistered = false
             println("Service '${registration.name()}' mit ID '${registration.id()}' erfolgreich bei Consul deregistriert.")
@@ -66,7 +68,8 @@ class ServiceRegistrar(private val appConfig: AppConfig) {
         val serviceId = "$serviceName-${UUID.randomUUID()}"
         val hostAddress = InetAddress.getLocalHost().hostAddress
 
-        // KORREKTUR: Der Aufruf erfolgt über die `Registration`-Klasse, nicht `ImmutableRegistration`.
+        // KORREKTUR: Der Health Check MUSS über die statische Factory-Methode `http`
+        // der `Registration.RegCheck`-Klasse erstellt werden. Dies war die Hauptfehlerquelle.
         val healthCheck = Registration.RegCheck.http(
             "http://$hostAddress:$servicePort/health", // Standard-Health-Check-Pfad
             10L, // Intervall in Sekunden

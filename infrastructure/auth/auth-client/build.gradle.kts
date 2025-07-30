@@ -18,13 +18,10 @@ dependencies {
     implementation(projects.core.coreDomain)
     implementation(projects.core.coreUtils)
 
-    // Spring Security
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.security:spring-security-oauth2-jose")
-
-    // JWT
-    implementation("com.auth0:java-jwt:4.4.0")
+    implementation(libs.spring.boot.starter.oauth2.client)
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.security.oauth2.jose)
+    implementation(libs.auth0.java.jwt)
 
     testImplementation(projects.platform.platformTesting)
 }

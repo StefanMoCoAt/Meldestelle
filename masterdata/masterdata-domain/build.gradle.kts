@@ -1,9 +1,27 @@
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
 }
 
-dependencies {
-    implementation(projects.core.coreDomain)
-    implementation(projects.core.coreUtils)
-    testImplementation(projects.platform.platformTesting)
+kotlin {
+    jvm()
+    js(IR) {
+        browser()
+    }
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                // KORREKTUR: Diese zwei Zeilen hinzufügen
+                implementation(projects.core.coreDomain)
+                implementation(projects.core.coreUtils)
+            }
+        }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(projects.platform.platformTesting)
+            }
+        }
+    }
 }

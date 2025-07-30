@@ -1,36 +1,43 @@
 plugins {
-    `java-library`
-    kotlin("jvm")
+    // KORREKTUR: 'java-library' und 'kotlin("jvm")' ersetzen
+    alias(libs.plugins.kotlin.multiplatform)
 }
 
-dependencies {
-    api(platform(projects.platform.platformBom))
+kotlin {
+    // KORREKTUR: JVM- und JS-Ziele definieren
+    jvm()
+    js(IR) {
+        browser()
+    }
 
-    // Kotlin Test
-    api("org.jetbrains.kotlin:kotlin-test")
-    api("org.jetbrains.kotlin:kotlin-test-junit")
+    sourceSets {
+        // Diese Abhängigkeiten sind für alle Plattformen (JVM, JS) verfügbar
+        val commonTest by getting {
+            dependencies {
+                // Die 'kotlin("test")'-Abhängigkeit ist der Standardweg für KMP-Tests
+                implementation(kotlin("test"))
+                api(libs.kotlinx.coroutines.test)
+            }
+        }
 
-    // JUnit
-    api("org.junit.jupiter:junit-jupiter-api")
-    api("org.junit.jupiter:junit-jupiter-engine")
-    api("org.junit.jupiter:junit-jupiter-params")
-    api("org.junit.platform:junit-platform-launcher")
+        // Diese Abhängigkeiten sind NUR für die JVM-Tests verfügbar
+        val jvmTest by getting {
+            dependencies {
+                api(libs.junit.jupiter.api)
+                api(libs.junit.jupiter.engine)
+                api(libs.junit.jupiter.params)
+                api(libs.junit.platform.launcher)
 
-    // Mocking and Assertions
-    api("io.mockk:mockk:1.13.8")
-    api("org.assertj:assertj-core:3.24.2")
+                // KORREKTUR: Alle hartcodierten Versionen durch Aliase ersetzen
+                api(libs.mockk)
+                api(libs.assertj.core)
+                api(libs.spring.boot.starter.test)
+                api(libs.h2.driver)
 
-    // Coroutines Testing
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-test")
-
-    // Spring Boot Testing
-    api("org.springframework.boot:spring-boot-starter-test")
-
-    // Database Testing
-    api("com.h2database:h2")
-
-    // Test Containers
-    api("org.testcontainers:testcontainers:1.19.5")
-    api("org.testcontainers:junit-jupiter:1.19.5")
-    api("org.testcontainers:postgresql:1.19.5")
+                api(libs.testcontainers.core)
+                api(libs.testcontainers.junit.jupiter)
+                api(libs.testcontainers.postgresql)
+            }
+        }
+    }
 }

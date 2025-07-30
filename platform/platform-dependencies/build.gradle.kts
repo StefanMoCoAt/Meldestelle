@@ -1,16 +1,35 @@
 plugins {
-    `java-library`
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.multiplatform)
 }
 
-dependencies {
-    api(platform(projects.platform.platformBom))
+kotlin {
+    jvm()
+    js(IR) {
+        browser()
+    }
 
-    api("org.jetbrains.kotlin:kotlin-stdlib")
-    api("org.jetbrains.kotlin:kotlin-reflect")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    api("io.github.microutils:kotlin-logging-jvm")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json")
-    api("org.jetbrains.kotlinx:kotlinx-datetime")
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                // KORREKTUR: Die explizite `platform()`-Abhängigkeit wird hier entfernt.
+                // Die Versionen aus der BOM werden trotzdem angewendet.
+
+                // KORREKTUR: `stdlib` und `reflect` werden entfernt.
+                // `stdlib` wird automatisch hinzugefügt.
+
+                api(libs.kotlinx.coroutines.core)
+                api(libs.kotlinx.serialization.json)
+                api(libs.kotlinx.datetime)
+            }
+        }
+
+        val jvmMain by getting {
+            dependencies {
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+                // KORREKTUR: Hartcodierte Version durch Alias ersetzen
+                api(libs.kotlin.logging.jvm)
+            }
+        }
+    }
 }

@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktor)
     application
+    alias(libs.plugins.spring.dependencyManagement)
 }
 
 application {
@@ -12,6 +13,7 @@ application {
 }
 
 dependencies {
+    api(platform(libs.spring.boot.dependencies))
     // Interne Module
     implementation(projects.platform.platformDependencies)
     implementation(projects.masterdata.masterdataDomain)

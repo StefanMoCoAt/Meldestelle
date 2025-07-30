@@ -17,8 +17,8 @@ dependencies {
     implementation(projects.infrastructure.eventStore.eventStoreApi)
     implementation(projects.infrastructure.messaging.messagingClient)
 
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.postgresql:postgresql")
+    implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.postgresql.driver)
 
     testImplementation(projects.platform.platformTesting)
 }

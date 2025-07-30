@@ -101,15 +101,15 @@ plugins {
     base
 }
 
-allprojects {
-    group = "at.mocode.meldestelle"
-    version = "0.1.0-SNAPSHOT"
-
-    repositories {
-        mavenCentral()
-        google() // Wichtig für Compose-Abhängigkeiten
-    }
-}
+//allprojects {
+//    group = "at.mocode.meldestelle"
+//    version = "0.1.0-SNAPSHOT"
+//
+//    repositories {
+//        mavenCentral()
+//        google() // Wichtig für Compose-Abhängigkeiten
+//    }
+//}
 
 subprojects {
     // Konfigurationen, die für alle Untermodule gelten.
