@@ -1,3 +1,5 @@
+/*
+// Multiplatform
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
 }
@@ -11,12 +13,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                // KORREKTUR: Die explizite `platform()`-Abhängigkeit wird hier entfernt.
-                // Die Versionen aus der BOM werden trotzdem angewendet.
-
-                // KORREKTUR: `stdlib` und `reflect` werden entfernt.
-                // `stdlib` wird automatisch hinzugefügt.
-
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.serialization.json)
                 api(libs.kotlinx.datetime)
@@ -25,11 +21,30 @@ kotlin {
 
         val jvmMain by getting {
             dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-
-                // KORREKTUR: Hartcodierte Version durch Alias ersetzen
                 api(libs.kotlin.logging.jvm)
+                api(libs.kotlinx.coroutines.reactor)
             }
         }
     }
+}
+*/
+
+// Dieses Modul ist ein reines "Sammelmodul".
+// Es hat keinen eigenen Code, sondern bündelt nur gemeinsame Laufzeit-Abhängigkeiten,
+// die von den meisten JVM-Modulen benötigt werden.
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+}
+
+dependencies {
+    // Importiert die zentrale BOM, um konsistente Versionen zu gewährleisten.
+    api(platform(projects.platform.platformBom))
+
+    // Stellt die wichtigsten Kotlin(x)-Bibliotheken via `api` bereit,
+    // damit jedes Modul, das von `platform-dependencies` abhängt, diese automatisch erhält.
+    api(libs.kotlinx.coroutines.core)
+    api(libs.kotlinx.serialization.json)
+    api(libs.kotlinx.datetime)
+    api(libs.kotlin.logging.jvm)
+    api(libs.kotlinx.coroutines.reactor)
 }

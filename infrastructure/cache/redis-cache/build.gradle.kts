@@ -1,27 +1,23 @@
+// Dieses Modul stellt eine konkrete Implementierung der `cache-api`
+// unter Verwendung von Redis als Caching-Backend bereit.
 plugins {
-//    kotlin("jvm")
-//    kotlin("plugin.spring")
-
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
-
-    // KORREKTUR: Dieses Plugin ist entscheidend. Es schaltet den `springBoot`-Block
-    // und alle Spring-Boot-spezifischen Gradle-Tasks frei.
     alias(libs.plugins.spring.boot)
-
-    // Dependency Management für konsistente Spring-Versionen
     alias(libs.plugins.spring.dependencyManagement)
 }
 
 dependencies {
+    // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
     api(platform(projects.platform.platformBom))
+
+    // Implementiert die provider-agnostische Caching-API.
     implementation(projects.infrastructure.cache.cacheApi)
 
-    implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("io.lettuce:lettuce-core")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    // OPTIMIERUNG: Verwendung des `redis-cache`-Bundles aus libs.versions.toml.
+    // Dieses Bundle enthält Spring Data Redis, Lettuce und Jackson-Module.
+    implementation(libs.bundles.redis.cache)
 
+    // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
-    testImplementation("org.testcontainers:testcontainers")
 }

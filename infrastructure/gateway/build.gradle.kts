@@ -1,9 +1,9 @@
-plugins {
+/*plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktor)
-    application
     alias(libs.plugins.spring.dependencyManagement)
+    application
 }
 
 application {
@@ -12,17 +12,12 @@ application {
 
 dependencies {
     api(platform(libs.spring.boot.dependencies))
-    // --- Interne Module ---
-    // Der Gateway benötigt nur die Kern-Definitionen und Utilities.
     implementation(projects.platform.platformDependencies)
     implementation(projects.core.coreDomain)
     implementation(projects.core.coreUtils)
-    // Der Gateway nutzt den Auth-Client, um Tokens zu validieren.
+
     implementation(projects.infrastructure.auth.authClient)
     implementation(projects.infrastructure.monitoring.monitoringClient)
-
-    // !!! WICHTIG: KEINE direkten Abhängigkeiten zu den Domänen- oder
-    // Infrastruktur-Modulen der Backend-Services mehr!
 
     // --- Ktor Server ---
     implementation(libs.ktor.server.core)
@@ -44,7 +39,7 @@ dependencies {
 
     // --- Ktor Client (damit der Gateway Anfragen an die Backend-Services weiterleiten kann) ---
     implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio) // CIO ist eine gute, asynchrone Engine
+    implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.contentNegotiation)
     implementation(libs.ktor.client.serialization.kotlinx.json)
 
@@ -54,4 +49,38 @@ dependencies {
     // --- Testing ---
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.ktor.server.tests)
+}*/
+
+// Dieses Modul ist das API-Gateway und der einzige öffentliche Einstiegspunkt
+// für alle externen Anfragen an das Meldestelle-System.
+plugins {
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependencyManagement)
+}
+
+// Konfiguriert die Hauptklasse für das ausführbare JAR.
+springBoot {
+    mainClass.set("at.mocode.infrastructure.gateway.GatewayApplicationKt")
+}
+
+dependencies {
+    // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
+    implementation(platform(projects.platform.platformBom))
+    // Stellt gemeinsame Abhängigkeiten bereit.
+    implementation(projects.platform.platformDependencies)
+
+    // OPTIMIERUNG: Verwendung des `spring-cloud-gateway`-Bundles.
+    // Es enthält den Gateway-Starter und den Consul Discovery Client.
+    implementation(libs.bundles.spring.cloud.gateway)
+
+    // Bindet die wiederverwendbare Logik zur JWT-Validierung ein.
+    implementation(projects.infrastructure.auth.authClient)
+
+    // Bindet die wiederverwendbare Logik für Metriken und Tracing ein.
+    implementation(projects.infrastructure.monitoring.monitoringClient)
+
+    // Stellt alle Test-Abhängigkeiten gebündelt bereit.
+    testImplementation(projects.platform.platformTesting)
 }

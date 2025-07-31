@@ -1,33 +1,32 @@
+// Dieses Modul ist ein eigenständiger Spring Boot Service, der den
+// Zipkin-Server mit seiner UI hostet, um Tracing-Daten zu visualisieren.
 plugins {
-//    kotlin("jvm")
-//    kotlin("plugin.spring")
-//    id("org.springframework.boot")
-
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
-
-    // KORREKTUR: Dieses Plugin ist entscheidend. Es schaltet den `springBoot`-Block
-    // und alle Spring-Boot-spezifischen Gradle-Tasks frei.
     alias(libs.plugins.spring.boot)
-
-    // Dependency Management für konsistente Spring-Versionen
     alias(libs.plugins.spring.dependencyManagement)
-
 }
 
-// Configure main class for bootJar task
+// Konfiguriert die Hauptklasse für das ausführbare JAR.
 springBoot {
     mainClass.set("at.mocode.infrastructure.monitoring.MonitoringServerApplicationKt")
 }
 
 dependencies {
+    // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
+    implementation(platform(projects.platform.platformBom))
+    // Stellt gemeinsame Abhängigkeiten bereit.
     implementation(projects.platform.platformDependencies)
 
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("io.zipkin.java:zipkin-server:2.12.9")
-    implementation("io.zipkin.java:zipkin-autoconfigure-ui:2.12.9")
+    // Spring Boot Starter für einen einfachen Web-Service.
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.actuator)
 
+    // Abhängigkeiten für den Zipkin-Server und seine UI.
+    // OPTIMIERUNG: Versionen werden jetzt zentral über libs.versions.toml verwaltet.
+    implementation(libs.zipkin.server)
+    implementation(libs.zipkin.autoconfigure.ui)
+
+    // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
 }

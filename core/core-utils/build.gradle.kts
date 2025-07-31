@@ -1,41 +1,34 @@
+// Dieses Modul stellt gemeinsame technische Hilfsfunktionen bereit,
+// wie z.B. Konfigurations-Management, Datenbank-Verbindungen und Service Discovery.
 plugins {
-    // KORREKTUR: Von JVM zu Multiplattform wechseln
-    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.jvm)
 }
 
-kotlin {
-    jvm()
-    js(IR) {
-        browser()
-    }
+dependencies {
+    // Abhängigkeit zum platform-Modul für zentrale Versionsverwaltung
+    api(projects.platform.platformDependencies)
+    // Abhängigkeit zum core-domain-Modul, um dessen Typen zu verwenden
+    api(projects.core.coreDomain)
 
-    sourceSets {
-        val commonMain by getting {
-            dependencies {
-                // Diese sind plattformunabhängig und können geteilt werden
-                api(projects.platform.platformDependencies)
-                api(projects.core.coreDomain)
-                api(libs.kotlinx.coroutines.core)
-                api(libs.bignum)
-            }
-        }
-        val jvmMain by getting {
-            dependencies {
-                // DIESE SIND NUR FÜR DIE JVM!
-                api(libs.exposed.core)
-                api(libs.exposed.dao)
-                api(libs.exposed.jdbc)
-                api(libs.exposed.kotlin.datetime)
-                api(libs.hikari.cp)
-                api(libs.flyway.core)
-                api(libs.flyway.postgresql)
-                api(libs.consul.client)
-            }
-        }
-        val commonTest by getting {
-            dependencies {
-                implementation(projects.platform.platformTesting)
-            }
-        }
-    }
+    // Asynchronität
+    api(libs.kotlinx.coroutines.core)
+
+    // Datenbank-Management
+    // OPTIMIERUNG: Verwendung von Bundles für Exposed und Flyway
+    api(libs.bundles.exposed)
+    api(libs.bundles.flyway)
+    api(libs.hikari.cp)
+
+    // Service Discovery
+    api(libs.consul.client)
+
+    // Logging
+    api(libs.kotlin.logging.jvm)
+
+    // Utilities
+    api(libs.bignum) // Für BigDecimal Serialisierung
+
+    // Testing
+    testImplementation(projects.platform.platformTesting)
+    testImplementation(libs.bundles.testing.jvm)
 }

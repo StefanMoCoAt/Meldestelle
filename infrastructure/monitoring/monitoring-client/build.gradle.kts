@@ -1,26 +1,22 @@
+// Dieses Modul ist eine wiederverwendbare Bibliothek, die von jedem Microservice
+// eingebunden wird, um Metriken und Tracing-Daten zu exportieren.
 plugins {
-//    kotlin("jvm")
-//    kotlin("plugin.spring")
-
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
-
-    // KORREKTUR: Dieses Plugin ist entscheidend. Es schaltet den `springBoot`-Block
-    // und alle Spring-Boot-spezifischen Gradle-Tasks frei.
     alias(libs.plugins.spring.boot)
-
-    // Dependency Management für konsistente Spring-Versionen
     alias(libs.plugins.spring.dependencyManagement)
 }
 
 dependencies {
+    // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
+    implementation(platform(projects.platform.platformBom))
+    // Stellt gemeinsame Abhängigkeiten bereit.
     implementation(projects.platform.platformDependencies)
 
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("io.zipkin.reporter2:zipkin-reporter-brave")
-    implementation("io.zipkin.reporter2:zipkin-sender-okhttp3")
-    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    // OPTIMIERUNG: Verwendung des `monitoring-client`-Bundles.
+    // Es enthält Spring Boot Actuator, Micrometer Prometheus und Zipkin Tracing.
+    implementation(libs.bundles.monitoring.client)
 
+    // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
 }

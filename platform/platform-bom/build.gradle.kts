@@ -1,22 +1,28 @@
+// Dieses Modul definiert die "Bill of Materials" (BOM) für das gesamte Projekt.
+// Es nutzt das `java-platform`-Plugin, um eine zentrale Liste von Abhängigkeitsversionen
+// zu erstellen, die von allen anderen Modulen importiert wird.
+// Dies ist die ultimative "Single Source of Truth" für Versionen.
 plugins {
     `java-platform`
-    `maven-publish`
+    `maven-publish` // Nützlich, falls die BOM extern veröffentlicht werden soll
 }
 
 javaPlatform {
+    // Erlaubt die Deklaration von Abhängigkeiten in einer Plattform.
     allowDependencies()
 }
 
 dependencies {
-    // KORREKTUR: Alle BOMs werden jetzt über Aliase aus der libs.versions.toml bezogen.
+    // Importiert andere wichtige BOMs. Die Versionen werden durch diese
+    // importierten Plattformen transitiv verwaltet.
     api(platform(libs.spring.boot.dependencies))
+    api(platform(libs.spring.cloud.dependencies)) // NEU: Spring Cloud BOM hinzugefügt
     api(platform(libs.kotlin.bom))
     api(platform(libs.kotlinx.coroutines.bom))
 
+    // `constraints` erzwingt spezifische Versionen für einzelne Bibliotheken.
+    // Alle Versionen werden sicher aus `libs.versions.toml` bezogen.
     constraints {
-        // KORREKTUR: Alle Abhängigkeiten verwenden jetzt Aliase.
-        // Keine einzige hartcodierte Version mehr in dieser Datei!
-
         // --- Utilities & Other ---
         api(libs.caffeine)
         api(libs.reactor.kafka)
@@ -26,16 +32,16 @@ dependencies {
         api(libs.consul.client)
         api(libs.kotlin.logging.jvm)
         api(libs.jakarta.annotation.api)
+        api(libs.auth0.java.jwt)
+        api(libs.logback.classic)
 
         // --- Spring & SpringDoc ---
         api(libs.springdoc.openapi.starter.common)
         api(libs.springdoc.openapi.starter.webmvc.ui)
 
         // --- Database & Persistence ---
-        api(libs.exposed.core)
-        api(libs.exposed.dao)
-        api(libs.exposed.jdbc)
-        api(libs.exposed.kotlin.datetime)
+        api(libs.bundles.exposed)
+        api(libs.bundles.flyway)
         api(libs.postgresql.driver)
         api(libs.hikari.cp)
         api(libs.h2.driver)
@@ -50,12 +56,11 @@ dependencies {
         api(libs.jackson.datatype.jsr310)
 
         // --- Testcontainers ---
-        api(libs.testcontainers.core)
-        api(libs.testcontainers.junit.jupiter)
-        api(libs.testcontainers.postgresql)
+        api(libs.bundles.testcontainers)
     }
 }
 
+// Konfiguration für das Veröffentlichen der BOM (optional, aber gute Praxis).
 publishing {
     publications {
         create<MavenPublication>("maven") {

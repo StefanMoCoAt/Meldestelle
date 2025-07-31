@@ -1,25 +1,23 @@
+// Dieses Modul stellt die zentrale, wiederverwendbare Konfiguration
+// für die Verbindung mit Apache Kafka bereit (z.B. Bootstrap-Server, Serializer).
 plugins {
-//    kotlin("jvm")
-//    kotlin("plugin.spring")
-
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
-
-    // KORREKTUR: Dieses Plugin ist entscheidend. Es schaltet den `springBoot`-Block
-    // und alle Spring-Boot-spezifischen Gradle-Tasks frei.
     alias(libs.plugins.spring.boot)
-
-    // Dependency Management für konsistente Spring-Versionen
     alias(libs.plugins.spring.dependencyManagement)
 }
 
 dependencies {
-    implementation(projects.platform.platformDependencies)
+    // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
+    api(platform(projects.platform.platformBom))
+    // Stellt gemeinsame Abhängigkeiten bereit.
+    api(projects.platform.platformDependencies)
 
-    implementation("org.springframework.kafka:spring-kafka")
-    implementation("org.springframework.boot:spring-boot-starter-json")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    // OPTIMIERUNG: Verwendung des `kafka-config`-Bundles.
+    // `api` wird verwendet, damit der `messaging-client` diese Konfigurationen
+    // und Abhängigkeiten (wie Jackson) direkt nutzen kann.
+    api(libs.bundles.kafka.config)
 
+    // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
 }

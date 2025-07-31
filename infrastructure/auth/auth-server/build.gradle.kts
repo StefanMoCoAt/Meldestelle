@@ -1,33 +1,40 @@
+// Dieses Modul ist ein eigenständiger Spring Boot Service, der als
+// zentraler Authentifizierungs- und Autorisierungs-Server agiert.
+// Er kommuniziert mit Keycloak und stellt Endpunkte für die Benutzerverwaltung bereit.
 plugins {
-//    kotlin("jvm")
-//    kotlin("plugin.spring")
-//    id("org.springframework.boot")
-
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
-
-    // KORREKTUR: Dieses Plugin ist entscheidend. Es schaltet den `springBoot`-Block
-    // und alle Spring-Boot-spezifischen Gradle-Tasks frei.
     alias(libs.plugins.spring.boot)
-
-    // Dependency Management für konsistente Spring-Versionen
     alias(libs.plugins.spring.dependencyManagement)
 }
 
-// Configure main class for bootJar task
+// Konfiguriert die Hauptklasse für das ausführbare JAR.
 springBoot {
     mainClass.set("at.mocode.infrastructure.auth.AuthServerApplicationKt")
 }
 
 dependencies {
+    // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
+    implementation(platform(projects.platform.platformBom))
+
+    // Stellt gemeinsame Abhängigkeiten bereit.
     implementation(projects.platform.platformDependencies)
+
+    // Nutzt die Client-Logik für die Kommunikation mit Keycloak.
     implementation(projects.infrastructure.auth.authClient)
 
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.keycloak:keycloak-admin-client:23.0.0")
+    // Spring Boot Starter für einen Web-Service.
+    // OPTIMIERUNG: Verwendung des `spring-boot-essentials`-Bundles.
+    implementation(libs.bundles.spring.boot.essentials)
 
+    // Spring Security für die Absicherung des Servers.
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.boot.starter.oauth2.resource.server)
+
+    // Keycloak Admin Client zur Verwaltung von Benutzern und Realms.
+    implementation(libs.keycloak.admin.client)
+
+
+    // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
 }
