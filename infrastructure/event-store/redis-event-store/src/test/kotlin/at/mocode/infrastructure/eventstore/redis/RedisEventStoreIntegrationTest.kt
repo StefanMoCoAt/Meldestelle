@@ -5,6 +5,8 @@ import at.mocode.core.domain.event.DomainEvent
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
@@ -18,8 +20,6 @@ import java.time.Instant
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
  * Integration tests for Redis Event Store.
@@ -285,7 +285,7 @@ class RedisEventStoreIntegrationTest {
         override val eventId: UUID = UUID.randomUUID(),
         override val timestamp: Instant = Instant.now(),
         override val aggregateId: UUID,
-        override val version: Long,
+        override val version: Int,
         val name: String
     ) : BaseDomainEvent(eventId, timestamp, aggregateId, version)
 
@@ -293,7 +293,7 @@ class RedisEventStoreIntegrationTest {
         override val eventId: UUID = UUID.randomUUID(),
         override val timestamp: Instant = Instant.now(),
         override val aggregateId: UUID,
-        override val version: Long,
+        override val version: Int,
         val name: String
     ) : BaseDomainEvent(eventId, timestamp, aggregateId, version)
 }

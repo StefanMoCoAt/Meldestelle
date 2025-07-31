@@ -231,7 +231,7 @@ class RedisIntegrationTest {
         override val eventId: UUID = UUID.randomUUID(),
         override val timestamp: Instant = Instant.now(),
         override val aggregateId: UUID,
-        override val version: Long,
+        override val version: UUID,
         val name: String
     ) : BaseDomainEvent(eventId, timestamp, aggregateId, version)
 
@@ -239,7 +239,7 @@ class RedisIntegrationTest {
         override val eventId: UUID = UUID.randomUUID(),
         override val timestamp: Instant = Instant.now(),
         override val aggregateId: UUID,
-        override val version: Long,
+        override val version: UUID,
         val name: String
     ) : BaseDomainEvent(eventId, timestamp, aggregateId, version)
 }

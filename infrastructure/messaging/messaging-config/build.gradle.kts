@@ -7,6 +7,11 @@ plugins {
     alias(libs.plugins.spring.dependencyManagement)
 }
 
+// Deaktiviert die Erstellung eines ausführbaren Jars für dieses Bibliotheks-Modul.
+tasks.getByName("bootJar") {
+    enabled = false
+}
+
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
     api(platform(projects.platform.platformBom))

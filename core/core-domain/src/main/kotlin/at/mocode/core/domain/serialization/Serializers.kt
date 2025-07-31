@@ -2,7 +2,7 @@ package at.mocode.core.domain.serialization
 
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime

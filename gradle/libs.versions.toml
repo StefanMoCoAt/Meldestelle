@@ -33,9 +33,9 @@ lettuce = "6.3.1.RELEASE"
 # --- Service Discovery & Monitoring ---
 consulClient = "1.5.3"
 micrometer = "1.12.2"
-micrometerTracing = "1.2.5" # NEU
-zipkin = "2.24.4" # NEU (Verwendet eine neuere, kompatible Version)
-zipkinReporter = "2.16.4" # NEU
+micrometerTracing = "1.2.5"
+zipkin = "3.0.5"
+zipkinReporter = "2.16.4"
 
 # --- Authentication ---
 auth0Jwt = "4.4.0"
@@ -134,10 +134,10 @@ lettuce-core = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
 consul-client = { module = "com.orbitz.consul:consul-client", version.ref = "consulClient" }
 micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 micrometer-tracing-bridge-brave = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometerTracing" } # NEU
-zipkin-reporter-brave = { module = "io.zipkin.reporter2:zipkin-reporter-brave", version.ref = "zipkinReporter" } # NEU
-zipkin-sender-okhttp3 = { module = "io.zipkin.reporter2:zipkin-sender-okhttp3", version.ref = "zipkinReporter" } # NEU
-zipkin-server = { module = "io.zipkin:zipkin-server", version.ref = "zipkin" } # NEU
-zipkin-autoconfigure-ui = { module = "io.zipkin:zipkin-autoconfigure-ui", version.ref = "zipkin" } # NEU
+zipkin-reporter-brave = { module = "io.zipkin.reporter2:zipkin-reporter-brave", version.ref = "zipkinReporter" }
+zipkin-sender-okhttp3 = { module = "io.zipkin.reporter2:zipkin-sender-okhttp3", version.ref = "zipkinReporter" }
+zipkin-server = { module = "io.zipkin:zipkin-server", version.ref = "zipkin" }
+zipkin-autoconfigure-ui = { module = "io.zipkin:zipkin-autoconfigure-ui", version.ref = "zipkin" }
 
 # --- Authentication ---
 auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "auth0Jwt" }

@@ -23,9 +23,7 @@ dependencies {
     implementation(libs.spring.boot.starter.actuator)
 
     // Abhängigkeiten für den Zipkin-Server und seine UI.
-    // OPTIMIERUNG: Versionen werden jetzt zentral über libs.versions.toml verwaltet.
     implementation(libs.zipkin.server)
-    implementation(libs.zipkin.autoconfigure.ui)
 
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)

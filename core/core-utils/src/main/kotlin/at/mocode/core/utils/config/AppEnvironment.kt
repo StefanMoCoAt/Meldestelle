@@ -1,48 +1,26 @@
 package at.mocode.core.utils.config
 
-/**
- * Aufzählung der verschiedenen Anwendungsumgebungen.
- */
+import org.slf4j.LoggerFactory
+
 enum class AppEnvironment {
-    DEVELOPMENT, // Lokale Entwicklungsumgebung
-    TEST,        // Testumgebung (CI/CD, Integrationstests)
-    STAGING,     // Vorabproduktionsumgebung
-    PRODUCTION;  // Produktionsumgebung
+    DEVELOPMENT,
+    TEST,
+    STAGING,
+    PRODUCTION;
+
+    fun isProduction() = this == PRODUCTION
 
     companion object {
-        /**
-         * Ermittelt die aktuelle Umgebung basierend auf der APP_ENV Umgebungsvariable.
-         *
-         * @return Die aktuelle Umgebung (Standardmäßig DEVELOPMENT wenn nicht definiert)
-         */
+        private val logger = LoggerFactory.getLogger(AppEnvironment::class.java)
+
         fun current(): AppEnvironment {
             val envName = System.getenv("APP_ENV")?.uppercase() ?: "DEVELOPMENT"
             return try {
                 valueOf(envName)
             } catch (_: IllegalArgumentException) {
-                println("Warnung: Unbekannte Umgebung '$envName', verwende DEVELOPMENT")
+                logger.warn("Unknown environment '{}', falling back to DEVELOPMENT.", envName)
                 DEVELOPMENT
             }
         }
-
-        /**
-         * Prüft, ob die aktuelle Umgebung die Entwicklungsumgebung ist.
-         */
-        fun isDevelopment() = current() == DEVELOPMENT
-
-        /**
-         * Prüft, ob die aktuelle Umgebung die Testumgebung ist.
-         */
-        fun isTest() = current() == TEST
-
-        /**
-         * Prüft, ob die aktuelle Umgebung die Staging-Umgebung ist.
-         */
-        fun isStaging() = current() == STAGING
-
-        /**
-         * Prüft, ob die aktuelle Umgebung die Produktionsumgebung ist.
-         */
-        fun isProduction() = current() == PRODUCTION
     }
 }

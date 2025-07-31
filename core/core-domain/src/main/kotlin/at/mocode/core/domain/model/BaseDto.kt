@@ -3,8 +3,8 @@ package at.mocode.core.domain.model
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
 import at.mocode.core.domain.serialization.UuidSerializer
 import com.benasher44.uuid.Uuid
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 
 /**
@@ -49,7 +49,8 @@ data class ErrorDto(
 data class ApiResponse<T>(
     val data: T?,
     val success: Boolean,
-    val errors: List<ErrorDto> = emptyList(), // OPTIMIZED: Using structured ErrorDto
+    val errors: List<ErrorDto> = emptyList(),
+    @Serializable(with = KotlinInstantSerializer::class)
     val timestamp: Instant = Clock.System.now()
 ) {
     companion object {

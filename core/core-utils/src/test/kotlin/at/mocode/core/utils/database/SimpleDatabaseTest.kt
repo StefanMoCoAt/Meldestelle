@@ -2,9 +2,8 @@ package at.mocode.core.utils.database
 
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.test.Ignore
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import org.junit.*
+import org.junit.jupiter.api.Assertions.assertEquals
 
 /**
  * Comprehensive database connectivity and operations test.

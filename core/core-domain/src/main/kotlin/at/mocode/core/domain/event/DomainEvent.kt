@@ -2,8 +2,9 @@ package at.mocode.core.domain.event
 
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import java.util.UUID
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Base interface for all domain events in the system.
@@ -12,9 +13,9 @@ import kotlinx.datetime.Instant
 interface DomainEvent {
     val eventId: Uuid
     val aggregateId: Uuid
-    val eventType: String
+    val eventType: java.time.Instant
     val timestamp: Instant
-    val version: Long
+    val version: Int
 
     // OPTIMIZED: Added correlation and causation IDs for distributed tracing.
     /**
@@ -33,8 +34,8 @@ interface DomainEvent {
  */
 abstract class BaseDomainEvent(
     override val aggregateId: Uuid,
-    override val eventType: String,
-    override val version: Long,
+    override val eventType: java.time.Instant,
+    override val version: Int,
     override val eventId: Uuid = uuid4(),
     override val timestamp: Instant = Clock.System.now(),
     override val correlationId: Uuid? = null,

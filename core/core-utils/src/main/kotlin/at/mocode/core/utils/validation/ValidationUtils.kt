@@ -1,9 +1,10 @@
 package at.mocode.core.utils.validation
 
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlin.time.ExperimentalTime
 
 /**
  * Common validation utilities
@@ -92,6 +93,7 @@ object ValidationUtils {
     /**
      * Validates birth date
      */
+    @OptIn(ExperimentalTime::class)
     fun validateBirthDate(birthDate: LocalDate?, fieldName: String = "geburtsdatum"): ValidationError? {
         if (birthDate == null) return null
 
@@ -116,6 +118,7 @@ object ValidationUtils {
     /**
      * Validates year value
      */
+    @OptIn(ExperimentalTime::class)
     fun validateYear(year: Int?, fieldName: String, minYear: Int = 1900): ValidationError? {
         if (year == null) return null
 

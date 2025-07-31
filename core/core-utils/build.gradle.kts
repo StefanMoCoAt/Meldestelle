@@ -4,6 +4,12 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+    }
+}
+
 dependencies {
     // Abhängigkeit zum platform-Modul für zentrale Versionsverwaltung
     api(projects.platform.platformDependencies)
@@ -31,4 +37,5 @@ dependencies {
     // Testing
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
+    testImplementation(libs.kotlin.test)
 }

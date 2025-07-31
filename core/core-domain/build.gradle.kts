@@ -5,14 +5,18 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xopt-in=kotlin.time.ExperimentalTime")
+    }
+}
+
 dependencies {
     // Stellt sicher, dass dieses Modul Zugriff auf die im zentralen Katalog
     // definierten Bibliotheken hat.
     api(projects.platform.platformDependencies)
 
-    // Kern-Abhängigkeiten für das Domänen-Modell.
-    // `api` wird verwendet, damit Services, die `core-domain` einbinden,
-    // diese Typen ebenfalls direkt nutzen können.
+    // Kern-Abhängigkeiten für das Domänen-Modul.
     api(libs.uuid)
     api(libs.kotlinx.serialization.json)
     api(libs.kotlinx.datetime)

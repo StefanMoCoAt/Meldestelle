@@ -4,7 +4,7 @@ import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
 // KORREKTUR: Der Import wurde von java.math.BigDecimal auf die korrekte Bibliothek geändert.
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -14,6 +14,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlin.time.ExperimentalTime
 
 object BigDecimalSerializer : KSerializer<BigDecimal> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("BigDecimal", PrimitiveKind.STRING)
@@ -27,6 +28,7 @@ object UuidSerializer : KSerializer<Uuid> {
     override fun deserialize(decoder: Decoder): Uuid = uuidFrom(decoder.decodeString())
 }
 
+@OptIn(ExperimentalTime::class)
 object KotlinInstantSerializer : KSerializer<Instant> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
     override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeString(value.toString())
