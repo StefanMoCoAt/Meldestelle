@@ -1,53 +1,56 @@
 package at.mocode.core.domain.event
 
+import at.mocode.core.domain.serialization.KotlinInstantSerializer
+import at.mocode.core.domain.serialization.UuidSerializer
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
-import java.util.UUID
-import kotlin.time.Clock
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 
 /**
- * Base interface for all domain events in the system.
- * A domain event represents something significant that has happened in a specific domain.
+ * Basis-Interface für alle Domänen-Events im System.
+ * Ein Domänen-Event repräsentiert etwas fachlich Bedeutsames, das passiert ist.
  */
 interface DomainEvent {
     val eventId: Uuid
     val aggregateId: Uuid
-    val eventType: java.time.Instant
-    val timestamp: Instant
-    val version: Int
-
-    // OPTIMIZED: Added correlation and causation IDs for distributed tracing.
-    /**
-     * Tracks a chain of events initiated by a single user action across multiple services.
-     */
+    val eventType: String
+    val timestamp: kotlin.time.Instant
+    val version: Long // KORRIGIERT: Einheitlich auf Long
     val correlationId: Uuid?
-
-    /**
-     * Tracks the direct cause of this event (the ID of the preceding event or command).
-     */
     val causationId: Uuid?
 }
 
 /**
- * Abstract base class for domain events to reduce boilerplate code.
+ * Abstrakte Basisklasse für Domänen-Events, um Boilerplate-Code zu reduzieren.
  */
+@Serializable
 abstract class BaseDomainEvent(
+    @Serializable(with = UuidSerializer::class)
     override val aggregateId: Uuid,
-    override val eventType: java.time.Instant,
-    override val version: Int,
+    override val eventType: String,
+    override val version: Long, // KORRIGIERT: Einheitlich auf Long
+    @Serializable(with = UuidSerializer::class)
     override val eventId: Uuid = uuid4(),
-    override val timestamp: Instant = Clock.System.now(),
+    @Serializable(with = KotlinInstantSerializer::class)
+    override val timestamp: kotlin.time.Instant = kotlin.time.Clock.System.now(), // KORRIGIERT: Einheitlich auf kotlinx.datetime.Instant
+    @Serializable(with = UuidSerializer::class)
     override val correlationId: Uuid? = null,
+    @Serializable(with = UuidSerializer::class)
     override val causationId: Uuid? = null
 ) : DomainEvent
 
-// ... (DomainEventPublisher and DomainEventHandler interfaces remain the same)
+/**
+ * Interface für einen Publisher, der Domänen-Events veröffentlichen kann.
+ */
 interface DomainEventPublisher {
     suspend fun publish(event: DomainEvent)
     suspend fun publishAll(events: List<DomainEvent>)
 }
 
+/**
+ * Interface für einen Handler, der auf bestimmte Domänen-Events reagieren kann.
+ */
 interface DomainEventHandler<T : DomainEvent> {
     suspend fun handle(event: T)
     fun canHandle(eventType: String): Boolean

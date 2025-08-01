@@ -29,7 +29,8 @@ dependencies {
         api(libs.redisson)
         api(libs.uuid)
         api(libs.bignum)
-        api(libs.consul.client)
+        // api(libs.consul.client) wird getauscht mir spring-cloud-starter-consul-discovery
+        api(libs.spring.cloud.starter.consul.discovery)
         api(libs.kotlin.logging.jvm)
         api(libs.jakarta.annotation.api)
         api(libs.auth0.java.jwt)

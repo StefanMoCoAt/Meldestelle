@@ -8,6 +8,16 @@ plugins {
     alias(libs.plugins.spring.dependencyManagement)
 }
 
+// Deaktiviert die Erstellung eines ausführbaren Jars für dieses Bibliotheks-Modul.
+tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    enabled = false
+}
+
+// Stellt sicher, dass stattdessen ein reguläres Jar gebaut wird.
+tasks.getByName<org.gradle.api.tasks.bundling.Jar>("jar") {
+    enabled = true
+}
+
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
     implementation(platform(projects.platform.platformBom))

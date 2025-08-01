@@ -75,7 +75,7 @@ class RedisEventStore(
             newVersion++
 
             // Ensure the event has the correct version
-            if (event.version != newVersion) {
+            if (event.version.toLong() != newVersion) {
                 throw IllegalArgumentException(
                     "Event version ${event.version} does not match expected version $newVersion"
                 )

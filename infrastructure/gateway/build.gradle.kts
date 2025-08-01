@@ -68,11 +68,12 @@ springBoot {
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
     implementation(platform(projects.platform.platformBom))
+    // Stellt Utilities bereit
+    implementation(projects.core.coreUtils)
     // Stellt gemeinsame Abhängigkeiten bereit.
     implementation(projects.platform.platformDependencies)
 
-    // OPTIMIERUNG: Verwendung des `spring-cloud-gateway`-Bundles.
-    // Es enthält den Gateway-Starter und den Consul Discovery Client.
+    // Stellt die Spring Cloud Gateway und Consul Discovery Abhängigkeiten bereit
     implementation(libs.bundles.spring.cloud.gateway)
 
     // Bindet die wiederverwendbare Logik zur JWT-Validierung ein.
@@ -83,4 +84,6 @@ dependencies {
 
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
+    testImplementation(libs.bundles.testing.jvm)
+
 }

@@ -26,7 +26,8 @@ dependencies {
     api(libs.hikari.cp)
 
     // Service Discovery
-    api(libs.consul.client)
+    // api(libs.consul.client) wird getauscht mir spring-cloud-starter-consul-discovery
+    api(libs.spring.cloud.starter.consul.discovery)
 
     // Logging
     api(libs.kotlin.logging.jvm)

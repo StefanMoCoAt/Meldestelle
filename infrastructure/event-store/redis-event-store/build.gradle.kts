@@ -7,6 +7,12 @@ plugins {
     alias(libs.plugins.spring.dependencyManagement)
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+    }
+}
+
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
     implementation(platform(projects.platform.platformBom))
@@ -24,8 +30,18 @@ dependencies {
     // Stellt Jakarta Annotations bereit (z.B. @PostConstruct), die von Spring verwendet werden.
     implementation(libs.jakarta.annotation.api)
 
-    // Stellt alle Test-Abhängigkeiten gebündelt bereit.
+    // Fügt JUnit, Mockk, AssertJ etc. für die Tests hinzu
     testImplementation(projects.platform.platformTesting)
-    // Stellt Testcontainers für Integrationstests mit einer echten Redis-Instanz bereit.
+    testImplementation(libs.bundles.testing.jvm)
     testImplementation(libs.bundles.testcontainers)
+}
+
+// Deaktiviert die Erstellung eines ausführbaren Jars für dieses Bibliotheks-Modul.
+tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    enabled = false
+}
+
+// Stellt sicher, dass stattdessen ein reguläres Jar gebaut wird.
+tasks.getByName<org.gradle.api.tasks.bundling.Jar>("jar") {
+    enabled = true
 }

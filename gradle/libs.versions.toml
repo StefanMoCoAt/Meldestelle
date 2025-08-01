@@ -31,7 +31,7 @@ redisson = "3.27.2"
 lettuce = "6.3.1.RELEASE"
 
 # --- Service Discovery & Monitoring ---
-consulClient = "1.5.3"
+# consulClient = "1.5.3" // wird getauscht mit spring-cloud-starter-consul-discovery
 micrometer = "1.12.2"
 micrometerTracing = "1.2.5"
 zipkin = "3.0.5"
@@ -131,7 +131,7 @@ redisson = { module = "org.redisson:redisson", version.ref = "redisson" }
 lettuce-core = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
 
 # --- Service Discovery & Monitoring ---
-consul-client = { module = "com.orbitz.consul:consul-client", version.ref = "consulClient" }
+# consul-client = { module = "com.orbitz.consul:consul-client", version.ref = "consulClient" } // wird getauscht mit spring-cloud-starter-consul-discovery
 micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 micrometer-tracing-bridge-brave = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometerTracing" } # NEU
 zipkin-reporter-brave = { module = "io.zipkin.reporter2:zipkin-reporter-brave", version.ref = "zipkinReporter" }

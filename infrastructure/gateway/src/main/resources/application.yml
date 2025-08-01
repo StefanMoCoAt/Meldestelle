@@ -1,0 +1,16 @@
+# Port, auf dem das Gateway läuft
+server:
+  port: 8080
+
+# Name, unter dem sich das Gateway in Consul registriert
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      # Aktiviert die automatische Routen-Erstellung basierend auf Consul
+      discovery:
+        locator:
+          enabled: true
+          # Macht Routen-Namen klein (z.B. /members-service/** statt /MEMBERS-SERVICE/**)
+          lower-case-service-id: true

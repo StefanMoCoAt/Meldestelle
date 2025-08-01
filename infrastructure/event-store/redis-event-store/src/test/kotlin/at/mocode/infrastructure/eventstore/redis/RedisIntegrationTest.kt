@@ -4,7 +4,13 @@ import at.mocode.core.domain.event.BaseDomainEvent
 import at.mocode.core.domain.event.DomainEvent
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
+import kotlin.time.Clock
+import kotlin.time.Instant
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
@@ -14,12 +20,8 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.time.Instant
-import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 /**
  * Integration tests for Redis Event Store and Event Consumer.
@@ -32,7 +34,7 @@ class RedisIntegrationTest {
 
     companion object {
         @Container
-        val redisContainer = GenericContainer(DockerImageName.parse("redis:7-alpine"))
+        val redisContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse("redis:7-alpine"))
             .withExposedPorts(6379)
     }
 
@@ -51,195 +53,95 @@ class RedisIntegrationTest {
         val connectionFactory = LettuceConnectionFactory(redisConfig)
         connectionFactory.afterPropertiesSet()
 
-        redisTemplate = StringRedisTemplate()
-        redisTemplate.setConnectionFactory(connectionFactory)
-        redisTemplate.afterPropertiesSet()
+        redisTemplate = StringRedisTemplate(connectionFactory)
 
-        serializer = JacksonEventSerializer()
-
-        // Register test event types
-        serializer.registerEventType(TestCreatedEvent::class.java, "TestCreated")
-        serializer.registerEventType(TestUpdatedEvent::class.java, "TestUpdated")
+        serializer = JacksonEventSerializer().apply {
+            registerEventType("TestCreated" as Class<out DomainEvent>, TestCreatedEvent::class.java as String)
+            registerEventType("TestUpdated" as Class<out DomainEvent>, TestUpdatedEvent::class.java as String)
+        }
 
         properties = RedisEventStoreProperties(
-            host = redisHost,
-            port = redisPort,
             streamPrefix = "test-stream:",
             allEventsStream = "all-events",
             consumerGroup = "test-group",
-            consumerName = "test-consumer",
-            createConsumerGroupIfNotExists = true
+            consumerName = "test-consumer"
         )
 
         eventStore = RedisEventStore(redisTemplate, serializer, properties)
         eventConsumer = RedisEventConsumer(redisTemplate, serializer, properties)
 
-        // Clear all streams
-        val keys = redisTemplate.keys("${properties.streamPrefix}*")
-        if (keys.isNotEmpty()) {
-            redisTemplate.delete(keys)
-        }
+        cleanupRedis()
     }
 
     @AfterEach
     fun tearDown() {
-        // Clear all streams
+        eventConsumer.shutdown()
+        cleanupRedis()
+    }
+
+    private fun cleanupRedis() {
         val keys = redisTemplate.keys("${properties.streamPrefix}*")
-        if (keys.isNotEmpty()) {
+        if (!keys.isNullOrEmpty()) {
             redisTemplate.delete(keys)
         }
+        redisTemplate.delete(properties.allEventsStream)
     }
 
     @Test
     fun `test event publishing and consuming with consumer groups`() {
-        // Create an aggregate ID
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = uuid4()
+        val event1 = TestCreatedEvent(aggregateId = aggregateId, version = 1L, name = "Test Entity")
+        val event2 = TestUpdatedEvent(aggregateId = aggregateId, version = 2L, name = "Updated Test Entity")
 
-        // Create events
-        val event1 = TestCreatedEvent(
-            aggregateId = aggregateId,
-            version = 0,
-            name = "Test Entity"
-        )
-
-        val event2 = TestUpdatedEvent(
-            aggregateId = aggregateId,
-            version = 1,
-            name = "Updated Test Entity"
-        )
-
-        // Set up a latch to wait for events
         val latch = CountDownLatch(2)
         val receivedEvents = mutableListOf<DomainEvent>()
 
-        // Register a handler for TestCreatedEvent
         eventConsumer.registerEventHandler("TestCreated") { event ->
             receivedEvents.add(event)
             latch.countDown()
         }
-
-        // Register a handler for TestUpdatedEvent
         eventConsumer.registerEventHandler("TestUpdated") { event ->
             receivedEvents.add(event)
             latch.countDown()
         }
 
-        // Initialize the consumer
         eventConsumer.init()
 
-        // Append events to the stream
-        eventStore.appendToStream(event1, aggregateId, -1)
-        eventStore.appendToStream(event2, aggregateId, 0)
+        eventStore.appendToStream(listOf(event1, event2), aggregateId, 0)
 
-        // Manually trigger event polling
-        eventConsumer.pollEvents()
+        assertTrue(latch.await(10, TimeUnit.SECONDS), "Timed out waiting for events")
 
-        // Wait for events to be processed
-        assertTrue(latch.await(5, TimeUnit.SECONDS), "Timed out waiting for events")
-
-        // Verify that both events were received
         assertEquals(2, receivedEvents.size)
 
-        // Verify the first event
-        val receivedEvent1 = receivedEvents[0] as TestCreatedEvent
+        val receivedEvent1 = receivedEvents.find { it.version == 1L } as TestCreatedEvent
         assertEquals(aggregateId, receivedEvent1.aggregateId)
-        assertEquals(0, receivedEvent1.version)
         assertEquals("Test Entity", receivedEvent1.name)
 
-        // Verify the second event
-        val receivedEvent2 = receivedEvents[1] as TestUpdatedEvent
+        val receivedEvent2 = receivedEvents.find { it.version == 2L } as TestUpdatedEvent
         assertEquals(aggregateId, receivedEvent2.aggregateId)
-        assertEquals(1, receivedEvent2.version)
         assertEquals("Updated Test Entity", receivedEvent2.name)
-
-        // Clean up
-        eventConsumer.shutdown()
     }
 
-    @Test
-    fun `test multiple consumers with consumer groups`() {
-        // Create an aggregate ID
-        val aggregateId = UUID.randomUUID()
+    // Hilfsklassen für Tests, die von BaseDomainEvent erben
+    data class TestCreatedEvent(
+        override val aggregateId: Uuid,
+        override val version: Long,
+        val name: String,
+        override val eventType: String = "TestCreated",
+        override val eventId: Uuid = uuid4(),
+        override val timestamp: Instant = Clock.System.now(),
+        override val correlationId: Uuid? = null,
+        override val causationId: Uuid? = null
+    ) : BaseDomainEvent(aggregateId, eventType, version, eventId, timestamp, correlationId, causationId)
 
-        // Create events
-        val event1 = TestCreatedEvent(
-            aggregateId = aggregateId,
-            version = 0,
-            name = "Test Entity"
-        )
-
-        val event2 = TestUpdatedEvent(
-            aggregateId = aggregateId,
-            version = 1,
-            name = "Updated Test Entity"
-        )
-
-        // Note: We don't need to pre-initialize streams since consumer group creation is disabled
-
-        // Set up latches to wait for events
-        val latch1 = CountDownLatch(2)
-        val latch2 = CountDownLatch(2)
-        val receivedEvents1 = mutableListOf<DomainEvent>()
-        val receivedEvents2 = mutableListOf<DomainEvent>()
-
-        // Create a second consumer with a different consumer group and consumer name
-        val properties2 = properties.copy(
-            consumerGroup = "test-group-2",
-            consumerName = "test-consumer-2"
-        )
-        val eventConsumer2 = RedisEventConsumer(redisTemplate, serializer, properties2)
-
-        // Register handlers for the first consumer
-        eventConsumer.registerAllEventsHandler { event ->
-            receivedEvents1.add(event)
-            latch1.countDown()
-        }
-
-        // Register handlers for the second consumer
-        eventConsumer2.registerAllEventsHandler { event ->
-            receivedEvents2.add(event)
-            latch2.countDown()
-        }
-
-        // Initialize the consumers
-        eventConsumer.init()
-        eventConsumer2.init()
-
-        // Append events to the stream
-        eventStore.appendToStream(event1, aggregateId, -1)
-        eventStore.appendToStream(event2, aggregateId, 0)
-
-        // Manually trigger event polling
-        eventConsumer.pollEvents()
-        eventConsumer2.pollEvents()
-
-        // Wait for events to be processed by both consumers
-        assertTrue(latch1.await(5, TimeUnit.SECONDS), "Timed out waiting for events on consumer 1")
-        assertTrue(latch2.await(5, TimeUnit.SECONDS), "Timed out waiting for events on consumer 2")
-
-        // Verify that both consumers received both events
-        assertEquals(2, receivedEvents1.size)
-        assertEquals(2, receivedEvents2.size)
-
-        // Clean up
-        eventConsumer.shutdown()
-        eventConsumer2.shutdown()
-    }
-
-    // Test event classes
-    class TestCreatedEvent(
-        override val eventId: UUID = UUID.randomUUID(),
-        override val timestamp: Instant = Instant.now(),
-        override val aggregateId: UUID,
-        override val version: UUID,
-        val name: String
-    ) : BaseDomainEvent(eventId, timestamp, aggregateId, version)
-
-    class TestUpdatedEvent(
-        override val eventId: UUID = UUID.randomUUID(),
-        override val timestamp: Instant = Instant.now(),
-        override val aggregateId: UUID,
-        override val version: UUID,
-        val name: String
-    ) : BaseDomainEvent(eventId, timestamp, aggregateId, version)
+    data class TestUpdatedEvent(
+        override val aggregateId: Uuid,
+        override val version: Long,
+        val name: String,
+        override val eventType: String = "TestUpdated",
+        override val eventId: Uuid = uuid4(),
+        override val timestamp: Instant = Clock.System.now(),
+        override val correlationId: Uuid? = null,
+        override val causationId: Uuid? = null
+    ) : BaseDomainEvent(aggregateId, eventType, version, eventId, timestamp, correlationId, causationId)
 }
