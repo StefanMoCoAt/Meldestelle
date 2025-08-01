@@ -50,8 +50,8 @@ class RedisEventStoreIntegrationTest {
         redisTemplate = StringRedisTemplate(connectionFactory)
 
         serializer = JacksonEventSerializer().apply {
-            registerEventType("TestCreated" as Class<out DomainEvent>, TestCreatedEvent::class.java as String)
-            registerEventType("TestUpdated" as Class<out DomainEvent>, TestUpdatedEvent::class.java as String)
+            registerEventType(TestCreatedEvent::class.java, "TestCreated")
+            registerEventType(TestUpdatedEvent::class.java, "TestUpdated")
         }
 
         properties = RedisEventStoreProperties(
@@ -78,7 +78,8 @@ class RedisEventStoreIntegrationTest {
         if (!keys.isNullOrEmpty()) {
             redisTemplate.delete(keys)
         }
-        redisTemplate.delete(properties.allEventsStream)
+        val allEventsStreamKey = "${properties.streamPrefix}${properties.allEventsStream}"
+        redisTemplate.delete(allEventsStreamKey)
     }
 
     @Test
@@ -103,7 +104,11 @@ class RedisEventStoreIntegrationTest {
 
         eventStore.appendToStream(listOf(event1, event2), aggregateId, 0)
 
-        assertTrue(latch.await(10, TimeUnit.SECONDS), "Timed out waiting for events")
+        // KORREKTUR: Manuelles Auslösen des Pollings, da @Scheduled im Test nicht aktiv ist.
+        eventConsumer.pollEvents()
+
+        // Der Latch sollte jetzt fast sofort herunterzählen. Wir warten zur Sicherheit eine kurze Zeit.
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "Timed out waiting for events. Latch count: ${latch.count}")
 
         assertEquals(2, receivedEvents.size)
 
@@ -116,7 +121,6 @@ class RedisEventStoreIntegrationTest {
         assertEquals("Updated Test Entity", receivedEvent2.name)
     }
 
-    // Hilfsklassen für Tests, die von BaseDomainEvent erben
     data class TestCreatedEvent(
         override val aggregateId: Uuid,
         override val version: Long,

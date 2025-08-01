@@ -55,9 +55,10 @@ class RedisIntegrationTest {
 
         redisTemplate = StringRedisTemplate(connectionFactory)
 
+        // KORREKTUR: Parameter in der korrekten Reihenfolge und mit korrekten Typen übergeben.
         serializer = JacksonEventSerializer().apply {
-            registerEventType("TestCreated" as Class<out DomainEvent>, TestCreatedEvent::class.java as String)
-            registerEventType("TestUpdated" as Class<out DomainEvent>, TestUpdatedEvent::class.java as String)
+            registerEventType(TestCreatedEvent::class.java, "TestCreated")
+            registerEventType(TestUpdatedEvent::class.java, "TestUpdated")
         }
 
         properties = RedisEventStoreProperties(
@@ -71,6 +72,8 @@ class RedisIntegrationTest {
         eventConsumer = RedisEventConsumer(redisTemplate, serializer, properties)
 
         cleanupRedis()
+        // WICHTIG: Consumer starten, damit er auf Events lauschen kann.
+        eventConsumer.init()
     }
 
     @AfterEach
@@ -80,11 +83,13 @@ class RedisIntegrationTest {
     }
 
     private fun cleanupRedis() {
+        val allEventsStreamKey = "${properties.streamPrefix}${properties.allEventsStream}"
         val keys = redisTemplate.keys("${properties.streamPrefix}*")
         if (!keys.isNullOrEmpty()) {
             redisTemplate.delete(keys)
         }
-        redisTemplate.delete(properties.allEventsStream)
+        // Sicherstellen, dass auch der allEventsStream-Key gelöscht wird, falls er nicht im Muster enthalten ist.
+        redisTemplate.delete(allEventsStreamKey)
     }
 
     @Test
@@ -105,11 +110,25 @@ class RedisIntegrationTest {
             latch.countDown()
         }
 
-        eventConsumer.init()
+        // Start polling in a separate thread to not block the test execution
+        val pollingThread = Thread {
+            // Poll multiple times to ensure messages are picked up
+            for (i in 1..20) {
+                if (latch.count > 0) {
+                    eventConsumer.pollEvents()
+                    Thread.sleep(100)
+                }
+            }
+        }
+        pollingThread.start()
+
 
         eventStore.appendToStream(listOf(event1, event2), aggregateId, 0)
 
-        assertTrue(latch.await(10, TimeUnit.SECONDS), "Timed out waiting for events")
+        assertTrue(
+            latch.await(10, TimeUnit.SECONDS),
+            "Timed out waiting for events. Received ${receivedEvents.size} of 2 events."
+        )
 
         assertEquals(2, receivedEvents.size)
 
@@ -120,6 +139,8 @@ class RedisIntegrationTest {
         val receivedEvent2 = receivedEvents.find { it.version == 2L } as TestUpdatedEvent
         assertEquals(aggregateId, receivedEvent2.aggregateId)
         assertEquals("Updated Test Entity", receivedEvent2.name)
+
+        pollingThread.interrupt()
     }
 
     // Hilfsklassen für Tests, die von BaseDomainEvent erben

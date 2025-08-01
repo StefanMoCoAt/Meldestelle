@@ -4,7 +4,8 @@ import at.mocode.core.domain.serialization.KotlinInstantSerializer
 import at.mocode.core.domain.serialization.UuidSerializer
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 
 /**
@@ -15,8 +16,8 @@ interface DomainEvent {
     val eventId: Uuid
     val aggregateId: Uuid
     val eventType: String
-    val timestamp: kotlin.time.Instant
-    val version: Long // KORRIGIERT: Einheitlich auf Long
+    val timestamp: Instant
+    val version: Long
     val correlationId: Uuid?
     val causationId: Uuid?
 }
@@ -29,11 +30,11 @@ abstract class BaseDomainEvent(
     @Serializable(with = UuidSerializer::class)
     override val aggregateId: Uuid,
     override val eventType: String,
-    override val version: Long, // KORRIGIERT: Einheitlich auf Long
+    override val version: Long,
     @Serializable(with = UuidSerializer::class)
     override val eventId: Uuid = uuid4(),
     @Serializable(with = KotlinInstantSerializer::class)
-    override val timestamp: kotlin.time.Instant = kotlin.time.Clock.System.now(), // KORRIGIERT: Einheitlich auf kotlinx.datetime.Instant
+    override val timestamp: Instant = Clock.System.now(),
     @Serializable(with = UuidSerializer::class)
     override val correlationId: Uuid? = null,
     @Serializable(with = UuidSerializer::class)

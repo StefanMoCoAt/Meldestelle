@@ -9,13 +9,11 @@ import kotlinx.serialization.Serializable
 
 /**
  * A marker interface for all Data Transfer Objects.
- * While not strictly necessary, it can be useful for generic constraints.
  */
 interface BaseDto
 
 /**
- * Base DTO for domain entities that have a unique ID and audit timestamps.
- * Ensures that all primary entities share a common structure.
+ * Base DTO for domain entities that have unique ID and audit timestamps.
  */
 @Serializable
 abstract class EntityDto : BaseDto {
@@ -34,16 +32,13 @@ abstract class EntityDto : BaseDto {
  */
 @Serializable
 data class ErrorDto(
-    val code: String, // A machine-readable error code, e.g., "VALIDATION_ERROR"
-    val message: String, // A human-readable message, e.g., "Email is not valid"
-    val field: String? = null // Optional: The specific field the error relates to
+    val code: String,
+    val message: String,
+    val field: String? = null
 ) : BaseDto
 
 /**
  * A standardized and consistent wrapper for all API responses.
- * It clearly separates the data payload from metadata about the request's success and potential errors.
- *
- * @param T The type of the data payload.
  */
 @Serializable
 data class ApiResponse<T>(
@@ -54,16 +49,10 @@ data class ApiResponse<T>(
     val timestamp: Instant = Clock.System.now()
 ) {
     companion object {
-        /**
-         * Factory function to create a standardized success response.
-         */
         fun <T> success(data: T): ApiResponse<T> {
             return ApiResponse(data = data, success = true)
         }
 
-        /**
-         * Factory function to create a standardized error response.
-         */
         fun <T> error(
             code: String,
             message: String,
@@ -76,9 +65,6 @@ data class ApiResponse<T>(
             )
         }
 
-        /**
-         * Factory function to create a standardized error response with multiple errors.
-         */
         fun <T> error(errors: List<ErrorDto>): ApiResponse<T> {
             return ApiResponse(data = null, success = false, errors = errors)
         }
@@ -87,9 +73,6 @@ data class ApiResponse<T>(
 
 /**
  * A standardized wrapper for paginated API responses.
- * Contains the list of items for the current page as well as all necessary pagination metadata.
- *
- * @param T The type of the content in the page.
  */
 @Serializable
 data class PagedResponse<T>(
@@ -101,5 +84,3 @@ data class PagedResponse<T>(
     val hasNext: Boolean,
     val hasPrevious: Boolean
 )
-
-// REMOVED: The PaginationDto was redundant as all its information is already contained within PagedResponse.

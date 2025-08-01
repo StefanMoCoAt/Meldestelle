@@ -2,12 +2,13 @@ package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.DomainEvent
 import at.mocode.infrastructure.eventstore.api.EventSerializer
+import com.benasher44.uuid.uuidFrom
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -22,13 +23,9 @@ class JacksonEventSerializer : EventSerializer {
         disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
-    // Maps from event type to event class
     private val eventTypeToClass = ConcurrentHashMap<String, Class<out DomainEvent>>()
-
-    // Maps from event class to event type
     private val eventClassToType = ConcurrentHashMap<Class<out DomainEvent>, String>()
 
-    // Standard field names in serialized events
     companion object {
         const val EVENT_TYPE_FIELD = "eventType"
         const val EVENT_ID_FIELD = "eventId"
@@ -40,16 +37,11 @@ class JacksonEventSerializer : EventSerializer {
 
     override fun serialize(event: DomainEvent): Map<String, String> {
         val eventType = getEventType(event)
-
-        // Register the event type if not already registered
         if (!eventClassToType.containsKey(event.javaClass)) {
             registerEventType(event.javaClass, eventType)
         }
 
-        // Serialize the event data
         val eventData = objectMapper.writeValueAsString(event)
-
-        // Create a map with the event metadata and data
         return mapOf(
             EVENT_TYPE_FIELD to eventType,
             EVENT_ID_FIELD to event.eventId.toString(),
@@ -72,47 +64,35 @@ class JacksonEventSerializer : EventSerializer {
     }
 
     override fun getEventType(event: DomainEvent): String {
-        // Use the registered type if available
-        val registeredType = eventClassToType[event.javaClass]
-        if (registeredType != null) {
-            return registeredType
-        }
-
-        // Otherwise, use the simple class name
-        val type = event.javaClass.simpleName
-        registerEventType(event.javaClass, type)
-        return type
+        return eventClassToType[event.javaClass] ?: event.javaClass.simpleName
     }
 
     override fun getEventType(data: Map<String, String>): String {
-        return data[EVENT_TYPE_FIELD]
-            ?: throw IllegalArgumentException("Event type is missing")
+        return data[EVENT_TYPE_FIELD] ?: throw IllegalArgumentException("Event type is missing")
     }
 
+    // KORRIGIERT: Parameterreihenfolge umgedreht
     override fun registerEventType(eventClass: Class<out DomainEvent>, eventType: String) {
         eventTypeToClass[eventType] = eventClass
         eventClassToType[eventClass] = eventType
-        logger.debug("Registered event type: $eventType for class: ${eventClass.name}")
+        logger.debug("Registered event type: {} for class: {}", eventType, eventClass.name)
     }
 
-    override fun getAggregateId(data: Map<String, String>): UUID {
+    override fun getAggregateId(data: Map<String, String>): com.benasher44.uuid.Uuid {
         val aggregateIdStr = data[AGGREGATE_ID_FIELD]
             ?: throw IllegalArgumentException("Aggregate ID is missing")
-
-        return UUID.fromString(aggregateIdStr)
+        return uuidFrom(aggregateIdStr)
     }
 
-    override fun getEventId(data: Map<String, String>): UUID {
+    override fun getEventId(data: Map<String, String>): com.benasher44.uuid.Uuid {
         val eventIdStr = data[EVENT_ID_FIELD]
             ?: throw IllegalArgumentException("Event ID is missing")
-
-        return UUID.fromString(eventIdStr)
+        return uuidFrom(eventIdStr)
     }
 
     override fun getVersion(data: Map<String, String>): Long {
         val versionStr = data[VERSION_FIELD]
             ?: throw IllegalArgumentException("Version is missing")
-
         return versionStr.toLong()
     }
 }
