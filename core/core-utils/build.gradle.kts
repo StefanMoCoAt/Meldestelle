@@ -33,10 +33,12 @@ dependencies {
     api(libs.kotlin.logging.jvm)
 
     // Utilities
-    api(libs.bignum) // Für BigDecimal Serialisierung
+    api(libs.bignum)
+    implementation(libs.room.common.jvm) // Für BigDecimal Serialisierung
 
     // Testing
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
     testImplementation(libs.kotlin.test)
+    testRuntimeOnly(libs.postgresql.driver)
 }

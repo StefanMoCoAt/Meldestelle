@@ -1,8 +1,8 @@
 ✅ TODO-Checkliste: Architektur-Validierung ("Tracer Bullet")
 Phase 1: Backend-Infrastruktur vorbereiten
-[ ] Gradle-Setup bereinigen:
+✅ Gradle-Setup bereinigen:
 
-[ ] In settings.gradle.kts sicherstellen, dass nur die platform-, core- und infrastructure-Module aktiv sind. Alle anderen (fachliche Services, Clients) müssen auskommentiert sein.
+✅ In settings.gradle.kts sicherstellen, dass nur die platform-, core- und infrastructure-Module aktiv sind. Alle anderen (fachliche Services, Clients) müssen auskommentiert sein.
 
 [ ] Konfiguration finalisieren:
 

@@ -2,133 +2,41 @@
 
 ## Überblick
 
-Das Core-Modul bildet das Fundament des gesamten Meldestelle-Systems und implementiert den **Shared Kernel** nach Domain-Driven Design Prinzipien. Es stellt gemeinsame Domänenkonzepte, Utilities und Infrastrukturkomponenten bereit, die von allen anderen Modulen (members, horses, events, masterdata, infrastructure) verwendet werden.
+Das Core-Modul bildet das Fundament des gesamten Meldestelle-Systems und implementiert den **Shared Kernel** nach Domain-Driven Design Prinzipien. Es stellt gemeinsame, domänen-agnostische Konzepte, Utilities und Infrastrukturkomponenten bereit, die von allen anderen Modulen verwendet werden.
 
 ## Architektur
 
-Das Core-Modul ist nach den Prinzipien der Clean Architecture in zwei Hauptkomponenten unterteilt:
+Das Modul ist nach den Prinzipien der Clean Architecture in zwei Hauptkomponenten unterteilt:
 
-
-```
-core/
-├── core-domain/                 # Shared Domain Layer
-│   ├── model/                   # Gemeinsame Domain Models
-│   │   ├── BaseDto.kt          # Basis-DTO-Klassen
-│   │   └── Enums.kt            # Gemeinsame Enumerationen
-│   ├── serialization/          # Serialisierung
-│   │   └── Serializers.kt      # Custom Serializers
-│   └── event/                  # Domain Events
-│       └── DomainEvent.kt      # Event-Infrastruktur
-└── core-utils/                 # Shared Utilities
-    ├── config/                 # Konfiguration
-    │   ├── AppConfig.kt        # Anwendungskonfiguration
-    │   └── AppEnvironment.kt   # Umgebungskonfiguration
-    ├── database/               # Datenbank-Utilities
-    │   ├── DatabaseConfig.kt   # Datenbank-Konfiguration
-    │   └── DatabaseFactory.kt  # Datenbank-Factory
-    ├── discovery/              # Service Discovery
-    │   └── ServiceRegistration.kt # Service-Registrierung
-    ├── error/                  # Fehlerbehandlung
-    │   └── Result.kt           # Result-Type für Fehlerbehandlung
-    ├── serialization/          # Serialisierung
-    │   └── Serialization.kt    # Serialisierungs-Utilities
-    └── validation/             # Validierung
-        ├── ValidationResult.kt  # Validierungsergebnisse
-        ├── ValidationUtils.kt   # Validierungs-Utilities
-        └── ApiValidationUtils.kt # API-Validierung
-```
+* **`:core-domain`**: Der "reine" Teil des Kernels. Enthält nur Datenstrukturen und Interfaces ohne externe Abhängigkeiten.
+* **`:core-utils`**: Stellt technische Hilfsfunktionen und konkrete Implementierungen bereit, die auf dem `core-domain` aufbauen.
 
 ## Core-Domain Komponenten
 
-### 1. Gemeinsame Enumerationen (`Enums.kt`)
-Zentrale Enumerationen, die modulübergreifend verwendet werden, um eine konsistente "Ubiquitäre Sprache" zu etablieren. Dazu gehören `SparteE`, `PferdeGeschlechtE`, `RolleE` und `BerechtigungE`.
+Dieses Modul hat eine **minimale Oberfläche**, um eine maximale Entkopplung der Fach-Services zu gewährleisten.
 
-### 2. Basis-DTOs (`BaseDto.kt`)
-Gemeinsame Basisklassen für Data Transfer Objects, die eine konsistente API-Struktur im gesamten System sicherstellen, wie `ApiResponse<T>` für Standard-Antworten und `PagedResponse<T>` für paginierte Listen.
-
-### 3. Domain Events (`DomainEvent.kt`)
-Die Event-Sourcing Infrastruktur für Domain-Driven Design. Definiert die Basis-Interfaces (`DomainEvent`, `DomainEventPublisher`, `DomainEventHandler`) für die asynchrone Kommunikation zwischen den Services.
-
-### 4. Custom Serializers (`Serializers.kt`)
-Spezialisierte Serializer für Kotlin-Typen wie `Uuid`, `Instant` und `LocalDate`, um eine einheitliche JSON-Serialisierung über alle Services hinweg zu garantieren.
+* **`BaseDto.kt`**: Definiert standardisierte DTOs (Data Transfer Objects) wie `ApiResponse<T>` und `PagedResponse<T>`, um eine konsistente API-Struktur im gesamten System sicherzustellen.
+* **`DomainEvent.kt`**: Stellt die Basis-Infrastruktur für Domänen-Events (`DomainEvent`, `BaseDomainEvent`) bereit, die für eine asynchrone, ereignisgesteuerte Kommunikation unerlässlich ist.
+* **`Enums.kt`**: Enthält ausschließlich fundamental querschnittliche Enums. Nach einem Refactoring verbleibt hier nur noch `DatenQuelleE`, da es die Herkunft von Daten beschreibt – ein Konzept, das für alle Domänen relevant ist. Domänenspezifische Enums (z.B. für Pferderassen oder Disziplinen) wurden bewusst entfernt.
+* **`Serializers.kt`**: Bietet benutzerdefinierte Serializer für `kotlinx.serialization`, um Typen wie `Uuid` und `Instant` systemweit konsistent in JSON umzuwandeln.
 
 ## Core-Utils Komponenten
 
-### 1. Fehlerbehandlung (`Result.kt`)
-Eine funktionale und typsichere `Result<T, E>`-Klasse zur Behandlung von vorhersehbaren Geschäftsfehlern ohne den Einsatz von Exceptions. Dies führt zu robusterem und besser lesbarem Code in den Anwendungs-Services.
+* **Konfiguration (`config/`)**:
+    * **`ConfigLoader.kt`**: Implementiert ein sauberes Muster zur Entkopplung der Konfigurations-Ladelogik. Er liest `.properties`-Dateien und Umgebungsvariablen.
+    * **`AppConfig.kt`**: Dient als reine, unveränderliche Datenklasse, die die vom `ConfigLoader` geladenen Werte enthält. Dieses Muster verbessert die Testbarkeit erheblich.
+* **Datenbank (`database/`)**:
+    * **`DatabaseFactory.kt`**: Eine robuste Factory zur Verwaltung von Datenbankverbindungen mit einem hoch-performanten Connection Pool (HikariCP) und automatischer Datenbank-Migration durch den Industriestandard **Flyway**.
+* **Fehlerbehandlung (`error/`)**:
+    * **`Result.kt`**: Eine typsichere, versiegelte Klasse (`sealed class`) für funktionales Error-Handling, die den übermäßigen Einsatz von Exceptions für erwartete Geschäftsfehler vermeidet.
+* **Validierung (`validation/`)**:
+    * **`ValidationResult.kt`**: Eine vereinheitlichte, serialisierbare Datenstruktur (`ValidationResult`, `ValidationError`) zur systemweiten, konsistenten Kommunikation von Validierungsfehlschlägen über API-Grenzen hinweg.
 
-### 2. Konfiguration (`AppConfig.kt`, `AppEnvironment.kt`)
-Eine zentrale und flexible Konfigurationsverwaltung, die Einstellungen aus verschiedenen Quellen (Umgebungsvariablen, Property-Dateien) für unterschiedliche Umgebungen (`DEVELOPMENT`, `PRODUCTION` etc.) laden kann.
+## Testing-Strategie
 
-### 3. Datenbank-Utilities (`DatabaseFactory.kt`, `DatabaseConfig.kt`)
-Stellt die zentrale Logik für Datenbankverbindungen bereit. Die `DatabaseFactory` konfiguriert einen hoch-performanten Connection Pool (HikariCP) und integriert das Industrie-Standard-Tool **Flyway** für die automatische Ausführung von versionierten SQL-Datenbankmigrationen beim Start eines Service.
+Das `core`-Modul ist durch eine umfassende Suite von Unit- und Integrationstests abgesichert, die einen hohen Qualitätsstandard setzen.
 
-### 4. Validierung (`ValidationUtils.kt`, `ApiValidationUtils.kt`)
-Eine umfassende Sammlung von wiederverwendbaren Hilfsfunktionen zur Validierung von Daten, von einfachen Längenprüfungen bis hin zu komplexen API-Parameter-Validierungen.
-
-### 5. Service Discovery (`ServiceRegistration.kt`)
-Eine Implementierung zur Registrierung von Microservices bei einem Consul-Server, um eine dynamische Service-Landschaft zu ermöglichen.
-
-## Verwendung in anderen Modulen
-
-Andere Module deklarieren eine Abhängigkeit zum `core`-Modul, um auf dessen Bausteine zugreifen zu können.
-
-### API Responses
-```kotlin
-// In API Controllers
-@RestController
-class MemberController {
-
-    @GetMapping("/api/members/{id}")
-    fun getMember(@PathVariable id: String): ApiResponse<Member> {
-        // ...
-    }
-}
-```
-
-### Result-Type Usage
-
-```kotlin
-// In Use Cases
-class CreateMemberUseCase {
-    suspend fun execute(member: Member): Result<Member, ValidationError> {
-        // ...
-    }
-}
-```
-
-## Best Practices
-
-### 1. Shared Kernel Prinzipien
-
-- **Minimale Oberfläche**: Nur wirklich gemeinsame Konzepte
-- **Stabile APIs**: Änderungen beeinflussen alle Module
-- **Versionierung**: Sorgfältige Versionierung bei Breaking Changes
-- **Dokumentation**: Umfassende Dokumentation für alle Komponenten
-
-### 2. Fehlerbehandlung
-
-- **Result-Type verwenden**: Statt Exceptions für erwartete Geschäftsfehler, um die Geschäftslogik klar und explizit zu halten.
-- **Validierung**: Frühe Validierung mit ValidationResult
-
-### 3. Serialisierung
-
-- **Custom Serializers**: Für spezielle Datentypen werden die bereitgestellten Serializer verwendet, um Konsistenz zu gewährleisten.
-- **Schema-Evolution**: Bei der Weiterentwicklung von DTOs und Events muss die Abwärtskompatibilität berücksichtigt werden.
-
-## Zukünftige Erweiterungen
-
-1. **Event Sourcing Enhancements** - Erweiterte Event Store Features
-2. **Distributed Tracing** - OpenTelemetry Integration
-3. **Metrics Collection** - Micrometer Integration
-4. **Configuration Management** - Externalized Configuration
-5. **Security Utilities** - Encryption/Decryption Utilities
-6. **Caching Abstractions** - Cache-Provider Abstractions
-7. **Async Utilities** - Coroutines Utilities
-8. **Testing Utilities** - Test-Helpers und Fixtures
+* **Unit-Tests**: Kritische Komponenten wie der `ConfigLoader`, die Serializer und die `ApiResponse`-Logik sind durch Unit-Tests abgedeckt.
+* **Datenbank-Tests (Goldstandard)**: Die Datenbanklogik wird nicht gegen eine ungenaue In-Memory-Datenbank (wie H2) getestet. Stattdessen wird **Testcontainers** verwendet, um für jeden Testlauf eine echte **PostgreSQL-Datenbank** in einem Docker-Container zu starten. Dies garantiert 100%ige Kompatibilität zwischen Test- und Produktionsumgebung.
 
 ---
-
-**Letzte Aktualisierung**: 28. Juli 2025
-
-Für weitere Informationen zur Gesamtarchitektur siehe [README.md](../README.md).

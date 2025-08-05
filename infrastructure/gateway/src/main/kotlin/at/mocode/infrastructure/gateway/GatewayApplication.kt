@@ -9,5 +9,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient
 class GatewayApplication
 
 fun main(args: Array<String>) {
+
     runApplication<GatewayApplication>(*args)
 }
