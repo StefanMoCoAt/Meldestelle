@@ -5,6 +5,13 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
+// Erlaubt die Verwendung der kotlin.time API im gesamten Modul
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xopt-in=kotlin.time.ExperimentalTime")
+    }
+}
+
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
     implementation(platform(projects.platform.platformBom))

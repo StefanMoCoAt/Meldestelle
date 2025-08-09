@@ -11,14 +11,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.redis.RedisConnectionFailureException
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
-import java.time.Duration
-import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Instant
+import kotlin.time.toJavaDuration
+import kotlin.time.ExperimentalTime
 
-/**
- * Redis implementation of DistributedCache with offline capability.
- */
+@OptIn(ExperimentalTime::class)
 class RedisDistributedCache(
     private val redisTemplate: RedisTemplate<String, ByteArray>,
     private val serializer: CacheSerializer,
@@ -35,7 +36,8 @@ class RedisDistributedCache(
 
     // Connection state
     private var connectionState = ConnectionState.DISCONNECTED
-    private var lastStateChangeTime = Instant.now()
+
+    private var lastStateChangeTime = Clock.System.now()
 
     // Connection state listeners
     private val connectionListeners = CopyOnWriteArrayList<ConnectionStateListener>()
@@ -45,24 +47,20 @@ class RedisDistributedCache(
         checkConnection()
     }
 
-    //
-    // DistributedCache implementation
-    //
-
     override fun <T : Any> get(key: String, clazz: Class<T>): T? {
         val prefixedKey = addPrefix(key)
 
-        // Try to get from local cache first
-        val localEntry = localCache[prefixedKey] as? CacheEntry<T>
+        // Try to get from the local cache first
+        val localEntry = localCache[prefixedKey] as? CacheEntry<*>
         if (localEntry != null) {
             if (localEntry.isExpired()) {
                 localCache.remove(prefixedKey)
                 return null
             }
-            return localEntry.value
+            return localEntry.value as T?
         }
 
-        // If not in local cache and we're disconnected, return null
+        // If not in the local cache, and we're disconnected, return null
         if (!isConnected()) {
             return null
         }
@@ -72,7 +70,7 @@ class RedisDistributedCache(
             val bytes = redisTemplate.opsForValue().get(prefixedKey) ?: return null
             val entry = serializer.deserializeEntry(bytes, clazz)
 
-            // Store in local cache
+            // Store in a local cache
             localCache[prefixedKey] = entry as CacheEntry<Any>
 
             return entry.value
@@ -87,7 +85,8 @@ class RedisDistributedCache(
 
     override fun <T : Any> set(key: String, value: T, ttl: Duration?) {
         val prefixedKey = addPrefix(key)
-        val expiresAt = ttl?.let { Instant.now().plus(it) } ?: config.defaultTtl?.let { Instant.now().plus(it) }
+        // KORREKTUR: Logik verwendet jetzt kotlin.time
+        val expiresAt = ttl?.let { Clock.System.now() + it } ?: config.defaultTtl?.let { Clock.System.now() + it }
 
         val entry = CacheEntry(
             key = prefixedKey,
@@ -95,25 +94,21 @@ class RedisDistributedCache(
             expiresAt = expiresAt
         )
 
-        // Store in local cache
         localCache[prefixedKey] = entry as CacheEntry<Any>
 
-        // If we're disconnected, mark as dirty and return
         if (!isConnected()) {
             markDirty(key)
             return
         }
 
-        // Try to store in Redis
         try {
             val bytes = serializer.serializeEntry(entry)
-            redisTemplate.opsForValue().set(prefixedKey, bytes)
-
-            if (ttl != null) {
-                redisTemplate.expire(prefixedKey, ttl)
-            } else if (config.defaultTtl != null) {
-                val defaultTtl: Duration = config.defaultTtl!!
-                redisTemplate.expire(prefixedKey, defaultTtl)
+            val effectiveTtl = ttl ?: config.defaultTtl
+            if (effectiveTtl != null) {
+                // KORREKTUR: Konvertierung zu java.time.Duration für RedisTemplate
+                redisTemplate.opsForValue().set(prefixedKey, bytes, effectiveTtl.toJavaDuration())
+            } else {
+                redisTemplate.opsForValue().set(prefixedKey, bytes)
             }
         } catch (e: RedisConnectionFailureException) {
             handleConnectionFailure(e)
@@ -127,7 +122,7 @@ class RedisDistributedCache(
     override fun delete(key: String) {
         val prefixedKey = addPrefix(key)
 
-        // Remove from local cache
+        // Remove from the local cache
         localCache.remove(prefixedKey)
 
         // If we're disconnected, mark as dirty and return
@@ -151,7 +146,7 @@ class RedisDistributedCache(
     override fun exists(key: String): Boolean {
         val prefixedKey = addPrefix(key)
 
-        // Check local cache first
+        // Check the local cache first
         if (localCache.containsKey(prefixedKey)) {
             val entry = localCache[prefixedKey]
             if (entry != null && !entry.isExpired()) {
@@ -181,7 +176,7 @@ class RedisDistributedCache(
     override fun <T : Any> multiGet(keys: Collection<String>, clazz: Class<T>): Map<String, T> {
         val result = mutableMapOf<String, T>()
 
-        // Get from local cache first
+        // Get from the local cache first
         val prefixedKeys = keys.map { addPrefix(it) }
         val localEntries = prefixedKeys.mapNotNull { key ->
             val entry = localCache[key] as? CacheEntry<T>
@@ -215,7 +210,7 @@ class RedisDistributedCache(
                         try {
                             val entry = serializer.deserializeEntry(bytes, clazz)
 
-                            // Store in local cache
+                            // Store in a local cache
                             localCache[key] = entry as CacheEntry<Any>
 
                             // Add to result
@@ -235,10 +230,10 @@ class RedisDistributedCache(
         return result
     }
 
+    // ... (multiSet ebenfalls anpassen)
     override fun <T : Any> multiSet(entries: Map<String, T>, ttl: Duration?) {
-        // Store in local cache and prepare for Redis
         val redisBatch = mutableMapOf<String, ByteArray>()
-        val expiresAt = ttl?.let { Instant.now().plus(it) } ?: config.defaultTtl?.let { Instant.now().plus(it) }
+        val expiresAt = ttl?.let { Clock.System.now() + it } ?: config.defaultTtl?.let { Clock.System.now() + it }
 
         for ((key, value) in entries) {
             val prefixedKey = addPrefix(key)
@@ -247,30 +242,24 @@ class RedisDistributedCache(
                 value = value,
                 expiresAt = expiresAt
             )
-
-            // Store in local cache
             localCache[prefixedKey] = entry as CacheEntry<Any>
-
-            // Prepare for Redis
             redisBatch[prefixedKey] = serializer.serializeEntry(entry)
         }
 
-        // If we're disconnected, mark all as dirty and return
         if (!isConnected()) {
             entries.keys.forEach { markDirty(it) }
             return
         }
 
-        // Try to store in Redis
         try {
             redisTemplate.opsForValue().multiSet(redisBatch)
-
-            if (ttl != null || config.defaultTtl != null) {
-                val duration = ttl ?: config.defaultTtl
-                if (duration != null) {
-                    for (key in redisBatch.keys) {
-                        redisTemplate.expire(key, duration)
+            val effectiveTtl = ttl ?: config.defaultTtl
+            if (effectiveTtl != null) {
+                redisTemplate.executePipelined { connection ->
+                    redisBatch.keys.forEach { key ->
+                        connection.keyCommands().pExpire(key.toByteArray(), effectiveTtl.inWholeMilliseconds)
                     }
+                    null
                 }
             }
         } catch (e: RedisConnectionFailureException) {
@@ -285,7 +274,7 @@ class RedisDistributedCache(
     override fun multiDelete(keys: Collection<String>) {
         val prefixedKeys = keys.map { addPrefix(it) }
 
-        // Remove from local cache
+        // Remove from the local cache
         prefixedKeys.forEach { localCache.remove(it) }
 
         // If we're disconnected, mark all as dirty and return
@@ -336,15 +325,21 @@ class RedisDistributedCache(
                 // Entry exists locally, update in Redis
                 try {
                     val bytes = serializer.serializeEntry(localEntry)
+
+                    // Die 'set'-Methode erwartet kein TTL-Argument hier
                     redisTemplate.opsForValue().set(prefixedKey, bytes)
 
-                    val ttl = localEntry.expiresAt?.let { Duration.between(Instant.now(), it) }
-                    if (ttl != null && !ttl.isNegative) {
-                        redisTemplate.expire(prefixedKey, ttl)
+                    // So wird die Dauer zwischen zwei Instants berechnet
+                    val ttl = localEntry.expiresAt?.let { it - Clock.System.now() }
+
+                    // 'isNegative' wird zu '< Duration.ZERO'
+                    if (ttl != null && ttl > Duration.ZERO) {
+                        // KORREKTUR: 'expire' braucht eine java.time.Duration
+                        redisTemplate.expire(prefixedKey, ttl.toJavaDuration())
                     }
 
                     // Update local entry to mark as clean
-                    localCache[prefixedKey] = localEntry.markClean() as CacheEntry<Any>
+                    localCache[prefixedKey] = localEntry.markClean()
                     dirtyKeys.remove(key)
                 } catch (e: Exception) {
                     logger.error("Error updating key $prefixedKey during synchronization", e)
@@ -359,7 +354,7 @@ class RedisDistributedCache(
         val prefixedKey = addPrefix(key)
         val entry = localCache[prefixedKey]
         if (entry != null) {
-            localCache[prefixedKey] = entry.markDirty() as CacheEntry<Any>
+            localCache[prefixedKey] = entry.markDirty()
         }
     }
 
@@ -431,7 +426,7 @@ class RedisDistributedCache(
         if (connectionState != newState) {
             val oldState = connectionState
             connectionState = newState
-            lastStateChangeTime = Instant.now()
+            lastStateChangeTime = Clock.System.now()
 
             logger.info("Cache connection state changed from $oldState to $newState")
 
@@ -455,12 +450,12 @@ class RedisDistributedCache(
     /**
      * Periodically check the connection to Redis.
      */
-    @Scheduled(fixedDelayString = "\${redis.connection-check-interval:10000}")
+    @Scheduled(fixedDelayString = $$"${redis.connection-check-interval:10000}")
     fun checkConnection() {
         try {
             redisTemplate.hasKey("connection-test")
             setConnectionState(ConnectionState.CONNECTED)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             setConnectionState(ConnectionState.DISCONNECTED)
         }
     }
@@ -468,11 +463,11 @@ class RedisDistributedCache(
     /**
      * Periodically clean up expired entries from the local cache.
      */
-    @Scheduled(fixedDelayString = "\${redis.local-cache-cleanup-interval:60000}")
+    @Scheduled(fixedDelayString = $$"${redis.local-cache-cleanup-interval:60000}")
     fun cleanupLocalCache() {
-        val now = Instant.now()
+        val now = Clock.System.now()
         val expiredKeys = localCache.entries
-            .filter { it.value.expiresAt?.isBefore(now) ?: false }
+            .filter { it.value.expiresAt?.let { exp -> exp < now } ?: false }
             .map { it.key }
 
         expiredKeys.forEach { localCache.remove(it) }
@@ -485,7 +480,7 @@ class RedisDistributedCache(
     /**
      * Periodically synchronize dirty keys when connected.
      */
-    @Scheduled(fixedDelayString = "\${redis.sync-interval:300000}")
+    @Scheduled(fixedDelayString = $$"${redis.sync-interval:300000}")
     fun scheduledSync() {
         if (isConnected() && dirtyKeys.isNotEmpty()) {
             synchronize(null)

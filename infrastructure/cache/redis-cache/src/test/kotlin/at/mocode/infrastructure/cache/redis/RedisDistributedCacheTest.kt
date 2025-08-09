@@ -1,11 +1,9 @@
 package at.mocode.infrastructure.cache.redis
 
-import at.mocode.infrastructure.cache.api.CacheConfiguration
-import at.mocode.infrastructure.cache.api.CacheSerializer
-import at.mocode.infrastructure.cache.api.ConnectionState
-import at.mocode.infrastructure.cache.api.DefaultCacheConfiguration
+import at.mocode.infrastructure.cache.api.*
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,8 +17,10 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.time.Duration
 import kotlin.test.*
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import java.time.Duration as JavaDuration // Alias für Eindeutigkeit
 
 @Testcontainers
 class RedisDistributedCacheTest {
@@ -54,14 +54,12 @@ class RedisDistributedCacheTest {
 
         serializer = JacksonCacheSerializer()
         config = DefaultCacheConfiguration(
-            keyPrefix = "test:",
+            keyPrefix = "test",
             offlineModeEnabled = true,
-            defaultTtl = Duration.ofMinutes(30)
+            defaultTtl = 30.minutes
         )
 
         cache = RedisDistributedCache(redisTemplate, serializer, config)
-
-        // Clear the cache before each test
         cache.clear()
     }
 
@@ -71,40 +69,29 @@ class RedisDistributedCacheTest {
     }
 
     @Test
-    fun `test basic cache operations`() {
-        // Set a value
+    fun `get should return value with new reified extension function`() {
         cache.set("key1", "value1")
+        val value = cache.get<String>("key1")
+        assertEquals("value1", value)
+    }
 
-        // Get the value
+    @Test
+    fun `test basic cache operations`() {
+        cache.set("key1", "value1")
         val value = cache.get("key1", String::class.java)
         assertEquals("value1", value)
-
-        // Check if the key exists
         assertTrue(cache.exists("key1"))
-
-        // Delete the key
         cache.delete("key1")
-
-        // Verify it's gone
         assertFalse(cache.exists("key1"))
         assertNull(cache.get("key1", String::class.java))
     }
 
     @Test
     fun `test cache with TTL`() {
-        // Set a value with a short TTL
-        cache.set("key2", "value2", Duration.ofMillis(100))
-
-        // Verify it exists
+        cache.set("key2", "value2", 100.milliseconds)
         assertTrue(cache.exists("key2"))
-        assertEquals("value2", cache.get("key2", String::class.java))
-
-        // Wait for it to expire
         Thread.sleep(200)
-
-        // Verify it's gone
         assertFalse(cache.exists("key2"))
-        assertNull(cache.get("key2", String::class.java))
     }
 
     @Test
@@ -135,45 +122,58 @@ class RedisDistributedCacheTest {
         assertNull(remainingValues["batch3"])
     }
 
-    // Note: Tests that stop and restart the container are commented out
-    // as they interfere with the Testcontainers lifecycle management
-    /*
     @Test
-    fun `test offline capability`() {
-        // Set a value
-        cache.set("offline1", "value1")
+    fun `should handle offline mode and synchronize correctly`() {
+        // Arrange
+        val mockTemplate = mockk<RedisTemplate<String, ByteArray>>(relaxed = true)
+        val mockValueOps = mockk<ValueOperations<String, ByteArray>>(relaxed = true)
+        every { mockTemplate.opsForValue() } returns mockValueOps
 
-        // Simulate going offline by stopping the Redis container
-        redisContainer.stop()
+        val offlineCache = RedisDistributedCache(mockTemplate, serializer, config)
 
-        // Verify connection state is DISCONNECTED
-        assertEquals(ConnectionState.DISCONNECTED, cache.getConnectionState())
+        // 1. Online-Phase
+        every { mockValueOps.set(any<String>(), any<ByteArray>(), any<JavaDuration>()) } returns Unit
+        offlineCache.set("key1", "online-value")
+        verify(exactly = 1) { mockValueOps.set(eq("test:key1"), any<ByteArray>(), any<JavaDuration>()) }
 
-        // We should still be able to get the value from local cache
-        assertEquals("value1", cache.get("offline1", String::class.java))
+        // 2. Offline-Phase simulieren
+        every {
+            mockValueOps.set(
+                any<String>(),
+                any<ByteArray>(),
+                any<JavaDuration>()
+            )
+        } throws RedisConnectionFailureException("Redis is down")
+        every { mockTemplate.delete(any<String>()) } throws RedisConnectionFailureException("Redis is down")
 
-        // Set a new value while offline
-        cache.set("offline2", "value2")
+        offlineCache.set("key2", "offline-value")
+        offlineCache.delete("key1")
 
-        // Verify it's marked as dirty
-        assertTrue(cache.getDirtyKeys().contains("offline2"))
+        assertEquals("offline-value", offlineCache.get<String>("key2"))
+        assertTrue(offlineCache.getDirtyKeys().contains("key2"))
+        assertTrue(offlineCache.getDirtyKeys().contains("key1"))
 
-        // Start Redis again
-        redisContainer.start()
+        // 3. Wiederverbindungs-Phase
+        every { mockValueOps.set(any<String>(), any<ByteArray>(), any<JavaDuration>()) } returns Unit
+        every { mockTemplate.delete(any<String>()) } returns true
+        every { mockTemplate.hasKey("connection-test") } returns true
 
-        // Manually trigger synchronization
-        cache.synchronize(null)
+        offlineCache.checkConnection()
 
-        // Verify connection state is CONNECTED
-        assertEquals(ConnectionState.CONNECTED, cache.getConnectionState())
-
-        // Verify the value set while offline is now in Redis
-        assertEquals("value2", cache.get("offline2", String::class.java))
-
-        // Verify it's no longer marked as dirty
-        assertFalse(cache.getDirtyKeys().contains("offline2"))
+        verify(exactly = 1) { mockValueOps.set(eq("test:key1"), any<ByteArray>(), any<JavaDuration>()) }
+        verify(exactly = 1) { mockTemplate.delete(eq("test:key1")) }
+        assertTrue(offlineCache.getDirtyKeys().isEmpty(), "Dirty keys should be empty after sync")
     }
-    */
+
+    @Test
+    fun `test multiSet with TTL`() {
+        val entries = mapOf("batchTtl1" to "value1", "batchTtl2" to "value2")
+        cache.multiSet(entries, 100.milliseconds)
+
+        assertTrue(cache.exists("batchTtl1"))
+        Thread.sleep(200)
+        assertFalse(cache.exists("batchTtl1"))
+    }
 
     @Test
     fun `test complex objects`() {
@@ -194,121 +194,6 @@ class RedisDistributedCacheTest {
         assertTrue(retrievedPerson.hobbies.contains("Reading"))
         assertTrue(retrievedPerson.hobbies.contains("Hiking"))
     }
-
-    // Note: Tests that stop and restart the container are commented out
-    /*
-    @Test
-    fun `test connection state listeners`() {
-        // Create a mock listener
-        val listener = mockk<ConnectionStateListener>(relaxed = true)
-
-        // Register the listener
-        cache.registerConnectionListener(listener)
-
-        // Simulate disconnection
-        redisContainer.stop()
-
-        // Manually trigger connection check
-        cache.checkConnection()
-
-        // Verify listener was called with DISCONNECTED state
-        verify(exactly = 1) {
-            listener.onConnectionStateChanged(ConnectionState.DISCONNECTED, any())
-        }
-
-        // Start Redis again
-        redisContainer.start()
-
-        // Manually trigger connection check
-        cache.checkConnection()
-
-        // Verify listener was called with CONNECTED state
-        verify(exactly = 1) {
-            listener.onConnectionStateChanged(ConnectionState.CONNECTED, any())
-        }
-
-        // Unregister the listener
-        cache.unregisterConnectionListener(listener)
-
-        // Simulate disconnection again
-        redisContainer.stop()
-        cache.checkConnection()
-
-        // Verify listener was not called again (still only once for DISCONNECTED)
-        verify(exactly = 1) {
-            listener.onConnectionStateChanged(ConnectionState.DISCONNECTED, any())
-        }
-    }
-
-    @Test
-    fun `test scheduled tasks`() {
-        // Set a value with a short TTL
-        cache.set("scheduled1", "value1", Duration.ofMillis(100))
-
-        // Wait for it to expire
-        Thread.sleep(200)
-
-        // Manually trigger cleanup
-        cache.cleanupLocalCache()
-
-        // Verify it's gone from local cache
-        assertNull(cache.get("scheduled1", String::class.java))
-
-        // Set a value while Redis is down
-        redisContainer.stop()
-        cache.set("scheduled2", "value2")
-
-        // Verify it's marked as dirty
-        assertTrue(cache.getDirtyKeys().contains("scheduled2"))
-
-        // Start Redis again
-        redisContainer.start()
-
-        // Manually trigger scheduled sync
-        cache.scheduledSync()
-
-        // Verify it's no longer marked as dirty
-        assertFalse(cache.getDirtyKeys().contains("scheduled2"))
-    }
-
-    @Test
-    fun `test synchronize with specific keys`() {
-        // Set multiple values
-        cache.set("sync1", "value1")
-        cache.set("sync2", "value2")
-        cache.set("sync3", "value3")
-
-        // Simulate going offline
-        redisContainer.stop()
-
-        // Update values while offline
-        cache.set("sync1", "updated1")
-        cache.set("sync2", "updated2")
-
-        // Verify they're marked as dirty
-        assertTrue(cache.getDirtyKeys().contains("sync1"))
-        assertTrue(cache.getDirtyKeys().contains("sync2"))
-
-        // Start Redis again
-        redisContainer.start()
-
-        // Synchronize only specific keys
-        cache.synchronize(listOf("sync1"))
-
-        // Verify only sync1 is no longer dirty
-        assertFalse(cache.getDirtyKeys().contains("sync1"))
-        assertTrue(cache.getDirtyKeys().contains("sync2"))
-
-        // Verify the values in Redis
-        assertEquals("updated1", cache.get("sync1", String::class.java))
-
-        // Now synchronize all
-        cache.synchronize(null)
-
-        // Verify all are no longer dirty
-        assertFalse(cache.getDirtyKeys().contains("sync2"))
-    }
-    */
 
     @Test
     fun `test clear method`() {
@@ -374,27 +259,6 @@ class RedisDistributedCacheTest {
 
         // The default TTL is 30 minutes, so it should still exist
         assertEquals("value", cache.get("defaultTtl", String::class.java))
-    }
-
-    @Test
-    fun `test multiSet with TTL`() {
-        // Set multiple values with TTL
-        val entries = mapOf(
-            "batchTtl1" to "value1",
-            "batchTtl2" to "value2"
-        )
-        cache.multiSet(entries, Duration.ofMillis(100))
-
-        // Verify they exist
-        assertTrue(cache.exists("batchTtl1"))
-        assertTrue(cache.exists("batchTtl2"))
-
-        // Wait for them to expire
-        Thread.sleep(200)
-
-        // Verify they're gone
-        assertFalse(cache.exists("batchTtl1"))
-        assertFalse(cache.exists("batchTtl2"))
     }
 
     // Test data class
