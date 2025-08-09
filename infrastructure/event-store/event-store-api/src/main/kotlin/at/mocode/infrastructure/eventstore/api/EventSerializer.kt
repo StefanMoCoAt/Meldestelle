@@ -17,15 +17,15 @@ interface EventSerializer {
     fun serialize(event: DomainEvent): Map<String, String>
 
     /**
-     * Deserializes a map of strings to strings to a domain event.
+     * Deserializes a map of strings to a domain event.
      *
-     * @param data The map of strings to strings to deserialize
+     * @param data The map of strings to deserialize
      * @return The deserialized domain event
      */
     fun deserialize(data: Map<String, String>): DomainEvent
 
     /**
-     * Gets the type of a domain event.
+     * Gets the type of domain event.
      * This is used to determine the type of event when deserializing.
      *
      * @param event The event to get the type of
@@ -34,7 +34,7 @@ interface EventSerializer {
     fun getEventType(event: DomainEvent): String
 
     /**
-     * Gets the type of a domain event from a serialized map.
+     * Gets the type of domain event from a serialized map.
      *
      * @param data The serialized event data
      * @return The type of the event as a string

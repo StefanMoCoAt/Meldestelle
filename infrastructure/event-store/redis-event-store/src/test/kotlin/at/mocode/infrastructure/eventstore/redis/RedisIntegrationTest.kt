@@ -6,11 +6,10 @@ import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
-import kotlin.time.Clock
-import kotlin.time.Instant
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
@@ -20,15 +19,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
-/**
- * Integration tests for Redis Event Store and Event Consumer.
- *
- * These tests verify the interaction between the Redis Event Store, Event Consumer, and Event Serializer
- * in a more realistic scenario.
- */
 @Testcontainers
 class RedisIntegrationTest {
 
@@ -48,33 +39,26 @@ class RedisIntegrationTest {
     fun setUp() {
         val redisPort = redisContainer.getMappedPort(6379)
         val redisHost = redisContainer.host
-
         val redisConfig = RedisStandaloneConfiguration(redisHost, redisPort)
         val connectionFactory = LettuceConnectionFactory(redisConfig)
         connectionFactory.afterPropertiesSet()
-
         redisTemplate = StringRedisTemplate(connectionFactory)
-
-        // KORREKTUR: Parameter in der korrekten Reihenfolge und mit korrekten Typen übergeben.
         serializer = JacksonEventSerializer().apply {
             registerEventType(TestCreatedEvent::class.java, "TestCreated")
             registerEventType(TestUpdatedEvent::class.java, "TestUpdated")
         }
-
         properties = RedisEventStoreProperties(
             streamPrefix = "test-stream:",
             allEventsStream = "all-events",
             consumerGroup = "test-group",
             consumerName = "test-consumer"
         )
-
         eventStore = RedisEventStore(redisTemplate, serializer, properties)
         eventConsumer = RedisEventConsumer(redisTemplate, serializer, properties)
-
         cleanupRedis()
-        // WICHTIG: Consumer starten, damit er auf Events lauschen kann.
         eventConsumer.init()
     }
+
 
     @AfterEach
     fun tearDown() {
@@ -88,47 +72,22 @@ class RedisIntegrationTest {
         if (!keys.isNullOrEmpty()) {
             redisTemplate.delete(keys)
         }
-        // Sicherstellen, dass auch der allEventsStream-Key gelöscht wird, falls er nicht im Muster enthalten ist.
         redisTemplate.delete(allEventsStreamKey)
     }
 
     @Test
-    fun `test event publishing and consuming with consumer groups`() {
+    fun `event publishing and consuming should be fast and reliable`() {
         val aggregateId = uuid4()
-        val event1 = TestCreatedEvent(aggregateId = aggregateId, version = 1L, name = "Test Entity")
-        val event2 = TestUpdatedEvent(aggregateId = aggregateId, version = 2L, name = "Updated Test Entity")
+        val event1 = TestCreatedEvent(aggregateId, 1L, "Test Entity")
+        val event2 = TestUpdatedEvent(aggregateId, 2L, "Updated Test Entity")
 
-        val latch = CountDownLatch(2)
         val receivedEvents = mutableListOf<DomainEvent>()
-
-        eventConsumer.registerEventHandler("TestCreated") { event ->
-            receivedEvents.add(event)
-            latch.countDown()
-        }
-        eventConsumer.registerEventHandler("TestUpdated") { event ->
-            receivedEvents.add(event)
-            latch.countDown()
-        }
-
-        // Start polling in a separate thread to not block the test execution
-        val pollingThread = Thread {
-            // Poll multiple times to ensure messages are picked up
-            for (i in 1..20) {
-                if (latch.count > 0) {
-                    eventConsumer.pollEvents()
-                    Thread.sleep(100)
-                }
-            }
-        }
-        pollingThread.start()
-
+        eventConsumer.registerEventHandler("TestCreated") { receivedEvents.add(it) }
+        eventConsumer.registerEventHandler("TestUpdated") { receivedEvents.add(it) }
 
         eventStore.appendToStream(listOf(event1, event2), aggregateId, 0)
 
-        assertTrue(
-            latch.await(10, TimeUnit.SECONDS),
-            "Timed out waiting for events. Received ${receivedEvents.size} of 2 events."
-        )
+        eventConsumer.pollEvents()
 
         assertEquals(2, receivedEvents.size)
 
@@ -139,30 +98,19 @@ class RedisIntegrationTest {
         val receivedEvent2 = receivedEvents.find { it.version == 2L } as TestUpdatedEvent
         assertEquals(aggregateId, receivedEvent2.aggregateId)
         assertEquals("Updated Test Entity", receivedEvent2.name)
-
-        pollingThread.interrupt()
     }
 
-    // Hilfsklassen für Tests, die von BaseDomainEvent erben
+    @Serializable
     data class TestCreatedEvent(
-        override val aggregateId: Uuid,
-        override val version: Long,
-        val name: String,
-        override val eventType: String = "TestCreated",
-        override val eventId: Uuid = uuid4(),
-        override val timestamp: Instant = Clock.System.now(),
-        override val correlationId: Uuid? = null,
-        override val causationId: Uuid? = null
-    ) : BaseDomainEvent(aggregateId, eventType, version, eventId, timestamp, correlationId, causationId)
+        @Transient override val aggregateId: Uuid = uuid4(),
+        @Transient override val version: Long = 0,
+        val name: String
+    ) : BaseDomainEvent(aggregateId, "TestCreated", version)
 
+    @Serializable
     data class TestUpdatedEvent(
-        override val aggregateId: Uuid,
-        override val version: Long,
-        val name: String,
-        override val eventType: String = "TestUpdated",
-        override val eventId: Uuid = uuid4(),
-        override val timestamp: Instant = Clock.System.now(),
-        override val correlationId: Uuid? = null,
-        override val causationId: Uuid? = null
-    ) : BaseDomainEvent(aggregateId, eventType, version, eventId, timestamp, correlationId, causationId)
+        @Transient override val aggregateId: Uuid = uuid4(),
+        @Transient override val version: Long = 0,
+        val name: String
+    ) : BaseDomainEvent(aggregateId, "TestUpdated", version)
 }

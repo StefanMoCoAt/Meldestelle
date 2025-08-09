@@ -7,7 +7,9 @@ import at.mocode.infrastructure.eventstore.api.EventStore
 import at.mocode.infrastructure.eventstore.api.Subscription
 import com.benasher44.uuid.Uuid
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DataAccessException
 import org.springframework.data.domain.Range
+import org.springframework.data.redis.core.SessionCallback
 import org.springframework.data.redis.core.StringRedisTemplate
 import java.util.concurrent.ConcurrentHashMap
 
@@ -43,12 +45,11 @@ class RedisEventStore(
         return currentVersion
     }
 
-    // Deprecated, use the list-based version for transactional safety.
     override fun appendToStream(event: DomainEvent, streamId: Uuid, expectedVersion: Long): Long {
         val currentVersion = getStreamVersion(streamId)
         if (currentVersion != expectedVersion) {
-            streamVersionCache.remove(streamId) // Invalidate cache on conflict
-            val actualVersion = getStreamVersion(streamId) // Re-fetch from Redis
+            streamVersionCache.remove(streamId)
+            val actualVersion = getStreamVersion(streamId)
             if (actualVersion != expectedVersion) {
                 throw ConcurrencyException("Concurrency conflict: expected version $expectedVersion but got $actualVersion")
             }
@@ -64,14 +65,27 @@ class RedisEventStore(
         val allEventsStreamKey = getAllEventsStreamKey()
         val eventData = serializer.serialize(event)
 
-        // KORREKTUR: Schreibe das Event in BEIDE Streams (aggregatspezifisch und global)
-        // Dies sollte idealerweise in einer Redis-Transaktion (MULTI/EXEC) geschehen.
-        // Für Einfachheit hier als separate Aufrufe.
-        redisTemplate.opsForStream<String, String>().add(streamKey, eventData)
-        redisTemplate.opsForStream<String, String>().add(allEventsStreamKey, eventData)
+        try {
+            redisTemplate.execute(object : SessionCallback<List<Any>> {
+                @Throws(DataAccessException::class)
+                override fun <K : Any?, V : Any?> execute(operations: org.springframework.data.redis.core.RedisOperations<K, V>): List<Any> {
+                    val streamOps = (operations as StringRedisTemplate).opsForStream<String, String>()
 
-        streamVersionCache[streamId] = newVersion
-        return newVersion
+                    operations.multi()
+                    streamOps.add(streamKey, eventData)
+                    streamOps.add(allEventsStreamKey, eventData)
+
+                    return operations.exec()
+                }
+            })
+
+            streamVersionCache[streamId] = newVersion
+            return newVersion
+        } catch (e: Exception) {
+            logger.error("Failed to append event transactionally for stream key: {}", streamKey, e)
+            streamVersionCache.remove(streamId)
+            throw e
+        }
     }
 
     override fun readFromStream(streamId: Uuid, fromVersion: Long, toVersion: Long?): List<DomainEvent> {
@@ -94,8 +108,6 @@ class RedisEventStore(
     override fun getStreamVersion(streamId: Uuid): Long {
         streamVersionCache[streamId]?.let { return it }
         val streamKey = getStreamKey(streamId)
-        // .size() ist die Anzahl der Einträge, was der Version entspricht, wenn bei 1 begonnen wird.
-        // Ein leerer Stream hat size=0, was Version 0 bedeutet.
         val size = redisTemplate.opsForStream<String, String>().size(streamKey) ?: 0L
         streamVersionCache[streamId] = size
         return size
@@ -109,7 +121,6 @@ class RedisEventStore(
         return "${properties.streamPrefix}${properties.allEventsStream}"
     }
 
-    // Stubs
     override fun readAllEvents(fromPosition: Long, maxCount: Int?): List<DomainEvent> {
         TODO("Not yet implemented")
     }

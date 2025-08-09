@@ -2,69 +2,53 @@
 
 ## Überblick
 
-Das **Event-Store-Modul** ist eine kritische Komponente der Infrastruktur, die für die Persistenz und Veröffentlichung von Domänen-Events zuständig ist. Es bildet die technische Grundlage für **Event Sourcing** und eine allgemeine **event-getriebene Architektur**. Anstatt nur den aktuellen Zustand einer Entität zu speichern, speichert der Event Store die gesamte Kette von Ereignissen (Events), die zu diesem Zustand geführt haben.
+Das **Event-Store-Modul** ist eine kritische Komponente der Infrastruktur, die für die Persistenz und Veröffentlichung von Domänen-Events zuständig ist. Es bildet die technische Grundlage für **Event Sourcing** und eine allgemeine **ereignisgesteuerte Architektur**. Anstatt nur den aktuellen Zustand einer Entität zu speichern, speichert der Event Store die gesamte Kette von Ereignissen, die zu diesem Zustand geführt haben.
 
 ## Architektur: Port-Adapter-Muster
 
-Wie schon das Cache-Modul, folgt auch der Event Store streng dem **Port-Adapter-Muster**, um eine maximale Entkopplung von der konkreten Speichertechnologie zu erreichen.
+Das Modul folgt streng dem **Port-Adapter-Muster**, um eine maximale Entkopplung von der konkreten Speichertechnologie zu erreichen.
 
+* **`:infrastructure:event-store:event-store-api`**: Definiert den abstrakten "Vertrag" (`EventStore`-Interface), gegen den die Fach-Services programmieren.
+* **`:infrastructure:event-store:redis-event-store`**: Die konkrete Implementierung des Vertrags, die **Redis Streams** als hoch-performantes, persistentes Log verwendet.
 
-infrastructure/event-store/
-├── event-store-api/      # Der "Port": Definiert die Event-Store-Schnittstelle
-└── redis-event-store/    # Der "Adapter": Implementiert die Schnittstelle mit Redis Streams
+## Schlüsselfunktionen
 
+* **Garantierte Konsistenz:** Schreibvorgänge in den aggregat spezifischen Stream und den globalen "all-events"-Stream werden innerhalb einer **atomaren Redis-Transaktion (`MULTI`/`EXEC`)** ausgeführt. Dies stellt sicher, dass der Event-Store niemals in einen inkonsistenten Zustand gerät.
+* **Resiliente Event-Verarbeitung:** Der `RedisEventConsumer` nutzt **Redis Consumer Groups**, um eine skalierbare und ausfallsichere Verarbeitung von Events zu ermöglichen. Er enthält eine robuste Logik zum "Claimen" von Nachrichten, die von ausgefallenen Consumern nicht bestätigt wurden, sodass keine Events verloren gehen.
+* **Optimistische Nebenhäufigkeitskontrolle:** Verhindert Race Conditions, indem beim Speichern von Events eine `expectedVersion` überprüft wird. Bei Konflikten wird eine `ConcurrencyException` geworfen.
+* **Intelligente Serialisierung:** Der `JacksonEventSerializer` speichert Event-Metadaten und die eigentliche Nutzlast getrennt in der Redis-Stream-Nachricht, was eine effiziente Analyse von Streams ermöglicht.
 
-### `event-store-api`
+## Verwendung
 
-Dieses Modul ist der **abstrakte "Port"** der Architektur. Es definiert den Vertrag, wie der Rest der Anwendung mit dem Event Store interagiert.
+Ein Anwendung-Service bindet `:infrastructure:event-store:redis-event-store` ein und lässt sich das `EventStore`-Interface per Dependency Injection geben.
 
-* **Zweck:** Definiert Interfaces wie `EventStore` (zum Speichern und Laden von Event-Streams) und `EventPublisher` (zum Veröffentlichen von Events an interessierte Listener). Es ist eng mit den `DomainEvent`-Definitionen aus dem `:core:core-domain`-Modul verknüpft.
-* **Vorteil:** Die Fach-Services (z.B. `members-application`) sind vollständig von der Implementierung des Event Stores entkoppelt. Sie wissen nicht, ob die Events in Redis, Kafka oder einer relationalen Datenbank gespeichert werden.
+```kotlin
+@Service
+class MemberApplicationService(
+    private val eventStore: EventStore // Nur das Interface wird verwendet!
+) {
+    fun registerNewMember(command: RegisterMemberCommand) {
+        // 1. Geschäftslogik ausführen und Event erzeugen
+        val memberRegisteredEvent = MemberRegisteredEvent(
+            aggregateId = uuid4(),
+            version = 1L,
+            name = command.name
+        )
 
-### `redis-event-store`
-
-Dieses Modul ist der **konkrete "Adapter"**, der die in `event-store-api` definierten Schnittstellen implementiert.
-
-* **Zweck:** Stellt eine Implementierung des `EventStore` bereit, die **Redis Streams** als zugrunde liegenden Datenspeicher verwendet. Redis Streams sind eine leistungsstarke Datenstruktur, die sich ideal für die Implementierung eines append-only Logs eignet, wie es für einen Event Store benötigt wird.
-* **Technologie:** Nutzt Spring Data Redis und den Lettuce-Client für die performante Kommunikation mit Redis. Die Domänen-Events werden vor der Speicherung mittels Jackson in ein JSON-Format serialisiert.
-* **Vorteil:** Kapselt die gesamte Redis-spezifische Logik. Ein zukünftiger Wechsel zu einem anderen Event-Store-System (z.B. Apache Kafka) würde nur den Austausch dieses einen Moduls erfordern.
-
-## Verwendung in anderen Modulen
-
-Ein Anwendungs-Service, der Event Sourcing verwendet, interagiert wie folgt mit dem Modul:
-
-1.  **Abhängigkeit deklarieren:** Das Service-Modul (z.B. `members-application`) fügt eine `implementation`-Abhängigkeit zu `:infrastructure:event-store:redis-event-store` in seiner `build.gradle.kts` hinzu.
-
-2.  **Interface injizieren:** Im Service-Code wird nur das `EventStore`-Interface aus der `event-store-api` injiziert.
-
-    ```kotlin
-    // In einem Use Case oder Application Service
-    @Service
-    class MemberApplicationService(
-        private val eventStore: EventStore, // Nur das Interface wird verwendet!
-        private val eventPublisher: EventPublisher
-    ) {
-        fun registerNewMember(command: RegisterMemberCommand): Member {
-            // 1. Geschäftslogik ausführen und ein oder mehrere Events erzeugen
-            val memberRegisteredEvent = MemberRegisteredEvent(
-                memberId = UUID.randomUUID(),
-                name = command.name,
-                // ...
-            )
-
-            // 2. Das Event im Event Store speichern
-            eventStore.save(memberRegisteredEvent)
-
-            // 3. Das Event veröffentlichen, damit andere Teile des Systems
-            // (z.B. ein E-Mail-Service) darauf reagieren können.
-            eventPublisher.publish(memberRegisteredEvent)
-
-            // ...
-        }
+        // 2. Event im Event Store speichern (mit Concurrency Check)
+        // hier wird erwartet, dass der Stream neu ist (Version 0)
+        eventStore.appendToStream(memberRegisteredEvent, memberRegisteredEvent.aggregateId, 0)
     }
-    ```
+}
+```
 
-Diese Architektur ermöglicht eine hochgradig entkoppelte, skalierbare und resiliente Systemlandschaft, die auf asynchroner Kommunikation basiert.
+## Testing-Strategie
+Die Qualität des Moduls wird durch eine robuste Teststrategie sichergestellt:
 
----
-**Letzte Aktualisierung**: 31. Juli 2025
+* *Integrationstests mit Testcontainer: Die Kernfunktionalität wird gegen eine echte Redis-Datenbank getestet, die zur Laufzeit in einem Docker-Container gestartet wird.*
+
+* *Zuverlässige Consumer-Tests: Die asynchrone Logik des Event-Consumers wird in den Tests synchron und deterministisch überprüft, indem der pollEvents()-Zyklus manuell angestoßen wird. Dies vermeidet unzuverlässige Tests, die auf Thread.sleep basieren.*
+
+* *Saubere Test-Daten: Test-Event-Klassen werden durch die Verwendung der @Transient-Annotation sauber und frei von Boilerplate-Code gehalten.*
+
+**Letzte Aktualisierung**: 9. August 2025
