@@ -1,5 +1,6 @@
 package at.mocode.infrastructure.auth.client
 
+import at.mocode.infrastructure.auth.client.model.BerechtigungE
 import com.benasher44.uuid.Uuid
 import java.time.LocalDateTime
 
@@ -58,7 +59,7 @@ interface AuthenticationService {
      */
     sealed class PasswordChangeResult {
         /**
-         * Password change was successful.
+         * The password change was successful.
          */
         object Success : PasswordChangeResult()
 
@@ -83,6 +84,6 @@ interface AuthenticationService {
         val personId: Uuid,
         val username: String,
         val email: String,
-        val permissions: List<String>
+        val permissions: List<BerechtigungE>
     )
 }

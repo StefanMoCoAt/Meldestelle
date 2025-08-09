@@ -1,9 +1,11 @@
 package at.mocode.infrastructure.auth.client
 
-import at.mocode.core.domain.model.BerechtigungE
+import at.mocode.infrastructure.auth.client.model.BerechtigungE
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import java.util.*
+import java.util.Date
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Service for JWT token generation and validation.
@@ -12,16 +14,14 @@ class JwtService(
     private val secret: String,
     private val issuer: String,
     private val audience: String,
-    private val expirationInMinutes: Long = 60
+    private val expiration: Duration = 60.minutes
 ) {
-    /**
-     * Generates a JWT token for the given user.
-     *
-     * @param userId The user ID
-     * @param username The username
-     * @param permissions The user's permissions
-     * @return The generated JWT token
-     */
+    private val algorithm = Algorithm.HMAC512(secret)
+    private val verifier = JWT.require(algorithm)
+        .withIssuer(issuer)
+        .withAudience(audience)
+        .build()
+
     fun generateToken(
         userId: String,
         username: String,
@@ -33,8 +33,8 @@ class JwtService(
             .withAudience(audience)
             .withClaim("username", username)
             .withArrayClaim("permissions", permissions.map { it.name }.toTypedArray())
-            .withExpiresAt(Date(System.currentTimeMillis() + expirationInMinutes * 60 * 1000))
-            .sign(Algorithm.HMAC512(secret))
+            .withExpiresAt(Date(System.currentTimeMillis() + expiration.inWholeMilliseconds))
+            .sign(algorithm)
     }
 
     /**
@@ -45,13 +45,9 @@ class JwtService(
      */
     fun validateToken(token: String): Boolean {
         return try {
-            JWT.require(Algorithm.HMAC512(secret))
-                .withIssuer(issuer)
-                .withAudience(audience)
-                .build()
-                .verify(token)
+            verifier.verify(token)
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -64,13 +60,8 @@ class JwtService(
      */
     fun getUserIdFromToken(token: String): String? {
         return try {
-            JWT.require(Algorithm.HMAC512(secret))
-                .withIssuer(issuer)
-                .withAudience(audience)
-                .build()
-                .verify(token)
-                .subject
-        } catch (e: Exception) {
+            verifier.verify(token).subject
+        } catch (_: Exception) {
             null
         }
     }
@@ -83,21 +74,16 @@ class JwtService(
      */
     fun getPermissionsFromToken(token: String): List<BerechtigungE> {
         return try {
-            val decodedJWT = JWT.require(Algorithm.HMAC512(secret))
-                .withIssuer(issuer)
-                .withAudience(audience)
-                .build()
-                .verify(token)
-
+            val decodedJWT = verifier.verify(token)
             val permissionStrings = decodedJWT.getClaim("permissions").asArray(String::class.java)
-            permissionStrings.mapNotNull {
+            permissionStrings?.mapNotNull {
                 try {
                     BerechtigungE.valueOf(it)
                 } catch (e: Exception) {
                     null
                 }
-            }
-        } catch (e: Exception) {
+            } ?: emptyList()
+        } catch (_: Exception) {
             emptyList()
         }
     }

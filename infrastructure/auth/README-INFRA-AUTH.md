@@ -10,10 +10,9 @@ Als Identity Provider wird **Keycloak** verwendet. Dieses Modul kapselt die gesa
 
 Das Auth-Modul ist in zwei spezialisierte Komponenten aufgeteilt, um eine klare Trennung der Verantwortlichkeiten zu gewährleisten:
 
-
 infrastructure/auth/
-├── auth-client/      # Wiederverwendbare Bibliothek für die JWT-Validierung
-└── auth-server/      # Eigenständiger Service für Benutzerverwaltung & Token-Austausch
+├── auth-client/ # Wiederverwendbare Bibliothek für die JWT-Validierung
+└── auth-server/ # Eigenständiger Service für Benutzerverwaltung & Token-Austausch
 
 
 ### `auth-client`
@@ -21,9 +20,9 @@ infrastructure/auth/
 Dieses Modul ist eine **wiederverwendbare Bibliothek** und kein eigenständiger Service. Es enthält die gesamte Logik, die andere Microservices (wie `masterdata-service`, `members-service` etc.) benötigen, um ihre Endpunkte abzusichern.
 
 **Hauptaufgaben:**
-* **JWT-Validierung:** Stellt Spring Security Konfigurationen bereit, um eingehende JWTs (ausgestellt von Keycloak) zu validieren. Es prüft die Signatur, den Aussteller (Issuer) und die Gültigkeitsdauer des Tokens.
-* **Rechte-Extraktion:** Extrahiert die Rollen und Berechtigungen des Benutzers aus dem validierten Token.
-* **Security Context:** Befüllt den `SecurityContextHolder` von Spring, sodass in den Controllern einfach auf den authentifizierten Benutzer zugegriffen werden kann (z.B. mit `@AuthenticationPrincipal`).
+* **JWT-Management:** Stellt einen `JwtService` zur Erstellung und Validierung von JSON Web Tokens bereit.
+* **Modell-Definition:** Definiert die **Quelle der Wahrheit** für sicherheitsrelevante Konzepte wie `RolleE` und `BerechtigungE` als typsichere Kotlin-Enums. Dies stellt sicher, dass alle Services dieselbe "Sprache" für Berechtigungen sprechen.
+* **Schnittstellen:** Bietet saubere Schnittstellen wie `AuthenticationService` an, die von der konkreten Implementierung (z.B. Keycloak) abstrahieren.
 
 Jeder Microservice, der geschützte Endpunkte anbietet, bindet dieses Modul als Abhängigkeit ein.
 
@@ -32,20 +31,18 @@ Jeder Microservice, der geschützte Endpunkte anbietet, bindet dieses Modul als 
 Dies ist ein **eigenständiger Spring Boot Microservice**, der als Brücke zwischen dem Meldestelle-System und Keycloak agiert.
 
 **Hauptaufgaben:**
-* **Benutzer-API:** Stellt eine REST-API zur Verfügung, um Benutzer zu verwalten (z.B. Registrierung, Profil-Updates). Diese API kommuniziert im Hintergrund über den `keycloak-admin-client` mit Keycloak.
-* **Token-Endpunkte:** Kann Endpunkte für den Austausch oder die Erneuerung von Tokens bereitstellen (Token Exchange).
-* **Zentraler Login-Punkt (Optional):** Kann als zentraler Punkt für Login-Weiterleitungen im OAuth2/OIDC-Flow dienen.
-
-Durch die Kapselung der Keycloak-spezifischen Logik im `auth-server` müssen die anderen Fach-Services nichts über die Interna der Benutzerverwaltung wissen. Sie interagieren nur mit der sauberen API des `auth-server`.
+* **Benutzer-API:** Stellt eine REST-API zur Verfügung, um Benutzer zu verwalten (z.B. Registrierung). Diese API kommuniziert im Hintergrund über den `keycloak-admin-client` mit Keycloak.
+* **Token-Endpunkte:** Ist verantwortlich für das Ausstellen von Tokens nach einer erfolgreichen Authentifizierung.
+* **Implementierung der `AuthenticationService`-Schnittstelle:** Enthält die konkrete Logik, die gegen Keycloak prüft, ob ein Benutzername und ein Passwort korrekt sind.
 
 ## Zusammenspiel im System
 
-1.  Ein **Benutzer** meldet sich über eine Client-Anwendung an und erhält ein JWT von **Keycloak**.
-2.  Die **Client-Anwendung** sendet eine Anfrage an einen Microservice (z.B. `masterdata-service`) und fügt das JWT als Bearer-Token in den `Authorization`-Header ein.
-3.  Der **Microservice**, der `auth-client` als Abhängigkeit hat, validiert das Token automatisch.
-4.  Wenn der Microservice Benutzerdaten ändern muss, ruft er nicht direkt Keycloak auf, sondern die sichere REST-API des **`auth-server`**.
+1.  Ein **Benutzer** meldet sich über eine Client-Anwendung am **`auth-server`** an.
+2.  Der **`auth-server`** validiert die Anmeldedaten gegen **Keycloak**.
+3.  Bei Erfolg erstellt der `auth-server` mit dem `JwtService` aus dem `auth-client` ein JWT, das die Berechtigungen des Benutzers enthält, und sendet es an den Client zurück.
+4.  Der **Client** sendet eine Anfrage an einen anderen Microservice (z.B. `members-service`) und fügt das JWT als Bearer-Token in den Header ein.
+5.  Der **`members-service`**, der ebenfalls den `auth-client` als Abhängigkeit hat, nutzt den `JwtService`, um das Token zu validieren und die Berechtigungen typsicher auszulesen.
 
 Diese Architektur entkoppelt die Fach-Services von der Komplexität der Identitätsverwaltung und schafft eine robuste, zentrale Sicherheitsinfrastruktur.
-
 ---
-**Letzte Aktualisierung**: 31. Juli 2025
+**Letzte Aktualisierung**: 9. August 2025
