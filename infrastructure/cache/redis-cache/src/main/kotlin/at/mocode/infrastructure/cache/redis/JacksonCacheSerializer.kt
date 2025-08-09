@@ -11,10 +11,10 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-/**
- * Jackson-based implementation of CacheSerializer.
- */
+@OptIn(ExperimentalTime::class)
 class JacksonCacheSerializer : CacheSerializer {
     private val objectMapper: ObjectMapper = ObjectMapper().apply {
         registerModule(KotlinModule.Builder().build())
@@ -31,14 +31,13 @@ class JacksonCacheSerializer : CacheSerializer {
     }
 
     override fun <T : Any> serializeEntry(entry: CacheEntry<T>): ByteArray {
-        // Create a wrapper that holds both the entry metadata and the serialized value
         val wrapper = CacheEntryWrapper(
             key = entry.key,
             valueBytes = serialize(entry.value),
             valueType = entry.value.javaClass.name,
-            createdAt = entry.createdAt,
-            expiresAt = entry.expiresAt,
-            lastModifiedAt = entry.lastModifiedAt,
+            createdAt = java.time.Instant.ofEpochMilli(entry.createdAt.toEpochMilliseconds()),
+            expiresAt = entry.expiresAt?.toEpochMilliseconds()?.let { java.time.Instant.ofEpochMilli(it) },
+            lastModifiedAt = java.time.Instant.ofEpochMilli(entry.lastModifiedAt.toEpochMilliseconds()),
             isDirty = entry.isDirty,
             isLocal = entry.isLocal
         )
@@ -48,13 +47,12 @@ class JacksonCacheSerializer : CacheSerializer {
     override fun <T : Any> deserializeEntry(bytes: ByteArray, valueClass: Class<T>): CacheEntry<T> {
         val wrapper = objectMapper.readValue<CacheEntryWrapper>(bytes)
         val value = deserialize(wrapper.valueBytes, valueClass)
-
         return CacheEntry(
             key = wrapper.key,
             value = value,
-            createdAt = wrapper.createdAt,
-            expiresAt = wrapper.expiresAt,
-            lastModifiedAt = wrapper.lastModifiedAt,
+            createdAt = Instant.fromEpochMilliseconds(wrapper.createdAt.toEpochMilli()),
+            expiresAt = wrapper.expiresAt?.toEpochMilli()?.let { Instant.fromEpochMilliseconds(it) },
+            lastModifiedAt = Instant.fromEpochMilliseconds(wrapper.lastModifiedAt.toEpochMilli()),
             isDirty = wrapper.isDirty,
             isLocal = wrapper.isLocal
         )
@@ -71,11 +69,6 @@ class JacksonCacheSerializer : CacheSerializer {
         return inputStream.readBytes()
     }
 
-    /**
-     * Wrapper class for serializing cache entries.
-     * This separates the metadata from the value, allowing us to deserialize
-     * the metadata without knowing the type of the value.
-     */
     private data class CacheEntryWrapper(
         val key: String,
         val valueBytes: ByteArray,
