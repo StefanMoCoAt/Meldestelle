@@ -2,80 +2,84 @@
 
 ## Überblick
 
-Das **Messaging-Modul** stellt die Infrastruktur für die asynchrone Kommunikation zwischen den Microservices des Meldestelle-Systems bereit. Es nutzt **Apache Kafka** als hochperformanten, verteilten Message-Broker. Dieses Modul ist entscheidend für die Entkopplung von Services und die Implementierung von Mustern wie Publish/Subscribe, um eine skalierbare und resiliente Architektur zu ermöglichen.
+Das **Messaging-Modul** stellt die Infrastruktur für die asynchrone, reaktive Kommunikation zwischen den Microservices bereit. Es nutzt **Apache Kafka** als hochperformanten, verteilten Message-Broker und ist entscheidend für die Entkopplung von Services und die Implementierung einer skalierbaren, ereignisgesteuerten Architektur.
 
 ## Architektur
 
-Ähnlich wie andere Infrastruktur-Module ist auch dieses in zwei spezialisierte Komponenten aufgeteilt, um Konfiguration von der Client-Logik zu trennen:
+Das Modul ist in zwei spezialisierte Komponenten aufgeteilt, um Konfiguration von der Client-Logik zu trennen:
 
 
 infrastructure/messaging/
 ├── messaging-config/   # Stellt die zentrale Kafka-Konfiguration bereit
-└── messaging-client/   # Stellt wiederverwendbare Producer- und Consumer-Clients bereit
+└── messaging-client/   # Stellt wiederverwendbare, reaktive Clients bereit
 
 
 ### `messaging-config`
 
-Dieses Modul ist die Basis für jede Kafka-Interaktion. Es ist dafür verantwortlich, die gesamte **Konfiguration** zu zentralisieren.
+Dieses Modul zentralisiert die grundlegende Kafka-Konfiguration für das gesamte Projekt.
 
-* **Zweck:** Definiert Spring-Beans für die grundlegende Kafka-Konfiguration. Dazu gehören:
-    * Die Adresse der Kafka-Broker (`bootstrap-servers`).
-    * Konfiguration für Serializer und Deserializer (z.B. `JsonSerializer` von Spring Kafka), um sicherzustellen, dass alle Services Nachrichten im selben Format (JSON) austauschen.
-    * Konfiguration für Topics, Partitionen und Replikationsfaktoren.
-* **Vorteil:** Jeder Service, der Kafka nutzt, kann sich auf diese zentrale Konfiguration verlassen, was die Konsistenz sicherstellt und die Einrichtung neuer Producer oder Consumer vereinfacht.
+* **Zweck:** Definiert Spring-Beans für die `ProducerFactory` (Basis für Producer) und eine `Map` mit Standard-Konfigurationen für Consumer (z.B. `bootstrap-servers`, `group-id`, Serializer).
+* **Vorteil:** Stellt Konsistenz sicher und vereinfacht die Einrichtung neuer Producer oder Consumer in den Services.
 
 ### `messaging-client`
 
-Dieses Modul baut auf `messaging-config` auf und stellt **wiederverwendbare High-Level-Komponenten** für die Interaktion mit Kafka bereit.
+Dieses Modul baut auf der Konfiguration auf und stellt wiederverwendbare High-Level-Komponenten für die Interaktion mit Kafka bereit.
 
-* **Zweck:** Stellt einfach zu verwendende Klassen oder Services zur Verfügung, z.B. einen `KafkaProducerService` zum Senden von Nachrichten und einen `KafkaConsumerService` zum Empfangen von Nachrichten. Es nutzt **Project Reactor** (`reactor-kafka`), um eine reaktive und nicht-blockierende Verarbeitung von Nachrichten zu ermöglichen.
-* **Vorteil:** Kapselt die Komplexität der Kafka-Producer- und -Consumer-API. Ein Fach-Service muss nur noch eine Methode wie `producer.sendMessage("topic", message)` aufrufen, ohne sich um die Details der Verbindung, Serialisierung oder Fehlerbehandlung kümmern zu müssen.
+* **Zweck:**
+    * **`KafkaEventPublisher`**: Ein reaktiver, nicht-blockierender Service zum Senden von Nachrichten. Er nutzt den `ReactiveKafkaProducerTemplate` von Spring.
+    * **`KafkaEventConsumer`**: Ein reaktiver Service zum Empfangen von Nachrichten. Er kapselt die Komplexität von `reactor-kafka` und gibt einen kontinuierlichen `Flux`-Stream von Events zurück.
+* **Vorteil:** Kapselt die Komplexität der reaktiven Kafka-API. Ein Fach-Service muss nur noch reaktive Streams (`Mono`, `Flux`) handhaben, ohne sich um die Details der Kafka-Interaktion zu kümmern.
 
-## Verwendung in anderen Modulen
+## Verwendung
 
-Ein Microservice, der Nachrichten senden oder empfangen möchte, geht wie folgt vor:
+Ein Microservice, der Nachrichten senden oder empfangen möchte, deklariert eine Abhängigkeit zu `:infrastructure:messaging:messaging-client` und injiziert die entsprechenden Interfaces.
 
-1.  **Abhängigkeit deklarieren:** Das Service-Modul (z.B. `events-service`) fügt eine `implementation`-Abhängigkeit zu `:infrastructure:messaging:messaging-client` in seiner `build.gradle.kts` hinzu.
-
-2.  **Client-Service injizieren:** Im Service-Code wird der `KafkaProducerService` oder `KafkaConsumerService` per Dependency Injection angefordert.
-
-    ```kotlin
-    // Beispiel für das Senden einer Nachricht
-    @Service
-    class EventNotificationService(
-        private val kafkaProducer: KafkaProducerService
-    ) {
-        fun notifyNewEvent(eventDetails: EventDetails) {
-            val topic = "new-events-topic"
-            // Einfacher Aufruf zum Senden der Nachricht.
-            // Die Komplexität der Serialisierung und des Sendens ist gekapselt.
-            kafkaProducer.sendMessage(topic, eventDetails.id, eventDetails)
-                .subscribe(
-                    { result -> logger.info("Message sent successfully to topic '{}'", topic) },
-                    { error -> logger.error("Failed to send message to topic '{}'", topic, error) }
-                )
-        }
+**Beispiel für das Senden einer Nachricht (nicht-blockierend):**
+```kotlin
+@Service
+class EventNotificationService(
+    private val eventPublisher: EventPublisher
+) {
+    fun notifyNewEvent(eventDetails: EventDetails) {
+        val topic = "new-events-topic"
+        eventPublisher.publishEvent(topic, eventDetails.id, eventDetails)
+            .subscribe(
+                null, // onComplete: Nichts zu tun
+                { error -> logger.error("Failed to send message to topic '{}'", topic, error) }
+            )
+        // Die Methode kehrt sofort zurück, ohne auf die Bestätigung von Kafka zu warten.
     }
-    ```kotlin
-    // Beispiel für das Empfangen von Nachrichten
-    @Component
-    class EventListener(
-        private val kafkaConsumer: KafkaConsumerService
-    ) {
-        @PostConstruct
-        fun listenForEvents() {
-            val topic = "new-events-topic"
-            // Reaktiv auf eingehende Nachrichten lauschen.
-            kafkaConsumer.receiveMessages<EventDetails>(topic)
-                .subscribe { event ->
-                    logger.info("Received new event with ID: {}", event.id)
-                    // Geschäftslogik zur Verarbeitung des Events...
-                }
-        }
-    }
-    ```
+}
+```
 
-Diese Architektur ermöglicht eine saubere, robuste und hochgradig entkoppelte Kommunikation zwischen den Diensten.
+**Beispiel für das Empfangen von Nachrichten (reaktiv):**
+```kotlin
+@Component
+class EventListener(
+    private val eventConsumer: EventConsumer
+) {
+    @PostConstruct
+    fun listenForEvents() {
+        val topic = "new-events-topic"
+        eventConsumer.receiveEvents<EventDetails>(topic)
+            .subscribe { event ->
+                logger.info("Received new event with ID: {}", event.id)
+                // Geschäftslogik zur Verarbeitung des Events...
+            }
+    }
+}
+```
+
+## Testing-Strategie
+
+Die Zuverlässigkeit des Moduls wird durch einen umfassenden Integrationstest sichergestellt, der auf dem "Goldstandard"-Prinzip beruht:
+
+* **Testcontainers: Der KafkaIntegrationTest startet einen echten Apachen Kafka Docker-Container, um die Funktionalität unter realen Bedingungen zu validieren.*
+
+* **Reaktives Testen: Der Test nutzt Project Reactor's StepVerifier, um die reaktiven Streams (Mono, Flux) deterministisch und ohne unzuverlässige Thread.sleep-Aufrufe zu überprüfen.*
+
+* **Lifecycle Management: Der Test-Lebenszyklus wird sauber über @BeforeEach und @AfterEach verwaltet, um sicherzustellen, dass alle Ressourcen (insbesondere Producer-Threads) nach jedem Test korrekt freigegeben werden.*
 
 ---
-**Letzte Aktualisierung**: 31. Juli 2025
+
+**Letzte Aktualisierung**: 9. August 2025

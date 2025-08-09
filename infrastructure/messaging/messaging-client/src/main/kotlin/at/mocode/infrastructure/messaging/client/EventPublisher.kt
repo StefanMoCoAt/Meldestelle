@@ -1,24 +1,22 @@
 package at.mocode.infrastructure.messaging.client
 
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+
 /**
  * Interface for publishing domain events to message broker.
  */
 interface EventPublisher {
 
     /**
-     * Publishes an event to the specified topic.
-     *
-     * @param topic The topic to publish to
-     * @param key The message key (optional)
-     * @param event The event to publish
+     * Publishes a single event to the specified topic.
+     * Returns a Mono that completes when the send operation is finished.
      */
-    suspend fun publishEvent(topic: String, key: String? = null, event: Any)
+    fun publishEvent(topic: String, key: String? = null, event: Any): Mono<Void>
 
     /**
      * Publishes multiple events to the specified topic.
-     *
-     * @param topic The topic to publish to
-     * @param events The events to publish with their keys
+     * Returns a Flux that completes when all send operations are finished.
      */
-    suspend fun publishEvents(topic: String, events: List<Pair<String?, Any>>)
+    fun publishEvents(topic: String, events: List<Pair<String?, Any>>): Flux<Void>
 }
