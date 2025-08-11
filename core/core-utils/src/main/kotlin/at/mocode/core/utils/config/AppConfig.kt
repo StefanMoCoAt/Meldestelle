@@ -15,43 +15,55 @@ data class AppConfig(
     val rateLimit: RateLimitConfig
 )
 
-data class AppInfoConfig(val name: String, val version: String, val description: String)
+data class AppInfoConfig(
+    val name: ApplicationName,
+    val version: ApplicationVersion,
+    val description: String
+)
 
 data class ServerConfig(
-    val port: Int,
-    val host: String,
-    val advertisedHost: String,
-    val workers: Int,
+    val port: Port,
+    val host: Host,
+    val advertisedHost: Host,
+    val workers: WorkerCount,
     val cors: CorsConfig
 ) {
     data class CorsConfig(val enabled: Boolean, val allowedOrigins: List<String>)
 }
 
 data class DatabaseConfig(
-    val host: String,
-    val port: Int,
-    val name: String,
-    val jdbcUrl: String,
-    val username: String,
-    val password: String,
+    val host: Host,
+    val port: Port,
+    val name: DatabaseName,
+    val jdbcUrl: JdbcUrl,
+    val username: DatabaseUsername,
+    val password: DatabasePassword,
     val driverClassName: String,
-    val maxPoolSize: Int,
-    val minPoolSize: Int,
+    val maxPoolSize: PoolSize,
+    val minPoolSize: PoolSize,
     val autoMigrate: Boolean
 )
 
-data class ServiceDiscoveryConfig(val enabled: Boolean, val consulHost: String, val consulPort: Int)
+data class ServiceDiscoveryConfig(
+    val enabled: Boolean,
+    val consulHost: Host,
+    val consulPort: Port
+)
 
-data class SecurityConfig(val jwt: JwtConfig, val apiKey: String?) {
+data class SecurityConfig(val jwt: JwtConfig, val apiKey: ApiKey?) {
     data class JwtConfig(
-        val secret: String,
-        val issuer: String,
-        val audience: String,
-        val realm: String,
+        val secret: JwtSecret,
+        val issuer: JwtIssuer,
+        val audience: JwtAudience,
+        val realm: JwtRealm,
         val expirationInMinutes: Long
     )
 }
 
 data class LoggingConfig(val level: String, val logRequests: Boolean, val logResponses: Boolean)
 
-data class RateLimitConfig(val enabled: Boolean, val globalLimit: Int, val globalPeriodMinutes: Int)
+data class RateLimitConfig(
+    val enabled: Boolean,
+    val globalLimit: RateLimit,
+    val globalPeriodMinutes: PeriodMinutes
+)

@@ -1,44 +1,70 @@
 // Dieses Modul stellt gemeinsame technische Hilfsfunktionen bereit,
 // wie z.B. Konfigurations-Management, Datenbank-Verbindungen und Service Discovery.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.multiplatform)
 }
 
 kotlin {
-    compilerOptions {
-        freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+    // Target platforms
+    jvm {
+        compilerOptions {
+            freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+        }
     }
-}
+    js(IR) {
+        browser()
+    }
 
-dependencies {
-    // Abhängigkeit zum platform-Modul für zentrale Versionsverwaltung
-    api(projects.platform.platformDependencies)
-    // Abhängigkeit zum core-domain-Modul, um dessen Typen zu verwenden
-    api(projects.core.coreDomain)
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                // Abhängigkeit zum core-domain-Modul, um dessen Typen zu verwenden
+                api(projects.core.coreDomain)
 
-    // Asynchronität
-    api(libs.kotlinx.coroutines.core)
+                // Asynchronität (available for all platforms) - explicit version to avoid BOM issues
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 
-    // Datenbank-Management
-    // OPTIMIERUNG: Verwendung von Bundles für Exposed und Flyway
-    api(libs.bundles.exposed)
-    api(libs.bundles.flyway)
-    api(libs.hikari.cp)
+                // Utilities (multiplatform compatible)
+                api(libs.bignum)
+            }
+        }
 
-    // Service Discovery
-    // api(libs.consul.client) wird getauscht mir spring-cloud-starter-consul-discovery
-    api(libs.spring.cloud.starter.consul.discovery)
+        val jvmMain by getting {
+            dependencies {
+                // Abhängigkeit zum platform-Modul für zentrale Versionsverwaltung
+                api(projects.platform.platformDependencies)
 
-    // Logging
-    api(libs.kotlin.logging.jvm)
+                // Datenbank-Management (JVM-specific)
+                // OPTIMIERUNG: Verwendung von Bundles für Exposed und Flyway
+                api(libs.bundles.exposed)
+                api(libs.bundles.flyway)
+                api(libs.hikari.cp)
 
-    // Utilities
-    api(libs.bignum)
-    implementation(libs.room.common.jvm) // Für BigDecimal Serialisierung
+                // Service Discovery (JVM-specific)
+                // api(libs.consul.client) wird getauscht mir spring-cloud-starter-consul-discovery
+                api(libs.spring.cloud.starter.consul.discovery)
 
-    // Testing
-    testImplementation(projects.platform.platformTesting)
-    testImplementation(libs.bundles.testing.jvm)
-    testImplementation(libs.kotlin.test)
-    testRuntimeOnly(libs.postgresql.driver)
+                // Logging (JVM-specific)
+                api(libs.kotlin.logging.jvm)
+
+                // JVM-specific utilities
+                implementation(libs.room.common.jvm) // Für BigDecimal Serialisierung
+            }
+        }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                // Testing (JVM-specific)
+                implementation(projects.platform.platformTesting)
+                implementation(libs.bundles.testing.jvm)
+                runtimeOnly(libs.postgresql.driver)
+            }
+        }
+    }
 }

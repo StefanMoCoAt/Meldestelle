@@ -47,6 +47,14 @@ include(":infrastructure:event-store:redis-event-store")
 include(":infrastructure:monitoring:monitoring-client")
 include(":infrastructure:monitoring:monitoring-server")
 
+// Temporary modules
+include(":temp:ping-service")
+
+// Client modules
+include(":client:common-ui")
+include(":client:web-app")
+include(":client:desktop-app")
+
 /*
 // Temporär deaktivierte Fach-Module
 // Members modules

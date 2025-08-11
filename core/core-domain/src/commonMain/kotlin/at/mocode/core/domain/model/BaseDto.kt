@@ -5,6 +5,7 @@ import at.mocode.core.domain.serialization.UuidSerializer
 import com.benasher44.uuid.Uuid
 import kotlin.time.Clock
 import kotlin.time.Instant
+import kotlin.time.ExperimentalTime
 import kotlinx.serialization.Serializable
 
 /**
@@ -16,9 +17,9 @@ interface BaseDto
  * Base DTO for domain entities that have unique ID and audit timestamps.
  */
 @Serializable
+@OptIn(ExperimentalTime::class)
 abstract class EntityDto : BaseDto {
-    @Serializable(with = UuidSerializer::class)
-    abstract val id: Uuid
+    abstract val id: EntityId
 
     @Serializable(with = KotlinInstantSerializer::class)
     abstract val createdAt: Instant
@@ -41,6 +42,7 @@ data class ErrorDto(
  * A standardized and consistent wrapper for all API responses.
  */
 @Serializable
+@OptIn(ExperimentalTime::class)
 data class ApiResponse<T>(
     val data: T?,
     val success: Boolean,
@@ -49,10 +51,12 @@ data class ApiResponse<T>(
     val timestamp: Instant = Clock.System.now()
 ) {
     companion object {
+        @OptIn(ExperimentalTime::class)
         fun <T> success(data: T): ApiResponse<T> {
             return ApiResponse(data = data, success = true)
         }
 
+        @OptIn(ExperimentalTime::class)
         fun <T> error(
             code: String,
             message: String,
@@ -65,6 +69,7 @@ data class ApiResponse<T>(
             )
         }
 
+        @OptIn(ExperimentalTime::class)
         fun <T> error(errors: List<ErrorDto>): ApiResponse<T> {
             return ApiResponse(data = null, success = false, errors = errors)
         }

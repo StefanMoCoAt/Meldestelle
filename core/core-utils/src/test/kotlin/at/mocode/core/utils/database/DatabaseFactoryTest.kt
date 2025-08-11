@@ -1,6 +1,6 @@
 package at.mocode.core.utils.database
 
-import at.mocode.core.utils.config.DatabaseConfig
+import at.mocode.core.utils.config.*
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
@@ -23,7 +23,7 @@ class DatabaseFactoryTest {
     companion object {
         @Container
         val postgresContainer = PostgreSQLContainer<Nothing>("postgres:16-alpine").apply {
-            withDatabaseName("test-db")
+            withDatabaseName("testdb")
             withUsername("test-user")
             withPassword("test-password")
         }
@@ -37,15 +37,15 @@ class DatabaseFactoryTest {
     fun setup() {
         // Erstelle eine DB-Konfiguration mit den dynamischen Daten des gestarteten Containers
         dbConfig = DatabaseConfig(
-            host = postgresContainer.host,
-            port = postgresContainer.firstMappedPort,
-            name = postgresContainer.databaseName,
-            jdbcUrl = postgresContainer.jdbcUrl,
-            username = postgresContainer.username,
-            password = postgresContainer.password,
+            host = Host(postgresContainer.host),
+            port = Port(postgresContainer.firstMappedPort),
+            name = DatabaseName(postgresContainer.databaseName),
+            jdbcUrl = JdbcUrl(postgresContainer.jdbcUrl),
+            username = DatabaseUsername(postgresContainer.username),
+            password = DatabasePassword(postgresContainer.password),
             driverClassName = "org.postgresql.Driver",
-            maxPoolSize = 2,
-            minPoolSize = 1,
+            maxPoolSize = PoolSize(2),
+            minPoolSize = PoolSize(1),
             autoMigrate = false // Wir steuern Migrationen im Test manuell
         )
         // Erstelle eine neue Factory-Instanz und verbinde sie mit der Test-DB

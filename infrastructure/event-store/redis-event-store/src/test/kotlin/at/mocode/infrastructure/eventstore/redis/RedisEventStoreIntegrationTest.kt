@@ -2,6 +2,7 @@ package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.BaseDomainEvent
 import at.mocode.core.domain.event.DomainEvent
+import at.mocode.core.domain.model.*
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
 import com.benasher44.uuid.Uuid
@@ -85,8 +86,8 @@ class RedisEventStoreIntegrationTest {
     @Test
     fun `event publishing and consuming with consumer groups should work`() {
         val aggregateId = uuid4()
-        val event1 = TestCreatedEvent(aggregateId = aggregateId, version = 1L, name = "Test Entity")
-        val event2 = TestUpdatedEvent(aggregateId = aggregateId, version = 2L, name = "Updated Test Entity")
+        val event1 = TestCreatedEvent(aggregateId = AggregateId(aggregateId), version = EventVersion(1L), name = "Test Entity")
+        val event2 = TestUpdatedEvent(aggregateId = AggregateId(aggregateId), version = EventVersion(2L), name = "Updated Test Entity")
 
         val latch = CountDownLatch(2)
         val receivedEvents = mutableListOf<DomainEvent>()
@@ -112,34 +113,34 @@ class RedisEventStoreIntegrationTest {
 
         assertEquals(2, receivedEvents.size)
 
-        val receivedEvent1 = receivedEvents.find { it.version == 1L } as TestCreatedEvent
-        assertEquals(aggregateId, receivedEvent1.aggregateId)
+        val receivedEvent1 = receivedEvents.find { it.version == EventVersion(1L) } as TestCreatedEvent
+        assertEquals(AggregateId(aggregateId), receivedEvent1.aggregateId)
         assertEquals("Test Entity", receivedEvent1.name)
 
-        val receivedEvent2 = receivedEvents.find { it.version == 2L } as TestUpdatedEvent
-        assertEquals(aggregateId, receivedEvent2.aggregateId)
+        val receivedEvent2 = receivedEvents.find { it.version == EventVersion(2L) } as TestUpdatedEvent
+        assertEquals(AggregateId(aggregateId), receivedEvent2.aggregateId)
         assertEquals("Updated Test Entity", receivedEvent2.name)
     }
 
     data class TestCreatedEvent(
-        override val aggregateId: Uuid,
-        override val version: Long,
+        override val aggregateId: AggregateId,
+        override val version: EventVersion,
         val name: String,
-        override val eventType: String = "TestCreated",
-        override val eventId: Uuid = uuid4(),
+        override val eventType: EventType = EventType("TestCreated"),
+        override val eventId: EventId = EventId(uuid4()),
         override val timestamp: Instant = Clock.System.now(),
-        override val correlationId: Uuid? = null,
-        override val causationId: Uuid? = null
+        override val correlationId: CorrelationId? = null,
+        override val causationId: CausationId? = null
     ) : BaseDomainEvent(aggregateId, eventType, version, eventId, timestamp, correlationId, causationId)
 
     data class TestUpdatedEvent(
-        override val aggregateId: Uuid,
-        override val version: Long,
+        override val aggregateId: AggregateId,
+        override val version: EventVersion,
         val name: String,
-        override val eventType: String = "TestUpdated",
-        override val eventId: Uuid = uuid4(),
+        override val eventType: EventType = EventType("TestUpdated"),
+        override val eventId: EventId = EventId(uuid4()),
         override val timestamp: Instant = Clock.System.now(),
-        override val correlationId: Uuid? = null,
-        override val causationId: Uuid? = null
+        override val correlationId: CorrelationId? = null,
+        override val causationId: CausationId? = null
     ) : BaseDomainEvent(aggregateId, eventType, version, eventId, timestamp, correlationId, causationId)
 }

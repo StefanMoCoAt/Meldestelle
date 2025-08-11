@@ -6,7 +6,18 @@ server:
 spring:
   application:
     name: api-gateway
+  security:
+    user:
+      name: admin
+      password: admin
   cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        register: true
+        health-check-path: /actuator/health
+        health-check-interval: 10s
     gateway:
       # HTTP Client-Timeouts für stabile Upstream-Verbindungen
       httpclient:
@@ -22,9 +33,17 @@ spring:
       # Antwort-Header bereinigen (verhindert doppelte CORS-Header)
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-      # Aktiviert die automatische Routen-Erstellung basierend auf Consul
-      discovery:
-        locator:
-          enabled: true
-          # Macht Routen-Namen klein (z.B. /members-service/** statt /MEMBERS-SERVICE/**)
-          lower-case-service-id: true
+      # Route definitions with service discovery
+      routes:
+        - id: ping-service-route
+          uri: lb://ping-service
+          predicates:
+            - Path=/api/ping/**
+          filters:
+            - StripPrefix=1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

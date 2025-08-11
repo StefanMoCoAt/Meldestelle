@@ -1,6 +1,8 @@
 package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.DomainEvent
+import at.mocode.core.domain.model.AggregateId
+import at.mocode.core.domain.model.EventVersion
 import at.mocode.infrastructure.eventstore.api.ConcurrencyException
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
@@ -26,7 +28,7 @@ class RedisEventStore(
 
         val aggregateId = events.first().aggregateId
         require(events.all { it.aggregateId == aggregateId }) { "All events must belong to the same aggregate" }
-        require(streamId == aggregateId) { "Stream ID must match aggregate ID" }
+        require(streamId == aggregateId.value) { "Stream ID must match aggregate ID" }
 
         var currentVersion = getStreamVersion(streamId)
 
@@ -59,7 +61,7 @@ class RedisEventStore(
 
     private fun appendToStreamInternal(event: DomainEvent, streamId: Uuid, currentVersion: Long): Long {
         val newVersion = currentVersion + 1
-        require(event.version == newVersion) { "Event version ${event.version} does not match expected new version $newVersion" }
+        require(event.version.value == newVersion) { "Event version ${event.version} does not match expected new version $newVersion" }
 
         val streamKey = getStreamKey(streamId)
         val allEventsStreamKey = getAllEventsStreamKey()
@@ -102,7 +104,7 @@ class RedisEventStore(
             }
         } ?: emptyList()
 
-        return events.filter { it.version >= fromVersion && (toVersion == null || it.version <= toVersion) }
+        return events.filter { it.version >= EventVersion(fromVersion) && (toVersion == null || it.version <= EventVersion(toVersion)) }
     }
 
     override fun getStreamVersion(streamId: Uuid): Long {

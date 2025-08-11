@@ -53,8 +53,8 @@ class ConfigLoader(private val configPath: String = "config") {
 
     // Die Konfigurations-Erstellungslogik ist hierher verschoben
     private fun createAppInfoConfig(props: Properties) = AppInfoConfig(
-        name = props.getProperty("app.name", "Meldestelle"),
-        version = props.getProperty("app.version", "1.0.0"),
+        name = ApplicationName(props.getProperty("app.name", "Meldestelle")),
+        version = ApplicationVersion(props.getProperty("app.version", "1.0.0")),
         description = props.getProperty("app.description", "Pferdesport Meldestelle System")
     )
 
@@ -65,10 +65,10 @@ class ConfigLoader(private val configPath: String = "config") {
             "127.0.0.1"
         }
         return ServerConfig(
-            port = props.getIntProperty("server.port", "API_PORT", 8081),
-            host = props.getStringProperty("server.host", "API_HOST", "0.0.0.0"),
-            advertisedHost = props.getStringProperty("server.advertisedHost", "API_HOST_ADVERTISED", defaultHost),
-            workers = props.getIntProperty("server.workers", "API_WORKERS", Runtime.getRuntime().availableProcessors()),
+            port = Port(props.getIntProperty("server.port", "API_PORT", 8081)),
+            host = Host(props.getStringProperty("server.host", "API_HOST", "0.0.0.0")),
+            advertisedHost = Host(props.getStringProperty("server.advertisedHost", "API_HOST_ADVERTISED", defaultHost)),
+            workers = WorkerCount(props.getIntProperty("server.workers", "API_WORKERS", Runtime.getRuntime().availableProcessors())),
             cors = ServerConfig.CorsConfig(
                 enabled = props.getBooleanProperty("server.cors.enabled", "API_CORS_ENABLED", true),
                 allowedOrigins = props.getProperty("server.cors.allowedOrigins")?.split(",")?.map { it.trim() }
@@ -82,15 +82,15 @@ class ConfigLoader(private val configPath: String = "config") {
         val port = props.getIntProperty("database.port", "DB_PORT", 5432)
         val name = props.getStringProperty("database.name", "DB_NAME", "meldestelle_db")
         return DatabaseConfig(
-            host = host,
-            port = port,
-            name = name,
-            jdbcUrl = "jdbc:postgresql://$host:$port/$name",
-            username = props.getStringProperty("database.username", "DB_USER", "meldestelle_user"),
-            password = props.getStringProperty("database.password", "DB_PASSWORD", "secure_password_change_me"),
+            host = Host(host),
+            port = Port(port),
+            name = DatabaseName(name),
+            jdbcUrl = JdbcUrl("jdbc:postgresql://$host:$port/$name"),
+            username = DatabaseUsername(props.getStringProperty("database.username", "DB_USER", "meldestelle_user")),
+            password = DatabasePassword(props.getStringProperty("database.password", "DB_PASSWORD", "secure_password_change_me")),
             driverClassName = "org.postgresql.Driver",
-            maxPoolSize = props.getIntProperty("database.maxPoolSize", "DB_MAX_POOL_SIZE", 10),
-            minPoolSize = props.getIntProperty("database.minPoolSize", "DB_MIN_POOL_SIZE", 5),
+            maxPoolSize = PoolSize(props.getIntProperty("database.maxPoolSize", "DB_MAX_POOL_SIZE", 10)),
+            minPoolSize = PoolSize(props.getIntProperty("database.minPoolSize", "DB_MIN_POOL_SIZE", 5)),
             autoMigrate = props.getBooleanProperty("database.autoMigrate", "DB_AUTO_MIGRATE", true)
         )
     }
@@ -99,27 +99,27 @@ class ConfigLoader(private val configPath: String = "config") {
     // analog zu den 'fromProperties' Methoden aus der alten AppConfig.
     private fun createServiceDiscoveryConfig(props: Properties) = ServiceDiscoveryConfig(
         enabled = props.getBooleanProperty("service-discovery.enabled", "CONSUL_ENABLED", true),
-        consulHost = props.getStringProperty("service-discovery.consul.host", "CONSUL_HOST", "consul"),
-        consulPort = props.getIntProperty("service-discovery.consul.port", "CONSUL_PORT", 8500)
+        consulHost = Host(props.getStringProperty("service-discovery.consul.host", "CONSUL_HOST", "consul")),
+        consulPort = Port(props.getIntProperty("service-discovery.consul.port", "CONSUL_PORT", 8500))
     )
 
     private fun createSecurityConfig(props: Properties) = SecurityConfig(
         jwt = SecurityConfig.JwtConfig(
-            secret = props.getStringProperty(
+            secret = JwtSecret(props.getStringProperty(
                 "security.jwt.secret",
                 "JWT_SECRET",
                 "default-secret-please-change-in-production"
-            ),
-            issuer = props.getStringProperty("security.jwt.issuer", "JWT_ISSUER", "meldestelle-api"),
-            audience = props.getStringProperty("security.jwt.audience", "JWT_AUDIENCE", "meldestelle-clients"),
-            realm = props.getStringProperty("security.jwt.realm", "JWT_REALM", "meldestelle"),
+            )),
+            issuer = JwtIssuer(props.getStringProperty("security.jwt.issuer", "JWT_ISSUER", "meldestelle-api")),
+            audience = JwtAudience(props.getStringProperty("security.jwt.audience", "JWT_AUDIENCE", "meldestelle-clients")),
+            realm = JwtRealm(props.getStringProperty("security.jwt.realm", "JWT_REALM", "meldestelle")),
             expirationInMinutes = props.getLongProperty(
                 "security.jwt.expirationInMinutes",
                 "JWT_EXPIRATION_MINUTES",
                 60 * 24
             )
         ),
-        apiKey = props.getStringProperty("security.apiKey", "API_KEY", "").ifEmpty { null }
+        apiKey = props.getStringProperty("security.apiKey", "API_KEY", "").ifEmpty { null }?.let { ApiKey(it) }
     )
 
     private fun createLoggingConfig(props: Properties, env: AppEnvironment) = LoggingConfig(
@@ -130,7 +130,7 @@ class ConfigLoader(private val configPath: String = "config") {
 
     private fun createRateLimitConfig(props: Properties) = RateLimitConfig(
         enabled = props.getBooleanProperty("ratelimit.enabled", "RATE_LIMIT_ENABLED", true),
-        globalLimit = props.getIntProperty("ratelimit.global.limit", "RATE_LIMIT_GLOBAL_LIMIT", 100),
-        globalPeriodMinutes = props.getIntProperty("ratelimit.global.periodMinutes", "RATE_LIMIT_GLOBAL_PERIOD", 1)
+        globalLimit = RateLimit(props.getIntProperty("ratelimit.global.limit", "RATE_LIMIT_GLOBAL_LIMIT", 100)),
+        globalPeriodMinutes = PeriodMinutes(props.getIntProperty("ratelimit.global.periodMinutes", "RATE_LIMIT_GLOBAL_PERIOD", 1))
     )
 }

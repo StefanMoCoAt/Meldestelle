@@ -1,5 +1,6 @@
 package at.mocode.core.domain.event
 
+import at.mocode.core.domain.model.*
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
 import at.mocode.core.domain.serialization.UuidSerializer
 import com.benasher44.uuid.Uuid
@@ -7,38 +8,38 @@ import com.benasher44.uuid.uuid4
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.serialization.Serializable
+import kotlin.time.ExperimentalTime
+
+@OptIn(ExperimentalTime::class)
 
 /**
  * Basis-Interface für alle Domänen-Events im System.
  * Ein Domänen-Event repräsentiert etwas fachlich Bedeutsames, das passiert ist.
  */
 interface DomainEvent {
-    val eventId: Uuid
-    val aggregateId: Uuid
-    val eventType: String
+    val eventId: EventId
+    val aggregateId: AggregateId
+    val eventType: EventType
     val timestamp: Instant
-    val version: Long
-    val correlationId: Uuid?
-    val causationId: Uuid?
+    val version: EventVersion
+    val correlationId: CorrelationId?
+    val causationId: CausationId?
 }
 
 /**
  * Abstrakte Basisklasse für Domänen-Events, um Boilerplate-Code zu reduzieren.
  */
 @Serializable
+@OptIn(ExperimentalTime::class)
 abstract class BaseDomainEvent(
-    @Serializable(with = UuidSerializer::class)
-    override val aggregateId: Uuid,
-    override val eventType: String,
-    override val version: Long,
-    @Serializable(with = UuidSerializer::class)
-    override val eventId: Uuid = uuid4(),
+    override val aggregateId: AggregateId,
+    override val eventType: EventType,
+    override val version: EventVersion,
+    override val eventId: EventId = EventId(uuid4()),
     @Serializable(with = KotlinInstantSerializer::class)
     override val timestamp: Instant = Clock.System.now(),
-    @Serializable(with = UuidSerializer::class)
-    override val correlationId: Uuid? = null,
-    @Serializable(with = UuidSerializer::class)
-    override val causationId: Uuid? = null
+    override val correlationId: CorrelationId? = null,
+    override val causationId: CausationId? = null
 ) : DomainEvent
 
 /**

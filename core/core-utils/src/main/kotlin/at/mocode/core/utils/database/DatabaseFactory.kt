@@ -51,11 +51,11 @@ class DatabaseFactory(private val config: DatabaseConfig) {
     private fun createHikariConfig(): HikariConfig {
         return HikariConfig().apply {
             driverClassName = config.driverClassName
-            jdbcUrl = config.jdbcUrl
-            username = config.username
-            password = config.password
-            maximumPoolSize = config.maxPoolSize
-            minimumIdle = config.minPoolSize
+            jdbcUrl = config.jdbcUrl.value
+            username = config.username.value
+            password = config.password.getValue() // Use getValue() for password to access actual value
+            maximumPoolSize = config.maxPoolSize.value
+            minimumIdle = config.minPoolSize.value
             isAutoCommit = false
             transactionIsolation = "TRANSACTION_READ_COMMITTED"
             validationTimeout = 5000

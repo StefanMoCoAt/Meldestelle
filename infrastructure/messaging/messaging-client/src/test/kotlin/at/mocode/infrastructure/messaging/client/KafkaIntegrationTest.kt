@@ -38,8 +38,8 @@ class KafkaIntegrationTest {
         }
         producerFactory = kafkaConfig.producerFactory()
 
-        val reactiveKafkaConfig = ReactiveKafkaConfig()
-        val reactiveTemplate = reactiveKafkaConfig.reactiveKafkaProducerTemplate(producerFactory)
+        val reactiveKafkaConfig = ReactiveKafkaConfig(kafkaConfig)
+        val reactiveTemplate = reactiveKafkaConfig.reactiveKafkaProducerTemplate()
         kafkaEventPublisher = KafkaEventPublisher(reactiveTemplate)
     }
 
@@ -54,19 +54,18 @@ class KafkaIntegrationTest {
         val testKey = "test-key"
         val testEvent = TestEvent("Test Message")
 
-        val consumerProps = mapOf(
-            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaContainer.bootstrapServers,
-            ConsumerConfig.GROUP_ID_CONFIG to "test-group-${UUID.randomUUID()}",
-            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
-            ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-            JsonDeserializer.TRUSTED_PACKAGES to "*",
-            JsonDeserializer.USE_TYPE_INFO_HEADERS to false,
-            JsonDeserializer.VALUE_DEFAULT_TYPE to TestEvent::class.java.name
-        )
+        // Use the same KafkaConfig for consistent and secure configuration
+        val testKafkaConfig = KafkaConfig().apply {
+            bootstrapServers = kafkaContainer.bootstrapServers
+            // For tests, we need to trust the test package
+            trustedPackages = "at.mocode.*"
+        }
+
+        val consumerProps = testKafkaConfig.consumerConfigs("test-group-${UUID.randomUUID()}")
 
         val jsonValueDeserializer = JsonDeserializer(TestEvent::class.java).apply {
-            addTrustedPackages("*")
+            addTrustedPackages(testKafkaConfig.trustedPackages)
+            setUseTypeHeaders(false)
         }
         val receiverOptions = ReceiverOptions.create<String, TestEvent>(consumerProps)
             .withKeyDeserializer(StringDeserializer())

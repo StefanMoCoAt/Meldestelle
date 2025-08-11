@@ -31,8 +31,8 @@ class ConfigLoaderTest {
         val config = configLoader.load(AppEnvironment.DEVELOPMENT)
 
         // Assert
-        assertEquals("Meldestelle", config.appInfo.name)
-        assertEquals(8081, config.server.port) // Standard-Port
+        assertEquals("Meldestelle", config.appInfo.name.value)
+        assertEquals(8081, config.server.port.value) // Standard-Port
     }
 
     @Test
@@ -53,8 +53,8 @@ class ConfigLoaderTest {
         val config = configLoader.load(AppEnvironment.DEVELOPMENT)
 
         // Assert
-        assertEquals("TestApp", config.appInfo.name)
-        assertEquals(9999, config.server.port)
+        assertEquals("TestApp", config.appInfo.name.value)
+        assertEquals(9999, config.server.port.value)
     }
 
     @Test
@@ -83,8 +83,8 @@ class ConfigLoaderTest {
 
         // Assert
         assertEquals(AppEnvironment.TEST, config.environment, "Environment should be TEST")
-        assertEquals("TestEnvApp", config.appInfo.name, "app.name should be overridden")
-        assertEquals(9000, config.server.port, "server.port should be overridden")
-        assertEquals("base-db-host", config.database.host, "database.host should come from the base file")
+        assertEquals("TestEnvApp", config.appInfo.name.value, "app.name should be overridden")
+        assertEquals(9000, config.server.port.value, "server.port should be overridden")
+        assertEquals("base-db-host", config.database.host.value, "database.host should come from the base file")
     }
 }

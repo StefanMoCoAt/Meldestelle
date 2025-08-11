@@ -71,7 +71,9 @@ class GatewayApplicationTests {
     class TestRoutes {
         @Bean
         fun routeLocator(builder: RouteLocatorBuilder): RouteLocator = builder.routes()
-            .route("test-forward") { r -> r.path("/hello").uri("forward:/internal/hello") }
+            .route("test-forward") {
+                it.path("/hello").uri("forward:/internal/hello")
+            }
             .build()
     }
 

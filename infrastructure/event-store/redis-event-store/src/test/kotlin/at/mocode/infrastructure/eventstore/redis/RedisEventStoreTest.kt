@@ -1,6 +1,7 @@
 package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.BaseDomainEvent
+import at.mocode.core.domain.model.*
 import at.mocode.infrastructure.eventstore.api.ConcurrencyException
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import com.benasher44.uuid.Uuid
@@ -68,8 +69,8 @@ class RedisEventStoreTest {
     @Test
     fun `append and read events should work correctly for new stream`() {
         val aggregateId = uuid4()
-        val event1 = TestCreatedEvent(aggregateId, 1L, "Test Entity")
-        val event2 = TestUpdatedEvent(aggregateId, 2L, "Updated Test Entity")
+        val event1 = TestCreatedEvent(AggregateId(aggregateId), EventVersion(1L), "Test Entity")
+        val event2 = TestUpdatedEvent(AggregateId(aggregateId), EventVersion(2L), "Updated Test Entity")
 
         eventStore.appendToStream(listOf(event1, event2), aggregateId, 0)
 
@@ -77,21 +78,21 @@ class RedisEventStoreTest {
         assertEquals(2, events.size)
 
         val firstEvent = events[0] as TestCreatedEvent
-        assertEquals(1L, firstEvent.version)
+        assertEquals(EventVersion(1L), firstEvent.version)
         assertEquals("Test Entity", firstEvent.name)
 
         val secondEvent = events[1] as TestUpdatedEvent
-        assertEquals(2L, secondEvent.version)
+        assertEquals(EventVersion(2L), secondEvent.version)
         assertEquals("Updated Test Entity", secondEvent.name)
     }
 
     @Test
     fun `appending with wrong expected version should throw ConcurrencyException`() {
         val aggregateId = uuid4()
-        val event1 = TestCreatedEvent(aggregateId, 1L, "Test Entity")
+        val event1 = TestCreatedEvent(AggregateId(aggregateId), EventVersion(1L), "Test Entity")
         eventStore.appendToStream(listOf(event1), aggregateId, 0) // Stream is now at version 1
 
-        val event2 = TestUpdatedEvent(aggregateId, 2L, "Updated Test Entity")
+        val event2 = TestUpdatedEvent(AggregateId(aggregateId), EventVersion(2L), "Updated Test Entity")
         assertThrows<ConcurrencyException> {
             eventStore.appendToStream(listOf(event2), aggregateId, 0)
         }
@@ -99,15 +100,15 @@ class RedisEventStoreTest {
 
     @Serializable
     data class TestCreatedEvent(
-        @Transient override val aggregateId: Uuid = uuid4(),
-        @Transient override val version: Long = 0,
+        @Transient override val aggregateId: AggregateId = AggregateId(uuid4()),
+        @Transient override val version: EventVersion = EventVersion(0),
         val name: String
-    ) : BaseDomainEvent(aggregateId, "TestCreated", version)
+    ) : BaseDomainEvent(aggregateId, EventType("TestCreated"), version)
 
     @Serializable
     data class TestUpdatedEvent(
-        @Transient override val aggregateId: Uuid = uuid4(),
-        @Transient override val version: Long = 0,
+        @Transient override val aggregateId: AggregateId = AggregateId(uuid4()),
+        @Transient override val version: EventVersion = EventVersion(0),
         val name: String
-    ) : BaseDomainEvent(aggregateId, "TestUpdated", version)
+    ) : BaseDomainEvent(aggregateId, EventType("TestUpdated"), version)
 }

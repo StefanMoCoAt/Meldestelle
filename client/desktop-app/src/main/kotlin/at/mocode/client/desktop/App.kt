@@ -15,15 +15,22 @@ import at.mocode.client.common.components.horses.PferdeListe
 import at.mocode.client.common.components.masterdata.StammdatenListe
 import at.mocode.client.web.screens.CreatePersonScreen
 import at.mocode.client.web.screens.PersonListScreen
-import at.mocode.client.web.viewmodel.CreatePersonViewModel
-import at.mocode.client.web.viewmodel.PersonListViewModel
 import at.mocode.core.domain.model.DatenQuelleE
 import at.mocode.core.domain.model.PferdeGeschlechtE
 import at.mocode.events.domain.model.Veranstaltung
 import at.mocode.horses.domain.model.DomPferd
 import at.mocode.masterdata.domain.model.LandDefinition
-import kotlinx.datetime.Clock
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.auth.providers.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.json.Json
 
 /**
  * Main application composable for the desktop application.
@@ -103,6 +110,10 @@ data class TabItem(
  */
 @Composable
 fun DashboardScreen() {
+    val coroutineScope = rememberCoroutineScope()
+    var pingResult by remember { mutableStateOf<String?>(null) }
+    var pingLoading by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -119,6 +130,15 @@ fun DashboardScreen() {
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(bottom = 32.dp)
         )
+
+        // Display ping result if available
+        pingResult?.let { result ->
+            Text(
+                text = "Ping Result: $result",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
 
         // Quick access buttons
         Row(
@@ -142,6 +162,47 @@ fun DashboardScreen() {
                     Icon(Icons.Default.Search, contentDescription = "Suche")
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("Suche")
+                }
+            }
+
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        pingLoading = true
+                        try {
+                            val pingClient = HttpClient(CIO) {
+                                install(ContentNegotiation) {
+                                    json(Json { ignoreUnknownKeys = true })
+                                }
+                                install(Auth) {
+                                    basic {
+                                        credentials {
+                                            BasicAuthCredentials(username = "admin", password = "admin")
+                                        }
+                                    }
+                                }
+                            }
+
+                            val response: Map<String, String> = pingClient.get("http://localhost:8080/api/ping").body()
+                            pingResult = response["status"] ?: "No status in response"
+
+                            pingClient.close()
+                        } catch (e: Exception) {
+                            pingResult = "Error: ${e.message}"
+                        } finally {
+                            pingLoading = false
+                        }
+                    }
+                },
+                enabled = !pingLoading
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        if (pingLoading) Icons.Default.Refresh else Icons.Default.NetworkCheck,
+                        contentDescription = "Ping Test"
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(if (pingLoading) "Pinging..." else "Ping Test")
                 }
             }
         }

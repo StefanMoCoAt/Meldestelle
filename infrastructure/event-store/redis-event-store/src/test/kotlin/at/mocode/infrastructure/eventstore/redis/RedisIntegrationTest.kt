@@ -2,6 +2,7 @@ package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.BaseDomainEvent
 import at.mocode.core.domain.event.DomainEvent
+import at.mocode.core.domain.model.*
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
 import com.benasher44.uuid.Uuid
@@ -78,8 +79,8 @@ class RedisIntegrationTest {
     @Test
     fun `event publishing and consuming should be fast and reliable`() {
         val aggregateId = uuid4()
-        val event1 = TestCreatedEvent(aggregateId, 1L, "Test Entity")
-        val event2 = TestUpdatedEvent(aggregateId, 2L, "Updated Test Entity")
+        val event1 = TestCreatedEvent(AggregateId(aggregateId), EventVersion(1L), "Test Entity")
+        val event2 = TestUpdatedEvent(AggregateId(aggregateId), EventVersion(2L), "Updated Test Entity")
 
         val receivedEvents = mutableListOf<DomainEvent>()
         eventConsumer.registerEventHandler("TestCreated") { receivedEvents.add(it) }
@@ -91,26 +92,26 @@ class RedisIntegrationTest {
 
         assertEquals(2, receivedEvents.size)
 
-        val receivedEvent1 = receivedEvents.find { it.version == 1L } as TestCreatedEvent
-        assertEquals(aggregateId, receivedEvent1.aggregateId)
+        val receivedEvent1 = receivedEvents.find { it.version == EventVersion(1L) } as TestCreatedEvent
+        assertEquals(AggregateId(aggregateId), receivedEvent1.aggregateId)
         assertEquals("Test Entity", receivedEvent1.name)
 
-        val receivedEvent2 = receivedEvents.find { it.version == 2L } as TestUpdatedEvent
-        assertEquals(aggregateId, receivedEvent2.aggregateId)
+        val receivedEvent2 = receivedEvents.find { it.version == EventVersion(2L) } as TestUpdatedEvent
+        assertEquals(AggregateId(aggregateId), receivedEvent2.aggregateId)
         assertEquals("Updated Test Entity", receivedEvent2.name)
     }
 
     @Serializable
     data class TestCreatedEvent(
-        @Transient override val aggregateId: Uuid = uuid4(),
-        @Transient override val version: Long = 0,
+        @Transient override val aggregateId: AggregateId = AggregateId(uuid4()),
+        @Transient override val version: EventVersion = EventVersion(0),
         val name: String
-    ) : BaseDomainEvent(aggregateId, "TestCreated", version)
+    ) : BaseDomainEvent(aggregateId, EventType("TestCreated"), version)
 
     @Serializable
     data class TestUpdatedEvent(
-        @Transient override val aggregateId: Uuid = uuid4(),
-        @Transient override val version: Long = 0,
+        @Transient override val aggregateId: AggregateId = AggregateId(uuid4()),
+        @Transient override val version: EventVersion = EventVersion(0),
         val name: String
-    ) : BaseDomainEvent(aggregateId, "TestUpdated", version)
+    ) : BaseDomainEvent(aggregateId, EventType("TestUpdated"), version)
 }

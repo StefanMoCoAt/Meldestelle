@@ -23,6 +23,12 @@ kotlin {
 
                 // Stellt die Web-spezifischen (HTML) Teile von Jetpack Compose bereit.
                 implementation(compose.html.core)
+
+                // HTTP client for making requests to the backend
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.ktor.client.js)
+                implementation(libs.ktor.client.contentNegotiation)
+                implementation(libs.ktor.client.serialization.kotlinx.json)
             }
         }
         val jsTest by getting {
