@@ -36,7 +36,7 @@ class KafkaIntegrationTest {
         val kafkaConfig = KafkaConfig().apply {
             bootstrapServers = kafkaContainer.bootstrapServers
         }
-        producerFactory = kafkaConfig.producerFactory() as DefaultKafkaProducerFactory<String, Any>
+        producerFactory = kafkaConfig.producerFactory()
 
         val reactiveKafkaConfig = ReactiveKafkaConfig()
         val reactiveTemplate = reactiveKafkaConfig.reactiveKafkaProducerTemplate(producerFactory)
@@ -60,9 +60,18 @@ class KafkaIntegrationTest {
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
-            JsonDeserializer.TRUSTED_PACKAGES to "*"
+            JsonDeserializer.TRUSTED_PACKAGES to "*",
+            JsonDeserializer.USE_TYPE_INFO_HEADERS to false,
+            JsonDeserializer.VALUE_DEFAULT_TYPE to TestEvent::class.java.name
         )
-        val receiverOptions = ReceiverOptions.create<String, TestEvent>(consumerProps).subscription(listOf(testTopic))
+
+        val jsonValueDeserializer = JsonDeserializer(TestEvent::class.java).apply {
+            addTrustedPackages("*")
+        }
+        val receiverOptions = ReceiverOptions.create<String, TestEvent>(consumerProps)
+            .withKeyDeserializer(StringDeserializer())
+            .withValueDeserializer(jsonValueDeserializer)
+            .subscription(listOf(testTopic))
 
         // Der Mono, der das nächste empfangene Ereignis darstellt
         val receivedEvent = KafkaReceiver.create(receiverOptions)

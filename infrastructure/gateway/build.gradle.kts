@@ -1,56 +1,3 @@
-/*plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ktor)
-    alias(libs.plugins.spring.dependencyManagement)
-    application
-}
-
-application {
-    mainClass.set("at.mocode.infrastructure.gateway.ApplicationKt")
-}
-
-dependencies {
-    api(platform(libs.spring.boot.dependencies))
-    implementation(projects.platform.platformDependencies)
-    implementation(projects.core.coreDomain)
-    implementation(projects.core.coreUtils)
-
-    implementation(projects.infrastructure.auth.authClient)
-    implementation(projects.infrastructure.monitoring.monitoringClient)
-
-    // --- Ktor Server ---
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.netty)
-    implementation(libs.ktor.server.contentNegotiation)
-    implementation(libs.ktor.server.serialization.kotlinx.json)
-    implementation(libs.ktor.server.cors)
-    implementation(libs.ktor.server.callLogging)
-    implementation(libs.ktor.server.defaultHeaders)
-    implementation(libs.ktor.server.statusPages)
-    implementation(libs.ktor.server.auth)
-    implementation(libs.ktor.server.authJwt)
-    implementation(libs.ktor.server.rateLimit)
-    implementation(libs.ktor.server.metrics.micrometer)
-
-    // --- OpenAPI & Swagger for Ktor ---
-    implementation(libs.ktor.server.openapi)
-    implementation(libs.ktor.server.swagger)
-
-    // --- Ktor Client (damit der Gateway Anfragen an die Backend-Services weiterleiten kann) ---
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.contentNegotiation)
-    implementation(libs.ktor.client.serialization.kotlinx.json)
-
-    // --- Monitoring ---
-    implementation(libs.micrometer.prometheus)
-
-    // --- Testing ---
-    testImplementation(projects.platform.platformTesting)
-    testImplementation(libs.ktor.server.tests)
-}*/
-
 // Dieses Modul ist das API-Gateway und der einzige öffentliche Einstiegspunkt
 // für alle externen Anfragen an das Meldestelle-System.
 plugins {
@@ -75,6 +22,8 @@ dependencies {
 
     // Stellt die Spring Cloud Gateway und Consul Discovery Abhängigkeiten bereit
     implementation(libs.bundles.spring.cloud.gateway)
+    // Sichert den reaktiven Webserver (Netty) explizit ab, um Test-/Kontext-Probleme zu vermeiden
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 
     // Bindet die wiederverwendbare Logik zur JWT-Validierung ein.
     implementation(projects.infrastructure.auth.authClient)
@@ -85,5 +34,7 @@ dependencies {
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
+    // Security im Testkontext, um eine permissive Security-Konfiguration bereitstellen zu können
+    testImplementation(libs.spring.boot.starter.security)
 
 }

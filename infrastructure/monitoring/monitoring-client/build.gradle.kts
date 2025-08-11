@@ -3,14 +3,9 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
-    alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }
 
-// Deaktiviert die Erstellung eines ausführbaren Jars für dieses Bibliotheks-Modul.
-tasks.getByName("bootJar") {
-    enabled = false
-}
 
 
 dependencies {

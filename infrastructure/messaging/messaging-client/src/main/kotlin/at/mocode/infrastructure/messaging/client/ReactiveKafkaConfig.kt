@@ -1,18 +1,22 @@
 package at.mocode.infrastructure.messaging.client
 
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.kafka.core.ProducerFactory
+import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import reactor.kafka.sender.SenderOptions
 
-@Configuration
+/**
+ * Reactive Kafka configuration utilities for creating a ReactiveKafkaProducerTemplate.
+ */
 class ReactiveKafkaConfig {
 
-    @Bean
-    fun reactiveKafkaProducerTemplate(producerFactory: ProducerFactory<String, Any>): ReactiveKafkaProducerTemplate<String, Any> {
-        // Nutzt die ProducerFactory aus dem messaging-config-Modul
-        val senderOptions = SenderOptions.create<String, Any>(producerFactory.configurationProperties)
+    /**
+     * Create a ReactiveKafkaProducerTemplate using the configuration from the given ProducerFactory.
+     */
+    fun reactiveKafkaProducerTemplate(
+        producerFactory: DefaultKafkaProducerFactory<String, Any>
+    ): ReactiveKafkaProducerTemplate<String, Any> {
+        val props: Map<String, Any> = producerFactory.configurationProperties
+        val senderOptions: SenderOptions<String, Any> = SenderOptions.create(props)
         return ReactiveKafkaProducerTemplate(senderOptions)
     }
 }

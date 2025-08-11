@@ -8,6 +8,20 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      # HTTP Client-Timeouts für stabile Upstream-Verbindungen
+      httpclient:
+        connect-timeout: 5000 # in Millisekunden
+        response-timeout: 30s
+      # Globales CORS-Setup (kann pro Umgebung überschrieben werden)
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      # Antwort-Header bereinigen (verhindert doppelte CORS-Header)
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
       # Aktiviert die automatische Routen-Erstellung basierend auf Consul
       discovery:
         locator:
