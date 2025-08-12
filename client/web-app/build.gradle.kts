@@ -7,9 +7,29 @@ plugins {
 kotlin {
     js(IR) {
         browser {
-            // Konfiguriert den Development-Server und die finalen Bundles.
             commonWebpackConfig {
-                outputFileName = "MeldestelleWebApp.js"
+                devServer = org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.DevServer(
+                    open = true,
+                    port = 8081
+                )
+            }
+            webpackTask {
+                cssSupport {
+                    enabled.set(true)
+                }
+            }
+            runTask {
+                cssSupport {
+                    enabled.set(true)
+                }
+            }
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                    webpackConfig.cssSupport {
+                        enabled.set(true)
+                    }
+                }
             }
         }
         binaries.executable()
@@ -18,23 +38,9 @@ kotlin {
     sourceSets {
         val jsMain by getting {
             dependencies {
-                // Greift explizit auf den JS-Teil unseres KMP-Moduls zu.
-                implementation(projects.client.commonUi)
-
-                // Stellt die Web-spezifischen (HTML) Teile von Jetpack Compose bereit.
-                implementation(compose.html.core)
-
-                // HTTP client for making requests to the backend
-                implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.ktor.client.js)
-                implementation(libs.ktor.client.contentNegotiation)
-                implementation(libs.ktor.client.serialization.kotlinx.json)
-            }
-        }
-        val jsTest by getting {
-            dependencies {
-                implementation(libs.kotlin.test)
+                implementation(project(":client:common-ui"))
             }
         }
     }
 }
+

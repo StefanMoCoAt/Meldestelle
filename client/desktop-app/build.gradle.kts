@@ -1,25 +1,31 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 plugins {
-    kotlin("jvm")
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.multiplatform)
 }
 
-dependencies {
-    // Greift explizit auf den "desktop" (JVM) Teil unseres KMP-Moduls zu.
-    implementation(projects.client.commonUi)
+kotlin {
+    jvm("desktop")
 
-    // Stellt die Desktop-spezifischen Teile von Jetpack Compose bereit.
-    implementation(compose.desktop.currentOs)
-
-    // Stellt die Coroutine-Integration für die Swing-UI-Bibliothek bereit.
-    implementation(libs.kotlinx.coroutines.swing)
-
-    // --- Testing ---
-    testImplementation(projects.platform.platformTesting)
+    sourceSets {
+        val desktopMain by getting {
+            dependencies {
+                implementation(libs.compose.desktop.currentOs)
+                implementation(project(":client:common-ui"))
+            }
+        }
+    }
 }
 
 compose.desktop {
     application {
-        mainClass = "at.mocode.client.desktop.MainKt"
+        mainClass = "MainKt"
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "MeldestellePro"
+            packageVersion = "1.0.0"
+        }
     }
 }

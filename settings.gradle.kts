@@ -14,6 +14,9 @@ pluginManagement {
         }
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+}
 
 dependencyResolutionManagement {
 
@@ -85,11 +88,5 @@ include(":masterdata:masterdata-infrastructure")
 include(":masterdata:masterdata-api")
 include(":masterdata:masterdata-service")
 
-// Client modules
-include(":client:common-ui")
-include(":client:web-app")
-include(":client:desktop-app")
-
 // Legacy modules have been removed after successful migration
-
  */

@@ -56,6 +56,7 @@ reactorKafka = "1.3.22"
 jackson = "2.17.0"
 jakartaAnnotation = "2.1.1"
 roomCommonJvm = "2.7.2"
+uiDesktop = "1.7.0"
 
 [libraries]
 # --- Platform BOMs (Bill of Materials) ---
@@ -178,6 +179,7 @@ testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.
 testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainers" }
 reactor-test = { module = "io.projectreactor:reactor-test" } # Version wird von der Spring BOM verwaltet
 room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
+ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
 
 [bundles]
 # OPTIMIERUNG: Bündelt gängige Abhängigkeitsgruppen.
