@@ -1,19 +1,28 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-
 plugins {
-    alias(libs.plugins.compose.multiplatform)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.kotlin.multiplatform)
+    kotlin("multiplatform")
+    id("org.jetbrains.compose")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 kotlin {
-    jvm("desktop")
+    jvm {
+        compilations.all {
+            compilerOptions.configure {
+                jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+            }
+        }
+    }
 
     sourceSets {
-        val desktopMain by getting {
+        val jvmMain by getting {
             dependencies {
-                implementation(libs.compose.desktop.currentOs)
                 implementation(project(":client:common-ui"))
+                implementation(compose.desktop.currentOs)
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.uiTooling)
+                implementation(libs.ktor.client.cio)
+                implementation(libs.kotlinx.coroutines.swing)
             }
         }
     }
@@ -21,11 +30,22 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "at.mocode.client.desktop.MainKt"
+
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "MeldestellePro"
+            // targetFormats(Tar, Dmg, Msi) // TODO: Fix TargetFormat import
+            packageName = "Meldestelle Desktop"
             packageVersion = "1.0.0"
+
+            windows {
+                iconFile.set(project.file("src/jvmMain/resources/icon.ico"))
+            }
+            linux {
+                iconFile.set(project.file("src/jvmMain/resources/icon.png"))
+            }
+            macOS {
+                iconFile.set(project.file("src/jvmMain/resources/icon.icns"))
+            }
         }
     }
 }

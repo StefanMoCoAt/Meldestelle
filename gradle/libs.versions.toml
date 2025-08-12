@@ -19,7 +19,7 @@ springdoc = "2.5.0"
 ktor = "3.0.0-beta-2"
 
 # --- Compose UI ---
-composeMultiplatform = "1.6.10"
+composeMultiplatform = "1.8.2"
 
 # --- Database & Persistence ---
 exposed = "0.51.1"
@@ -67,7 +67,7 @@ spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-d
 
 # --- Kotlin & Coroutines ---
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core" } # Version from BOM
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing" } # Version from BOM
 kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor" } # Version from BOM
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx" }

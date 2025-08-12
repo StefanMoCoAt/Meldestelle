@@ -22,7 +22,8 @@ kotlin {
                 api(projects.core.coreDomain)
 
                 // Asynchronität (available for all platforms) - explicit version to avoid BOM issues
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+                api(libs.kotlinx.coroutines.core)
+
 
                 // Utilities (multiplatform compatible)
                 api(libs.bignum)

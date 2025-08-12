@@ -168,7 +168,7 @@ services:
     networks:
       - meldestelle-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
+      test: ["CMD", "curl", "-f", "http://localhost:8082/ping"]
       interval: 10s
       timeout: 5s
       retries: 3
