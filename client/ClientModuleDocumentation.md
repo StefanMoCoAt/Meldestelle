@@ -51,10 +51,16 @@ Hot-Reload wird vom Compose-/Ktor-Dev-Server automatisch gehandhabt.
 
 ## 4. Architekturüberblick
 
-```client
-commonMain ├─ UI: Compose Runtime/Foundation/Material³ ├─ Netzwerk: Ktor Client (+ JSON Serialisierung) └─ Geschäftslogik & Models
-jvmMain └─ Ktor CIO Engine (Desktop)
-jsMain └─ Ktor JS Engine (Browser)
+```
+client
+  commonMain
+    ├─ UI: Compose Runtime/Foundation/Material³
+    ├─ Netzwerk: Ktor Client (+ JSON Serialisierung)
+    └─ Geschäftslogik & Models
+  jvmMain
+    └─ Ktor CIO Engine (Desktop)
+  jsMain
+    └─ Ktor JS Engine (Browser)
 ```
 
 Gemeinsame Logik (UI-State, Repository-Klassen etc.) lebt in
