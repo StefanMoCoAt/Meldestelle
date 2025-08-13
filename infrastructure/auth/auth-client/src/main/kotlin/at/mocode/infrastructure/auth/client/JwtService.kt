@@ -79,7 +79,7 @@ class JwtService(
             permissionStrings?.mapNotNull {
                 try {
                     BerechtigungE.valueOf(it)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     null
                 }
             } ?: emptyList()

@@ -11,8 +11,8 @@ data class PingTestState(
     val isConnected: Boolean = false
 )
 
-class PingTestComponent {
-    private val pingService = PingService()
+class PingTestComponent(baseUrl: String = "http://localhost:8080") {
+    private val pingService = PingService(baseUrl)
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     var state: PingTestState = PingTestState()

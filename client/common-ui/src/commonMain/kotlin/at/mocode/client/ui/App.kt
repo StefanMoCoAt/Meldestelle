@@ -20,7 +20,7 @@ fun App(baseUrl: String = "http://localhost:8080") {
 
 @Composable
 fun PingScreen(baseUrl: String) {
-    val pingComponent = remember { PingTestComponent() }
+    val pingComponent = remember { PingTestComponent(baseUrl) }
     var pingState by remember { mutableStateOf(pingComponent.state) }
 
     LaunchedEffect(pingComponent) {

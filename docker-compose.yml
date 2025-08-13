@@ -209,7 +209,7 @@ services:
       retries: 3
       start_period: 15s
     restart: unless-stopped
-    # Security: Run as non-root user
+    # Security: Run as a non-root user
     user: "65534:65534"
     # Resource limits for development
     deploy:
@@ -242,7 +242,7 @@ services:
       retries: 3
       start_period: 20s
     restart: unless-stopped
-    # Security: Run as non-root user
+    # Security: Run as a non-root user
     user: "472:472"
     # Resource limits for development
     deploy:

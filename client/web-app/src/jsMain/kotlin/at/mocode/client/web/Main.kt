@@ -15,7 +15,11 @@ fun main() {
 
 @Composable
 fun MeldestelleWebApp() {
-    val pingComponent = remember { PingTestComponent() }
+    // Get baseUrl from a window location or use default
+    val baseUrl = remember {
+        js("window.location.origin").toString().ifEmpty { "http://localhost:8080" }
+    }
+    val pingComponent = remember { PingTestComponent(baseUrl) }
     var pingState by remember { mutableStateOf(pingComponent.state) }
 
     LaunchedEffect(pingComponent) {

@@ -20,7 +20,7 @@ class PingService(private val baseUrl: String = "http://localhost:8080") {
     }
 
     suspend fun ping(): Result<PingResponse> = try {
-        val response = client.get("$baseUrl/ping-service/ping").body<PingResponse>()
+        val response = client.get("$baseUrl/api/ping/ping").body<PingResponse>()
         Result.success(response)
     } catch (e: Exception) {
         Result.failure(e)

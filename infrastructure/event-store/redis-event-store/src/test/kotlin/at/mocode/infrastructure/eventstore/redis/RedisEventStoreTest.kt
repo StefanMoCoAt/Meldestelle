@@ -1,10 +1,11 @@
 package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.BaseDomainEvent
-import at.mocode.core.domain.model.*
+import at.mocode.core.domain.model.AggregateId
+import at.mocode.core.domain.model.EventType
+import at.mocode.core.domain.model.EventVersion
 import at.mocode.infrastructure.eventstore.api.ConcurrencyException
 import at.mocode.infrastructure.eventstore.api.EventSerializer
-import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient

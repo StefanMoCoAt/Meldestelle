@@ -57,7 +57,7 @@ class GatewaySecurityTests {
 
     @BeforeEach
     fun setUpClient() {
-        // Ensure absolute base URL with scheme to satisfy CORS processor
+        // Ensure absolute base URL with a scheme to satisfy the CORS processor
         webTestClient = webTestClient.mutate()
             .baseUrl("http://localhost:$port")
             .build()
