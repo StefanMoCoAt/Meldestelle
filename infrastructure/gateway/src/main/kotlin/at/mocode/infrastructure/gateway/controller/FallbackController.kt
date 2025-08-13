@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 /**
  * Fallback Controller für Circuit Breaker Szenarien.
- * Bietet standardisierte Fehlermeldungen wenn Backend-Services nicht verfügbar sind.
+ * Bietet standardisierte Fehlermeldungen, wenn Backend-Services nicht verfügbar sind.
  */
 @RestController
 @RequestMapping("/fallback")

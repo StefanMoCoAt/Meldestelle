@@ -1,23 +1,19 @@
 package at.mocode.infrastructure.gateway
 
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.cloud.gateway.route.RouteLocator
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 /**
  * Tests for Gateway security configuration including CORS settings.
@@ -48,13 +44,24 @@ import org.springframework.web.bind.annotation.RestController
         "server.port=0"
     ]
 )
-@ActiveProfiles("dev") // Use dev profile to get CORS configuration
+@ActiveProfiles("test") // Use test profile to disable unrelated global filters; CORS config is present in application-test.yml
 @AutoConfigureWebTestClient
 @Import(GatewaySecurityTests.TestSecurityConfig::class)
 class GatewaySecurityTests {
 
     @Autowired
     lateinit var webTestClient: WebTestClient
+
+    @LocalServerPort
+    private var port: Int = 0
+
+    @BeforeEach
+    fun setUpClient() {
+        // Ensure absolute base URL with scheme to satisfy CORS processor
+        webTestClient = webTestClient.mutate()
+            .baseUrl("http://localhost:$port")
+            .build()
+    }
 
     @Test
     fun `should handle CORS preflight requests`() {
@@ -236,8 +243,15 @@ class GatewaySecurityTests {
     @RequestMapping("/mock")
     class SecurityTestController {
 
-        @GetMapping("/cors-test")
-        @PostMapping("/cors-test")
+        @RequestMapping(
+            value = ["/cors-test"],
+            method = [
+                RequestMethod.GET,
+                RequestMethod.POST,
+                RequestMethod.PUT,
+                RequestMethod.DELETE
+            ]
+        )
         fun corsTest(): Map<String, String> = mapOf(
             "message" to "CORS test successful",
             "timestamp" to System.currentTimeMillis().toString()

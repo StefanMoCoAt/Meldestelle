@@ -278,7 +278,7 @@ services:
 
   # Production monitoring services
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.48.1
     volumes:
       - ./config/monitoring/prometheus.prod.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -320,7 +320,7 @@ services:
           cpus: '0.25'
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.2.3
     volumes:
       - ./config/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./config/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro

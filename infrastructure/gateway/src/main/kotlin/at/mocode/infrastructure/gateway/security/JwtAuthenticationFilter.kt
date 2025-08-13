@@ -1,13 +1,10 @@
 package at.mocode.infrastructure.gateway.security
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
 import org.springframework.cloud.gateway.filter.GlobalFilter
-import org.springframework.context.annotation.Profile
 import org.springframework.core.Ordered
 import org.springframework.http.HttpStatus
-import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Component
 import org.springframework.util.AntPathMatcher
@@ -42,7 +39,7 @@ class JwtAuthenticationFilter : GlobalFilter, Ordered {
         val request = exchange.request
         val path = request.path.value()
 
-        // Prüfe ob der Pfad öffentlich zugänglich ist
+        // Prüfe, ob der Pfad öffentlich zugänglich ist
         if (isPublicPath(path)) {
             return chain.filter(exchange)
         }
@@ -56,8 +53,8 @@ class JwtAuthenticationFilter : GlobalFilter, Ordered {
 
         val token = authHeader.substring(7)
 
-        // Hier würde normalerweise die JWT-Validierung mit dem auth-client erfolgen
-        // Für diese Implementation verwenden wir eine vereinfachte Validierung
+        // Hier würde normalerweise die JWT-Validierung mit dem auth-client erfolgen,
+        // für diese Implementation verwenden wir eine vereinfachte Validierung
         return validateJwtToken(token, exchange, chain)
     }
 
@@ -78,7 +75,7 @@ class JwtAuthenticationFilter : GlobalFilter, Ordered {
             return handleUnauthorized(exchange, "Invalid JWT token")
         }
 
-        // Füge User-Information zu Headers hinzu (simuliert)
+        // Füge User-Informationen zu Headers hinzu (simuliert)
         val userRole = extractUserRole(token)
         val userId = extractUserId(token)
 

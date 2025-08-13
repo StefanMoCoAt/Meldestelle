@@ -9,14 +9,9 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 /**
  * Tests for JWT Authentication Filter functionality.
@@ -47,7 +42,7 @@ import org.springframework.web.bind.annotation.RestController
         "server.port=0"
     ]
 )
-@ActiveProfiles("dev") // Use dev profile to enable JWT filter
+@ActiveProfiles("test") // Use test profile to disable unrelated global filters; JWT is enabled via properties above
 @AutoConfigureWebTestClient
 @Import(JwtAuthenticationTests.TestJwtConfig::class)
 class JwtAuthenticationTests {
@@ -112,10 +107,10 @@ class JwtAuthenticationTests {
             .expectStatus().isOk
             .expectBody(String::class.java)
             .consumeWith { result ->
-                // The mock controller will return the injected headers
-                val body = result.responseBody
-                assert(body?.contains("X-User-ID") == true)
-                assert(body?.contains("X-User-Role") == true)
+                // The mock controller returns injected header values in the message
+                val body = result.responseBody ?: ""
+                assert(body.contains("User ID:"))
+                assert(body.contains("Role:"))
             }
     }
 
@@ -180,8 +175,8 @@ class JwtAuthenticationTests {
         fun jwtTestRoutes(builder: RouteLocatorBuilder): RouteLocator = builder.routes()
             .route("test-protected") { r ->
                 r.path("/api/members/**")
-                    .filters { f -> f.stripPrefix(1) }
-                    .uri("forward:/mock/protected")
+                    .filters { f -> f.setPath("/mock/protected") }
+                    .uri("forward:/")
             }
             .route("test-public-health") { r ->
                 r.path("/health")
@@ -189,13 +184,13 @@ class JwtAuthenticationTests {
             }
             .route("test-public-ping") { r ->
                 r.path("/api/ping/**")
-                    .filters { f -> f.stripPrefix(1) }
-                    .uri("forward:/mock/ping")
+                    .filters { f -> f.setPath("/mock/ping") }
+                    .uri("forward:/")
             }
             .route("test-public-auth") { r ->
                 r.path("/api/auth/**")
-                    .filters { f -> f.stripPrefix(1) }
-                    .uri("forward:/mock/auth")
+                    .filters { f -> f.setPath("/mock/auth") }
+                    .uri("forward:/")
             }
             .route("test-public-fallback") { r ->
                 r.path("/fallback/**")
@@ -211,11 +206,8 @@ class JwtAuthenticationTests {
             }
             .route("test-root") { r ->
                 r.path("/")
-                    .filters { f ->
-                        f.setStatus(HttpStatus.OK)
-                            .setResponseHeader("Content-Type", "application/json")
-                    }
-                    .uri("forward:/mock/root")
+                    .filters { f -> f.setPath("/mock/root") }
+                    .uri("forward:/")
             }
             .build()
 
@@ -231,8 +223,10 @@ class JwtAuthenticationTests {
     @RequestMapping("/mock")
     class JwtTestController {
 
-        @GetMapping("/protected")
-        @PostMapping("/protected")
+        @RequestMapping(
+            value = ["/protected"],
+            method = [RequestMethod.GET, RequestMethod.POST]
+        )
         fun protectedEndpoint(
             @RequestHeader(value = "X-User-ID", required = false) userId: String?,
             @RequestHeader(value = "X-User-Role", required = false) userRole: String?

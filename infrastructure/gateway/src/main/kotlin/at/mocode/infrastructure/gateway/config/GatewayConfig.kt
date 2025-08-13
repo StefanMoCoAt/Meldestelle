@@ -1,11 +1,7 @@
 package at.mocode.infrastructure.gateway.config
 
-import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
 import org.springframework.cloud.gateway.filter.GlobalFilter
-import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpRequest

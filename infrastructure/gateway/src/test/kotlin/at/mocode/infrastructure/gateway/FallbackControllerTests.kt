@@ -1,14 +1,11 @@
 package at.mocode.infrastructure.gateway
 
-import at.mocode.infrastructure.gateway.controller.FallbackController
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.context.annotation.Import
 
 /**
  * Tests for the Fallback Controller that handles circuit breaker scenarios.
@@ -57,7 +54,8 @@ class FallbackControllerTests {
             .jsonPath("$.message").isEqualTo("Member operations are temporarily unavailable")
             .jsonPath("$.service").isEqualTo("members-service")
             .jsonPath("$.status").isEqualTo(503)
-            .jsonPath("$.suggestion").isEqualTo("Please try again in a few moments. If the problem persists, contact support.")
+            .jsonPath("$.suggestion")
+            .isEqualTo("Please try again in a few moments. If the problem persists, contact support.")
             .jsonPath("$.timestamp").exists()
     }
 
