@@ -88,9 +88,9 @@ class JacksonCacheSerializer : CacheSerializer {
             if (key != other.key) return false
             if (!valueBytes.contentEquals(other.valueBytes)) return false
             if (valueType != other.valueType) return false
-            if (createdAt != other.createdAt) return false
-            if (expiresAt != other.expiresAt) return false
-            if (lastModifiedAt != other.lastModifiedAt) return false
+            if (!createdAt.equals(other.createdAt)) return false
+            if (expiresAt != other.expiresAt && expiresAt?.equals(other.expiresAt) != true) return false
+            if (!lastModifiedAt.equals(other.lastModifiedAt)) return false
             if (isDirty != other.isDirty) return false
             if (isLocal != other.isLocal) return false
 

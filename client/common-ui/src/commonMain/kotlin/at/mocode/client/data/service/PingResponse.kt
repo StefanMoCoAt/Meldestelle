@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PingResponse(val status: String)
 
-class PingService {
+class PingService(private val baseUrl: String = "http://localhost:8080") {
     private val client = HttpClient {
         install(ContentNegotiation) {
             json()
@@ -20,7 +20,7 @@ class PingService {
     }
 
     suspend fun ping(): Result<PingResponse> = try {
-        val response = client.get("http://localhost:8082/ping").body<PingResponse>()
+        val response = client.get("$baseUrl/ping-service/ping").body<PingResponse>()
         Result.success(response)
     } catch (e: Exception) {
         Result.failure(e)

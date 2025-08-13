@@ -57,6 +57,7 @@ class RedisDistributedCache(
                 localCache.remove(prefixedKey)
                 return null
             }
+            @Suppress("UNCHECKED_CAST")
             return localEntry.value as T?
         }
 
@@ -71,6 +72,7 @@ class RedisDistributedCache(
             val entry = serializer.deserializeEntry(bytes, clazz)
 
             // Store in a local cache
+            @Suppress("UNCHECKED_CAST")
             localCache[prefixedKey] = entry as CacheEntry<Any>
 
             return entry.value
@@ -94,6 +96,7 @@ class RedisDistributedCache(
             expiresAt = expiresAt
         )
 
+        @Suppress("UNCHECKED_CAST")
         localCache[prefixedKey] = entry as CacheEntry<Any>
 
         if (!isConnected()) {
@@ -179,6 +182,7 @@ class RedisDistributedCache(
         // Get from the local cache first
         val prefixedKeys = keys.map { addPrefix(it) }
         val localEntries = prefixedKeys.mapNotNull { key ->
+            @Suppress("UNCHECKED_CAST")
             val entry = localCache[key] as? CacheEntry<T>
             if (entry != null && !entry.isExpired()) {
                 key to entry.value
@@ -211,6 +215,7 @@ class RedisDistributedCache(
                             val entry = serializer.deserializeEntry(bytes, clazz)
 
                             // Store in a local cache
+                            @Suppress("UNCHECKED_CAST")
                             localCache[key] = entry as CacheEntry<Any>
 
                             // Add to result
@@ -242,6 +247,7 @@ class RedisDistributedCache(
                 value = value,
                 expiresAt = expiresAt
             )
+            @Suppress("UNCHECKED_CAST")
             localCache[prefixedKey] = entry as CacheEntry<Any>
             redisBatch[prefixedKey] = serializer.serializeEntry(entry)
         }

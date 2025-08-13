@@ -30,7 +30,7 @@ class KafkaEventPublisher(
         logger.debug("Publishing event to topic '{}' with key '{}', event type: '{}'",
             topic, key, event::class.simpleName)
 
-        return reactiveKafkaTemplate.send(topic, key, event)
+        return reactiveKafkaTemplate.send(topic, key ?: "", event)
             .doOnSuccess { result ->
                 val record = result.recordMetadata()
                 logger.debug(

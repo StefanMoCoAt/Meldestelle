@@ -22,8 +22,12 @@ dependencies {
 
     // Stellt die Spring Cloud Gateway und Consul Discovery Abhängigkeiten bereit
     implementation(libs.bundles.spring.cloud.gateway)
-    // Sichert den reaktiven Webserver (Netty) explizit ab, um Test-/Kontext-Probleme zu vermeiden
+    // Circuit Breaker (Resilience4j) für Gateway Filter
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j")
+    // Reaktiver Webserver (Netty)
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    // Spring Security (WebFlux) – benötigt für SecurityWebFilterChain-Konfiguration
+    implementation("org.springframework.boot:spring-boot-starter-security")
 
     // Bindet die wiederverwendbare Logik zur JWT-Validierung ein.
     implementation(projects.infrastructure.auth.authClient)
@@ -34,7 +38,7 @@ dependencies {
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
-    // Security im Testkontext, um eine permissive Security-Konfiguration bereitstellen zu können
+    // Security im Testkontext – redundant aber ok
     testImplementation(libs.spring.boot.starter.security)
 
 }
