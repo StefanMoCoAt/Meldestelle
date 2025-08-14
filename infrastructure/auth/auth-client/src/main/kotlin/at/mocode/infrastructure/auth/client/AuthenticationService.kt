@@ -61,7 +61,7 @@ interface AuthenticationService {
         /**
          * The password change was successful.
          */
-        object Success : PasswordChangeResult()
+        data object Success : PasswordChangeResult()
 
         /**
          * Password change failed.
@@ -73,7 +73,7 @@ interface AuthenticationService {
         /**
          * The new password is too weak.
          */
-        object WeakPassword : PasswordChangeResult()
+        data object WeakPassword : PasswordChangeResult()
     }
 
     /**

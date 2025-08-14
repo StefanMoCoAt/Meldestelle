@@ -1,9 +1,10 @@
 // Dieses Modul ist ein eigenständiger Spring Boot Service, der als
-// zentraler Authentifizierungs- und Autorisierungs-Server agiert.
+// zentraler Authentifizierung- und Autorisierungs-Server agiert.
 // Er kommuniziert mit Keycloak und stellt Endpunkte für die Benutzerverwaltung bereit.
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }
@@ -34,7 +35,18 @@ dependencies {
     // Keycloak Admin Client zur Verwaltung von Benutzern und Realms.
     implementation(libs.keycloak.admin.client)
 
+    // API-Dokumentation mit OpenAPI/Swagger.
+    implementation(libs.springdoc.openapi.starter.webmvc.ui)
+
+    // Monitoring und Metriken für Production-Readiness.
+    implementation(libs.bundles.monitoring.client)
+
+    // JSON-Serialization für API-Responses.
+    implementation(libs.kotlinx.serialization.json)
 
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
+
+    // Testcontainers für Integration Tests
+    testImplementation(libs.bundles.testcontainers)
 }

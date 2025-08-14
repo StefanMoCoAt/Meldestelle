@@ -35,10 +35,10 @@ class JwtServiceTest {
 
         // Assert
         assertNotNull(token)
-        assertTrue(jwtService.validateToken(token))
-        assertEquals(userId, jwtService.getUserIdFromToken(token))
+        assertTrue(jwtService.validateToken(token).isSuccess)
+        assertEquals(userId, jwtService.getUserIdFromToken(token).getOrNull())
 
-        val extractedPermissions = jwtService.getPermissionsFromToken(token)
+        val extractedPermissions = jwtService.getPermissionsFromToken(token).getOrElse { emptyList() }
         assertEquals(2, extractedPermissions.size)
         assertTrue(extractedPermissions.contains(BerechtigungE.PERSON_READ))
         assertTrue(extractedPermissions.contains(BerechtigungE.PFERD_CREATE))
@@ -51,20 +51,18 @@ class JwtServiceTest {
         val token = otherService.generateToken("user-123", "test", emptyList())
 
         // Act & Assert
-        assertFalse(jwtService.validateToken(token))
+        assertFalse(jwtService.validateToken(token).isSuccess)
     }
 
     @Test
     fun `validateToken should return false for expired token`() {
         // Arrange
         val expiredService =
-            JwtService(testSecret, testIssuer, testAudience, expiration = (-1).seconds) // läuft sofort ab
+            JwtService(testSecret, testIssuer, testAudience, expiration = (-10).seconds) // bereits abgelaufen
         val token = expiredService.generateToken("user-123", "test", emptyList())
 
         // Act & Assert
-        // möglicherweise ist eine kleine Verzögerung nötig, um sicherzustellen, dass die Zeitstempel unterschiedlich sind
-        Thread.sleep(10)
-        assertFalse(jwtService.validateToken(token))
+        assertFalse(jwtService.validateToken(token).isSuccess)
     }
 
     @Test
@@ -73,7 +71,7 @@ class JwtServiceTest {
         val invalidToken = "this.is.not.a.valid.token"
 
         // Act
-        val permissions = jwtService.getPermissionsFromToken(invalidToken)
+        val permissions = jwtService.getPermissionsFromToken(invalidToken).getOrElse { emptyList() }
 
         // Assert
         assertTrue(permissions.isEmpty())

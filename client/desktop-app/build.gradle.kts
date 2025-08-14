@@ -1,7 +1,10 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 plugins {
-    kotlin("multiplatform")
-    id("org.jetbrains.compose")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.compose.compiler)
 }
 
 kotlin {
@@ -16,13 +19,34 @@ kotlin {
     sourceSets {
         val jvmMain by getting {
             dependencies {
+                // Project dependencies
                 implementation(project(":client:common-ui"))
+
+                // Compose Desktop
                 implementation(compose.desktop.currentOs)
                 implementation(compose.material3)
                 implementation(compose.ui)
                 implementation(compose.uiTooling)
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+
+                // Serialization support
+                implementation(libs.kotlinx.serialization.json)
+
+                // HTTP Client & Coroutines
                 implementation(libs.ktor.client.cio)
+                implementation(libs.ktor.client.contentNegotiation)
+                implementation(libs.ktor.client.serialization.kotlinx.json)
                 implementation(libs.kotlinx.coroutines.swing)
+
+                // Logging
+                implementation(libs.kotlin.logging.jvm)
+            }
+        }
+
+        val jvmTest by getting {
+            dependencies {
+                implementation(libs.bundles.testing.jvm)
             }
         }
     }
@@ -33,7 +57,7 @@ compose.desktop {
         mainClass = "at.mocode.client.desktop.MainKt"
 
         nativeDistributions {
-            // targetFormats(Tar, Dmg, Msi) // TODO: Fix TargetFormat import
+            targetFormats(TargetFormat.Deb, TargetFormat.Dmg, TargetFormat.Msi)
             packageName = "Meldestelle Desktop"
             packageVersion = "1.0.0"
 

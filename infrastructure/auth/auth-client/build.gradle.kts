@@ -4,17 +4,18 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }
 
-// Deaktiviert die Erstellung eines ausführbaren Jars für dieses Bibliotheks-Modul.
+// Deaktiviert die Erstellung eines ausführbaren Jars für dieses Bibliothek-Modul.
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     enabled = false
 }
 
 // Stellt sicher, dass stattdessen ein reguläres Jar gebaut wird.
-tasks.getByName<org.gradle.api.tasks.bundling.Jar>("jar") {
+tasks.getByName<Jar>("jar") {
     enabled = true
 }
 
@@ -35,6 +36,9 @@ dependencies {
 
     // Bibliothek zur einfachen Handhabung von JWTs.
     implementation(libs.auth0.java.jwt)
+
+    // JSON-Serialization für konsistente API-Datenverarbeitung.
+    implementation(libs.kotlinx.serialization.json)
 
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)

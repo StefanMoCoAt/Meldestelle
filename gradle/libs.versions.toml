@@ -10,10 +10,10 @@ kotlinxDatetime = "0.7.1"
 kotlinLogging = "3.0.5"
 
 # --- Spring Ecosystem ---
-springBoot = "3.2.5"
-springCloud = "2023.0.1" # NEU: Version für Spring Cloud
-springDependencyManagement = "1.1.5"
-springdoc = "2.5.0"
+springBoot = "3.3.2"
+springCloud = "2023.0.3" # NEU: Version für Spring Cloud
+springDependencyManagement = "1.1.6"
+springdoc = "2.6.0"
 
 # --- Ktor (API Layer & Client) ---
 ktor = "3.0.0-beta-2"
@@ -39,7 +39,7 @@ zipkinReporter = "2.16.4"
 
 # --- Authentication ---
 auth0Jwt = "4.4.0"
-keycloak = "23.0.0"
+keycloak = "25.0.2"
 
 # --- Testing ---
 junitJupiter = "5.10.2"
