@@ -8,7 +8,7 @@ plugins {
 // Erlaubt die Verwendung der kotlin.time API im gesamten Modul
 kotlin {
     compilerOptions {
-        freeCompilerArgs.add("-Xopt-in=kotlin.time.ExperimentalTime")
+        freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
     }
 }
 

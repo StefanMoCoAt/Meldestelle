@@ -27,4 +27,7 @@ dependencies {
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
     testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlin.logging.jvm)
+    testImplementation(libs.logback.classic)
+    testImplementation(libs.logback.core)
 }

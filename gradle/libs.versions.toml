@@ -158,6 +158,7 @@ keycloak-admin-client = { module = "org.keycloak:keycloak-admin-client", version
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
 bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "bignum" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 kotlin-logging-jvm = { module = "io.github.microutils:kotlin-logging-jvm", version.ref = "kotlinLogging" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 reactor-kafka = { module = "io.projectreactor.kafka:reactor-kafka", version.ref = "reactorKafka" }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console Appender für Test-Ausgaben -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Cache-spezifische Logger -->
+    <logger name="at.mocode.infrastructure.cache" level="DEBUG" />
+
+    <!-- Performance Test Logger -->
+    <logger name="RedisDistributedCachePerformanceTest" level="INFO" />
+
+    <!-- Edge Cases Test Logger -->
+    <logger name="RedisDistributedCacheEdgeCasesTest" level="INFO" />
+
+    <!-- Resilience Test Logger -->
+    <logger name="RedisDistributedCacheResilienceTest" level="INFO" />
+
+    <!-- Configuration Test Logger -->
+    <logger name="RedisDistributedCacheConfigurationTest" level="INFO" />
+
+    <!-- Integration Test Logger -->
+    <logger name="RedisDistributedCacheIntegrationTest" level="INFO" />
+
+    <!-- Testcontainers Logger (reduziert Verbosity) -->
+    <logger name="org.testcontainers" level="WARN" />
+    <logger name="com.github.dockerjava" level="WARN" />
+
+    <!-- Redis/Lettuce Logger (reduziert Verbosity) -->
+    <logger name="io.lettuce" level="WARN" />
+    <logger name="org.springframework.data.redis" level="WARN" />
+
+    <!-- Root Logger -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

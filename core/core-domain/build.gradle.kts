@@ -1,4 +1,4 @@
-// Dieses Modul definiert die Kern-Domänenobjekte des Shared Kernels.
+// Dieses Modul definiert die Kern-Domänenobjekte des Shared kernels.
 // Es enthält keine Implementierungsdetails, nur reine Datenklassen und Enums.
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -9,7 +9,7 @@ kotlin {
     // Target platforms
     jvm {
         compilerOptions {
-            freeCompilerArgs.add("-Xopt-in=kotlin.time.ExperimentalTime")
+            freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
         }
     }
     js(IR) {
