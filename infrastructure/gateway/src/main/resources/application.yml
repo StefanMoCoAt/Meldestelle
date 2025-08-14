@@ -6,7 +6,7 @@ server:
     connection-timeout: 5s
     idle-timeout: 15s
 
-# Name, unter dem sich das Gateway in Consul registriert
+# Der Name, unter dem sich das Gateway in Consul registriert
 spring:
   application:
     name: api-gateway
@@ -69,6 +69,27 @@ spring:
               maxBackoff: 500ms
               factor: 2
               basedOnPreviousValue: false
+        # Security Headers for enhanced protection
+        - name: AddResponseHeader
+          args:
+            name: X-Content-Type-Options
+            value: nosniff
+        - name: AddResponseHeader
+          args:
+            name: X-Frame-Options
+            value: DENY
+        - name: AddResponseHeader
+          args:
+            name: X-XSS-Protection
+            value: 1; mode=block
+        - name: AddResponseHeader
+          args:
+            name: Referrer-Policy
+            value: strict-origin-when-cross-origin
+        - name: AddResponseHeader
+          args:
+            name: Cache-Control
+            value: no-cache, no-store, must-revalidate
       # Route definitions with service discovery
       routes:
         # Health Check und Gateway Info Routes
@@ -191,29 +212,83 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus,gateway
+        include: health,info,metrics,prometheus,gateway,circuitbreakers
+      base-path: /actuator
+      cors:
+        allowed-origins:
+          - "https://*.meldestelle.at"
+          - "http://localhost:*"
+        allowed-methods: GET,POST
+        allowed-headers: "*"
+        allow-credentials: true
   endpoint:
     health:
       show-details: always
       show-components: always
+      probes:
+        enabled: true
     metrics:
+      enabled: true
+    info:
+      enabled: true
+    prometheus:
+      enabled: true
+    gateway:
+      enabled: true
+    circuitbreakers:
       enabled: true
   metrics:
     export:
       prometheus:
+        # Prometheus configuration moved to monitoring-client module
     distribution:
       percentiles-histogram:
         spring.cloud.gateway.requests: true
+        http.server.requests: true
       percentiles:
-        spring.cloud.gateway.requests: 0.5,0.95,0.99
+        spring.cloud.gateway.requests: 0.5,0.90,0.95,0.99
+        http.server.requests: 0.5,0.90,0.95,0.99
+      minimum-expected-value:
+        spring.cloud.gateway.requests: 1ms
+        http.server.requests: 1ms
+      maximum-expected-value:
+        spring.cloud.gateway.requests: 30s
+        http.server.requests: 30s
     tags:
       application: ${spring.application.name}
+      environment: ${spring.profiles.active}
+      instance: ${spring.cloud.consul.discovery.instance-id}
+      gateway: api-gateway
+  info:
+    env:
+      enabled: true
+    git:
+      mode: full
+    build:
+      enabled: true
+    java:
+      enabled: true
 
-# Logging Configuration
+# Enhanced Logging Configuration
 logging:
   level:
     org.springframework.cloud.gateway: INFO
     org.springframework.cloud.loadbalancer: DEBUG
+    org.springframework.cloud.consul: INFO
     at.mocode.infrastructure.gateway: DEBUG
+    io.github.resilience4j: INFO
+    reactor.netty.http.client: INFO
+    org.springframework.security: WARN
+    org.springframework.web: INFO
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr([%X{correlationId:-}]){yellow} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
+  file:
+    name: logs/gateway.log
+    max-size: 100MB
+  logback:
+    rollingpolicy:
+      clean-history-on-start: true
+      max-file-size: 100MB
+      total-size-cap: 1GB
+      max-history: 30

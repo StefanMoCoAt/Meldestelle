@@ -61,6 +61,8 @@ servers:
 tags:
   - name: Authentication
     description: User authentication, registration, and profile management
+  - name: Members
+    description: Member registration, profile management, and membership administration
   - name: Master Data
     description: Reference data management (countries, states, age classes, venues)
   - name: Horse Registry
@@ -179,6 +181,264 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Members Context
+  /api/members:
+    get:
+      tags:
+        - Members
+      summary: Get All Members
+      description: Returns a list of all members with pagination support
+      operationId: getAllMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: activeOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+          description: Filter to only return active members
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 200
+          description: Maximum number of members to return
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+          description: Number of members to skip for pagination
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Search term for member name or email
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembersResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Members
+      summary: Create Member
+      description: Creates a new member registration
+      operationId: createMember
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMemberRequest'
+      responses:
+        '201':
+          description: Member successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberResponse'
+        '400':
+          description: Invalid member data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/members/{id}:
+    get:
+      tags:
+        - Members
+      summary: Get Member by ID
+      description: Returns a member by their unique ID
+      operationId: getMemberById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the member
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Members
+      summary: Update Member
+      description: Updates an existing member's information
+      operationId: updateMember
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemberRequest'
+      responses:
+        '200':
+          description: Member successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberResponse'
+        '400':
+          description: Invalid member data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Members
+      summary: Delete Member
+      description: Soft deletes a member (marks as inactive)
+      operationId: deleteMember
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the member
+      responses:
+        '204':
+          description: Member successfully deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/members/search:
+    get:
+      tags:
+        - Members
+      summary: Search Members
+      description: Search members by various criteria
+      operationId: searchMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+          description: Search query for member name, email, or membership number
+        - name: membershipType
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [FULL, YOUTH, HONORARY, ASSOCIATE]
+          description: Filter by membership type
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, SUSPENDED]
+            default: ACTIVE
+          description: Filter by member status
+      responses:
+        '200':
+          description: Successful search operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembersResponse'
+        '400':
+          description: Invalid search parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Unauthorized
           content:
@@ -1185,6 +1445,218 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/User'
+
+    # Members Models
+    MembersResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                members:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Member'
+                totalCount:
+                  type: integer
+                  description: Total number of members matching the criteria
+                  example: 150
+                pagination:
+                  type: object
+                  properties:
+                    limit:
+                      type: integer
+                      example: 50
+                    offset:
+                      type: integer
+                      example: 0
+                    hasNext:
+                      type: boolean
+                      example: true
+
+    MemberResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Member'
+
+    CreateMemberRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - membershipType
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Maria
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Müller
+        email:
+          type: string
+          format: email
+          example: maria.mueller@example.com
+        phone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+          example: +43 123 456789
+        dateOfBirth:
+          type: string
+          format: date
+          example: 1985-03-15
+        address:
+          $ref: '#/components/schemas/Address'
+        membershipType:
+          type: string
+          enum: [FULL, YOUTH, HONORARY, ASSOCIATE]
+          example: FULL
+        emergencyContact:
+          $ref: '#/components/schemas/EmergencyContact'
+
+    UpdateMemberRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Maria
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Müller-Schmidt
+        email:
+          type: string
+          format: email
+          example: maria.mueller-schmidt@example.com
+        phone:
+          type: string
+          pattern: '^\+?[1-9]\d{1,14}$'
+          example: +43 123 456789
+        address:
+          $ref: '#/components/schemas/Address'
+        membershipType:
+          type: string
+          enum: [FULL, YOUTH, HONORARY, ASSOCIATE]
+          example: FULL
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, SUSPENDED]
+          example: ACTIVE
+        emergencyContact:
+          $ref: '#/components/schemas/EmergencyContact'
+
+    Member:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        membershipNumber:
+          type: string
+          example: M2024001234
+        firstName:
+          type: string
+          example: Maria
+        lastName:
+          type: string
+          example: Müller
+        email:
+          type: string
+          format: email
+          example: maria.mueller@example.com
+        phone:
+          type: string
+          example: +43 123 456789
+        dateOfBirth:
+          type: string
+          format: date
+          example: 1985-03-15
+        address:
+          $ref: '#/components/schemas/Address'
+        membershipType:
+          type: string
+          enum: [FULL, YOUTH, HONORARY, ASSOCIATE]
+          example: FULL
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, SUSPENDED]
+          example: ACTIVE
+        joinDate:
+          type: string
+          format: date
+          example: 2024-01-15
+        lastPaymentDate:
+          type: string
+          format: date
+          example: 2024-01-01
+        emergencyContact:
+          $ref: '#/components/schemas/EmergencyContact'
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-01-15T10:30:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2024-01-15T10:30:00Z
+
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - postalCode
+        - country
+      properties:
+        street:
+          type: string
+          example: Hauptstraße 123
+        city:
+          type: string
+          example: Wien
+        postalCode:
+          type: string
+          example: 1010
+        state:
+          type: string
+          example: Wien
+        country:
+          type: string
+          example: Austria
+
+    EmergencyContact:
+      type: object
+      required:
+        - name
+        - relationship
+        - phone
+      properties:
+        name:
+          type: string
+          example: Johann Müller
+        relationship:
+          type: string
+          example: Ehepartner
+        phone:
+          type: string
+          example: +43 123 456788
+        email:
+          type: string
+          format: email
+          example: johann.mueller@example.com
 
     User:
       type: object

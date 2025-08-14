@@ -274,6 +274,23 @@
             </div>
 
             <div class="card">
+                <h3>Members Context</h3>
+                <p>Member registration, profile management, and membership administration</p>
+                <p><strong>Base Path:</strong> /api/members</p>
+                <div class="endpoints">
+                    <h4>Key Endpoints:</h4>
+                    <ul>
+                        <li><span class="method get">GET</span> /api/members - Get all members with pagination</li>
+                        <li><span class="method get">GET</span> /api/members/search - Search members by criteria</li>
+                        <li><span class="method get">GET</span> /api/members/{id} - Get member by ID</li>
+                        <li><span class="method post">POST</span> /api/members - Create new member</li>
+                        <li><span class="method put">PUT</span> /api/members/{id} - Update member information</li>
+                        <li><span class="method delete">DELETE</span> /api/members/{id} - Delete member (soft delete)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
                 <h3>Master Data Context</h3>
                 <p>Reference data management (countries, states, age classes, venues)</p>
                 <p><strong>Base Path:</strong> /api/masterdata</p>
@@ -333,18 +350,48 @@
                 <div class="resource-card">
                     <h3>Swagger UI</h3>
                     <p>Interactive documentation for exploring and testing the API endpoints.</p>
-                    <a href="/swagger" class="btn" target="_blank">Open Swagger UI</a>
+                    <a href="/swagger" class="btn" target="_blank" aria-label="Open Swagger UI in new tab">Open Swagger UI</a>
                 </div>
                 <div class="resource-card">
                     <h3>OpenAPI Specification</h3>
                     <p>Raw OpenAPI 3.0.3 specification in YAML format for code generation or import into other tools.</p>
-                    <a href="/openapi" class="btn" target="_blank">View OpenAPI Spec</a>
+                    <a href="/openapi" class="btn" target="_blank" aria-label="View OpenAPI specification in new tab">View OpenAPI Spec</a>
                 </div>
                 <div class="resource-card">
                     <h3>Postman Collection</h3>
                     <p>Comprehensive API collection covering all endpoints with pre-configured request examples.</p>
-                    <a href="/docs/postman/Meldestelle_API_Collection.json" class="btn" target="_blank">Download Collection</a>
+                    <a href="/docs/postman/Meldestelle_API_Collection.json" class="btn" target="_blank" aria-label="Download Postman collection">Download Collection</a>
                 </div>
+                <div class="resource-card">
+                    <h3>Health Monitoring</h3>
+                    <p>Real-time health status and monitoring information for all downstream services.</p>
+                    <a href="/actuator/health" class="btn" target="_blank" aria-label="View health monitoring in new tab">View Health Status</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="monitoring" class="section">
+            <h2>System Monitoring & Health</h2>
+            <div class="card">
+                <h3>Health Check Endpoints</h3>
+                <p>The API Gateway provides comprehensive health monitoring for all downstream services:</p>
+                <div class="endpoints">
+                    <h4>Monitoring Endpoints:</h4>
+                    <ul>
+                        <li><span class="method get">GET</span> /actuator/health - Comprehensive health status of all services</li>
+                        <li><span class="method get">GET</span> /actuator/metrics - System metrics and performance data</li>
+                        <li><span class="method get">GET</span> /actuator/info - Application information and build details</li>
+                        <li><span class="method get">GET</span> /actuator/prometheus - Prometheus-compatible metrics export</li>
+                    </ul>
+                </div>
+                <p><strong>Health Indicator Features:</strong></p>
+                <ul>
+                    <li>Monitors critical services: Members, Horses, Events, Masterdata, Auth</li>
+                    <li>Optional service monitoring: Ping service</li>
+                    <li>Circuit breaker status integration</li>
+                    <li>Service discovery status from Consul</li>
+                    <li>Detailed error reporting and status codes</li>
+                </ul>
             </div>
         </section>
 

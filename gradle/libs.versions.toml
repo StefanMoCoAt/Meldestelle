@@ -111,6 +111,7 @@ spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-star
 spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
 spring-boot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
 spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
 spring-boot-starter-json = { module = "org.springframework.boot:spring-boot-starter-json" }
 spring-kafka = { module = "org.springframework.kafka:spring-kafka" }
 spring-security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
