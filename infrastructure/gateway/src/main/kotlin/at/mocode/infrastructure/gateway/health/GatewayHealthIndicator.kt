@@ -134,7 +134,7 @@ class GatewayHealthIndicator(
                 503 -> "DOWN"
                 else -> "ERROR"
             }
-        } catch (exception: Exception) {
+        } catch (_: Exception) {
             "ERROR"
         }
     }
