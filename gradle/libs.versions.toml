@@ -47,6 +47,9 @@ mockk = "1.13.8"
 assertj = "3.24.2"
 testcontainers = "1.19.6"
 
+# --- Resilience4j ---
+resilience4j = "2.2.0"
+
 # --- Utilities ---
 uuid = "0.8.4"
 bignum = "0.3.9"
@@ -140,6 +143,11 @@ zipkin-reporter-brave = { module = "io.zipkin.reporter2:zipkin-reporter-brave", 
 zipkin-sender-okhttp3 = { module = "io.zipkin.reporter2:zipkin-sender-okhttp3", version.ref = "zipkinReporter" }
 zipkin-server = { module = "io.zipkin:zipkin-server", version.ref = "zipkin" }
 zipkin-autoconfigure-ui = { module = "io.zipkin:zipkin-autoconfigure-ui", version.ref = "zipkin" }
+
+# --- Resilience4j ---
+resilience4j-spring-boot3 = { module = "io.github.resilience4j:resilience4j-spring-boot3", version.ref = "resilience4j" }
+resilience4j-reactor = { module = "io.github.resilience4j:resilience4j-reactor", version.ref = "resilience4j" }
+spring-boot-starter-aop = { module = "org.springframework.boot:spring-boot-starter-aop" }
 
 # --- Authentication ---
 auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "auth0Jwt" }

@@ -1,17 +1,15 @@
 spring:
   application:
-    name: ping-service
+    name: ping-service-test
   cloud:
     consul:
-      host: localhost
-      port: 8500
+      enabled: false
       discovery:
-        register: true
-        health-check-path: /actuator/health
-        health-check-interval: 10s
+        enabled: false
+        register: false
 
 server:
-  port: 8082
+  port: 0
 
 management:
   endpoints:
@@ -22,40 +20,34 @@ management:
     health:
       show-details: always
 
-# Resilience4j Circuit Breaker Configuration
+# Resilience4j Circuit Breaker Configuration for tests
 resilience4j:
   circuitbreaker:
     configs:
       default:
-        # Circuit breaker opens when the failure rate exceeds 50%
         failure-rate-threshold: 50
-        # Minimum number of calls to calculate the failure rate
         minimum-number-of-calls: 5
-        # Time to wait before transitioning from OPEN to HALF_OPEN
         wait-duration-in-open-state: 10s
-        # Number of calls in HALF_OPEN state before deciding to close/open
         permitted-number-of-calls-in-half-open-state: 3
-        # Sliding window size for calculating failure rate
         sliding-window-size: 10
-        # Type of sliding window (COUNT_BASED or TIME_BASED)
         sliding-window-type: COUNT_BASED
-        # Record exceptions that should be considered as failures
         record-exceptions:
           - java.lang.Exception
-        # Ignore certain exceptions (don't count as failures)
         ignore-exceptions:
           - java.lang.IllegalArgumentException
     instances:
       pingCircuitBreaker:
-        # Use default configuration
         base-config: default
-        # Override specific settings for this instance if needed
         failure-rate-threshold: 60
         minimum-number-of-calls: 4
         wait-duration-in-open-state: 5s
 
-  # Optional: Metrics configuration
   metrics:
     enabled: true
     legacy:
       enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.consul: ERROR
+    com.ecwid.consul: ERROR
