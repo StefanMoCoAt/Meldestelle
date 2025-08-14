@@ -9,6 +9,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.util.Objects
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.time.ExperimentalTime
@@ -88,9 +89,9 @@ class JacksonCacheSerializer : CacheSerializer {
             if (key != other.key) return false
             if (!valueBytes.contentEquals(other.valueBytes)) return false
             if (valueType != other.valueType) return false
-            if (!createdAt.equals(other.createdAt)) return false
-            if (expiresAt != other.expiresAt && expiresAt?.equals(other.expiresAt) != true) return false
-            if (!lastModifiedAt.equals(other.lastModifiedAt)) return false
+            if (!Objects.equals(createdAt, other.createdAt)) return false
+            if (!Objects.equals(expiresAt, other.expiresAt)) return false
+            if (!Objects.equals(lastModifiedAt, other.lastModifiedAt)) return false
             if (isDirty != other.isDirty) return false
             if (isLocal != other.isLocal) return false
 

@@ -1,5 +1,7 @@
 # Infrastructure/Cache Module
 
+*Letzte Aktualisierung: 14. August 2025*
+
 ## Überblick
 
 Das **Cache-Modul** stellt eine zentrale, hochverfügbare und wiederverwendbare Caching-Infrastruktur für alle Microservices bereit. Es dient der Verbesserung der Anwendungsperformance, der Reduzierung von Latenzen und der Entlastung der primären PostgreSQL-Datenbank.
@@ -48,6 +50,14 @@ class MasterdataService(
     }
 }
 ```
+
+## Changelog
+
+### 2025-08-14
+- **Bug Fix:** Behoben: Compiler-Warnungen in `JacksonCacheSerializer` bezüglich identity-sensitiver Operationen auf `java.time.Instant` Typen
+  - Ersetzt direkte Gleichheitsvergleiche (`==`, `!=`) mit `Objects.equals()` für sichere Vergleiche von nullable Instant-Objekten
+  - Verbesserte Typsicherheit beim Vergleich von Zeitstempel-Feldern in der Cache-Serialisierung
+  - Alle Tests weiterhin erfolgreich, keine funktionalen Änderungen
 
 ## Testing-Strategie
 Die Qualität des Moduls wird durch eine zweistufige Teststrategie sichergestellt:
