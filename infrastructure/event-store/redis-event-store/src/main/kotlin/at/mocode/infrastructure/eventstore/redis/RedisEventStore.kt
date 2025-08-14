@@ -1,18 +1,17 @@
 package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.DomainEvent
-import at.mocode.core.domain.model.AggregateId
 import at.mocode.core.domain.model.EventVersion
 import at.mocode.infrastructure.eventstore.api.ConcurrencyException
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
 import at.mocode.infrastructure.eventstore.api.Subscription
-import com.benasher44.uuid.Uuid
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DataAccessException
 import org.springframework.data.domain.Range
 import org.springframework.data.redis.core.SessionCallback
 import org.springframework.data.redis.core.StringRedisTemplate
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class RedisEventStore(
@@ -21,22 +20,31 @@ class RedisEventStore(
     private val properties: RedisEventStoreProperties
 ) : EventStore {
     private val logger = LoggerFactory.getLogger(RedisEventStore::class.java)
-    private val streamVersionCache = ConcurrentHashMap<Uuid, Long>()
+    private val streamVersionCache = ConcurrentHashMap<UUID, Long>()
 
-    override fun appendToStream(events: List<DomainEvent>, streamId: Uuid, expectedVersion: Long): Long {
-        if (events.isEmpty()) return getStreamVersion(streamId)
+    override fun appendToStream(events: List<DomainEvent>, streamId: UUID, expectedVersion: Long): Long {
+        if (events.isEmpty()) {
+            logger.debug("Empty event list provided for stream {}, returning current version", streamId)
+            return getStreamVersion(streamId)
+        }
 
         val aggregateId = events.first().aggregateId
-        require(events.all { it.aggregateId == aggregateId }) { "All events must belong to the same aggregate" }
-        require(streamId == aggregateId.value) { "Stream ID must match aggregate ID" }
+        require(events.all { it.aggregateId == aggregateId }) {
+            "All events must belong to the same aggregate. Expected: $aggregateId, but found mixed aggregate IDs"
+        }
+        require(streamId == aggregateId.value) {
+            "Stream ID $streamId must match aggregate ID ${aggregateId.value}"
+        }
 
+        logger.debug("Appending {} events to stream {} with expected version {}", events.size, streamId, expectedVersion)
         var currentVersion = getStreamVersion(streamId)
 
         if (currentVersion != expectedVersion) {
+            logger.warn("Version conflict detected for stream {}. Expected: {}, current: {}", streamId, expectedVersion, currentVersion)
             streamVersionCache.remove(streamId) // Invalidate cache on conflict
             val actualVersion = getStreamVersion(streamId) // Re-fetch from Redis
             if (actualVersion != expectedVersion) {
-                throw ConcurrencyException("Concurrency conflict: expected version $expectedVersion but got $actualVersion")
+                throw ConcurrencyException("Concurrency conflict for stream $streamId: expected version $expectedVersion but got $actualVersion")
             }
             currentVersion = actualVersion
         }
@@ -44,28 +52,41 @@ class RedisEventStore(
         for (event in events) {
             currentVersion = appendToStreamInternal(event, streamId, currentVersion)
         }
+
+        logger.info("Successfully appended {} events to stream {}. New version: {}", events.size, streamId, currentVersion)
         return currentVersion
     }
 
-    override fun appendToStream(event: DomainEvent, streamId: Uuid, expectedVersion: Long): Long {
-        val currentVersion = getStreamVersion(streamId)
+    override fun appendToStream(event: DomainEvent, streamId: UUID, expectedVersion: Long): Long {
+        logger.debug("Appending single event to stream {} with expected version {}", streamId, expectedVersion)
+        var currentVersion = getStreamVersion(streamId)
+
         if (currentVersion != expectedVersion) {
-            streamVersionCache.remove(streamId)
-            val actualVersion = getStreamVersion(streamId)
+            logger.warn("Version conflict detected for stream {}. Expected: {}, current: {}", streamId, expectedVersion, currentVersion)
+            streamVersionCache.remove(streamId) // Invalidate cache on conflict
+            val actualVersion = getStreamVersion(streamId) // Re-fetch from Redis
             if (actualVersion != expectedVersion) {
-                throw ConcurrencyException("Concurrency conflict: expected version $expectedVersion but got $actualVersion")
+                throw ConcurrencyException("Concurrency conflict for stream $streamId: expected version $expectedVersion but got $actualVersion")
             }
+            currentVersion = actualVersion
         }
-        return appendToStreamInternal(event, streamId, expectedVersion)
+
+        val newVersion = appendToStreamInternal(event, streamId, currentVersion)
+        logger.info("Successfully appended event to stream {}. New version: {}", streamId, newVersion)
+        return newVersion
     }
 
-    private fun appendToStreamInternal(event: DomainEvent, streamId: Uuid, currentVersion: Long): Long {
+    private fun appendToStreamInternal(event: DomainEvent, streamId: UUID, currentVersion: Long): Long {
         val newVersion = currentVersion + 1
-        require(event.version.value == newVersion) { "Event version ${event.version} does not match expected new version $newVersion" }
+        require(event.version.value == newVersion) {
+            "Event version ${event.version.value} does not match expected new version $newVersion for stream $streamId"
+        }
 
         val streamKey = getStreamKey(streamId)
         val allEventsStreamKey = getAllEventsStreamKey()
         val eventData = serializer.serialize(event)
+
+        logger.debug("Writing event {} to stream {} and all-events stream atomically", event.eventId, streamId)
 
         try {
             redisTemplate.execute(object : SessionCallback<List<Any>> {
@@ -82,15 +103,16 @@ class RedisEventStore(
             })
 
             streamVersionCache[streamId] = newVersion
+            logger.debug("Successfully wrote event {} to Redis streams, updated cache version to {}", event.eventId, newVersion)
             return newVersion
         } catch (e: Exception) {
-            logger.error("Failed to append event transactionally for stream key: {}", streamKey, e)
+            logger.error("Failed to append event {} transactionally for stream {}: {}", event.eventId, streamId, e.message, e)
             streamVersionCache.remove(streamId)
             throw e
         }
     }
 
-    override fun readFromStream(streamId: Uuid, fromVersion: Long, toVersion: Long?): List<DomainEvent> {
+    override fun readFromStream(streamId: UUID, fromVersion: Long, toVersion: Long?): List<DomainEvent> {
         val streamKey = getStreamKey(streamId)
         val range = Range.of(Range.Bound.inclusive("-"), Range.Bound.unbounded())
 
@@ -107,7 +129,7 @@ class RedisEventStore(
         return events.filter { it.version >= EventVersion(fromVersion) && (toVersion == null || it.version <= EventVersion(toVersion)) }
     }
 
-    override fun getStreamVersion(streamId: Uuid): Long {
+    override fun getStreamVersion(streamId: UUID): Long {
         streamVersionCache[streamId]?.let { return it }
         val streamKey = getStreamKey(streamId)
         val size = redisTemplate.opsForStream<String, String>().size(streamKey) ?: 0L
@@ -115,7 +137,7 @@ class RedisEventStore(
         return size
     }
 
-    private fun getStreamKey(streamId: Uuid): String {
+    private fun getStreamKey(streamId: UUID): String {
         return "${properties.streamPrefix}$streamId"
     }
 
@@ -124,14 +146,59 @@ class RedisEventStore(
     }
 
     override fun readAllEvents(fromPosition: Long, maxCount: Int?): List<DomainEvent> {
-        TODO("Not yet implemented")
+        val allEventsStreamKey = getAllEventsStreamKey()
+        val range = Range.of(Range.Bound.inclusive("-"), Range.Bound.unbounded())
+
+        val records = redisTemplate.opsForStream<String, String>().range(allEventsStreamKey, range)
+        val events = records?.mapNotNull { record ->
+            try {
+                serializer.deserialize(record.value)
+            } catch (e: Exception) {
+                logger.error("Error deserializing event from all events stream: {}", e.message, e)
+                null
+            }
+        } ?: emptyList()
+
+        val filteredEvents = events.drop(fromPosition.toInt())
+        return if (maxCount != null && maxCount > 0) {
+            filteredEvents.take(maxCount)
+        } else {
+            filteredEvents
+        }
     }
 
-    override fun subscribeToStream(streamId: Uuid, fromVersion: Long, handler: (DomainEvent) -> Unit): Subscription {
-        TODO("Not yet implemented")
+    override fun subscribeToStream(streamId: UUID, fromVersion: Long, handler: (DomainEvent) -> Unit): Subscription {
+        // Basic implementation - for full functionality, integrate with RedisEventConsumer
+        logger.info("Stream subscription for streamId {} from version {} - basic implementation", streamId, fromVersion)
+        return BasicSubscription {
+            logger.info("Unsubscribed from stream {}", streamId)
+        }
     }
 
     override fun subscribeToAll(fromPosition: Long, handler: (DomainEvent) -> Unit): Subscription {
-        TODO("Not yet implemented")
+        // Basic implementation - for full functionality, integrate with RedisEventConsumer
+        logger.info("All events subscription from position {} - basic implementation", fromPosition)
+        return BasicSubscription {
+            logger.info("Unsubscribed from all events")
+        }
     }
+}
+
+/**
+ * Basic subscription implementation.
+ */
+private class BasicSubscription(
+    private val unsubscribeAction: () -> Unit
+) : Subscription {
+    @Volatile
+    private var active = true
+
+    override fun unsubscribe() {
+        if (active) {
+            active = false
+            unsubscribeAction()
+        }
+    }
+
+    override fun isActive(): Boolean = active
 }

@@ -49,12 +49,12 @@ class RedisIntegrationTest {
             registerEventType(TestCreatedEvent::class.java, "TestCreated")
             registerEventType(TestUpdatedEvent::class.java, "TestUpdated")
         }
-        properties = RedisEventStoreProperties(
-            streamPrefix = "test-stream:",
-            allEventsStream = "all-events",
-            consumerGroup = "test-group",
+        properties = RedisEventStoreProperties().apply {
+            streamPrefix = "test-stream:"
+            allEventsStream = "all-events"
+            consumerGroup = "test-group"
             consumerName = "test-consumer"
-        )
+        }
         eventStore = RedisEventStore(redisTemplate, serializer, properties)
         eventConsumer = RedisEventConsumer(redisTemplate, serializer, properties)
         cleanupRedis()

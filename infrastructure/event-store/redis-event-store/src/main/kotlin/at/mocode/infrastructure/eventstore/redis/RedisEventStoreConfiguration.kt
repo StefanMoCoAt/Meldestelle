@@ -19,23 +19,23 @@ import java.time.Duration
  */
 @ConfigurationProperties(prefix = "redis.event-store")
 data class RedisEventStoreProperties(
-    val host: String = "localhost",
-    val port: Int = 6379,
-    val password: String? = null,
-    val database: Int = 0,
-    val connectionTimeout: Long = 2000,
-    val readTimeout: Long = 2000,
-    val usePooling: Boolean = true,
-    val maxPoolSize: Int = 8,
-    val minPoolSize: Int = 2,
-    val consumerGroup: String = "event-processors",
-    val consumerName: String = "event-consumer",
-    val streamPrefix: String = "event-stream:",
-    val allEventsStream: String = "all-events",
-    val claimIdleTimeout: Duration = Duration.ofMinutes(1),
-    val pollTimeout: Duration = Duration.ofMillis(100),
-    val maxBatchSize: Int = 100,
-    val createConsumerGroupIfNotExists: Boolean = true
+    var host: String = "localhost",
+    var port: Int = 6379,
+    var password: String? = null,
+    var database: Int = 0,
+    var connectionTimeout: Long = 2000,
+    var readTimeout: Long = 2000,
+    var usePooling: Boolean = true,
+    var maxPoolSize: Int = 8,
+    var minPoolSize: Int = 2,
+    var consumerGroup: String = "event-processors",
+    var consumerName: String = "event-consumer",
+    var streamPrefix: String = "event-stream:",
+    var allEventsStream: String = "all-events",
+    var claimIdleTimeout: Duration = Duration.ofMinutes(1),
+    var pollTimeout: Duration = Duration.ofMillis(100),
+    var maxBatchSize: Int = 100,
+    var createConsumerGroupIfNotExists: Boolean = true
 )
 
 /**

@@ -5,10 +5,7 @@ import at.mocode.core.domain.event.DomainEvent
 import at.mocode.core.domain.model.*
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
-import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
-import kotlin.time.Clock
-import kotlin.time.Instant
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -23,6 +20,8 @@ import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Testcontainers
 class RedisEventStoreIntegrationTest {
@@ -55,12 +54,12 @@ class RedisEventStoreIntegrationTest {
             registerEventType(TestUpdatedEvent::class.java, "TestUpdated")
         }
 
-        properties = RedisEventStoreProperties(
-            streamPrefix = "test-stream:",
-            allEventsStream = "all-events",
-            consumerGroup = "test-group",
+        properties = RedisEventStoreProperties().apply {
+            streamPrefix = "test-stream:"
+            allEventsStream = "all-events"
+            consumerGroup = "test-group"
             consumerName = "test-consumer"
-        )
+        }
 
         eventStore = RedisEventStore(redisTemplate, serializer, properties)
         eventConsumer = RedisEventConsumer(redisTemplate, serializer, properties)
