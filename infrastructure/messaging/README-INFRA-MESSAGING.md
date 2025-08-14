@@ -80,6 +80,24 @@ Die Zuverlässigkeit des Moduls wird durch einen umfassenden Integrationstest si
 
 * **Lifecycle Management: Der Test-Lebenszyklus wird sauber über @BeforeEach und @AfterEach verwaltet, um sicherzustellen, dass alle Ressourcen (insbesondere Producer-Threads) nach jedem Test korrekt freigegeben werden.*
 
+## Neue Features und Optimierungen (2025)
+
+### Erweiterte Konfigurationsvalidierung
+* **Automatische Validierung**: Alle Konfigurationsparameter werden automatisch bei der Zuweisung validiert
+* **Bootstrap-Server-Format**: Unterstützt sowohl einfache (`host:port`) als auch protokoll-präfixierte Formate (`PLAINTEXT://host:port`)
+* **Sicherheitsfeatures**: Configurable Sicherheitsfunktionen für Produktionsumgebungen
+* **Connection-Pool-Management**: Konfigurierbare Verbindungspool-Größe für bessere Ressourcenverwaltung
+
+### Verbesserte Observability
+* **Strukturierte Logs**: Erweiterte Logging-Informationen mit GroupID, Timestamps und Event-Kontext
+* **Fehlerkontext**: Detaillierte Fehlerinformationen mit Retry-Status und Event-Type-Details
+* **Performance-Tracking**: Bessere Nachvollziehbarkeit von Batch-Operationen und Retry-Versuchen
+
+### Robustheit-Verbesserungen
+* **Intelligente Validierung**: Erkennt und verhindert häufige Konfigurationsfehler
+* **Testcontainer-Kompatibilität**: Vollständige Kompatibilität mit Docker-basierten Tests
+* **Enhanced Error Handling**: Verbesserte Fehlerbehandlung mit strukturierten Kontext-Informationen
+
 ---
 
-**Letzte Aktualisierung**: 9. August 2025
+**Letzte Aktualisierung**: 14. August 2025

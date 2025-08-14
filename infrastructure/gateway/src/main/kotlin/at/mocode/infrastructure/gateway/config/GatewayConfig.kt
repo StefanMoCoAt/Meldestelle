@@ -1,5 +1,6 @@
 package at.mocode.infrastructure.gateway.config
 
+import org.slf4j.LoggerFactory
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
 import org.springframework.cloud.gateway.filter.GlobalFilter
 import org.springframework.core.Ordered
@@ -58,6 +59,8 @@ class CorrelationIdFilter : GlobalFilter, Ordered {
 @org.springframework.context.annotation.Profile("!test")
 class EnhancedLoggingFilter : GlobalFilter, Ordered {
 
+    private val logger = LoggerFactory.getLogger(EnhancedLoggingFilter::class.java)
+
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
         val startTime = System.currentTimeMillis()
         val request = exchange.request
@@ -77,29 +80,44 @@ class EnhancedLoggingFilter : GlobalFilter, Ordered {
     }
 
     private fun logRequest(request: ServerHttpRequest, correlationId: String?) {
-        println("""
-            [${LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}] [REQUEST] [${correlationId}]
-            Method: ${request.method}
-            URI: ${request.uri}
-            RemoteAddress: ${request.remoteAddress}
-            UserAgent: ${request.headers.getFirst("User-Agent")}
-        """.trimIndent())
+        logger.info("""
+            [REQUEST] [{}]
+            Method: {}
+            URI: {}
+            RemoteAddress: {}
+            UserAgent: {}
+        """.trimIndent(),
+            correlationId,
+            request.method,
+            request.uri,
+            request.remoteAddress,
+            request.headers.getFirst("User-Agent")
+        )
     }
 
     private fun logResponse(response: ServerHttpResponse, correlationId: String?, responseTime: Long) {
-        println("""
-            [${LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}] [RESPONSE] [${correlationId}]
-            Status: ${response.statusCode}
-            ResponseTime: ${responseTime}ms
-        """.trimIndent())
+        logger.info("""
+            [RESPONSE] [{}]
+            Status: {}
+            ResponseTime: {}ms
+        """.trimIndent(),
+            correlationId,
+            response.statusCode,
+            responseTime
+        )
     }
 
     private fun logError(error: Throwable, correlationId: String?, responseTime: Long) {
-        println("""
-            [${LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}] [ERROR] [${correlationId}]
-            Error: ${error.message}
-            ResponseTime: ${responseTime}ms
-        """.trimIndent())
+        logger.error("""
+            [ERROR] [{}]
+            Error: {}
+            ResponseTime: {}ms
+        """.trimIndent(),
+            correlationId,
+            error.message,
+            responseTime,
+            error
+        )
     }
 
     override fun getOrder(): Int = Ordered.HIGHEST_PRECEDENCE + 1

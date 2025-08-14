@@ -5,6 +5,7 @@ import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kafka.sender.SenderResult
 import reactor.util.retry.Retry
 import java.time.Duration
 
@@ -26,7 +27,7 @@ class KafkaEventPublisher(
         private const val DEFAULT_BATCH_CONCURRENCY = 10
     }
 
-    override fun publishEvent(topic: String, key: String?, event: Any): Mono<Void> {
+    override fun publishEvent(topic: String, key: String?, event: Any): Mono<Unit> {
         logger.debug("Publishing event to topic '{}' with key '{}', event type: '{}'",
             topic, key, event::class.simpleName)
 
@@ -39,18 +40,18 @@ class KafkaEventPublisher(
                 )
             }
             .doOnError { exception ->
-                logger.warn("Failed to publish event to topic '{}' with key '{}' - will retry if configured",
-                    topic, key, exception)
+                logger.warn("Failed to publish event to topic '{}' with key '{}' [eventType={}, retryable={}] - will retry if configured: {}",
+                    topic, key, event::class.simpleName, isRetryableException(exception), exception.message, exception)
             }
             .retryWhen(createRetrySpec(topic, key))
             .doOnError { exception ->
                 logger.error("Final failure after retries: Failed to publish event to topic '{}' with key '{}'",
                     topic, key, exception)
             }
-            .then()
+            .map { Unit }
     }
 
-    override fun publishEvents(topic: String, events: List<Pair<String?, Any>>): Flux<Void> {
+    override fun publishEvents(topic: String, events: List<Pair<String?, Any>>): Flux<Unit> {
         if (events.isEmpty()) {
             logger.debug("No events to publish to topic '{}'", topic)
             return Flux.empty()
@@ -64,13 +65,22 @@ class KafkaEventPublisher(
                 val index = indexedEventPair.t1
                 val eventPair = indexedEventPair.t2
                 val (key, event) = eventPair
-                publishEvent(topic, key, event)
-                    .doOnSuccess {
+                reactiveKafkaTemplate.send(topic, key ?: "", event)
+                    .doOnSuccess { result ->
+                        val record = result.recordMetadata()
+                        logger.debug("Successfully published event to topic-partition {}-{} with offset {} (key: '{}')",
+                            record.topic(), record.partition(), record.offset(), key)
                         if ((index + 1) % 100 == 0L || index == events.size.toLong() - 1) {
                             logger.info("Batch progress: {}/{} events published to topic '{}'",
                                 index + 1, events.size, topic)
                         }
                     }
+                    .doOnError { exception ->
+                        logger.warn("Failed to publish event {} in batch to topic '{}' with key '{}' [eventType={}, retryable={}] - will retry if configured: {}",
+                            index + 1, topic, key, event::class.simpleName, isRetryableException(exception), exception.message, exception)
+                    }
+                    .retryWhen(createRetrySpec(topic, key))
+                    .map { Unit } // Convert to Mono<Unit> that emits one Unit per successful send
                     .onErrorContinue { error, _ ->
                         logger.error("Error publishing event {} in batch to topic '{}': {}",
                             index + 1, topic, error.message)

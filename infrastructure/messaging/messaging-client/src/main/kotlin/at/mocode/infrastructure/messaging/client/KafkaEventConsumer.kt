@@ -31,6 +31,7 @@ class KafkaEventConsumer(
         logger.info("Setting up reactive consumer for topic '{}' with event type '{}'", topic, eventType.simpleName)
 
         val cacheKey = "${topic}-${eventType.name}"
+        val groupId = "${kafkaConfig.defaultGroupIdPrefix}-${topic}-${eventType.simpleName.lowercase()}"
 
         // Get or create a cached receiver for this topic-eventType combination
         @Suppress("UNCHECKED_CAST")
@@ -41,8 +42,9 @@ class KafkaEventConsumer(
         return receiver.receive()
             .doOnNext { record ->
                 logger.debug(
-                    "Received message from topic-partition {}-{} with offset {} for event type '{}'",
-                    record.topic(), record.partition(), record.offset(), eventType.simpleName
+                    "Received message from topic-partition {}-{} with offset {} for event type '{}' [groupId={}, timestamp={}]",
+                    record.topic(), record.partition(), record.offset(), eventType.simpleName,
+                    groupId, record.timestamp()
                 )
             }
             .map { record ->
@@ -51,8 +53,8 @@ class KafkaEventConsumer(
                 record.value()
             }
             .doOnError { exception ->
-                logger.error("Error receiving events from topic '{}' for event type '{}'",
-                    topic, eventType.simpleName, exception)
+                logger.error("Error receiving events from topic '{}' for event type '{}' [groupId={}, cacheKey={}]: {}",
+                    topic, eventType.simpleName, groupId, cacheKey, exception.message, exception)
             }
             .retryWhen(
                 Retry.backoff(3, Duration.ofSeconds(1))

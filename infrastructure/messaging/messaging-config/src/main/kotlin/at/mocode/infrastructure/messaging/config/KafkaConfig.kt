@@ -13,6 +13,8 @@ import org.springframework.kafka.support.serializer.JsonSerializer
  *
  * This class can be instantiated programmatically (as done in tests) or
  * registered as a Spring @Configuration with @Bean methods in an application context.
+ *
+ * Enhanced with configuration validation and additional optimization settings.
  */
 class KafkaConfig {
 
@@ -20,17 +22,52 @@ class KafkaConfig {
      * Comma-separated list of host:port pairs used for establishing the initial connection to the Kafka cluster.
      */
     var bootstrapServers: String = "localhost:9092"
+        set(value) {
+            require(value.isNotBlank()) { "Bootstrap servers cannot be blank" }
+            // Support both simple format (host:port) and protocol-prefixed format (PLAINTEXT://host:port)
+            val isValidFormat = value.matches(Regex("^[a-zA-Z0-9._-]+:[0-9]+(,[a-zA-Z0-9._-]+:[0-9]+)*$")) ||
+                    value.matches(Regex("^[A-Z]+://[a-zA-Z0-9._-]+:[0-9]+(,[A-Z]+://[a-zA-Z0-9._-]+:[0-9]+)*$"))
+            require(isValidFormat) {
+                "Bootstrap servers must be in format 'host:port' or 'PROTOCOL://host:port'"
+            }
+            field = value
+        }
 
     /**
      * Default consumer group ID prefix.
      */
     var defaultGroupIdPrefix: String = "messaging-client"
+        set(value) {
+            require(value.isNotBlank()) { "Default group ID prefix cannot be blank" }
+            require(value.matches(Regex("^[a-zA-Z0-9._-]+$"))) {
+                "Group ID prefix must contain only alphanumeric characters, dots, underscores, and hyphens"
+            }
+            field = value
+        }
 
     /**
      * Comma-separated list of trusted packages for JSON deserialization security.
      * Default restricts to application packages only.
      */
     var trustedPackages: String = "at.mocode.*"
+        set(value) {
+            require(value.isNotBlank()) { "Trusted packages cannot be blank" }
+            field = value
+        }
+
+    /**
+     * Enable additional security features for production environments.
+     */
+    var enableSecurityFeatures: Boolean = true
+
+    /**
+     * Connection pool size for better resource management.
+     */
+    var connectionPoolSize: Int = 10
+        set(value) {
+            require(value > 0) { "Connection pool size must be positive" }
+            field = value
+        }
 
     /**
      * Optimized producer properties with performance tuning and reliability settings.

@@ -10,13 +10,13 @@ interface EventPublisher {
 
     /**
      * Publishes a single event to the specified topic.
-     * Returns a Mono that completes when the send operation is finished.
+     * Returns a Mono that emits Unit when the send operation is finished.
      */
-    fun publishEvent(topic: String, key: String? = null, event: Any): Mono<Void>
+    fun publishEvent(topic: String, key: String? = null, event: Any): Mono<Unit>
 
     /**
      * Publishes multiple events to the specified topic.
-     * Returns a Flux that completes when all send operations are finished.
+     * Returns a Flux that emits one Unit per successfully published event.
      */
-    fun publishEvents(topic: String, events: List<Pair<String?, Any>>): Flux<Void>
+    fun publishEvents(topic: String, events: List<Pair<String?, Any>>): Flux<Unit>
 }
