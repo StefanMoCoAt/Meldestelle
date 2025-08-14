@@ -171,7 +171,7 @@ Das gesamte Modul verwendet professionelle SLF4J/kotlin-logging Standards:
 
 ```kotlin
 // Konsistentes Pattern in allen Klassen:
-companion object {
+companion.object {
     private val logger = KotlinLogging.logger {}
 }
 

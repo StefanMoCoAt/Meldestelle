@@ -80,13 +80,12 @@ class RedisDistributedCacheResilienceTest {
 
         // Simulate slow Redis responses
         every { mockValueOps.get(any()) } answers {
-            Thread.sleep(5000) // 5 second delay
+            Thread.sleep(5000) // 5-second delay
             "slow-response".toByteArray()
         }
 
         every { mockValueOps.set(any<String>(), any<ByteArray>(), any<JavaDuration>()) } answers {
-            Thread.sleep(3000) // 3 second delay
-            Unit
+            Thread.sleep(3000) // 3-second delay
         }
 
         val slowCache = RedisDistributedCache(mockTemplate, serializer, config)
@@ -135,7 +134,6 @@ class RedisDistributedCacheResilienceTest {
             if (failureCounter.incrementAndGet() % 3 == 0) {
                 throw RedisConnectionFailureException("Intermittent failure")
             }
-            Unit
         }
 
         val unreliableCache = RedisDistributedCache(mockTemplate, serializer, config)
@@ -164,7 +162,7 @@ class RedisDistributedCacheResilienceTest {
         logger.info { "Failed operations: $failureCount" }
         logger.info { "Total operations: 20" }
 
-        // Due to offline mode, operations might succeed locally even when Redis fails
+        // Due to offline mode, operations might succeed locally even when Redis fails,
         // So we verify the cache is resilient and continues working
         assertTrue(successCount >= 0, "Should handle operations gracefully")
         assertEquals(20, successCount + failureCount, "Should process all operations")
@@ -194,14 +192,20 @@ class RedisDistributedCacheResilienceTest {
         assertEquals("value-2", cache.get<String>("partition-test-2"))
         assertEquals(ConnectionState.CONNECTED, cache.getConnectionState())
 
-        // Phase 2: Simulate network partition by creating a new cache with broken connection
+        // Phase 2: Simulate network partition by creating a new cache with a broken connection
         logger.info { "Phase 2: Simulating network partition" }
         val mockTemplate = mockk<RedisTemplate<String, ByteArray>>()
         val mockValueOps = mockk<ValueOperations<String, ByteArray>>()
 
         every { mockTemplate.opsForValue() } returns mockValueOps
         every { mockValueOps.get(any()) } throws RedisConnectionFailureException("Network partition")
-        every { mockValueOps.set(any<String>(), any<ByteArray>(), any<JavaDuration>()) } throws RedisConnectionFailureException("Network partition")
+        every {
+            mockValueOps.set(
+                any<String>(),
+                any<ByteArray>(),
+                any<JavaDuration>()
+            )
+        } throws RedisConnectionFailureException("Network partition")
         every { mockTemplate.delete(any<String>()) } throws RedisConnectionFailureException("Network partition")
         every { mockTemplate.hasKey(any()) } throws RedisConnectionFailureException("Network partition")
 
@@ -211,7 +215,7 @@ class RedisDistributedCacheResilienceTest {
         partitionedCache.set("partition-offline-1", "offline-value-1")
         partitionedCache.set("partition-offline-2", "offline-value-2")
 
-        // Should be able to retrieve from local cache
+        // Should be able to retrieve from a local cache
         assertEquals("offline-value-1", partitionedCache.get<String>("partition-offline-1"))
         assertEquals("offline-value-2", partitionedCache.get<String>("partition-offline-2"))
         assertEquals(ConnectionState.DISCONNECTED, partitionedCache.getConnectionState())
@@ -237,7 +241,13 @@ class RedisDistributedCacheResilienceTest {
 
         // Phase 1: Simulate disconnection
         every { mockValueOps.get(any()) } throws RedisConnectionFailureException("Disconnected")
-        every { mockValueOps.set(any<String>(), any<ByteArray>(), any<JavaDuration>()) } throws RedisConnectionFailureException("Disconnected")
+        every {
+            mockValueOps.set(
+                any<String>(),
+                any<ByteArray>(),
+                any<JavaDuration>()
+            )
+        } throws RedisConnectionFailureException("Disconnected")
         every { mockTemplate.hasKey(any()) } throws RedisConnectionFailureException("Disconnected")
 
         reconnectingCache.set("reconnect-test-1", "value-1")
@@ -251,10 +261,10 @@ class RedisDistributedCacheResilienceTest {
         every { mockTemplate.hasKey(any()) } returns true
         every { mockTemplate.delete(any<String>()) } returns true
 
-        // Trigger connection check (this would normally be done by scheduled task)
+        // Trigger connection check (this would normally be done by a scheduled task)
         reconnectingCache.checkConnection()
 
-        // After successful connection check, dirty keys should be synchronized
+        // After a successful connection check, dirty keys should be synchronized
         // Note: In a real scenario, this would be handled by the synchronization mechanism
 
         logger.info { "Reconnection simulation completed" }
@@ -314,7 +324,7 @@ class RedisDistributedCacheResilienceTest {
         assertEquals("initial-value-1", cache.get<String>("restart-test-1"))
 
         // Simulate Redis restart by creating a new cache instance
-        // (In a real scenario, this would be the same instance but Redis would be restarted)
+        // (In a real scenario, this would be the same instance, but Redis would be restarted)
 
         // During "restart" (brief unavailability), operations should work locally
         val duringRestartCache = RedisDistributedCache(redisTemplate, serializer, config)
