@@ -218,7 +218,7 @@ Das Auth-Modul wurde von **kritisch untergetestet** auf **umfassend getestet** t
 ## Dependencies-Übersicht
 
 ### Auth-Client Dependencies
-```kotlin
+```kotlin;
 ├── platform-bom (Version Management)
 ├── platform-dependencies (Common Dependencies)
 ├── core-utils (Domain Objects)
@@ -230,7 +230,7 @@ Das Auth-Modul wurde von **kritisch untergetestet** auf **umfassend getestet** t
 ```
 
 ### Auth-Server Dependencies
-```kotlin
+```kotlin;
 ├── platform-bom (Version Management)
 ├── platform-dependencies (Common Dependencies)
 ├── auth-client (Client Logic)

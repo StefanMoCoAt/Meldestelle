@@ -8,7 +8,7 @@ Das **client/desktop-app/build.gradle.kts** wurde am 14. August 2025 analysiert,
 
 ### 1. Plugin-Konfiguration Modernisierung
 **Vorher:**
-```kotlin
+```kotlin;
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
@@ -17,7 +17,7 @@ plugins {
 ```
 
 **Nachher:**
-```kotlin
+```kotlin;
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
