@@ -16,8 +16,9 @@ Das Gateway ist als eigenständiger Spring Boot Service implementiert und nutzt 
 - **Spring WebFlux** - Reaktive Web-Programmierung mit Netty
 - **Resilience4j** - Circuit Breaker Pattern Implementation
 - **Consul** - Service Discovery und Health Checks
-- **Micrometer + Prometheus** - Metriken und Monitoring
+- **Micrometer + Prometheus** - Umfassende Metriken und Monitoring
 - **JWT** - Token-basierte Authentifizierung
+- **Reactive Streams** - Non-blocking I/O für optimale Performance
 
 ## Hauptverantwortlichkeiten
 
@@ -57,13 +58,42 @@ Das Gateway handhabt alle Cross-Cutting Concerns (übergreifende Belange), die f
 - **Graceful Degradation**: Systembetrieb auch bei partiellen Service-Ausfällen
 
 ### 5. Monitoring und Observability
-- **Health Indicator**: Umfassende Überwachung aller Downstream Services
+Das Gateway implementiert umfassende Observability durch eine vollständig integrierte Micrometer-basierte Metriken-Architektur.
+
+#### Automatische Metriken-Erfassung (GatewayMetricsConfig)
+- **Request Duration Tracking**: Automatische Messung aller Request-Response Zyklen
+  - Metric: `gateway_request_duration` (Timer)
+  - Tags: method, path, status, status_series
+  - Percentile-basierte Auswertung (P50, P90, P95, P99)
+- **Error Rate Monitoring**: Detailliertes Error-Tracking für 4xx/5xx Responses
+  - Metric: `gateway_errors_total` (Counter)
+  - Tags: method, path, status, status_series, error_type
+  - Unterscheidung zwischen client_error und server_error
+- **Request Volume Tracking**: Vollständige Request-Volumen Überwachung
+  - Metric: `gateway_requests_total` (Counter)
+  - Tags: method, path für detaillierte Analyse
+- **Circuit Breaker Events**: Monitoring von Resilience-Pattern Events
+  - Metric: `gateway_circuit_breaker_events_total` (Counter)
+  - Integration mit Resilience4j Circuit Breaker Status
+
+#### Intelligente Pfad-Normalisierung
+- **Kardinalitäts-Kontrolle**: Automatische Normalisierung von dynamischen Pfaden
+  - `/api/horses/123` → `/api/horses/{id}`
+  - UUID-Pattern → `/{uuid}`
+  - Sehr lange Pfade werden gekürzt (100+ Zeichen)
+
+#### Health Monitoring Integration
+- **Downstream Service Health**: Umfassende Überwachung aller Backend Services
   - Kritische Services: Members, Horses, Events, Masterdata, Auth
   - Optionale Services: Ping Service
   - Circuit Breaker Status Integration
 - **Distributed Tracing**: Korrelations-ID basiertes Request-Tracking
-- **Prometheus Metriken**: Detaillierte Performance- und Business-Metriken
 - **Strukturierte Logs**: JSON-Format für maschinelle Auswertung
+
+#### Prometheus Export
+- **Automatischer Export**: Alle Metriken werden automatisch an Prometheus exportiert
+- **Common Tags**: Alle Metriken erhalten automatisch Service- und Component-Tags
+- **Filter-Optimierung**: Rauschen-reduzierende Metrik-Filter für interne Spring/Netty Metriken
 
 ### 6. CORS-Management
 - **Produktionstaugliche CORS-Konfiguration**:
@@ -97,6 +127,14 @@ Das Gateway handhabt alle Cross-Cutting Concerns (übergreifende Belange), die f
 ✅ **Security Hardening**: Non-root User, Security Updates
 ✅ **OCI Compliance**: Vollständige Container-Metadaten
 ✅ **Production-Ready**: Optimierte JVM-Settings für Container-Umgebung
+
+### Metriken-Integration (GatewayMetricsConfig.kt)
+✅ **Comprehensive Micrometer Integration**: Vollständige Metriken-Erfassung mit automatischem Prometheus Export
+✅ **Request/Response Time Tracking**: Detaillierte Performance-Metriken mit Percentile-Auswertung
+✅ **Error Rate Monitoring**: Intelligente Fehler-Klassifikation und -Tracking
+✅ **Path Normalization**: Kardinalitäts-kontrolle für dynamische API-Pfade
+✅ **Circuit Breaker Metrics**: Integration mit Resilience4j Event-Tracking
+✅ **Custom Business Metrics**: Erweiterbare Metrik-Architektur für fachliche KPIs
 
 ### Dokumentation
 ✅ **OpenAPI 3.0.3 Spezifikation**: Vollständige API-Dokumentation mit Members Service
@@ -150,11 +188,37 @@ Ein typischer Anfrage-Flow:
 - `/actuator/circuitbreakers` - Circuit Breaker Status
 
 ### Key Performance Indicators (KPIs)
-- **Request Throughput**: Anfragen pro Sekunde
-- **Response Times**: P50, P90, P95, P99 Percentile
-- **Error Rates**: 4xx/5xx Response Codes
-- **Circuit Breaker States**: Open/Half-Open/Closed Status
-- **Service Availability**: Upstream Service Health
+
+#### Automatisch erfasste Metriken
+- **Request Throughput**: `gateway_requests_total` - Anfragen pro Sekunde nach Method/Path
+- **Response Times**: `gateway_request_duration` - P50, P90, P95, P99 Percentile nach Status
+- **Error Rates**: `gateway_errors_total` - 4xx/5xx Response Codes mit Error-Type Klassifikation
+- **Circuit Breaker Events**: `gateway_circuit_breaker_events_total` - Resilience Pattern Aktivierungen
+- **Service Availability**: Upstream Service Health via Health Indicators
+
+#### Verfügbare Metric Tags für detaillierte Analyse
+- **method**: HTTP-Method (GET, POST, PUT, DELETE, etc.)
+- **path**: Normalisierter API-Pfad (z.B. `/api/horses/{id}`)
+- **status**: HTTP-Status-Code (200, 404, 500, etc.)
+- **status_series**: Status-Gruppe (2xx, 3xx, 4xx, 5xx)
+- **error_type**: Fehler-Klassifikation (client_error, server_error)
+- **service**: Automatisches "gateway" Tag
+- **component**: Automatisches "infrastructure" Tag
+
+#### Prometheus Query Beispiele
+```promql
+# Request Rate pro Endpunkt
+rate(gateway_requests_total[5m])
+
+# 95. Percentile Response Time
+histogram_quantile(0.95, rate(gateway_request_duration_bucket[5m]))
+
+# Error Rate nach Service
+rate(gateway_errors_total[5m]) / rate(gateway_requests_total[5m])
+
+# Circuit Breaker Aktivierungen
+increase(gateway_circuit_breaker_events_total[1h])
+```
 
 ## Security Features
 
@@ -272,6 +336,13 @@ spec:
 - JVM Heap Usage monitoring
 - Request Rate Limiting überprüfen
 
+**Metriken und Monitoring Issues**
+- Prometheus Scraping Endpunkt prüfen: `/actuator/prometheus`
+- Metrics Registry Status überprüfen: `/actuator/metrics`
+- GatewayMetricsWebFilter Aktivierung validieren
+- Metric Tags auf Kardinalitäts-Explosion prüfen
+- Path Normalization bei unerwarteten Metric-Namen
+
 ### Logging und Debugging
 ```bash
 # Logs mit Korrelations-IDs
@@ -313,10 +384,10 @@ curl http://localhost:8080/actuator/health
 
 **Letzte Aktualisierung**: 14. August 2025
 
-**Version**: 1.0.0
+**Version**: 1.1.0
 
 **Maintainer**: Meldestelle Development Team
 
 ---
 
-Diese Dokumentation wurde durch die Konsolidierung von OPTIMIZATION_SUMMARY.md und der ursprünglichen README-INFRA-GATEWAY.md erstellt und um alle implementierten Optimierungen erweitert.
+Diese Dokumentation wurde umfassend aktualisiert und um die neue Micrometer Metrics Integration (GatewayMetricsConfig.kt) erweitert. Sie dokumentiert alle implementierten Optimierungen einschließlich der vollständigen Observability-Architektur mit automatischer Request/Response Zeit Messung, Error Rate Tracking und Custom Business Metrics.
