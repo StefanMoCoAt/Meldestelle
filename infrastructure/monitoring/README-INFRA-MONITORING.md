@@ -45,5 +45,27 @@ Das vollständige Monitoring-Setup besteht aus mehreren Teilen:
 
 Diese Kombination aus Micrometer, Prometheus, Zipkin und Grafana bildet einen leistungsstarken, branchenüblichen "Observability Stack".
 
+## Neue Funktionen und Optimierungen
+
+### Sicherheitsverbesserungen
+* **Umgebungsvariablen für Credentials**: Alle hardcodierten Passwörter und API-Schlüssel wurden durch Umgebungsvariablen ersetzt
+* **Alertmanager-Konfiguration**: SMTP- und Slack-Einstellungen nutzen jetzt sichere Umgebungsvariablen
+* **Prometheus-Authentifizierung**: Metriken-Endpunkte sind durch Benutzername/Passwort geschützt
+
+### Performance-Optimierungen
+* **Konfigurierbare Tracing-Sampling-Rate**: Standard 100% für Entwicklung, über `TRACING_SAMPLING_PROBABILITY` anpassbar für Produktion
+* **Optimierte Prometheus-Konfiguration**: Korrigierte Metriken-Pfade und eliminierte doppelte Jobs
+* **Verbesserte Speicher-Retention**: Produktion nutzt 30 Tage Retention und WAL-Komprimierung
+
+### Erweiterte Dashboards
+* **Application Overview Dashboard**: Zentrale Anwendungsmetriken (Request Rate, Response Times, Error Rate, Status)
+* **Infrastructure Components Dashboard**: Überwachung von PostgreSQL, Redis, Kafka, System-Metriken
+* **JVM Dashboard**: Bestehende JVM-Metriken für Java-Anwendungen
+
+### Konfigurationsverbesserungen
+* **Einheitliche Endpunkt-Pfade**: Verwendung von `/actuator/prometheus` für alle Services
+* **Umgebungsspezifische Konfiguration**: Getrennte Einstellungen für Entwicklung und Produktion
+* **Erweiterte ELK-Integration**: Vollständige Logging-Pipeline mit Elasticsearch und Logstash
+
 ---
-**Letzte Aktualisierung**: 31. Juli 2025
+**Letzte Aktualisierung**: 15. August 2025

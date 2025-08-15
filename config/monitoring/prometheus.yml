@@ -23,30 +23,17 @@ scrape_configs:
       - targets: ["localhost:9090"]
 
   # Scrape configuration for the Meldestelle application
-  - job_name: "meldestelle-server"
-    metrics_path: /metrics
+  - job_name: "meldestelle-api"
+    metrics_path: /actuator/prometheus
     scrape_interval: 10s
     basic_auth:
       username: ${METRICS_USER:-metrics}
-      password: ${METRICS_PASSWORD:-metrics-password-change-in-production}
+      password: ${METRICS_PASSWORD:-metrics-password-dev}
     static_configs:
       - targets: ["server:8081"]
         labels:
           application: "meldestelle"
           service: "api-gateway"
-
-  # JVM metrics for the Meldestelle application
-  - job_name: "meldestelle-jvm"
-    metrics_path: /metrics
-    scrape_interval: 10s
-    basic_auth:
-      username: ${METRICS_USER:-metrics}
-      password: ${METRICS_PASSWORD:-metrics-password-change-in-production}
-    static_configs:
-      - targets: ["server:8081"]
-        labels:
-          application: "meldestelle"
-          service: "jvm"
 
   # Node exporter for host metrics (if added later)
   # - job_name: "node-exporter"

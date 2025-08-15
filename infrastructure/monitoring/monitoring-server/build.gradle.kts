@@ -24,6 +24,7 @@ dependencies {
 
     // Abhängigkeiten für den Zipkin-Server und seine UI.
     implementation(libs.zipkin.server)
+    implementation(libs.zipkin.autoconfigure.ui)
 
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)

@@ -19,6 +19,6 @@ class MonitoringServerApplicationTest {
 
     @Test
     fun `context loads successfully`() {
-        // Test ist bestanden, wenn der Kontext ohne Exception startet.
+        // Der Test ist bestanden, wenn der Kontext ohne Exception startet.
     }
 }
