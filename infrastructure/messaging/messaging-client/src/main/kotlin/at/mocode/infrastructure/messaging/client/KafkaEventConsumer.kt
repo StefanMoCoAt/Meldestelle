@@ -1,7 +1,8 @@
 package at.mocode.infrastructure.messaging.client
 
 import at.mocode.infrastructure.messaging.config.KafkaConfig
-import org.apache.kafka.clients.consumer.ConsumerConfig
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.stereotype.Component
@@ -10,7 +11,7 @@ import reactor.kafka.receiver.KafkaReceiver
 import reactor.kafka.receiver.ReceiverOptions
 import reactor.util.retry.Retry
 import java.time.Duration
-import java.util.Collections
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -26,6 +27,22 @@ class KafkaEventConsumer(
 
     // Connection pool to reuse KafkaReceiver instances per topic-eventType combination
     private val receiverCache = ConcurrentHashMap<String, KafkaReceiver<String, Any>>()
+
+    override fun <T : Any> receiveEventsWithResult(topic: String, eventType: Class<T>): Flow<Result<T>> {
+        logger.info("Setting up Result-based consumer for topic '{}' with event type '{}'", topic, eventType.simpleName)
+
+        return receiveEvents(topic, eventType)
+            .map<Result<T>> { event -> Result.success(event) }
+            .onErrorContinue { error, _ ->
+                logger.warn("Error occurred while consuming events from topic '{}' for event type '{}': {}",
+                    topic, eventType.simpleName, error.message)
+            }
+            .doOnError { exception ->
+                logger.error("Fatal error in consumer stream for topic '{}' and event type '{}': {}",
+                    topic, eventType.simpleName, exception.message, exception)
+            }
+            .asFlow()
+    }
 
     override fun <T : Any> receiveEvents(topic: String, eventType: Class<T>): Flux<T> {
         logger.info("Setting up reactive consumer for topic '{}' with event type '{}'", topic, eventType.simpleName)

@@ -1,6 +1,5 @@
 package at.mocode.infrastructure.messaging.client
 
-import at.mocode.infrastructure.messaging.client.ReactiveKafkaConfig
 import at.mocode.infrastructure.messaging.config.KafkaConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig

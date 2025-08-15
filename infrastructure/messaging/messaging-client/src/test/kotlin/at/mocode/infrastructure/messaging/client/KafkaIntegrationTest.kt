@@ -1,6 +1,5 @@
 package at.mocode.infrastructure.messaging.client
 
-import at.mocode.infrastructure.messaging.client.ReactiveKafkaConfig
 import at.mocode.infrastructure.messaging.config.KafkaConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.AfterEach
@@ -77,7 +76,7 @@ class KafkaIntegrationTest {
             .map { it.value() } // Extract the value (our TestEvent instance)
 
         // The Mono that represents the send action
-        val sendAction = kafkaEventPublisher.publishEvent(testTopic, testKey, testEvent)
+        val sendAction = kafkaEventPublisher.publishEventReactive(testTopic, testKey, testEvent)
 
         // CORRECTION: Combine the send action and receive expectation in one StepVerifier.
         // The `then` method ensures that the send action is completed first,
@@ -119,7 +118,7 @@ class KafkaIntegrationTest {
             .collectList()
 
         // Send batch and verify reception
-        val sendAction = kafkaEventPublisher.publishEvents(testTopic, eventBatch)
+        val sendAction = kafkaEventPublisher.publishEventsReactive(testTopic, eventBatch)
 
         StepVerifier.create(sendAction.then(receivedEvents))
             .expectNextMatches { events ->
@@ -171,7 +170,7 @@ class KafkaIntegrationTest {
             .next()
             .map { it.value() }
 
-        val sendAction = kafkaEventPublisher.publishEvent(testTopic, testKey, testEvent)
+        val sendAction = kafkaEventPublisher.publishEventReactive(testTopic, testKey, testEvent)
 
         // Both consumers should receive the same message (different groups)
         StepVerifier.create(sendAction.then(consumer1Event.zipWith(consumer2Event)))
@@ -210,7 +209,7 @@ class KafkaIntegrationTest {
             .next()
             .map { it.value() }
 
-        val sendAction = kafkaEventPublisher.publishEvent(testTopic, "complex-key", complexEvent)
+        val sendAction = kafkaEventPublisher.publishEventReactive(testTopic, "complex-key", complexEvent)
 
         StepVerifier.create(sendAction.then(receivedEvent))
             .expectNext(complexEvent)
@@ -246,7 +245,7 @@ class KafkaIntegrationTest {
             .map { it.value() }
             .collectList()
 
-        val sendAction = kafkaEventPublisher.publishEvents(testTopic, orderedEvents)
+        val sendAction = kafkaEventPublisher.publishEventsReactive(testTopic, orderedEvents)
 
         StepVerifier.create(sendAction.then(receivedEvents))
             .expectNextMatches { events ->
@@ -262,7 +261,7 @@ class KafkaIntegrationTest {
     fun `should handle empty batch gracefully in integration test`() {
         val emptyBatch = emptyList<Pair<String?, Any>>()
 
-        StepVerifier.create(kafkaEventPublisher.publishEvents(testTopic, emptyBatch))
+        StepVerifier.create(kafkaEventPublisher.publishEventsReactive(testTopic, emptyBatch))
             .verifyComplete()
     }
 
