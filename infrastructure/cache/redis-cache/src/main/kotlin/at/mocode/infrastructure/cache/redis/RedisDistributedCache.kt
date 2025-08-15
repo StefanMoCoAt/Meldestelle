@@ -42,6 +42,11 @@ class RedisDistributedCache(
     // Connection state listeners
     private val connectionListeners = CopyOnWriteArrayList<ConnectionStateListener>()
 
+    // Performance metrics tracking
+    private var totalOperations = 0L
+    private var successfulOperations = 0L
+    private var lastMetricsLogTime = Clock.System.now()
+
     init {
         // Try to connect to Redis
         checkConnection()
@@ -68,19 +73,25 @@ class RedisDistributedCache(
 
         // Try to get from Redis
         try {
-            val bytes = redisTemplate.opsForValue().get(prefixedKey) ?: return null
+            val bytes = redisTemplate.opsForValue().get(prefixedKey) ?: run {
+                trackOperation(true) // successful operation, just no data
+                return null
+            }
             val entry = serializer.deserializeEntry(bytes, clazz)
 
             // Store in a local cache
             @Suppress("UNCHECKED_CAST")
             localCache[prefixedKey] = entry as CacheEntry<Any>
 
+            trackOperation(true)
             return entry.value
         } catch (e: RedisConnectionFailureException) {
             handleConnectionFailure(e)
+            trackOperation(false)
             return null
         } catch (e: Exception) {
             logger.error("Error getting value from Redis for key $prefixedKey", e)
+            trackOperation(false)
             return null
         }
     }
@@ -113,12 +124,15 @@ class RedisDistributedCache(
             } else {
                 redisTemplate.opsForValue().set(prefixedKey, bytes)
             }
+            trackOperation(true)
         } catch (e: RedisConnectionFailureException) {
             handleConnectionFailure(e)
             markDirty(key)
+            trackOperation(false)
         } catch (e: Exception) {
             logger.error("Error setting value in Redis for key $prefixedKey", e)
             markDirty(key)
+            trackOperation(false)
         }
     }
 
@@ -491,5 +505,105 @@ class RedisDistributedCache(
         if (isConnected() && dirtyKeys.isNotEmpty()) {
             synchronize(null)
         }
+    }
+
+    //
+    // Performance monitoring and optimization methods
+    //
+
+    /**
+     * Track a cache operation for metrics
+     */
+    private fun trackOperation(success: Boolean) {
+        synchronized(this) {
+            totalOperations++
+            if (success) successfulOperations++
+        }
+    }
+
+    /**
+     * Get current performance metrics
+     */
+    fun getPerformanceMetrics(): Map<String, Any> {
+        val now = Clock.System.now()
+        val successRate = if (totalOperations > 0) {
+            (successfulOperations.toDouble() / totalOperations.toDouble()) * 100.0
+        } else 0.0
+
+        return mapOf(
+            "totalOperations" to totalOperations,
+            "successfulOperations" to successfulOperations,
+            "successRate" to String.format("%.1f%%", successRate),
+            "dirtyKeysCount" to dirtyKeys.size,
+            "localCacheSize" to localCache.size,
+            "connectionState" to connectionState.name,
+            "lastStateChangeTime" to lastStateChangeTime,
+            "uptimeSinceLastMetrics" to (now - lastMetricsLogTime)
+        )
+    }
+
+    /**
+     * Log performance metrics (called periodically)
+     */
+    @Scheduled(fixedDelayString = $$"${redis.metrics-log-interval:300000}")
+    fun logPerformanceMetrics() {
+        val metrics = getPerformanceMetrics()
+        logger.info("Cache performance metrics: $metrics")
+        lastMetricsLogTime = Clock.System.now()
+    }
+
+    /**
+     * Cache warming utility - preloads specified keys
+     */
+    fun warmCache(keys: Collection<String>, dataLoader: (String) -> Any?) {
+        logger.info("Starting cache warming for ${keys.size} keys")
+        var warmedCount = 0
+        val startTime = Clock.System.now()
+
+        keys.forEach { key ->
+            if (!exists(key)) {
+                val data = dataLoader(key)
+                if (data != null) {
+                    set(key, data, config.defaultTtl)
+                    warmedCount++
+                }
+            }
+        }
+
+        val duration = Clock.System.now() - startTime
+        logger.info("Cache warming completed: $warmedCount/$${keys.size} keys loaded in $duration")
+    }
+
+    /**
+     * Bulk cache warming with batch operations
+     */
+    fun warmCacheBulk(keyDataMap: Map<String, Any>, ttl: Duration? = null) {
+        logger.info("Starting bulk cache warming for ${keyDataMap.size} entries")
+        val startTime = Clock.System.now()
+
+        multiSet(keyDataMap, ttl ?: config.defaultTtl)
+
+        val duration = Clock.System.now() - startTime
+        logger.info("Bulk cache warming completed: ${keyDataMap.size} entries loaded in $duration")
+    }
+
+    /**
+     * Get cache health status
+     */
+    fun getHealthStatus(): Map<String, Any> {
+        val metrics = getPerformanceMetrics()
+        val successRate = metrics["successRate"] as String
+        val successRateValue = successRate.replace("%", "").toDoubleOrNull() ?: 0.0
+
+        return mapOf(
+            "healthy" to (connectionState == ConnectionState.CONNECTED && successRateValue >= 90.0),
+            "connectionState" to connectionState.name,
+            "successRate" to successRate,
+            "localCacheUtilization" to if (config.localCacheMaxSize != null) {
+                "${localCache.size}/${config.localCacheMaxSize}"
+            } else "${localCache.size}/unlimited",
+            "dirtyKeysCount" to dirtyKeys.size,
+            "lastHealthCheck" to Clock.System.now()
+        )
     }
 }

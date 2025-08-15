@@ -1,6 +1,6 @@
 # Infrastructure/Cache Module - Comprehensive Documentation
 
-*Letzte Aktualisierung: 14. August 2025*
+*Letzte Aktualisierung: 15. August 2025*
 
 ## Überblick
 
@@ -31,6 +31,13 @@ Das Modul folgt streng dem **Port-Adapter-Muster** (Hexagonale Architektur), um 
 * **Performance-Optimierung:** 5.000+ gleichzeitige Operationen mit >95% Erfolgsrate
 * **Unicode-Vollunterstützung:** Internationale Deployment-fähig mit Emojis, Umlauten, Chinesisch, Arabisch
 * **10MB+ Objektgrößen:** Automatische Kompression und Übertragung sehr großer Objekte
+
+### Enhanced Monitoring & Operations (NEW)
+* **Real-time Performance Metrics:** Automatisches Tracking aller Cache-Operationen mit Erfolgsraten
+* **Strukturierte Metrics-Logging:** Periodische Performance-Reports mit detaillierten Metriken
+* **Cache Warming Utilities:** Produktions-bereite Warming-Strategien für optimale Performance
+* **Health Status Monitoring:** Umfassende Gesundheitschecks mit automatischer Status-Bewertung
+* **Advanced Connection Tracking:** Erweiterte Verbindungsüberwachung mit detaillierten Zustandsinformationen
 
 ## Verwendung
 
@@ -84,6 +91,31 @@ cache.registerConnectionListener(object : ConnectionStateListener {
         logger.info { "Cache connection state changed to: $newState" }
     }
 })
+
+// Performance Monitoring (NEW)
+val metrics = cache.getPerformanceMetrics()
+logger.info { "Current performance: ${metrics["successRate"]} success rate, ${metrics["totalOperations"]} operations" }
+
+// Health Status Checking (NEW)
+val health = cache.getHealthStatus()
+if (health["healthy"] as Boolean) {
+    logger.info { "Cache is healthy with ${health["successRate"]} success rate" }
+} else {
+    logger.warn { "Cache health issue detected: ${health["connectionState"]}" }
+}
+
+// Cache Warming (NEW)
+// Individual key warming with data loader
+cache.warmCache(listOf("user:1", "user:2", "user:3")) { key ->
+    userService.loadUser(key.substringAfter(":"))
+}
+
+// Bulk cache warming
+val preloadData = mapOf(
+    "config:app" to applicationConfig,
+    "config:features" to featureFlags
+)
+cache.warmCacheBulk(preloadData, ttl = 1.hours)
 ```
 
 ## Test-Suite: Vollständige Produktionsabdeckung
@@ -406,6 +438,15 @@ cache.set("db:${query.hash()}", results, ttl = 15.minutes)
 - ✅ Migration kann schrittweise erfolgen
 
 ## Changelog
+
+### 2025-08-15 - Enhanced Monitoring & Operations Update v2.1
+- ✅ **Real-time Performance Metrics:** Automatisches Tracking aller Cache-Operationen mit detaillierter Erfolgsraten-Überwachung
+- ✅ **Strukturierte Metrics-Logging:** Periodische Performance-Reports alle 5 Minuten mit umfassenden Metriken
+- ✅ **Cache Warming Utilities:** Produktions-bereite Warming-Strategien mit Individual- und Bulk-Operations
+- ✅ **Health Status Monitoring:** Umfassende Gesundheitschecks mit automatischer Status-Bewertung (>90% Erfolgsrate)
+- ✅ **Enhanced Connection Tracking:** Erweiterte Verbindungsüberwachung mit detaillierten Zustandsinformationen
+- ✅ **Production-Ready Monitoring:** Integration hooks für Enterprise-Monitoring-Systeme
+- ✅ **Performance Optimization:** Verbesserte Metriken-Sammlung ohne Performance-Impact
 
 ### 2025-08-14 - Major Update v2.0
 - ✅ **Vollständige Test-Suite-Erweiterung:** Von 12 auf 39 Tests (94.7% Success Rate)
