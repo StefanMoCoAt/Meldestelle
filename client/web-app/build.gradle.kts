@@ -12,6 +12,17 @@ kotlin {
                 cssSupport {
                     enabled.set(true)
                 }
+                // Enable source maps for debugging
+                devtool = "source-map"
+            }
+            // Configure webpack for production optimization
+            webpackTask {
+                mainOutputFileName = "web-app.js"
+            }
+            // Configure development server
+            runTask {
+                mainOutputFileName = "web-app.js"
+                sourceMaps = true
             }
         }
     }
@@ -24,6 +35,16 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(libs.ktor.client.js)
                 implementation(libs.kotlinx.coroutines.core)
+                // Add additional web-specific dependencies
+                implementation(libs.ktor.client.contentNegotiation)
+                implementation(libs.ktor.client.serialization.kotlinx.json)
+            }
+        }
+
+        val jsTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }
@@ -31,4 +52,13 @@ kotlin {
 
 compose.experimental {
     web.application {}
+}
+
+// Web-specific optimizations
+tasks.named("jsBrowserDevelopmentWebpack") {
+    outputs.upToDateWhen { false }
+}
+
+tasks.named("jsBrowserProductionWebpack") {
+    outputs.upToDateWhen { false }
 }

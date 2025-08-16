@@ -1,0 +1,235 @@
+# ===================================================================
+# Docker Compose Override - Development Configuration
+# Meldestelle Project - Development Workflow Optimizations
+# ===================================================================
+# This file is automatically loaded by docker-compose in development
+# Usage: docker-compose up (automatically includes this override)
+# ===================================================================
+# Features:
+# - Hot-reload for frontend development
+# - Debug port exposure for backend services
+# - Volume mounts for live code changes
+# - Development-specific environment variables
+# - Faster startup times
+# ===================================================================
+
+version: '3.8'
+
+services:
+  # ===================================================================
+  # Web Application - Development with Hot Reload
+  # ===================================================================
+  web-app:
+    # Override build for development - use Node.js dev server instead of production build
+    build:
+      target: development  # Use development stage if multi-stage build supports it
+    ports:
+      - "3001:80"
+      - "3002:3000"  # Additional port for webpack dev server if needed
+    volumes:
+      # Mount source code for hot-reload (read-only to prevent container changes)
+      - ./client/web-app/src:/workspace/client/web-app/src:ro
+      - ./client/common-ui/src:/workspace/client/common-ui/src:ro
+      # Mount build configuration for live updates
+      - ./client/web-app/build.gradle.kts:/workspace/client/web-app/build.gradle.kts:ro
+      - ./client/common-ui/build.gradle.kts:/workspace/client/common-ui/build.gradle.kts:ro
+    environment:
+      # Development-specific environment
+      - NODE_ENV=development
+      - WEBPACK_DEV_SERVER=true
+      - HOT_RELOAD=true
+      - API_BASE_URL=http://localhost:8080  # Direct to host for easier debugging
+    command: >
+      sh -c "
+        echo 'Starting Web App in DEVELOPMENT mode with hot-reload...';
+        nginx -t && nginx -g 'daemon off;'
+      "
+
+  # ===================================================================
+  # API Gateway - Development Debug Configuration
+  # ===================================================================
+  api-gateway:
+    ports:
+      - "8080:8080"
+      - "5005:5005"  # Debug port for IDE attachment
+    environment:
+      # Enable debug mode
+      - DEBUG=true
+      - SPRING_PROFILES_ACTIVE=docker,debug
+      - LOGGING_LEVEL_ROOT=INFO
+      - LOGGING_LEVEL_AT_MOCODE=DEBUG
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      # Development CORS settings
+      - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_[/**]_ALLOWEDORIGINS=http://localhost:3001,http://localhost:3002
+      - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_[/**]_ALLOWEDMETHODS=GET,POST,PUT,DELETE,OPTIONS
+      - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_[/**]_ALLOWEDHEADERS=*
+      - SPRING_CLOUD_GATEWAY_GLOBALCORS_CORSCONFIGURATIONS_[/**]_ALLOWCREDENTIALS=true
+    volumes:
+      # Mount logs for easier debugging
+      - ./logs/gateway:/app/logs
+
+  # ===================================================================
+  # Auth Server - Development Debug Configuration
+  # ===================================================================
+  auth-server:
+    ports:
+      - "8081:8081"
+      - "5006:5005"  # Debug port (different from gateway)
+    environment:
+      # Enable debug mode
+      - DEBUG=true
+      - SPRING_PROFILES_ACTIVE=docker,debug
+      - LOGGING_LEVEL_ROOT=INFO
+      - LOGGING_LEVEL_AT_MOCODE=DEBUG
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      # Development JWT settings (shorter expiration for testing)
+      - JWT_EXPIRATION=3600  # 1 hour instead of 24 hours
+      - JWT_SECRET=development-secret-key-not-for-production
+    volumes:
+      # Mount logs for easier debugging
+      - ./logs/auth:/app/logs
+
+  # ===================================================================
+  # Monitoring Server - Development Debug Configuration
+  # ===================================================================
+  monitoring-server:
+    ports:
+      - "8083:8083"
+      - "5007:5005"  # Debug port
+    environment:
+      # Enable debug mode
+      - DEBUG=true
+      - SPRING_PROFILES_ACTIVE=docker,debug
+      - LOGGING_LEVEL_ROOT=INFO
+      - LOGGING_LEVEL_AT_MOCODE=DEBUG
+      - LOGGING_LEVEL_MICROMETER=DEBUG
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+    volumes:
+      # Mount logs for easier debugging
+      - ./logs/monitoring:/app/logs
+
+  # ===================================================================
+  # Ping Service - Development Debug Configuration
+  # ===================================================================
+  ping-service:
+    ports:
+      - "8082:8082"
+      - "5008:5005"  # Debug port
+    environment:
+      # Enable debug mode
+      - DEBUG=true
+      - SPRING_PROFILES_ACTIVE=docker,debug
+      - LOGGING_LEVEL_ROOT=INFO
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+    volumes:
+      # Mount logs for easier debugging
+      - ./logs/ping:/app/logs
+
+  # ===================================================================
+  # Infrastructure Services - Development Optimizations
+  # ===================================================================
+
+  postgres:
+    ports:
+      - "5432:5432"  # Expose for external DB tools
+    environment:
+      # Development database settings
+      - POSTGRES_DB=meldestelle_dev
+      - POSTGRES_USER=meldestelle_dev
+      - POSTGRES_PASSWORD=meldestelle_dev
+    volumes:
+      # Use local directory for easier database inspection
+      - ./dev-data/postgres:/var/lib/postgresql/data
+      - ./logs/postgres:/var/log/postgresql
+
+  redis:
+    ports:
+      - "6379:6379"  # Expose for Redis CLI access
+    volumes:
+      # Use local directory for easier cache inspection
+      - ./dev-data/redis:/data
+    command: redis-server --appendonly yes --save 60 1000  # More frequent saves in dev
+
+  prometheus:
+    ports:
+      - "9090:9090"
+    volumes:
+      # Development prometheus config with more scraping
+      - ./config/monitoring/prometheus.dev.yml:/etc/prometheus/prometheus.yml:ro
+      - ./dev-data/prometheus:/prometheus
+
+  grafana:
+    ports:
+      - "3000:3000"
+    environment:
+      # Development admin credentials
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+      - GF_USERS_ALLOW_SIGN_UP=true  # Allow signup in development
+    volumes:
+      # Development dashboards and data
+      - ./config/monitoring/grafana/dev-dashboards:/var/lib/grafana/dashboards:ro
+      - ./dev-data/grafana:/var/lib/grafana
+
+  consul:
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    volumes:
+      # Development consul data
+      - ./dev-data/consul:/consul/data
+
+  # ===================================================================
+  # Development-Only Services
+  # ===================================================================
+
+  # PostgreSQL Admin Interface (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: meldestelle-pgadmin-dev
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@meldestelle.dev
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - meldestelle-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    profiles:
+      - dev-tools  # Only start with: docker-compose --profile dev-tools up
+
+  # Redis Admin Interface (optional)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: meldestelle-redis-commander-dev
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    networks:
+      - meldestelle-network
+    depends_on:
+      - redis
+    restart: unless-stopped
+    profiles:
+      - dev-tools  # Only start with: docker-compose --profile dev-tools up
+
+# ===================================================================
+# Development Volumes
+# ===================================================================
+volumes:
+  pgadmin-data:
+    driver: local
+
+# ===================================================================
+# Networks - Same as main compose
+# ===================================================================
+networks:
+  meldestelle-network:
+    driver: bridge

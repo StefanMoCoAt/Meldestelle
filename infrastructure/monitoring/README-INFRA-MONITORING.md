@@ -67,5 +67,20 @@ Diese Kombination aus Micrometer, Prometheus, Zipkin und Grafana bildet einen le
 * **Umgebungsspezifische Konfiguration**: Getrennte Einstellungen für Entwicklung und Produktion
 * **Erweiterte ELK-Integration**: Vollständige Logging-Pipeline mit Elasticsearch und Logstash
 
+## Testing-Strategie (Tracer-Bullet Zyklus)
+
+Im Rahmen des aktuellen "Tracer-Bullet"-Entwicklungszyklus wurde die Testing-Strategie auf das **Minimum für die Architektur-Validierung** reduziert:
+
+### Monitoring-Server Test
+* **Ein essentieller "Smoke-Test"**: Überprüft, ob der Zipkin-Server (monitoring-server) überhaupt starten kann
+* **Zweck**: Validiert die korrekte Konfiguration des zentralen Monitoring-Servers
+* **Warum essentiell**: Ohne einen funktionsfähigen Zipkin-Server können im finalen E2E-Test keine Tracing-Daten empfangen und ausgewertet werden
+
+### Monitoring-Client
+* **Keine separaten Tests**: Die monitoring-client Bibliothek wird implizit durch die Integration in andere Services (z.B. ping-service) getestet
+* **Validierung erfolgt End-to-End**: Die Funktionalität wird durch den finalen "Tracer-Bullet"-Test bestätigt, wenn Services erfolgreich Tracing-Daten senden
+
+Diese minimalistische Teststrategie stellt sicher, dass die Monitoring-Komponenten für den "Tracer-Bullet"-Test bereit sind, ohne Zeit in umfangreiche Testsuites zu investieren, die für die Architektur-Validierung nicht notwendig sind.
+
 ---
-**Letzte Aktualisierung**: 15. August 2025
+**Letzte Aktualisierung**: 16. August 2025

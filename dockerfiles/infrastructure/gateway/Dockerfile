@@ -4,19 +4,42 @@
 # =============================================================================
 
 # =============================================================================
-# Build stage - Extract JAR layers for better caching
+# Build stage - Full Gradle build for better dependency management
 # =============================================================================
-FROM eclipse-temurin:21-jre-alpine AS builder
+FROM gradle:8.14-jdk21-alpine AS builder
 
-# Set working directory for build operations
-WORKDIR /builder
+LABEL stage=builder
+LABEL service=api-gateway
+LABEL maintainer="Meldestelle Development Team"
 
-# Copy the gateway JAR file for layer extraction
-COPY infrastructure/gateway/build/libs/*.jar app.jar
+WORKDIR /workspace
+
+# Gradle optimizations
+ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
+                 -Dorg.gradle.daemon=false \
+                 -Dorg.gradle.parallel=true \
+                 -Dorg.gradle.configureondemand=true \
+                 -Xmx2g"
+
+# Copy build files in optimal order for caching
+COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
+COPY gradle/ gradle/
+COPY platform/ platform/
+COPY core/ core/
+COPY build.gradle.kts ./
+
+# Copy gateway specific files
+COPY infrastructure/gateway/build.gradle.kts infrastructure/gateway/
+COPY infrastructure/gateway/src/ infrastructure/gateway/src/
+
+# Build application
+RUN ./gradlew :infrastructure:gateway:dependencies --no-daemon --info
+RUN ./gradlew :infrastructure:gateway:bootJar --no-daemon --info
 
 # Extract JAR layers for optimized Docker layer caching
-# This allows Docker to cache dependencies separately from application code
-RUN java -Djarmode=layertools -jar app.jar extract
+WORKDIR /builder
+RUN cp /workspace/infrastructure/gateway/build/libs/*.jar app.jar && \
+    java -Djarmode=layertools -jar app.jar extract
 
 # =============================================================================
 # Runtime stage - Optimized production image
@@ -59,6 +82,10 @@ ENV TZ=Europe/Vienna
 # Set working directory
 WORKDIR /app
 
+# Create required directories with proper permissions
+RUN mkdir -p /app/logs /app/tmp && \
+    chown -R gateway:gateway /app
+
 # Copy Spring Boot layers in optimal order for Docker layer caching
 # Dependencies change less frequently than application code
 COPY --from=builder --chown=gateway:gateway /builder/dependencies/ ./
@@ -72,43 +99,52 @@ COPY --from=builder --chown=gateway:gateway /builder/application/ ./
 # Switch to non-root user for security
 USER gateway
 
-# Expose application port
-EXPOSE 8080
+# Expose application port and debug port
+EXPOSE 8080 5005
 
 # =============================================================================
 # JVM and Application Configuration
 # =============================================================================
 # Optimized JVM settings for containerized Spring Boot reactive applications
-ENV JAVA_OPTS="-server \
-    -Xmx512m \
-    -Xms256m \
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -XX:+UseG1GC \
+    -XX:+UseStringDeduplication \
     -XX:+UseContainerSupport \
-    -XX:MaxRAMPercentage=75.0 \
-    -XX:+UnlockExperimentalVMOptions \
-    -XX:+UseCGroupMemoryLimitForHeap \
+    -XX:G1HeapRegionSize=16m \
+    -XX:+OptimizeStringConcat \
+    -XX:+UseCompressedOops \
     -Djava.security.egd=file:/dev/./urandom \
     -Djava.awt.headless=true \
     -Dfile.encoding=UTF-8 \
-    -Duser.timezone=Europe/Vienna"
+    -Duser.timezone=Europe/Vienna \
+    -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus,gateway"
 
 # Spring Boot specific optimizations
-ENV SPRING_PROFILES_ACTIVE=prod
-ENV SERVER_PORT=8080
-ENV MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
+    SPRING_PROFILES_ACTIVE=docker \
+    SERVER_PORT=8080 \
+    MANAGEMENT_SERVER_PORT=8080 \
+    LOGGING_LEVEL_ROOT=INFO
 
 # =============================================================================
 # Health Check Configuration
 # =============================================================================
-# Comprehensive health check with proper timing for Spring Boot startup
-HEALTHCHECK --interval=30s --timeout=15s --start-period=90s --retries=3 \
-  CMD curl -f -s http://localhost:8080/actuator/health | grep -q '"status":"UP"' || exit 1
+# Enhanced health check with proper timing for Spring Boot startup
+HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=3 \
+  CMD curl -fsS --max-time 3 http://localhost:8080/actuator/health/readiness || exit 1
 
 # =============================================================================
 # Application Startup
 # =============================================================================
-# Run the application with optimized settings and proper signal handling
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]
+# Gateway-focused startup command with debug support
+ENTRYPOINT ["sh", "-c", "\
+    echo 'Starting Meldestelle API Gateway on port 8080...'; \
+    if [ \"${DEBUG:-false}\" = \"true\" ]; then \
+        echo 'Debug mode enabled on port 5005'; \
+        exec java $JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 org.springframework.boot.loader.launch.JarLauncher; \
+    else \
+        exec java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher; \
+    fi"]
 
 # =============================================================================
 # Documentation

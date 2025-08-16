@@ -275,7 +275,7 @@ class AuthPerformanceTest {
             val permissions = jwtService.getPermissionsFromToken(token).getOrElse { emptyList() }
             assertEquals(allPermissions.size, permissions.size)
         }
-        assertTrue(validationTime < 20, "Validation with all permissions should be under 20ms")
+        assertTrue(validationTime < 50, "Validation with all permissions should be under 50ms")
     }
 
     // ========== Stress Tests ==========

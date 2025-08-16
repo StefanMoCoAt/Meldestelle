@@ -1,0 +1,261 @@
+# ===================================================================
+# Docker Compose - Application Services
+# Meldestelle Project - Service Layer Configuration
+# ===================================================================
+# Usage:
+#   Development: docker-compose -f docker-compose.yml -f docker-compose.services.yml up
+#   Production:  docker-compose -f docker-compose.prod.yml -f docker-compose.services.yml up
+# ===================================================================
+
+version: '3.8'
+
+services:
+  # ===================================================================
+  # Authentication Server
+  # ===================================================================
+  auth-server:
+    build:
+      context: .
+      dockerfile: dockerfiles/infrastructure/auth-server/Dockerfile
+      args:
+        SPRING_PROFILES_ACTIVE: docker
+    image: meldestelle/auth-server:latest
+    container_name: meldestelle-auth-server
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Spring Boot Configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8081
+      - MANAGEMENT_SERVER_PORT=8081
+
+      # Service Discovery
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_APPLICATION_NAME=auth-server
+
+      # Database Configuration
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-meldestelle}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-meldestelle}
+
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD:-}
+
+      # Security Configuration
+      - JWT_SECRET=${JWT_SECRET:-meldestelle-auth-secret-key-change-in-production}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-86400}
+
+      # Monitoring
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+    networks:
+      - meldestelle-network
+    volumes:
+      - auth-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    labels:
+      - "prometheus.scrape=true"
+      - "prometheus.port=8081"
+      - "prometheus.path=/actuator/prometheus"
+      - "prometheus.service=auth-server"
+
+  # ===================================================================
+  # Monitoring Server
+  # ===================================================================
+  monitoring-server:
+    build:
+      context: .
+      dockerfile: dockerfiles/infrastructure/monitoring-server/Dockerfile
+      args:
+        SPRING_PROFILES_ACTIVE: docker
+    image: meldestelle/monitoring-server:latest
+    container_name: meldestelle-monitoring-server
+    ports:
+      - "8083:8083"
+    depends_on:
+      consul:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+    environment:
+      # Spring Boot Configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8083
+      - MANAGEMENT_SERVER_PORT=8083
+
+      # Service Discovery
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_APPLICATION_NAME=monitoring-server
+
+      # Monitoring Configuration
+      - PROMETHEUS_URL=http://prometheus:9090
+      - GRAFANA_URL=http://grafana:3000
+      - ZIPKIN_URL=http://zipkin:9411
+
+      # Metrics Collection
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,env,configprops,beans
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
+
+      # Logging
+      - LOGGING_LEVEL_AT_MOCODE=DEBUG
+      - LOGGING_LEVEL_MICROMETER=DEBUG
+    networks:
+      - meldestelle-network
+    volumes:
+      - monitoring-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    restart: unless-stopped
+    labels:
+      - "prometheus.scrape=true"
+      - "prometheus.port=8083"
+      - "prometheus.path=/actuator/prometheus"
+      - "prometheus.service=monitoring-server"
+
+  # ===================================================================
+  # API Gateway (Enhanced Configuration)
+  # ===================================================================
+  api-gateway:
+    build:
+      context: .
+      dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
+    image: meldestelle/api-gateway:latest
+    container_name: meldestelle-api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      consul:
+        condition: service_healthy
+      auth-server:
+        condition: service_healthy
+    environment:
+      # Spring Boot Configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8080
+
+      # Service Discovery
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_APPLICATION_NAME=api-gateway
+
+      # Gateway Configuration
+      - SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_ENABLED=true
+      - SPRING_CLOUD_GATEWAY_DISCOVERY_LOCATOR_LOWER_CASE_SERVICE_ID=true
+
+      # Security Configuration
+      - AUTH_SERVER_URL=http://auth-server:8081
+      - JWT_SECRET=${JWT_SECRET:-meldestelle-auth-secret-key-change-in-production}
+
+      # Circuit Breaker
+      - RESILIENCE4J_CIRCUITBREAKER_INSTANCES_DEFAULT_SLIDING_WINDOW_SIZE=10
+      - RESILIENCE4J_CIRCUITBREAKER_INSTANCES_DEFAULT_FAILURE_RATE_THRESHOLD=50
+
+      # Monitoring
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,gateway
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    networks:
+      - meldestelle-network
+    volumes:
+      - gateway-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    restart: unless-stopped
+    labels:
+      - "prometheus.scrape=true"
+      - "prometheus.port=8080"
+      - "prometheus.path=/actuator/prometheus"
+      - "prometheus.service=api-gateway"
+
+  # ===================================================================
+  # Ping Service (Enhanced for Integration Testing)
+  # ===================================================================
+  ping-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/ping-service/Dockerfile
+    image: meldestelle/ping-service:latest
+    container_name: meldestelle-ping-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      consul:
+        condition: service_healthy
+    environment:
+      # Spring Boot Configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVER_PORT=8082
+
+      # Service Discovery
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_APPLICATION_NAME=ping-service
+
+      # Monitoring
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    networks:
+      - meldestelle-network
+    volumes:
+      - ping-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    labels:
+      - "prometheus.scrape=true"
+      - "prometheus.port=8082"
+      - "prometheus.path=/actuator/prometheus"
+      - "prometheus.service=ping-service"
+
+# ===================================================================
+# Volumes for Service Logs
+# ===================================================================
+volumes:
+  auth-logs:
+    driver: local
+  monitoring-logs:
+    driver: local
+  gateway-logs:
+    driver: local
+  ping-logs:
+    driver: local
+
+# ===================================================================
+# Networks (inherits from main docker-compose.yml)
+# ===================================================================
+networks:
+  meldestelle-network:
+    external: true

@@ -22,9 +22,10 @@ dependencies {
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.actuator)
 
-    // Abhängigkeiten für den Zipkin-Server und seine UI.
+    // Abhängigkeiten für den Zipkin-Server (UI ist via zipkin-lens bereits enthalten).
     implementation(libs.zipkin.server)
-    implementation(libs.zipkin.autoconfigure.ui)
+    // Prometheus client für Zipkin Metriken
+    implementation(libs.micrometer.prometheus)
 
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)

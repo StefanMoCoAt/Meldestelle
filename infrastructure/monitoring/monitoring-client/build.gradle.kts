@@ -18,6 +18,4 @@ dependencies {
     // Es enthält Spring Boot Actuator, Micrometer Prometheus und Zipkin Tracing.
     implementation(libs.bundles.monitoring.client)
 
-    // Stellt alle Test-Abhängigkeiten gebündelt bereit.
-    testImplementation(projects.platform.platformTesting)
 }

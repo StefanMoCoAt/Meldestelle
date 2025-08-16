@@ -114,7 +114,7 @@ ENV JAVA_OPTS_BASE="-XX:MaxRAMPercentage=80.0 \
     -Dspring.jmx.enabled=false \
     -Djava.awt.headless=true \
     -Dfile.encoding=UTF-8 \
-    -Duser.timezone=UTC"
+    -Duser.timezone=Europe/Vienna"
 
 # Monitoring and observability settings
 ENV JAVA_OPTS_MONITORING="-Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus \

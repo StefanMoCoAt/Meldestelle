@@ -159,3 +159,23 @@ Migrations-Skripte müssen einer klaren Namenskonvention folgen.
 
 Alle öffentlichen REST-Endpunkte müssen mit OpenAPI-Annotationen (`@Operation`, `@ApiResponse`) dokumentiert werden, um
 eine klare und interaktive API-Dokumentation zu generieren.
+
+---
+
+## 7. Dokumentationsstandards
+
+### 7.1. Sprache für Dokumentation
+
+* **README-Dateien:** Alle README-Dokumentationen im Projekt müssen in **deutscher Sprache** verfasst werden.
+  Dies gewährleistet Konsistenz und Zugänglichkeit für das deutsche Entwicklungsteam.
+
+* **Code-Kommentare:** Komplexe Geschäftslogik und fachliche Zusammenhänge sollen in deutscher Sprache kommentiert werden.
+
+* **API-Dokumentation:** OpenAPI-Beschreibungen und -Beispiele sind bevorzugt in deutscher Sprache zu verfassen,
+  sofern keine internationalen Anforderungen bestehen.
+
+### 7.2. Dokumentationsstruktur
+
+* README-Dateien sollen eine einheitliche Struktur befolgen: Überblick, Architektur, Entwicklung, Tests, Deployment.
+
+* Technische Begriffe dürfen in englischer Originalform verwendet werden, wenn keine etablierte deutsche Übersetzung existiert.

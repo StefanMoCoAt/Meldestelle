@@ -41,5 +41,14 @@ kotlin {
                 implementation(libs.ktor.client.js)
             }
         }
+
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
+                // Note: ktor-client-mock would be ideal but may not be available in libs
+                // Using core testing dependencies for now
+            }
+        }
     }
 }

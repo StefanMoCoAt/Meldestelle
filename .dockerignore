@@ -1,0 +1,229 @@
+# ===================================================================
+# Docker Ignore File for Meldestelle Project
+# Optimizes build performance by excluding unnecessary files
+# ===================================================================
+
+# ===================================================================
+# Version Control and Git
+# ===================================================================
+.git
+.gitignore
+.gitattributes
+.gitmodules
+**/.git
+**/.gitignore
+
+# ===================================================================
+# Documentation and README files
+# ===================================================================
+*.md
+**/README*
+**/CHANGELOG*
+**/LICENSE*
+**/CONTRIBUTING*
+docs/
+**/*.md
+
+# ===================================================================
+# IDE and Editor files
+# ===================================================================
+.idea/
+.vscode/
+.settings/
+.project
+.classpath
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-*
+*.iml
+*.iws
+*.ipr
+
+# ===================================================================
+# Build artifacts and cache directories
+# ===================================================================
+**/build/
+**/target/
+**/out/
+**/.gradle/
+**/node_modules/
+**/dist/
+**/tmp/
+**/.cache/
+**/.tmp/
+**/kotlin-js-store/
+
+# ===================================================================
+# Test and Coverage reports
+# ===================================================================
+**/test-results/
+**/coverage/
+**/reports/
+**/*.log
+**/logs/
+**/.coverage
+**/.nyc_output
+
+# ===================================================================
+# Environment and Configuration files
+# ===================================================================
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.*
+
+# ===================================================================
+# Docker and Container files
+# ===================================================================
+Dockerfile*
+docker-compose*
+.dockerignore
+**/.dockerignore
+
+# ===================================================================
+# Development data and temporary files
+# ===================================================================
+dev-data/
+temp-data/
+*.tmp
+*.temp
+**/temp/
+**/.temp/
+
+# ===================================================================
+# Gradle wrapper executable (keep gradle wrapper jar)
+# ===================================================================
+!gradle/wrapper/gradle-wrapper.jar
+
+# ===================================================================
+# Kotlin Multiplatform specific
+# ===================================================================
+**/kotlin-js-store/
+**/build/js/
+**/build/compileSync/
+**/build/klib/
+
+# ===================================================================
+# Client build artifacts
+# ===================================================================
+**/build/distributions/
+**/build/webpack-config-cache/
+**/build/webpack/
+
+# ===================================================================
+# Monitoring and Logging (exclude from builds)
+# ===================================================================
+**/prometheus-data/
+**/grafana-data/
+**/logs/
+**/*.log.*
+**/log/
+
+# ===================================================================
+# Backup and Archive files
+# ===================================================================
+*.bak
+*.backup
+*.old
+*.orig
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tgz
+
+# ===================================================================
+# OS specific files
+# ===================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===================================================================
+# JetBrains IDE
+# ===================================================================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+# ===================================================================
+# Package managers lock files (keep for reproducible builds)
+# ===================================================================
+# Keep these files for consistent dependency versions
+!package-lock.json
+!yarn.lock
+!gradle.lockfile
+
+# ===================================================================
+# Build and deployment scripts (exclude from builds)
+# ===================================================================
+scripts/deploy/
+scripts/backup/
+scripts/monitoring/
+Makefile
+deploy.sh
+backup.sh
+
+# ===================================================================
+# Security and certificates (never include in builds)
+# ===================================================================
+config/ssl/
+**/*.key
+**/*.pem
+**/*.p12
+**/*.jks
+**/*.crt
+secrets/
+**/*secret*
+**/*password*
+**/*credential*
+
+# ===================================================================
+# Database and data files
+# ===================================================================
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/postgres-data/
+**/redis-data/
+**/data/
+
+# ===================================================================
+# Application specific exclusions
+# ===================================================================
+TODO*.md
+NOTES*.md
+**/temp/
+**/.junie/
+
+# ===================================================================
+# Keep essential files (override exclusions)
+# ===================================================================
+# Gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Essential configuration files for builds
+!src/main/resources/application*.yml
+!src/main/resources/application*.yaml
+!src/main/resources/application*.properties
+
+# Essential client configuration
+!client/**/src/
+!platform/
+!core/
+
+# ===================================================================
+# Final note: Each Dockerfile should copy only what it needs
+# This .dockerignore provides a baseline for all builds
+# ===================================================================
