@@ -7,23 +7,51 @@
 ARG GRADLE_VERSION=8.14
 ARG JAVA_VERSION=21
 ARG NGINX_VERSION=alpine
+ARG NODE_VERSION=20.11.0
+
+# Client-specific build arguments (can be overridden at build time)
+ARG CLIENT_PATH=client/web-app
+ARG CLIENT_MODULE=client:web-app
+ARG CLIENT_NAME=web-app
 
 # ===================================================================
 # Build Stage - Kotlin/JS Compilation
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS kotlin-builder
 
+# Re-declare build arguments for kotlin-builder stage
+ARG CLIENT_PATH=client/web-app
+ARG CLIENT_MODULE=client:web-app
+ARG CLIENT_NAME=web-app
+ARG NODE_VERSION=20.11.0
+
 LABEL stage=kotlin-builder
 LABEL maintainer="Meldestelle Development Team"
 
 WORKDIR /workspace
 
-# Gradle optimizations for Kotlin Multiplatform
+# Install specific Node.js version for Kotlin/JS compatibility
+RUN apk add --no-cache wget ca-certificates && \
+    wget -q -O - https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64-musl.tar.xz | \
+    tar -xJ -C /usr/local --strip-components=1 && \
+    apk del wget ca-certificates && \
+    rm -rf /var/cache/apk/* && \
+    npm config set cache /tmp/.npm-cache && \
+    npm config set progress false && \
+    npm config set audit false
+
+# Gradle optimizations for Kotlin Multiplatform builds
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -Dorg.gradle.daemon=false \
                  -Dorg.gradle.parallel=true \
                  -Dorg.gradle.configureondemand=true \
-                 -Xmx3g"
+                 -Dorg.gradle.jvmargs=-Xmx3g \
+                 -Dkotlin.compiler.execution.strategy=in-process"
+
+# Kotlin/JS and Node.js environment variables
+ENV NODE_OPTIONS="--max-old-space-size=4096" \
+    NPM_CONFIG_CACHE="/tmp/.npm-cache" \
+    KOTLIN_JS_GENERATE_EXTERNALS=false
 
 # Copy build configuration files first for optimal caching
 COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
@@ -38,16 +66,28 @@ COPY core/ core/
 COPY client/common-ui/ client/common-ui/
 COPY ${CLIENT_PATH}/ ${CLIENT_PATH}/
 
-# Download dependencies in a separate layer
-RUN ./gradlew :${CLIENT_MODULE}:dependencies --no-daemon --info
+# Clear npm cache and verify Node.js installation
+RUN npm cache clean --force && \
+    node --version && npm --version
 
-# Build web application with production optimizations
-RUN ./gradlew :${CLIENT_MODULE}:jsBrowserProductionWebpack --no-daemon --info
+# Download dependencies in a separate layer
+RUN ./gradlew :${CLIENT_MODULE}:dependencies --no-daemon --info --stacktrace
+
+# Build web application with production optimizations and better error handling
+RUN ./gradlew :${CLIENT_MODULE}:jsBrowserProductionWebpack --no-daemon --info --stacktrace --debug
+
+# Verify build output
+RUN ls -la /workspace/${CLIENT_PATH}/build/dist/ || (echo "Build failed - no dist directory found" && exit 1)
 
 # ===================================================================
 # Production Stage - Nginx serving
 # ===================================================================
 FROM nginx:${NGINX_VERSION} AS runtime
+
+# Re-declare build arguments for runtime stage
+ARG CLIENT_PATH=client/web-app
+ARG CLIENT_MODULE=client:web-app
+ARG CLIENT_NAME=web-app
 
 # Metadata
 LABEL service="${CLIENT_NAME}" \
@@ -58,33 +98,35 @@ LABEL service="${CLIENT_NAME}" \
 # Security and system setup
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache curl && \
+    apk add --no-cache curl jq && \
     rm -rf /var/cache/apk/*
 
-# Remove default nginx content
-RUN rm -rf /usr/share/nginx/html/*
+# Remove default nginx content and logs
+RUN rm -rf /usr/share/nginx/html/* && \
+    rm -f /var/log/nginx/*.log
 
 # Copy built web application from builder stage
 COPY --from=kotlin-builder /workspace/${CLIENT_PATH}/build/dist/ /usr/share/nginx/html/
 
-# Copy nginx configuration if exists, otherwise use default
+# Copy nginx configuration
 COPY ${CLIENT_PATH}/nginx.conf /etc/nginx/nginx.conf
 
-# Create non-root user for nginx (if not using default nginx user)
-RUN adduser -D -s /bin/sh -G www-data nginx-user
+# Set proper permissions for nginx
+RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run /var/log/nginx && \
+    chmod -R 755 /usr/share/nginx/html
 
-# Set proper permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run /var/log/nginx
+# Switch to nginx user for security
+USER nginx
 
-# Health check for web application
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:80/ || exit 1
+# Health check specifically for the web application
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost/health || exit 1
 
 # Expose HTTP port
 EXPOSE 80
 
-# Start nginx with proper signal handling
+# Start nginx with proper signal handling for graceful shutdowns
 STOPSIGNAL SIGQUIT
 
-# Run nginx in foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Run nginx in foreground with error handling
+CMD ["sh", "-c", "nginx -t && exec nginx -g 'daemon off;'"]

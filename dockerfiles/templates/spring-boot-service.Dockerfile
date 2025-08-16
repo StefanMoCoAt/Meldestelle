@@ -10,11 +10,20 @@ ARG GRADLE_VERSION=8.14
 ARG JAVA_VERSION=21
 ARG ALPINE_VERSION=3.19
 ARG SPRING_PROFILES_ACTIVE=default
+ARG SERVICE_PATH=.
+ARG SERVICE_NAME=spring-boot-service
+ARG SERVICE_PORT=8080
 
 # ===================================================================
 # Build Stage
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
+
+# Re-declare build arguments for this stage
+ARG SERVICE_PATH=.
+ARG SERVICE_NAME=spring-boot-service
+ARG SERVICE_PORT=8080
+ARG SPRING_PROFILES_ACTIVE=default
 
 LABEL stage=builder
 LABEL maintainer="Meldestelle Development Team"
@@ -34,14 +43,28 @@ COPY gradle/ gradle/
 COPY platform/ platform/
 COPY build.gradle.kts ./
 
-# Copy service-specific files (replace SERVICE_PATH with actual path)
-COPY ${SERVICE_PATH}/build.gradle.kts ${SERVICE_PATH}/
-COPY ${SERVICE_PATH}/src/ ${SERVICE_PATH}/src/
-
-# Build application
-RUN ./gradlew :${SERVICE_NAME}:dependencies --no-daemon --info
-RUN ./gradlew :${SERVICE_NAME}:bootJar --no-daemon --info \
-    -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
+# Create standalone project structure when using template generically
+RUN if [ "${SERVICE_PATH}" = "." ]; then \
+        echo "Creating isolated standalone Spring Boot application..."; \
+        mkdir -p /tmp/standalone-app/src/main/kotlin/com/example /tmp/standalone-app/src/main/resources; \
+        cd /tmp/standalone-app; \
+        echo 'plugins { id("org.springframework.boot") version "3.2.0"; id("io.spring.dependency-management") version "1.1.4"; kotlin("jvm") version "2.2.0"; kotlin("plugin.spring") version "2.2.0" }' > build.gradle.kts; \
+        echo 'group = "com.example"; version = "1.0.0"; java { sourceCompatibility = JavaVersion.VERSION_21 }' >> build.gradle.kts; \
+        echo 'repositories { mavenCentral() }' >> build.gradle.kts; \
+        echo 'dependencies { implementation("org.springframework.boot:spring-boot-starter-web"); testImplementation("org.springframework.boot:spring-boot-starter-test") }' >> build.gradle.kts; \
+        echo 'package com.example; import org.springframework.boot.autoconfigure.SpringBootApplication; import org.springframework.boot.runApplication; @SpringBootApplication class Application; fun main(args: Array<String>) { runApplication<Application>(*args) }' > src/main/kotlin/com/example/Application.kt; \
+        echo 'rootProject.name = "standalone-app"' > settings.gradle.kts; \
+        cp /workspace/gradlew /workspace/gradlew.bat .; \
+        cp -r /workspace/gradle .; \
+        echo "Building standalone application..."; \
+        ./gradlew bootJar --no-daemon --info -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}; \
+        cp build/libs/*.jar /workspace/app.jar; \
+    else \
+        echo "Building specific service: ${SERVICE_NAME}"; \
+        ./gradlew :${SERVICE_NAME}:dependencies --no-daemon --info; \
+        ./gradlew :${SERVICE_NAME}:bootJar --no-daemon --info -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}; \
+        cp ${SERVICE_PATH}/build/libs/*.jar /workspace/app.jar; \
+    fi
 
 # ===================================================================
 # Runtime Stage
@@ -76,9 +99,14 @@ RUN addgroup -g ${APP_GID} -S ${APP_GROUP} && \
 RUN mkdir -p /app/logs /app/tmp && \
     chown -R ${APP_USER}:${APP_GROUP} /app
 
-# Copy JAR
+# Re-declare build arguments for runtime stage
+ARG SERVICE_PATH=.
+ARG SERVICE_NAME=spring-boot-service
+ARG SERVICE_PORT=8080
+
+# Copy JAR (different locations for standalone vs service-specific builds)
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} \
-     /workspace/${SERVICE_PATH}/build/libs/*.jar app.jar
+     /workspace/app.jar app.jar
 
 USER ${APP_USER}
 

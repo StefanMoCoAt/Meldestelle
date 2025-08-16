@@ -104,7 +104,7 @@ class RedisDistributedCachePerformanceTest {
 
         val totalOperations = numberOfCoroutines * operationsPerCoroutine
         val successRate = successCounter.get().toDouble() / totalOperations
-        val operationsPerSecond = totalOperations / time.inWholeSeconds
+        val operationsPerSecond = if (time.inWholeSeconds > 0) totalOperations / time.inWholeSeconds else totalOperations * 1000 / maxOf(1, time.inWholeMilliseconds)
 
         logger.info { "Performance test completed" }
         logger.info { "Total operations: $totalOperations" }

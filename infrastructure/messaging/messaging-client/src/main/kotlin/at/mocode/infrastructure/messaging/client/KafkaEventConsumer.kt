@@ -47,6 +47,7 @@ class KafkaEventConsumer(
             .asFlow()
     }
 
+    @Deprecated("Use receiveEventsWithResult with Flow<Result<T>> instead.")
     override fun <T : Any> receiveEvents(topic: String, eventType: Class<T>): Flux<T> {
         logger.info("Setting up reactive consumer for topic '{}' with event type '{}'", topic, eventType.simpleName)
 

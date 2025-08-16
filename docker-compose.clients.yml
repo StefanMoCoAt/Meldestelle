@@ -94,4 +94,4 @@ volumes:
 # ===================================================================
 networks:
   meldestelle-network:
-    external: true
+    driver: bridge

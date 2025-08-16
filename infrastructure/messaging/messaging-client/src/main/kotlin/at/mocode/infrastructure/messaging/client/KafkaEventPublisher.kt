@@ -58,6 +58,7 @@ class KafkaEventPublisher(
         }
     }
 
+    @Deprecated("Use publishEvent with Result<Unit> instead.")
     override fun publishEventReactive(topic: String, key: String?, event: Any): Mono<Unit> {
         logger.debug("Publishing event to topic '{}' with key '{}', event type: '{}'",
             topic, key, event::class.simpleName)
@@ -82,6 +83,7 @@ class KafkaEventPublisher(
             .map { Unit }
     }
 
+    @Deprecated("Use publishEvents with Result<List<Unit>> instead.")
     override fun publishEventsReactive(topic: String, events: List<Pair<String?, Any>>): Flux<Unit> {
         if (events.isEmpty()) {
             logger.debug("No events to publish to topic '{}'", topic)

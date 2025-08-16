@@ -7,17 +7,37 @@
 ARG GRADLE_VERSION=8.14
 ARG JAVA_VERSION=21
 ARG NGINX_VERSION=alpine
+ARG NODE_VERSION=20.11.0
+
+# Client-specific build arguments (parametrized for better maintainability)
+ARG CLIENT_PATH=client/web-app
+ARG CLIENT_MODULE=client:web-app
 
 # ===================================================================
 # Build Stage - Kotlin/JS Compilation
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS kotlin-builder
 
+# Re-declare build arguments for kotlin-builder stage
+ARG CLIENT_PATH=client/web-app
+ARG CLIENT_MODULE=client:web-app
+ARG NODE_VERSION=20.11.0
+
 LABEL stage=kotlin-builder
 LABEL service=web-app
 LABEL maintainer="Meldestelle Development Team"
 
 WORKDIR /workspace
+
+# Install specific Node.js version for Kotlin/JS compatibility
+RUN apk add --no-cache wget ca-certificates && \
+    wget -q -O - https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64-musl.tar.xz | \
+    tar -xJ -C /usr/local --strip-components=1 && \
+    apk del wget ca-certificates && \
+    rm -rf /var/cache/apk/* && \
+    npm config set cache /tmp/.npm-cache && \
+    npm config set progress false && \
+    npm config set audit false
 
 # Gradle optimizations for Kotlin Multiplatform builds
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
@@ -26,6 +46,11 @@ ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -Dorg.gradle.configureondemand=true \
                  -Dorg.gradle.jvmargs=-Xmx3g \
                  -Dkotlin.compiler.execution.strategy=in-process"
+
+# Kotlin/JS and Node.js environment variables
+ENV NODE_OPTIONS="--max-old-space-size=4096" \
+    NPM_CONFIG_CACHE="/tmp/.npm-cache" \
+    KOTLIN_JS_GENERATE_EXTERNALS=false
 
 # Copy build configuration files first for optimal Docker layer caching
 COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
@@ -38,21 +63,32 @@ COPY core/ core/
 
 # Copy client modules in dependency order for optimal caching
 COPY client/common-ui/ client/common-ui/
-COPY client/web-app/ client/web-app/
+COPY ${CLIENT_PATH}/ ${CLIENT_PATH}/
+
+# Clear npm cache and verify Node.js installation
+RUN npm cache clean --force && \
+    node --version && npm --version
 
 # Download and cache dependencies in a separate layer
-RUN ./gradlew :client:web-app:dependencies --no-daemon --info
+RUN ./gradlew :${CLIENT_MODULE}:dependencies --no-daemon --info --stacktrace
 
-# Build web application with production optimizations
-RUN ./gradlew :client:web-app:jsBrowserProductionWebpack --no-daemon --info
+# Build web application with production optimizations and better error handling
+RUN ./gradlew :${CLIENT_MODULE}:jsBrowserProductionWebpack --no-daemon --info --stacktrace --debug
 
 # Verify build output
-RUN ls -la /workspace/client/web-app/build/dist/ || (echo "Build failed - no dist directory found" && exit 1)
+RUN ls -la /workspace/${CLIENT_PATH}/build/dist/ || (echo "Build failed - no dist directory found" && exit 1)
 
 # ===================================================================
 # Production Stage - Nginx serving
 # ===================================================================
 FROM nginx:${NGINX_VERSION} AS runtime
+
+# Re-declare build arguments for runtime stage
+ARG CLIENT_PATH=client/web-app
+ARG CLIENT_MODULE=client:web-app
+ARG GRADLE_VERSION=8.14
+ARG JAVA_VERSION=21
+ARG NGINX_VERSION=alpine
 
 # Comprehensive metadata
 LABEL service="web-app" \
@@ -74,10 +110,10 @@ RUN rm -rf /usr/share/nginx/html/* && \
     rm -f /var/log/nginx/*.log
 
 # Copy built web application from builder stage
-COPY --from=kotlin-builder /workspace/client/web-app/build/dist/ /usr/share/nginx/html/
+COPY --from=kotlin-builder /workspace/${CLIENT_PATH}/build/dist/ /usr/share/nginx/html/
 
 # Copy optimized nginx configuration
-COPY client/web-app/nginx.conf /etc/nginx/nginx.conf
+COPY ${CLIENT_PATH}/nginx.conf /etc/nginx/nginx.conf
 
 # Set proper permissions for nginx
 RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run /var/log/nginx && \
@@ -102,8 +138,15 @@ CMD ["sh", "-c", "nginx -t && exec nginx -g 'daemon off;'"]
 # ===================================================================
 # Build and Usage Instructions
 # ===================================================================
-# Build:
-#   docker build -t meldestelle/web-app:latest -f client/web-app/Dockerfile .
+# Build with default parameters:
+#   docker build -t meldestelle/web-app:latest -f dockerfiles/clients/web-app/Dockerfile .
+#
+# Build with custom parameters:
+#   docker build -t meldestelle/web-app:latest \
+#     --build-arg NODE_VERSION=20.11.0 \
+#     --build-arg CLIENT_PATH=client/web-app \
+#     --build-arg CLIENT_MODULE=client:web-app \
+#     -f dockerfiles/clients/web-app/Dockerfile .
 #
 # Run standalone:
 #   docker run -p 3001:80 --name web-app meldestelle/web-app:latest
@@ -116,4 +159,11 @@ CMD ["sh", "-c", "nginx -t && exec nginx -g 'daemon off;'"]
 #   http://localhost:3001/health (health check)
 #
 # Development with hot-reload (use docker-compose.override.yml instead)
+#
+# Optimization improvements:
+# - Added Node.js v20.11.0 for optimal Kotlin/JS compatibility
+# - Parametrized build arguments for better maintainability
+# - Enhanced npm and Node.js environment variables
+# - Improved error handling with --stacktrace and --debug flags
+# - npm cache management for better performance
 # ===================================================================

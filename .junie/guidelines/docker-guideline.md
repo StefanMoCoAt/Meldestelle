@@ -1,8 +1,9 @@
 # Docker-Guidelines für das Meldestelle-Projekt
 
-> **Version:** 1.0
+> **Version:** 1.1
 > **Datum:** 16. August 2025
 > **Autor:** Meldestelle Development Team
+> **Letzte Aktualisierung:** Erweitert und optimiert basierend auf aktueller Implementierung
 
 ---
 
@@ -72,17 +73,21 @@ graph TB
 
 ### Service-Ports Matrix
 
-| Service | Development | Production | Health Check |
-|---------|------------|------------|--------------|
-| PostgreSQL | 5432 | Internal | :5432 |
-| Redis | 6379 | Internal | :6379 |
-| Keycloak | 8180 | 8443 (HTTPS) | /health/ready |
-| Kafka | 9092 | Internal | broker list |
-| API Gateway | 8080 | Internal | /actuator/health |
-| Ping Service | 8082 | Internal | /ping |
-| Prometheus | 9090 | Internal | /-/healthy |
-| Grafana | 3000 | 3443 (HTTPS) | /api/health |
-| Nginx | - | 80/443 | /health |
+| Service | Development | Production | Health Check | Debug Port |
+|---------|------------|------------|--------------|------------|
+| PostgreSQL | 5432 | Internal | pg_isready -U meldestelle -d meldestelle | - |
+| Redis | 6379 | Internal | redis-cli ping | - |
+| Keycloak | 8180 | 8443 (HTTPS) | /health/ready | - |
+| Kafka | 9092 | Internal | kafka-topics --bootstrap-server localhost:9092 --list | - |
+| Zookeeper | 2181 | Internal | nc -z localhost 2181 | - |
+| Zipkin | 9411 | Internal | /health | - |
+| Consul | 8500 | Internal | /v1/status/leader | - |
+| Auth Server | 8081 | Internal | /actuator/health/readiness | 5005 |
+| Ping Service | 8082 | Internal | /actuator/health/readiness | 5005 |
+| Monitoring Server | 8083 | Internal | /actuator/health/readiness | 5005 |
+| Prometheus | 9090 | Internal | /-/healthy | - |
+| Grafana | 3000 | 3443 (HTTPS) | /api/health | - |
+| Nginx | - | 80/443 | /health | - |
 
 ---
 
@@ -114,49 +119,68 @@ dockerfiles/
 **Datei:** `dockerfiles/templates/spring-boot-service.Dockerfile`
 
 ```dockerfile
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.8
 
 # ===================================================================
 # Multi-stage Dockerfile Template for Spring Boot Services
-# Features: Security hardening, monitoring support, optimal caching
+# Features: Security hardening, monitoring support, optimal caching, BuildKit cache mounts
 # ===================================================================
 
-# Build arguments
+# Build arguments for flexibility
 ARG GRADLE_VERSION=8.14
 ARG JAVA_VERSION=21
-ARG ALPINE_VERSION=3.19
 ARG SPRING_PROFILES_ACTIVE=default
+ARG SERVICE_PATH=.
+ARG SERVICE_NAME=spring-boot-service
+ARG SERVICE_PORT=8080
 
 # ===================================================================
 # Build Stage
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
+# Re-declare build arguments for this stage
+ARG SERVICE_PATH=.
+ARG SERVICE_NAME=spring-boot-service
+ARG SERVICE_PORT=8080
+ARG SPRING_PROFILES_ACTIVE=default
+
 LABEL stage=builder
+LABEL service="${SERVICE_NAME}"
 LABEL maintainer="Meldestelle Development Team"
 
 WORKDIR /workspace
 
-# Gradle optimizations
+# Gradle optimizations for containerized builds
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -Dorg.gradle.daemon=false \
                  -Dorg.gradle.parallel=true \
                  -Dorg.gradle.configureondemand=true \
                  -Xmx2g"
 
-# Copy build files in optimal order for caching
-COPY ../../gradlew gradlew.bat gradle.properties settings.gradle.kts ./
-COPY ../../gradle gradle/
-COPY ../../platform platform/
-COPY ../../build.gradle.kts ./
+# Copy gradle wrapper and configuration files first for optimal caching
+COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
+COPY gradle/ gradle/
 
-# Copy service-specific files (replace SERVICE_PATH with actual path)
+# Copy platform dependencies (changes less frequently)
+COPY platform/ platform/
+
+# Copy root build configuration
+COPY build.gradle.kts ./
+
+# Copy service-specific files last (changes most frequently)
 COPY ${SERVICE_PATH}/build.gradle.kts ${SERVICE_PATH}/
 COPY ${SERVICE_PATH}/src/ ${SERVICE_PATH}/src/
 
-# Build application
-RUN ./gradlew :${SERVICE_NAME}:dependencies --no-daemon --info
-RUN ./gradlew :${SERVICE_NAME}:bootJar --no-daemon --info \
+# Download and cache dependencies with BuildKit cache mount
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    ./gradlew :${SERVICE_NAME}:dependencies --no-daemon --info
+
+# Build the application with optimizations and build cache
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    ./gradlew :${SERVICE_NAME}:bootJar --no-daemon --info \
     -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
 
 # ===================================================================
@@ -164,13 +188,22 @@ RUN ./gradlew :${SERVICE_NAME}:bootJar --no-daemon --info \
 # ===================================================================
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
 
-# Metadata
+# Build arguments for runtime stage
+ARG BUILD_DATE
+ARG SPRING_PROFILES_ACTIVE=default
+ARG SERVICE_NAME=spring-boot-service
+ARG SERVICE_PORT=8080
+
+# Enhanced metadata
 LABEL service="${SERVICE_NAME}" \
       version="1.0.0" \
+      description="Containerized Spring Boot microservice" \
       maintainer="Meldestelle Development Team" \
-      java.version="${JAVA_VERSION}"
+      java.version="${JAVA_VERSION}" \
+      spring.profiles.active="${SPRING_PROFILES_ACTIVE}" \
+      build.date="${BUILD_DATE}"
 
-# Build arguments
+# Build arguments for user configuration
 ARG APP_USER=appuser
 ARG APP_GROUP=appgroup
 ARG APP_UID=1001
@@ -178,34 +211,33 @@ ARG APP_GID=1001
 
 WORKDIR /app
 
-# System setup
+# Update Alpine packages, install tools, create user and directories in one layer
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache curl jq tzdata && \
-    rm -rf /var/cache/apk/*
-
-# Non-root user creation
-RUN addgroup -g ${APP_GID} -S ${APP_GROUP} && \
-    adduser -u ${APP_UID} -S ${APP_USER} -G ${APP_GROUP} -h /app -s /bin/sh
-
-# Directory setup
-RUN mkdir -p /app/logs /app/tmp && \
+    apk add --no-cache \
+        curl \
+        tzdata && \
+    rm -rf /var/cache/apk/* && \
+    addgroup -g ${APP_GID} -S ${APP_GROUP} && \
+    adduser -u ${APP_UID} -S ${APP_USER} -G ${APP_GROUP} -h /app -s /bin/sh && \
+    mkdir -p /app/logs /app/tmp && \
     chown -R ${APP_USER}:${APP_GROUP} /app
 
-# Copy JAR
+# Copy the built JAR from builder stage with proper ownership
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} \
      /workspace/${SERVICE_PATH}/build/libs/*.jar app.jar
 
+# Switch to non-root user
 USER ${APP_USER}
 
-# Expose ports
+# Expose application port and debug port
 EXPOSE ${SERVICE_PORT} 5005
 
-# Health check
+# Enhanced health check with better configuration
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=3 \
     CMD curl -fsS --max-time 2 http://localhost:${SERVICE_PORT}/actuator/health/readiness || exit 1
 
-# JVM configuration
+# Optimized JVM settings for Spring Boot 3.x with Java 21 and monitoring support
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -XX:+UseG1GC \
     -XX:+UseStringDeduplication \
@@ -213,8 +245,10 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -Djava.security.egd=file:/dev/./urandom \
     -Djava.awt.headless=true \
     -Dfile.encoding=UTF-8 \
-    -Duser.timezone=UTC \
-    -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus"
+    -Duser.timezone=Europe/Vienna \
+    -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus \
+    -Dmanagement.endpoint.health.show-details=always \
+    -Dmanagement.metrics.export.prometheus.enabled=true"
 
 # Spring Boot configuration
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
@@ -222,13 +256,16 @@ ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
     SERVER_PORT=${SERVICE_PORT} \
     LOGGING_LEVEL_ROOT=INFO
 
-# Startup command with debug support
+# Enhanced entrypoint with conditional debug support and better logging
 ENTRYPOINT ["sh", "-c", "\
+    echo 'Starting ${SERVICE_NAME} with Java ${JAVA_VERSION}...'; \
+    echo 'Active Spring profiles: ${SPRING_PROFILES_ACTIVE}'; \
     if [ \"${DEBUG:-false}\" = \"true\" ]; then \
-        echo 'Starting ${SERVICE_NAME} in DEBUG mode on port 5005...'; \
-        exec java $JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar app.jar; \
+        echo 'DEBUG mode enabled - remote debugging available on port 5005'; \
+        exec java ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar app.jar; \
     else \
-        exec java $JAVA_OPTS -jar app.jar; \
+        echo 'Starting application in production mode'; \
+        exec java ${JAVA_OPTS} -jar app.jar; \
     fi"]
 ```
 
@@ -288,6 +325,63 @@ CMD ["nginx", "-g", "daemon off;"]
 
 ---
 
+## 🚀 Moderne Docker-Features und Optimierungen
+
+### BuildKit Cache Mounts
+
+Unsere Templates nutzen moderne **BuildKit Cache Mounts** für optimale Build-Performance:
+
+```dockerfile
+# BuildKit Cache Mount für Gradle Dependencies
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    ./gradlew :${SERVICE_NAME}:dependencies --no-daemon --info
+```
+
+**Vorteile:**
+- **Erheblich schnellere Builds**: Dependencies werden zwischen Builds gecacht
+- **Geringerer Netzwerk-Traffic**: Erneute Downloads werden vermieden
+- **Konsistente Build-Zeiten**: Vorhersagbare Performance auch bei häufigen Builds
+- **CI/CD Optimierung**: Drastische Reduktion der Pipeline-Laufzeiten
+
+### Docker Syntax und Versioning
+
+```dockerfile
+# Verwendung der neuesten Dockerfile-Syntax für erweiterte Features
+# syntax=docker/dockerfile:1.8
+```
+
+**Moderne Features:**
+- **Cache Mounts**: Persistente Build-Caches zwischen Container-Builds
+- **Secret Mounts**: Sichere Übertragung von Build-Secrets ohne Layer-Persistierung
+- **SSH Mounts**: Sichere Git-Repository-Zugriffe während des Builds
+- **Multi-Platform Builds**: Unterstützung für ARM64 und AMD64 Architekturen
+
+### Container Testing und Validation
+
+**Automatisierte Dockerfile-Tests mit `test-dockerfile.sh`:**
+
+```bash
+# Vollständige Template-Validierung
+./test-dockerfile.sh
+
+# Tests umfassen:
+# 1. Dockerfile-Syntax-Validierung
+# 2. ARG-Deklarationen-Prüfung
+# 3. Build-Tests mit Default-Argumenten
+# 4. Build-Tests mit Custom-Argumenten
+# 5. Container-Startup-Verifikation
+# 6. Service-Health-Checks
+```
+
+**Test-Kategorien:**
+- **Syntax-Tests**: Docker-Parser-Validierung ohne vollständigen Build
+- **Build-Tests**: Vollständige Container-Builds mit verschiedenen Parametern
+- **Runtime-Tests**: Container-Startup und Service-Health-Prüfungen
+- **Cleanup-Tests**: Automatische Bereinigung von Test-Artefakten
+
+---
+
 ## 🎼 Docker-Compose Organisation
 
 ### Multi-Environment Strategie
@@ -315,10 +409,67 @@ docker-compose \
   up -d
 
 # Nur Infrastructure für Backend-Entwicklung
-docker-compose -f docker-compose.yml up -d postgres redis kafka consul
+docker-compose -f docker-compose.yml up -d postgres redis kafka consul zipkin
+
+# Mit Debug-Unterstützung für Service-Entwicklung
+DEBUG=true SPRING_PROFILES_ACTIVE=docker \
+docker-compose -f docker-compose.yml -f docker-compose.services.yml up -d
 
 # Mit Live-Reload für Frontend-Entwicklung
 docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+```
+
+#### 🔧 Erweiterte Umgebungskonfiguration
+
+**Beispiel für Auth-Server Konfiguration:**
+
+```yaml
+# Erweiterte Environment-Variablen aus docker-compose.services.yml
+auth-server:
+  environment:
+    # Spring Boot Configuration
+    - SPRING_PROFILES_ACTIVE=docker
+    - SERVER_PORT=8081
+    - DEBUG=false
+
+    # Service Discovery
+    - SPRING_CLOUD_CONSUL_HOST=consul
+    - SPRING_CLOUD_CONSUL_PORT=8500
+
+    # Database Configuration mit Connection Pooling
+    - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/meldestelle
+    - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=10
+    - SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=5
+
+    # Redis Configuration mit Timeout-Einstellungen
+    - SPRING_REDIS_HOST=redis
+    - SPRING_REDIS_TIMEOUT=2000ms
+    - SPRING_REDIS_LETTUCE_POOL_MAX_ACTIVE=8
+
+    # Security & JWT Configuration
+    - JWT_SECRET=meldestelle-auth-secret-key-change-in-production
+    - JWT_EXPIRATION=86400
+    - JWT_REFRESH_EXPIRATION=604800
+
+    # Monitoring & Observability
+    - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,configprops
+    - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+    - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=0.1
+    - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+
+    # Performance Tuning
+    - JAVA_OPTS=-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC
+    - LOGGING_LEVEL_AT_MOCODE=DEBUG
+
+  # Resource Constraints
+  deploy:
+    resources:
+      limits:
+        memory: 512M
+        cpus: '1.0'
+      reservations:
+        memory: 256M
+        cpus: '0.5'
 ```
 
 #### 🚀 Production Deployment
@@ -781,6 +932,16 @@ brew install ctop  # Container-Monitoring-Tool
 
 | Version | Datum | Änderungen |
 |---------|-------|------------|
+| 1.1.0 | 2025-08-16 | **Umfassende Überarbeitung und Optimierung:** |
+|         |            | • Aktualisierung aller Dockerfile-Templates auf aktuelle Implementierung |
+|         |            | • Integration von BuildKit Cache Mounts für optimale Build-Performance |
+|         |            | • Dokumentation moderner Docker-Features (syntax=docker/dockerfile:1.8) |
+|         |            | • Erweiterte Service-Ports-Matrix mit Debug-Ports und korrekten Health-Checks |
+|         |            | • Umfassende docker-compose Konfigurationsbeispiele mit Environment-Variablen |
+|         |            | • Neue Sektion für automatisierte Container-Tests (test-dockerfile.sh) |
+|         |            | • Aktualisierung auf Europe/Vienna Timezone und Java 21 Optimierungen |
+|         |            | • Erweiterte Monitoring- und Observability-Konfigurationen |
+|         |            | • Verbesserte Resource-Management und Performance-Tuning Einstellungen |
 | 1.0.0 | 2025-08-16 | Initiale Docker-Guidelines basierend auf Containerisierungsstrategie |
 
 ---

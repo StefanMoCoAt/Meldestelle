@@ -2,22 +2,13 @@
 // Es stellt Konfigurationen und Beans bereit, um mit einem OAuth2/OIDC-Provider
 // wie Keycloak zu interagieren und JWTs zu validieren.
 plugins {
+    `java-library`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }
 
-// Deaktiviert die Erstellung eines ausführbaren Jars für dieses Bibliothek-Modul.
-tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
-    enabled = false
-}
-
-// Stellt sicher, dass stattdessen ein reguläres Jar gebaut wird.
-tasks.getByName<Jar>("jar") {
-    enabled = true
-}
 
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.

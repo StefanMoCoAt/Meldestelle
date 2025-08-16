@@ -276,30 +276,18 @@ class AuthenticationServiceTest {
         val lockedResult = AuthenticationService.AuthResult.Locked(LocalDateTime.now())
 
         // Act & Assert
-        when (successResult) {
-            is AuthenticationService.AuthResult.Success -> {
-                assertNotNull(successResult.token)
-                assertNotNull(successResult.user)
-            }
-            is AuthenticationService.AuthResult.Failure -> fail("Should not be failure")
-            is AuthenticationService.AuthResult.Locked -> fail("Should not be locked")
-        }
+        // Test Success result
+        assertTrue(successResult is AuthenticationService.AuthResult.Success)
+        assertNotNull(successResult.token)
+        assertNotNull(successResult.user)
 
-        when (failureResult) {
-            is AuthenticationService.AuthResult.Success -> fail("Should not be success")
-            is AuthenticationService.AuthResult.Failure -> {
-                assertEquals("Failed", failureResult.reason)
-            }
-            is AuthenticationService.AuthResult.Locked -> fail("Should not be locked")
-        }
+        // Test Failure result
+        assertTrue(failureResult is AuthenticationService.AuthResult.Failure)
+        assertEquals("Failed", failureResult.reason)
 
-        when (lockedResult) {
-            is AuthenticationService.AuthResult.Success -> fail("Should not be success")
-            is AuthenticationService.AuthResult.Failure -> fail("Should not be failure")
-            is AuthenticationService.AuthResult.Locked -> {
-                assertNotNull(lockedResult.lockedUntil)
-            }
-        }
+        // Test Locked result
+        assertTrue(lockedResult is AuthenticationService.AuthResult.Locked)
+        assertNotNull(lockedResult.lockedUntil)
     }
 
     @Test
@@ -310,30 +298,14 @@ class AuthenticationServiceTest {
         val weakPasswordResult = AuthenticationService.PasswordChangeResult.WeakPassword
 
         // Act & Assert
-        when (successResult) {
-            is AuthenticationService.PasswordChangeResult.Success -> {
-                // Success case - no additional data
-                assertTrue(true)
-            }
-            is AuthenticationService.PasswordChangeResult.Failure -> fail("Should not be failure")
-            is AuthenticationService.PasswordChangeResult.WeakPassword -> fail("Should not be weak password")
-        }
+        // Test Success result
+        assertTrue(successResult is AuthenticationService.PasswordChangeResult.Success)
 
-        when (failureResult) {
-            is AuthenticationService.PasswordChangeResult.Success -> fail("Should not be success")
-            is AuthenticationService.PasswordChangeResult.Failure -> {
-                assertEquals("Failed", failureResult.reason)
-            }
-            is AuthenticationService.PasswordChangeResult.WeakPassword -> fail("Should not be weak password")
-        }
+        // Test Failure result
+        assertTrue(failureResult is AuthenticationService.PasswordChangeResult.Failure)
+        assertEquals("Failed", failureResult.reason)
 
-        when (weakPasswordResult) {
-            is AuthenticationService.PasswordChangeResult.Success -> fail("Should not be success")
-            is AuthenticationService.PasswordChangeResult.Failure -> fail("Should not be failure")
-            is AuthenticationService.PasswordChangeResult.WeakPassword -> {
-                // Weak password case - no additional data
-                assertTrue(true)
-            }
-        }
+        // Test WeakPassword result
+        assertTrue(weakPasswordResult is AuthenticationService.PasswordChangeResult.WeakPassword)
     }
 }

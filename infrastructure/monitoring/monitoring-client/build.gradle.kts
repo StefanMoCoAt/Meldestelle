@@ -1,6 +1,7 @@
 // Dieses Modul ist eine wiederverwendbare Bibliothek, die von jedem Microservice
 // eingebunden wird, um Metriken und Tracing-Daten zu exportieren.
 plugins {
+    `java-library`
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.spring.dependencyManagement)

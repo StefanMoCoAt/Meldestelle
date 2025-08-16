@@ -143,7 +143,6 @@ micrometer-tracing-bridge-brave = { module = "io.micrometer:micrometer-tracing-b
 zipkin-reporter-brave = { module = "io.zipkin.reporter2:zipkin-reporter-brave", version.ref = "zipkinReporter" }
 zipkin-sender-okhttp3 = { module = "io.zipkin.reporter2:zipkin-sender-okhttp3", version.ref = "zipkinReporter" }
 zipkin-server = { module = "io.zipkin:zipkin-server", version.ref = "zipkin" }
-zipkin-autoconfigure-ui = { module = "io.zipkin:zipkin-autoconfigure-ui", version.ref = "zipkin" }
 
 # --- Resilience4j ---
 resilience4j-spring-boot3 = { module = "io.github.resilience4j:resilience4j-spring-boot3", version.ref = "resilience4j" }
