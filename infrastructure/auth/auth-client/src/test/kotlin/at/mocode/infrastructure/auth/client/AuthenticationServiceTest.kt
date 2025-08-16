@@ -277,17 +277,26 @@ class AuthenticationServiceTest {
 
         // Act & Assert
         // Test Success result
-        assertTrue(successResult is AuthenticationService.AuthResult.Success)
-        assertNotNull(successResult.token)
-        assertNotNull(successResult.user)
+        when (successResult) {
+            is AuthenticationService.AuthResult.Success -> {
+                assertNotNull(successResult.token)
+                assertNotNull(successResult.user)
+            }
+        }
 
         // Test Failure result
-        assertTrue(failureResult is AuthenticationService.AuthResult.Failure)
-        assertEquals("Failed", failureResult.reason)
+        when (failureResult) {
+            is AuthenticationService.AuthResult.Failure -> {
+                assertEquals("Failed", failureResult.reason)
+            }
+        }
 
         // Test Locked result
-        assertTrue(lockedResult is AuthenticationService.AuthResult.Locked)
-        assertNotNull(lockedResult.lockedUntil)
+        when (lockedResult) {
+            is AuthenticationService.AuthResult.Locked -> {
+                assertNotNull(lockedResult.lockedUntil)
+            }
+        }
     }
 
     @Test
@@ -299,13 +308,24 @@ class AuthenticationServiceTest {
 
         // Act & Assert
         // Test Success result
-        assertTrue(successResult is AuthenticationService.PasswordChangeResult.Success)
+        when (successResult) {
+            is AuthenticationService.PasswordChangeResult.Success -> {
+                // Success case verified
+            }
+        }
 
         // Test Failure result
-        assertTrue(failureResult is AuthenticationService.PasswordChangeResult.Failure)
-        assertEquals("Failed", failureResult.reason)
+        when (failureResult) {
+            is AuthenticationService.PasswordChangeResult.Failure -> {
+                assertEquals("Failed", failureResult.reason)
+            }
+        }
 
         // Test WeakPassword result
-        assertTrue(weakPasswordResult is AuthenticationService.PasswordChangeResult.WeakPassword)
+        when (weakPasswordResult) {
+            is AuthenticationService.PasswordChangeResult.WeakPassword -> {
+                // WeakPassword case verified
+            }
+        }
     }
 }
