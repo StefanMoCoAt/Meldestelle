@@ -134,7 +134,7 @@ class PingServiceTest {
     @Test
     fun `should properly encapsulate HttpClient lifecycle`() {
         // Given
-        var client: HttpClient? = null
+        val client: HttpClient? = null
 
         // When
         val service = PingService()

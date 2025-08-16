@@ -3,7 +3,6 @@ package at.mocode.client.web
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import kotlin.test.assertEquals
 
 class MainTest {
 

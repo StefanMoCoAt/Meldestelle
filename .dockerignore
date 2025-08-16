@@ -102,7 +102,6 @@ temp-data/
 # ===================================================================
 # Kotlin Multiplatform specific
 # ===================================================================
-**/kotlin-js-store/
 **/build/js/
 **/build/compileSync/
 **/build/klib/
@@ -119,7 +118,6 @@ temp-data/
 # ===================================================================
 **/prometheus-data/
 **/grafana-data/
-**/logs/
 **/*.log.*
 **/log/
 
@@ -138,21 +136,15 @@ temp-data/
 # ===================================================================
 # OS specific files
 # ===================================================================
-.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db
 
 # ===================================================================
 # JetBrains IDE
 # ===================================================================
-.idea/
-*.iws
-*.iml
-*.ipr
 out/
 .idea_modules/
 
@@ -203,14 +195,12 @@ secrets/
 # ===================================================================
 TODO*.md
 NOTES*.md
-**/temp/
 **/.junie/
 
 # ===================================================================
 # Keep essential files (override exclusions)
 # ===================================================================
 # Gradle wrapper
-!gradle/wrapper/gradle-wrapper.jar
 !gradle/wrapper/gradle-wrapper.properties
 
 # Essential configuration files for builds

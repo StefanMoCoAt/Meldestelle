@@ -114,7 +114,7 @@ scrape_configs:
       # Only scrape services that have prometheus.scrape=true
       - source_labels: [__meta_consul_service_metadata_prometheus_scrape]
         action: keep
-        regex: true
+        regex: "true"
 
       # Use service name as job name
       - source_labels: [__meta_consul_service]
@@ -123,12 +123,12 @@ scrape_configs:
       # Use custom metrics path if specified
       - source_labels: [__meta_consul_service_metadata_prometheus_path]
         target_label: __metrics_path__
-        regex: (.+)
+        regex: "(.+)"
 
       # Use custom port if specified
       - source_labels: [__address__, __meta_consul_service_metadata_prometheus_port]
         target_label: __address__
-        regex: ([^:]+)(?::\d+)?;(\d+)
+        regex: "([^:]+)(?::\d+)?;(\d+)"
         replacement: $1:$2
 
   # ===================================================================

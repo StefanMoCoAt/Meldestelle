@@ -2,8 +2,9 @@ package at.mocode.client.ui.viewmodel
 
 import at.mocode.client.data.service.PingResponse
 import at.mocode.client.data.service.PingService
-import kotlinx.coroutines.*
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlin.test.*
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)

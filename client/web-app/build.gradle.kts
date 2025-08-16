@@ -50,10 +50,6 @@ kotlin {
     }
 }
 
-compose.experimental {
-    web.application {}
-}
-
 // Web-specific optimizations
 tasks.named("jsBrowserDevelopmentWebpack") {
     outputs.upToDateWhen { false }
