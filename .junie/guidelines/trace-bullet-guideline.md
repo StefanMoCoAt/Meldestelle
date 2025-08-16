@@ -17,15 +17,33 @@ Entwicklung der fachlichen Features aufsetzen kann.
 
 Die folgenden Module und Aufgaben sind Teil dieses Zyklus:
 
-* **Backend-Infrastruktur (`:core` & `:infrastructure`):**
-    * Vollständige Überarbeitung, Optimierung und Testabdeckung aller Infrastruktur-Module (`cache`, `event-store`,
-      `auth`, `messaging`, `monitoring`, `gateway`).
-    * Implementierung einer robusten Logging- und Konfigurations-Infrastruktur.
-* **Temporärer Test-Service (`:temp:ping-service`):**
-    * Erstellung eines minimalen Spring-Boot-Service, der nur einen `GET /ping`-Endpunkt bereitstellt.
+### 2.1. Backend-Infrastruktur (`:core` & `:infrastructure`):
+
+* Vollständige Überarbeitung, Optimierung und Testabdeckung aller Infrastruktur-Module (`cache`, `event-store`,
+  `auth`, `messaging`, `monitoring`, `gateway`).
+* Implementierung einer robusten Logging- und Konfigurations-Infrastruktur.
+
+### 2.2. Temporärer Test-Service (`:temp:ping-service`):
+
+* Erstellung eines minimalen Spring-Boot-Service, der nur einen `GET /ping`-Endpunkt bereitstellt.
+
 * **Frontend-Infrastruktur (`:client`):**
     * Aufbau einer sauberen, leeren Grundstruktur für die Kotlin Multiplatform App nach dem MVVM-Muster.
     * Implementierung einer minimalen UI mit einem "Ping"-Button und einem Anzeigefeld für die Antwort.
+
+### 2.3. Frontend-Infrastruktur (:client)
+
+* **Aufgabe:** Aufbau einer sauberen Grundstruktur für die Kotlin Multiplatform App nach dem **MVVM-Muster** und
+  Implementierung der **"Ping"**-Funktionalität.
+* **Status:** 🔳 In Arbeit.
+* **Spezifische Anforderungen & Test-Szenarien:**
+    * **UI-Komponenten:** Die UI muss einen Button ("Ping Backend") und ein Textfeld zur Statusanzeige enthalten.
+        * **Zustands-Management:** Die UI muss vier Zustände klar und visuell unterscheidbar abbilden:
+            1. **Initialzustand:** Neutrale Nachricht ("Klicke auf den Button …"), Button aktiv.
+            2. **Ladezustand:** Lade-Nachricht ("Pinge Backend …"), Button deaktiviert.
+            3. **Erfolgszustand:** Positive Antwort ("Antwort vom Backend: pong"), Button aktiv.
+            4. **Fehlerzustand:** Klare Fehlermeldung ("Fehler: ..."), Button aktiv.
+        * **Architektur:** Der API-Aufruf muss nach dem **MVVM-Muster im :client:common-ui-Modul gekapselt sein.**
 
 ## 3. Spezifische Richtlinien für diesen Zyklus
 
