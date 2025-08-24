@@ -54,7 +54,7 @@ if (config.name && config.name.includes('test')) {
         concatenateModules: false // Disable for faster builds
     };
 
-    console.log('Test-specific webpack optimization applied');
+    // Test-specific webpack optimization applied (silent)
 } else {
     // For production builds, apply stricter size limits for non-test files
     if (config.mode === 'production') {
@@ -79,5 +79,5 @@ if (isTestEnvironment) {
     config.optimization.removeEmptyChunks = false;
     config.optimization.splitChunks = false; // Disable splitting for tests
 
-    console.log('Fast test build configuration applied');
+    // Fast test build configuration applied (silent)
 }

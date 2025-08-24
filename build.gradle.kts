@@ -19,6 +19,14 @@ subprojects {
     }
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
+        doFirst {
+            val agent = project.configurations.findByName("testRuntimeClasspath")?.files?.find {
+                it.name.startsWith("byte-buddy-agent")
+            }
+            if (agent != null) {
+                jvmArgs("-javaagent:${agent.absolutePath}")
+            }
+        }
     }
 }
 

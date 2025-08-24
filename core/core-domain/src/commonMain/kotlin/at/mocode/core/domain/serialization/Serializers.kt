@@ -2,8 +2,6 @@ package at.mocode.core.domain.serialization
 
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuidFrom
-import kotlin.time.Instant // KORRIGIERT: Finaler Wechsel zu kotlin.time
-import kotlin.time.ExperimentalTime
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -13,34 +11,86 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-object UuidSerializer : KSerializer<Uuid> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: Uuid) = encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): Uuid = uuidFrom(decoder.decodeString())
-}
-
+/**
+ * Serializer für kotlin.time. Instant Objekte.
+ * Konvertiert Instant zu/von ISO-8601 String-Repräsentation.
+ */
 @OptIn(ExperimentalTime::class)
 object KotlinInstantSerializer : KSerializer<Instant> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): Instant = Instant.parse(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: Instant) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): Instant {
+        return Instant.parse(decoder.decodeString())
+    }
 }
 
-object KotlinLocalDateSerializer : KSerializer<LocalDate> {
+/**
+ * Serializer für UUID Objekte.
+ * Konvertiert UUID zu/von String-Repräsentation.
+ */
+object UuidSerializer : KSerializer<Uuid> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Uuid) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): Uuid {
+        return uuidFrom(decoder.decodeString())
+    }
+}
+
+/**
+ * Serializer für kotlinx.datetime.LocalDate Objekte.
+ * Konvertiert LocalDate zu/von ISO-8601 String-Repräsentation.
+ */
+object LocalDateSerializer : KSerializer<LocalDate> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDate", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: LocalDate) = encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): LocalDate = LocalDate.parse(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: LocalDate) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): LocalDate {
+        return LocalDate.parse(decoder.decodeString())
+    }
 }
 
-object KotlinLocalDateTimeSerializer : KSerializer<LocalDateTime> {
+/**
+ * Serializer für kotlinx.datetime. LocalDateTime Objekte.
+ * Konvertiert LocalDateTime zu/von ISO-8601 String-Repräsentation.
+ */
+object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDateTime", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: LocalDateTime) = encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): LocalDateTime = LocalDateTime.parse(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: LocalDateTime) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): LocalDateTime {
+        return LocalDateTime.parse(decoder.decodeString())
+    }
 }
 
-object KotlinLocalTimeSerializer : KSerializer<LocalTime> {
+/**
+ * Serializer für kotlinx.datetime.LocalTime Objekte.
+ * Konvertiert LocalTime zu/von ISO-8601 String-Repräsentation.
+ */
+object LocalTimeSerializer : KSerializer<LocalTime> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalTime", PrimitiveKind.STRING)
-    override fun serialize(encoder: Encoder, value: LocalTime) = encoder.encodeString(value.toString())
-    override fun deserialize(decoder: Decoder): LocalTime = LocalTime.parse(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: LocalTime) {
+        encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): LocalTime {
+        return LocalTime.parse(decoder.decodeString())
+    }
 }

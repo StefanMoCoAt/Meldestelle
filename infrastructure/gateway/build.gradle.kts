@@ -55,6 +55,11 @@ dependencies {
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
+    testImplementation(libs.logback.classic)  // SLF4J provider for tests
     // Redundante Security-Abhängigkeit im Testkontext entfernt (bereits durch platform-testing abgedeckt)
 
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

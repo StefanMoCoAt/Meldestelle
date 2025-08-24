@@ -3,8 +3,8 @@ package at.mocode.masterdata.application.usecase
 import at.mocode.core.domain.model.SparteE
 import at.mocode.masterdata.domain.model.AltersklasseDefinition
 import at.mocode.masterdata.domain.repository.AltersklasseRepository
-import at.mocode.core.utils.validation.ValidationResult
-import at.mocode.core.utils.validation.ValidationError
+import at.mocode.core.domain.model.ValidationResult
+import at.mocode.core.domain.model.ValidationError
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 

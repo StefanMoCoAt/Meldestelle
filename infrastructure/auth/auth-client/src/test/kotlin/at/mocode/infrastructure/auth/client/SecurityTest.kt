@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertTimeoutPreemptively
+import org.springframework.test.annotation.DirtiesContext
 import java.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
@@ -13,6 +14,7 @@ import kotlin.time.Duration.Companion.minutes
  * Security-focused tests for JWT handling.
  * Tests against common JWT vulnerabilities and security attack vectors.
  */
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SecurityTest {
 
     private lateinit var jwtService: JwtService
@@ -33,28 +35,58 @@ class SecurityTest {
     // ========== Signature Tampering Tests ==========
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     fun `should reject tokens with tampered signatures`() {
+        // Arrange - neue JwtService-Instanz für vollständige Isolation
+        val isolatedJwtService = JwtService(
+            secret = testSecret,
+            issuer = testIssuer,
+            audience = testAudience,
+            expiration = 60.minutes
+        )
+
         // Arrange
-        val validToken = jwtService.generateToken("user-123", "testuser", listOf(BerechtigungE.PERSON_READ))
+        val validToken = isolatedJwtService.generateToken("user-123", "testuser", listOf(BerechtigungE.PERSON_READ))
         val tokenParts = validToken.split(".")
+
+        // Validierung der Token-Struktur
+        assertEquals(3, tokenParts.size, "JWT should have exactly 3 parts")
+        assertTrue(tokenParts[2].isNotEmpty(), "Signature part should not be empty")
 
         // Tamper with the signature by changing the last character
         val tamperedSignature = tokenParts[2].dropLast(1) + "X"
         val tamperedToken = "${tokenParts[0]}.${tokenParts[1]}.$tamperedSignature"
 
-        // Act
-        val result = jwtService.validateToken(tamperedToken)
+        // Sicherstellen, dass Signatur tatsächlich verändert wurde
+        assertNotEquals(tokenParts[2], tamperedSignature, "Signature should be different after tampering")
 
-        // Assert
-        assertTrue(result.isFailure)
-        assertInstanceOf(JWTVerificationException::class.java, result.exceptionOrNull())
+        // Act
+        val result = isolatedJwtService.validateToken(tamperedToken)
+
+        // Assert - Erweiterte Validierung
+        assertTrue(result.isFailure, "Tampered token should be rejected")
+        val exception = result.exceptionOrNull()
+        assertNotNull(exception, "Exception should be present for failed validation")
+        assertInstanceOf(
+            JWTVerificationException::class.java, exception,
+            "Exception should be JWTVerificationException, but was: ${exception?.javaClass?.simpleName}"
+        )
+
+        // Zusätzliche Sicherheitsüberprüfung: Original Token sollte noch gültig sein
+        val originalResult = isolatedJwtService.validateToken(validToken)
+        assertTrue(originalResult.isSuccess, "Original valid token should still be valid")
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     fun `should reject tokens with completely different signatures`() {
+        // Isolierte Instanzen verwenden
+        val isolatedJwtService1 = JwtService(testSecret, testIssuer, testAudience, expiration = 60.minutes)
+        val isolatedJwtService2 = JwtService(testSecret, testIssuer, testAudience, expiration = 60.minutes)
+
         // Arrange
-        val validToken = jwtService.generateToken("user-123", "testuser", emptyList())
-        val anotherValidToken = jwtService.generateToken("user-456", "anotheruser", emptyList())
+        val validToken = isolatedJwtService1.generateToken("user-123", "testuser", emptyList())
+        val anotherValidToken = isolatedJwtService2.generateToken("user-456", "anotheruser", emptyList())
 
         val tokenParts1 = validToken.split(".")
         val tokenParts2 = anotherValidToken.split(".")
@@ -63,7 +95,7 @@ class SecurityTest {
         val mixedToken = "${tokenParts1[0]}.${tokenParts1[1]}.${tokenParts2[2]}"
 
         // Act
-        val result = jwtService.validateToken(mixedToken)
+        val result = isolatedJwtService1.validateToken(mixedToken)
 
         // Assert
         assertTrue(result.isFailure)
@@ -253,8 +285,10 @@ class SecurityTest {
             val result = jwtService.getUserIdFromToken(token)
 
             assertTrue(result.isSuccess)
-            assertEquals(specialUserId, result.getOrNull(),
-                "Special characters in user ID should be preserved exactly")
+            assertEquals(
+                specialUserId, result.getOrNull(),
+                "Special characters in user ID should be preserved exactly"
+            )
         }
     }
 
@@ -274,8 +308,10 @@ class SecurityTest {
             val result = jwtService.getUserIdFromToken(token)
 
             assertTrue(result.isSuccess)
-            assertEquals(userId, result.getOrNull(),
-                "International characters should be handled correctly")
+            assertEquals(
+                userId, result.getOrNull(),
+                "International characters should be handled correctly"
+            )
         }
     }
 
@@ -294,8 +330,10 @@ class SecurityTest {
         val endTime = System.currentTimeMillis()
 
         // Should complete 1000 validations in a reasonable time (less than 5 seconds)
-        assertTrue(endTime - startTime < 5000,
-            "1000 token validations should complete within 5 seconds")
+        assertTrue(
+            endTime - startTime < 5000,
+            "1000 token validations should complete within 5 seconds"
+        )
     }
 
     // ========== Memory Safety Tests ==========
@@ -312,17 +350,24 @@ class SecurityTest {
 
         // Error message should not contain the secret or other sensitive information
         val errorMessage = exception!!.message ?: ""
-        assertFalse(errorMessage.contains(testSecret),
-            "Error message should not contain the secret")
-        assertFalse(errorMessage.contains("HMAC"),
-            "Error message should not reveal internal algorithm details")
+        assertFalse(
+            errorMessage.contains(testSecret),
+            "Error message should not contain the secret"
+        )
+        assertFalse(
+            errorMessage.contains("HMAC"),
+            "Error message should not reveal internal algorithm details"
+        )
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     fun `should handle concurrent validation requests safely`() {
-        // Test thread safety of JWT validation
-        val token = jwtService.generateToken("user-123", "testuser", emptyList())
+        // Thread-safe JwtService-Instanz
+        val threadSafeJwtService = JwtService(testSecret, testIssuer, testAudience, expiration = 60.minutes)
+        val token = threadSafeJwtService.generateToken("user-123", "testuser", emptyList())
         val results = mutableListOf<Boolean>()
+
 
         val threads = (1..10).map { threadIndex ->
             Thread {

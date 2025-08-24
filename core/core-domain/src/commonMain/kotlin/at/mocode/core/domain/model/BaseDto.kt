@@ -1,20 +1,18 @@
 package at.mocode.core.domain.model
 
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
-import at.mocode.core.domain.serialization.UuidSerializer
-import com.benasher44.uuid.Uuid
-import kotlin.time.Clock
-import kotlin.time.Instant
-import kotlin.time.ExperimentalTime
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
- * A marker interface for all Data Transfer Objects.
+ * Marker-Interface für alle Data-Transfer-Objekte (DTO).
  */
 interface BaseDto
 
 /**
- * Base DTO for domain entities that have unique ID and audit timestamps.
+ * Basis-DTO für Domänen-Entitäten mit eindeutiger ID und Audit-Zeitstempeln.
  */
 @Serializable
 @OptIn(ExperimentalTime::class)
@@ -29,17 +27,17 @@ abstract class EntityDto : BaseDto {
 }
 
 /**
- * A structured representation of a single error.
+ * Strukturierte Darstellung eines einzelnen Fehlers (Code, Nachricht, optionales Feld).
  */
 @Serializable
 data class ErrorDto(
-    val code: String,
+    val code: ErrorCode,
     val message: String,
     val field: String? = null
 ) : BaseDto
 
 /**
- * A standardized and consistent wrapper for all API responses.
+ * Standardisierte Hülle für API-Antworten mit einheitlicher Struktur.
  */
 @Serializable
 @OptIn(ExperimentalTime::class)
@@ -48,12 +46,26 @@ data class ApiResponse<T>(
     val success: Boolean,
     val errors: List<ErrorDto> = emptyList(),
     @Serializable(with = KotlinInstantSerializer::class)
-    val timestamp: Instant = Clock.System.now()
+    val timestamp: Instant
 ) {
     companion object {
         @OptIn(ExperimentalTime::class)
         fun <T> success(data: T): ApiResponse<T> {
-            return ApiResponse(data = data, success = true)
+            return ApiResponse(data = data, success = true, timestamp = Clock.System.now())
+        }
+
+        @OptIn(ExperimentalTime::class)
+        fun <T> error(
+            code: ErrorCode,
+            message: String,
+            field: String? = null
+        ): ApiResponse<T> {
+            return ApiResponse(
+                data = null,
+                success = false,
+                errors = listOf(ErrorDto(code = code, message = message, field = field)),
+                timestamp = Clock.System.now()
+            )
         }
 
         @OptIn(ExperimentalTime::class)
@@ -62,30 +74,52 @@ data class ApiResponse<T>(
             message: String,
             field: String? = null
         ): ApiResponse<T> {
-            return ApiResponse(
-                data = null,
-                success = false,
-                errors = listOf(ErrorDto(code = code, message = message, field = field))
-            )
+            return error(ErrorCode(code), message, field)
         }
 
         @OptIn(ExperimentalTime::class)
         fun <T> error(errors: List<ErrorDto>): ApiResponse<T> {
-            return ApiResponse(data = null, success = false, errors = errors)
+            return ApiResponse(data = null, success = false, errors = errors, timestamp = Clock.System.now())
         }
     }
 }
 
 /**
- * A standardized wrapper for paginated API responses.
+ * Standardisierte Hülle für paginierte API-Antworten.
  */
 @Serializable
 data class PagedResponse<T>(
     val content: List<T>,
-    val page: Int,
-    val size: Int,
+    val page: PageNumber,
+    val size: PageSize,
     val totalElements: Long,
     val totalPages: Int,
     val hasNext: Boolean,
     val hasPrevious: Boolean
-)
+) {
+    companion object {
+        /**
+         * Erzeugt eine PagedResponse mit Rückwärtskompatibilität für einfache Int-Werte.
+         * Nützlich, wenn Aufrufer noch keine PageNumber/PageSize verwenden.
+         */
+        fun <T> create(
+            content: List<T>,
+            page: Int,
+            size: Int,
+            totalElements: Long,
+            totalPages: Int,
+            hasNext: Boolean,
+            hasPrevious: Boolean
+        ): PagedResponse<T> {
+            return PagedResponse(
+                content = content,
+                page = PageNumber(page),
+                size = PageSize(size),
+                totalElements = totalElements,
+                totalPages = totalPages,
+                hasNext = hasNext,
+                hasPrevious = hasPrevious
+            )
+        }
+    }
+}

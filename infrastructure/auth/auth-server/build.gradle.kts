@@ -49,4 +49,11 @@ dependencies {
 
     // Testcontainers für Integration Tests
     testImplementation(libs.bundles.testcontainers)
+
+    // SLF4J provider for tests
+    testImplementation(libs.logback.classic)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

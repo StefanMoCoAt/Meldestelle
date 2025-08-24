@@ -43,9 +43,9 @@ class JacksonEventSerializer : EventSerializer {
         val eventData = objectMapper.writeValueAsString(event)
         return mapOf(
             EVENT_TYPE_FIELD to eventType,
-            EVENT_ID_FIELD to event.eventId.toString(),
-            AGGREGATE_ID_FIELD to event.aggregateId.toString(),
-            VERSION_FIELD to event.version.toString(),
+            EVENT_ID_FIELD to event.eventId.value.toString(),
+            AGGREGATE_ID_FIELD to event.aggregateId.value.toString(),
+            VERSION_FIELD to event.version.value.toString(),
             TIMESTAMP_FIELD to event.timestamp.toString(),
             EVENT_DATA_FIELD to eventData
         )

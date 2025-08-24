@@ -191,19 +191,37 @@ room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.r
 ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
 
 [bundles]
-# OPTIMIERUNG: Bündelt gängige Abhängigkeitsgruppen.
-# Dies vereinfacht die build.gradle.kts-Dateien der Module erheblich.
 ktor-server-essentials = [
     "ktor-server-core", "ktor-server-netty", "ktor-server-contentNegotiation",
     "ktor-server-serialization-kotlinx-json", "ktor-server-statusPages", "ktor-server-callLogging"
 ]
-ktor-client-essentials = ["ktor-client-core", "ktor-client-cio", "ktor-client-contentNegotiation", "ktor-client-serialization-kotlinx-json"]
-exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-kotlin-datetime"]
-flyway = ["flyway-core", "flyway-postgresql"]
-spring-boot-essentials = ["spring-boot-starter-web", "spring-boot-starter-validation", "spring-boot-starter-actuator"]
-redis-cache = ["spring-boot-starter-data-redis", "lettuce-core", "jackson-module-kotlin", "jackson-datatype-jsr310"]
-kafka-config = ["spring-kafka", "spring-boot-starter-json", "jackson-module-kotlin", "jackson-datatype-jsr310"]
-testing-jvm = ["junit-jupiter-api", "junit-jupiter-engine", "mockk", "assertj-core", "kotlinx-coroutines-test"]
+ktor-client-essentials = [
+    "ktor-client-core", "ktor-client-cio", "ktor-client-contentNegotiation", "ktor-client-serialization-kotlinx-json"
+]
+exposed = [
+    "exposed-core", "exposed-dao", "exposed-jdbc", "exposed-kotlin-datetime"
+]
+flyway = [
+    "flyway-core", "flyway-postgresql"
+]
+spring-boot-essentials = [
+    "spring-boot-starter-web", "spring-boot-starter-validation", "spring-boot-starter-actuator"
+]
+redis-cache = [
+    "spring-boot-starter-data-redis", "lettuce-core", "jackson-module-kotlin", "jackson-datatype-jsr310"
+]
+kafka-config = [
+    "spring-kafka", "spring-boot-starter-json", "jackson-module-kotlin", "jackson-datatype-jsr310"
+]
+testing-jvm = [
+    "junit-jupiter-api",
+    "junit-jupiter-engine",
+    "junit-jupiter-params",
+    "junit-platform-launcher",  # <- DIESE ABHÄNGIGKEIT FEHLT!
+    "mockk",
+    "assertj-core",
+    "kotlinx-coroutines-test"
+]
 testcontainers = ["testcontainers-core", "testcontainers-junit-jupiter", "testcontainers-postgresql"]
 # NEU: Bündelt alle Abhängigkeiten, die ein Service für Metriken und Tracing benötigt.
 monitoring-client = [

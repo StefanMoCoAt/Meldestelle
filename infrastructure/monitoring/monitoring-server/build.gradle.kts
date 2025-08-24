@@ -29,4 +29,9 @@ dependencies {
 
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
+    testImplementation(libs.logback.classic)  // SLF4J provider for tests
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

@@ -5,8 +5,8 @@ import at.mocode.core.domain.model.ErrorDto
 import at.mocode.events.domain.model.Veranstaltung
 import at.mocode.events.domain.repository.VeranstaltungRepository
 import at.mocode.core.domain.model.SparteE
-import at.mocode.core.utils.validation.ValidationResult
-import at.mocode.core.utils.validation.ValidationError
+import at.mocode.core.domain.model.ValidationResult
+import at.mocode.core.domain.model.ValidationError
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate

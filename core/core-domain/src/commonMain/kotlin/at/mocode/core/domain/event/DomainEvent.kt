@@ -2,20 +2,17 @@ package at.mocode.core.domain.event
 
 import at.mocode.core.domain.model.*
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
-import at.mocode.core.domain.serialization.UuidSerializer
-import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
 import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.serialization.Serializable
-import kotlin.time.ExperimentalTime
-
-@OptIn(ExperimentalTime::class)
 
 /**
- * Basis-Interface für alle Domänen-Events im System.
- * Ein Domänen-Event repräsentiert etwas fachlich Bedeutsames, das passiert ist.
+ * Basis-Interface für alle Domain-Events im System.
+ * Ein Domain-Event beschreibt ein fachlich relevantes Ereignis, das stattgefunden hat.
  */
+@OptIn(ExperimentalTime::class)
 interface DomainEvent {
     val eventId: EventId
     val aggregateId: AggregateId
@@ -27,7 +24,7 @@ interface DomainEvent {
 }
 
 /**
- * Abstrakte Basisklasse für Domänen-Events, um Boilerplate-Code zu reduzieren.
+ * Abstrakte Basisklasse für Domain-Events, um Boilerplate zu reduzieren.
  */
 @Serializable
 @OptIn(ExperimentalTime::class)
@@ -37,13 +34,36 @@ abstract class BaseDomainEvent(
     override val version: EventVersion,
     override val eventId: EventId = EventId(uuid4()),
     @Serializable(with = KotlinInstantSerializer::class)
-    override val timestamp: Instant = Clock.System.now(),
+    override val timestamp: Instant,
     override val correlationId: CorrelationId? = null,
     override val causationId: CausationId? = null
-) : DomainEvent
+) : DomainEvent {
+
+    constructor(
+        aggregateId: AggregateId,
+        eventType: EventType,
+        version: EventVersion,
+        eventId: EventId = EventId(uuid4()),
+        correlationId: CorrelationId? = null,
+        causationId: CausationId? = null
+    ) : this(
+        aggregateId = aggregateId,
+        eventType = eventType,
+        version = version,
+        eventId = eventId,
+        timestamp = createTimestamp(),
+        correlationId = correlationId,
+        causationId = causationId
+    )
+
+    companion object {
+        @OptIn(ExperimentalTime::class)
+        private fun createTimestamp(): Instant = Clock.System.now()
+    }
+}
 
 /**
- * Interface für einen Publisher, der Domänen-Events veröffentlichen kann.
+ * Schnittstelle für einen Publisher, der Domain-Events veröffentlichen kann.
  */
 interface DomainEventPublisher {
     suspend fun publish(event: DomainEvent)
@@ -51,9 +71,14 @@ interface DomainEventPublisher {
 }
 
 /**
- * Interface für einen Handler, der auf bestimmte Domänen-Events reagieren kann.
+ * Schnittstelle für einen Handler, der auf bestimmte Domain-Events reagieren kann.
  */
 interface DomainEventHandler<T : DomainEvent> {
     suspend fun handle(event: T)
-    fun canHandle(eventType: String): Boolean
+    fun canHandle(eventType: EventType): Boolean
+
+    /**
+     * Rückwärtskompatible Methode für String-basierte Prüfung des Event-Typs.
+     */
+    fun canHandle(eventType: String): Boolean = canHandle(EventType(eventType))
 }

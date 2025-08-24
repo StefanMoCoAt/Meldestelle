@@ -47,4 +47,9 @@ dependencies {
     // Testing
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.logback.classic)  // SLF4J provider for tests
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

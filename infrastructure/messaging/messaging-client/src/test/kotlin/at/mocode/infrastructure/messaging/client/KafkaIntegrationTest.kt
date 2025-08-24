@@ -1,6 +1,7 @@
 package at.mocode.infrastructure.messaging.client
 
 import at.mocode.infrastructure.messaging.config.KafkaConfig
+import kotlinx.coroutines.test.runTest
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -46,7 +47,7 @@ class KafkaIntegrationTest {
     }
 
     @Test
-    fun `publishEvent should send a message that can be received`() {
+    fun `publishEvent should send a message that can be received`() = runTest {
         // Arrange
         val testKey = "test-key"
         val testEvent = TestEvent("Test Message")
@@ -75,19 +76,18 @@ class KafkaIntegrationTest {
             .next() // Take only the first event
             .map { it.value() } // Extract the value (our TestEvent instance)
 
-        // The Mono that represents the send action
-        val sendAction = kafkaEventPublisher.publishEventReactive(testTopic, testKey, testEvent)
+        // Execute the send action and verify success
+        val publishResult = kafkaEventPublisher.publishEvent(testTopic, testKey, testEvent)
+        assert(publishResult.isSuccess) { "Expected successful publish result" }
 
-        // CORRECTION: Combine the send action and receive expectation in one StepVerifier.
-        // The `then` method ensures that the send action is completed first,
-        // before the `receivedEvent` Mono is subscribed and verified.
-        StepVerifier.create(sendAction.then(receivedEvent))
+        // Verify that the message can be received
+        StepVerifier.create(receivedEvent)
             .expectNext(testEvent) // Expect that our test event arrives
             .verifyComplete()      // Complete the verification
     }
 
     @Test
-    fun `publishEvents should send batch messages that can be received`() {
+    fun `publishEvents should send batch messages that can be received`() = runTest {
         // Arrange
         val batchSize = 10
         val eventBatch = (1..batchSize).map { i ->
@@ -117,10 +117,13 @@ class KafkaIntegrationTest {
             .map { it.value() }
             .collectList()
 
-        // Send batch and verify reception
-        val sendAction = kafkaEventPublisher.publishEventsReactive(testTopic, eventBatch)
+        // Send batch and verify success
+        val publishResult = kafkaEventPublisher.publishEvents(testTopic, eventBatch)
+        assert(publishResult.isSuccess) { "Expected successful batch publish result" }
+        assert(publishResult.getOrNull()?.size == batchSize) { "Expected $batchSize successful operations" }
 
-        StepVerifier.create(sendAction.then(receivedEvents))
+        // Verify reception
+        StepVerifier.create(receivedEvents)
             .expectNextMatches { events ->
                 events.size == batchSize && events.all { it.message.startsWith("Batch message") }
             }
@@ -128,7 +131,7 @@ class KafkaIntegrationTest {
     }
 
     @Test
-    fun `should handle multiple consumers on same topic`() {
+    fun `should handle multiple consumers on same topic`() = runTest {
         val testEvent = TestEvent("Multi-consumer message")
         val testKey = "multi-consumer-key"
 
@@ -170,10 +173,12 @@ class KafkaIntegrationTest {
             .next()
             .map { it.value() }
 
-        val sendAction = kafkaEventPublisher.publishEventReactive(testTopic, testKey, testEvent)
+        // Execute the send action and verify success
+        val publishResult = kafkaEventPublisher.publishEvent(testTopic, testKey, testEvent)
+        assert(publishResult.isSuccess) { "Expected successful publish result" }
 
         // Both consumers should receive the same message (different groups)
-        StepVerifier.create(sendAction.then(consumer1Event.zipWith(consumer2Event)))
+        StepVerifier.create(consumer1Event.zipWith(consumer2Event))
             .expectNextMatches { tuple ->
                 tuple.t1 == testEvent && tuple.t2 == testEvent
             }
@@ -181,7 +186,7 @@ class KafkaIntegrationTest {
     }
 
     @Test
-    fun `should handle different event types in integration scenario`() {
+    fun `should handle different event types in integration scenario`() = runTest {
         val complexEvent = ComplexTestEvent(
             id = 123,
             name = "Integration Test",
@@ -209,15 +214,18 @@ class KafkaIntegrationTest {
             .next()
             .map { it.value() }
 
-        val sendAction = kafkaEventPublisher.publishEventReactive(testTopic, "complex-key", complexEvent)
+        // Execute the send action and verify success
+        val publishResult = kafkaEventPublisher.publishEvent(testTopic, "complex-key", complexEvent)
+        assert(publishResult.isSuccess) { "Expected successful publish result" }
 
-        StepVerifier.create(sendAction.then(receivedEvent))
+        // Verify that the complex event can be received
+        StepVerifier.create(receivedEvent)
             .expectNext(complexEvent)
             .verifyComplete()
     }
 
     @Test
-    fun `should maintain message ordering within partition`() {
+    fun `should maintain message ordering within partition`() = runTest {
         val partitionKey = "ordered-messages"
         val messageCount = 5
         val orderedEvents = (1..messageCount).map { i ->
@@ -245,9 +253,13 @@ class KafkaIntegrationTest {
             .map { it.value() }
             .collectList()
 
-        val sendAction = kafkaEventPublisher.publishEventsReactive(testTopic, orderedEvents)
+        // Send ordered events and verify success
+        val publishResult = kafkaEventPublisher.publishEvents(testTopic, orderedEvents)
+        assert(publishResult.isSuccess) { "Expected successful batch publish result" }
+        assert(publishResult.getOrNull()?.size == messageCount) { "Expected $messageCount successful operations" }
 
-        StepVerifier.create(sendAction.then(receivedEvents))
+        // Verify message ordering is maintained
+        StepVerifier.create(receivedEvents)
             .expectNextMatches { events ->
                 events.size == messageCount &&
                 events.mapIndexed { index, event ->
@@ -258,11 +270,12 @@ class KafkaIntegrationTest {
     }
 
     @Test
-    fun `should handle empty batch gracefully in integration test`() {
+    fun `should handle empty batch gracefully in integration test`() = runTest {
         val emptyBatch = emptyList<Pair<String?, Any>>()
 
-        StepVerifier.create(kafkaEventPublisher.publishEventsReactive(testTopic, emptyBatch))
-            .verifyComplete()
+        val publishResult = kafkaEventPublisher.publishEvents(testTopic, emptyBatch)
+        assert(publishResult.isSuccess) { "Expected successful result for empty batch" }
+        assert(publishResult.getOrNull()?.isEmpty() == true) { "Expected empty result list" }
     }
 
     data class TestEvent(val message: String)

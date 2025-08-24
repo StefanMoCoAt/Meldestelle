@@ -36,10 +36,20 @@ interface EventConsumer {
 }
 
 /**
+ * Kotlin-idiomatic extension function for `receiveEventsWithResult` using reified types.
+ *
+ * Example: `consumer.receiveEventsWithResult<MyEvent>("my-topic").collect { result -> ... }`
+ */
+inline fun <reified T : Any> EventConsumer.receiveEventsWithResult(topic: String): Flow<Result<T>> {
+    return this.receiveEventsWithResult(topic, T::class.java)
+}
+
+/**
  * Kotlin-idiomatic extension function for `receiveEvents` using reified types.
  *
  * Example: `consumer.receiveEvents<MyEvent>("my-topic").subscribe { ... }`
  */
+@Deprecated("Use receiveEventsWithResult with Flow<Result<T>> instead", ReplaceWith("receiveEventsWithResult<T>(topic)"))
 inline fun <reified T : Any> EventConsumer.receiveEvents(topic: String): Flux<T> {
     return this.receiveEvents(topic, T::class.java)
 }

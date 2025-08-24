@@ -2,23 +2,23 @@ package at.mocode.core.domain.model
 
 import at.mocode.core.domain.serialization.UuidSerializer
 import com.benasher44.uuid.Uuid
-import kotlin.jvm.JvmInline
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 
 /**
- * Value classes for strongly typed IDs and domain values.
- * These provide compile-time type safety without runtime overhead.
+ * Value-Classes für stark typisierte IDs und Fachwerte.
+ * Bieten Typsicherheit zur Compile-Zeit ohne Laufzeit-Overhead.
  */
 
 // === ID Value Classes ===
 
 /**
- * A strongly typed wrapper for entity IDs.
+ * Stark typisierte Hülle für Entitäts-IDs.
  */
 @Serializable
 @JvmInline
 value class EntityId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    override fun toString(): String = value.toString()
+    companion object
 }
 
 /**
@@ -27,7 +27,7 @@ value class EntityId(@Serializable(with = UuidSerializer::class) val value: Uuid
 @Serializable
 @JvmInline
 value class EventId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    override fun toString(): String = value.toString()
+    companion object
 }
 
 /**
@@ -36,7 +36,7 @@ value class EventId(@Serializable(with = UuidSerializer::class) val value: Uuid)
 @Serializable
 @JvmInline
 value class AggregateId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    override fun toString(): String = value.toString()
+    companion object
 }
 
 /**
@@ -45,7 +45,7 @@ value class AggregateId(@Serializable(with = UuidSerializer::class) val value: U
 @Serializable
 @JvmInline
 value class CorrelationId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    override fun toString(): String = value.toString()
+    companion object
 }
 
 /**
@@ -54,7 +54,7 @@ value class CorrelationId(@Serializable(with = UuidSerializer::class) val value:
 @Serializable
 @JvmInline
 value class CausationId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    override fun toString(): String = value.toString()
+    companion object
 }
 
 // === Domain Value Classes ===

@@ -2,8 +2,8 @@ package at.mocode.masterdata.application.usecase
 
 import at.mocode.masterdata.domain.model.BundeslandDefinition
 import at.mocode.masterdata.domain.repository.BundeslandRepository
-import at.mocode.core.utils.validation.ValidationResult
-import at.mocode.core.utils.validation.ValidationError
+import at.mocode.core.domain.model.ValidationResult
+import at.mocode.core.domain.model.ValidationError
 import com.benasher44.uuid.Uuid
 import kotlinx.datetime.Clock
 

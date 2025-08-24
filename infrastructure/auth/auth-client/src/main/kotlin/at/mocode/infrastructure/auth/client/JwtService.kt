@@ -50,7 +50,7 @@ class JwtService(
     fun validateToken(token: String): Result<Boolean> {
         return try {
             verifier.verify(token)
-            logger.debug { "JWT token validation successful" }
+            // Avoid per-call debug logging on successful validations to keep hot path overhead minimal
             Result.success(true)
         } catch (e: JWTVerificationException) {
             logger.warn { "JWT token validation failed: ${e.message}" }

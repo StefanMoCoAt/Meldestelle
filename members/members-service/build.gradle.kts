@@ -48,4 +48,9 @@ dependencies {
     testRuntimeOnly("com.h2database:h2")
 
     testImplementation(projects.platform.platformTesting)
+    testImplementation(libs.logback.classic)  // SLF4J provider for tests
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

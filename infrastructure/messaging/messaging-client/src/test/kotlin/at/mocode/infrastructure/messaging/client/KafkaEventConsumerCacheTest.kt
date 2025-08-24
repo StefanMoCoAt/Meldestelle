@@ -120,8 +120,8 @@ class KafkaEventConsumerCacheTest {
             assertThat(secureConsumer).isNotNull
 
             // Should be able to create streams
-            val flux = secureConsumer.receiveEvents<TestEvent>("secure-topic")
-            assertThat(flux).isNotNull
+            val flow = secureConsumer.receiveEventsWithResult<TestEvent>("secure-topic")
+            assertThat(flow).isNotNull
         }
     }
 
@@ -143,8 +143,8 @@ class KafkaEventConsumerCacheTest {
 
             assertDoesNotThrow {
                 val testConsumer = KafkaEventConsumer(config)
-                val flux = testConsumer.receiveEvents<TestEvent>("validation-topic")
-                assertThat(flux).isNotNull
+                val flow = testConsumer.receiveEventsWithResult<TestEvent>("validation-topic")
+                assertThat(flow).isNotNull
             }
         }
     }
@@ -165,8 +165,8 @@ class KafkaEventConsumerCacheTest {
                 assertThat(testConsumer).isNotNull
 
                 // Should be able to create reactive streams
-                val flux = testConsumer.receiveEvents<TestEvent>("pool-test-topic")
-                assertThat(flux).isNotNull
+                val flow = testConsumer.receiveEventsWithResult<TestEvent>("pool-test-topic")
+                assertThat(flow).isNotNull
             }
         }
     }
@@ -189,22 +189,22 @@ class KafkaEventConsumerCacheTest {
 
             assertDoesNotThrow {
                 val testConsumer = KafkaEventConsumer(config)
-                val flux = testConsumer.receiveEvents<TestEvent>("prefix-test-topic")
-                assertThat(flux).isNotNull
+                val flow = testConsumer.receiveEventsWithResult<TestEvent>("prefix-test-topic")
+                assertThat(flow).isNotNull
             }
         }
     }
 
     @Test
     fun `should support extension function for reified types`() {
-        // Test the Kotlin extension function receiveEvents<T>()
+        // Test the Kotlin extension function receiveEventsWithResult<T>()
         assertDoesNotThrow {
-            val fluxWithReified = consumer.receiveEvents<TestEvent>("reified-topic")
-            val fluxWithClass = consumer.receiveEvents("reified-topic", TestEvent::class.java)
+            val flowWithReified = consumer.receiveEventsWithResult<TestEvent>("reified-topic")
+            val flowWithClass = consumer.receiveEventsWithResult("reified-topic", TestEvent::class.java)
 
-            // Both should work and create valid Flux instances
-            assertThat(fluxWithReified).isNotNull
-            assertThat(fluxWithClass).isNotNull
+            // Both should work and create valid Flow instances
+            assertThat(flowWithReified).isNotNull
+            assertThat(flowWithClass).isNotNull
         }
     }
 
@@ -226,8 +226,8 @@ class KafkaEventConsumerCacheTest {
             assertThat(testConsumer).isNotNull
 
             // Each should be able to create streams
-            val flux = testConsumer.receiveEvents<TestEvent>("concurrent-topic")
-            assertThat(flux).isNotNull
+            val flow = testConsumer.receiveEventsWithResult<TestEvent>("concurrent-topic")
+            assertThat(flow).isNotNull
         }
 
         // Clean up all consumers

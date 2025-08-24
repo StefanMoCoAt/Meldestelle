@@ -6,8 +6,8 @@ import at.mocode.members.domain.model.Member
 import at.mocode.members.domain.repository.MemberRepository
 import at.mocode.members.domain.events.MemberCreatedEvent
 import at.mocode.infrastructure.messaging.client.EventPublisher
-import at.mocode.core.utils.validation.ValidationResult
-import at.mocode.core.utils.validation.ValidationError
+import at.mocode.core.domain.model.ValidationResult
+import at.mocode.core.domain.model.ValidationError
 import com.benasher44.uuid.uuid4
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate

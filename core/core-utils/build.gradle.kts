@@ -11,6 +11,7 @@ kotlin {
             freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
         }
     }
+
     js(IR) {
         browser()
     }
@@ -18,44 +19,45 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                // Abhängigkeit zum core-domain-Modul, um dessen Typen zu verwenden
+                // Dependency on core-domain module to use its types
                 api(projects.core.coreDomain)
 
-                // Asynchronität (available for all platforms) - explicit version to avoid BOM issues
+                // Async support (available for all platforms)
                 api(libs.kotlinx.coroutines.core)
-
 
                 // Utilities (multiplatform compatible)
                 api(libs.bignum)
             }
         }
 
+        val commonTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+
         val jvmMain by getting {
             dependencies {
-                // Abhängigkeit zum platform-Modul für zentrale Versionsverwaltung
+                // JVM-specific dependencies - access to central catalog
                 api(projects.platform.platformDependencies)
 
-                // Datenbank-Management (JVM-specific)
-                // OPTIMIERUNG: Verwendung von Bundles für Exposed und Flyway
+                // Database Management (JVM-specific)
                 api(libs.bundles.exposed)
                 api(libs.bundles.flyway)
                 api(libs.hikari.cp)
 
                 // Service Discovery (JVM-specific)
-                // api(libs.consul.client) wird getauscht mir spring-cloud-starter-consul-discovery
                 api(libs.spring.cloud.starter.consul.discovery)
 
                 // Logging (JVM-specific)
                 api(libs.kotlin.logging.jvm)
 
-                // JVM-specific utilities
-                implementation(libs.room.common.jvm) // Für BigDecimal Serialisierung
-            }
-        }
+                // Jakarta Annotation API
+                api(libs.jakarta.annotation.api)
 
-        val commonTest by getting {
-            dependencies {
-                implementation(libs.kotlin.test)
+                // JSON Processing
+                api(libs.jackson.module.kotlin)
+                api(libs.jackson.datatype.jsr310)
             }
         }
 
@@ -68,4 +70,8 @@ kotlin {
             }
         }
     }
+}
+
+tasks.named<Test>("jvmTest") {
+    useJUnitPlatform()
 }

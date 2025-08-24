@@ -20,3 +20,17 @@ dependencies {
     api(libs.spring.boot.starter.test)
     api(libs.h2.driver)
 }
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+    doFirst {
+        val agent = configurations.testRuntimeClasspath.get().files.find {
+            it.name.startsWith("byte-buddy-agent")
+        }
+        if (agent != null) {
+            jvmArgs("-javaagent:${agent.absolutePath}")
+        }
+    }
+}
