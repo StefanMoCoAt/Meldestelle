@@ -52,6 +52,11 @@ dependencies {
     // Obwohl bereits im monitoring-client Bundle, wird durch 'implementation' nicht transitiv verfügbar
     implementation(libs.spring.boot.starter.actuator)
 
+    // Logback-Abhängigkeiten für Tests - Versionen werden von Spring Boot BOM verwaltet
+    implementation("ch.qos.logback:logback-classic")
+    implementation("ch.qos.logback:logback-core")
+    implementation("org.slf4j:slf4j-api")
+
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)

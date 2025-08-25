@@ -31,7 +31,28 @@ class KafkaEventConsumer(
     override fun <T : Any> receiveEventsWithResult(topic: String, eventType: Class<T>): Flow<Result<T>> {
         logger.info("Setting up Result-based consumer for topic '{}' with event type '{}'", topic, eventType.simpleName)
 
-        return receiveEvents(topic, eventType)
+        val cacheKey = "${topic}-${eventType.name}"
+        val groupId = "${kafkaConfig.defaultGroupIdPrefix}-${topic}-${eventType.simpleName.lowercase()}"
+
+        // Get or create a cached receiver for this topic-eventType combination
+        @Suppress("UNCHECKED_CAST")
+        val receiver = receiverCache.computeIfAbsent(cacheKey) {
+            createOptimizedReceiver<T>(topic, eventType) as KafkaReceiver<String, Any>
+        } as KafkaReceiver<String, T>
+
+        return receiver.receive()
+            .doOnNext { record ->
+                logger.debug(
+                    "Received message from topic-partition {}-{} with offset {} for event type '{}' [groupId={}, timestamp={}]",
+                    record.topic(), record.partition(), record.offset(), eventType.simpleName,
+                    groupId, record.timestamp()
+                )
+            }
+            .map { record ->
+                // Manual commit acknowledgment for better control
+                record.receiverOffset().acknowledge()
+                record.value()
+            }
             .map<Result<T>> { event -> Result.success(event) }
             .onErrorResume { exception ->
                 logger.warn("Error occurred while consuming events from topic '{}' for event type '{}': {}",
@@ -40,6 +61,19 @@ class KafkaEventConsumer(
                 val messagingError = mapToMessagingError(exception)
                 reactor.core.publisher.Mono.just(Result.failure<T>(messagingError))
             }
+            .retryWhen(
+                Retry.backoff(3, Duration.ofSeconds(1))
+                    .maxBackoff(Duration.ofSeconds(10))
+                    .doBeforeRetry { retrySignal ->
+                        logger.warn("Retrying consumer for topic '{}', attempt: {}, error: {}",
+                            topic, retrySignal.totalRetries() + 1, retrySignal.failure().message)
+                    }
+                    .onRetryExhaustedThrow { _, retrySignal ->
+                        logger.error("Consumer retry exhausted for topic '{}' after {} attempts",
+                            topic, retrySignal.totalRetries())
+                        retrySignal.failure()
+                    }
+            )
             .doOnError { exception ->
                 logger.error("Fatal error in consumer stream for topic '{}' and event type '{}': {}",
                     topic, eventType.simpleName, exception.message, exception)

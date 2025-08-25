@@ -121,7 +121,7 @@ class KafkaSecurityTest {
 
         // Test that reactive streams can be created (they use secure deserializer internally)
         assertDoesNotThrow {
-            val flux = consumer.receiveEvents<SecureTestEvent>("secure-topic")
+            val flux = consumer.receiveEventsWithResult<SecureTestEvent>("secure-topic")
             assertThat(flux).isNotNull
         }
     }

@@ -42,7 +42,27 @@ class KafkaEventPublisher(
 
     override suspend fun publishEvent(topic: String, key: String?, event: Any): Result<Unit> {
         return try {
-            publishEventReactive(topic, key, event).awaitSingle()
+            logger.debug("Publishing event to topic '{}' with key '{}', event type: '{}'",
+                topic, key, event::class.simpleName)
+
+            reactiveKafkaTemplate.send(topic, key ?: "", event)
+                .doOnSuccess { result ->
+                    val record = result.recordMetadata()
+                    logger.debug(
+                        "Successfully published event to topic-partition {}-{} with offset {} (key: '{}')",
+                        record.topic(), record.partition(), record.offset(), key
+                    )
+                }
+                .doOnError { exception ->
+                    logger.warn("Failed to publish event to topic '{}' with key '{}' [eventType={}, retryable={}] - will retry if configured: {}",
+                        topic, key, event::class.simpleName, isRetryableException(exception), exception.message, exception)
+                }
+                .retryWhen(createRetrySpec(topic, key))
+                .doOnError { exception ->
+                    logger.error("Final failure after retries: Failed to publish event to topic '{}' with key '{}'",
+                        topic, key, exception)
+                }
+                .awaitSingle()
             Result.success(Unit)
         } catch (exception: Throwable) {
             Result.failure(mapToMessagingError(exception))
@@ -51,7 +71,49 @@ class KafkaEventPublisher(
 
     override suspend fun publishEvents(topic: String, events: List<Pair<String?, Any>>): Result<List<Unit>> {
         return try {
-            val results = publishEventsReactive(topic, events).collectList().awaitSingle()
+            if (events.isEmpty()) {
+                logger.debug("No events to publish to topic '{}'", topic)
+                return Result.success(emptyList())
+            }
+
+            logger.info("Publishing {} events to topic '{}' using optimized batch processing", events.size, topic)
+
+            val results = Flux.fromIterable(events)
+                .index() // Add index for progress tracking
+                .flatMap({ indexedEventPair ->
+                    val index = indexedEventPair.t1
+                    val eventPair = indexedEventPair.t2
+                    val (key, event) = eventPair
+                    reactiveKafkaTemplate.send(topic, key ?: "", event)
+                        .doOnSuccess { result ->
+                            val record = result.recordMetadata()
+                            logger.debug("Successfully published event to topic-partition {}-{} with offset {} (key: '{}')",
+                                record.topic(), record.partition(), record.offset(), key)
+                            if ((index + 1) % BATCH_PROGRESS_LOG_INTERVAL == 0L || index == events.size.toLong() - 1) {
+                                logger.info("Batch progress: {}/{} events published to topic '{}'",
+                                    index + 1, events.size, topic)
+                            }
+                        }
+                        .doOnError { exception ->
+                            logger.warn("Failed to publish event {} in batch to topic '{}' with key '{}' [eventType={}, retryable={}] - will retry if configured: {}",
+                                index + 1, topic, key, event::class.simpleName, isRetryableException(exception), exception.message, exception)
+                        }
+                        .retryWhen(createRetrySpec(topic, key))
+                        .map { Unit } // Convert to Mono<Unit> that emits one Unit per successful send
+                        .onErrorContinue { error, _ ->
+                            logger.error("Error publishing event {} in batch to topic '{}': {}",
+                                index + 1, topic, error.message)
+                        }
+                }, BATCH_CONCURRENCY_LEVEL) // Controlled concurrency for better resource management
+                .doOnComplete {
+                    logger.info("Completed publishing batch of {} events to topic '{}'", events.size, topic)
+                }
+                .doOnError { error ->
+                    logger.error("Batch publishing to topic '{}' failed with error: {}", topic, error.message)
+                }
+                .collectList()
+                .awaitSingle()
+
             Result.success(results)
         } catch (exception: Throwable) {
             Result.failure(mapToMessagingError(exception))

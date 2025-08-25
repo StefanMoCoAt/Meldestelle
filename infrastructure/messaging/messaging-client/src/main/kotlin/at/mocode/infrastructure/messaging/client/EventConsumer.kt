@@ -2,6 +2,8 @@ package at.mocode.infrastructure.messaging.client
 
 import reactor.core.publisher.Flux
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.reactive.asPublisher
 
 /**
  * A generic interface for consuming events from a message broker.
@@ -51,5 +53,9 @@ inline fun <reified T : Any> EventConsumer.receiveEventsWithResult(topic: String
  */
 @Deprecated("Use receiveEventsWithResult with Flow<Result<T>> instead", ReplaceWith("receiveEventsWithResult<T>(topic)"))
 inline fun <reified T : Any> EventConsumer.receiveEvents(topic: String): Flux<T> {
-    return this.receiveEvents(topic, T::class.java)
+    // Convert Flow<Result<T>> to Flux<T> for backward compatibility
+    return this.receiveEventsWithResult<T>(topic)
+        .map { result: Result<T> -> result.getOrThrow() }
+        .asPublisher()
+        .let { Flux.from(it) }
 }

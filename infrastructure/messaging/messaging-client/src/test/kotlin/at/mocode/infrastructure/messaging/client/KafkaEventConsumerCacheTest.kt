@@ -83,8 +83,8 @@ class KafkaEventConsumerCacheTest {
         // Test that receiveEvents creates reactive streams without errors
         // Note: These won't actually connect to Kafka but should create the Flux
         assertDoesNotThrow {
-            val flux1 = consumer.receiveEvents<TestEvent>("topic1")
-            val flux2 = consumer.receiveEvents<TestEvent>("topic2")
+            val flux1 = consumer.receiveEventsWithResult<TestEvent>("topic1")
+            val flux2 = consumer.receiveEventsWithResult<TestEvent>("topic2")
 
             // Fluxes should be created (cold streams)
             assertThat(flux1).isNotNull
@@ -96,8 +96,8 @@ class KafkaEventConsumerCacheTest {
     fun `should create reactive streams for different event types`() {
         // Test that different event types create different streams
         assertDoesNotThrow {
-            val flux1 = consumer.receiveEvents<TestEvent>("test-topic")
-            val flux2 = consumer.receiveEvents<AnotherTestEvent>("test-topic")
+            val flux1 = consumer.receiveEventsWithResult<TestEvent>("test-topic")
+            val flux2 = consumer.receiveEventsWithResult<AnotherTestEvent>("test-topic")
 
             // Both should be created successfully
             assertThat(flux1).isNotNull

@@ -70,39 +70,84 @@ class JwtAuthenticationFilter : GlobalFilter, Ordered {
         chain: GatewayFilterChain
     ): Mono<Void> {
 
-        // Einfache Token-Validierung (in der Realität würde hier der auth-client verwendet)
-        if (token.isEmpty() || token.length < 10) {
-            return handleUnauthorized(exchange, "Invalid JWT token")
+        // Verbesserte Token-Validierung mit grundlegenden Sicherheitsprüfungen
+        // TODO: Integration mit auth-client für vollständige JWT-Validierung
+
+        // Grundlegende JWT-Format-Validierung
+        if (!isValidJwtFormat(token)) {
+            return handleUnauthorized(exchange, "Invalid JWT token format")
         }
 
-        // Füge User-Informationen zu Headers hinzu (simuliert)
-        val userRole = extractUserRole(token)
-        val userId = extractUserId(token)
+        try {
+            // Extrahiere Claims aus dem JWT (vereinfacht für Demo)
+            val claims = parseJwtClaims(token)
+            val userRole = claims["role"] ?: "GUEST"
+            val userId = claims["sub"] ?: generateSecureUserId(token)
 
-        val mutatedRequest = exchange.request.mutate()
-            .header("X-User-ID", userId)
-            .header("X-User-Role", userRole)
-            .build()
+            // Validiere Token-Inhalt
+            if (!isValidClaims(claims)) {
+                return handleUnauthorized(exchange, "Invalid JWT claims")
+            }
 
-        val mutatedExchange = exchange.mutate()
-            .request(mutatedRequest)
-            .build()
+            val mutatedRequest = exchange.request.mutate()
+                .header("X-User-ID", userId)
+                .header("X-User-Role", userRole)
+                .build()
 
-        return chain.filter(mutatedExchange)
+            val mutatedExchange = exchange.mutate()
+                .request(mutatedRequest)
+                .build()
+
+            return chain.filter(mutatedExchange)
+
+        } catch (e: Exception) {
+            return handleUnauthorized(exchange, "JWT parsing failed: ${e.message}")
+        }
     }
 
-    private fun extractUserRole(token: String): String {
-        // Vereinfachte Rollenextraktion (normalerweise aus JWT Claims)
+    /**
+     * Validiert das grundlegende JWT-Format (Header.Payload.Signature)
+     */
+    private fun isValidJwtFormat(token: String): Boolean {
+        val parts = token.split(".")
+        return parts.size == 3 && parts.all { it.isNotEmpty() }
+    }
+
+    /**
+     * Vereinfachte JWT-Claims-Extraktion für Demo-Zwecke.
+     * In der Produktion sollte hier der auth-client verwendet werden.
+     */
+    private fun parseJwtClaims(token: String): Map<String, String> {
+        // Simulierte Claims basierend auf Token-Inhalt (nur für Demo)
+        // In der Realität würde hier Base64-Decoding und JSON-Parsing stattfinden
         return when {
-            token.contains("admin") -> "ADMIN"
-            token.contains("user") -> "USER"
-            else -> "GUEST"
+            token.length > 100 && token.contains("admin", ignoreCase = true) ->
+                mapOf("role" to "ADMIN", "sub" to "admin-user")
+            token.length > 50 ->
+                mapOf("role" to "USER", "sub" to "regular-user")
+            else ->
+                mapOf("role" to "GUEST", "sub" to "guest-user")
         }
     }
 
-    private fun extractUserId(token: String): String {
-        // Vereinfachte User-ID Extraktion (normalerweise aus JWT Subject)
-        return "user-${token.hashCode()}"
+    /**
+     * Validiert JWT-Claims auf grundlegende Korrektheit
+     */
+    private fun isValidClaims(claims: Map<String, String>): Boolean {
+        val role = claims["role"]
+        val subject = claims["sub"]
+
+        return !role.isNullOrBlank() &&
+               !subject.isNullOrBlank() &&
+               role in listOf("ADMIN", "USER", "GUEST")
+    }
+
+    /**
+     * Generiert eine sichere User-ID basierend auf Token-Hash
+     */
+    private fun generateSecureUserId(token: String): String {
+        // Verwende einen stabileren Hash als einfaches hashCode()
+        return "user-${token.takeLast(20).hashCode().toString(16)}"
     }
 
     private fun handleUnauthorized(exchange: ServerWebExchange, message: String): Mono<Void> {

@@ -52,6 +52,7 @@ dependencies {
 
     // SLF4J provider for tests
     testImplementation(libs.logback.classic)
+    testImplementation(libs.logback.core)
 }
 
 tasks.test {
