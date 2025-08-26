@@ -80,15 +80,15 @@ tasks.register("generateOpenApiDocs") {
                   "openapi": "3.0.3",
                   "info": {
                     "title": "${moduleName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }} API",
-                    "description": "REST API for $moduleName management",
+                    "description": "REST API für $moduleName Verwaltung",
                     "version": "1.0.0",
                     "contact": {
                       "name": "Meldestelle Development Team"
                     }
                   },
                   "servers": [
-                    { "url": "http://localhost:8080", "description": "Development server" },
-                    { "url": "https://api.meldestelle.at", "description": "Production server" }
+                    { "url": "http://localhost:8080", "description": "Entwicklungs-Server" },
+                    { "url": "https://api.meldestelle.at", "description": "Produktions-Server" }
                   ],
                   "paths": {},
                   "components": {

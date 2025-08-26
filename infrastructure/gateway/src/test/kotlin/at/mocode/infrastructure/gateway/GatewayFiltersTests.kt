@@ -114,6 +114,7 @@ class GatewayFiltersTests {
             .uri("/test/ratelimit")
             .header("Authorization", "Bearer test-token")
             .header("X-User-Role", "ADMIN")
+            .header("X-User-ID", "admin-test-user") // Required for admin detection security
             .exchange()
             .expectStatus().isOk
             .expectHeader().valueEquals("X-RateLimit-Limit", "500") // ADMIN_LIMIT

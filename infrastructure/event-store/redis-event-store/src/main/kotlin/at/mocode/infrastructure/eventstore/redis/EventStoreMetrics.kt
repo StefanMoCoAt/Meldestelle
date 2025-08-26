@@ -6,7 +6,6 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.LongAdder
-import kotlin.time.toKotlinDuration
 
 /**
  * Comprehensive metrics tracking for Redis Event Store operations.

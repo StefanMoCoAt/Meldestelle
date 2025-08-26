@@ -52,7 +52,7 @@ dependencies {
     // Obwohl bereits im monitoring-client Bundle, wird durch 'implementation' nicht transitiv verfügbar
     implementation(libs.spring.boot.starter.actuator)
 
-    // Logback-Abhängigkeiten für Tests - Versionen werden von Spring Boot BOM verwaltet
+    // Logback-Abhängigkeiten - Versionen werden von Spring Boot BOM verwaltet
     implementation("ch.qos.logback:logback-classic")
     implementation("ch.qos.logback:logback-core")
     implementation("org.slf4j:slf4j-api")
@@ -60,7 +60,10 @@ dependencies {
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
-    testImplementation(libs.logback.classic)  // SLF4J provider for tests
+    // Ensure Logback dependencies are available in test classpath
+    testImplementation("ch.qos.logback:logback-classic")
+    testImplementation("ch.qos.logback:logback-core")
+    testImplementation("org.slf4j:slf4j-api")
     // Redundante Security-Abhängigkeit im Testkontext entfernt (bereits durch platform-testing abgedeckt)
 
 }

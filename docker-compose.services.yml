@@ -380,6 +380,394 @@ services:
       - "service.version=1.0.0"
       - "service.environment=${SPRING_PROFILES_ACTIVE:-docker}"
 
+  # ===================================================================
+  # Members Service
+  # ===================================================================
+  members-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/members-service/Dockerfile
+      args:
+        GRADLE_VERSION: ${GRADLE_VERSION:-8.14}
+        JAVA_VERSION: ${JAVA_VERSION:-21}
+        SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+        APP_USER: ${MEMBERS_APP_USER:-membersuser}
+        APP_UID: ${MEMBERS_APP_UID:-1004}
+        APP_GID: ${MEMBERS_APP_GID:-1004}
+    image: meldestelle/members-service:latest
+    container_name: meldestelle-members-service
+    ports:
+      - "${MEMBERS_SERVICE_PORT:-8084}:8084"
+      - "${MEMBERS_DEBUG_PORT:-5004}:5004"  # Debug port
+    depends_on:
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-server:
+        condition: service_healthy
+    environment:
+      # Spring Boot Configuration
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - SERVER_PORT=8084
+      - MANAGEMENT_SERVER_PORT=8084
+      - DEBUG=${DEBUG:-false}
+
+      # Service Discovery
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_APPLICATION_NAME=members-service
+
+      # Database Configuration
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-meldestelle}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-meldestelle}
+      - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=${MEMBERS_DB_POOL_SIZE:-20}
+      - SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=${MEMBERS_DB_MIN_IDLE:-10}
+
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - SPRING_REDIS_TIMEOUT=${REDIS_TIMEOUT:-2000ms}
+
+      # Security Configuration
+      - AUTH_SERVER_URL=http://auth-server:8081
+      - JWT_SECRET=${JWT_SECRET:-meldestelle-auth-secret-key-change-in-production}
+
+      # Monitoring & Observability
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,configprops
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+      - MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED=true
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=${TRACING_SAMPLING:-0.1}
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+
+      # Performance Tuning
+      - JAVA_OPTS=-XX:MaxRAMPercentage=80.0 -XX:+UseG1GC -XX:+UseStringDeduplication
+      - LOGGING_LEVEL_ROOT=${LOG_LEVEL:-INFO}
+      - LOGGING_LEVEL_AT_MOCODE_MEMBERS=${MEMBERS_LOG_LEVEL:-DEBUG}
+    networks:
+      - meldestelle-network
+    volumes:
+      - members-logs:/app/logs
+      - members-temp:/app/tmp
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "3", "http://localhost:8084/actuator/health/readiness"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.5'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.members-service.rule=Host(`members.meldestelle.local`)"
+      - "traefik.http.services.members-service.loadbalancer.server.port=8084"
+      - "prometheus.scrape=true"
+      - "prometheus.port=8084"
+      - "prometheus.path=/actuator/prometheus"
+      - "prometheus.service=members-service"
+      - "service.name=members-service"
+      - "service.version=1.0.0"
+      - "service.environment=${SPRING_PROFILES_ACTIVE:-docker}"
+
+  # ===================================================================
+  # Horses Service
+  # ===================================================================
+  horses-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/horses-service/Dockerfile
+      args:
+        GRADLE_VERSION: ${GRADLE_VERSION:-8.14}
+        JAVA_VERSION: ${JAVA_VERSION:-21}
+        SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+        APP_USER: ${HORSES_APP_USER:-horsesuser}
+        APP_UID: ${HORSES_APP_UID:-1005}
+        APP_GID: ${HORSES_APP_GID:-1005}
+    image: meldestelle/horses-service:latest
+    container_name: meldestelle-horses-service
+    ports:
+      - "${HORSES_SERVICE_PORT:-8085}:8085"
+      - "${HORSES_DEBUG_PORT:-5005}:5005"  # Debug port
+    depends_on:
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-server:
+        condition: service_healthy
+    environment:
+      # Spring Boot Configuration
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - SERVER_PORT=8085
+      - MANAGEMENT_SERVER_PORT=8085
+      - DEBUG=${DEBUG:-false}
+
+      # Service Discovery
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_APPLICATION_NAME=horses-service
+
+      # Database Configuration
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-meldestelle}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-meldestelle}
+      - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=${HORSES_DB_POOL_SIZE:-20}
+      - SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=${HORSES_DB_MIN_IDLE:-10}
+
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - SPRING_REDIS_TIMEOUT=${REDIS_TIMEOUT:-2000ms}
+
+      # Security Configuration
+      - AUTH_SERVER_URL=http://auth-server:8081
+      - JWT_SECRET=${JWT_SECRET:-meldestelle-auth-secret-key-change-in-production}
+
+      # Monitoring & Observability
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,configprops
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+      - MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED=true
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=${TRACING_SAMPLING:-0.1}
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+
+      # Performance Tuning
+      - JAVA_OPTS=-XX:MaxRAMPercentage=80.0 -XX:+UseG1GC -XX:+UseStringDeduplication
+      - LOGGING_LEVEL_ROOT=${LOG_LEVEL:-INFO}
+      - LOGGING_LEVEL_AT_MOCODE_HORSES=${HORSES_LOG_LEVEL:-DEBUG}
+    networks:
+      - meldestelle-network
+    volumes:
+      - horses-logs:/app/logs
+      - horses-temp:/app/tmp
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "3", "http://localhost:8085/actuator/health/readiness"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.5'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.horses-service.rule=Host(`horses.meldestelle.local`)"
+      - "traefik.http.services.horses-service.loadbalancer.server.port=8085"
+      - "prometheus.scrape=true"
+      - "prometheus.port=8085"
+      - "prometheus.path=/actuator/prometheus"
+      - "prometheus.service=horses-service"
+      - "service.name=horses-service"
+      - "service.version=1.0.0"
+      - "service.environment=${SPRING_PROFILES_ACTIVE:-docker}"
+
+  # ===================================================================
+  # Events Service
+  # ===================================================================
+  events-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/events-service/Dockerfile
+      args:
+        GRADLE_VERSION: ${GRADLE_VERSION:-8.14}
+        JAVA_VERSION: ${JAVA_VERSION:-21}
+        SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+        APP_USER: ${EVENTS_APP_USER:-eventsuser}
+        APP_UID: ${EVENTS_APP_UID:-1006}
+        APP_GID: ${EVENTS_APP_GID:-1006}
+    image: meldestelle/events-service:latest
+    container_name: meldestelle-events-service
+    ports:
+      - "${EVENTS_SERVICE_PORT:-8086}:8086"
+      - "${EVENTS_DEBUG_PORT:-5006}:5006"  # Debug port
+    depends_on:
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-server:
+        condition: service_healthy
+    environment:
+      # Spring Boot Configuration
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - SERVER_PORT=8086
+      - MANAGEMENT_SERVER_PORT=8086
+      - DEBUG=${DEBUG:-false}
+
+      # Service Discovery
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_APPLICATION_NAME=events-service
+
+      # Database Configuration
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-meldestelle}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-meldestelle}
+      - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=${EVENTS_DB_POOL_SIZE:-20}
+      - SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=${EVENTS_DB_MIN_IDLE:-10}
+
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - SPRING_REDIS_TIMEOUT=${REDIS_TIMEOUT:-2000ms}
+
+      # Security Configuration
+      - AUTH_SERVER_URL=http://auth-server:8081
+      - JWT_SECRET=${JWT_SECRET:-meldestelle-auth-secret-key-change-in-production}
+
+      # Monitoring & Observability
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,configprops
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+      - MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED=true
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=${TRACING_SAMPLING:-0.1}
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+
+      # Performance Tuning
+      - JAVA_OPTS=-XX:MaxRAMPercentage=80.0 -XX:+UseG1GC -XX:+UseStringDeduplication
+      - LOGGING_LEVEL_ROOT=${LOG_LEVEL:-INFO}
+      - LOGGING_LEVEL_AT_MOCODE_EVENTS=${EVENTS_LOG_LEVEL:-DEBUG}
+    networks:
+      - meldestelle-network
+    volumes:
+      - events-logs:/app/logs
+      - events-temp:/app/tmp
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "3", "http://localhost:8086/actuator/health/readiness"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: '1.5'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.events-service.rule=Host(`events.meldestelle.local`)"
+      - "traefik.http.services.events-service.loadbalancer.server.port=8086"
+      - "prometheus.scrape=true"
+      - "prometheus.port=8086"
+      - "prometheus.path=/actuator/prometheus"
+      - "prometheus.service=events-service"
+      - "service.name=events-service"
+      - "service.version=1.0.0"
+      - "service.environment=${SPRING_PROFILES_ACTIVE:-docker}"
+
+  # ===================================================================
+  # Masterdata Service
+  # ===================================================================
+  masterdata-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/masterdata-service/Dockerfile
+      args:
+        GRADLE_VERSION: ${GRADLE_VERSION:-8.14}
+        JAVA_VERSION: ${JAVA_VERSION:-21}
+        SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+        APP_USER: ${MASTERDATA_APP_USER:-masterdatauser}
+        APP_UID: ${MASTERDATA_APP_UID:-1007}
+        APP_GID: ${MASTERDATA_APP_GID:-1007}
+    image: meldestelle/masterdata-service:latest
+    container_name: meldestelle-masterdata-service
+    ports:
+      - "${MASTERDATA_SERVICE_PORT:-8087}:8087"
+      - "${MASTERDATA_DEBUG_PORT:-5007}:5007"  # Debug port
+    depends_on:
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      auth-server:
+        condition: service_healthy
+    environment:
+      # Spring Boot Configuration
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - SERVER_PORT=8087
+      - MANAGEMENT_SERVER_PORT=8087
+      - DEBUG=${DEBUG:-false}
+
+      # Service Discovery
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_CLOUD_CONSUL_PORT=8500
+      - SPRING_APPLICATION_NAME=masterdata-service
+
+      # Database Configuration
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER:-meldestelle}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD:-meldestelle}
+      - SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=${MASTERDATA_DB_POOL_SIZE:-15}
+      - SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=${MASTERDATA_DB_MIN_IDLE:-8}
+
+      # Redis Configuration
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - SPRING_REDIS_TIMEOUT=${REDIS_TIMEOUT:-2000ms}
+
+      # Security Configuration
+      - AUTH_SERVER_URL=http://auth-server:8081
+      - JWT_SECRET=${JWT_SECRET:-meldestelle-auth-secret-key-change-in-production}
+
+      # Monitoring & Observability
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus,configprops
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+      - MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED=true
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=${TRACING_SAMPLING:-0.1}
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+
+      # Performance Tuning
+      - JAVA_OPTS=-XX:MaxRAMPercentage=80.0 -XX:+UseG1GC -XX:+UseStringDeduplication
+      - LOGGING_LEVEL_ROOT=${LOG_LEVEL:-INFO}
+      - LOGGING_LEVEL_AT_MOCODE_MASTERDATA=${MASTERDATA_LOG_LEVEL:-DEBUG}
+    networks:
+      - meldestelle-network
+    volumes:
+      - masterdata-logs:/app/logs
+      - masterdata-temp:/app/tmp
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--max-time", "3", "http://localhost:8087/actuator/health/readiness"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '1.0'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.masterdata-service.rule=Host(`masterdata.meldestelle.local`)"
+      - "traefik.http.services.masterdata-service.loadbalancer.server.port=8087"
+      - "prometheus.scrape=true"
+      - "prometheus.port=8087"
+      - "prometheus.path=/actuator/prometheus"
+      - "prometheus.service=masterdata-service"
+      - "service.name=masterdata-service"
+      - "service.version=1.0.0"
+      - "service.environment=${SPRING_PROFILES_ACTIVE:-docker}"
+
 # ===================================================================
 # Volumes for Service Data, Logs, and Temporary Files
 # ===================================================================
@@ -428,6 +816,46 @@ volumes:
       o: bind
       device: ./logs/ping-service
   ping-temp:
+    driver: local
+
+  # Members Service
+  members-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs/members-service
+  members-temp:
+    driver: local
+
+  # Horses Service
+  horses-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs/horses-service
+  horses-temp:
+    driver: local
+
+  # Events Service
+  events-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs/events-service
+  events-temp:
+    driver: local
+
+  # Masterdata Service
+  masterdata-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs/masterdata-service
+  masterdata-temp:
     driver: local
 
 # ===================================================================

@@ -10,8 +10,6 @@ import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -43,7 +41,7 @@ class CorrelationIdFilter : GlobalFilter, Ordered {
             .request(mutatedRequest)
             .build()
 
-        // Add a response header after processing
+        // Response-Header nach der Verarbeitung hinzufügen
         mutatedExchange.response.headers.add(CORRELATION_ID_HEADER, correlationId)
 
         return chain.filter(mutatedExchange)
@@ -177,7 +175,7 @@ class RateLimitingFilter : GlobalFilter, Ordered {
         val limit = determineRateLimit(request, path)
         val counter = requestCounts.computeIfAbsent(clientIp) { RequestCounter() }
 
-        // Reset counter if more than a minute has passed
+        // Zähler zurücksetzen, wenn mehr als eine Minute vergangen ist
         val now = System.currentTimeMillis()
         if (now - counter.lastReset > 60_000) {
             counter.count = 0
@@ -186,7 +184,7 @@ class RateLimitingFilter : GlobalFilter, Ordered {
 
         counter.count++
 
-        // Add rate limit headers
+        // Rate-Limit-Header hinzufügen
         response.headers.add(RATE_LIMIT_ENABLED_HEADER, "true")
         response.headers.add(RATE_LIMIT_LIMIT_HEADER, limit.toString())
         response.headers.add(RATE_LIMIT_REMAINING_HEADER, maxOf(0, limit - counter.count).toString())

@@ -17,6 +17,9 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.material3)
 
+                // Skiko - explicitly declared in common-ui
+                implementation("org.jetbrains.skiko:skiko:0.9.4.2")
+
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)
 

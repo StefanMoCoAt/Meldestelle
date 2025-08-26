@@ -93,12 +93,13 @@ class JwtAuthenticationTests {
             .expectStatus().isUnauthorized
             .expectBody()
             .jsonPath("$.error").isEqualTo("UNAUTHORIZED")
-            .jsonPath("$.message").isEqualTo("Invalid JWT token")
+            .jsonPath("$.message").isEqualTo("Invalid JWT token format")
     }
 
     @Test
     fun `should allow access with valid JWT token and inject user headers`() {
-        val validToken = "valid-jwt-token-with-user-data"
+        // Create a mock JWT token with proper format (header.payload.signature) and length >50 for USER role
+        val validToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNjAwMDAwMDAwfQ.mockSignatureForUserTokenThatIsLongEnoughForValidation"
 
         webTestClient.get()
             .uri("/api/members/protected")
@@ -116,7 +117,8 @@ class JwtAuthenticationTests {
 
     @Test
     fun `should extract admin role from JWT token`() {
-        val adminToken = "valid-jwt-token-with-admin-data"
+        // Create a mock JWT token with proper format, length >100, and "admin" in the token for ADMIN role
+        val adminToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbi11c2VyLTEyMyIsInJvbGUiOiJBRE1JTiIsImFkbWluIjp0cnVlLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MTYwMDAwMDAwMH0.mockSignatureForAdminTokenThatIsVeryLongEnoughToMeetTheRequiredLengthForAdminValidation"
 
         webTestClient.get()
             .uri("/api/members/protected")
@@ -132,7 +134,8 @@ class JwtAuthenticationTests {
 
     @Test
     fun `should extract user role from JWT token`() {
-        val userToken = "valid-jwt-token-with-user-data"
+        // Create a mock JWT token with proper format and length >50 for USER role
+        val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTQ1NiIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNjAwMDAwMDAwfQ.mockSignatureForUserRoleTokenThatIsLongEnoughForValidation"
 
         webTestClient.get()
             .uri("/api/members/protected")
@@ -148,7 +151,8 @@ class JwtAuthenticationTests {
 
     @Test
     fun `should handle POST requests to protected endpoints`() {
-        val validToken = "valid-jwt-token-for-post"
+        // Create a mock JWT token with proper format and length >50 for USER role
+        val validToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTc4OSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNjAwMDAwMDAwfQ.mockSignatureForPostRequestTokenThatIsLongEnoughForValidation"
 
         webTestClient.post()
             .uri("/api/members/protected")

@@ -18,32 +18,32 @@ import org.springframework.web.bind.annotation.*
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 
 /**
- * Simple no-op EventPublisher implementation for the controller.
+ * Einfache No-op EventPublisher Implementierung für den Controller.
  */
 class NoOpEventPublisher : EventPublisher {
     override suspend fun publishEvent(topic: String, key: String?, event: Any) {
-        // No-op implementation - events are not published in this simple version
+        // No-op Implementierung - Events werden in dieser einfachen Version nicht veröffentlicht
     }
 
     override suspend fun publishEvents(topic: String, events: List<Pair<String?, Any>>) {
-        // No-op implementation - events are not published in this simple version
+        // No-op Implementierung - Events werden in dieser einfachen Version nicht veröffentlicht
     }
 }
 
 /**
- * REST API controller for member management operations.
+ * REST API Controller für Mitgliederverwaltungs-Operationen.
  *
- * This controller provides HTTP endpoints for all member-related operations
- * including CRUD operations and member search functionality.
+ * Dieser Controller stellt HTTP-Endpunkte für alle mitgliederbezogenen Operationen
+ * zur Verfügung, einschließlich CRUD-Operationen und Mitgliedersuche.
  */
 @RestController
 @RequestMapping("/api/members")
-@Tag(name = "Members", description = "Member management operations")
+@Tag(name = "Members", description = "Mitgliederverwaltungs-Operationen")
 class MemberController(
     @Qualifier("memberRepositoryImpl") private val memberRepository: MemberRepository
 ) {
 
-    // Simple no-op EventPublisher implementation for now
+    // Einfache No-op EventPublisher Implementierung vorerst
     private val eventPublisher = NoOpEventPublisher()
 
     private val createMemberUseCase = CreateMemberUseCase(memberRepository, eventPublisher)
@@ -55,7 +55,7 @@ class MemberController(
     private val validateMemberDataUseCase = ValidateMemberDataUseCase(memberRepository)
 
     /**
-     * Helper method to handle common response patterns for use case execution
+     * Hilfsmethode zur Behandlung gemeinsamer Antwortmuster für Use-Case-Ausführung
      */
     private inline fun <T> handleUseCaseExecution(
         crossinline operation: suspend () -> ApiResponse<T>,
@@ -87,7 +87,7 @@ class MemberController(
     }
 
     /**
-     * Helper method to handle repository operations with common error handling
+     * Hilfsmethode zur Behandlung von Repository-Operationen mit gemeinsamer Fehlerbehandlung
      */
     private inline fun <T> handleRepositoryOperation(
         crossinline operation: () -> T,
@@ -103,27 +103,27 @@ class MemberController(
     }
 
     /**
-     * Get all members with optional filtering
+     * Alle Mitglieder mit optionaler Filterung abrufen
      */
     @Operation(
-        summary = "Get all members",
-        description = "Retrieve all members with optional filtering by active status and search term"
+        summary = "Alle Mitglieder abrufen",
+        description = "Abrufen aller Mitglieder mit optionaler Filterung nach Aktivitätsstatus und Suchbegriff"
     )
     @ApiResponses(
         value = [
-            SwaggerApiResponse(responseCode = "200", description = "Successfully retrieved members"),
-            SwaggerApiResponse(responseCode = "500", description = "Internal server error")
+            SwaggerApiResponse(responseCode = "200", description = "Mitglieder erfolgreich abgerufen"),
+            SwaggerApiResponse(responseCode = "500", description = "Interner Serverfehler")
         ]
     )
     @GetMapping
     fun getAllMembers(
-        @Parameter(description = "Filter by active members only", example = "true")
+        @Parameter(description = "Nur nach aktiven Mitgliedern filtern", example = "true")
         @RequestParam(defaultValue = "true") activeOnly: Boolean,
-        @Parameter(description = "Maximum number of results to return", example = "100")
+        @Parameter(description = "Maximale Anzahl der zurückzugebenden Ergebnisse", example = "100")
         @RequestParam(defaultValue = "100") limit: Int,
-        @Parameter(description = "Number of results to skip", example = "0")
+        @Parameter(description = "Anzahl der zu überspringenden Ergebnisse", example = "0")
         @RequestParam(defaultValue = "0") offset: Int,
-        @Parameter(description = "Search term for member names")
+        @Parameter(description = "Suchbegriff für Mitgliedernamen")
         @RequestParam(required = false) search: String?
     ): ResponseEntity<ApiResponse<List<*>>> {
         return try {
