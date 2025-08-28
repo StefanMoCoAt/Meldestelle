@@ -17,8 +17,7 @@ kotlin {
                 implementation(compose.foundation)
                 implementation(compose.material3)
 
-                // Skiko - explicitly declared in common-ui
-                implementation("org.jetbrains.skiko:skiko:0.9.4.2")
+                // Skiko is provided by Compose Multiplatform - no explicit dependency needed
 
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)

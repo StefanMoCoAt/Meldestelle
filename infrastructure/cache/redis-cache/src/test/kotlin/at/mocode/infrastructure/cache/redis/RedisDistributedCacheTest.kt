@@ -1,10 +1,10 @@
 package at.mocode.infrastructure.cache.redis
 
 import at.mocode.infrastructure.cache.api.*
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import mu.KotlinLogging
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -30,7 +30,10 @@ class RedisDistributedCacheTest {
         private val logger = KotlinLogging.logger {}
 
         @Container
-        val redisContainer = GenericContainer<Nothing>(DockerImageName.parse("redis:7-alpine")).apply {
+        val redisContainer = GenericContainer<Nothing>(
+            DockerImageName.parse("redis:7-alpine")
+                .asCompatibleSubstituteFor("redis")
+        ).apply {
             withExposedPorts(6379)
         }
     }

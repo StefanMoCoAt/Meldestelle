@@ -76,7 +76,7 @@ fun Query.paginate(page: Int, size: Int): Query {
     require(page >= 0) { "Page number must be non-negative" }
     require(size > 0) { "Page size must be positive" }
 
-    return this.limit(size, offset = (page * size).toLong())
+    return limit(size).offset(start = (page * size).toLong())
 }
 
 /**

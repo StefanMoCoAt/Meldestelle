@@ -8,9 +8,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.support.serializer.JsonDeserializer
-import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.kafka.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 import reactor.kafka.receiver.KafkaReceiver
 import reactor.kafka.receiver.ReceiverOptions
@@ -22,7 +22,9 @@ class KafkaIntegrationTest {
 
     companion object {
         @Container
-        private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0"))
+        private val kafkaContainer = KafkaContainer(
+            DockerImageName.parse("apache/kafka:3.8.1")
+        )
     }
 
     private lateinit var kafkaEventPublisher: KafkaEventPublisher

@@ -19,14 +19,12 @@ subprojects {
     }
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
-        doFirst {
-            val agent = project.configurations.findByName("testRuntimeClasspath")?.files?.find {
-                it.name.startsWith("byte-buddy-agent")
-            }
-            if (agent != null) {
-                jvmArgs("-javaagent:${agent.absolutePath}")
-            }
-        }
+        // Configure CDS in auto-mode to prevent bootstrap classpath warnings
+        jvmArgs("-Xshare:auto", "-Djdk.instrument.traceUsage=false")
+        // Increase test JVM memory with stable configuration
+        maxHeapSize = "2g"
+        // Removed byte-buddy-agent configuration to fix Gradle 9.0.0 deprecation warning
+        // The agent configuration was causing Task.project access at execution time
     }
 }
 
@@ -113,6 +111,6 @@ tasks.register("generateAllDocs") {
 
 // Wrapper-Konfiguration
 tasks.wrapper {
-    gradleVersion = "8.14"
+    gradleVersion = "9.0.0"
     distributionType = Wrapper.DistributionType.BIN
 }

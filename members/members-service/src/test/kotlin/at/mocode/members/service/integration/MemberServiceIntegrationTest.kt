@@ -4,6 +4,7 @@ import at.mocode.infrastructure.messaging.client.EventPublisher
 import at.mocode.members.api.rest.MemberController
 import at.mocode.members.domain.model.Member
 import at.mocode.members.domain.repository.MemberRepository
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
@@ -12,8 +13,10 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -33,6 +36,7 @@ import kotlin.test.assertTrue
     "spring.datasource.url=jdbc:h2:mem:testdb",
     "spring.kafka.bootstrap-servers=localhost:9092"
 ])
+@ContextConfiguration(classes = [MemberServiceIntegrationTest.TestConfig::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MemberServiceIntegrationTest {
 
@@ -40,8 +44,11 @@ class MemberServiceIntegrationTest {
     @Qualifier("memberRepositoryImpl")
     private lateinit var memberRepository: MemberRepository
 
-    @MockBean
-    private lateinit var eventPublisher: EventPublisher
+    @Configuration
+    class TestConfig {
+        @Bean
+        fun eventPublisher(): EventPublisher = mockk(relaxed = true)
+    }
 
     @BeforeEach
     fun setUp() = runBlocking {

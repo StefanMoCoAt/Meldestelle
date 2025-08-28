@@ -1,7 +1,10 @@
 package at.mocode.infrastructure.cache.redis
 
-import at.mocode.infrastructure.cache.api.*
-import mu.KotlinLogging
+import at.mocode.infrastructure.cache.api.CacheSerializer
+import at.mocode.infrastructure.cache.api.DefaultCacheConfiguration
+import at.mocode.infrastructure.cache.api.get
+import at.mocode.infrastructure.cache.api.multiGet
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
@@ -12,7 +15,9 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
@@ -31,7 +36,10 @@ class RedisDistributedCacheConfigurationTest {
         private val logger = KotlinLogging.logger {}
 
         @Container
-        val redisContainer = GenericContainer<Nothing>(DockerImageName.parse("redis:7-alpine")).apply {
+        val redisContainer = GenericContainer<Nothing>(
+            DockerImageName.parse("redis:7-alpine")
+                .asCompatibleSubstituteFor("redis")
+        ).apply {
             withExposedPorts(6379)
         }
     }

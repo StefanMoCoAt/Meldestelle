@@ -4,8 +4,8 @@ import at.mocode.infrastructure.auth.client.model.BerechtigungE
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
-import mu.KotlinLogging
-import java.util.Date
+import io.github.oshai.kotlinlogging.KotlinLogging
+import java.util.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 

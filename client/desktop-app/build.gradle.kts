@@ -10,6 +10,20 @@ plugins {
 kotlin {
     jvm {
         compilations.all {
+//            compileTaskProvider.configure{
+//                compilerOptions {
+//                    freeCompilerArgs.add("-Xjvm-default=all")
+//                    freeCompilerArgs.add("-Xcontext-receivers")
+//                    freeCompilerArgs.add("-Xno-param-assertions")
+//                    freeCompilerArgs.add("-Xno-call-assertions")
+//                    freeCompilerArgs.add("-Xno-receiver-assertions")
+//                    freeCompilerArgs.add("-Xno-optimize")
+//                    freeCompilerArgs.add("-Xno-param-assertions")
+//                    freeCompilerArgs.add("-Xno-receiver-assertions")
+//                    freeCompilerArgs.add("-Xno-optimize")
+//                    freeCompilerArgs.add("-Xno-check-impl")
+//                    freeCompilerArgs.add("-Xno-optimize")
+//                }
             compilerOptions.configure {
                 jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
             }

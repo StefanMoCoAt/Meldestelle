@@ -4,16 +4,19 @@ import at.mocode.horses.domain.model.DomPferd
 import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.infrastructure.messaging.client.EventPublisher
 import at.mocode.core.domain.model.PferdeGeschlechtE
+import io.mockk.mockk
 import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestPropertySource
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.TestPropertySource
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -32,14 +35,18 @@ import kotlin.test.assertTrue
     "spring.datasource.url=jdbc:h2:mem:testdb",
     "spring.kafka.bootstrap-servers=localhost:9092"
 ])
+@ContextConfiguration(classes = [HorseServiceIntegrationTest.TestConfig::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HorseServiceIntegrationTest {
 
     @Autowired
     private lateinit var horseRepository: HorseRepository
 
-    @MockBean
-    private lateinit var eventPublisher: EventPublisher
+    @Configuration
+    class TestConfig {
+        @Bean
+        fun eventPublisher(): EventPublisher = mockk(relaxed = true)
+    }
 
     @BeforeEach
     fun setUp() = runBlocking {

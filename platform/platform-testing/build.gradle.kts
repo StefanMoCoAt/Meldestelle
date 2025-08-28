@@ -23,14 +23,6 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-    systemProperty("junit.jupiter.execution.parallel.enabled", "true")
-    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
-    doFirst {
-        val agent = configurations.testRuntimeClasspath.get().files.find {
-            it.name.startsWith("byte-buddy-agent")
-        }
-        if (agent != null) {
-            jvmArgs("-javaagent:${agent.absolutePath}")
-        }
-    }
+    // Removed parallel execution and byte-buddy agent configuration to prevent conflicts
+    // with global test configuration in root build.gradle.kts
 }
