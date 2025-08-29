@@ -52,5 +52,18 @@ kotlin {
                 // Using core testing dependencies for now
             }
         }
+        val jsTest by getting {
+            // Avoid duplicate Skiko runtime files in test processedResources
+            resources.exclude("**/skiko.*")
+            resources.exclude("**/skikod8.mjs")
+        }
     }
+}
+
+// Avoid overwrite warnings when syncing JS test executable: keep first occurrence of duplicate resources
+// Configure the Kotlin JS incremental sync task directly using fully-qualified types (no imports in the middle of the file)
+
+tasks.named<org.jetbrains.kotlin.gradle.targets.js.ir.DefaultIncrementalSyncTask>("jsTestTestDevelopmentExecutableCompileSync").configure {
+    // Skip copying duplicates that already exist in destination
+    duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.EXCLUDE
 }

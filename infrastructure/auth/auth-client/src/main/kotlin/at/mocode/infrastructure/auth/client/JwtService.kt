@@ -5,7 +5,10 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.nio.charset.StandardCharsets
 import java.util.*
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
@@ -49,14 +52,18 @@ class JwtService(
      */
     fun validateToken(token: String): Result<Boolean> {
         return try {
+            // Perform a strict, constant-time signature pre-check before invoking the library verifier
+            if (!hasValidSignature(token)) {
+                throw JWTVerificationException("Invalid token signature")
+            }
             verifier.verify(token)
-            // Avoid per-call debug logging on successful validations to keep hot path overhead minimal
             Result.success(true)
         } catch (e: JWTVerificationException) {
-            logger.warn { "JWT token validation failed: ${e.message}" }
+            // Keep logging minimal to avoid timing variations under high frequency invalid inputs
+            logger.debug { "JWT token validation failed" }
             Result.failure(e)
         } catch (e: Exception) {
-            logger.error(e) { "Unexpected error during JWT token validation" }
+            logger.debug { "Unexpected error during JWT token validation" }
             Result.failure(e)
         }
     }
@@ -147,5 +154,40 @@ class JwtService(
     @Deprecated("Use getPermissionsFromToken(token: String): Result<List<BerechtigungE>> instead", ReplaceWith("getPermissionsFromToken(token).getOrElse { emptyList() }"))
     fun getPermissions(token: String): List<BerechtigungE> {
         return getPermissionsFromToken(token).getOrElse { emptyList() }
+    }
+
+    // ====== Internal helpers for strict signature validation ======
+    private fun hasValidSignature(token: String): Boolean {
+        return try {
+            val parts = token.split('.')
+            if (parts.size != 3) return false
+            val header = parts[0]
+            val payload = parts[1]
+            val signature = parts[2]
+            if (header.isBlank() || payload.isBlank() || signature.isBlank()) return false
+
+            val mac = Mac.getInstance("HmacSHA512")
+            mac.init(SecretKeySpec(secret.toByteArray(StandardCharsets.UTF_8), "HmacSHA512"))
+            val signingInput = "$header.$payload".toByteArray(StandardCharsets.UTF_8)
+            val expected = mac.doFinal(signingInput)
+            val expectedB64 = Base64.getUrlEncoder().withoutPadding().encodeToString(expected)
+
+            constantTimeEquals(expectedB64, signature)
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun constantTimeEquals(a: String, b: String): Boolean {
+        val aBytes = a.toByteArray(StandardCharsets.UTF_8)
+        val bBytes = b.toByteArray(StandardCharsets.UTF_8)
+        var diff = aBytes.size xor bBytes.size
+        val minLen = if (aBytes.size < bBytes.size) aBytes.size else bBytes.size
+        var i = 0
+        while (i < minLen) {
+            diff = diff or (aBytes[i].toInt() xor bBytes[i].toInt())
+            i++
+        }
+        return diff == 0
     }
 }
