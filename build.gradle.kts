@@ -1,4 +1,3 @@
-import java.util.Locale
 
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
@@ -23,7 +22,7 @@ subprojects {
         }
         // Configure CDS in auto-mode to prevent bootstrap classpath warnings
         jvmArgs("-Xshare:auto", "-Djdk.instrument.traceUsage=false")
-        // Increase test JVM memory with stable configuration
+        // Increase test JVM memory with a stable configuration
         maxHeapSize = "2g"
         // Removed byte-buddy-agent configuration to fix Gradle 9.0.0 deprecation warning
         // The agent configuration was causing Task.project access at execution time
@@ -62,84 +61,14 @@ subprojects {
 }
 
 // ##################################################################
-// ###                  IHRE DOKUMENTATIONS-TASKS                 ###
+// ###                     DOKU-AGGREGATOR                        ###
 // ##################################################################
 
-// Abstrakte Klasse für die Custom Task (Best Practice)
-abstract class ValidateDocumentationTask @Inject constructor(
-    private val execOperations: ExecOperations
-) : DefaultTask() {
-
-    @TaskAction
-    fun validate() {
-        println("🔍 Validating documentation...")
-        execOperations.exec {
-            commandLine("./scripts/validation/validate-docs.sh")
-        }
-    }
-}
-
-// Registrierung der Tasks
-tasks.register<ValidateDocumentationTask>("validateDocumentation") {
-    description = "Validates documentation completeness and consistency"
+// Leichter Aggregator im Root-Projekt, ruft die eigentlichen Tasks im :docs Subprojekt auf
+tasks.register("docs") {
+    description = "Aggregates documentation tasks from :docs"
     group = "documentation"
-}
-
-tasks.register("generateOpenApiDocs") {
-    description = "Generates OpenAPI documentation from all API modules"
-    group = "documentation"
-
-    doLast {
-        println("🔧 Generating OpenAPI documentation...")
-        val apiModules = listOf(
-            "members:members-api",
-            "horses:horses-api",
-            "events:events-api",
-            "masterdata:masterdata-api"
-        )
-        val outputDir = file("docs/api/generated")
-        outputDir.mkdirs()
-
-        apiModules.forEach { module ->
-            val moduleName = module.split(":").last().replace("-api", "")
-            println("📝 Processing $moduleName API...")
-
-            val specFile = file("$outputDir/${moduleName}-openapi.json")
-            specFile.writeText(
-                """
-                {
-                  "openapi": "3.0.3",
-                  "info": {
-                    "title": "${moduleName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }} API",
-                    "description": "REST API für $moduleName Verwaltung",
-                    "version": "1.0.0",
-                    "contact": {
-                      "name": "Meldestelle Development Team"
-                    }
-                  },
-                  "servers": [
-                    { "url": "http://localhost:8080", "description": "Entwicklungs-Server" },
-                    { "url": "https://api.meldestelle.at", "description": "Produktions-Server" }
-                  ],
-                  "paths": {},
-                  "components": {
-                    "securitySchemes": {
-                      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
-                    }
-                  },
-                  "security": [ { "bearerAuth": [] } ]
-                }
-                """.trimIndent()
-            )
-        }
-        println("✅ OpenAPI documentation generated in docs/api/generated/")
-    }
-}
-
-tasks.register("generateAllDocs") {
-    description = "Generates all documentation (API docs + validation)"
-    group = "documentation"
-    dependsOn("generateOpenApiDocs", "validateDocumentation")
+    dependsOn(":docs:generateAllDocs")
 }
 
 // Wrapper-Konfiguration

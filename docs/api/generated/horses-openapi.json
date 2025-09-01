@@ -2,35 +2,19 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Horses API",
-    "description": "REST API for horses management",
+    "description": "REST API für horses Verwaltung",
     "version": "1.0.0",
-    "contact": {
-      "name": "Meldestelle Development Team"
-    }
+    "contact": { "name": "Meldestelle Development Team" }
   },
   "servers": [
-    {
-      "url": "http://localhost:8080",
-      "description": "Development server"
-    },
-    {
-      "url": "https://api.meldestelle.at",
-      "description": "Production server"
-    }
+    { "url": "http://localhost:8080", "description": "Entwicklungs-Server" },
+    { "url": "https://api.meldestelle.at", "description": "Produktions-Server" }
   ],
   "paths": {},
   "components": {
     "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
     }
   },
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ]
+  "security": [ { "bearerAuth": [] } ]
 }

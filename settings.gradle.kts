@@ -58,6 +58,9 @@ include(":client:common-ui")
 include(":client:web-app")
 include(":client:desktop-app")
 
+// Documentation module
+include(":docs")
+
 /*
 // Temporär deaktivierte Fach-Module
 // Members modules
