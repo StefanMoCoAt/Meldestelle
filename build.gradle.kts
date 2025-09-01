@@ -18,13 +18,35 @@ subprojects {
         }
     }
     tasks.withType<Test>().configureEach {
-        useJUnitPlatform()
+        useJUnitPlatform {
+            excludeTags("perf")
+        }
         // Configure CDS in auto-mode to prevent bootstrap classpath warnings
         jvmArgs("-Xshare:auto", "-Djdk.instrument.traceUsage=false")
         // Increase test JVM memory with stable configuration
         maxHeapSize = "2g"
         // Removed byte-buddy-agent configuration to fix Gradle 9.0.0 deprecation warning
         // The agent configuration was causing Task.project access at execution time
+    }
+
+    // Dedicated performance test task per JVM subproject
+    plugins.withId("java") {
+        val javaExt = extensions.getByType<org.gradle.api.plugins.JavaPluginExtension>()
+        tasks.register<Test>("perfTest") {
+            description = "Runs tests tagged with 'perf'"
+            group = "verification"
+            // Use the regular test source set outputs
+            testClassesDirs = javaExt.sourceSets.getByName("test").output.classesDirs
+            classpath = javaExt.sourceSets.getByName("test").runtimeClasspath
+            useJUnitPlatform {
+                includeTags("perf")
+            }
+            shouldRunAfter("test")
+            // Keep same JVM settings for consistency
+            jvmArgs("-Xshare:auto", "-Djdk.instrument.traceUsage=false")
+            maxHeapSize = "2g"
+            dependsOn("testClasses")
+        }
     }
 
     // Suppress Node.js deprecation warnings (e.g., DEP0040 punycode) during Kotlin/JS npm/yarn tasks

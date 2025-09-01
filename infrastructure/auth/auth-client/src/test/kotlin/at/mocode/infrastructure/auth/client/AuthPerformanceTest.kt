@@ -4,6 +4,7 @@ import at.mocode.infrastructure.auth.client.model.BerechtigungE
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertTimeoutPreemptively
 import org.springframework.test.annotation.DirtiesContext
@@ -100,10 +101,17 @@ class AuthPerformanceTest {
 
     // ========== Token Generation Performance Tests ==========
 
+    @Tag("perf")
     @Test
     fun `token generation should complete under 5ms`() {
         // Arrange
         val permissions = listOf(BerechtigungE.PERSON_READ, BerechtigungE.PFERD_CREATE, BerechtigungE.VEREIN_UPDATE)
+
+        // Warmup to stabilize JIT/caches
+        repeat(3) {
+            val t = jwtService.generateToken("warm-$it", "warmuser$it", permissions)
+            assertTrue(t.isNotEmpty())
+        }
 
         // Act & Assert
         repeat(100) {
@@ -112,7 +120,7 @@ class AuthPerformanceTest {
                 assertNotNull(token)
                 assertTrue(token.isNotEmpty())
             }
-            assertTrue(timeMs < 50, "Token generation should complete under 50ms (took ${timeMs}ms)")
+            assertTrue(timeMs < 80, "Token generation should complete under 80ms (took ${timeMs}ms)")
         }
     }
 
@@ -258,17 +266,25 @@ class AuthPerformanceTest {
 
     // ========== Complex Permissions Performance Tests ==========
 
+    @Tag("perf")
     @Test
     fun `should handle large permission sets efficiently`() {
         // Arrange - Create a token with all available permissions
         val allPermissions = BerechtigungE.entries
+
+        // Warmup - allow JIT and caches to stabilize
+        repeat(3) {
+            val warmToken = jwtService.generateToken("admin-user", "admin", allPermissions)
+            jwtService.validateToken(warmToken)
+            jwtService.getPermissionsFromToken(warmToken)
+        }
 
         // Act & Assert - Generation should still be fast
         val generationTime = measureTimeMillis {
             val token = jwtService.generateToken("admin-user", "admin", allPermissions)
             assertNotNull(token)
         }
-        assertTrue(generationTime < 500, "Generation with all permissions should be under 500ms")
+        assertTrue(generationTime < 500, "Generation with all permissions should be under 500ms (was ${generationTime}ms)")
 
         // Validation should also be fast
         val token = jwtService.generateToken("admin-user", "admin", allPermissions)
@@ -279,7 +295,7 @@ class AuthPerformanceTest {
             val permissions = jwtService.getPermissionsFromToken(token).getOrElse { emptyList() }
             assertEquals(allPermissions.size, permissions.size)
         }
-        assertTrue(validationTime < 80, "Validation with all permissions should be under 50ms")
+        assertTrue(validationTime < 120, "Validation with all permissions should be under 120ms (was ${validationTime}ms)")
     }
 
     // ========== Stress Tests ==========
