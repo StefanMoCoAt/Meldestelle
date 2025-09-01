@@ -31,7 +31,7 @@ subprojects {
 
     // Dedicated performance test task per JVM subproject
     plugins.withId("java") {
-        val javaExt = extensions.getByType<org.gradle.api.plugins.JavaPluginExtension>()
+        val javaExt = extensions.getByType<JavaPluginExtension>()
         tasks.register<Test>("perfTest") {
             description = "Runs tests tagged with 'perf'"
             group = "verification"
@@ -51,7 +51,7 @@ subprojects {
 
     // Suppress Node.js deprecation warnings (e.g., DEP0040 punycode) during Kotlin/JS npm/yarn tasks
     // Applies to all Exec-based tasks (covers Yarn/NPM invocations used by Kotlin JS plugin)
-    tasks.withType<org.gradle.api.tasks.Exec>().configureEach {
+    tasks.withType<Exec>().configureEach {
         // Merge existing NODE_OPTIONS with --no-deprecation
         val current = (environment["NODE_OPTIONS"] as String?) ?: System.getenv("NODE_OPTIONS")
         val merged = if (current.isNullOrBlank()) "--no-deprecation" else "$current --no-deprecation"
@@ -145,7 +145,7 @@ tasks.register("generateAllDocs") {
 // Wrapper-Konfiguration
 // Apply Node warning suppression on root project Exec tasks as well
 // Ensures aggregated Kotlin/JS tasks created at root (e.g., kotlinNpmInstall) inherit the env
-tasks.withType<org.gradle.api.tasks.Exec>().configureEach {
+tasks.withType<Exec>().configureEach {
     val current = (environment["NODE_OPTIONS"] as String?) ?: System.getenv("NODE_OPTIONS")
     val merged = if (current.isNullOrBlank()) "--no-deprecation" else "$current --no-deprecation"
     environment("NODE_OPTIONS", merged)
