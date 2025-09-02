@@ -31,6 +31,9 @@ subprojects {
     // Dedicated performance test task per JVM subproject
     plugins.withId("java") {
         val javaExt = extensions.getByType<JavaPluginExtension>()
+        // Ensure a full JDK toolchain with compiler is available (Gradle will auto-download if missing)
+        javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+
         tasks.register<Test>("perfTest") {
             description = "Runs tests tagged with 'perf'"
             group = "verification"

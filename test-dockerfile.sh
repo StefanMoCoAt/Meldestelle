@@ -1,104 +1,163 @@
 #!/bin/bash
 
-# Test script to validate the corrected kotlin-multiplatform-web.Dockerfile template
-# This script tests the Dockerfile with default values and custom build arguments
+# Test script to validate the kotlin-multiplatform-web.Dockerfile template
+# - Robust pre-checks (Docker, buildx, file existence)
+# - Safer bash settings, clear diagnostics
+# - Uses ephemeral ports for container run test (avoids conflicts)
+# - Cleans up containers/images even on failure
 
-set -e
+set -Eeuo pipefail
 
 DOCKERFILE_PATH="dockerfiles/templates/kotlin-multiplatform-web.Dockerfile"
+SCRIPT_NAME="$(basename "$0")"
 
-echo "Testing Kotlin Multiplatform Web Dockerfile Template..."
-echo "======================================================="
+# Unique suffix to avoid tag/container collisions
+RAND_SUFFIX=$(date +%s)-$RANDOM
+IMAGE_DEFAULT="test-kotlin-web:default-${RAND_SUFFIX}"
+IMAGE_CUSTOM="test-kotlin-web:custom-${RAND_SUFFIX}"
+CONTAINER_NAME="test-container-${RAND_SUFFIX}"
 
-# Test 1: Check if Dockerfile syntax is valid
-echo "1. Testing Dockerfile syntax validation..."
-# Create a minimal validation that doesn't require project compilation
-echo "  Testing Dockerfile structure and ARG definitions..."
-
-# Check if all required ARG variables are defined
-if grep -q "^ARG CLIENT_PATH=" "$DOCKERFILE_PATH" && \
-   grep -q "^ARG CLIENT_MODULE=" "$DOCKERFILE_PATH" && \
-   grep -q "^ARG CLIENT_NAME=" "$DOCKERFILE_PATH"; then
-    echo "✓ Required ARG declarations found"
-else
-    echo "✗ Missing required ARG declarations"
-    exit 1
-fi
-
-# Check if ARGs are re-declared in both stages
-kotlin_builder_args=$(grep -A 10 "FROM.*AS kotlin-builder" "$DOCKERFILE_PATH" | grep -c "^ARG")
-runtime_args=$(grep -A 10 "FROM.*AS runtime" "$DOCKERFILE_PATH" | grep -c "^ARG")
-
-if [ "$kotlin_builder_args" -ge 3 ] && [ "$runtime_args" -ge 3 ]; then
-    echo "✓ ARG declarations found in both build stages"
-else
-    echo "✗ Missing ARG declarations in build stages"
-    exit 1
-fi
-
-# Test basic Docker parsing without building
-echo "  Testing basic Docker parsing..."
-if docker buildx build --no-cache -f "$DOCKERFILE_PATH" --platform linux/amd64 . 2>&1 | head -20 | grep -q "ERROR.*failed to solve"; then
-    echo "✗ Dockerfile has parsing errors"
-    exit 1
-else
-    echo "✓ Dockerfile syntax validation passed"
-fi
-
-# Test 2: Test with default build arguments (web-app)
-echo "2. Testing build with default arguments (web-app)..."
-docker build --no-cache \
-    -f "$DOCKERFILE_PATH" \
-    -t test-kotlin-web:default \
-    . || {
-    echo "✗ Build with default arguments failed"
-    exit 1
+cleanup() {
+  echo "[cleanup] Stopping/removing test resources (if any)..." || true
+  docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
+  docker rmi "$IMAGE_DEFAULT" "$IMAGE_CUSTOM" >/dev/null 2>&1 || true
 }
-echo "✓ Build with default arguments successful"
+trap cleanup EXIT
 
-# Test 3: Test with custom build arguments (desktop-app scenario)
-echo "3. Testing build with custom arguments..."
-docker build --no-cache \
-    -f "$DOCKERFILE_PATH" \
+info()  { echo "[INFO]  $*"; }
+success(){ echo "[ OK ]  $*"; }
+warn()  { echo "[WARN]  $*"; }
+fail()  { echo "[FAIL]  $*"; exit 1; }
+
+info "Testing Kotlin Multiplatform Web Dockerfile Template"
+echo  "======================================================="
+
+# -------------------------------------------------------------------
+# 0. Pre-checks
+# -------------------------------------------------------------------
+command -v docker >/dev/null 2>&1 || fail "Docker is not installed or not in PATH"
+if ! docker info >/dev/null 2>&1; then
+  fail "Docker does not seem to be running or accessible for the current user"
+fi
+
+if [ ! -f "$DOCKERFILE_PATH" ]; then
+  fail "Dockerfile not found at: $DOCKERFILE_PATH"
+fi
+
+HAS_BUILDX=1
+if ! docker buildx version >/dev/null 2>&1; then
+  HAS_BUILDX=0
+  warn "docker buildx not available; skipping buildx-specific syntax check"
+fi
+
+# -------------------------------------------------------------------
+# 1. Static checks on Dockerfile structure
+# -------------------------------------------------------------------
+info "1) Validating Dockerfile structure and ARG definitions"
+
+# Required ARG variables must be defined (somewhere in the file)
+if grep -q "^ARG CLIENT_PATH=" "$DOCKERFILE_PATH" \
+   && grep -q "^ARG CLIENT_MODULE=" "$DOCKERFILE_PATH" \
+   && grep -q "^ARG CLIENT_NAME=" "$DOCKERFILE_PATH"; then
+  success "Required ARG declarations found"
+else
+  fail "Missing required ARG declarations (CLIENT_PATH, CLIENT_MODULE, CLIENT_NAME)"
+fi
+
+# Ensure expected stages are present
+if grep -qiE "^FROM .* as kotlin-builder" "$DOCKERFILE_PATH" && \
+   grep -qiE "^FROM .* as runtime" "$DOCKERFILE_PATH"; then
+  success "Build stages 'kotlin-builder' and 'runtime' found"
+else
+  fail "Expected stages 'kotlin-builder' and/or 'runtime' not found"
+fi
+
+# Verify that ARGs are re-declared in both stages (search within ~40 lines after each stage marker)
+kotlin_builder_args=$(grep -n "^FROM .* [Aa][Ss] kotlin-builder" "$DOCKERFILE_PATH" | cut -d: -f1 | xargs -I{} sh -c "sed -n '{}','{}+40p' '$DOCKERFILE_PATH' | grep -c '^ARG'" || echo 0)
+runtime_args=$(grep -n "^FROM .* [Aa][Ss] runtime" "$DOCKERFILE_PATH" | cut -d: -f1 | xargs -I{} sh -c "sed -n '{}','{}+40p' '$DOCKERFILE_PATH' | grep -c '^ARG'" || echo 0)
+if [ "${kotlin_builder_args:-0}" -ge 3 ] && [ "${runtime_args:-0}" -ge 3 ]; then
+  success "ARG declarations appear in both build stages"
+else
+  fail "ARG declarations appear to be missing in one or both build stages"
+fi
+
+# Optional: attempt a lightweight parsing via buildx (does not necessarily run heavy build)
+if [ "$HAS_BUILDX" -eq 1 ]; then
+  info "Performing basic Dockerfile parsing with buildx (no image kept)"
+  # Try to parse/resolve without caching; don't fail the whole flow on noisy build output
+  if docker buildx build --no-cache -f "$DOCKERFILE_PATH" --platform linux/amd64 . \
+      2>&1 | head -50 | grep -q "ERROR.*failed to solve"; then
+    fail "Dockerfile has parsing errors (buildx failed to solve)"
+  else
+    success "Dockerfile basic parsing passed"
+  fi
+else
+  warn "Skipping buildx parsing check"
+fi
+
+# -------------------------------------------------------------------
+# 2. Build with default arguments (web-app)
+# -------------------------------------------------------------------
+info "2) Building image with default arguments (web-app)"
+if docker build --no-cache -f "$DOCKERFILE_PATH" -t "$IMAGE_DEFAULT" .; then
+  success "Build with default arguments successful"
+else
+  fail "Build with default arguments failed"
+fi
+
+# -------------------------------------------------------------------
+# 3. Build with custom arguments (desktop-app scenario)
+# -------------------------------------------------------------------
+info "3) Building image with custom arguments (desktop-app scenario)"
+if docker build --no-cache -f "$DOCKERFILE_PATH" \
     --build-arg CLIENT_PATH=client/desktop-app \
     --build-arg CLIENT_MODULE=client:desktop-app \
     --build-arg CLIENT_NAME=desktop-app \
-    -t test-kotlin-web:custom \
-    . || {
-    echo "✗ Build with custom arguments failed - this is expected if desktop-app doesn't have nginx.conf"
-    echo "ℹ This test shows the template can accept different client modules"
-}
-
-# Test 4: Verify the built image can start (quick test)
-echo "4. Testing if the built container can start..."
-if docker run --rm -d --name test-container -p 8080:80 test-kotlin-web:default; then
-    sleep 5
-    # Test if nginx is running
-    if docker exec test-container ps aux | grep nginx > /dev/null; then
-        echo "✓ Container started successfully and nginx is running"
-        docker stop test-container
-    else
-        echo "✗ Container started but nginx is not running properly"
-        docker stop test-container
-        exit 1
-    fi
+    -t "$IMAGE_CUSTOM" .; then
+  success "Build with custom arguments successful"
 else
-    echo "✗ Container failed to start"
-    exit 1
+  warn "Build with custom arguments failed (this can be expected if desktop-app lacks proper assets/nginx.conf)"
 fi
 
-# Cleanup
-echo "5. Cleaning up test images..."
-docker rmi test-kotlin-web:default test-kotlin-web:custom 2>/dev/null || true
+# -------------------------------------------------------------------
+# 4. Run container and validate it responds over HTTP
+# -------------------------------------------------------------------
+info "4) Running container from default image and validating HTTP response"
+# -P maps service ports to random host ports; then detect the mapped port
+if docker run --rm -d --name "$CONTAINER_NAME" -P "$IMAGE_DEFAULT" >/dev/null; then
+  # Determine mapped host port for container port 80
+  sleep 3
+  HOST_PORT=$(docker port "$CONTAINER_NAME" 80/tcp | sed -E 's/.*:(\d+)/\1/' | head -n1 || true)
+  if [ -z "${HOST_PORT:-}" ]; then
+    docker logs "$CONTAINER_NAME" || true
+    fail "Could not determine mapped host port for container"
+  fi
+  # Try a few times to allow nginx to start
+  for i in {1..10}; do
+    if curl -fsS "http://127.0.0.1:${HOST_PORT}" >/dev/null 2>&1; then
+      success "Container responded over HTTP on localhost:${HOST_PORT}"
+      break
+    fi
+    sleep 1
+  done
+  # Final check (if not succeeded yet)
+  if ! curl -fsS "http://127.0.0.1:${HOST_PORT}" >/dev/null 2>&1; then
+    docker logs "$CONTAINER_NAME" || true
+    fail "Container started but did not respond on HTTP port"
+  fi
+else
+  fail "Container failed to start"
+fi
 
+# -------------------------------------------------------------------
+# 5. Done (cleanup happens via trap)
+# -------------------------------------------------------------------
 echo ""
 echo "======================================================="
-echo "✓ All tests passed! The Dockerfile template is working correctly."
-echo "✓ Fixed issues:"
-echo "  - Added missing ARG declarations for CLIENT_PATH, CLIENT_MODULE, CLIENT_NAME"
-echo "  - Fixed undefined variable references"
-echo "  - Added build verification step"
-echo "  - Improved security with proper user switching"
-echo "  - Enhanced Gradle optimization settings"
-echo "  - Added better error handling in CMD"
+success "All tests completed successfully. The Dockerfile template looks healthy."
+echo "Highlights:"
+echo "  - Verified presence of required ARGs and stages"
+echo "  - Performed basic parsing (when buildx available)"
+echo "  - Built images (default + custom args)"
+echo "  - Validated container HTTP responsiveness via ephemeral port"
 echo "======================================================="
