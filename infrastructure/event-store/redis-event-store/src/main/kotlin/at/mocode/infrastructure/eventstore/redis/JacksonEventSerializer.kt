@@ -11,7 +11,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Jackson-based implementation of EventSerializer.
+ * Jackson-basierte Implementierung des EventSerializer.
  */
 class JacksonEventSerializer : EventSerializer {
     private val logger = LoggerFactory.getLogger(JacksonEventSerializer::class.java)

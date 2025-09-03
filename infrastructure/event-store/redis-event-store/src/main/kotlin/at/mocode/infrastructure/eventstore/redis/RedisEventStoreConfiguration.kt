@@ -15,7 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import java.time.Duration
 
 /**
- * Redis event store properties.
+ * Redis Event Store Eigenschaften.
  */
 @ConfigurationProperties(prefix = "redis.event-store")
 data class RedisEventStoreProperties(
@@ -39,17 +39,17 @@ data class RedisEventStoreProperties(
 )
 
 /**
- * Spring configuration for Redis event store.
+ * Spring-Konfiguration für Redis Event Store.
  */
 @Configuration
 @EnableConfigurationProperties(RedisEventStoreProperties::class)
 class RedisEventStoreConfiguration {
 
     /**
-     * Creates a Redis connection factory for the event store.
+     * Erstellt eine Redis-Verbindungsfactory für den Event Store.
      *
-     * @param properties Redis event store properties
-     * @return Redis connection factory
+     * @param properties Redis Event Store Eigenschaften
+     * @return Redis-Verbindungsfactory
      */
     @Bean
     @ConditionalOnMissingBean(name = ["eventStoreRedisConnectionFactory"])
@@ -68,10 +68,10 @@ class RedisEventStoreConfiguration {
     }
 
     /**
-     * Creates a Redis template for the event store.
+     * Erstellt ein Redis-Template für den Event Store.
      *
-     * @param connectionFactory Redis connection factory
-     * @return Redis template
+     * @param connectionFactory Redis-Verbindungsfactory
+     * @return Redis-Template
      */
     @Bean
     @ConditionalOnMissingBean(name = ["eventStoreRedisTemplate"])
@@ -86,9 +86,9 @@ class RedisEventStoreConfiguration {
     }
 
     /**
-     * Creates an event serializer.
+     * Erstellt einen Event-Serializer.
      *
-     * @return Event serializer
+     * @return Event-Serializer
      */
     @Bean
     @ConditionalOnMissingBean
@@ -97,12 +97,12 @@ class RedisEventStoreConfiguration {
     }
 
     /**
-     * Creates a Redis event store.
+     * Erstellt einen Redis Event Store.
      *
-     * @param redisTemplate Redis template
-     * @param eventSerializer Event serializer
-     * @param properties Redis event store properties
-     * @return Event store
+     * @param redisTemplate Redis-Template
+     * @param eventSerializer Event-Serializer
+     * @param properties Redis Event Store Eigenschaften
+     * @return Event Store
      */
     @Bean
     @ConditionalOnMissingBean
@@ -116,12 +116,12 @@ class RedisEventStoreConfiguration {
     }
 
     /**
-     * Creates a Redis event consumer.
+     * Erstellt einen Redis Event Consumer.
      *
-     * @param redisTemplate Redis template
-     * @param eventSerializer Event serializer
-     * @param properties Redis event store properties
-     * @return Event consumer
+     * @param redisTemplate Redis-Template
+     * @param eventSerializer Event-Serializer
+     * @param properties Redis Event Store Eigenschaften
+     * @return Event Consumer
      */
     @Bean
     @ConditionalOnMissingBean

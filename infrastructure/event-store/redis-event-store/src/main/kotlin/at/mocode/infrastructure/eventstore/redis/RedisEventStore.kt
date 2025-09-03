@@ -86,7 +86,7 @@ class RedisEventStore(
     }
 
     /**
-     * Validates the expected version and returns the current version, handling cache invalidation on conflicts.
+     * Validiert die erwartete Version und gibt die aktuelle Version zurück, behandelt Cache-Invalidierung bei Konflikten.
      */
     private fun validateAndGetCurrentVersion(streamId: UUID, expectedVersion: Long): Long {
         var currentVersion = getStreamVersion(streamId)
@@ -105,7 +105,7 @@ class RedisEventStore(
     }
 
     /**
-     * Appends multiple events in a single Redis transaction for optimal performance.
+     * Fügt mehrere Events in einer einzigen Redis-Transaktion hinzu für optimale Performance.
      */
     private fun appendEventsInBatch(events: List<DomainEvent>, streamId: UUID, currentVersion: Long): Long {
         val streamKey = getStreamKey(streamId)

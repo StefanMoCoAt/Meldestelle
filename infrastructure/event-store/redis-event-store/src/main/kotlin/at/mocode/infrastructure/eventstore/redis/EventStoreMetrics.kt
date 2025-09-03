@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.LongAdder
 
 /**
- * Comprehensive metrics tracking for Redis Event Store operations.
+ * Umfassende Metriken-Verfolgung für Redis Event-Store-Operationen.
  *
- * Tracks performance metrics, error rates, and operational statistics
- * to provide insights into event store health and performance.
+ * Verfolgt Performance-Metriken, Fehlerquoten und Betriebsstatistiken,
+ * um Einblicke in die Gesundheit und Performance des Event-Stores zu geben.
  */
 class EventStoreMetrics {
     private val logger = LoggerFactory.getLogger(EventStoreMetrics::class.java)

@@ -4,73 +4,73 @@ import at.mocode.core.domain.event.DomainEvent
 import java.util.UUID
 
 /**
- * Interface for serializing and deserializing domain events.
+ * Schnittstelle für die Serialisierung und Deserialisierung von Domain-Events.
  */
 interface EventSerializer {
     /**
-     * Serializes a domain event to a map of strings to strings.
-     * This format is suitable for storage in Redis Streams.
+     * Serialisiert ein Domain-Event zu einer Map von Strings zu Strings.
+     * Dieses Format ist für die Speicherung in Redis Streams geeignet.
      *
-     * @param event The event to serialize
-     * @return A map of strings to strings representing the event
+     * @param event Das zu serialisierende Event
+     * @return Eine Map von Strings zu Strings, die das Event repräsentiert
      */
     fun serialize(event: DomainEvent): Map<String, String>
 
     /**
-     * Deserializes a map of strings to a domain event.
+     * Deserialisiert eine Map von Strings zu einem Domain-Event.
      *
-     * @param data The map of strings to deserialize
-     * @return The deserialized domain event
+     * @param data Die zu deserialisierende Map von Strings
+     * @return Das deserialisierte Domain-Event
      */
     fun deserialize(data: Map<String, String>): DomainEvent
 
     /**
-     * Gets the type of domain event.
-     * This is used to determine the type of event when deserializing.
+     * Ermittelt den Typ des Domain-Events.
+     * Dies wird verwendet, um den Typ des Events bei der Deserialisierung zu bestimmen.
      *
-     * @param event The event to get the type of
-     * @return The type of the event as a string
+     * @param event Das Event, dessen Typ ermittelt werden soll
+     * @return Der Typ des Events als String
      */
     fun getEventType(event: DomainEvent): String
 
     /**
-     * Gets the type of domain event from a serialized map.
+     * Ermittelt den Typ des Domain-Events aus einer serialisierten Map.
      *
-     * @param data The serialized event data
-     * @return The type of the event as a string
+     * @param data Die serialisierten Event-Daten
+     * @return Der Typ des Events als String
      */
     fun getEventType(data: Map<String, String>): String
 
     /**
-     * Registers a domain event class with the serializer.
-     * This is used to map event types to their corresponding classes.
+     * Registriert eine Domain-Event-Klasse beim Serializer.
+     * Dies wird verwendet, um Event-Typen auf ihre entsprechenden Klassen abzubilden.
      *
-     * @param eventClass The class of the event to register
-     * @param eventType The type of the event as a string
+     * @param eventClass Die Klasse des zu registrierenden Events
+     * @param eventType Der Typ des Events als String
      */
     fun registerEventType(eventClass: Class<out DomainEvent>, eventType: String)
 
     /**
-     * Gets the aggregate ID from a serialized event.
+     * Ermittelt die Aggregat-ID aus einem serialisierten Event.
      *
-     * @param data The serialized event data
-     * @return The aggregate ID
+     * @param data Die serialisierten Event-Daten
+     * @return Die Aggregat-ID
      */
     fun getAggregateId(data: Map<String, String>): UUID
 
     /**
-     * Gets the event ID from a serialized event.
+     * Ermittelt die Event-ID aus einem serialisierten Event.
      *
-     * @param data The serialized event data
-     * @return The event ID
+     * @param data Die serialisierten Event-Daten
+     * @return Die Event-ID
      */
     fun getEventId(data: Map<String, String>): UUID
 
     /**
-     * Gets the version from a serialized event.
+     * Ermittelt die Version aus einem serialisierten Event.
      *
-     * @param data The serialized event data
-     * @return The version
+     * @param data Die serialisierten Event-Daten
+     * @return Die Version
      */
     fun getVersion(data: Map<String, String>): Long
 }
