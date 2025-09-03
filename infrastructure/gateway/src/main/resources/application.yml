@@ -35,140 +35,142 @@ spring:
           max-idle-time: 15s
           max-life-time: 60s
       # Verbesserte CORS-Konfiguration
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOriginPatterns:
-              - "https://*.meldestelle.at"
-              - "http://localhost:*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-            maxAge: 3600
       # Antwort-Header bereinigen und globale Filter
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-        - name: CircuitBreaker
-          args:
-            name: defaultCircuitBreaker
-            fallbackUri: forward:/fallback
-        - name: Retry
-          args:
-            retries: 3
-            statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
-            methods: GET,POST,PUT,DELETE
-            backoff:
-              firstBackoff: 50ms
-              maxBackoff: 500ms
-              factor: 2
-              basedOnPreviousValue: false
-        # Security Headers for enhanced protection
-        - name: AddResponseHeader
-          args:
-            name: X-Content-Type-Options
-            value: nosniff
-        - name: AddResponseHeader
-          args:
-            name: X-Frame-Options
-            value: DENY
-        - name: AddResponseHeader
-          args:
-            name: X-XSS-Protection
-            value: 1; mode=block
-        - name: AddResponseHeader
-          args:
-            name: Referrer-Policy
-            value: strict-origin-when-cross-origin
-        - name: AddResponseHeader
-          args:
-            name: Cache-Control
-            value: no-cache, no-store, must-revalidate
       # Route definitions with service discovery
-      routes:
-        # Health Check und Gateway Info Routes
-        - id: gateway-info-route
-          uri: http://localhost:${server.port}
-          predicates:
-            - Path=/
-            - Method=GET
-          filters:
-            - SetStatus=200
-            - SetResponseHeader=Content-Type,application/json
-
-        # Members Service Routes
-        - id: members-service-route
-          uri: lb://members-service
-          predicates:
-            - Path=/api/members/**
-          filters:
-            - StripPrefix=1
+      server:
+        webflux:
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
             - name: CircuitBreaker
-              args:
-                name: membersCircuitBreaker
-                fallbackUri: forward:/fallback/members
+                      args:
+                        name: defaultCircuitBreaker
+                        fallbackUri: forward:/fallback
+            - name: Retry
+                      args:
+                        retries: 3
+                        statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+                        methods: GET,POST,PUT,DELETE
+                        backoff:
+                          firstBackoff: 50ms
+                          maxBackoff: 500ms
+                          factor: 2
+                          basedOnPreviousValue: false
+                    # Security Headers for enhanced protection
+            - name: AddResponseHeader
+                      args:
+                        name: X-Content-Type-Options
+                        value: nosniff
+            - name: AddResponseHeader
+                      args:
+                        name: X-Frame-Options
+                        value: DENY
+            - name: AddResponseHeader
+                      args:
+                        name: X-XSS-Protection
+                        value: 1; mode=block
+            - name: AddResponseHeader
+                      args:
+                        name: Referrer-Policy
+                        value: strict-origin-when-cross-origin
+            - name: AddResponseHeader
+                      args:
+                        name: Cache-Control
+                        value: no-cache, no-store, must-revalidate
+          routes:
+            # Health Check und Gateway Info Routes
+                    - id: gateway-info-route
+                      uri: http://localhost:${server.port}
+                      predicates:
+                        - Path=/
+                        - Method=GET
+                      filters:
+                        - SetStatus=200
+                        - SetResponseHeader=Content-Type,application/json
 
-        # Horses Service Routes
-        - id: horses-service-route
-          uri: lb://horses-service
-          predicates:
-            - Path=/api/horses/**
-          filters:
-            - StripPrefix=1
-            - name: CircuitBreaker
-              args:
-                name: horsesCircuitBreaker
-                fallbackUri: forward:/fallback/horses
+                    # Members Service Routes
+                    - id: members-service-route
+                      uri: lb://members-service
+                      predicates:
+                        - Path=/api/members/**
+                      filters:
+                        - StripPrefix=1
+                        - name: CircuitBreaker
+                          args:
+                            name: membersCircuitBreaker
+                            fallbackUri: forward:/fallback/members
 
-        # Events Service Routes
-        - id: events-service-route
-          uri: lb://events-service
-          predicates:
-            - Path=/api/events/**
-          filters:
-            - StripPrefix=1
-            - name: CircuitBreaker
-              args:
-                name: eventsCircuitBreaker
-                fallbackUri: forward:/fallback/events
+                    # Horses Service Routes
+                    - id: horses-service-route
+                      uri: lb://horses-service
+                      predicates:
+                        - Path=/api/horses/**
+                      filters:
+                        - StripPrefix=1
+                        - name: CircuitBreaker
+                          args:
+                            name: horsesCircuitBreaker
+                            fallbackUri: forward:/fallback/horses
 
-        # Masterdata Service Routes
-        - id: masterdata-service-route
-          uri: lb://masterdata-service
-          predicates:
-            - Path=/api/masterdata/**
-          filters:
-            - StripPrefix=1
-            - name: CircuitBreaker
-              args:
-                name: masterdataCircuitBreaker
-                fallbackUri: forward:/fallback/masterdata
+                    # Events Service Routes
+                    - id: events-service-route
+                      uri: lb://events-service
+                      predicates:
+                        - Path=/api/events/**
+                      filters:
+                        - StripPrefix=1
+                        - name: CircuitBreaker
+                          args:
+                            name: eventsCircuitBreaker
+                            fallbackUri: forward:/fallback/events
 
-        # Auth Service Routes (if exists)
-        - id: auth-service-route
-          uri: lb://auth-service
-          predicates:
-            - Path=/api/auth/**
-          filters:
-            - StripPrefix=1
-            - name: CircuitBreaker
-              args:
-                name: authCircuitBreaker
-                fallbackUri: forward:/fallback/auth
+                    # Masterdata Service Routes
+                    - id: masterdata-service-route
+                      uri: lb://masterdata-service
+                      predicates:
+                        - Path=/api/masterdata/**
+                      filters:
+                        - StripPrefix=1
+                        - name: CircuitBreaker
+                          args:
+                            name: masterdataCircuitBreaker
+                            fallbackUri: forward:/fallback/masterdata
 
-        # Ping Service Routes (existing)
-        - id: ping-service-route
-          uri: lb://ping-service
-          predicates:
-            - Path=/api/ping/**
-          filters:
-            - StripPrefix=1
+                    # Auth Service Routes (if exists)
+                    - id: auth-service-route
+                      uri: lb://auth-service
+                      predicates:
+                        - Path=/api/auth/**
+                      filters:
+                        - StripPrefix=1
+                        - name: CircuitBreaker
+                          args:
+                            name: authCircuitBreaker
+                            fallbackUri: forward:/fallback/auth
+
+                    # Ping Service Routes (existing)
+                    - id: ping-service-route
+                      uri: lb://ping-service
+                      predicates:
+                        - Path=/api/ping/**
+                      filters:
+                        - StripPrefix=1
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                          allowedOriginPatterns:
+                            - "https://*.meldestelle.at"
+                            - "http://localhost:*"
+                          allowedMethods:
+                            - GET
+                            - POST
+                            - PUT
+                            - DELETE
+                            - PATCH
+                            - OPTIONS
+                          allowedHeaders:
+                            - "*"
+                          allowCredentials: true
+                          maxAge: 3600
 
 # Circuit Breaker Configuration
 resilience4j:
@@ -228,14 +230,14 @@ management:
       probes:
         enabled: true
     metrics:
-      enabled: true
+      access: unrestricted
     info:
-      enabled: true
+      access: unrestricted
     prometheus:
-      enabled: true
+      access: unrestricted
     gateway:
-      enabled: true
-    circuitbreakers:
+      access: unrestricted
+    circuit breakers:
       enabled: true
   metrics:
     export:

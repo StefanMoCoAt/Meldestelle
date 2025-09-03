@@ -1,10 +1,25 @@
-# Infrastructure/Auth Module - Comprehensive Documentation
+# Infrastructure/Auth Modul – Aktuelle Dokumentation (Stand: September 2025)
 
 ## Überblick
 
 Das **Auth-Modul** ist die zentrale Komponente für die gesamte Authentifizierung und Autorisierung innerhalb der Meldestelle-Systemlandschaft. Es ist verantwortlich für die Absicherung von APIs, die Validierung von Benutzeridentitäten und die Verwaltung von Berechtigungen.
 
 Als Identity Provider wird **Keycloak** verwendet. Dieses Modul kapselt die gesamte Interaktion mit Keycloak und stellt dem Rest des Systems eine einheitliche und vereinfachte Sicherheitsschicht zur Verfügung.
+
+## Aufgabe des Moduls
+
+- Zentrale Bereitstellung von Authentifizierungs- und Autorisierungsfunktionen für alle Services
+- Minimierung der Kopplung an Keycloak durch eine API/Client-Abstraktion (`auth-client`)
+- Einheitliche, typsichere Repräsentation von Rollen und Berechtigungen als Enums
+- Sichere Erzeugung, Validierung und Auswertung von JWTs (Issuer, Audience, Ablauf, Signatur)
+- Bereitstellung eines dedizierten Auth-Servers für Benutzer-Workflows (Login, optional Passwortänderung, Token-Ausstellung)
+
+## Umsetzung (High-Level)
+
+- Authentifizierung findet gegen Keycloak statt; der `auth-server` kapselt dessen Aufrufe.
+- Nach erfolgreicher Authentifizierung wird ein signiertes JWT erzeugt, das Rollen/Berechtigungen enthält.
+- Downstream-Services validieren das JWT über den `auth-client` und führen autorisierte Domänenaktionen aus.
+- Das API-Gateway kann JWTs vorvalidieren und Metadaten-Header weitergeben; vollständige Validierung sollte via `auth-client` erfolgen.
 
 ## Architektur
 
@@ -20,12 +35,17 @@ infrastructure/auth/
 
 Dieses Modul ist eine **wiederverwendbare Bibliothek** und kein eigenständiger Service. Es enthält die gesamte Logik, die andere Microservices (wie `masterdata-service`, `members-service` etc.) benötigen, um ihre Endpunkte abzusichern.
 
-**Hauptaufgaben:**
-* **JWT-Management:** Stellt einen `JwtService` zur Erstellung und Validierung von JSON Web Tokens bereit.
-* **Modell-Definition:** Definiert die **Quelle der Wahrheit** für sicherheitsrelevante Konzepte wie `RolleE` und `BerechtigungE` als typsichere Kotlin-Enums. Dies stellt sicher, dass alle Services dieselbe "Sprache" für Berechtigungen sprechen.
-* **Schnittstellen:** Bietet saubere Schnittstellen wie `AuthenticationService` an, die von der konkreten Implementierung (z.B. Keycloak) abstrahieren.
+Aktueller Stand (09/2025):
+- Enthält ein typensicheres Rollen- und Berechtigungsmodell: `RolleE`, `BerechtigungE` (kotlinx.serialization-annotiert für konsistente JSON-Serialisierung).
+- Definiert die Schnittstelle `AuthenticationService` mit suspend-Funktionen und Result-Typen zur Authentifizierung und Passwortänderung. Rückgabewerte sind versiegelt (sealed) und decken Success/Failure/Locked ab. Dadurch klare, explizite Fehlerfälle ohne Exceptions in Kontrollflüssen.
+- Stellt den `JwtService` bereit, der via Spring konfiguriert werden kann und in Services zur Token-Erzeugung/-Validierung genutzt wird.
 
-Jeder Microservice, der geschützte Endpunkte anbietet, bindet dieses Modul als Abhängigkeit ein.
+**Hauptaufgaben:**
+* **JWT-Management:** Stellt einen `JwtService` zur Erstellung und Validierung von JSON Web Tokens bereit (Signatur, Claims, Ablaufzeiten). Neue, result-basierte APIs erleichtern das Fehler-Handling.
+* **Modell-Definition:** Definiert die **Quelle der Wahrheit** für sicherheitsrelevante Konzepte wie `RolleE` und `BerechtigungE` als typsichere Kotlin-Enums. Dies stellt sicher, dass alle Services dieselbe "Sprache" für Berechtigungen sprechen.
+* **Schnittstellen:** Bietet saubere Schnittstellen wie `AuthenticationService` an, die von der konkreten Implementierung (z.B. Keycloak) abstrahieren. Dadurch können Implementierungen im `auth-server` oder in Tests (Mocks/Fakes) ausgetauscht werden.
+
+Einbindung: Jeder Microservice, der geschützte Endpunkte anbietet, bindet dieses Modul als Abhängigkeit ein.
 
 ### `auth-server`
 
@@ -36,6 +56,42 @@ Dies ist ein **eigenständiger Spring Boot Microservice**, der als Brücke zwisc
 * **Token-Endpunkte:** Ist verantwortlich für das Ausstellen von Tokens nach einer erfolgreichen Authentifizierung.
 * **Implementierung der `AuthenticationService`-Schnittstelle:** Enthält die konkrete Logik, die gegen Keycloak prüft, ob ein Benutzername und ein Passwort korrekt sind.
 
+**Konfiguration (AuthServerConfiguration):**
+Der Service stellt einen konfigurierbaren `JwtService` per Spring-Bean bereit. Die dazugehörigen Properties werden über `auth.jwt.*` gesetzt:
+
+```yaml
+auth:
+  jwt:
+    secret: <32+ Zeichen starkes Secret>
+    issuer: meldestelle-auth-server
+    audience: meldestelle-services
+    expiration: 60  # Minuten
+```
+
+Kotlin-Konfiguration (vereinfacht):
+```kotlin
+@Configuration
+@EnableConfigurationProperties(JwtProperties::class)
+class AuthServerConfiguration {
+  @Bean
+  fun jwtService(props: JwtProperties) = JwtService(
+    secret = props.secret,
+    issuer = props.issuer,
+    audience = props.audience,
+    expiration = props.expiration.minutes
+  )
+  @ConfigurationProperties(prefix = "auth.jwt")
+  data class JwtProperties(
+    val secret: String,
+    val issuer: String,
+    val audience: String,
+    val expiration: Long
+  )
+}
+```
+
+Hinweis: Standardwerte sind nur für lokale Entwicklung gedacht und müssen in Produktion überschrieben werden. Zusätzlich validiert der Auth-Server die JWT-Properties: Secret min. 32 Zeichen, issuer/audience nicht leer; bei Verwendung des Default-Secrets wird eine Laufzeit-Warnung ausgegeben.
+
 ## Zusammenspiel im System
 
 1.  Ein **Benutzer** meldet sich über eine Client-Anwendung am **`auth-server`** an.
@@ -43,10 +99,11 @@ Dies ist ein **eigenständiger Spring Boot Microservice**, der als Brücke zwisc
 3.  Bei Erfolg erstellt der `auth-server` mit dem `JwtService` aus dem `auth-client` ein JWT, das die Berechtigungen des Benutzers enthält, und sendet es an den Client zurück.
 4.  Der **Client** sendet eine Anfrage an einen anderen Microservice (z.B. `members-service`) und fügt das JWT als Bearer-Token in den Header ein.
 5.  Der **`members-service`**, der ebenfalls den `auth-client` als Abhängigkeit hat, nutzt den `JwtService`, um das Token zu validieren und die Berechtigungen typsicher auszulesen.
+6.  Das **Gateway** kann vorgelagert JWT-basierte Authentifizierung durchführen. Aktuell existiert ein `JwtAuthenticationFilter`, der über `gateway.security.jwt.enabled=true` aktiviert wird. In der vorliegenden Codebasis nutzt dieser noch eine vereinfachte Validierung; die geplante Integration ist die Nutzung des `auth-client` zur vollständigen Validierung und Claim-Extraktion.
 
 Diese Architektur entkoppelt die Fach-Services von der Komplexität der Identitätsverwaltung und schafft eine robuste, zentrale Sicherheitsinfrastruktur.
 
-## Modernisierungen (August 2025)
+## Modernisierungen (September 2025)
 
 ### Technische Verbesserungen
 
@@ -67,6 +124,21 @@ Diese Architektur entkoppelt die Fach-Services von der Komplexität der Identit�
 **Test-Verbesserungen:**
 - Entfernung von `Thread.sleep()` für zuverlässigere Tests
 - Bessere Expired-Token-Tests mit eindeutigen Zeitstempel-Differenzen
+
+### Token Claims und Struktur
+
+Empfohlene Claims im JWT (Beispiel):
+- sub: Benutzer-ID (UUID)
+- pid: Personen-ID (UUID)
+- preferred_username: Loginname (derzeit intern als Claim "username" umgesetzt)
+- email: E-Mail-Adresse
+- roles: Liste von Rollen (`RolleE`)
+- perms: Liste von Berechtigungen (`BerechtigungE`)
+- iss: Issuer (z.B. meldestelle-auth-server)
+- aud: Audience (z.B. meldestelle-services)
+- iat/exp: Ausstellungs- und Ablaufzeitpunkt
+
+Diese Claims werden vom `auth-client` gelesen und in typsichere Modelle abgebildet.
 
 ### API-Änderungen
 
@@ -255,6 +327,14 @@ Das Auth-Modul wurde von **kritisch untergetestet** auf **umfassend getestet** t
 └── kotlinx-serialization-json (JSON Serialization)
 ```
 
+## Aktualitäts-Check (Repo-Stand September 2025)
+
+- `auth-client` enthält `AuthenticationService` mit suspend-Funktionen und versiegelten Result-Typen (Success/Failure/Locked; PasswordChangeResult inkl. WeakPassword). Diese Schnittstelle ist in dieser README beschrieben und aktuell.
+- `auth-server` stellt `JwtService` via `AuthServerConfiguration` bereit und liest Properties unter `auth.jwt.*`. Beispielkonfiguration ist oben dokumentiert und entspricht dem Code.
+- Das API-Gateway besitzt einen `JwtAuthenticationFilter`, der derzeit eine vereinfachte Tokenprüfung implementiert. Geplante nächste Stufe: Verwendung des `auth-client` zur echten JWT-Validierung und Claim-Extraktion. Property-Schalter: `gateway.security.jwt.enabled`.
+
+Diese README wurde am 03.09.2025 aktualisiert und spiegelt den aktuellen Stand der Implementierung wider.
+
 ## Production-Readiness Status
 
 ### ✅ Production-Ready Bereiche
@@ -305,7 +385,7 @@ Das infrastructure/auth Modul ist **production-ready** und umfassend modernisier
 Die Transformation von "kritisch untergetestet" zu "production-ready" ist vollständig abgeschlossen und erfüllt alle Anforderungen für ein sicherheitskritisches Authentifizierungs-System in einer Microservice-Landschaft.
 
 ---
-**Letzte Aktualisierung**: 15. August 2025
+**Letzte Aktualisierung**: 3. September 2025
 **Status**: Production-Ready mit umfassender Test-Abdeckung
 **Dokumentation**: Vollständig konsolidiert aus allen Teilbereichen
 **Validierung**: Sicherheitstests erfolgreich bestanden (15.08.2025)

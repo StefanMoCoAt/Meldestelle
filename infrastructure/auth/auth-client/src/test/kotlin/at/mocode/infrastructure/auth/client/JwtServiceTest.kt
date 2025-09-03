@@ -47,7 +47,7 @@ class JwtServiceTest {
     @Test
     fun `validateToken should return false for token with wrong secret`() {
         // Arrange
-        val otherService = JwtService("a-different-wrong-secret", testIssuer, testAudience)
+        val otherService = JwtService("a-different-wrong-secret-that-is-long-enough-1234567890", testIssuer, testAudience)
         val token = otherService.generateToken("user-123", "test", emptyList())
 
         // Act & Assert

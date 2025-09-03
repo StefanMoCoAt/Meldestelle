@@ -82,6 +82,7 @@ class RedisDistributedCache(
             // Store in a local cache
             @Suppress("UNCHECKED_CAST")
             localCache[prefixedKey] = entry as CacheEntry<Any>
+            enforceLocalCacheSize()
 
             trackOperation(true)
             return entry.value
@@ -109,6 +110,7 @@ class RedisDistributedCache(
 
         @Suppress("UNCHECKED_CAST")
         localCache[prefixedKey] = entry as CacheEntry<Any>
+        enforceLocalCacheSize()
 
         if (!isConnected()) {
             markDirty(key)
@@ -231,6 +233,7 @@ class RedisDistributedCache(
                             // Store in a local cache
                             @Suppress("UNCHECKED_CAST")
                             localCache[key] = entry as CacheEntry<Any>
+                            enforceLocalCacheSize()
 
                             // Add to result
                             result[removePrefix(key)] = entry.value
@@ -263,6 +266,7 @@ class RedisDistributedCache(
             )
             @Suppress("UNCHECKED_CAST")
             localCache[prefixedKey] = entry as CacheEntry<Any>
+            enforceLocalCacheSize()
             redisBatch[prefixedKey] = serializer.serializeEntry(entry)
         }
 
@@ -437,6 +441,22 @@ class RedisDistributedCache(
         return if (config.keyPrefix.isEmpty()) key else key.substring(config.keyPrefix.length + 1)
     }
 
+    /**
+     * Erzwingt die maximale Größe des lokalen Caches, indem die am längsten nicht
+     * mehr modifizierten Einträge entfernt werden.
+     */
+    private fun enforceLocalCacheSize() {
+        val max = config.localCacheMaxSize ?: return
+        val overflow = localCache.size - max
+        if (overflow <= 0) return
+        val toEvict = localCache.entries
+            .sortedBy { it.value.lastModifiedAt }
+            .take(overflow)
+            .map { it.key }
+        toEvict.forEach { localCache.remove(it) }
+        logger.debug("Evicted ${toEvict.size} entries to enforce local cache size limit $max")
+    }
+
     private fun handleConnectionFailure(e: Exception) {
         logger.warn("Redis connection failure: ${e.message}")
         setConnectionState(ConnectionState.DISCONNECTED)
@@ -468,9 +488,9 @@ class RedisDistributedCache(
     }
 
     /**
-     * Periodically check the connection to Redis.
+     * Prüft periodisch die Verbindung zu Redis.
      */
-    @Scheduled(fixedDelayString = $$"${redis.connection-check-interval:10000}")
+    @Scheduled(fixedDelayString = "\${redis.connection-check-interval:10000}")
     fun checkConnection() {
         try {
             redisTemplate.hasKey("connection-test")
@@ -481,9 +501,9 @@ class RedisDistributedCache(
     }
 
     /**
-     * Periodically clean up expired entries from the local cache.
+     * Bereinigt periodisch abgelaufene Einträge aus dem lokalen Cache.
      */
-    @Scheduled(fixedDelayString = $$"${redis.local-cache-cleanup-interval:60000}")
+    @Scheduled(fixedDelayString = "\${redis.local-cache-cleanup-interval:60000}")
     fun cleanupLocalCache() {
         val now = Clock.System.now()
         val expiredKeys = localCache.entries
@@ -498,9 +518,9 @@ class RedisDistributedCache(
     }
 
     /**
-     * Periodically synchronize dirty keys when connected.
+     * Synchronisiert periodisch schmutzige Schlüssel, sobald verbunden.
      */
-    @Scheduled(fixedDelayString = $$"${redis.sync-interval:300000}")
+    @Scheduled(fixedDelayString = "\${redis.sync-interval:300000}")
     fun scheduledSync() {
         if (isConnected() && dirtyKeys.isNotEmpty()) {
             synchronize(null)
@@ -512,7 +532,7 @@ class RedisDistributedCache(
     //
 
     /**
-     * Track a cache operation for metrics
+     * Zeichnet eine Cache-Operation für Metriken auf.
      */
     private fun trackOperation(success: Boolean) {
         synchronized(this) {
@@ -522,7 +542,7 @@ class RedisDistributedCache(
     }
 
     /**
-     * Get current performance metrics
+     * Liefert aktuelle Performance-Metriken.
      */
     fun getPerformanceMetrics(): Map<String, Any> {
         val now = Clock.System.now()
@@ -543,9 +563,9 @@ class RedisDistributedCache(
     }
 
     /**
-     * Log performance metrics (called periodically)
+     * Loggt Performance-Metriken (periodisch aufgerufen).
      */
-    @Scheduled(fixedDelayString = $$"${redis.metrics-log-interval:300000}")
+    @Scheduled(fixedDelayString = "\${redis.metrics-log-interval:300000}")
     fun logPerformanceMetrics() {
         val metrics = getPerformanceMetrics()
         logger.info("Cache performance metrics: $metrics")
@@ -553,7 +573,7 @@ class RedisDistributedCache(
     }
 
     /**
-     * Cache warming utility - preloads specified keys
+     * Cache-Warming-Helfer – lädt angegebene Schlüssel vor.
      */
     fun warmCache(keys: Collection<String>, dataLoader: (String) -> Any?) {
         logger.info("Starting cache warming for ${keys.size} keys")
@@ -571,11 +591,11 @@ class RedisDistributedCache(
         }
 
         val duration = Clock.System.now() - startTime
-        logger.info("Cache warming completed: $warmedCount/$${keys.size} keys loaded in $duration")
+        logger.info("Cache warming completed: $warmedCount/${keys.size} keys loaded in $duration")
     }
 
     /**
-     * Bulk cache warming with batch operations
+     * Bulk-Cache-Warming mit Batch-Operationen.
      */
     fun warmCacheBulk(keyDataMap: Map<String, Any>, ttl: Duration? = null) {
         logger.info("Starting bulk cache warming for ${keyDataMap.size} entries")
@@ -588,7 +608,7 @@ class RedisDistributedCache(
     }
 
     /**
-     * Get cache health status
+     * Liefert den Cache-Gesundheitsstatus.
      */
     fun getHealthStatus(): Map<String, Any> {
         val metrics = getPerformanceMetrics()

@@ -12,49 +12,49 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import java.time.Duration
 
 /**
- * Enhanced reactive security configuration for the Gateway.
+ * Erweiterte reaktive Sicherheitskonfiguration für das Gateway.
  *
- * ARCHITECTURE OVERVIEW:
+ * ARCHITEKTUR-ÜBERBLICK:
+ * ======================
+ * Diese Konfiguration stellt die grundlegende Sicherheits-Schicht für das Spring Cloud Gateway bereit.
+ * Sie arbeitet zusammen mit mehreren weiteren Sicherheitskomponenten:
+ *
+ * 1. JwtAuthenticationFilter (GlobalFilter) – Validiert JWT-Tokens und authentifiziert Benutzer
+ * 2. RateLimitingFilter (GlobalFilter) – Bietet IP-basiertes Rate-Limiting mit benutzerbezogenen Limits
+ * 3. CorrelationIdFilter (GlobalFilter) – Fügt Request-Tracing-Fähigkeiten hinzu
+ * 4. EnhancedLoggingFilter (GlobalFilter) – Liefert strukturiertes Request/Response-Logging
+ *
+ * SICHERHEITSSTRATEGIE:
  * =====================
- * This configuration establishes the foundational security layer for the Spring Cloud Gateway.
- * It works in conjunction with several other security components:
+ * Das Gateway verwendet einen mehrschichtigen Sicherheitsansatz:
+ * - Diese SecurityWebFilterChain liefert grundlegende Einstellungen (CORS, CSRF, Basis-Header)
+ * - Der JwtAuthenticationFilter übernimmt die eigentliche Authentifizierung, wenn per Property aktiviert
+ * - Die SecurityWebFilterChain bleibt permissiv (permitAll), damit der JWT-Filter den Zugriff steuert
+ * - Rate-Limiting- und Logging-Filter liefern operative Sicherheit und Monitoring
  *
- * 1. JwtAuthenticationFilter (GlobalFilter) - Handles JWT token validation and user authentication
- * 2. RateLimitingFilter (GlobalFilter) - Provides IP-based rate limiting with user-aware limits
- * 3. CorrelationIdFilter (GlobalFilter) - Adds request tracing capabilities
- * 4. EnhancedLoggingFilter (GlobalFilter) - Provides structured request/response logging
+ * ENTWURFSBEGRÜNDUNG:
+ * ===================
+ * - Während Tests ist Spring Security auf dem Classpath (testImplementation), was
+ *   die Auto-Konfiguration aktiviert und alle Endpunkte sperren kann, sofern keine SecurityWebFilterChain bereitgestellt wird
+ * - Das Gateway erzwingt Authentifizierung über den JwtAuthenticationFilter (falls per Property aktiviert),
+ *   daher sollte die SecurityWebFilterChain permissiv bleiben und sich auf grundlegende Belange konzentrieren
+ * - Explizite CORS-Konfiguration stellt eine korrekte Behandlung von Cross-Origin-Anfragen aus Web-Clients sicher
+ * - Konfigurierbare Properties erlauben umgebungsspezifische Sicherheitseinstellungen ohne Codeänderungen
+ * - CSRF-Schutz ist deaktiviert, da er für zustandslose JWT-basierte Authentifizierung nicht benötigt wird
  *
- * SECURITY STRATEGY:
- * ==================
- * The Gateway employs a layered security approach:
- * - This SecurityWebFilterChain provides foundational settings (CORS, CSRF, basic headers)
- * - JwtAuthenticationFilter handles actual authentication when enabled via property
- * - The SecurityWebFilterChain remains permissive (permitAll) to let the JWT filter control access
- * - Rate limiting and logging filters provide operational security and monitoring
- *
- * DESIGN RATIONALE:
+ * CORS-INTEGRATION:
  * =================
- * - During tests, Spring Security is on the classpath (testImplementation), which enables
- *   security autoconfiguration and can lock down all endpoints unless a SecurityWebFilterChain is provided
- * - The Gateway enforces authentication using JwtAuthenticationFilter when enabled via property,
- *   so the SecurityWebFilterChain should stay permissive and focus on foundational concerns
- * - Explicit CORS configuration ensures proper handling of cross-origin requests from web clients
- * - Configurable properties allow environment-specific security settings without code changes
- * - CSRF protection is disabled as it's not needed for stateless JWT-based authentication
+ * Die CORS-Konfiguration arbeitet mit der bestehenden Filterkette zusammen:
+ * - Erlaubt Anfragen von konfigurierten Ursprüngen (Dev/Prod-Umgebungen)
+ * - Gibt benutzerdefinierte Header aus Gateway-Filtern frei (Korrelations-IDs, Rate-Limits)
+ * - Unterstützt Credentials für JWT-Authentifizierung
+ * - Cacht Preflight-Antworten für bessere Performance
  *
- * CORS INTEGRATION:
- * =================
- * The CORS configuration works with the existing filter chain:
- * - Allows requests from configured origins (dev/prod environments)
- * - Exposes custom headers from Gateway filters (correlation IDs, rate limits)
- * - Supports credentials for JWT authentication
- * - Caches preflight responses for performance
- *
- * TESTING CONSIDERATIONS:
- * =======================
- * - Configuration is designed to work seamlessly with existing security tests
- * - Test profile can override CORS settings if needed
- * - Permissive authorization ensures tests can focus on filter-level security
+ * TESTHINWEISE:
+ * =============
+ * - Die Konfiguration ist so gestaltet, dass sie nahtlos mit bestehenden Sicherheitstests funktioniert
+ * - Das Test-Profil kann CORS-Einstellungen bei Bedarf überschreiben
+ * - Eine permissive Autorisierung stellt sicher, dass Tests sich auf die Sicherheit der Filterebene konzentrieren können
  */
 @Configuration
 @EnableConfigurationProperties(GatewaySecurityProperties::class)
@@ -63,113 +63,113 @@ class SecurityConfig(
 ) {
 
     /**
-     * Main Spring Security filter chain configuration.
+     * Hauptkonfiguration der Spring-Security-Filterkette.
      *
-     * This method configures the reactive security filter chain with:
-     * - CSRF disabled for stateless API operation
-     * - Explicit CORS configuration for cross-origin support
-     * - Permissive authorization (authentication handled by JWT filter)
+     * Diese Methode konfiguriert die reaktive Sicherheits-Filterkette mit:
+     * - CSRF deaktiviert für zustandslosen API-Betrieb
+     * - Expliziter CORS-Konfiguration für Cross-Origin-Unterstützung
+     * - Permissiver Autorisierung (Authentifizierung durch den JWT-Filter)
      *
-     * The configuration maintains compatibility with the existing filter architecture
-     * while providing enhanced CORS control and configurability.
+     * Die Konfiguration bleibt kompatibel mit der bestehenden Filterarchitektur
+     * und bietet zugleich bessere CORS-Steuerung und Konfigurierbarkeit.
      */
     @Bean
     fun springSecurityFilterChain(): SecurityWebFilterChain {
         return ServerHttpSecurity.http()
             .csrf { csrf ->
-                // Disable CSRF for stateless API gateway
-                // CSRF protection is not required for JWT-based stateless authentication
-                // The Gateway operates as a stateless proxy with no session state
+                // CSRF für zustandsloses API-Gateway deaktivieren
+                // CSRF-Schutz ist für JWT-basierte zustandslose Authentifizierung nicht erforderlich
+                // Das Gateway arbeitet als zustandsloser Proxy ohne Session-Zustand
                 csrf.disable()
             }
             .cors { cors ->
-                // Use explicit CORS configuration instead of default
-                // This provides better control over cross-origin access policies
+                // Explizite CORS-Konfiguration anstelle des Defaults verwenden
+                // Dies ermöglicht eine bessere Kontrolle über Cross-Origin-Zugriffsrichtlinien
                 cors.configurationSource(corsConfigurationSource())
             }
             .httpBasic { basic ->
-                // Disable HTTP Basic auth for stateless API
+                // HTTP Basic Auth für zustandslose API deaktivieren
                 basic.disable()
             }
             .formLogin { form ->
-                // Disable form login for API gateway
+                // Formular-Login für API-Gateway deaktivieren
                 form.disable()
             }
             .authorizeExchange { exchanges ->
-                // Allow all requests through Spring Security
-                // Authentication and authorization are handled by JwtAuthenticationFilter
-                // This approach maintains the existing security architecture while
-                // allowing the JWT filter to make granular access control decisions
+                // Alle Anfragen durch Spring Security erlauben
+                // Authentifizierung und Autorisierung erfolgen durch den JwtAuthenticationFilter
+                // Dieser Ansatz bewahrt die bestehende Sicherheitsarchitektur und
+                // ermöglicht dem JWT-Filter granulare Zugriffskontroll-Entscheidungen
                 exchanges.anyExchange().permitAll()
             }
             .build()
     }
 
     /**
-     * Explicit CORS configuration source.
+     * Explizite CORS-Konfigurationsquelle.
      *
-     * This bean provides detailed control over cross-origin resource sharing settings,
-     * replacing the default empty CORS configuration with explicit, configurable settings.
+     * Dieser Bean bietet eine detaillierte Steuerung der Cross-Origin-Resource-Sharing-Einstellungen
+     * und ersetzt die leere Standard-CORS-Konfiguration durch explizite, konfigurierbare Einstellungen.
      *
-     * Key features:
-     * - Environment-specific allowed origins
-     * - Comprehensive HTTP method support
-     * - JWT-aware header configuration
-     * - Integration with Gateway filter headers
-     * - Performance-optimized preflight caching
+     * Schlüsselfunktionen:
+     * - Umgebungsspezifische erlaubte Ursprünge (Allowed Origins)
+     * - Umfassende Unterstützung für HTTP-Methoden
+     * - JWT-bewusste Header-Konfiguration
+     * - Integration mit Headern aus Gateway-Filtern
+     * - Performance-optimiertes Preflight-Caching
      *
-     * The configuration is designed to work with typical web application architectures
-     * where a JavaScript frontend makes API calls to the Gateway.
+     * Die Konfiguration ist darauf ausgelegt, mit typischen Webanwendungs-Architekturen zu funktionieren,
+     * bei denen ein JavaScript-Frontend API-Aufrufe an das Gateway sendet.
      */
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration().apply {
-            // Allowed origins - configurable per environment
-            // Development: localhost URLs for local testing
-            // Production: domain-specific URLs for deployed applications
+            // Erlaubte Ursprünge – pro Umgebung konfigurierbar
+            // Entwicklung: localhost-URLs für lokale Tests
+            // Produktion: domainspezifische URLs für ausgelieferte Anwendungen
             allowedOrigins = securityProperties.cors.allowedOrigins.toList()
 
 
-            // Allowed HTTP methods - comprehensive REST API support
-            // Includes all standard methods plus OPTIONS for preflight requests
+            // Erlaubte HTTP-Methoden – umfassende REST-API-Unterstützung
+            // Enthält alle Standardmethoden plus OPTIONS für Preflight-Anfragen
             allowedMethods = securityProperties.cors.allowedMethods.toList()
 
-            // Allowed request headers - includes JWT and custom headers
-            // Authorization: for JWT Bearer tokens
-            // X-Correlation-ID: for request tracing
-            // Standard headers: Content-Type, Accept, etc.
+            // Erlaubte Request-Header – beinhaltet JWT und benutzerdefinierte Header
+            // Authorization: für JWT Bearer Tokens
+            // X-Correlation-ID: für Request-Tracing
+            // Standard-Header: Content-Type, Accept, etc.
             allowedHeaders = securityProperties.cors.allowedHeaders.toList()
 
-            // Exposed response headers - allows client access to custom headers
-            // Includes headers added by Gateway filters:
-            // - X-Correlation-ID from CorrelationIdFilter
-            // - X-RateLimit-* from RateLimitingFilter
+            // Sichtbare Response-Header – ermöglicht Client-Zugriff auf benutzerdefinierte Header
+            // Beinhaltet Header, die von Gateway-Filtern hinzugefügt werden:
+            // - X-Correlation-ID vom CorrelationIdFilter
+            // - X-RateLimit-* vom RateLimitingFilter
             exposedHeaders = securityProperties.cors.exposedHeaders.toList()
 
-            // Allow credentials - required for JWT authentication
-            // Enables cookies and authorization headers in cross-origin requests
+            // Credentials erlauben – erforderlich für JWT-Authentifizierung
+            // Aktiviert Cookies und Authorization-Header in Cross-Origin-Anfragen
             allowCredentials = securityProperties.cors.allowCredentials
 
-            // Preflight cache duration - performance optimization
-            // Reduces the number of OPTIONS requests for repeated API calls
+            // Preflight-Cache-Dauer – Performance-Optimierung
+            // Reduziert die Anzahl an OPTIONS-Anfragen für wiederholte API-Aufrufe
             maxAge = securityProperties.cors.maxAge.seconds
         }
 
         return UrlBasedCorsConfigurationSource().apply {
-            // Apply CORS configuration to all Gateway routes
+            // CORS-Konfiguration auf alle Gateway-Routen anwenden
             registerCorsConfiguration("/**", configuration)
         }
     }
 }
 
 /**
- * Configuration properties for Gateway security settings.
+ * Konfigurationseigenschaften für die Sicherheits-Einstellungen des Gateways.
  *
- * Enables environment-specific security configuration via application.yml/properties.
- * This approach allows different security settings across development, testing, and
- * production environments without requiring code changes.
+ * Ermöglicht umgebungsspezifische Sicherheitskonfiguration über application.yml/-properties.
+ * Dieser Ansatz erlaubt unterschiedliche Sicherheitseinstellungen für Entwicklung, Test und
+ * Produktion, ohne Codeänderungen vornehmen zu müssen.
  *
- * Example application.yml configuration:
+ * Beispielkonfiguration in application.yml:
  * ```yaml
  * gateway:
  *   security:
@@ -192,26 +192,26 @@ data class GatewaySecurityProperties(
 )
 
 /**
- * CORS-specific configuration properties with sensible defaults.
+ * CORS-spezifische Konfigurationseigenschaften mit sinnvollen Defaults.
  *
- * Default values are chosen to work with typical development and production setups:
- * - Common development URLs (localhost with standard ports)
- * - Production domain pattern matching
- * - Full REST API method support
- * - JWT and Gateway filter header support
- * - Reasonable preflight cache duration
+ * Die Default-Werte sind so gewählt, dass sie mit typischen Entwicklungs- und Produktions-Setups funktionieren:
+ * - Übliche Entwicklungs-URLs (localhost mit Standardports)
+ * - Produktions-Domain-Muster
+ * - Volle Unterstützung der REST-API-Methoden
+ * - Unterstützung für JWT- und Gateway-Filter-Header
+ * - Sinnvolle Preflight-Cache-Dauer
  */
 data class CorsProperties(
     /**
-     * Allowed origins for CORS requests.
+     * Erlaubte Ursprünge (Allowed Origins) für CORS-Anfragen.
      *
-     * Defaults support common development and production scenarios:
-     * - localhost:3000 - typical React development server
-     * - localhost:8080 - common alternative development port
-     * - localhost:4200 - typical Angular development server
-     * - Specific meldestelle.at subdomains for production
+     * Defaults unterstützen gängige Entwicklungs- und Produktionsszenarien:
+     * - localhost:3000 – typischer React-Entwicklungsserver
+     * - localhost:8080 – gängiger alternativer Entwicklungsport
+     * - localhost:4200 – typischer Angular-Entwicklungsserver
+     * - Spezifische Subdomains von meldestelle.at für die Produktion
      *
-     * Can be overridden per environment as needed.
+     * Kann je Umgebung bei Bedarf überschrieben werden.
      */
     val allowedOrigins: Set<String> = setOf(
         "http://localhost:3000",
@@ -224,23 +224,23 @@ data class CorsProperties(
 
 
     /**
-     * Allowed HTTP methods for CORS requests.
+     * Erlaubte HTTP-Methoden für CORS-Anfragen.
      *
-     * Includes all standard REST API methods plus OPTIONS for preflight
-     * and HEAD for metadata requests.
+     * Enthält alle Standard-REST-API-Methoden sowie OPTIONS für Preflight-
+     * und HEAD für Metadaten-Anfragen.
      */
     val allowedMethods: Set<String> = setOf(
         "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"
     ),
 
     /**
-     * Allowed request headers for CORS requests.
+     * Erlaubte Request-Header für CORS-Anfragen.
      *
-     * Includes:
-     * - Standard headers: Content-Type, Accept, etc.
-     * - JWT authentication: Authorization
-     * - Gateway tracing: X-Correlation-ID
-     * - Cache control: Cache-Control, Pragma
+     * Beinhaltet:
+     * - Standard-Header: Content-Type, Accept, etc.
+     * - JWT-Authentifizierung: Authorization
+     * - Gateway-Tracing: X-Correlation-ID
+     * - Cache-Steuerung: Cache-Control, Pragma
      */
     val allowedHeaders: Set<String> = setOf(
         "Authorization",
@@ -254,13 +254,13 @@ data class CorsProperties(
     ),
 
     /**
-     * Exposed response headers for CORS requests.
+     * Sichtbare Response-Header für CORS-Anfragen.
      *
-     * Headers that client JavaScript can access in responses.
-     * Includes custom headers added by Gateway filters:
-     * - X-Correlation-ID: request tracing (CorrelationIdFilter)
-     * - X-RateLimit-*: rate limiting info (RateLimitingFilter)
-     * - Standard headers: Content-Length, Date
+     * Header, auf die Client-JavaScript in Antworten zugreifen darf.
+     * Beinhaltet benutzerdefinierte Header, die von Gateway-Filtern hinzugefügt werden:
+     * - X-Correlation-ID: Request-Tracing (CorrelationIdFilter)
+     * - X-RateLimit-*: Informationen zum Rate-Limiting (RateLimitingFilter)
+     * - Standard-Header: Content-Length, Date
      */
     val exposedHeaders: Set<String> = setOf(
         "X-Correlation-ID",
@@ -272,21 +272,21 @@ data class CorsProperties(
     ),
 
     /**
-     * Allow credentials in CORS requests.
+     * Credentials in CORS-Anfragen erlauben.
      *
-     * Set to true to support:
-     * - JWT Bearer tokens in Authorization headers
-     * - Cookies (if used)
-     * - Client certificates (if used)
+     * Auf true setzen, um zu unterstützen:
+     * - JWT Bearer Tokens im Authorization-Header
+     * - Cookies (falls verwendet)
+     * - Client-Zertifikate (falls verwendet)
      */
     val allowCredentials: Boolean = true,
 
     /**
-     * Maximum age for preflight request caching.
+     * Maximales Alter für das Caching von Preflight-Anfragen.
      *
-     * Duration that browsers can cache preflight responses, reducing
-     * the number of OPTIONS requests for repeated API calls.
-     * Default: 1 hour (reasonable balance of performance vs. flexibility)
+     * Dauer, für die Browser Preflight-Antworten cachen können, wodurch
+     * die Anzahl der OPTIONS-Anfragen für wiederholte API-Aufrufe reduziert wird.
+     * Default: 1 Stunde (guter Kompromiss zwischen Performance und Flexibilität)
      */
     val maxAge: Duration = Duration.ofHours(1)
 )

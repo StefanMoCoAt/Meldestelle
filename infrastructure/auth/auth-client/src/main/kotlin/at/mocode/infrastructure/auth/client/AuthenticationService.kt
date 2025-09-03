@@ -5,37 +5,37 @@ import com.benasher44.uuid.Uuid
 import java.time.LocalDateTime
 
 /**
- * Service for user authentication and password management.
+ * Service für Benutzerauthentifizierung und Passwortverwaltung.
  */
 interface AuthenticationService {
     /**
-     * Authenticates a user with the given username and password.
+     * Authentifiziert einen Benutzer mit Benutzernamen und Passwort.
      *
-     * @param username The username
-     * @param password The password
-     * @return The authentication result
+     * @param username Der Benutzername
+     * @param password Das Passwort
+     * @return Das Authentifizierungsergebnis
      */
     suspend fun authenticate(username: String, password: String): AuthResult
 
     /**
-     * Changes a user's password.
+     * Ändert das Passwort eines Benutzers.
      *
-     * @param userId The user ID
-     * @param currentPassword The current password
-     * @param newPassword The new password
-     * @return The password change result
+     * @param userId Die Benutzer-ID
+     * @param currentPassword Das aktuelle Passwort
+     * @param newPassword Das neue Passwort
+     * @return Das Ergebnis der Passwortänderung
      */
     suspend fun changePassword(userId: Uuid, currentPassword: String, newPassword: String): PasswordChangeResult
 
     /**
-     * Possible results of an authentication attempt.
+     * Mögliche Ergebnisse eines Authentifizierungsversuchs.
      */
     sealed class AuthResult {
         /**
-         * Authentication was successful.
+         * Authentifizierung war erfolgreich.
          *
-         * @param token The JWT token
-         * @param user The authenticated user
+         * @param token Das JWT-Token
+         * @param user Der authentifizierte Benutzer
          */
         data class Success(val token: String, val user: AuthenticatedUser) : AuthResult()
 

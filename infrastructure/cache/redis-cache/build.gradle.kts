@@ -3,13 +3,24 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
-    alias(libs.plugins.spring.boot)
+    // Als Bibliothek benötigt dieses Modul das Spring Boot Plugin nicht.
     alias(libs.plugins.spring.dependencyManagement)
 }
 
-// Deaktiviert die Erstellung eines ausführbaren Jars für dieses Bibliotheks-Modul.
-tasks.getByName("bootJar") {
-    enabled = false
+// Stellt sicher, dass ein normales JAR gebaut wird (Bibliotheks-Modul).
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 dependencies {

@@ -23,6 +23,12 @@ class JwtService(
 ) {
     private val logger = KotlinLogging.logger {}
 
+    init {
+        require(secret.length >= 32) { "JWT secret must be at least 32 characters for HMAC512" }
+        require(issuer.isNotBlank()) { "JWT issuer must not be blank" }
+        require(audience.isNotBlank()) { "JWT audience must not be blank" }
+    }
+
     private val algorithm = Algorithm.HMAC512(secret)
     private val verifier = JWT.require(algorithm)
         .withIssuer(issuer)

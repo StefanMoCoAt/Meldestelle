@@ -9,6 +9,12 @@ plugins {
     alias(libs.plugins.spring.dependencyManagement)
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 // Konfiguriert die Hauptklasse für das ausführbare JAR.
 springBoot {
     mainClass.set("at.mocode.infrastructure.auth.AuthServerApplicationKt")

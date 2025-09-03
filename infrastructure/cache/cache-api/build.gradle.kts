@@ -5,6 +5,12 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 // Erlaubt die Verwendung der kotlin.time API im gesamten Modul
 kotlin {
     compilerOptions {
@@ -12,11 +18,15 @@ kotlin {
     }
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
-    implementation(platform(projects.platform.platformBom))
-    // Stellt gemeinsame Abhängigkeiten wie Logging bereit.
-    implementation(projects.platform.platformDependencies)
+    api(platform(projects.platform.platformBom))
+    // Stellt gemeinsame Abhängigkeiten wie Logging bereit und exportiert sie für Konsumenten der API.
+    api(projects.platform.platformDependencies)
 
     // Stellt Test-Abhängigkeiten bereit.
     testImplementation(projects.platform.platformTesting)

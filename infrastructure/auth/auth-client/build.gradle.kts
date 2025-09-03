@@ -9,6 +9,21 @@ plugins {
     alias(libs.plugins.spring.dependencyManagement)
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.

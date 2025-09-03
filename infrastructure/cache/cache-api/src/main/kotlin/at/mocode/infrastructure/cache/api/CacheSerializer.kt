@@ -1,56 +1,56 @@
 package at.mocode.infrastructure.cache.api
 
 /**
- * Interface for serializing and deserializing cache entries.
+ * Schnittstelle zum Serialisieren und Deserialisieren von Cache-Einträgen.
  */
 interface CacheSerializer {
     /**
-     * Serializes a value to a byte array.
+     * Serialisiert einen Wert zu einem Byte-Array.
      *
-     * @param value The value to serialize
-     * @return The serialized value as a byte array
+     * @param value Der zu serialisierende Wert
+     * @return Der serialisierte Wert als Byte-Array
      */
     fun <T : Any> serialize(value: T): ByteArray
 
     /**
-     * Deserializes a byte array to a value.
+     * Deserialisiert ein Byte-Array zu einem Wert.
      *
-     * @param bytes The byte array to deserialize
-     * @param clazz The class of the value to deserialize to
-     * @return The deserialized value
+     * @param bytes Das zu deserialisierende Byte-Array
+     * @param clazz Die Zielklasse des zu deserialisierenden Werts
+     * @return Der deserialisierte Wert
      */
     fun <T : Any> deserialize(bytes: ByteArray, clazz: Class<T>): T
 
     /**
-     * Serializes a cache entry to a byte array.
+     * Serialisiert einen Cache-Eintrag zu einem Byte-Array.
      *
-     * @param entry The cache entry to serialize
-     * @return The serialized cache entry as a byte array
+     * @param entry Der zu serialisierende Cache-Eintrag
+     * @return Der serialisierte Cache-Eintrag als Byte-Array
      */
     fun <T : Any> serializeEntry(entry: CacheEntry<T>): ByteArray
 
     /**
-     * Deserializes a byte array to a cache entry.
+     * Deserialisiert ein Byte-Array zu einem Cache-Eintrag.
      *
-     * @param bytes The byte array to deserialize
-     * @param valueClass The class of the value in the cache entry
-     * @return The deserialized cache entry
+     * @param bytes Das zu deserialisierende Byte-Array
+     * @param valueClass Die Klasse des Werts im Cache-Eintrag
+     * @return Der deserialisierte Cache-Eintrag
      */
     fun <T : Any> deserializeEntry(bytes: ByteArray, valueClass: Class<T>): CacheEntry<T>
 
     /**
-     * Compresses a byte array.
+     * Komprimiert ein Byte-Array.
      *
-     * @param bytes The byte array to compress
-     * @return The compressed byte array
+     * @param bytes Das zu komprimierende Byte-Array
+     * @return Das komprimierte Byte-Array
      */
     fun compress(bytes: ByteArray): ByteArray
 
     /**
-     * Decompresses a byte array.
+     * Dekomprimiert ein Byte-Array.
      *
-     * @param bytes The byte array to decompress
-     * @return The decompressed byte array
+     * @param bytes Das zu dekomprimierende Byte-Array
+     * @return Das dekomprimierte Byte-Array
      */
     fun decompress(bytes: ByteArray): ByteArray
 }
