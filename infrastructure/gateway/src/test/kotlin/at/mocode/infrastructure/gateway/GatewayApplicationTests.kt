@@ -26,7 +26,7 @@ import org.springframework.test.context.ActiveProfiles
         // Reaktiven Web-Anwendungstyp verwenden
         "spring.main.web-application-type=reactive",
         // Gateway Discovery deaktivieren
-        "spring.cloud.gateway.discovery.locator.enabled=false",
+        "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false",
         // Actuator Security deaktivieren
         "management.security.enabled=false",
         // Zufälligen Port setzen

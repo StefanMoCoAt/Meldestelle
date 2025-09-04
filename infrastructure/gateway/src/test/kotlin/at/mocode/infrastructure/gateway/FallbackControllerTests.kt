@@ -29,7 +29,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
         // Reaktiven Web-Anwendungstyp verwenden
         "spring.main.web-application-type=reactive",
         // Gateway Discovery deaktivieren
-        "spring.cloud.gateway.discovery.locator.enabled=false",
+        "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false",
         // Actuator Security deaktivieren
         "management.security.enabled=false",
         // Zufälligen Port setzen
@@ -43,7 +43,7 @@ class FallbackControllerTests {
     lateinit var webTestClient: WebTestClient
 
     @Test
-    fun `sollte Members Service Fallback Response zurückgeben`() {
+    fun `sollte Members Service Fallback Response zurueckgeben`() {
         webTestClient.get()
             .uri("/fallback/members")
             .exchange()
@@ -60,7 +60,7 @@ class FallbackControllerTests {
     }
 
     @Test
-    fun `sollte Horses Service Fallback Response zurückgeben`() {
+    fun `sollte Horses Service Fallback Response zurueckgeben`() {
         webTestClient.get()
             .uri("/fallback/horses")
             .exchange()
@@ -75,7 +75,7 @@ class FallbackControllerTests {
     }
 
     @Test
-    fun `sollte Events Service Fallback Response zurückgeben`() {
+    fun `sollte Events Service Fallback Response zurueckgeben`() {
         webTestClient.get()
             .uri("/fallback/events")
             .exchange()

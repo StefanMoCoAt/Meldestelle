@@ -18,31 +18,34 @@ spring:
     loadbalancer:
       enabled: false
     gateway:
-      discovery:
-        locator:
-          enabled: false
-      httpclient:
-        connectTimeout: 1000
-        responseTimeout: 5s
       # IMPORTANT: Do not load production lb:// routes in tests
-      routes: []
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOriginPatterns:
-              - "http://localhost:*"
-              - "https://*.meldestelle.at"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-            maxAge: 3600
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+          httpclient:
+            connect-timeout: 1000
+            response-timeout: 5s
+          routes:
+            [ ]
+          globals:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns:
+                  - "http://localhost:*"
+                  - "https://*.meldestelle.at"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                allowCredentials: true
+                maxAge: 3600
 
 management:
   endpoints:
@@ -53,7 +56,7 @@ management:
     health:
       show-details: always
   health:
-    circuitbreakers:
+    circuit breakers:
       enabled: false
 
 logging:

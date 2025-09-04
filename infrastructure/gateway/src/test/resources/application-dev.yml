@@ -18,33 +18,34 @@ spring:
     loadbalancer:
       enabled: false
     gateway:
-      discovery:
-        locator:
-          enabled: false
       server:
         webflux:
           httpclient:
             connect-timeout: 1000
             response-timeout: 5s
+          discovery:
+            locator:
+              enabled: false
+          routes:
+            [ ]
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns:
+                  - "http://localhost:*"
+                  - "https://*.meldestelle.at"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                allowCredentials: true
+                maxAge: 3600
       # Override production routes: keep empty in tests running with dev profile
-      routes: []
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOriginPatterns:
-              - "http://localhost:*"
-              - "https://*.meldestelle.at"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-            maxAge: 3600
 
 management:
   endpoints:

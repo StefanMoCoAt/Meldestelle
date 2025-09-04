@@ -5,9 +5,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class PingController(
-    private val pingServiceCircuitBreaker: PingServiceCircuitBreaker
-) {
+class PingController {
 
     /**
      * Standard ping endpoint - maintains backward compatibility
@@ -19,12 +17,10 @@ class PingController(
 
     /**
      * Enhanced ping endpoint with circuit breaker protection
-     *
-     * @param simulate - whether to simulate failures for testing circuit breaker
      */
     @GetMapping("/ping/enhanced")
     fun enhancedPing(@RequestParam(defaultValue = "false") simulate: Boolean): Map<String, Any> {
-        return pingServiceCircuitBreaker.ping(simulate)
+        return mapOf("status" to "pong", "message" to "Circuit breaker not available")
     }
 
     /**
@@ -32,7 +28,7 @@ class PingController(
      */
     @GetMapping("/ping/health")
     fun health(): Map<String, Any> {
-        return pingServiceCircuitBreaker.healthCheck()
+        return mapOf("status" to "UP", "message" to "Circuit breaker not available")
     }
 
     /**
@@ -40,6 +36,6 @@ class PingController(
      */
     @GetMapping("/ping/test-failure")
     fun testFailure(): Map<String, Any> {
-        return pingServiceCircuitBreaker.ping(simulateFailure = true)
+        return mapOf("status" to "error", "message" to "Circuit breaker not available")
     }
 }

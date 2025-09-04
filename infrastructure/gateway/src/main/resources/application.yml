@@ -1,6 +1,6 @@
 # Port, auf dem das Gateway läuft
 server:
-  port: 8080
+  port: 8081
   # Optimierte Netty-Konfiguration für reaktive Anwendungen
   netty:
     connection-timeout: 5s
@@ -20,10 +20,10 @@ spring:
     consul:
       host: ${CONSUL_HOST:localhost}
       port: ${CONSUL_PORT:8500}
-      enabled: ${CONSUL_ENABLED:false}
+      enabled: ${CONSUL_ENABLED:true}
       discovery:
-        enabled: ${CONSUL_ENABLED:false}
-        register: ${CONSUL_ENABLED:false}
+        enabled: ${CONSUL_ENABLED:true}
+        register: ${CONSUL_ENABLED:true}
         health-check-path: /actuator/health
         health-check-interval: 10s
         instance-id: ${spring.application.name}-${server.port}-${random.uuid}
@@ -37,6 +37,138 @@ spring:
             pool:
               max-idle-time: 15s
               max-life-time: 60s
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns:
+                  - "https://*.meldestelle.at"
+                  - "http://localhost:*"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                allowCredentials: true
+                maxAge: 3600
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            - name: CircuitBreaker
+              args:
+                name: defaultCircuitBreaker
+                fallbackUri: forward:/fallback
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+                methods: GET,POST,PUT,DELETE
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+            # Sicherheits-Header für erweiterten Schutz
+            - name: AddResponseHeader
+              args:
+                name: X-Content-Type-Options
+                value: nosniff
+            - name: AddResponseHeader
+              args:
+                name: X-Frame-Options
+                value: DENY
+            - name: AddResponseHeader
+              args:
+                name: X-XSS-Protection
+                value: 1; mode=block
+            - name: AddResponseHeader
+              args:
+                name: Referrer-Policy
+                value: strict-origin-when-cross-origin
+            - name: AddResponseHeader
+              args:
+                name: Cache-Control
+                value: no-cache, no-store, must-revalidate
+          routes:
+            # Health Check und Gateway Info Routes
+            - id: gateway-info-route
+              uri: http://localhost:${server.port}
+              predicates:
+                - Path=/
+                - Method=GET
+              filters:
+                - SetStatus=200
+                - SetResponseHeader=Content-Type,application/json
+
+            # Members Service Routes
+            - id: members-service-route
+              uri: lb://members-service
+              predicates:
+                - Path=/api/members/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: membersCircuitBreaker
+                    fallbackUri: forward:/fallback/members
+
+            # Horses Service Routes
+            - id: horses-service-route
+              uri: lb://horses-service
+              predicates:
+                - Path=/api/horses/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: horsesCircuitBreaker
+                    fallbackUri: forward:/fallback/horses
+
+            # Events Service Routes
+            - id: events-service-route
+              uri: lb://events-service
+              predicates:
+                - Path=/api/events/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: eventsCircuitBreaker
+                    fallbackUri: forward:/fallback/events
+
+            # Masterdata Service Routes
+            - id: masterdata-service-route
+              uri: lb://masterdata-service
+              predicates:
+                - Path=/api/masterdata/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: masterdataCircuitBreaker
+                    fallbackUri: forward:/fallback/masterdata
+
+            # Auth Service Routes (falls vorhanden)
+            - id: auth-service-route
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: authCircuitBreaker
+                    fallbackUri: forward:/fallback/auth
+
+            # Ping Service Routes (bestehend)
+            - id: ping-service-route
+              uri: lb://ping-service
+              predicates:
+                - Path=/api/ping/**
+              filters:
+                - StripPrefix=1
       # Disable weight calculation filter to prevent blocking operations
       filter:
         weight:
@@ -44,138 +176,6 @@ spring:
       # Verbesserte CORS-Konfiguration
       # Antwort-Header bereinigen und globale Filter
       # Route-Definitionen mit Service Discovery
-      defaultFilters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-        - name: CircuitBreaker
-          args:
-            name: defaultCircuitBreaker
-            fallbackUri: forward:/fallback
-        - name: Retry
-          args:
-            retries: 3
-            statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
-            methods: GET,POST,PUT,DELETE
-            backoff:
-              firstBackoff: 50ms
-              maxBackoff: 500ms
-              factor: 2
-              basedOnPreviousValue: false
-        # Sicherheits-Header für erweiterten Schutz
-        - name: AddResponseHeader
-          args:
-            name: X-Content-Type-Options
-            value: nosniff
-        - name: AddResponseHeader
-          args:
-            name: X-Frame-Options
-            value: DENY
-        - name: AddResponseHeader
-          args:
-            name: X-XSS-Protection
-            value: 1; mode=block
-        - name: AddResponseHeader
-          args:
-            name: Referrer-Policy
-            value: strict-origin-when-cross-origin
-        - name: AddResponseHeader
-          args:
-            name: Cache-Control
-            value: no-cache, no-store, must-revalidate
-      routes:
-        # Health Check und Gateway Info Routes
-        - id: gateway-info-route
-          uri: http://localhost:${server.port}
-          predicates:
-            - Path=/
-            - Method=GET
-          filters:
-            - SetStatus=200
-            - SetResponseHeader=Content-Type,application/json
-
-        # Members Service Routes
-        - id: members-service-route
-          uri: lb://members-service
-          predicates:
-            - Path=/api/members/**
-          filters:
-            - StripPrefix=1
-            - name: CircuitBreaker
-              args:
-                name: membersCircuitBreaker
-                fallbackUri: forward:/fallback/members
-
-        # Horses Service Routes
-        - id: horses-service-route
-          uri: lb://horses-service
-          predicates:
-            - Path=/api/horses/**
-          filters:
-            - StripPrefix=1
-            - name: CircuitBreaker
-              args:
-                name: horsesCircuitBreaker
-                fallbackUri: forward:/fallback/horses
-
-        # Events Service Routes
-        - id: events-service-route
-          uri: lb://events-service
-          predicates:
-            - Path=/api/events/**
-          filters:
-            - StripPrefix=1
-            - name: CircuitBreaker
-              args:
-                name: eventsCircuitBreaker
-                fallbackUri: forward:/fallback/events
-
-        # Masterdata Service Routes
-        - id: masterdata-service-route
-          uri: lb://masterdata-service
-          predicates:
-            - Path=/api/masterdata/**
-          filters:
-            - StripPrefix=1
-            - name: CircuitBreaker
-              args:
-                name: masterdataCircuitBreaker
-                fallbackUri: forward:/fallback/masterdata
-
-        # Auth Service Routes (falls vorhanden)
-        - id: auth-service-route
-          uri: lb://auth-service
-          predicates:
-            - Path=/api/auth/**
-          filters:
-            - StripPrefix=1
-            - name: CircuitBreaker
-              args:
-                name: authCircuitBreaker
-                fallbackUri: forward:/fallback/auth
-
-        # Ping Service Routes (bestehend)
-        - id: ping-service-route
-          uri: lb://ping-service
-          predicates:
-            - Path=/api/ping/**
-          filters:
-            - StripPrefix=1
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOriginPatterns:
-              - "https://*.meldestelle.at"
-              - "http://localhost:*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-            maxAge: 3600
 
 # Circuit Breaker Konfiguration
 resilience4j:
@@ -290,7 +290,7 @@ logging:
   file:
     name: logs/gateway.log
   logback:
-    rollingpolicy:
+    rolling policy:
       clean-history-on-start: true
       max-file-size: 100MB
       total-size-cap: 1GB
