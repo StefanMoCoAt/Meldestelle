@@ -3,59 +3,68 @@ package at.mocode.infrastructure.messaging.client
 import reactor.core.publisher.Flux
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.reactive.asPublisher
+import org.slf4j.LoggerFactory
 
 /**
- * A generic interface for consuming events from a message broker.
+ * Generische Schnittstelle zum Konsumieren von Events aus einem Message-Broker.
  *
- * Follows DDD principles with explicit error handling using domain-specific error types.
- * Provides both Result-based methods and reactive streams for flexibility.
+ * Folgt DDD-Prinzipien mit expliziter Fehlerbehandlung über domänenspezifische Fehlertypen.
+ * Bietet sowohl Result-basierte Methoden als auch reaktive Streams für Flexibilität.
  */
 interface EventConsumer {
 
     /**
-     * Receives events from the specified topic with explicit error handling.
+     * Empfängt Events vom angegebenen Topic mit expliziter Fehlerbehandlung.
      *
-     * @param T The expected type of the event payload
-     * @param topic The topic to subscribe to
-     * @param eventType The class type of events to consume
-     * @return Flow<Result<T>> where each Result contains either a successful event or MessagingError
+     * @param T Erwarteter Typ der Event-Payload
+     * @param topic Das zu abonnierende Topic
+     * @param eventType Der Klassen-Typ der zu konsumierenden Events
+     * @return Flow<Result<T>> wobei jedes Result entweder ein erfolgreiches Event oder einen MessagingError enthält
      */
     fun <T : Any> receiveEventsWithResult(topic: String, eventType: Class<T>): Flow<Result<T>>
 
     /**
-     * Legacy reactive method for receiving events.
+     * Legacy reaktive Methode zum Empfangen von Events.
      *
-     * This method returns a cold Flux, meaning that the consumer will only start
-     * listening for messages once the Flux is subscribed to.
+     * Diese Methode liefert einen "kalten" Flux, d. h. der Consumer beginnt erst
+     * nach Subscription mit dem Empfang von Nachrichten.
      *
-     * @param T The expected type of the event payload.
-     * @param topic The topic to subscribe to.
-     * @return A reactive stream (Flux) of events of type T.
+     * @param T Erwarteter Typ der Event-Payload.
+     * @param topic Das zu abonnierende Topic.
+     * @return Ein reaktiver Stream (Flux) von Events des Typs T.
      */
     @Deprecated("Use receiveEventsWithResult with Flow<Result<T>> instead", ReplaceWith("receiveEventsWithResult(topic, eventType)"))
     fun <T : Any> receiveEvents(topic: String, eventType: Class<T>): Flux<T>
 }
 
 /**
- * Kotlin-idiomatic extension function for `receiveEventsWithResult` using reified types.
+ * Kotlin-idiomatische Extension-Funktion für `receiveEventsWithResult` mit reified Typen.
  *
- * Example: `consumer.receiveEventsWithResult<MyEvent>("my-topic").collect { result -> ... }`
+ * Beispiel: `consumer.receiveEventsWithResult<MyEvent>("my-topic").collect { result -> ... }`
  */
 inline fun <reified T : Any> EventConsumer.receiveEventsWithResult(topic: String): Flow<Result<T>> {
     return this.receiveEventsWithResult(topic, T::class.java)
 }
 
 /**
- * Kotlin-idiomatic extension function for `receiveEvents` using reified types.
+ * Kotlin-idiomatische Extension-Funktion für `receiveEvents` mit reified Typen.
  *
- * Example: `consumer.receiveEvents<MyEvent>("my-topic").subscribe { ... }`
+ * Beispiel: `consumer.receiveEvents<MyEvent>("my-topic").subscribe { ... }`
  */
 @Deprecated("Use receiveEventsWithResult with Flow<Result<T>> instead", ReplaceWith("receiveEventsWithResult<T>(topic)"))
 inline fun <reified T : Any> EventConsumer.receiveEvents(topic: String): Flux<T> {
     // Convert Flow<Result<T>> to Flux<T> for backward compatibility
+    // New behavior: emit only successful events; log failures instead of throwing to keep the stream alive
+    val logger = LoggerFactory.getLogger("EventConsumerExtensions")
     return this.receiveEventsWithResult<T>(topic)
-        .map { result: Result<T> -> result.getOrThrow() }
+        .mapNotNull { result: Result<T> ->
+            result.getOrElse {
+                logger.warn("Dropping failed event in legacy receiveEvents: {}", it.message)
+                null
+            }
+        }
         .asPublisher()
         .let { Flux.from(it) }
 }

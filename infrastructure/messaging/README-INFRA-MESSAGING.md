@@ -716,3 +716,11 @@ eventConsumer.receiveEventsWithResult(topic, EventType::class.java)
 ---
 
 **Letzte Aktualisierung**: 15. August 2025
+
+
+
+## Aktualisierungen (September 2025)
+
+- ReactiveKafkaConfig: Der Bean kafkaConfig() ist jetzt mit @ConditionalOnMissingBean annotiert. Dadurch wird kein zweiter KafkaConfig-Bean erzeugt, wenn bereits extern einer bereitgestellt wird. Dies verhindert Bean-Kollisionen und erleichtert Überschreibungen in Services/Tests.
+- Legacy Consumer API: Die reifizierte Extension receiveEvents<T>(topic) wirft bei Fehlern nicht mehr, sondern filtert Fehl-Results heraus und protokolliert sie. Das hält den Flux lebendig und ist robuster. Die moderne, empfohlene Methode bleibt receiveEventsWithResult(topic): Flow<Result<T>>.
+- Dokumentation: Diese Hinweise wurden ergänzt. Module bleiben ansonsten unverändert und production-ready.

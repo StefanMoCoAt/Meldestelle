@@ -9,17 +9,17 @@ import org.springframework.kafka.support.serializer.JsonDeserializer
 import org.springframework.kafka.support.serializer.JsonSerializer
 
 /**
- * Central Kafka configuration used across modules with optimized settings for performance and reliability.
+ * Zentrale Kafka-Konfiguration mit optimierten Einstellungen für Performance und Zuverlässigkeit.
  *
- * This class can be instantiated programmatically (as done in tests) or
- * registered as a Spring @Configuration with @Bean methods in an application context.
+ * Diese Klasse kann programmatisch instanziiert werden (z. B. in Tests) oder
+ * als Spring-@Configuration mit @Bean-Methoden in einem Application Context registriert werden.
  *
- * Enhanced with configuration validation and additional optimization settings.
+ * Erweitert um Konfigurationsvalidierung und zusätzliche Optimierungen.
  */
 class KafkaConfig {
 
     /**
-     * Comma-separated list of host:port pairs used for establishing the initial connection to the Kafka cluster.
+     * Kommagetrennte Liste von host:port-Paaren für die initiale Verbindung zum Kafka-Cluster.
      */
     var bootstrapServers: String = "localhost:9092"
         set(value) {
@@ -34,7 +34,7 @@ class KafkaConfig {
         }
 
     /**
-     * Default consumer group ID prefix.
+     * Standard-Präfix für Consumer-Group-IDs.
      */
     var defaultGroupIdPrefix: String = "messaging-client"
         set(value) {

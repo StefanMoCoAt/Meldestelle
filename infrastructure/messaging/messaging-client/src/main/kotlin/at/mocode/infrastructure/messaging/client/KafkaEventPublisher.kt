@@ -10,11 +10,11 @@ import reactor.util.retry.Retry
 import java.time.Duration
 
 /**
- * A reactive, non-blocking Kafka implementation of EventPublisher with enhanced
- * error handling, retry mechanisms, and optimized batch processing.
+ * Reaktive, nicht-blockierende Kafka-Implementierung von EventPublisher mit erweiterter
+ * Fehlerbehandlung, Retry-Mechanismen und optimierter Batch-Verarbeitung.
  *
- * Implements both Result-based methods (preferred) and reactive methods (legacy).
- * Follows DDD principles with explicit error handling using domain-specific error types.
+ * Implementiert sowohl Result-basierte Methoden (präferiert) als auch reaktive Legacy-Methoden.
+ * Folgt DDD-Prinzipien mit expliziter Fehlerbehandlung über domänenspezifische Fehlertypen.
  */
 @Component
 class KafkaEventPublisher(
@@ -24,19 +24,19 @@ class KafkaEventPublisher(
     private val logger = LoggerFactory.getLogger(KafkaEventPublisher::class.java)
 
     companion object {
-        /** Maximum number of retry attempts for failed message publishing operations */
+        /** Maximale Anzahl an Retry-Versuchen für fehlgeschlagene Publish-Operationen */
         private const val MAX_RETRY_ATTEMPTS = 3L
 
-        /** Initial delay in seconds between retry attempts */
+        /** Initiale Verzögerung in Sekunden zwischen Retry-Versuchen */
         private const val RETRY_DELAY_SECONDS = 1L
 
-        /** Maximum backoff delay in seconds for exponential backoff retry strategy */
+        /** Maximale Backoff-Verzögerung in Sekunden für die exponentielle Retry-Strategie */
         private const val MAX_BACKOFF_SECONDS = 10L
 
-        /** Default concurrency level for batch processing operations */
+        /** Standard-Parallelität für Batch-Operationen */
         private const val BATCH_CONCURRENCY_LEVEL = 10
 
-        /** Progress logging interval for batch operations (every N events) */
+        /** Fortschritts-Logging-Intervall für Batch-Operationen (alle N Events) */
         private const val BATCH_PROGRESS_LOG_INTERVAL = 100
     }
 

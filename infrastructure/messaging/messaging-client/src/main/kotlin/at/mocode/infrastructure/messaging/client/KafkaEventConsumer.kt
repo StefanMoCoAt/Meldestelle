@@ -15,8 +15,8 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * A reactive, non-blocking Kafka implementation of the EventConsumer interface
- * with optimized connection pooling, security, and error handling.
+ * Reaktive, nicht-blockierende Kafka-Implementierung des EventConsumer-Interfaces
+ * mit optimiertem Connection-Pooling, Sicherheit und Fehlerbehandlung.
  */
 @Component
 class KafkaEventConsumer(

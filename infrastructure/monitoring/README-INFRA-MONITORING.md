@@ -1,86 +1,111 @@
-# Infrastructure/Monitoring Module
+# Infrastructure/Monitoring Modul – Aktuelle Dokumentation (Stand: September 2025)
 
 ## Überblick
 
-Das **Monitoring-Modul** ist die Grundlage für die **Observability** (Beobachtbarkeit) der gesamten Meldestelle-Systemlandschaft. In einer verteilten Microservice-Architektur ist es unerlässlich, Einblicke in das Verhalten, die Leistung und die Gesundheit der einzelnen Dienste zu haben. Dieses Modul stellt die Werkzeuge für zwei der drei Säulen der Observability bereit: **Metriken** und **Distributed Tracing**.
+Das Monitoring-Modul stellt die zentrale Observability-Infrastruktur für alle Services bereit. Es deckt zwei der drei Observability-Säulen ab: Metriken und Distributed Tracing. Ziel ist es, Betriebsdaten konsistent zu erfassen, zu visualisieren und Probleme schnell zu erkennen.
 
-* **Metriken:** Quantitative Daten über die Leistung von Services (z.B. CPU-Auslastung, Antwortzeiten, Fehlerraten).
-* **Distributed Tracing:** Verfolgung einer einzelnen Anfrage über mehrere Service-Grenzen hinweg, um Engpässe und Fehlerquellen zu identifizieren.
+- Metriken: Quantitative Leistungsdaten wie Antwortzeiten, Fehlerraten, JVM- und Systemmetriken.
+- Distributed Tracing: Ende-zu-Ende-Verfolgung einer Anfrage über Service-Grenzen hinweg (Trace/Span).
+
+## Aufgabe des Moduls
+
+- Bereitstellung einer einheitlichen Monitoring-Client-Bibliothek für alle Microservices.
+- Zentrale Bereitstellung eines Zipkin-Servers zur Sammlung und Visualisierung von Traces.
+- Sicherstellung eines konsistenten Prometheus-/Micrometer-Setups über alle Services hinweg.
+- Bereitstellung konservativer Default-Properties, die pro Service überschrieben werden können.
 
 ## Architektur
 
 Das Modul ist in eine wiederverwendbare Client-Bibliothek und einen zentralen Server aufgeteilt:
 
-
+```
 infrastructure/monitoring/
 ├── monitoring-client/      # Bibliothek, die jeder Service einbindet
 └── monitoring-server/      # Eigenständiger Service, der den Zipkin-Server hostet
+```
 
+### monitoring-client
 
-### `monitoring-client`
+Dies ist eine wiederverwendbare Bibliothek, die von jedem Microservice (z. B. gateway, members, masterdata) eingebunden wird.
 
-Dies ist eine **wiederverwendbare Bibliothek**, die von **jedem einzelnen Microservice** (z.B. `masterdata-service`, `gateway`) als Abhängigkeit eingebunden werden muss.
+- Zweck: Automatische Instrumentierung der Anwendung, Aktivierung von Actuator-/Tracing-Funktionen und Export von Metriken.
+- Technologien:
+  - Spring Boot Actuator: Stellt u. a. den Endpunkt `/actuator/prometheus` bereit.
+  - Micrometer (Core, Prometheus): Einheitliches Metrik-API, Export in Prometheus-Format.
+  - Micrometer Tracing (Brave Bridge) + Zipkin Reporter: Erzeugt und sendet Traces (Spans) an Zipkin.
+- Vorteile: Keine individuelle Konfiguration in jedem Service nötig; sinnvolle Defaults per AutoConfiguration.
 
-* **Zweck:** Instrumentiert den Service automatisch, um Metriken und Traces zu generieren.
-* **Technologien:**
-    * **Spring Boot Actuator:** Stellt einen `/actuator/prometheus`-Endpunkt bereit, an dem Metriken im Prometheus-Format abgerufen werden können.
-    * **Micrometer:** Eine Fassade für Metriken, die es ermöglicht, Anwendungsmetriken zu sammeln (z.B. HTTP-Request-Zeiten, JVM-Statistiken).
-    * **Brave & Zipkin Reporter:** Instrumentiert den Code für Distributed Tracing und sendet die gesammelten Spans (Teile eines Traces) an den Zipkin-Server.
-* **Vorteil:** Entwickler müssen sich nicht aktiv um die Implementierung von Monitoring kümmern. Durch das Einbinden dieser Bibliothek erhält jeder Service automatisch grundlegende Observability.
+#### AutoConfiguration und Defaults
 
-### `monitoring-server`
+Die Klasse MonitoringClientAutoConfiguration ist als `@AutoConfiguration` deklariert und aktiviert nur, wenn Actuator/Micrometer am Classpath sind (`@ConditionalOnClass`). Sie lädt `monitoring-defaults.properties` mit niedriger Priorität. Wichtige Defaults:
 
-Dies ist ein **eigenständiger Spring Boot Service**, der eine zentrale Komponente des Monitoring-Stacks hostet.
+```
+management.endpoints.web.exposure.include=health,info,prometheus
+management.tracing.enabled=true
+management.tracing.sampling.probability=${TRACING_SAMPLING_PROBABILITY:1.0}
+management.observations.http.server.requests.enabled=true
+management.info.env.enabled=true
+management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans
+```
 
-* **Zweck:** Hostet den **Zipkin-Server** inklusive seiner grafischen Benutzeroberfläche. Alle `monitoring-client`-Instanzen senden ihre Tracing-Daten an diesen Server. Entwickler können dann in der Zipkin-UI die gesamten Anfrage-Flows visualisieren und analysieren.
+Hinweise:
+- Sampling-Rate: In Entwicklung 1.0 (100%). In Produktion sollte dies reduziert werden (z. B. 0.1).
+- Endpunkte: Der Prometheus-Scrape-Pfad ist einheitlich `/actuator/prometheus`.
+- Überschreibung: Jede Anwendung kann diese Werte über application.yml/-properties anpassen.
 
-## Zusammenspiel im Ökosystem
+### monitoring-server
 
-Das vollständige Monitoring-Setup besteht aus mehreren Teilen:
+Eigenständiger Spring-Boot-Service, der den Zipkin-Server hostet. Durch die Zipkin-Server-Abhängigkeit erfolgt die Auto-Konfiguration; eine explizite `@EnableZipkinServer`-Annotation ist nicht erforderlich.
 
-1.  Jeder **Microservice** bindet `:infrastructure:monitoring:monitoring-client` ein und stellt Metriken unter `/actuator/prometheus` bereit und sendet Traces an Zipkin.
-2.  Der **`:infrastructure:monitoring:monitoring-server`** empfängt die Traces und stellt die Zipkin-UI zur Verfügung.
-3.  Ein **Prometheus-Server** (definiert in `docker-compose.yml`) ist so konfiguriert, dass er periodisch die `/actuator/prometheus`-Endpunkte aller Microservices abfragt ("scraped") und die Metriken in seiner Zeitreihen-Datenbank speichert.
-4.  Ein **Grafana-Server** (definiert in `docker-compose.yml`) visualisiert die in Prometheus gespeicherten Metriken in anpassbaren Dashboards.
+- Zweck: Empfang und UI-Visualisierung von Traces aus allen Services.
+- Metriken: Der Server exportiert eigene Metriken (Prometheus-Registry eingebunden), sodass er ebenfalls von Prometheus gescraped werden kann.
 
-Diese Kombination aus Micrometer, Prometheus, Zipkin und Grafana bildet einen leistungsstarken, branchenüblichen "Observability Stack".
+## Zusammenspiel im System
 
-## Neue Funktionen und Optimierungen
+1. Jeder Microservice bindet `:infrastructure:monitoring:monitoring-client` ein und exponiert `/actuator/prometheus`; Traces werden an Zipkin gesendet.
+2. Der `:infrastructure:monitoring:monitoring-server` empfängt Traces und stellt die Zipkin UI bereit.
+3. Prometheus (docker-compose) scraped periodisch alle `/actuator/prometheus`-Endpunkte und speichert Metriken.
+4. Grafana (docker-compose) visualisiert Metriken/Dashboards.
 
-### Sicherheitsverbesserungen
-* **Umgebungsvariablen für Credentials**: Alle hardcodierten Passwörter und API-Schlüssel wurden durch Umgebungsvariablen ersetzt
-* **Alertmanager-Konfiguration**: SMTP- und Slack-Einstellungen nutzen jetzt sichere Umgebungsvariablen
-* **Prometheus-Authentifizierung**: Metriken-Endpunkte sind durch Benutzername/Passwort geschützt
+Diese Kombination aus Micrometer, Prometheus, Zipkin und Grafana bildet einen gängigen Production-Stack.
 
-### Performance-Optimierungen
-* **Konfigurierbare Tracing-Sampling-Rate**: Standard 100% für Entwicklung, über `TRACING_SAMPLING_PROBABILITY` anpassbar für Produktion
-* **Optimierte Prometheus-Konfiguration**: Korrigierte Metriken-Pfade und eliminierte doppelte Jobs
-* **Verbesserte Speicher-Retention**: Produktion nutzt 30 Tage Retention und WAL-Komprimierung
+## Verwendung in Services
 
-### Erweiterte Dashboards
-* **Application Overview Dashboard**: Zentrale Anwendungsmetriken (Request Rate, Response Times, Error Rate, Status)
-* **Infrastructure Components Dashboard**: Überwachung von PostgreSQL, Redis, Kafka, System-Metriken
-* **JVM Dashboard**: Bestehende JVM-Metriken für Java-Anwendungen
+- Abhängigkeit hinzufügen: `implementation(projects.infrastructure.monitoring.monitoringClient)` (über build.gradle.kts der Services).
+- Optional: Eigene Tags setzen (z. B. `management.metrics.tags.application`, `environment`).
+- Optional: Sampling-Rate via Umgebungsvariable `TRACING_SAMPLING_PROBABILITY` anpassen.
 
-### Konfigurationsverbesserungen
-* **Einheitliche Endpunkt-Pfade**: Verwendung von `/actuator/prometheus` für alle Services
-* **Umgebungsspezifische Konfiguration**: Getrennte Einstellungen für Entwicklung und Produktion
-* **Erweiterte ELK-Integration**: Vollständige Logging-Pipeline mit Elasticsearch und Logstash
+Beispiel (application.yml):
 
-## Testing-Strategie (Tracer-Bullet Zyklus)
+```yaml
+management:
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${SPRING_PROFILES_ACTIVE:dev}
+  tracing:
+    sampling:
+      probability: 0.2
+```
 
-Im Rahmen des aktuellen "Tracer-Bullet"-Entwicklungszyklus wurde die Testing-Strategie auf das **Minimum für die Architektur-Validierung** reduziert:
+## Testing-Strategie (Tracer-Bullet-Zyklus)
 
-### Monitoring-Server Test
-* **Ein essentieller "Smoke-Test"**: Überprüft, ob der Zipkin-Server (monitoring-server) überhaupt starten kann
-* **Zweck**: Validiert die korrekte Konfiguration des zentralen Monitoring-Servers
-* **Warum essentiell**: Ohne einen funktionsfähigen Zipkin-Server können im finalen E2E-Test keine Tracing-Daten empfangen und ausgewertet werden
+- Monitoring-Server: Ein grundlegender Smoke-Test prüft erfolgreichen Start der Anwendung.
+- Monitoring-Client: Keine dedizierten Unit-Tests; Validierung erfolgt End-to-End durch integrierte Services (Prometheus scrape, Zipkin-Empfang).
 
-### Monitoring-Client
-* **Keine separaten Tests**: Die monitoring-client Bibliothek wird implizit durch die Integration in andere Services (z.B. ping-service) getestet
-* **Validierung erfolgt End-to-End**: Die Funktionalität wird durch den finalen "Tracer-Bullet"-Test bestätigt, wenn Services erfolgreich Tracing-Daten senden
+## Aktualitäts-Check (Repo-Stand September 2025)
 
-Diese minimalistische Teststrategie stellt sicher, dass die Monitoring-Komponenten für den "Tracer-Bullet"-Test bereit sind, ohne Zeit in umfangreiche Testsuites zu investieren, die für die Architektur-Validierung nicht notwendig sind.
+- monitoring-client: AutoConfiguration (Deutsch kommentiert) und Defaults vorhanden; Endpunkt `management.zipkin.tracing.endpoint` verweist auf `zipkin:9411` und entspricht docker-compose.
+- monitoring-server: Kotlin-Hauptklasse startet Zipkin-Server; Build-Datei bindet Actuator, Zipkin-Server und Prometheus-Registry ein.
+- Gateway application.yml exponiert Actuator-Endpunkte inkl. prometheus; passt zum Monitoring-Ansatz.
+
+## Optimierungen (September 2025)
+
+- Dokumentation präzisiert und vollständig auf Deutsch gebracht; Zweck und Umsetzung klar herausgestellt.
+- Kleine Konsistenz-Anpassung: Kommentare im Wurzel-Build-Skript des Monitoring-Moduls ins Deutsche übertragen.
+- Empfehlung (optional, nicht zwingend umgesetzt):
+  - Standard-Tags global setzen (application, environment, instance) via `management.metrics.tags.*`.
+  - Falls Services eigene MeterRegistry konfigurieren: `@ConditionalOnMissingBean` beachten, um Kollisionen zu vermeiden.
 
 ---
-**Letzte Aktualisierung**: 16. August 2025
+Letzte Aktualisierung: 4. September 2025

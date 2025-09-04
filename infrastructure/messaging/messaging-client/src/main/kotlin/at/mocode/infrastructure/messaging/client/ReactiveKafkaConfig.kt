@@ -2,6 +2,7 @@ package at.mocode.infrastructure.messaging.client
 
 import at.mocode.infrastructure.messaging.config.KafkaConfig
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.core.DefaultKafkaProducerFactory
@@ -10,7 +11,7 @@ import reactor.kafka.sender.SenderOptions
 import java.time.Duration
 
 /**
- * Spring Configuration for reactive Kafka components with optimized settings.
+ * Spring-Konfiguration für reaktive Kafka-Komponenten mit optimierten Einstellungen.
  */
 @Configuration
 class ReactiveKafkaConfig(
@@ -20,8 +21,8 @@ class ReactiveKafkaConfig(
     private val logger = LoggerFactory.getLogger(ReactiveKafkaConfig::class.java)
 
     /**
-     * Creates a Spring Bean for the optimized ReactiveKafkaProducerTemplate.
-     * This template includes enhanced error handling, monitoring, and performance tuning.
+     * Erstellt einen Spring-Bean für das optimierte ReactiveKafkaProducerTemplate.
+     * Dieses Template beinhaltet erweiterte Fehlerbehandlung, Monitoring und Performance-Tuning.
      */
     @Bean
     fun reactiveKafkaProducerTemplate(): ReactiveKafkaProducerTemplate<String, Any> {
@@ -45,10 +46,11 @@ class ReactiveKafkaConfig(
     }
 
     /**
-     * Creates a KafkaConfig bean if not already provided.
-     * This allows for external configuration override while providing sensible defaults.
+     * Erstellt einen KafkaConfig-Bean, falls nicht bereits vorhanden.
+     * Ermöglicht externe Konfigurationsüberschreibung bei gleichzeitigen sinnvollen Defaults.
      */
     @Bean
+    @ConditionalOnMissingBean(KafkaConfig::class)
     fun kafkaConfig(): KafkaConfig {
         return KafkaConfig().apply {
             logger.info("Initializing KafkaConfig with bootstrap servers: {}", bootstrapServers)
