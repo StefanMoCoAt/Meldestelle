@@ -21,9 +21,11 @@ spring:
       discovery:
         locator:
           enabled: false
-      httpclient:
-        connect-timeout: 1000
-        response-timeout: 5s
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 1000
+            response-timeout: 5s
       # Override production routes: keep empty in tests running with dev profile
       routes: []
       globalcors:

@@ -240,7 +240,13 @@ Cache-Control: no-cache, no-store, must-revalidate
 ## Development und Testing
 
 ### Local Development
+
+**WICHTIG:** Alle Befehle müssen aus dem Projekt-Root-Verzeichnis (`/home/stefan/WsMeldestelle/Meldestelle`) ausgeführt werden.
+
 ```bash
+# Sicherstellen, dass Sie im richtigen Verzeichnis sind
+cd /home/stefan/WsMeldestelle/Meldestelle
+
 # Gateway starten
 ./gradlew :infrastructure:gateway:bootRun
 
@@ -248,6 +254,8 @@ Cache-Control: no-cache, no-store, must-revalidate
 docker build -t meldestelle/gateway:latest -f infrastructure/gateway/Dockerfile .
 docker run -p 8080:8080 meldestelle/gateway:latest
 ```
+
+📖 **Detaillierte Startup-Anleitung:** Siehe `GATEWAY-STARTUP-GUIDE.md` im Projekt-Root für vollständige Befehle und Fehlerbehebung.
 
 ### Testing
 ```bash

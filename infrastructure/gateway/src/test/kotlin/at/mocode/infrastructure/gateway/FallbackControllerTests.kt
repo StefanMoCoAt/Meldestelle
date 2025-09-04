@@ -8,31 +8,31 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 
 /**
- * Tests for the Fallback Controller that handles circuit breaker scenarios.
- * Tests all fallback endpoints for different services.
+ * Tests für den Fallback Controller, der Circuit Breaker Szenarien behandelt.
+ * Testet alle Fallback-Endpunkte für verschiedene Services.
  */
 @SpringBootTest(
     classes = [GatewayApplication::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
-        // Disable external dependencies for fallback tests
+        // Externe Abhängigkeiten für Fallback-Tests deaktivieren
         "spring.cloud.discovery.enabled=false",
         "spring.cloud.consul.enabled=false",
         "spring.cloud.consul.config.enabled=false",
         "spring.cloud.consul.discovery.register=false",
         "spring.cloud.loadbalancer.enabled=false",
-        // Disable circuit breaker health indicator to avoid interference
+        // Circuit Breaker Health Indicator deaktivieren um Interferenzen zu vermeiden
         "resilience4j.circuitbreaker.configs.default.registerHealthIndicator=false",
         "management.health.circuitbreakers.enabled=false",
-        // Disable custom filters for pure fallback testing
+        // Custom Filter für reine Fallback-Tests deaktivieren
         "gateway.security.jwt.enabled=false",
-        // Use reactive web application type
+        // Reaktiven Web-Anwendungstyp verwenden
         "spring.main.web-application-type=reactive",
-        // Disable gateway discovery
+        // Gateway Discovery deaktivieren
         "spring.cloud.gateway.discovery.locator.enabled=false",
-        // Disable actuator security
+        // Actuator Security deaktivieren
         "management.security.enabled=false",
-        // Set random port
+        // Zufälligen Port setzen
         "server.port=0"
     ]
 )
@@ -43,7 +43,7 @@ class FallbackControllerTests {
     lateinit var webTestClient: WebTestClient
 
     @Test
-    fun `should return members service fallback response`() {
+    fun `sollte Members Service Fallback Response zurückgeben`() {
         webTestClient.get()
             .uri("/fallback/members")
             .exchange()
@@ -60,7 +60,7 @@ class FallbackControllerTests {
     }
 
     @Test
-    fun `should return horses service fallback response`() {
+    fun `sollte Horses Service Fallback Response zurückgeben`() {
         webTestClient.get()
             .uri("/fallback/horses")
             .exchange()
@@ -75,7 +75,7 @@ class FallbackControllerTests {
     }
 
     @Test
-    fun `should return events service fallback response`() {
+    fun `sollte Events Service Fallback Response zurückgeben`() {
         webTestClient.get()
             .uri("/fallback/events")
             .exchange()

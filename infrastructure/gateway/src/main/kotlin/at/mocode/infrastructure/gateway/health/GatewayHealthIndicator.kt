@@ -85,13 +85,13 @@ class GatewayHealthIndicator(
             if (hasCriticalFailure && !isTestEnvironment) {
                 builder.down()
                 details["status"] = "DOWN"
-                details["reason"] = "One or more critical services are unavailable"
+                details["reason"] = "Ein oder mehrere kritische Services sind nicht verfügbar"
             } else {
                 details["status"] = "UP"
                 details["reason"] = if (isTestEnvironment) {
-                    "Health check passed (test environment)"
+                    "Gesundheitsprüfung erfolgreich (Testumgebung)"
                 } else {
-                    "All critical services are available"
+                    "Alle kritischen Services sind verfügbar"
                 }
             }
 
@@ -99,7 +99,7 @@ class GatewayHealthIndicator(
             builder.down()
                 .withException(exception)
             details["status"] = "DOWN"
-            details["reason"] = "Failed to check downstream services: ${exception.message}"
+            details["reason"] = "Fehler beim Prüfen der nachgelagerten Services: ${exception.message}"
         }
 
         return builder.withDetails(details).build()

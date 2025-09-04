@@ -22,8 +22,8 @@ spring:
         locator:
           enabled: false
       httpclient:
-        connect-timeout: 1000
-        response-timeout: 5s
+        connectTimeout: 1000
+        responseTimeout: 5s
       # IMPORTANT: Do not load production lb:// routes in tests
       routes: []
       globalcors:

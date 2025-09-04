@@ -77,7 +77,7 @@ class GatewayMetricsConfig {
     @Bean
     fun requestTimer(meterRegistry: MeterRegistry): Timer {
         return Timer.builder(GATEWAY_REQUEST_TIMER)
-            .description("Gateway request processing time")
+            .description("Gateway Request-Verarbeitungszeit")
             .tag("type", "http")
             .register(meterRegistry)
     }
@@ -88,7 +88,7 @@ class GatewayMetricsConfig {
     @Bean
     fun errorCounter(meterRegistry: MeterRegistry): Counter {
         return Counter.builder(GATEWAY_ERROR_COUNTER)
-            .description("Total number of gateway errors")
+            .description("Gesamtanzahl der Gateway-Fehler")
             .register(meterRegistry)
     }
 
@@ -98,7 +98,7 @@ class GatewayMetricsConfig {
     @Bean
     fun requestCounter(meterRegistry: MeterRegistry): Counter {
         return Counter.builder(GATEWAY_REQUESTS_COUNTER)
-            .description("Total number of gateway requests")
+            .description("Gesamtanzahl der Gateway-Requests")
             .register(meterRegistry)
     }
 
@@ -108,7 +108,7 @@ class GatewayMetricsConfig {
     @Bean
     fun circuitBreakerCounter(meterRegistry: MeterRegistry): Counter {
         return Counter.builder(GATEWAY_CIRCUIT_BREAKER_COUNTER)
-            .description("Circuit breaker events in gateway")
+            .description("Circuit Breaker Events im Gateway")
             .register(meterRegistry)
     }
 }
@@ -128,7 +128,7 @@ class GatewayMetricsWebFilter(private val meterRegistry: MeterRegistry) : WebFil
         Counter.builder(GatewayMetricsConfig.GATEWAY_REQUESTS_COUNTER)
             .tag("method", method)
             .tag("path", normalizePath(path))
-            .description("Total gateway requests")
+            .description("Gateway-Requests gesamt")
             .register(meterRegistry)
             .increment()
 
@@ -151,7 +151,7 @@ class GatewayMetricsWebFilter(private val meterRegistry: MeterRegistry) : WebFil
                     .tag("path", normalizePath(path))
                     .tag("status", statusCode)
                     .tag("status_series", statusSeries)
-                    .description("Gateway request processing time")
+                    .description("Gateway Request-Verarbeitungszeit")
                     .register(meterRegistry)
                     .record(duration)
 
@@ -163,7 +163,7 @@ class GatewayMetricsWebFilter(private val meterRegistry: MeterRegistry) : WebFil
                         .tag("status", statusCode)
                         .tag("status_series", statusSeries)
                         .tag("error_type", if (statusCode.startsWith("4")) "client_error" else "server_error")
-                        .description("Gateway error count")
+                        .description("Gateway-Fehleranzahl")
                         .register(meterRegistry)
                         .increment()
                 }

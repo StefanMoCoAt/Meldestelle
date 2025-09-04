@@ -38,6 +38,8 @@ dependencies {
     implementation(libs.resilience4j.spring.boot3)
     implementation(libs.resilience4j.reactor)
     implementation(libs.spring.boot.starter.aop) // Benötigt für Resilience4j AOP
+    // Spring Cloud CircuitBreaker für Gateway Filter Integration
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
     // Reaktiver Webserver (Netty) - now properly referenced from libs
     implementation(libs.spring.boot.starter.webflux)
     // Spring Security (WebFlux) – benötigt für SecurityWebFilterChain-Konfiguration
@@ -70,4 +72,37 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+// Konfiguration für Integration Tests
+sourceSets {
+    val integrationTest by creating {
+        compileClasspath += sourceSets.main.get().output
+        runtimeClasspath += sourceSets.main.get().output
+    }
+}
+
+val integrationTestImplementation by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+
+tasks.register<Test>("integrationTest") {
+    description = "Führt die Integration Tests aus"
+    group = "verification"
+
+    testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+    classpath = sourceSets["integrationTest"].runtimeClasspath
+
+    useJUnitPlatform()
+
+    shouldRunAfter("test")
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = false
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }

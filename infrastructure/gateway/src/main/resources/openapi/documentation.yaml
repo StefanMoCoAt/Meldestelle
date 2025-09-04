@@ -2,12 +2,12 @@ openapi: 3.0.3
 info:
   title: Meldestelle API
   description: |
-    Self-Contained Systems API Gateway for Austrian Equestrian Federation.
-    This API provides access to various bounded contexts including authentication,
-    master data management, horse registry, and event management.
+    Self-Contained Systems API Gateway für den Österreichischen Pferdesportverband.
+    Diese API bietet Zugriff auf verschiedene Bounded Contexts einschließlich Authentifizierung,
+    Stammdatenverwaltung, Pferderegister und Veranstaltungsmanagement.
 
     ## Rate Limiting
-    This API implements rate limiting to ensure fair usage and system stability.
+    Diese API implementiert Rate Limiting zur Gewährleistung fairer Nutzung und Systemstabilität.
 
     ### Global Rate Limits
     - Default limit: 100 requests per minute per IP address

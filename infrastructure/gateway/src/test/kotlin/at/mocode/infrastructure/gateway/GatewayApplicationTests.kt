@@ -5,31 +5,31 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
 /**
- * Basic test to verify that the Gateway application context loads successfully.
- * Uses test profile to disable production filters and external dependencies.
+ * Basis-Test zur Überprüfung, dass der Gateway-Anwendungskontext erfolgreich lädt.
+ * Verwendet Test-Profil um Produktions-Filter und externe Abhängigkeiten zu deaktivieren.
  */
 @SpringBootTest(
     classes = [GatewayApplication::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
-        // Disable all external dependencies for context loading test
+        // Alle externen Abhängigkeiten für Context-Loading-Test deaktivieren
         "spring.cloud.discovery.enabled=false",
         "spring.cloud.consul.enabled=false",
         "spring.cloud.consul.config.enabled=false",
         "spring.cloud.consul.discovery.register=false",
         "spring.cloud.loadbalancer.enabled=false",
-        // Disable circuit breaker for tests
+        // Circuit Breaker für Tests deaktivieren
         "resilience4j.circuitbreaker.configs.default.registerHealthIndicator=false",
         "management.health.circuitbreakers.enabled=false",
-        // Disable custom security and filters
+        // Custom Security und Filter deaktivieren
         "gateway.security.jwt.enabled=false",
-        // Use reactive web application type
+        // Reaktiven Web-Anwendungstyp verwenden
         "spring.main.web-application-type=reactive",
-        // Disable gateway discovery
+        // Gateway Discovery deaktivieren
         "spring.cloud.gateway.discovery.locator.enabled=false",
-        // Disable actuator security
+        // Actuator Security deaktivieren
         "management.security.enabled=false",
-        // Set random port
+        // Zufälligen Port setzen
         "server.port=0"
     ]
 )
@@ -38,7 +38,7 @@ class GatewayApplicationTests {
 
     @Test
     fun contextLoads() {
-        // This test passes if the Spring application context loads successfully
-        // without any configuration errors or missing bean dependencies
+        // Dieser Test ist erfolgreich, wenn der Spring-Anwendungskontext erfolgreich lädt
+        // ohne Konfigurationsfehler oder fehlende Bean-Abhängigkeiten
     }
 }
