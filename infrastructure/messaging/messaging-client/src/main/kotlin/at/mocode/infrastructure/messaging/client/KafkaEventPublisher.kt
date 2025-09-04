@@ -99,7 +99,7 @@ class KafkaEventPublisher(
                                 index + 1, topic, key, event::class.simpleName, isRetryableException(exception), exception.message, exception)
                         }
                         .retryWhen(createRetrySpec(topic, key))
-                        .map { Unit } // Convert to Mono<Unit> that emits one Unit per successful send
+                        .map { } // Convert to Mono<Unit> that emits one Unit per successful send
                         .onErrorContinue { error, _ ->
                             logger.error("Error publishing event {} in batch to topic '{}': {}",
                                 index + 1, topic, error.message)
@@ -142,7 +142,7 @@ class KafkaEventPublisher(
                 logger.error("Final failure after retries: Failed to publish event to topic '{}' with key '{}'",
                     topic, key, exception)
             }
-            .map { Unit }
+            .map { }
     }
 
     @Deprecated("Use publishEvents with Result<List<Unit>> instead.")
@@ -175,7 +175,7 @@ class KafkaEventPublisher(
                             index + 1, topic, key, event::class.simpleName, isRetryableException(exception), exception.message, exception)
                     }
                     .retryWhen(createRetrySpec(topic, key))
-                    .map { Unit } // Convert to Mono<Unit> that emits one Unit per successful send
+                    .map { } // Convert to Mono<Unit> that emits one Unit per successful send
                     .onErrorContinue { error, _ ->
                         logger.error("Error publishing event {} in batch to topic '{}': {}",
                             index + 1, topic, error.message)

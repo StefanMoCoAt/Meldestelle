@@ -625,9 +625,7 @@ suspend fun handleMessagingError(error: MessagingError, topic: String) {
 ```kotlin
 // Umfassendes Monitoring einrichten
 @Component
-class MessagingMetrics(
-    private val meterRegistry: MeterRegistry
-) {
+class MessagingMetrics( private val meterRegistry: MeterRegistry ) {
     private val publishedEvents = Counter.builder("messaging.events.published")
         .register(meterRegistry)
 

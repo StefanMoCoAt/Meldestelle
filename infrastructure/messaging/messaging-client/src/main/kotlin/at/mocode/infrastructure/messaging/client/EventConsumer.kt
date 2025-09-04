@@ -1,11 +1,10 @@
 package at.mocode.infrastructure.messaging.client
 
-import reactor.core.publisher.Flux
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.reactive.asPublisher
 import org.slf4j.LoggerFactory
+import reactor.core.publisher.Flux
 
 /**
  * Generische Schnittstelle zum Konsumieren von Events aus einem Message-Broker.
