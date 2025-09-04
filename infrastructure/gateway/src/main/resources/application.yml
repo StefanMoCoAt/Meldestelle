@@ -1,6 +1,6 @@
 # Port, auf dem das Gateway läuft
 server:
-  port: 8081
+  port: 8080
   # Optimierte Netty-Konfiguration für reaktive Anwendungen
   netty:
     connection-timeout: 5s
@@ -28,11 +28,10 @@ spring:
         health-check-interval: 10s
         instance-id: ${spring.application.name}-${server.port}-${random.uuid}
     gateway:
-      # HTTP Client-Timeouts für stabile Upstream-Verbindungen
       server:
         webflux:
           httpclient:
-            connect-timeout: 5000 # in Millisekunden
+            connect-timeout: 5000
             response-timeout: 30s
             pool:
               max-idle-time: 15s
@@ -70,7 +69,6 @@ spring:
                   maxBackoff: 500ms
                   factor: 2
                   basedOnPreviousValue: false
-            # Sicherheits-Header für erweiterten Schutz
             - name: AddResponseHeader
               args:
                 name: X-Content-Type-Options
@@ -92,7 +90,6 @@ spring:
                 name: Cache-Control
                 value: no-cache, no-store, must-revalidate
           routes:
-            # Health Check und Gateway Info Routes
             - id: gateway-info-route
               uri: http://localhost:${server.port}
               predicates:
@@ -101,8 +98,6 @@ spring:
               filters:
                 - SetStatus=200
                 - SetResponseHeader=Content-Type,application/json
-
-            # Members Service Routes
             - id: members-service-route
               uri: lb://members-service
               predicates:
@@ -113,8 +108,6 @@ spring:
                   args:
                     name: membersCircuitBreaker
                     fallbackUri: forward:/fallback/members
-
-            # Horses Service Routes
             - id: horses-service-route
               uri: lb://horses-service
               predicates:
@@ -125,8 +118,6 @@ spring:
                   args:
                     name: horsesCircuitBreaker
                     fallbackUri: forward:/fallback/horses
-
-            # Events Service Routes
             - id: events-service-route
               uri: lb://events-service
               predicates:
@@ -137,8 +128,6 @@ spring:
                   args:
                     name: eventsCircuitBreaker
                     fallbackUri: forward:/fallback/events
-
-            # Masterdata Service Routes
             - id: masterdata-service-route
               uri: lb://masterdata-service
               predicates:
@@ -149,8 +138,6 @@ spring:
                   args:
                     name: masterdataCircuitBreaker
                     fallbackUri: forward:/fallback/masterdata
-
-            # Auth Service Routes (falls vorhanden)
             - id: auth-service-route
               uri: lb://auth-service
               predicates:
@@ -161,21 +148,15 @@ spring:
                   args:
                     name: authCircuitBreaker
                     fallbackUri: forward:/fallback/auth
-
-            # Ping Service Routes (bestehend)
             - id: ping-service-route
               uri: lb://ping-service
               predicates:
                 - Path=/api/ping/**
               filters:
                 - StripPrefix=1
-      # Disable weight calculation filter to prevent blocking operations
-      filter:
-        weight:
-          enabled: false
-      # Verbesserte CORS-Konfiguration
-      # Antwort-Header bereinigen und globale Filter
-      # Route-Definitionen mit Service Discovery
+          filter:
+            weight:
+              enabled: false
 
 # Circuit Breaker Konfiguration
 resilience4j:
@@ -295,3 +276,5 @@ logging:
       max-file-size: 100MB
       total-size-cap: 1GB
       max-history: 30
+
+

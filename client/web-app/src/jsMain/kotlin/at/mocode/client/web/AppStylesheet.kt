@@ -109,13 +109,4 @@ object AppStylesheet : StyleSheet() {
         property("vertical-align", "middle")
     }
 
-    @Suppress("unused")
-    private val spinKeyframes = keyframes {
-        0.percent {
-            transform { rotate(0.deg) }
-        }
-        100.percent {
-            transform { rotate(360.deg) }
-        }
-    }
 }

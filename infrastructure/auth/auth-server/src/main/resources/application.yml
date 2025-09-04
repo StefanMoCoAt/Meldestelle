@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: auth-server
+
+  cloud:
+    consul:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # This will be configured via environment variables in production
+          jwk-set-uri: http://localhost:8080/realms/meldestelle/protocol/openid-connect/certs
+
+server:
+  port: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  security:
+    enabled: false
+
+logging:
+  level:
+    at.mocode.infrastructure.auth: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.cloud.consul: INFO
+
+# Keycloak configuration
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: meldestelle
+  resource: auth-server
+  credentials:
+    secret: your-client-secret-here
+
+# JWT configuration (development only - use proper secrets in production)
+jwt:
+  secret: dev-secret-key-change-in-production
+  expiration: 86400000 # 24 hours in milliseconds

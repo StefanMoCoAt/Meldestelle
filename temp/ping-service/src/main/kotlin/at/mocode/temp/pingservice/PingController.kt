@@ -5,12 +5,15 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class PingController {
+class PingController(
+    private val pingService: PingServiceCircuitBreaker
+) {
 
     /**
      * Standard ping endpoint - maintains backward compatibility
+     * NOW HANDLES BOTH /ping AND /ping/ping paths for Gateway compatibility
      */
-    @GetMapping("/ping")
+    @GetMapping("/ping", "/ping/ping")
     fun ping(): Map<String, String> {
         return mapOf("status" to "pong")
     }
@@ -20,7 +23,8 @@ class PingController {
      */
     @GetMapping("/ping/enhanced")
     fun enhancedPing(@RequestParam(defaultValue = "false") simulate: Boolean): Map<String, Any> {
-        return mapOf("status" to "pong", "message" to "Circuit breaker not available")
+        // Delegate to service with circuit breaker
+        return pingService.ping(simulateFailure = simulate)
     }
 
     /**
@@ -28,14 +32,20 @@ class PingController {
      */
     @GetMapping("/ping/health")
     fun health(): Map<String, Any> {
-        return mapOf("status" to "UP", "message" to "Circuit breaker not available")
+        return pingService.healthCheck()
     }
 
     /**
      * Endpoint to test circuit breaker behavior by forcing failures
+     * Uses simulate=true to increase chance of fallback
      */
     @GetMapping("/ping/test-failure")
     fun testFailure(): Map<String, Any> {
-        return mapOf("status" to "error", "message" to "Circuit breaker not available")
+        return try {
+            pingService.ping(simulateFailure = true)
+        } catch (ex: Exception) {
+            // Although CircuitBreaker should handle it, ensure safe fallback
+            pingService.fallbackPing(simulateFailure = true, exception = ex)
+        }
     }
 }

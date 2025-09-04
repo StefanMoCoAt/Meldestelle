@@ -38,6 +38,9 @@ dependencies {
     // Web starter for REST endpoints
     implementation(libs.spring.boot.starter.web)
 
+    // Kotlin reflection for Spring Boot Kotlin serialization
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+
     // Validation for request/response validation
     implementation(libs.spring.boot.starter.validation)
 
