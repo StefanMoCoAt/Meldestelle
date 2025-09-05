@@ -18,6 +18,15 @@ COPY core core/
 # Infrastructure Module kopieren (für Dependencies)
 COPY infrastructure infrastructure/
 
+# Client Module kopieren (für Dependencies)
+COPY client client/
+
+# Documentation Module kopieren (für Dependencies)
+COPY docs docs/
+
+# Temporary Module kopieren (für Dependencies)
+COPY temp temp/
+
 # Gateway Module bauen
 RUN ./gradlew :infrastructure:gateway:bootJar -x test --no-daemon
 

@@ -12,6 +12,15 @@ tasks.getByName("bootJar") {
     enabled = false
 }
 
+// Deaktiviert bootRun und bootTestRun für dieses Bibliotheks-Modul, da es keine ausführbare Anwendung ist.
+tasks.getByName("bootRun") {
+    enabled = false
+}
+
+tasks.getByName("bootTestRun") {
+    enabled = false
+}
+
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
     api(platform(projects.platform.platformBom))

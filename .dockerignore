@@ -215,6 +215,9 @@ NOTES*.md
 !platform/
 !core/
 
+# Essential documentation for build
+!docs/
+
 # ===================================================================
 # Final note: Each Dockerfile should copy only what it needs
 # This .dockerignore provides a baseline for all builds

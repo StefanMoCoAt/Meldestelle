@@ -103,6 +103,38 @@ services:
       start_period: 15s
     restart: unless-stopped
 
+  # ===================================================================
+  # API Gateway
+  # ===================================================================
+  api-gateway:
+    build:
+      context: .
+      dockerfile: infrastructure/gateway/Dockerfile
+    container_name: meldestelle-api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      CONSUL_HOST: consul
+      CONSUL_PORT: 8500
+      CONSUL_ENABLED: true
+    ports:
+      - "8080:8080"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
 # ===================================================================
 # Volumes
 # ===================================================================

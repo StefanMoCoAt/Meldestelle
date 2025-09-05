@@ -11,20 +11,18 @@ import org.springframework.context.ApplicationContext
  * Testet, ob der Spring Application Context für den Monitoring-Server
  * erfolgreich geladen werden kann.
  *
- * DEAKTIVIERT: Spring context loading fails due to Zipkin/Armeria auto-configuration issues.
- * @SpringBootTest annotation removed to prevent context loading during test class initialization.
+ * Mit der Armeria Auto-Configuration Ausschluss-Konfiguration sollte der Context erfolgreich laden.
+ * Verwendet RANDOM_PORT um Konflikte mit bootRun-Tasks zu vermeiden.
  */
-@Disabled("Spring context loading fails due to Zipkin/Armeria auto-configuration issues - needs investigation")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MonitoringServerApplicationTest {
 
-    // @Autowired - Removed to prevent Spring dependency injection
-    // private lateinit var context: ApplicationContext
+    @Autowired
+    private lateinit var context: ApplicationContext
 
     @Test
-    @Disabled("Spring context loading fails due to Zipkin/Armeria auto-configuration issues - needs investigation")
     fun `context loads successfully`() {
         // Bestätigt, dass der gesamte Server-Kontext erfolgreich gestartet wurde.
-        // Test disabled due to Spring context loading issues
-        // assertThat(context).isNotNull()
+        assertThat(context).isNotNull()
     }
 }
