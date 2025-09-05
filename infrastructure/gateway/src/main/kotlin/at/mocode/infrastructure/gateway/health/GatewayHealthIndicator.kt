@@ -81,17 +81,18 @@ class GatewayHealthIndicator(
 
             // Gateway Status basierend auf kritischen Services
             val isTestEnvironment = environment.activeProfiles.contains("test")
+            val isDevEnvironment = environment.activeProfiles.contains("dev")
 
-            if (hasCriticalFailure && !isTestEnvironment) {
+            if (hasCriticalFailure && !isTestEnvironment && !isDevEnvironment) {
                 builder.down()
                 details["status"] = "DOWN"
                 details["reason"] = "Ein oder mehrere kritische Services sind nicht verfügbar"
             } else {
                 details["status"] = "UP"
-                details["reason"] = if (isTestEnvironment) {
-                    "Gesundheitsprüfung erfolgreich (Testumgebung)"
-                } else {
-                    "Alle kritischen Services sind verfügbar"
+                details["reason"] = when {
+                    isTestEnvironment -> "Gesundheitsprüfung erfolgreich (Testumgebung)"
+                    isDevEnvironment -> "Gesundheitsprüfung erfolgreich (Entwicklungsumgebung - nicht alle Services erforderlich)"
+                    else -> "Alle kritischen Services sind verfügbar"
                 }
             }
 

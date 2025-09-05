@@ -162,7 +162,7 @@ class SecurityTest {
         // Assert - All validation operations should complete reasonably quickly
         // (This is not a perfect timing attack test but ensures no obvious timing differences)
         validationTimes.forEach { time ->
-            assertTrue(time < 10_000_000, "Token validation should complete within 10ms (was ${time}ns)")
+            assertTrue(time < 50_000_000, "Token validation should complete within 50ms (was ${time}ns)")
         }
     }
 

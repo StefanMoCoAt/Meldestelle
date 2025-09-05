@@ -58,10 +58,7 @@ class JwtService(
      */
     fun validateToken(token: String): Result<Boolean> {
         return try {
-            // Perform a strict, constant-time signature pre-check before invoking the library verifier
-            if (!hasValidSignature(token)) {
-                throw JWTVerificationException("Invalid token signature")
-            }
+            // The library verifier already performs signature validation, so no need for redundant pre-check
             verifier.verify(token)
             Result.success(true)
         } catch (e: JWTVerificationException) {

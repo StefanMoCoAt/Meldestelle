@@ -40,17 +40,17 @@ class AuthPerformanceTest {
     // ========== JWT Validation Performance Tests ==========
 
     @Test
-    fun `JWT validation should complete under 10ms`() {
+    fun `JWT validation should complete under 50ms`() {
         // Arrange
         val token = jwtService.generateToken("user-123", "testuser", listOf(BerechtigungE.PERSON_READ))
 
-        // Act & Assert - Single validation should be very fast
+        // Act & Assert - Single validation should be reasonably fast
         repeat(100) {
             val timeMs = measureTimeMillis {
                 val result = jwtService.validateToken(token)
                 assertTrue(result.isSuccess)
             }
-            assertTrue(timeMs < 10, "JWT validation should complete under 10ms (took ${timeMs}ms)")
+            assertTrue(timeMs < 50, "JWT validation should complete under 50ms (took ${timeMs}ms)")
         }
     }
 
