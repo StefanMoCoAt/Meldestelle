@@ -14,10 +14,10 @@ spring:
       resourceserver:
         jwt:
           # This will be configured via environment variables in production
-          jwk-set-uri: http://localhost:8080/realms/meldestelle/protocol/openid-connect/certs
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/meldestelle/protocol/openid-connect/certs}
 
 server:
-  port: 0
+  port: ${AUTH_SERVICE_PORT:8087}
 
 management:
   endpoints:
@@ -40,7 +40,7 @@ logging:
 
 # Keycloak configuration
 keycloak:
-  auth-server-url: http://localhost:8080
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8180}
   realm: meldestelle
   resource: auth-server
   credentials:

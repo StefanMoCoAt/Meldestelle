@@ -33,6 +33,9 @@ class KeycloakIntegrationTest {
         private const val KEYCLOAK_PORT = 8080
         private const val KEYCLOAK_ADMIN_USER = "admin"
         private const val KEYCLOAK_ADMIN_PASSWORD = "admin"
+        private const val HTTP_CONNECT_TIMEOUT = 5000
+        private const val HTTP_READ_TIMEOUT = 5000
+        private const val CONTAINER_STARTUP_TIMEOUT_MINUTES = 3L
 
         @Container
         @JvmStatic
@@ -44,7 +47,7 @@ class KeycloakIntegrationTest {
             .waitingFor(
                 Wait.forHttp("/admin/master/console/")
                     .forPort(KEYCLOAK_PORT)
-                    .withStartupTimeout(Duration.ofMinutes(3))
+                    .withStartupTimeout(Duration.ofMinutes(CONTAINER_STARTUP_TIMEOUT_MINUTES))
             )
 
         /**
@@ -64,17 +67,26 @@ class KeycloakIntegrationTest {
 
         /**
          * Makes an HTTP GET request to the specified URL and returns the response code.
+         * Includes proper resource management and enhanced error handling.
          */
         private fun makeHttpRequest(url: String): Int {
+            var connection: HttpURLConnection? = null
             return try {
-                val connection = URI.create(url).toURL().openConnection() as HttpURLConnection
+                connection = URI.create(url).toURL().openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
-                connection.connectTimeout = 5000
-                connection.readTimeout = 5000
-                connection.responseCode
+                connection.connectTimeout = HTTP_CONNECT_TIMEOUT
+                connection.readTimeout = HTTP_READ_TIMEOUT
+                val responseCode = connection.responseCode
+                println("[DEBUG_LOG] HTTP request to $url returned: $responseCode")
+                responseCode
             } catch (e: IOException) {
-                println("[DEBUG_LOG] HTTP request failed: ${e.message}")
+                println("[DEBUG_LOG] HTTP request failed for URL: $url - ${e.message}")
                 -1
+            } catch (e: Exception) {
+                println("[DEBUG_LOG] Unexpected error during HTTP request to $url: ${e.javaClass.simpleName} - ${e.message}")
+                -1
+            } finally {
+                connection?.disconnect()
             }
         }
     }
@@ -103,8 +115,8 @@ class KeycloakIntegrationTest {
 
         // Verify the port is accessible
         val mappedPort = keycloakContainer.getMappedPort(KEYCLOAK_PORT)
-        assert(mappedPort > 0) { "Keycloak port should be mapped" }
-        assert(mappedPort != KEYCLOAK_PORT) { "Mapped port should be different from container port" }
+        assert(mappedPort > 0) { "Keycloak port should be mapped to a valid port, got: $mappedPort" }
+        assert(mappedPort != KEYCLOAK_PORT) { "Mapped port ($mappedPort) should be different from container port ($KEYCLOAK_PORT)" }
 
         println("[DEBUG_LOG] Container health check passed")
         println("[DEBUG_LOG] Container ID: ${keycloakContainer.containerId}")
@@ -238,11 +250,17 @@ class KeycloakIntegrationTest {
         // Test concurrent access to Keycloak
         val threads = (1..5).map { threadIndex ->
             Thread {
-                repeat(3) { requestIndex ->
-                    val responseCode = makeHttpRequest("$keycloakUrl/realms/master")
-                    assert(responseCode == 200) {
-                        "Concurrent request $threadIndex-$requestIndex should succeed (got $responseCode)"
+                try {
+                    repeat(3) { requestIndex ->
+                        val responseCode = makeHttpRequest("$keycloakUrl/realms/master")
+                        assert(responseCode == 200) {
+                            "Concurrent request Thread-$threadIndex Request-$requestIndex should succeed (got HTTP $responseCode)"
+                        }
+                        println("[DEBUG_LOG] Concurrent request Thread-$threadIndex Request-$requestIndex: HTTP $responseCode")
                     }
+                } catch (e: Exception) {
+                    println("[DEBUG_LOG] Concurrent request Thread-$threadIndex failed: ${e.message}")
+                    throw e
                 }
             }
         }
