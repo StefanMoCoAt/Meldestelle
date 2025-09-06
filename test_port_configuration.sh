@@ -49,8 +49,11 @@ fi
 echo
 echo "🧪 Test 2: All Services Have Unique Ports"
 echo "------------------------------------------"
-ALL_PORTS=($GATEWAY_TEST_PORT $PING_TEST_PORT ${CONSUL_PORT:-8500} ${REDIS_PORT:-6379})
-UNIQUE_PORTS=($(printf "%s\n" "${ALL_PORTS[@]}" | sort -u))
+ALL_PORTS=("$GATEWAY_TEST_PORT" "$PING_TEST_PORT" "${CONSUL_PORT:-8500}" "${REDIS_PORT:-6379}")
+UNIQUE_PORTS=()
+while IFS= read -r line; do
+    UNIQUE_PORTS+=("$line")
+done < <(printf "%s\n" "${ALL_PORTS[@]}" | sort -u)
 
 if [ ${#ALL_PORTS[@]} -eq ${#UNIQUE_PORTS[@]} ]; then
     echo "✅ PASS: All services have unique ports"

@@ -154,9 +154,6 @@ spring:
                 - Path=/api/ping/**
               filters:
                 - StripPrefix=1
-          filter:
-            weight:
-              enabled: false
 
 # Circuit Breaker Konfiguration
 resilience4j:

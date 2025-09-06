@@ -6,8 +6,6 @@ spring:
     consul:
       discovery:
         enabled: false
-      config:
-        enabled: false
 
   security:
     oauth2:
@@ -29,8 +27,6 @@ management:
     health:
       show-details: always
       show-components: always
-  security:
-    enabled: false
 
 logging:
   level:
@@ -38,15 +34,5 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.cloud.consul: INFO
 
-# Keycloak configuration
-keycloak:
-  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8180}
-  realm: meldestelle
-  resource: auth-server
-  credentials:
-    secret: your-client-secret-here
-
-# JWT configuration (development only - use proper secrets in production)
-jwt:
-  secret: dev-secret-key-change-in-production
-  expiration: 86400000 # 24 hours in milliseconds
+# Custom properties can be added here when proper @ConfigurationProperties classes are created
+# For now, these properties are moved to environment variables or removed to avoid warnings

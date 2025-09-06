@@ -54,8 +54,5 @@ resilience4j:
         minimum-number-of-calls: 4
         wait-duration-in-open-state: 5s
 
-  # Optional: Metrics configuration
-  metrics:
-    enabled: true
-    legacy:
-      enabled: true
+  # Metrics configuration removed to avoid property resolution warnings
+  # Use micrometer and actuator endpoints for metrics instead
