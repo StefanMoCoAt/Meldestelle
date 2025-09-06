@@ -2,17 +2,21 @@
 
 ## Was wurde implementiert
 
-Dieses Projekt wurde erfolgreich mit einer umfassenden Umgebungsvariablen-Konfiguration für die lokale Entwicklung ausgestattet.
+Das Meldestelle-Projekt verfügt über eine vollständig zentralisierte Umgebungsvariablen-Konfiguration im `config/` Verzeichnis.
 
-### 1. Erstellte Dateien
+### 1. Zentrale Konfigurationsstruktur
 
-- **`.env`** - Zentrale Konfigurationsdatei mit allen erforderlichen Umgebungsvariablen
-- **`docs/development/environment-variables-de.md`** - Umfassende Dokumentation aller Umgebungsvariablen
-- **`validate-env.sh`** - Validierungsskript für die Umgebungskonfiguration
+- **`config/.env.template`** - Master-Vorlage mit allen verfügbaren Umgebungsvariablen
+- **`config/.env.dev`** - Entwicklungsumgebung-Konfiguration
+- **`config/.env.prod`** - Produktionsumgebung-Konfiguration
+- **`config/.env.staging`** - Staging-Umgebung-Konfiguration
+- **`config/.env.test`** - Testumgebung-Konfiguration
+- **`config/README.md`** - Umfassende Dokumentation der Konfigurationsverwaltung
 
 ### 2. Aktualisierte Dateien
 
-- **`docker-compose.yml`** - Alle Services verwenden jetzt Umgebungsvariablen mit Fallback-Werten
+- **`docker-compose.yml`** - Alle Services verwenden Umgebungsvariablen mit Fallback-Werten
+- **Symlink `.env`** - Verweist auf die aktuelle Umgebungskonfiguration
 
 ### 3. Konfigurierte Services
 
@@ -43,14 +47,21 @@ Die folgenden Services sind vollständig konfiguriert:
 
 ### Schnellstart
 
-1. **Services starten:**
+1. **Umgebung wählen:**
    ```bash
-   docker-compose up -d
+   # Für Entwicklung
+   ln -sf config/.env.dev .env
+
+   # Für Produktion
+   ln -sf config/.env.prod .env
+
+   # Für Tests
+   ln -sf config/.env.test .env
    ```
 
-2. **Konfiguration validieren:**
+2. **Services starten:**
    ```bash
-   ./validate-env.sh
+   docker-compose up -d
    ```
 
 3. **Services überprüfen:**
@@ -60,14 +71,14 @@ Die folgenden Services sind vollständig konfiguriert:
 
 ### Anpassungen
 
-- Bearbeiten Sie die `.env`-Datei für lokale Anpassungen
-- Verwenden Sie verschiedene Ports für mehrere Entwickler
-- Ändern Sie Passwörter für Produktionsumgebungen
+- Kopieren und bearbeiten Sie die gewünschte `.env.*` Datei aus dem `config/` Verzeichnis
+- Verwenden Sie verschiedene Ports für mehrere Entwickler (siehe `.env.test` für Beispiel)
+- Ändern Sie alle `CHANGE_ME` Werte in Produktionsumgebungen
 
 ### Dokumentation
 
 Vollständige Dokumentation finden Sie in:
-- `docs/development/environment-variables-de.md`
+- `config/README.md` - Zentrale Konfigurationsdokumentation
 
 ## Sicherheitshinweise
 
@@ -80,12 +91,14 @@ Vollständige Dokumentation finden Sie in:
 ## Fehlerbehebung
 
 Bei Problemen:
-1. Führen Sie `./validate-env.sh` aus
-2. Überprüfen Sie die Logs mit `docker-compose logs -f`
-3. Validieren Sie die Konfiguration mit `docker-compose config`
+1. Überprüfen Sie die aktive Umgebungskonfiguration: `ls -la .env`
+2. Validieren Sie die Docker-Compose-Konfiguration: `docker-compose config`
+3. Überprüfen Sie die Service-Logs: `docker-compose logs -f`
+4. Konsultieren Sie `config/README.md` für detaillierte Konfigurationsrichtlinien
 
 ## Nächste Schritte
 
-- Testen Sie die Anwendung mit den neuen Umgebungsvariablen
-- Passen Sie die Werte nach Bedarf für Ihre Entwicklungsumgebung an
-- Erstellen Sie umgebungsspezifische .env-Dateien für verschiedene Stages
+- Die zentrale Konfiguration ist bereits vollständig implementiert
+- Wählen Sie die gewünschte Umgebung mit den Symlink-Befehlen oben
+- Passen Sie Konfigurationswerte in den `config/.env.*` Dateien nach Bedarf an
+- Für neue Umgebungen verwenden Sie `config/.env.template` als Ausgangspunkt

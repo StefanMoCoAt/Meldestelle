@@ -1,6 +1,6 @@
 # ===================================================================
 # Meldestelle Docker Development Makefile
-# Convenient commands for managing containerized development workflow
+# Optimierte Befehle für containerisierte Entwicklungs-Workflows
 # ===================================================================
 
 .PHONY: help dev-up dev-down dev-restart dev-logs build clean test
@@ -8,7 +8,8 @@
 .PHONY: clients-up clients-down clients-restart clients-logs
 .PHONY: prod-up prod-down prod-restart prod-logs
 .PHONY: infrastructure-up infrastructure-down infrastructure-logs
-.PHONY: dev-tools-up dev-tools-down status health-check logs shell env-template dev-info clean-all build-service build-client
+.PHONY: full-up full-down full-restart full-logs
+.PHONY: dev-tools-up dev-tools-down status health-check logs shell env-setup env-dev env-prod env-staging env-test dev-info clean-all build-service build-client
 
 .ONESHELL:
 
@@ -69,48 +70,139 @@ infrastructure-down: ## Stop infrastructure services
 infrastructure-logs: ## Show infrastructure logs
 	$(COMPOSE) -f docker-compose.yml logs -f
 
-services-up: ## Start application services (simplified: base compose only)
-	@echo "⚙️ Starting services (simplified setup using docker-compose.yml only)..."
-	$(COMPOSE) -f docker-compose.yml up -d
-	@echo "✅ Services started (based on docker-compose.yml)"
+services-up: ## Start application services (infrastructure + microservices)
+	@echo "⚙️ Starting application services..."
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml up -d
+	@echo "✅ Application services started"
+	@echo "🔗 Gateway:         http://localhost:8081"
+	@echo "🏓 Ping Service:    http://localhost:8082"
+	@echo "👥 Members Service: http://localhost:8083"
+	@echo "🐎 Horses Service:  http://localhost:8084"
+	@echo "🎯 Events Service:  http://localhost:8085"
+	@echo "📊 Master Service:  http://localhost:8086"
 
-services-down: ## Stop application services (simplified)
-	$(COMPOSE) -f docker-compose.yml down
+services-down: ## Stop application services
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml down
 
 services-restart: ## Restart application services
 	@$(MAKE) services-down
 	@$(MAKE) services-up
 
-services-logs: ## Show application services logs (simplified)
-	$(COMPOSE) -f docker-compose.yml logs -f
+services-logs: ## Show application services logs
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml logs -f
 
-clients-up: ## Start client applications (simplified using base compose)
-	@echo "💻 Starting client applications (simplified)..."
-	$(COMPOSE) -f docker-compose.yml up -d
-	@echo "✅ Client applications started (docker-compose.yml)"
+clients-up: ## Start client applications (infrastructure + clients)
+	@echo "💻 Starting client applications..."
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.clients.yml up -d
+	@echo "✅ Client applications started"
+	@echo "🌐 Web App:         http://localhost:3000"
+	@echo "🔐 Auth Server:     http://localhost:8087"
+	@echo "📈 Monitoring:      http://localhost:8088"
 
-clients-down: ## Stop client applications (simplified)
-	$(COMPOSE) -f docker-compose.yml down
+clients-down: ## Stop client applications
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.clients.yml down
 
 clients-restart: ## Restart client applications
 	@$(MAKE) clients-down
 	@$(MAKE) clients-up
 
-clients-logs: ## Show client application logs (simplified)
-	$(COMPOSE) -f docker-compose.yml logs -f
+clients-logs: ## Show client application logs
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.clients.yml logs -f
+
+# ===================================================================
+# Full System Commands
+# ===================================================================
+
+full-up: ## Start complete system (infrastructure + services + clients)
+	@echo "🚀 Starting complete Meldestelle system..."
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml up -d
+	@echo "✅ Complete system started"
+	@echo ""
+	@echo "🌐 Frontend & APIs:"
+	@echo "   Web App:         http://localhost:3000"
+	@echo "   API Gateway:     http://localhost:8081"
+	@echo ""
+	@echo "🔧 Infrastructure:"
+	@echo "   PostgreSQL:      localhost:5432"
+	@echo "   Redis:           localhost:6379"
+	@echo "   Keycloak:        http://localhost:8180"
+	@echo "   Consul:          http://localhost:8500"
+	@echo "   Prometheus:      http://localhost:9090"
+	@echo "   Grafana:         http://localhost:3000"
+	@echo ""
+	@echo "⚙️  Microservices:"
+	@echo "   Ping Service:    http://localhost:8082"
+	@echo "   Members Service: http://localhost:8083"
+	@echo "   Horses Service:  http://localhost:8084"
+	@echo "   Events Service:  http://localhost:8085"
+	@echo "   Master Service:  http://localhost:8086"
+	@echo "   Auth Server:     http://localhost:8087"
+	@echo "   Monitoring:      http://localhost:8088"
+
+full-down: ## Stop complete system
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml down
+
+full-restart: ## Restart complete system
+	@$(MAKE) full-down
+	@$(MAKE) full-up
+
+full-logs: ## Show all system logs
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml logs -f
+
+# ===================================================================
+# Environment Configuration Commands
+# ===================================================================
+
+env-setup: ## Show environment setup instructions
+	@echo "🔧 Umgebungskonfiguration - Environment Setup"
+	@echo "=============================================="
+	@echo ""
+	@echo "Verfügbare Umgebungen:"
+	@echo "  make env-dev      - Entwicklungsumgebung"
+	@echo "  make env-prod     - Produktionsumgebung"
+	@echo "  make env-staging  - Staging-Umgebung"
+	@echo "  make env-test     - Testumgebung"
+	@echo ""
+	@echo "Aktuelle Konfiguration:"
+	@ls -la .env 2>/dev/null || echo "  Keine .env Datei gefunden - führe 'make env-dev' aus"
+
+env-dev: ## Switch to development environment
+	@echo "🔧 Switching to development environment..."
+	@ln -sf config/.env.dev .env
+	@echo "✅ Development environment activated (.env -> config/.env.dev)"
+	@echo "Debug mode: enabled, CORS: permissive, Logging: verbose"
+
+env-prod: ## Switch to production environment
+	@echo "🔧 Switching to production environment..."
+	@ln -sf config/.env.prod .env
+	@echo "✅ Production environment activated (.env -> config/.env.prod)"
+	@echo "⚠️  WICHTIG: Überprüfen Sie alle CHANGE_ME Werte in .env!"
+
+env-staging: ## Switch to staging environment
+	@echo "🔧 Switching to staging environment..."
+	@ln -sf config/.env.staging .env
+	@echo "✅ Staging environment activated (.env -> config/.env.staging)"
+	@echo "Production-like settings with moderate resources"
+
+env-test: ## Switch to test environment
+	@echo "🔧 Switching to test environment..."
+	@ln -sf config/.env.test .env
+	@echo "✅ Test environment activated (.env -> config/.env.test)"
+	@echo "Optimized for automated testing with alternative ports"
 
 # ===================================================================
 # Production Commands
 # ===================================================================
 
-prod-up: ## Start production environment (simplified)
-	@echo "🚀 Starting production environment (simplified)..."
-	@echo "⚠️ Make sure environment variables are properly set!"
-	$(COMPOSE) -f docker-compose.yml up -d
-	@echo "✅ Production environment started (docker-compose.yml)"
+prod-up: ## Start production environment
+	@echo "🚀 Starting production environment..."
+	@echo "⚠️  Make sure environment variables are properly set!"
+	@if [ ! -f .env ]; then echo "❌ No .env file found! Run 'make env-prod' first."; exit 1; fi
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml up -d
+	@echo "✅ Production environment started"
 
-prod-down: ## Stop production environment (simplified)
-	$(COMPOSE) -f docker-compose.yml down
+prod-down: ## Stop production environment
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml down
 
 prod-restart: ## Restart production environment
 	@$(MAKE) prod-down

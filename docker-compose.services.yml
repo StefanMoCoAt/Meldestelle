@@ -1,0 +1,232 @@
+# ===================================================================
+# Docker Compose - Microservices
+# Meldestelle Project - Application Services
+# ===================================================================
+# Usage:
+#   Vollständiges System: docker-compose -f docker-compose.yml -f docker-compose.services.yml up -d
+# ===================================================================
+
+services:
+  # ===================================================================
+  # Ping Service (Health Check & Test Service)
+  # ===================================================================
+  ping-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/ping-service/Dockerfile
+    container_name: meldestelle-ping-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${PING_SERVICE_PORT:-8082}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USER: ${POSTGRES_USER:-meldestelle}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD: ${REDIS_PASSWORD:-}
+    ports:
+      - "${PING_SERVICE_PORT:-8082}:${PING_SERVICE_PORT:-8082}"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${PING_SERVICE_PORT:-8082}/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # ===================================================================
+  # Members Service
+  # ===================================================================
+  members-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/members-service/Dockerfile
+    container_name: meldestelle-members-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${MEMBERS_SERVICE_PORT:-8083}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USER: ${POSTGRES_USER:-meldestelle}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD: ${REDIS_PASSWORD:-}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    ports:
+      - "${MEMBERS_SERVICE_PORT:-8083}:${MEMBERS_SERVICE_PORT:-8083}"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${MEMBERS_SERVICE_PORT:-8083}/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # ===================================================================
+  # Horses Service
+  # ===================================================================
+  horses-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/horses-service/Dockerfile
+    container_name: meldestelle-horses-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${HORSES_SERVICE_PORT:-8084}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USER: ${POSTGRES_USER:-meldestelle}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD: ${REDIS_PASSWORD:-}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    ports:
+      - "${HORSES_SERVICE_PORT:-8084}:${HORSES_SERVICE_PORT:-8084}"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${HORSES_SERVICE_PORT:-8084}/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # ===================================================================
+  # Events Service
+  # ===================================================================
+  events-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/events-service/Dockerfile
+    container_name: meldestelle-events-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${EVENTS_SERVICE_PORT:-8085}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USER: ${POSTGRES_USER:-meldestelle}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD: ${REDIS_PASSWORD:-}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    ports:
+      - "${EVENTS_SERVICE_PORT:-8085}:${EVENTS_SERVICE_PORT:-8085}"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${EVENTS_SERVICE_PORT:-8085}/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  # ===================================================================
+  # Masterdata Service
+  # ===================================================================
+  masterdata-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/masterdata-service/Dockerfile
+    container_name: meldestelle-masterdata-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${MASTERDATA_SERVICE_PORT:-8086}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USER: ${POSTGRES_USER:-meldestelle}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD: ${REDIS_PASSWORD:-}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    ports:
+      - "${MASTERDATA_SERVICE_PORT:-8086}:${MASTERDATA_SERVICE_PORT:-8086}"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${MASTERDATA_SERVICE_PORT:-8086}/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+# ===================================================================
+# Networks (external reference to main network)
+# ===================================================================
+networks:
+  meldestelle-network:
+    external: true

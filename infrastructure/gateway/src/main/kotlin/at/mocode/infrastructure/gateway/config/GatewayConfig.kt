@@ -134,7 +134,7 @@ class EnhancedLoggingFilter : GlobalFilter, Ordered {
 class RateLimitingFilter : GlobalFilter, Ordered {
 
     private val requestCounts = ConcurrentHashMap<String, RequestCounter>()
-    private val logger = org.slf4j.LoggerFactory.getLogger(RateLimitingFilter::class.java)
+    private val logger = LoggerFactory.getLogger(RateLimitingFilter::class.java)
 
     // Timestamp der letzten Bereinigung
     @Volatile
@@ -169,7 +169,7 @@ class RateLimitingFilter : GlobalFilter, Ordered {
         val clientIp = getClientIp(request)
         val path = request.path.value()
 
-        // Periodische Bereinigung des Caches zur Vermeidung von Memory Leaks
+        // Periodische Bereinigung des Caches zur Vermeidung von memory Leaks
         performPeriodicCleanup()
 
         val limit = determineRateLimit(request, path)
@@ -219,17 +219,17 @@ class RateLimitingFilter : GlobalFilter, Ordered {
 
     private fun isAdminUser(request: ServerHttpRequest): Boolean {
         // Sichere Rollenvalidierung basierend auf JWT-Authentifizierung
-        // Die X-User-Role wird vom JwtAuthenticationFilter nach erfolgreicher JWT-Validierung gesetzt
+        // die X-User-Role wird vom JwtAuthenticationFilter nach erfolgreicher JWT-Validierung gesetzt
         val userRole = request.headers.getFirst("X-User-Role")
         val userId = request.headers.getFirst("X-User-ID")
 
-        // Zusätzliche Sicherheitsprüfung: Beide Header müssen vorhanden sein
+        // Zusätzliche Sicherheitsprüfung: Beide Header müssen vorhanden sein.
         // Dies reduziert die Wahrscheinlichkeit von Header-Spoofing
         return userRole == "ADMIN" && userId != null
     }
 
     /**
-     * Bereinigt alte Einträge aus dem requestCounts Cache zur Vermeidung von Memory Leaks.
+     * Bereinigt alte Einträge aus dem requestCounts Cache zur Vermeidung von memory Leaks.
      * Wird nur alle CLEANUP_INTERVAL_MS ausgeführt für bessere Performance.
      */
     private fun performPeriodicCleanup() {

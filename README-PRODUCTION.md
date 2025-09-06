@@ -60,16 +60,19 @@ cd Meldestelle
 ### 2. Produktionsumgebung konfigurieren
 
 ```bash
-# Kopieren Sie die Produktions-Umgebungsvariablen
-cp .env.prod.example .env.prod
+# Kopieren Sie die Produktions-Umgebungsvariablen aus dem config Verzeichnis
+cp config/.env.prod .env.prod
 
 # Bearbeiten Sie die Produktionskonfiguration
 nano .env.prod
+
+# Oder verwenden Sie einen Symlink für direkte Nutzung
+ln -sf config/.env.prod .env
 ```
 
 ### 3. SSL-Zertifikate einrichten
 
-Siehe [SSL Certificate Setup Guide](config/ssl/README.md) für detaillierte Anweisungen.
+Siehe [SSL-Zertifikat Setup Anleitung](config/ssl/README-de.md) für detaillierte Anweisungen.
 
 #### Schnellstart mit Let's Encrypt
 

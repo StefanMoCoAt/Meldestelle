@@ -250,6 +250,13 @@ management:
       enabled: true
     java:
       enabled: true
+  # Tracing-Konfiguration - Zipkin deaktiviert da kein Service verfügbar
+  tracing:
+    sampling:
+      probability: 0.0  # Deaktiviert Tracing komplett
+  zipkin:
+    tracing:
+      endpoint: ""  # Leer um Zipkin zu deaktivieren
 
 # Erweiterte Logging-Konfiguration
 logging:

@@ -94,11 +94,13 @@ class GatewayMetricsConfig {
 
     /**
      * Bean für Request Counter - ermöglicht Request-Volumen Tracking.
+     * Hinweis: Dieser Counter wird nur als Fallback registriert.
+     * Die tatsächlichen Requests werden mit dynamischen Tags im WebFilter erfasst.
      */
     @Bean
     fun requestCounter(meterRegistry: MeterRegistry): Counter {
-        return Counter.builder(GATEWAY_REQUESTS_COUNTER)
-            .description("Gesamtanzahl der Gateway-Requests")
+        return Counter.builder("${GATEWAY_REQUESTS_COUNTER}_fallback")
+            .description("Gateway-Requests Fallback Counter")
             .register(meterRegistry)
     }
 

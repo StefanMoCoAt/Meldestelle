@@ -7,79 +7,44 @@
 # configured for the Meldestelle application.
 # =============================================================================
 
-set -e
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Counters
-ERRORS=0
-WARNINGS=0
-CHECKS=0
-
-echo -e "${BLUE}==============================================================================${NC}"
-echo -e "${BLUE}Meldestelle - Environment Variables Validation${NC}"
-echo -e "${BLUE}==============================================================================${NC}"
-echo
-
-# Function to print status
-print_status() {
-    local status=$1
-    local message=$2
-
-    case $status in
-        "OK")
-            echo -e "${GREEN}✓${NC} $message"
-            ;;
-        "WARNING")
-            echo -e "${YELLOW}⚠${NC} $message"
-            ((WARNINGS++))
-            ;;
-        "ERROR")
-            echo -e "${RED}✗${NC} $message"
-            ((ERRORS++))
-            ;;
-        "INFO")
-            echo -e "${BLUE}ℹ${NC} $message"
-            ;;
-    esac
-    ((CHECKS++))
+# Load common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../utils/common.sh
+source "$SCRIPT_DIR/../utils/common.sh" || {
+    echo "Error: Could not load common utilities from $SCRIPT_DIR/../utils/common.sh"
+    exit 1
 }
 
+log_section "Meldestelle - Environment Variables Validation"
+
 # Check if .env file exists
-echo -e "${BLUE}1. Checking .env file...${NC}"
+log_info "1. Checking .env file..."
 if [ -f ".env" ]; then
-    print_status "OK" ".env file exists"
+    log_success ".env file exists"
 
     # Load .env file
     set -a
     source .env
     set +a
 
-    print_status "OK" ".env file loaded successfully"
+    log_success ".env file loaded successfully"
 else
-    print_status "ERROR" ".env file not found"
-    echo -e "${RED}Please create a .env file based on the documentation.${NC}"
+    log_error ".env file not found"
+    log_error "Please create a .env file based on the documentation."
     exit 1
 fi
-echo
 
 # Check if docker-compose.yml exists
-echo -e "${BLUE}2. Checking docker-compose.yml file...${NC}"
+log_info "2. Checking docker-compose.yml file..."
 if [ -f "docker-compose.yml" ]; then
     print_status "OK" "docker-compose.yml file exists"
 else
-    print_status "ERROR" "docker-compose.yml file not found"
+    log_error "docker-compose.yml file not found"
     exit 1
 fi
-echo
 
 # Define required environment variables
-echo -e "${BLUE}3. Checking required environment variables...${NC}"
+log_info "3. Checking required environment variables..."
 
 # Application Configuration
 check_var() {
@@ -89,11 +54,11 @@ check_var() {
     local description=$3
 
     if [ -n "$var_value" ]; then
-        print_status "OK" "$var_name is set: '$var_value'"
+        log_success "$var_name is set: '$var_value'"
     elif [ "$is_required" = true ]; then
-        print_status "ERROR" "$var_name is required but not set ($description)"
+        log_error "$var_name is required but not set ($description)"
     else
-        print_status "WARNING" "$var_name is not set ($description)"
+        log_warning "$var_name is not set ($description)"
     fi
 }
 
