@@ -20,7 +20,7 @@ class PingServiceCircuitBreaker {
 
     companion object {
         const val PING_CIRCUIT_BREAKER = "pingCircuitBreaker"
-        private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        private val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME //.ofPattern("yyyy-MM-dd HH:mm:ss")
     }
 
     /**
@@ -38,7 +38,7 @@ class PingServiceCircuitBreaker {
             throw RuntimeException("Simulated service failure")
         }
 
-        val currentTime = LocalDateTime.now().format(formatter)
+        val currentTime = LocalDateTime.now().atOffset(java.time.ZoneOffset.UTC).format(formatter)
         logger.info("Ping service call successful")
 
         return mapOf(
@@ -57,9 +57,11 @@ class PingServiceCircuitBreaker {
      * @return Map containing fallback response
      */
     fun fallbackPing(simulateFailure: Boolean = false, exception: Exception): Map<String, Any> {
-        logger.warn("Circuit breaker fallback triggered due to: {}", exception.message)
+        // Die volle Exception nur loggen, nicht an den Client weitergeben.
+        logger.warn("Circuit breaker fallback triggered due to: {}", exception.toString())
 
-        val currentTime = LocalDateTime.now().format(formatter)
+        val currentTime = LocalDateTime.now().atOffset(java.time.ZoneOffset.UTC).format(formatter)
+        val correlatedId = java.util.UUID.randomUUID().toString()
 
         return mapOf(
             "status" to "fallback",
@@ -67,7 +69,7 @@ class PingServiceCircuitBreaker {
             "timestamp" to currentTime,
             "service" to "ping-service-fallback",
             "circuitBreaker" to "OPEN",
-            "error" to (exception.message ?: "Unknown error")
+            "error" to correlatedId // Diese ID kann für Support-Anfragen genutzt werden.
         )
     }
 
