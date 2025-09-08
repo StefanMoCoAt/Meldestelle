@@ -28,7 +28,7 @@ services:
       test: [ "CMD-SHELL", "pg_isready -U meldestelle -d meldestelle" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 3
       start_period: 20s
     restart: unless-stopped
 
@@ -50,7 +50,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 20s
     restart: unless-stopped
 
   # ===================================================================
@@ -80,8 +80,8 @@ services:
       test: [ "CMD", "curl", "--fail", "http://localhost:8080/health/ready" ]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 30s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
 
   # ===================================================================
@@ -100,7 +100,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 15s
+      start_period: 20s
     restart: unless-stopped
 
   # ===================================================================
@@ -121,7 +121,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 15s
+      start_period: 20s
     restart: unless-stopped
 
   kafka:
@@ -146,7 +146,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 30s
+      start_period: 20s
     restart: unless-stopped
 
   # ===================================================================
@@ -199,7 +199,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 30s
+      start_period: 20s
     restart: unless-stopped
 
   # ===================================================================
@@ -228,10 +228,10 @@ services:
     networks:
       - meldestelle-network
     healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://localhost:8080/actuator/health" ]
-      interval: 10s
+      test: [ "CMD", "curl", "--fail", "http://localhost:${GATEWAY_PORT:-8081}/actuator/health" ]
+      interval: 15s
       timeout: 5s
-      retries: 5
+      retries: 3
       start_period: 30s
     restart: unless-stopped
 

@@ -90,42 +90,39 @@ COPY --from=builder --chown=${APP_USER}:${APP_GROUP} \
 USER ${APP_USER}
 
 # Expose monitoring-server port and debug port
-EXPOSE 8083 5005
+EXPOSE 8088 5005
 
 # Enhanced health check for monitoring service
-HEALTHCHECK --interval=10s --timeout=5s --start-period=45s --retries=3 \
-    CMD curl -fsS --max-time 3 http://localhost:8083/actuator/health/readiness || exit 1
+HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -fsS --max-time 3 http://localhost:8088/actuator/health/readiness || exit 1
 
-# Optimized JVM settings for monitoring workloads
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
+# Optimized JVM settings for monitoring workloads (aligned with service standards)
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -XX:+UseG1GC \
     -XX:+UseStringDeduplication \
     -XX:+UseContainerSupport \
-    -XX:G1HeapRegionSize=8m \
+    -XX:G1HeapRegionSize=16m \
     -XX:+OptimizeStringConcat \
     -XX:+UseCompressedOops \
-    -XX:MaxMetaspaceSize=256m \
     -Djava.security.egd=file:/dev/./urandom \
     -Djava.awt.headless=true \
     -Dfile.encoding=UTF-8 \
     -Duser.timezone=Europe/Vienna \
-    -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus,env,configprops,beans"
+    -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus"
 
 # Monitoring-server specific Spring Boot configuration
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
     SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
-    SERVER_PORT=8083 \
-    MANAGEMENT_SERVER_PORT=8083 \
-    MANAGEMENT_ENDPOINTS_WEB_BASE_PATH=/actuator \
+    SERVER_PORT=8088 \
+    MANAGEMENT_SERVER_PORT=8088 \
     LOGGING_LEVEL_ROOT=INFO \
-    LOGGING_LEVEL_AT_MOCODE=DEBUG \
-    LOGGING_LEVEL_MICROMETER=DEBUG
+    LOGGING_LEVEL_AT_MOCODE=DEBUG
 
 # Monitoring-focused startup command with debug support
 ENTRYPOINT ["sh", "-c", "\
-    echo 'Starting Meldestelle Monitoring Server on port 8083...'; \
-    echo 'Metrics endpoint: http://localhost:8083/actuator/metrics'; \
-    echo 'Prometheus endpoint: http://localhost:8083/actuator/prometheus'; \
+    echo 'Starting Meldestelle Monitoring Server on port 8088...'; \
+    echo 'Metrics endpoint: http://localhost:8088/actuator/metrics'; \
+    echo 'Prometheus endpoint: http://localhost:8088/actuator/prometheus'; \
     if [ \"${DEBUG:-false}\" = \"true\" ]; then \
         echo 'Debug mode enabled on port 5005'; \
         exec java $JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar app.jar; \

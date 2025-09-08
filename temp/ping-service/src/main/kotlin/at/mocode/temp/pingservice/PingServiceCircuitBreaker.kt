@@ -83,9 +83,10 @@ class PingServiceCircuitBreaker {
         // Health check is now deterministic for reliable integration testing
         // Random failures were causing intermittent test failures
 
+        val currentTime = LocalDateTime.now().atOffset(java.time.ZoneOffset.UTC).format(formatter)
         return mapOf(
             "status" to "UP",
-            "timestamp" to LocalDateTime.now().format(formatter),
+            "timestamp" to currentTime,
             "circuitBreaker" to "CLOSED"
         )
     }
@@ -96,10 +97,11 @@ class PingServiceCircuitBreaker {
     fun fallbackHealth(exception: Exception): Map<String, Any> {
         logger.warn("Health check fallback triggered: {}", exception.message)
 
+        val currentTime = LocalDateTime.now().atOffset(java.time.ZoneOffset.UTC).format(formatter)
         return mapOf(
             "status" to "DOWN",
             "message" to "Health check temporarily unavailable",
-            "timestamp" to LocalDateTime.now().format(formatter),
+            "timestamp" to currentTime,
             "circuitBreaker" to "OPEN"
         )
     }

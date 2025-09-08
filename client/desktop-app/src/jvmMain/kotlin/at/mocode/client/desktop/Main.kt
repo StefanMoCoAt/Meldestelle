@@ -20,6 +20,6 @@ fun main() = application {
     ) {
         // Use the shared App component from common-ui
         // This eliminates code duplication and ensures consistent UI across platforms
-        App(baseUrl = System.getProperty("meldestelle.api.url", "http://localhost:8080"))
+        App(baseUrl = System.getProperty("meldestelle.api.url", "http://localhost:8081"))
     }
 }

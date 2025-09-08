@@ -81,10 +81,10 @@ services:
       - meldestelle-network
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:${AUTH_SERVICE_PORT:-8087}/actuator/health"]
-      interval: 15s
-      timeout: 5s
+      interval: 30s
+      timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 60s
     restart: unless-stopped
 
   # ===================================================================
@@ -115,7 +115,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 45s
+      start_period: 60s
     restart: unless-stopped
     volumes:
       - monitoring-data:/app/data
@@ -129,8 +129,8 @@ volumes:
     driver: local
 
 # ===================================================================
-# Networks (external reference to main network)
+# Networks (shared network from main compose file)
 # ===================================================================
 networks:
   meldestelle-network:
-    external: true
+    external: false

@@ -59,15 +59,24 @@ object AppStylesheet : StyleSheet() {
         property("transition", "all 0.2s ease")
         width(100.percent)
         marginBottom(20.px)
+
+        // Improved focus management using property
+        property("&:focus", "outline: 2px solid #1976d2; outline-offset: 2px; box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);")
+
+        // Enhanced active state
+        property("&:active", "transform: scale(0.98);")
     }
 
     val buttonHover by style {
         transform { scale(1.02) }
+        property("box-shadow", "0 2px 8px rgba(0, 0, 0, 0.15)")
     }
 
     val buttonDisabled by style {
         opacity(0.6)
         cursor("not-allowed")
+        property("transform", "none")
+        property("box-shadow", "none")
     }
 
     val primaryButton by style {
@@ -76,7 +85,11 @@ object AppStylesheet : StyleSheet() {
 
         hover(self) style {
             backgroundColor(Color("#1565c0"))
+            property("box-shadow", "0 4px 12px rgba(25, 118, 210, 0.3)")
         }
+
+        // Using property for disabled state
+        property("&:disabled", "background-color: #bbbbbb; cursor: not-allowed;")
     }
 
     val successMessage by style {

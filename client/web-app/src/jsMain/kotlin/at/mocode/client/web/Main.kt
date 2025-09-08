@@ -76,19 +76,35 @@ fun MeldestelleWebApp() {
 
     Div(attrs = {
         classes(AppStylesheet.container)
+        attr("role", "application")
+        attr("aria-label", "Meldestelle Web Application")
     }) {
-        Header(attrs = { classes(AppStylesheet.header) }) {
-            H1 { Text("Meldestelle Web App") }
+        Header(attrs = {
+            classes(AppStylesheet.header)
+            attr("role", "banner")
+        }) {
+            H1(attrs = {
+                attr("id", "app-title")
+            }) {
+                Text("Meldestelle Web App")
+            }
         }
 
-        Main(attrs = { classes(AppStylesheet.main) }) {
+        Main(attrs = {
+            classes(AppStylesheet.main)
+            attr("role", "main")
+            attr("aria-labelledby", "app-title")
+        }) {
             PingTestWebView(
                 state = viewModel.uiState,
                 onTestConnection = { viewModel.pingBackend() }
             )
         }
 
-        Footer(attrs = { classes(AppStylesheet.footer) }) {
+        Footer(attrs = {
+            classes(AppStylesheet.footer)
+            attr("role", "contentinfo")
+        }) {
             P { Text("© 2025 Meldestelle - Powered by Kotlin Multiplatform") }
         }
     }
@@ -99,49 +115,83 @@ fun PingTestWebView(
     state: PingUiState,
     onTestConnection: () -> Unit
 ) {
-    Div(attrs = { classes(AppStylesheet.card) }) {
-        H2 { Text("Backend Verbindungstest") }
+    Div(attrs = {
+        classes(AppStylesheet.card)
+        attr("role", "region")
+        attr("aria-labelledby", "ping-test-title")
+    }) {
+        H2(attrs = {
+            attr("id", "ping-test-title")
+        }) {
+            Text("Backend Verbindungstest")
+        }
 
         Button(
             attrs = {
                 classes(AppStylesheet.button, AppStylesheet.primaryButton)
                 if (state is PingUiState.Loading) {
                     attr("disabled", "")
+                    attr("aria-disabled", "true")
                 }
+                attr("aria-describedby", "ping-status")
+                attr("type", "button")
                 onClick { onTestConnection() }
             }
         ) {
             if (state is PingUiState.Loading) {
-                Span(attrs = { classes(AppStylesheet.spinner) }) {}
+                Span(attrs = {
+                    classes(AppStylesheet.spinner)
+                    attr("aria-hidden", "true")
+                }) {}
                 Text(" Pinge Backend...")
             } else {
                 Text("Ping Backend")
             }
         }
 
-        // Status display with four distinct states
-        Div {
+        // Status display with four distinct states and proper announcements
+        Div(attrs = {
+            attr("id", "ping-status")
+            attr("role", "status")
+            attr("aria-live", "polite")
+            attr("aria-atomic", "true")
+        }) {
             when (state) {
                 is PingUiState.Initial -> {
-                    Div {
+                    Div(attrs = {
+                        attr("aria-label", "Bereit für Backend-Test")
+                    }) {
                         Text("Klicke auf den Button, um das Backend zu testen")
                     }
                 }
                 is PingUiState.Loading -> {
-                    Div {
-                        Span(attrs = { classes(AppStylesheet.spinner) }) {}
+                    Div(attrs = {
+                        attr("aria-label", "Backend wird getestet")
+                    }) {
+                        Span(attrs = {
+                            classes(AppStylesheet.spinner)
+                            attr("aria-hidden", "true")
+                        }) {}
                         Text(" Pinge Backend ...")
                     }
                 }
                 is PingUiState.Success -> {
-                    Div(attrs = { classes(AppStylesheet.successMessage) }) {
-                        Span { Text("✅ ") }
+                    Div(attrs = {
+                        classes(AppStylesheet.successMessage)
+                        attr("role", "alert")
+                        attr("aria-label", "Backend-Test erfolgreich")
+                    }) {
+                        Span(attrs = { attr("aria-hidden", "true") }) { Text("✅ ") }
                         Text("Antwort vom Backend: ${state.response.status}")
                     }
                 }
                 is PingUiState.Error -> {
-                    Div(attrs = { classes(AppStylesheet.errorMessage) }) {
-                        Span { Text("❌ ") }
+                    Div(attrs = {
+                        classes(AppStylesheet.errorMessage)
+                        attr("role", "alert")
+                        attr("aria-label", "Backend-Test fehlgeschlagen")
+                    }) {
+                        Span(attrs = { attr("aria-hidden", "true") }) { Text("❌ ") }
                         Text("Fehler: ${state.message}")
                     }
                 }

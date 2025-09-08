@@ -71,19 +71,26 @@ COPY --from=build --chown=gateway:gateway /workspace/build/dependency/applicatio
 # Logs-Verzeichnis erstellen
 RUN mkdir -p logs && chown gateway:gateway logs
 
-# JVM-Parameter für Container-Umgebung
-ENV JAVA_OPTS="-server -Xmx512m -Xms256m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
+# JVM-Parameter für Container-Umgebung (optimized for Java 21)
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
+    -XX:+UseG1GC \
+    -XX:+UseStringDeduplication \
+    -XX:+UseContainerSupport \
+    -Djava.security.egd=file:/dev/./urandom \
+    -Djava.awt.headless=true \
+    -Dfile.encoding=UTF-8 \
+    -Duser.timezone=Europe/Vienna"
 
-# Spring Profile und Port
-ENV SPRING_PROFILES_ACTIVE=prod
-ENV SERVER_PORT=8080
+# Spring Profile und Port (configurable)
+ENV SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
+ENV SERVER_PORT=${GATEWAY_PORT:-8081}
 
 # Health Check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8080/actuator/health || exit 1
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:${GATEWAY_PORT:-8081}/actuator/health || exit 1
 
 # Gateway Port exposieren
-EXPOSE 8080
+EXPOSE ${GATEWAY_PORT:-8081}
 
 # Anwendung starten
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher"]

@@ -80,7 +80,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      api-gateway:
+      kafka:
         condition: service_healthy
     networks:
       - meldestelle-network
@@ -124,7 +124,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      api-gateway:
+      kafka:
         condition: service_healthy
     networks:
       - meldestelle-network
@@ -168,7 +168,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      api-gateway:
+      kafka:
         condition: service_healthy
     networks:
       - meldestelle-network
@@ -212,7 +212,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      api-gateway:
+      kafka:
         condition: service_healthy
     networks:
       - meldestelle-network
@@ -225,8 +225,8 @@ services:
     restart: unless-stopped
 
 # ===================================================================
-# Networks (external reference to main network)
+# Networks (shared network from main compose file)
 # ===================================================================
 networks:
   meldestelle-network:
-    external: true
+    external: false
