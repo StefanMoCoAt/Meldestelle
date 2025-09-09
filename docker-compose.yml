@@ -67,7 +67,7 @@ services:
       KC_DB_USERNAME: ${POSTGRES_USER:-meldestelle}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
     ports:
-      - "8180:8080"
+      - "8180:8081"
     depends_on:
       postgres:
         condition: service_healthy
@@ -77,7 +77,7 @@ services:
     networks:
       - meldestelle-network
     healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://localhost:8080/health/ready" ]
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8081/" ]
       interval: 10s
       timeout: 5s
       retries: 3

@@ -3,9 +3,10 @@ spring:
     name: ping-service
   cloud:
     consul:
-      host: localhost
-      port: 8500
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
       discovery:
+        enabled: true
         register: true
         health-check-path: /actuator/health
         health-check-interval: 10s

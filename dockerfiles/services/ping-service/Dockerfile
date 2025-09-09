@@ -86,6 +86,11 @@ ARG VERSION=1.0.0
 ARG JAVA_VERSION=21
 ARG SPRING_PROFILES_ACTIVE=default
 
+# Convert build arguments to environment variables
+ENV JAVA_VERSION=${JAVA_VERSION} \
+    VERSION=${VERSION} \
+    BUILD_DATE=${BUILD_DATE}
+
 # Add comprehensive metadata
 LABEL service="ping-service" \
       version="${VERSION}" \
