@@ -1,0 +1,10 @@
+site:
+  title: "Meldestelle Kobweb Application"
+
+server:
+  files:
+    dev:
+      contentRoot: ".kobweb/server/dev"
+    prod:
+      contentRoot: ".kobweb/server/prod"
+      siteRoot: "/"

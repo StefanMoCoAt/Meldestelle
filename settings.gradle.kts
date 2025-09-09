@@ -12,6 +12,8 @@ pluginManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        maven("https://us-central1-maven.pkg.dev/varabyte-repos/public")
     }
 }
 plugins {
@@ -25,6 +27,8 @@ dependencyResolutionManagement {
         google()
         maven { url = uri("https://jitpack.io") }
         maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
+        maven { url = uri("https://us-central1-maven.pkg.dev/varabyte-repos/public") }
     }
 }
 
@@ -55,7 +59,7 @@ include(":temp:ping-service")
 
 // Client modules
 include(":client:common-ui")
-include(":client:web-app")
+include(":client:kobweb-app")
 include(":client:desktop-app")
 
 // Documentation module

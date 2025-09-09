@@ -9,7 +9,7 @@ Das **Client**-Modul stellt die vollständige Benutzeroberflächen-Lösung für 
 - 🏗️ **Moderne MVVM** - Umfassende Model-View-ViewModel-Architektur mit ordnungsgemäßer Zustandsverwaltung
 - 🧪 **Testabdeckung** - Produktionsbereit mit umfassenden Tests über alle Module
 - 🚀 **Optimiert** - Build- und Laufzeit-Optimierungen für Leistung und Entwicklererfahrung
-- 📱 **Progressive** - Web-App mit vollständigen PWA-Fähigkeiten für mobile und Desktop-Installation
+- 🌐 **Kobweb-Framework** - Moderne Web-Anwendung mit Kobweb-Framework für typsichere UI-Entwicklung
 
 ---
 
@@ -25,10 +25,11 @@ client/
 │   ├── src/jvmMain/                    # Desktop-spezifische Implementierung
 │   ├── src/jvmTest/                    # Desktop-Anwendungs-Tests
 │   └── README-CLIENT-DESKTOP-APP.md    # Detaillierte desktop-app Dokumentation
-├── web-app/                            # Progressive Web Application
-│   ├── src/jsMain/                     # Web-spezifische Implementierung mit PWA
-│   ├── src/jsTest/                     # JavaScript-kompatible Tests
-│   └── README-CLIENT-WEB-APP.md        # Detaillierte web-app Dokumentation
+├── kobweb-app/                         # Kobweb Web Application
+│   ├── src/jsMain/                     # Kobweb-spezifische Implementierung
+│   ├── .kobweb/conf.yaml               # Kobweb-Konfiguration
+│   └── pages/Index.kt                  # Hauptseite mit @Page-Annotation
+├── KOBWEB-MIGRATION-REPORT.md          # Migration von web-app zu kobweb-app
 └── README-CLIENT.md                    # Diese Übersichts-Dokumentation
 ```
 
@@ -44,8 +45,8 @@ Die Client-Architektur folgt einem geschichteten Ansatz mit maximaler Code-Wiede
 ┌─────────────────────────────────────────────────┐
 │                  Client-Apps                    │
 ├─────────────────┬───────────────────────────────┤
-│  Desktop-App    │         Web-App               │
-│  (JVM/Compose)  │    (Kotlin/JS + PWA)          │
+│  Desktop-App    │       Kobweb-App              │
+│  (JVM/Compose)  │   (Kobweb Framework)          │
 ├─────────────────┴───────────────────────────────┤
 │              Common-UI Modul                    │
 │         (Geteilte MVVM + Geschäftslogik)        │
@@ -91,16 +92,16 @@ Gemäß den trace-bullet-guideline.md Spezifikationen:
 ./gradlew :client:desktop-app:run                    # Desktop-App starten
 ./gradlew :client:desktop-app:jvmTest               # Desktop-Tests ausführen
 
-# 🌐 Web-Anwendung
-./gradlew :client:web-app:jsBrowserDevelopmentRun   # Web-Dev-Server starten
-./gradlew :client:web-app:jsTest                    # Web-Tests ausführen
+# 🌐 Kobweb-Anwendung
+./gradlew :client:kobweb-app:kobwebStart            # Kobweb-Dev-Server starten
+./gradlew :client:kobweb-app:build                  # Kobweb-App erstellen
 
 # 🧩 Common-UI Modul
 ./gradlew :client:common-ui:jvmTest                 # Geteilte Logik-Tests ausführen
 ./gradlew :client:common-ui:build                   # Geteiltes Modul erstellen
 
 # 🔄 Alle Client-Tests
-./gradlew :client:common-ui:jvmTest :client:desktop-app:jvmTest :client:web-app:jsTest
+./gradlew :client:common-ui:jvmTest :client:desktop-app:jvmTest :client:kobweb-app:build
 ```
 
 ---
@@ -113,7 +114,7 @@ Jedes Modul hat eine umfassende Dokumentation, die Architektur, Entwicklung, Tes
 
 - **[Common-UI Modul](common-ui/README-CLIENT-COMMON-UI.md)** - Geteilte MVVM-Architektur, Services und Geschäftslogik
 - **[Desktop-App Modul](desktop-app/README-CLIENT-DESKTOP-APP.md)** - Native Desktop-Anwendung mit plattformübergreifender Distribution
-- **[Web-App Modul](web-app/README-CLIENT-WEB-APP.md)** - Progressive Web Application mit modernen Web-Standards
+- **[Kobweb Migration Report](KOBWEB-MIGRATION-REPORT.md)** - Details zur Migration von web-app zu kobweb-app (Kobweb Framework)
 
 ### 🎯 Wichtige Dokumentations-Abschnitte
 
