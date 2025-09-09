@@ -3,7 +3,11 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("maven-publish")
 }
+
+group = "at.mocode.client"
+version = "1.0.0-SNAPSHOT"
 
 kotlin {
     jvm()
