@@ -61,6 +61,7 @@ include(":temp:ping-service")
 include(":client:common-ui")
 // kobweb-app is now an independent build with its own Gradle wrapper (8.14.2). See client/kobweb-app/README.md for details.
 //include(":client:kobweb-app")
+include(":client:web-app")
 include(":client:desktop-app")
 
 // Documentation module

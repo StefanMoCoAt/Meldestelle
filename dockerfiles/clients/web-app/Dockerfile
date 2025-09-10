@@ -1,169 +1,113 @@
-# ===================================================================
-# Dockerfile for Meldestelle Web Application
-# Based on kotlin-multiplatform-web template
-# ===================================================================
+# Multi-stage build for Meldestelle Compose for Web Application
+# Builds Kotlin/JS (Compose for Web) client and serves via Nginx
 
-# Build arguments
-ARG GRADLE_VERSION=8.14
-ARG JAVA_VERSION=21
-ARG NGINX_VERSION=alpine
-ARG NODE_VERSION=20.11.0
+# ===================================================================
+# Arguments (can be overridden during build)
+# ===================================================================
+ARG JVM_VERSION=21
+ARG GRADLE_VERSION=8.10
+ARG NODE_VERSION=18
+ARG NGINX_VERSION=1.25-alpine
 
-# Client-specific build arguments (parametrized for better maintainability)
+# ===================================================================
+# Build Arguments for Client Configuration
+# ===================================================================
 ARG CLIENT_PATH=client/web-app
 ARG CLIENT_MODULE=client:web-app
 
 # ===================================================================
-# Build Stage - Kotlin/JS Compilation
+# Build Stage - Kotlin/JS (Compose for Web) Compilation
 # ===================================================================
-FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS kotlin-builder
+FROM gradle:${GRADLE_VERSION}-jdk${JVM_VERSION} AS builder
 
-# Re-declare build arguments for kotlin-builder stage
 ARG CLIENT_PATH=client/web-app
 ARG CLIENT_MODULE=client:web-app
-ARG NODE_VERSION=20.11.0
 
-LABEL stage=kotlin-builder
+# Set working directory
+WORKDIR /build
+
+# Set build labels
 LABEL service=web-app
-LABEL maintainer="Meldestelle Development Team"
+LABEL stage=build
 
-WORKDIR /workspace
-
-# Install specific Node.js version for Kotlin/JS compatibility
-RUN apk add --no-cache wget ca-certificates && \
-    wget -q -O - https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64-musl.tar.xz | \
-    tar -xJ -C /usr/local --strip-components=1 && \
-    apk del wget ca-certificates && \
-    rm -rf /var/cache/apk/* && \
-    npm config set cache /tmp/.npm-cache && \
-    npm config set progress false && \
-    npm config set audit false
-
-# Gradle optimizations for Kotlin Multiplatform builds
-ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
-                 -Dorg.gradle.daemon=false \
-                 -Dorg.gradle.parallel=true \
-                 -Dorg.gradle.configureondemand=true \
-                 -Dorg.gradle.jvmargs=-Xmx3g \
-                 -Dkotlin.compiler.execution.strategy=in-process"
-
-# Kotlin/JS and Node.js environment variables
-ENV NODE_OPTIONS="--max-old-space-size=4096" \
-    NPM_CONFIG_CACHE="/tmp/.npm-cache" \
-    KOTLIN_JS_GENERATE_EXTERNALS=false
-
-# Copy build configuration files first for optimal Docker layer caching
-COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
+# Copy Gradle files first for better layer caching
 COPY gradle/ gradle/
+COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
 COPY build.gradle.kts ./
 
-# Copy platform and core dependencies (changes less frequently)
-COPY platform/ platform/
+# Copy version catalog
+COPY gradle/libs.versions.toml gradle/libs.versions.toml
+
+# Copy all source files needed for the build
+# Core and platform modules (dependencies)
 COPY core/ core/
+COPY platform/ platform/
 
-# Copy client modules in dependency order for optimal caching
-COPY client/common-ui/ client/common-ui/
-COPY ${CLIENT_PATH}/ ${CLIENT_PATH}/
+# Infrastructure modules (if needed)
+COPY infrastructure/ infrastructure/
 
-# Clear npm cache and verify Node.js installation
-RUN npm cache clean --force && \
-    node --version && npm --version
+# Client modules
+COPY client/ client/
 
-# Download and cache dependencies in a separate layer
-RUN ./gradlew :${CLIENT_MODULE}:dependencies --no-daemon --info --stacktrace
+# Copy any additional required directories
+COPY temp/ temp/
+COPY docs/ docs/
 
-# Build web application with production optimizations and better error handling
-RUN ./gradlew :${CLIENT_MODULE}:jsBrowserProductionWebpack --no-daemon --info --stacktrace --debug
+# Install Node.js for JavaScript toolchain
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
+    apt-get install -y nodejs
 
-# Verify build output
-RUN ls -la /workspace/${CLIENT_PATH}/build/dist/ || (echo "Build failed - no dist directory found" && exit 1)
+# Make Gradle wrapper executable
+RUN chmod +x gradlew
+
+# Build client application
+# For Compose for Web projects, jsBrowserDistribution produces static assets
+RUN echo "Building ${CLIENT_MODULE} module..." && \
+    ./gradlew ${CLIENT_MODULE}:jsBrowserDistribution --no-daemon --stacktrace --info
 
 # ===================================================================
-# Production Stage - Nginx serving
+# Production Stage - Nginx Static File Server
 # ===================================================================
-FROM nginx:${NGINX_VERSION} AS runtime
+FROM nginx:${NGINX_VERSION} AS production
 
-# Re-declare build arguments for runtime stage
 ARG CLIENT_PATH=client/web-app
-ARG CLIENT_MODULE=client:web-app
-ARG GRADLE_VERSION=8.14
-ARG JAVA_VERSION=21
-ARG NGINX_VERSION=alpine
 
-# Comprehensive metadata
+# Set production labels
 LABEL service="web-app" \
-      version="1.0.0" \
-      description="Meldestelle Web Application - Kotlin Multiplatform Client" \
-      maintainer="Meldestelle Development Team" \
-      build.gradle.version="${GRADLE_VERSION}" \
-      java.version="${JAVA_VERSION}" \
-      nginx.version="${NGINX_VERSION}"
+      environment="production" \
+      description="Meldestelle Compose for Web Application"
 
-# Security and system setup
-RUN apk update && \
-    apk upgrade && \
-    apk add --no-cache curl jq && \
-    rm -rf /var/cache/apk/*
+# Create nginx user if not exists and set permissions
+RUN addgroup -g 1001 -S nginx-group && \
+    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx-group -g nginx nginx-user
 
-# Remove default nginx content and logs
-RUN rm -rf /usr/share/nginx/html/* && \
-    rm -f /var/log/nginx/*.log
+# Copy built distribution files from builder stage
+COPY --from=builder /build/${CLIENT_PATH}/build/dist/js/productionExecutable/ /usr/share/nginx/html/
+COPY --from=builder /build/${CLIENT_PATH}/src/jsMain/resources/ /usr/share/nginx/html/
 
-# Copy built web application from builder stage
-COPY --from=kotlin-builder /workspace/${CLIENT_PATH}/build/dist/ /usr/share/nginx/html/
+# Copy custom nginx configuration
+COPY dockerfiles/clients/web-app/nginx.conf /etc/nginx/nginx.conf
 
-# Copy optimized nginx configuration
-COPY ${CLIENT_PATH}/nginx.conf /etc/nginx/nginx.conf
+# Create log directories and set permissions
+RUN mkdir -p /var/log/nginx && \
+    chown -R nginx-user:nginx-group /var/log/nginx && \
+    chown -R nginx-user:nginx-group /var/cache/nginx && \
+    chown -R nginx-user:nginx-group /usr/share/nginx/html
 
-# Set proper permissions for nginx
-RUN chown -R nginx:nginx /usr/share/nginx/html /var/cache/nginx /var/run /var/log/nginx && \
-    chmod -R 755 /usr/share/nginx/html
+# Health check endpoint
+RUN echo '{"status":"ok","service":"web-app"}' > /usr/share/nginx/html/health
 
-# Switch to nginx user for security
-USER nginx
+# Switch to non-root user
+USER nginx-user
 
-# Health check specifically for the web application
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+# Expose port
+EXPOSE 3000
 
-# Expose HTTP port
-EXPOSE 80
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl --fail http://localhost:3000/health || exit 1
 
-# Start nginx with proper signal handling for graceful shutdowns
-STOPSIGNAL SIGQUIT
-
-# Run nginx in foreground with error handling
-CMD ["sh", "-c", "nginx -t && exec nginx -g 'daemon off;'"]
-
-# ===================================================================
-# Build and Usage Instructions
-# ===================================================================
-# Build with default parameters:
-#   docker build -t meldestelle/web-app:latest -f dockerfiles/clients/web-app/Dockerfile .
-#
-# Build with custom parameters:
-#   docker build -t meldestelle/web-app:latest \
-#     --build-arg NODE_VERSION=20.11.0 \
-#     --build-arg CLIENT_PATH=client/web-app \
-#     --build-arg CLIENT_MODULE=client:web-app \
-#     -f dockerfiles/clients/web-app/Dockerfile .
-#
-# Run standalone:
-#   docker run -p 3001:80 --name web-app meldestelle/web-app:latest
-#
-# Run with API backend:
-#   docker run -p 3001:80 --link api-gateway:api-gateway --name web-app meldestelle/web-app:latest
-#
-# Access application:
-#   http://localhost:3001
-#   http://localhost:3001/health (health check)
-#
-# Development with hot-reload (use docker-compose.override.yml instead)
-#
-# Optimization improvements:
-# - Added Node.js v20.11.0 for optimal Kotlin/JS compatibility
-# - Parametrized build arguments for better maintainability
-# - Enhanced npm and Node.js environment variables
-# - Improved error handling with --stacktrace and --debug flags
-# - npm cache management for better performance
-# ===================================================================
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

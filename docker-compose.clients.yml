@@ -9,15 +9,15 @@
 
 services:
   # ===================================================================
-  # Web Application (Kotlin Multiplatform)
+  # Web Application (Compose for Web)
   # ===================================================================
   web-app:
     build:
       context: .
       dockerfile: dockerfiles/clients/web-app/Dockerfile
       args:
-        CLIENT_PATH: client/common-ui
-        CLIENT_MODULE: web-app
+        CLIENT_PATH: client/web-app
+        CLIENT_MODULE: client:web-app
         CLIENT_NAME: meldestelle-web-app
     container_name: meldestelle-web-app
     environment:
@@ -47,40 +47,6 @@ services:
       - "traefik.http.routers.web-app.rule=Host(`localhost`) && PathPrefix(`/`)"
       - "traefik.http.services.web-app.loadbalancer.server.port=3000"
 
-  # ===================================================================
-  # KobWeb Application (Kotlin/KobWeb)
-  # ===================================================================
-  kobweb-app:
-    build:
-      context: .
-      dockerfile: dockerfiles/clients/kobweb-app/Dockerfile
-      args:
-        CLIENT_PATH: client/kobweb-app
-        CLIENT_MODULE: client:kobweb-app
-    container_name: meldestelle-kobweb-app
-    environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      API_BASE_URL: http://api-gateway:${GATEWAY_PORT:-8081}
-      WS_URL: ws://api-gateway:${GATEWAY_PORT:-8081}/ws
-      APP_TITLE: ${APP_NAME:-Meldestelle KobWeb}
-      APP_VERSION: ${APP_VERSION:-1.0.0}
-    ports:
-      - "3001:80"
-    depends_on:
-      - api-gateway
-    networks:
-      - meldestelle-network
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.kobweb-app.rule=Host(`localhost`) && PathPrefix(`/kobweb`)"
-      - "traefik.http.services.kobweb-app.loadbalancer.server.port=80"
 
   # ===================================================================
   # Auth Server (Custom Keycloak Extension)
