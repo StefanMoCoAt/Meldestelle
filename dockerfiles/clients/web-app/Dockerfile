@@ -5,23 +5,22 @@
 # Arguments (can be overridden during build)
 # ===================================================================
 ARG JVM_VERSION=21
-ARG GRADLE_VERSION=8.10
-ARG NODE_VERSION=18
+ARG GRADLE_VERSION=9.0
 ARG NGINX_VERSION=1.25-alpine
 
 # ===================================================================
 # Build Arguments for Client Configuration
 # ===================================================================
-ARG CLIENT_PATH=client/web-app
-ARG CLIENT_MODULE=client:web-app
+ARG CLIENT_PATH=client
+ARG CLIENT_MODULE=client
 
 # ===================================================================
 # Build Stage - Kotlin/JS (Compose for Web) Compilation
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JVM_VERSION} AS builder
 
-ARG CLIENT_PATH=client/web-app
-ARG CLIENT_MODULE=client:web-app
+ARG CLIENT_PATH=client
+ARG CLIENT_MODULE=client
 
 # Set working directory
 WORKDIR /build
@@ -53,39 +52,34 @@ COPY client/ client/
 COPY temp/ temp/
 COPY docs/ docs/
 
-# Install Node.js for JavaScript toolchain
-RUN apt-get update && \
-    apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - && \
-    apt-get install -y nodejs
-
 # Make Gradle wrapper executable
 RUN chmod +x gradlew
 
 # Build client application
-# For Compose for Web projects, jsBrowserDistribution produces static assets
+# For Compose Multiplatform Web (WASM), wasmJsBrowserDistribution produces static assets
 RUN echo "Building ${CLIENT_MODULE} module..." && \
-    ./gradlew ${CLIENT_MODULE}:jsBrowserDistribution --no-daemon --stacktrace --info
+    ./gradlew ${CLIENT_MODULE}:wasmJsBrowserDistribution --no-daemon --stacktrace --info
 
 # ===================================================================
 # Production Stage - Nginx Static File Server
 # ===================================================================
 FROM nginx:${NGINX_VERSION} AS production
 
-ARG CLIENT_PATH=client/web-app
+ARG CLIENT_PATH=client
 
 # Set production labels
 LABEL service="web-app" \
       environment="production" \
       description="Meldestelle Compose for Web Application"
 
-# Create nginx user if not exists and set permissions
-RUN addgroup -g 1001 -S nginx-group && \
+# Install curl for health checks and create nginx user
+RUN apk add --no-cache curl && \
+    addgroup -g 1001 -S nginx-group && \
     adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx-group -g nginx nginx-user
 
-# Copy built distribution files from builder stage
-COPY --from=builder /build/${CLIENT_PATH}/build/dist/js/productionExecutable/ /usr/share/nginx/html/
-COPY --from=builder /build/${CLIENT_PATH}/src/jsMain/resources/ /usr/share/nginx/html/
+# Copy built distribution files from builder stage (WASM build output)
+COPY --from=builder /build/${CLIENT_PATH}/build/dist/wasmJs/productionExecutable/ /usr/share/nginx/html/
+COPY --from=builder /build/${CLIENT_PATH}/src/wasmJsMain/resources/ /usr/share/nginx/html/
 
 # Copy custom nginx configuration
 COPY dockerfiles/clients/web-app/nginx.conf /etc/nginx/nginx.conf

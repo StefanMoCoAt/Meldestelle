@@ -17,7 +17,7 @@ pluginManagement {
     }
 }
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 dependencyResolutionManagement {
@@ -58,17 +58,13 @@ include(":infrastructure:monitoring:monitoring-server")
 include(":temp:ping-service")
 
 // Client modules
-include(":client:common-ui")
-// kobweb-app is now an independent build with its own Gradle wrapper (8.14.2). See client/kobweb-app/README.md for details.
-//include(":client:kobweb-app")
-include(":client:web-app")
-include(":client:desktop-app")
+include(":client")
 
 // Documentation module
 include(":docs")
 
 /*
-// Temporär deaktivierte Fach-Module
+// Business modules (temporarily disabled - require multiplatform configuration updates)
 // Members modules
 include(":members:members-domain")
 include(":members:members-application")
@@ -97,5 +93,5 @@ include(":masterdata:masterdata-infrastructure")
 include(":masterdata:masterdata-api")
 include(":masterdata:masterdata-service")
 
-// Legacy modules have been removed after successful migration
- */
+// Note: These modules need multiplatform configuration updates to work with current KMP/WASM setup
+*/
