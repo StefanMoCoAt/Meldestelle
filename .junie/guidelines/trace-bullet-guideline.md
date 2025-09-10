@@ -3,6 +3,7 @@
 * **Zyklus-Start:** 15. August 2025
 * **Status:** In Arbeit
 * **Basis:** Diese Guideline erweitert die [Master-Guideline](./master-guideline.md)
+* **Frontend-Standard:** Alle Web-Frontend-Entwicklung erfolgt gemäß der [`web-app-guideline.md`](./web-app-guideline.md), die ab sofort der verbindliche Standard ist.
 
 ## 1. Ziel des Zyklus
 
@@ -33,17 +34,16 @@ Die folgenden Module und Aufgaben sind Teil dieses Zyklus:
 
 ### 2.3. Frontend-Infrastruktur (:client)
 
-* **Aufgabe:** Aufbau einer sauberen Grundstruktur für die Kotlin Multiplatform App nach dem **MVVM-Muster** und
-  Implementierung der **"Ping"**-Funktionalität.
+* **Aufgabe:** Aufbau einer sauberen Grundstruktur für die Kotlin Multiplatform App nach dem **MVVM-Muster** und Implementierung der **"Ping"**-Funktionalität. Die Umsetzung erfolgt mit **Compose for Web** gemäß der [`web-app-guideline.md`](./web-app-guideline.md).
 * **Status:** 🔳 In Arbeit.
 * **Spezifische Anforderungen & Test-Szenarien:**
-    * **UI-Komponenten:** Die UI muss einen Button ("Ping Backend") und ein Textfeld zur Statusanzeige enthalten.
+    * **UI-Komponenten:** Die UI muss einen Button ("Ping Backend") und ein Textfeld zur Statusanzeige enthalten, umgesetzt als `@Composable`-Funktionen.
         * **Zustands-Management:** Die UI muss vier Zustände klar und visuell unterscheidbar abbilden:
             1. **Initialzustand:** Neutrale Nachricht ("Klicke auf den Button …"), Button aktiv.
             2. **Ladezustand:** Lade-Nachricht ("Pinge Backend …"), Button deaktiviert.
             3. **Erfolgszustand:** Positive Antwort ("Antwort vom Backend: pong"), Button aktiv.
             4. **Fehlerzustand:** Klare Fehlermeldung ("Fehler: ..."), Button aktiv.
-        * **Architektur:** Der API-Aufruf muss nach dem **MVVM-Muster im :client:common-ui-Modul gekapselt sein.**
+        * **Architektur:** Der API-Aufruf muss nach dem **MVVM-Muster** gekapselt sein, wobei die UI (`jsMain`) das ViewModel aus `commonMain` konsumiert.
 
 ## 3. Spezifische Richtlinien für diesen Zyklus
 
@@ -64,9 +64,9 @@ Dieser Zyklus ist abgeschlossen, wenn **alle** der folgenden Kriterien erfüllt 
 * [x] Alle `:core` und `:infrastructure`-Module wurden überarbeitet, sind fehlerfrei testbar und ihre `README.md`
   -Dateien sind auf dem neuesten Stand.
 * [x] Der `:temp:ping-service` ist implementiert, getestet und lauffähig.
-* [x] Die `:client:web-app` ist mit einer sauberen MVVM-Struktur aufgesetzt und startet fehlerfrei.
+* [ ] Die `:client:web-app` ist mit einer sauberen MVVM-Struktur aufgesetzt, startet fehlerfrei und implementiert den Ping-Test mit **Compose for Web**.
 * [ ] **Der End-to-End "Tracer Bullet"-Test ist erfolgreich:**
-    * [ ] Alle Docker-Container (`docker-compose up`) starten.
+    * [ ] Alle Docker-Container (`docker-compose up`) starten fehlerfrei.
     * [ ] Der `gateway`-Service startet.
     * [ ] Der `ping-service` startet und registriert sich erfolgreich bei Consul.
     * [ ] Die `web-app` startet.
