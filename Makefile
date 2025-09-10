@@ -95,7 +95,7 @@ clients-up: ## Start client applications (infrastructure + clients)
 	@echo "💻 Starting client applications..."
 	$(COMPOSE) -f docker-compose.yml -f docker-compose.clients.yml up -d
 	@echo "✅ Client applications started"
-	@echo "🌐 Web App:         http://localhost:3000"
+	@echo "🌐 Web App:         http://localhost:4000"
 	@echo "🔐 Auth Server:     http://localhost:8087"
 	@echo "📈 Monitoring:      http://localhost:8088"
 
@@ -119,7 +119,7 @@ full-up: ## Start complete system (infrastructure + services + clients)
 	@echo "✅ Complete system started"
 	@echo ""
 	@echo "🌐 Frontend & APIs:"
-	@echo "   Web App:         http://localhost:3000"
+	@echo "   Web App:         http://localhost:4000"
 	@echo "   API Gateway:     http://localhost:8081"
 	@echo ""
 	@echo "🔧 Infrastructure:"

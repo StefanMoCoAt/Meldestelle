@@ -7,7 +7,7 @@
 # ===================================================================
 
 # Build arguments for flexibility
-ARG GRADLE_VERSION=8.14
+ARG GRADLE_VERSION=9.0.0
 ARG JAVA_VERSION=21
 ARG SPRING_PROFILES_ACTIVE=default
 ARG BUILD_DATE

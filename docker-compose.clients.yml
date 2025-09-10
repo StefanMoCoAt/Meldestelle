@@ -28,15 +28,15 @@ services:
       APP_VERSION: ${APP_VERSION:-1.0.0}
       # Development specific
       WEBPACK_DEV_SERVER_HOST: 0.0.0.0
-      WEBPACK_DEV_SERVER_PORT: 3000
+      WEBPACK_DEV_SERVER_PORT: 4000
     ports:
-      - "3000:3000"
+      - "4000:4000"
     depends_on:
       - api-gateway
     networks:
       - meldestelle-network
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:3000/health"]
+      test: ["CMD", "curl", "--fail", "http://localhost:4000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -45,7 +45,47 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.web-app.rule=Host(`localhost`) && PathPrefix(`/`)"
-      - "traefik.http.services.web-app.loadbalancer.server.port=3000"
+      - "traefik.http.services.web-app.loadbalancer.server.port=4000"
+
+  # ===================================================================
+  # Desktop Application (Compose Desktop with VNC)
+  # ===================================================================
+  desktop-app:
+    build:
+      context: .
+      dockerfile: dockerfiles/clients/desktop-app/Dockerfile
+      args:
+        CLIENT_PATH: client
+        CLIENT_MODULE: client
+        CLIENT_NAME: meldestelle-desktop-app
+    container_name: meldestelle-desktop-app
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      API_BASE_URL: http://api-gateway:${GATEWAY_PORT:-8081}
+      APP_TITLE: ${APP_NAME:-Meldestelle}
+      APP_VERSION: ${APP_VERSION:-1.0.0}
+      # VNC Configuration
+      DISPLAY: ":99"
+      VNC_PORT: "5901"
+      NOVNC_PORT: "6080"
+    ports:
+      - "6080:6080"  # Web-based VNC (noVNC)
+      - "5901:5901"  # VNC direct access
+    depends_on:
+      - api-gateway
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "/opt/health-check.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.desktop-app.rule=Host(`localhost`) && PathPrefix(`/desktop`)"
+      - "traefik.http.services.desktop-app.loadbalancer.server.port=6080"
 
 
   # ===================================================================

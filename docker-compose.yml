@@ -214,7 +214,7 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       CONSUL_HOST: consul
       CONSUL_PORT: ${CONSUL_PORT:-8500}
-      CONSUL_ENABLED: true
+      CONSUL_ENABLED: "true"
       GATEWAY_PORT: ${GATEWAY_PORT:-8081}
     ports:
       - "${GATEWAY_PORT:-8081}:${GATEWAY_PORT:-8081}"
@@ -235,6 +235,46 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  # ===================================================================
+  # Ping Service (Health Check & Test Service)
+  # ===================================================================
+  ping-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/ping-service/Dockerfile
+    container_name: meldestelle-ping-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${PING_SERVICE_PORT:-8082}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: true
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USER: ${POSTGRES_USER:-meldestelle}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD: ${REDIS_PASSWORD:-}
+    ports:
+      - "${PING_SERVICE_PORT:-8082}:${PING_SERVICE_PORT:-8082}"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${PING_SERVICE_PORT:-8082}/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
 
 # ===================================================================
 # Volumes

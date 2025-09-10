@@ -28,7 +28,7 @@ Das Meldestelle-Projekt nutzt eine modulare Docker-Compose-Struktur für verschi
 - **Masterdata Service** (Port 8086) - Stammdaten
 
 ### Client-Anwendungen (docker-compose.clients.yml)
-- **Web Application** (Port 3000) - Kotlin Multiplatform Frontend
+- **Web Application** (Port 4000) - Kotlin Multiplatform Frontend
 - **Auth Server** (Port 8087) - Erweiterte Authentifizierung
 - **Monitoring Server** (Port 8088) - Monitoring-Erweiterungen
 
