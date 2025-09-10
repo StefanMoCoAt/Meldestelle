@@ -11,10 +11,15 @@ kotlin {
     js(IR) {
         browser {
             commonWebpackConfig {
+//                devServer = devServer?.copy(
+//                    port = 8080,
+//                    static = mutableListOf("src/jsMain/resources")
+//                )
                 devServer = devServer?.copy(
                     port = 8080,
-                    static = mutableListOf("src/jsMain/resources")
+                    static = mutableListOf(project.projectDir.resolve("src/jsMain/resources").path)
                 )
+
 
                 // Webpack optimization settings
                 configDirectory = project.projectDir.resolve("webpack.config.d")

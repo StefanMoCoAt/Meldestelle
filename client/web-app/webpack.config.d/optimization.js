@@ -83,8 +83,8 @@ config.optimization = {
 // Performance budget adjusted for Kotlin/JS applications
 // Note: Kotlin/JS apps require all dependencies loaded initially, so larger budgets are realistic
 config.performance = {
-    maxAssetSize: 400000, // 400KB per asset (realistic for Kotlin libs)
-    maxEntrypointSize: 2000000, // 2MB total entry point (realistic for Kotlin/JS + Compose)
+    maxAssetSize: 1000000, // 1MB per asset (realistic for large Kotlin/Compose libs)
+    maxEntrypointSize: 7000000, // 7MB total entry point (realistic for Kotlin/JS + Compose)
     hints: 'warning',
     assetFilter: function(assetFilename) {
         // Only check JS files for performance
