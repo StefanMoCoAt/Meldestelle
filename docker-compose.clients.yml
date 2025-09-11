@@ -99,7 +99,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       SERVER_PORT: ${AUTH_SERVICE_PORT:-8087}
-      KEYCLOAK_SERVER_URL: http://keycloak:8081
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
       KEYCLOAK_REALM: meldestelle
       KEYCLOAK_CLIENT_ID: meldestelle-auth-service
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-auth-service-secret}
@@ -174,4 +174,4 @@ volumes:
 # ===================================================================
 networks:
   meldestelle-network:
-    external: false
+    external: true

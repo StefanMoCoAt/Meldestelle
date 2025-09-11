@@ -18,6 +18,10 @@ TIMEOUT_SECONDS=300
 HEALTH_CHECK_INTERVAL=10
 MAX_RETRIES=30
 
+# NEU: Alle Compose-Dateien zentral definieren
+COMPOSE_FILES="-f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml"
+
+
 # Logging functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -45,7 +49,9 @@ wait_for_health_check() {
     log_info "Waiting for $service_name health check at $health_url"
 
     while [ $attempt -le $max_attempts ]; do
-        if curl -f -s --max-time 5 "$health_url" > /dev/null 2>&1; then
+        # ALT: if curl -f -s --max-time 5 "$health_url" > /dev/null 2>&1; then
+        # NEU: Die Option -L wurde hinzugefügt, um HTTP-Redirects zu folgen.
+        if curl -f -s -L --max-time 5 "$health_url" > /dev/null 2>&1; then
             log_success "$service_name is healthy (attempt $attempt/$max_attempts)"
             return 0
         fi
@@ -79,83 +85,34 @@ check_service_logs() {
 }
 
 # Function to test infrastructure services
-test_infrastructure_services() {
+test_all_services() {
     log_info "========================================="
-    log_info "Testing Infrastructure Services"
+    log_info "Starting All Meldestelle Services"
     log_info "========================================="
 
-    # Start infrastructure services
-    log_info "Starting infrastructure services..."
-    # Use docker directly since docker-compose has system issues
-    log_info "Note: Using docker run directly due to docker-compose system issues"
-
-    # Create network if it doesn't exist
-    docker network create meldestelle-network 2>/dev/null || true
-
-    # Start PostgreSQL
-    docker run -d --name meldestelle-postgres \
-        --network meldestelle-network \
-        -e POSTGRES_USER=meldestelle \
-        -e POSTGRES_PASSWORD=meldestelle \
-        -e POSTGRES_DB=meldestelle \
-        -p 5432:5432 \
-        postgres:16-alpine 2>/dev/null || log_info "PostgreSQL container already exists"
-
-    # Start Redis
-    docker run -d --name meldestelle-redis \
-        --network meldestelle-network \
-        -p 6379:6379 \
-        redis:7-alpine redis-server --appendonly yes 2>/dev/null || log_info "Redis container already exists"
-
-    # Start Consul
-    docker run -d --name meldestelle-consul \
-        --network meldestelle-network \
-        -p 8500:8500 \
-        hashicorp/consul:1.15 agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0 2>/dev/null || log_info "Consul container already exists"
-
-    # Start Prometheus
-    docker run -d --name meldestelle-prometheus \
-        --network meldestelle-network \
-        -p 9090:9090 \
-        prom/prometheus:v2.47.0 \
-        --config.file=/etc/prometheus/prometheus.yml \
-        --storage.tsdb.path=/prometheus \
-        --web.console.libraries=/etc/prometheus/console_libraries \
-        --web.console.templates=/etc/prometheus/consoles \
-        --storage.tsdb.retention.time=200h \
-        --web.enable-lifecycle 2>/dev/null || log_info "Prometheus container already exists"
-
-    # Start Grafana
-    docker run -d --name meldestelle-grafana \
-        --network meldestelle-network \
-        -p 3000:3000 \
-        -e GF_SECURITY_ADMIN_USER=admin \
-        -e GF_SECURITY_ADMIN_PASSWORD=admin \
-        grafana/grafana:10.1.0 2>/dev/null || log_info "Grafana container already exists"
-
-    # Start Keycloak
-    docker run -d --name meldestelle-keycloak \
-        --network meldestelle-network \
-        -p 8180:8080 \
-        -e KEYCLOAK_ADMIN=admin \
-        -e KEYCLOAK_ADMIN_PASSWORD=admin \
-        quay.io/keycloak/keycloak:23.0 start-dev 2>/dev/null || log_info "Keycloak container already exists"
+    # Start ALL services using all compose files
+    log_info "Starting full environment with docker-compose..."
+    # ALT: docker compose up -d
+    docker compose $COMPOSE_FILES up -d
 
     # Give services time to initialize
-    log_info "Waiting 30 seconds for services to initialize..."
-    sleep 30
+    log_info "Waiting 45 seconds for services to initialize..."
+    sleep 45
 
-    # Wait for services to be ready
-    local services=(
+    # =========================================
+    # CHECK INFRASTRUCTURE
+    # =========================================
+    log_info "--- Checking Infrastructure Services ---"
+    local infra_services=(
         "postgres:http://localhost:5432:PostgreSQL"
         "redis:redis://localhost:6379:Redis"
         "consul:http://localhost:8500/v1/status/leader:Consul"
         "prometheus:http://localhost:9090/-/healthy:Prometheus"
         "grafana:http://localhost:3000/api/health:Grafana"
-        "keycloak:http://localhost:8180/health/ready:Keycloak"
+        "keycloak:http://localhost:8180/:Keycloak"
     )
 
-    for service_info in "${services[@]}"; do
+    for service_info in "${infra_services[@]}"; do
         # Parse service info: service_name:health_url:description
         # Extract service name (everything before first colon)
         service_name=$(echo "$service_info" | cut -d':' -f1)
@@ -188,94 +145,57 @@ test_infrastructure_services() {
         else
             wait_for_health_check "$description" "$health_url" $MAX_RETRIES || return 1
         fi
-
         check_service_logs "$description" "meldestelle-$service_name"
     done
-
     log_success "All infrastructure services are healthy!"
-}
 
-# Function to test API Gateway
-test_api_gateway() {
-    log_info "========================================="
-    log_info "Testing API Gateway"
-    log_info "========================================="
-
-    # Start API Gateway
-    log_info "Starting API Gateway..."
-    docker-compose up -d api-gateway
-
-    # Wait for API Gateway to be ready
+    # =========================================
+    # CHECK API GATEWAY
+    # =========================================
+    log_info "--- Checking API Gateway ---"
     wait_for_health_check "API Gateway" "http://localhost:8081/actuator/health" $MAX_RETRIES || return 1
-
-    # Check specific actuator endpoints
-    local endpoints=("health" "info" "metrics")
-    for endpoint in "${endpoints[@]}"; do
-        local url="http://localhost:8081/actuator/$endpoint"
-        if curl -f -s --max-time 5 "$url" > /dev/null 2>&1; then
-            log_success "API Gateway $endpoint endpoint is accessible"
-        else
-            log_warning "API Gateway $endpoint endpoint is not accessible at $url"
-        fi
-    done
-
     check_service_logs "API Gateway" "meldestelle-api-gateway"
     log_success "API Gateway is healthy!"
-}
 
-# Function to test application services
-test_application_services() {
-    log_info "========================================="
-    log_info "Testing Application Services"
-    log_info "========================================="
-
-    # Start application services
-    log_info "Starting application services..."
-    docker-compose -f docker-compose.yml -f docker-compose.services.yml up -d
-
-    # Define application services with their health check URLs
+    # =========================================
+    # CHECK APPLICATION SERVICES
+    # =========================================
+    log_info "--- Checking Application Services ---"
     local app_services=(
         "ping-service:http://localhost:8082/actuator/health:Ping Service"
-        "members-service:http://localhost:8083/actuator/health:Members Service"
-        "horses-service:http://localhost:8084/actuator/health:Horses Service"
-        "events-service:http://localhost:8085/actuator/health:Events Service"
-        "masterdata-service:http://localhost:8086/actuator/health:Masterdata Service"
     )
+    # Note: Add other services like members-service here when they are enabled
 
     for service_info in "${app_services[@]}"; do
         IFS=':' read -r service_name health_url description <<< "$service_info"
         wait_for_health_check "$description" "$health_url" $MAX_RETRIES || return 1
         check_service_logs "$description" "meldestelle-$service_name"
     done
-
     log_success "All application services are healthy!"
-}
 
-# Function to test client services
-test_client_services() {
-    log_info "========================================="
-    log_info "Testing Client Services"
-    log_info "========================================="
-
-    # Start client services
-    log_info "Starting client services..."
-    docker-compose -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml up -d
-
-    # Define client services with their health check URLs
+    # =========================================
+    # CHECK CLIENT SERVICES
+    # =========================================
+    log_info "--- Checking Client Services ---"
     local client_services=(
-        "web-app:http://localhost:3000/health:Web Application"
+        "web-app:http://localhost:4000/health:Web Application"
         "auth-server:http://localhost:8087/actuator/health:Auth Server"
-        "monitoring-server:http://localhost:8088/actuator/health:Monitoring Server"
     )
+    # Note: Add other client services here when enabled
 
     for service_info in "${client_services[@]}"; do
-        IFS=':' read -r service_name health_url description <<< "$service_info"
+        # ... (parsing logic remains the same)
+        service_name=$(echo "$service_info" | cut -d':' -f1)
+        health_url=$(echo "$service_info" | cut -d':' -f2)
+        description=$(echo "$service_info" | cut -d':' -f3)
         wait_for_health_check "$description" "$health_url" $MAX_RETRIES || return 1
+        # Use the container name from docker-compose.clients.yml (e.g., meldestelle-web-app)
         check_service_logs "$description" "meldestelle-$service_name"
     done
-
     log_success "All client services are healthy!"
 }
+
+# ENTFERNT: test_api_gateway, test_application_services, test_client_services wurden in test_all_services integriert.
 
 # Function to test network connectivity
 test_network_connectivity() {
@@ -328,18 +248,21 @@ cleanup() {
     log_info "Cleaning up test environment"
     log_info "========================================="
 
-    log_info "Stopping and removing test containers..."
+    log_info "Stopping and removing all test containers..."
 
-    # Stop and remove containers if they exist
-    local containers=("meldestelle-postgres" "meldestelle-redis" "meldestelle-consul" "meldestelle-prometheus" "meldestelle-grafana" "meldestelle-keycloak" "meldestelle-api-gateway")
+    # Use the same files to tear down the environment
+    docker compose $COMPOSE_FILES down --remove-orphans -v
 
-    for container in "${containers[@]}"; do
-        if docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
-            log_info "Stopping and removing $container"
-            docker stop "$container" >/dev/null 2>&1 || true
-            docker rm "$container" >/dev/null 2>&1 || true
-        fi
-    done
+#    # Stop and remove containers if they exist
+#    local containers=("meldestelle-postgres" "meldestelle-redis" "meldestelle-consul" "meldestelle-prometheus" "meldestelle-grafana" "meldestelle-keycloak" "meldestelle-api-gateway")
+#
+#    for container in "${containers[@]}"; do
+#        if docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
+#            log_info "Stopping and removing $container"
+#            docker stop "$container" >/dev/null 2>&1 || true
+#            docker rm "$container" >/dev/null 2>&1 || true
+#        fi
+#    done
 
     # Remove network if it exists
     docker network rm meldestelle-network >/dev/null 2>&1 || true
@@ -357,10 +280,7 @@ main() {
     trap cleanup EXIT
 
     # Run tests in sequence
-    test_infrastructure_services || exit 1
-    test_api_gateway || exit 1
-    test_application_services || exit 1
-    test_client_services || exit 1
+    test_all_services || exit 1
     test_network_connectivity || exit 1
 
     # Generate report
@@ -374,17 +294,8 @@ main() {
 
 # Parse command line arguments
 case "${1:-}" in
-    "infrastructure")
-        test_infrastructure_services
-        ;;
-    "gateway")
-        test_api_gateway
-        ;;
-    "services")
-        test_application_services
-        ;;
-    "clients")
-        test_client_services
+    "all")
+        test_all_services
         ;;
     "network")
         test_network_connectivity

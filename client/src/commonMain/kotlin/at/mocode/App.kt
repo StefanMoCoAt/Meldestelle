@@ -84,7 +84,10 @@ fun App() {
                     coroutineScope.launch {
                         pingState = PingState.Loading
                         try {
-                            val response: PingResponse = httpClient.get("http://localhost:8082/ping").body()
+                            // Direkter Aufruf des Ping-Service
+                            //val response: PingResponse = httpClient.get("http://localhost:8082/ping").body()
+                            // NEU: Aufruf über das Gateway
+                            val response: PingResponse = httpClient.get("http://localhost:8081/api/ping").body()
                             pingState = PingState.Success(response)
                         } catch (e: Exception) {
                             pingState = PingState.Error(e.message ?: "Unknown error occurred")
@@ -136,6 +139,7 @@ fun App() {
                         }
                     }
                 }
+
                 is PingState.Error -> {
                     Card(
                         modifier = Modifier
@@ -158,6 +162,7 @@ fun App() {
                         }
                     }
                 }
+
                 else -> {
                     // Idle or Loading state - no additional display needed
                 }

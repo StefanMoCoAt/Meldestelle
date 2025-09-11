@@ -22,7 +22,7 @@ source "$SCRIPT_DIR/../utils/common.sh" || {
 
 readonly GATEWAY_MODULE="infrastructure:gateway"
 readonly GATEWAY_JAR="infrastructure/gateway/build/libs/gateway-1.0.0.jar"
-readonly GATEWAY_PORT="${GATEWAY_PORT:-8080}"
+readonly GATEWAY_PORT="${GATEWAY_PORT:-8081}"
 readonly GATEWAY_HOST="${GATEWAY_HOST:-localhost}"
 readonly GATEWAY_BASE_URL="http://${GATEWAY_HOST}:${GATEWAY_PORT}"
 
