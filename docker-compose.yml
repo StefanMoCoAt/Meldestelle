@@ -217,7 +217,7 @@ services:
       CONSUL_ENABLED: "true"
       GATEWAY_PORT: ${GATEWAY_PORT:-8081}
     ports:
-      - "${GATEWAY_PORT:-8081}:${GATEWAY_PORT:-8081}"
+      - "${GATEWAY_PORT:-8081}:8081"
     depends_on:
       consul:
         condition: service_healthy

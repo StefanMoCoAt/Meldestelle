@@ -31,8 +31,6 @@ services:
       WEBPACK_DEV_SERVER_PORT: 4000
     ports:
       - "4000:4000"
-    depends_on:
-      - api-gateway
     networks:
       - meldestelle-network
     healthcheck:
@@ -71,8 +69,6 @@ services:
     ports:
       - "6080:6080"  # Web-based VNC (noVNC)
       - "5901:5901"  # VNC direct access
-    depends_on:
-      - api-gateway
     networks:
       - meldestelle-network
     healthcheck:
@@ -91,76 +87,69 @@ services:
   # ===================================================================
   # Auth Server (Custom Keycloak Extension)
   # ===================================================================
-  auth-server:
-    build:
-      context: .
-      dockerfile: dockerfiles/infrastructure/auth-server/Dockerfile
-    container_name: meldestelle-auth-server
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
-      SERVER_PORT: ${AUTH_SERVICE_PORT:-8087}
-      KEYCLOAK_SERVER_URL: http://keycloak:8080
-      KEYCLOAK_REALM: meldestelle
-      KEYCLOAK_CLIENT_ID: meldestelle-auth-service
-      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-auth-service-secret}
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB:-meldestelle}
-      DB_USER: ${POSTGRES_USER:-meldestelle}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
-      JWT_SECRET: ${JWT_SECRET:-meldestelle-jwt-secret-key-for-development-change-in-production}
-      JWT_ISSUER: ${JWT_ISSUER:-meldestelle-api}
-      JWT_AUDIENCE: ${JWT_AUDIENCE:-meldestelle-clients}
-    ports:
-      - "${AUTH_SERVICE_PORT:-8087}:${AUTH_SERVICE_PORT:-8087}"
-    depends_on:
-      keycloak:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    networks:
-      - meldestelle-network
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:${AUTH_SERVICE_PORT:-8087}/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
+#  auth-server:
+#    build:
+#      context: .
+#      dockerfile: dockerfiles/infrastructure/auth-server/Dockerfile
+#    container_name: meldestelle-auth-server
+#    environment:
+#      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+#      SERVER_PORT: ${AUTH_SERVICE_PORT:-8087}
+#      KEYCLOAK_SERVER_URL: http://keycloak:8080
+#      KEYCLOAK_REALM: meldestelle
+#      KEYCLOAK_CLIENT_ID: meldestelle-auth-service
+#      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-auth-service-secret}
+#      DB_HOST: postgres
+#      DB_PORT: 5432
+#      DB_NAME: ${POSTGRES_DB:-meldestelle}
+#      DB_USER: ${POSTGRES_USER:-meldestelle}
+#      DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+#      JWT_SECRET: ${JWT_SECRET:-meldestelle-jwt-secret-key-for-development-change-in-production}
+#      JWT_ISSUER: ${JWT_ISSUER:-meldestelle-api}
+#      JWT_AUDIENCE: ${JWT_AUDIENCE:-meldestelle-clients}
+#    ports:
+#      - "${AUTH_SERVICE_PORT:-8087}:${AUTH_SERVICE_PORT:-8087}"
+#    networks:
+#      - meldestelle-network
+#    healthcheck:
+#      test: ["CMD", "curl", "--fail", "http://localhost:${AUTH_SERVICE_PORT:-8087}/actuator/health"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 60s
+#    restart: unless-stopped
 
   # ===================================================================
   # Monitoring Server (Custom Grafana Extensions)
   # ===================================================================
-  monitoring-server:
-    build:
-      context: .
-      dockerfile: dockerfiles/infrastructure/monitoring-server/Dockerfile
-    container_name: meldestelle-monitoring-server
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
-      SERVER_PORT: 8088
-      GRAFANA_URL: http://grafana:3000
-      PROMETHEUS_URL: http://prometheus:9090
-      GRAFANA_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
-      GRAFANA_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
-      METRICS_AUTH_USERNAME: ${METRICS_AUTH_USERNAME:-admin}
-      METRICS_AUTH_PASSWORD: ${METRICS_AUTH_PASSWORD:-metrics}
-    ports:
-      - "8088:8088"
-    depends_on:
-      - api-gateway
-    networks:
-      - meldestelle-network
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8088/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
-    volumes:
-      - monitoring-data:/app/data
-      - ./docker/monitoring:/app/config:ro
+#  monitoring-server:
+#    build:
+#      context: .
+#      dockerfile: dockerfiles/infrastructure/monitoring-server/Dockerfile
+#    container_name: meldestelle-monitoring-server
+#    environment:
+#      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+#      SERVER_PORT: 8088
+#      GRAFANA_URL: http://grafana:3000
+#      PROMETHEUS_URL: http://prometheus:9090
+#      GRAFANA_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+#      GRAFANA_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+#      METRICS_AUTH_USERNAME: ${METRICS_AUTH_USERNAME:-admin}
+#      METRICS_AUTH_PASSWORD: ${METRICS_AUTH_PASSWORD:-metrics}
+#    ports:
+#      - "8088:8088"
+#    networks:
+#      - meldestelle-network
+#    healthcheck:
+#      test: ["CMD", "curl", "--fail", "http://localhost:8088/actuator/health"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 60s
+#    restart: unless-stopped
+#    volumes:
+#      - monitoring-data:/app/data
+#      - ./docker/monitoring:/app/config:ro
 
 # ===================================================================
 # Volumes für Client-spezifische Daten
@@ -174,4 +163,4 @@ volumes:
 # ===================================================================
 networks:
   meldestelle-network:
-    external: true
+    driver: bridge

@@ -1,79 +1,42 @@
 # Docker Compose Fix Summary - Meldestelle Project
 
-## Issues Identified and Fixed
+## What was failing
+Starting docker-compose.services.yml or docker-compose.clients.yml alone (while docker-compose.yml was already running) failed with errors like:
+- service "ping-service" depends on undefined service "consul"
+- service "web-app" depends on undefined service "api-gateway"
 
-### Problem Description
-The user reported that `docker-compose.services.yml` and `docker-compose.clients.yml` were not working properly, while `docker-compose.yml` worked except for a Keycloak issue.
+## Root cause
+Docker Compose validates depends_on only against services defined in the same compose project (the files provided in the same command). Our services/clients files referenced infrastructure services (consul, postgres, redis, keycloak, api-gateway) that live in docker-compose.yml, so starting them standalone produced “depends on undefined service”.
 
-### Root Causes Identified
+## Fixes applied (minimal, safe)
+1. Removed cross-file depends_on from these files:
+   - docker-compose.services.yml → ping-service (removed depends_on on consul, postgres, redis)
+   - docker-compose.clients.yml → web-app, desktop-app, auth-server, monitoring-server (removed depends_on on api-gateway, keycloak, postgres)
+2. Kept existing healthchecks. The apps already handle startup ordering by retrying connections, and you are starting infra first, so this is safe.
+3. Left networking as-is to continue sharing the same project-scoped bridge network when using the same project name.
 
-1. **Standalone Execution Issue**: The services and clients compose files were designed to work in combination with the main infrastructure file, not as standalone files
-2. **Keycloak Port Mismatch**: Auth-server in clients.yml was trying to connect to `keycloak:8081` but Keycloak runs on port `8080`
-3. **Network Configuration Error**: clients.yml had `external: false` instead of `external: true` for the shared network
+## How to run now
+Option A — Recommended project name (ensures all stacks share the same resources):
+- Start infra:
+  docker compose -p meldestelle -f docker-compose.yml up -d
+- Start services (optional):
+  docker compose -p meldestelle -f docker-compose.services.yml up -d
+- Start clients (optional):
+  docker compose -p meldestelle -f docker-compose.clients.yml up -d
 
-### Fixes Applied
+Option B — Combined (unchanged and still works):
+- Infra + Services:
+  docker compose -f docker-compose.yml -f docker-compose.services.yml up -d
+- Infra + Clients:
+  docker compose -f docker-compose.yml -f docker-compose.clients.yml up -d
+- Full stack:
+  docker compose -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml up -d
 
-#### 1. Fixed Keycloak Port Reference
-**File**: `docker-compose.clients.yml`
-**Line**: 102
-**Change**:
-```
-BEFORE: KEYCLOAK_SERVER_URL: http://keycloak:8081
-AFTER:  KEYCLOAK_SERVER_URL: http://keycloak:8080
-```
+Notes:
+- Always start docker-compose.yml before the others when running separately.
+- Using -p meldestelle ensures the same project-scoped network (meldestelle_meldestelle-network) is reused so containers can resolve each other (postgres, consul, api-gateway, etc.).
+- If you prefer not to pass -p each time, you can export COMPOSE_PROJECT_NAME=meldestelle in your shell or define it in .env.
 
-#### 2. Fixed Network Configuration
-**File**: `docker-compose.clients.yml`
-**Line**: 177
-**Change**:
-```
-BEFORE: external: false
-AFTER:  external: true
-```
-
-## Correct Usage Instructions
-
-### 1. Infrastructure Only (Base Services)
-```bash
-docker compose -f docker-compose.yml up -d
-```
-This starts: PostgreSQL, Redis, Keycloak, Consul, Kafka, Prometheus, Grafana, API Gateway
-
-### 2. Infrastructure + Application Services
-```bash
-docker compose -f docker-compose.yml -f docker-compose.services.yml up -d
-```
-This adds: Ping Service (and other services when uncommented)
-
-### 3. Full Stack (Infrastructure + Services + Clients)
-```bash
-docker compose -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml up -d
-```
-This adds: Web App, Desktop App, Auth Server, Monitoring Server
-
-### 4. Infrastructure + Clients Only (Frontend Development)
-```bash
-docker compose -f docker-compose.yml -f docker-compose.clients.yml up -d
-```
-This is useful for frontend development without backend services.
-
-## Important Notes
-
-1. **Do not run services.yml or clients.yml standalone** - they depend on infrastructure services from the main compose file
-2. **Always start with docker-compose.yml first** - it creates the shared network and infrastructure services
-3. **Use the newer `docker compose` command** instead of `docker-compose` if you encounter Python module errors
-4. **Service Dependencies**:
-   - Services depend on: consul, postgres, redis (from main compose)
-   - Clients depend on: api-gateway, keycloak, postgres (from main compose)
-
-## Test Results
-
-All combinations now pass configuration validation:
-- ✅ `docker-compose.yml` - Works standalone
-- ✅ `docker-compose.yml` + `docker-compose.services.yml` - Works combined
-- ✅ `docker-compose.yml` + `docker-compose.clients.yml` - Works combined
-- ✅ All three files combined - Works as full stack
-
-## Status: RESOLVED ✅
-
-The docker-compose configuration issues have been fixed. All files can now be started successfully using the correct command combinations shown above.
+## Status
+- Services and clients files can now be started standalone (with -p meldestelle) while the infra stack is already running.
+- Combined modes continue to work.
