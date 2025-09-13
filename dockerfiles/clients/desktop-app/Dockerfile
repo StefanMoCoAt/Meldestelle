@@ -2,10 +2,19 @@
 # Builds Kotlin/JVM (Compose Desktop) client and serves via VNC with noVNC web interface
 
 # ===================================================================
-# Arguments (can be overridden during build)
+# CENTRALIZED BUILD ARGUMENTS
+# Values sourced from docker/versions.toml and docker/build-args/
 # ===================================================================
-ARG JVM_VERSION=21
-ARG GRADLE_VERSION=9.0
+# Global arguments (docker/build-args/global.env)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+ARG BUILD_DATE
+ARG VERSION
+
+# Client-specific arguments (docker/build-args/clients.env)
+ARG NODE_VERSION
+
+# Desktop-specific arguments
 ARG UBUNTU_VERSION=22.04
 
 # ===================================================================
@@ -17,7 +26,7 @@ ARG CLIENT_MODULE=client
 # ===================================================================
 # Build Stage - Kotlin/JVM (Compose Desktop) Compilation
 # ===================================================================
-FROM gradle:${GRADLE_VERSION}-jdk${JVM_VERSION} AS builder
+FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION} AS builder
 
 ARG CLIENT_PATH=client
 ARG CLIENT_MODULE=client

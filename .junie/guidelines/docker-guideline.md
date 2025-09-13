@@ -1,9 +1,9 @@
 # Docker-Guidelines für das Meldestelle-Projekt
 
-> **Version:** 1.1
-> **Datum:** 16. August 2025
+> **Version:** 3.0.0
+> **Datum:** 13. September 2025
 > **Autor:** Meldestelle Development Team
-> **Letzte Aktualisierung:** Erweitert und optimiert basierend auf aktueller Implementierung
+> **Letzte Aktualisierung:** 🎯 ZENTRALE DOCKER-VERSIONSVERWALTUNG implementiert - Single Source of Truth für alle Build-Argumente, eliminiert Redundanz in 12+ Dockerfiles, automatisierte Build-Scripts und Version-Update-Utilities
 
 ---
 
@@ -22,13 +22,14 @@ Das Meldestelle-Projekt implementiert eine **moderne, sicherheitsorientierte Con
 ## 📋 Inhaltsverzeichnis
 
 1. [Architektur-Überblick](#architektur-überblick)
-2. [Dockerfile-Standards](#dockerfile-standards)
-3. [Docker-Compose Organisation](#docker-compose-organisation)
-4. [Development-Workflow](#development-workflow)
-5. [Production-Deployment](#production-deployment)
-6. [Monitoring und Observability](#monitoring-und-observability)
-7. [Troubleshooting](#troubleshooting)
-8. [Best Practices](#best-practices)
+2. [Zentrale Docker-Versionsverwaltung](#zentrale-docker-versionsverwaltung) 🆕
+3. [Dockerfile-Standards](#dockerfile-standards)
+4. [Docker-Compose Organisation](#docker-compose-organisation)
+5. [Development-Workflow](#development-workflow)
+6. [Production-Deployment](#production-deployment)
+7. [Monitoring und Observability](#monitoring-und-observability)
+8. [Troubleshooting](#troubleshooting)
+9. [Best Practices](#best-practices)
 
 ---
 
@@ -91,6 +92,257 @@ graph TB
 
 ---
 
+## 🎯 Zentrale Docker-Versionsverwaltung
+
+### Überblick und Motivation
+
+**Version 3.0.0** führt eine revolutionäre Änderung in der Docker-Versionsverwaltung ein: die **zentrale Verwaltung aller Build-Argumente** analog zum bewährten `gradle/libs.versions.toml` System.
+
+#### Das Problem vor Version 3.0.0
+
+```dockerfile
+# BEFORE: Redundante Hardcodierung in 12+ Dockerfiles
+ARG GRADLE_VERSION=9.0.0
+ARG GRADLE_VERSION=9.0.0
+ARG GRADLE_VERSION=9.0.0
+# ... 9 weitere Male identisch wiederholt!
+```
+
+#### Die Lösung: Single Source of Truth
+
+```toml
+# docker/versions.toml - SINGLE SOURCE OF TRUTH
+[versions]
+gradle = "9.0.0"
+java = "21"
+node = "20.11.0"
+nginx = "1.25-alpine"
+```
+
+### 🏗️ Architektur der zentralen Versionsverwaltung
+
+```
+docker/
+├── versions.toml                    # 🎯 Single Source of Truth
+├── build-args/                     # Auto-generierte Environment Files
+│   ├── global.env                  # Globale Build-Argumente
+│   ├── services.env                # dockerfiles/services/*
+│   ├── clients.env                 # dockerfiles/clients/*
+│   └── infrastructure.env          # dockerfiles/infrastructure/*
+└── README.md                       # Dokumentation
+```
+
+### 📊 Hierarchische Versionsverwaltung
+
+#### 1. **Globale Versionen** (`docker/build-args/global.env`)
+Verwendet von **allen** Dockerfiles:
+```bash
+GRADLE_VERSION=9.0.0
+JAVA_VERSION=21
+BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+VERSION=1.0.0
+```
+
+#### 2. **Kategorie-spezifische Versionen**
+
+**Services** (`docker/build-args/services.env`):
+```bash
+SPRING_PROFILES_ACTIVE=docker
+SERVICE_PORT=8080
+PING_SERVICE_PORT=8082
+MEMBERS_SERVICE_PORT=8083
+```
+
+**Clients** (`docker/build-args/clients.env`):
+```bash
+NODE_VERSION=20.11.0
+NGINX_VERSION=1.25-alpine
+WEB_APP_PORT=4000
+DESKTOP_APP_VNC_PORT=5901
+```
+
+**Infrastructure** (`docker/build-args/infrastructure.env`):
+```bash
+SPRING_PROFILES_ACTIVE=default
+GATEWAY_PORT=8081
+AUTH_SERVER_PORT=8087
+```
+
+### 🛠️ Verwendung der zentralen Versionsverwaltung
+
+#### Automatisierte Builds mit `scripts/docker-build.sh`
+
+```bash
+# Alle Services mit zentralen Versionen bauen
+./scripts/docker-build.sh services
+
+# Client-Anwendungen bauen
+./scripts/docker-build.sh clients
+
+# Komplettes System bauen
+./scripts/docker-build.sh all
+
+# Aktuelle Versionen anzeigen
+./scripts/docker-build.sh --versions
+```
+
+#### Versionen aktualisieren mit `scripts/docker-versions-update.sh`
+
+```bash
+# Aktuelle Versionen anzeigen
+./scripts/docker-versions-update.sh show
+
+# Java auf Version 22 upgraden
+./scripts/docker-versions-update.sh update java 22
+
+# Gradle auf 9.1.0 upgraden
+./scripts/docker-versions-update.sh update gradle 9.1.0
+
+# Alle Environment-Dateien synchronisieren
+./scripts/docker-versions-update.sh sync
+```
+
+### 📋 Dockerfile Template-System Version 3.0.0
+
+#### Neue Template-Struktur
+
+```dockerfile
+# === CENTRALIZED BUILD ARGUMENTS ===
+# Values sourced from docker/versions.toml and docker/build-args/
+# Global arguments (docker/build-args/global.env)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+ARG BUILD_DATE
+ARG VERSION
+
+# Category-specific arguments (docker/build-args/services.env)
+ARG SPRING_PROFILES_ACTIVE
+ARG SERVICE_PATH=.
+ARG SERVICE_NAME=spring-boot-service
+ARG SERVICE_PORT=8080
+```
+
+#### Docker-Compose Integration
+
+```yaml
+api-gateway:
+  build:
+    context: .
+    dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
+    args:
+      # Zentrale Versionen via Environment-Variablen
+      GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
+      JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+      BUILD_DATE: ${BUILD_DATE}
+      VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+      SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DEFAULT:-default}
+```
+
+### 🎉 Vorteile der zentralen Versionsverwaltung
+
+#### **DRY-Prinzip Durchsetzung** ✅
+- **Vor Version 3.0.0**: `GRADLE_VERSION=9.0.0` in 12 Dockerfiles
+- **Ab Version 3.0.0**: `gradle = "9.0.0"` **einmalig** in `docker/versions.toml`
+
+#### **Wartungsaufwand drastisch reduziert** ✅
+```bash
+# BEFORE: 12 Dateien manuell editieren für Gradle-Update
+# AFTER: Ein Befehl für alle Services
+./scripts/docker-versions-update.sh update gradle 9.1.0
+```
+
+#### **Konsistenz garantiert** ✅
+- Keine Version-Inkonsistenzen zwischen Services möglich
+- Automatische Synchronisation aller Environment-Dateien
+- Einheitliche Spring-Profile-Behandlung
+
+#### **Skalierbarkeit für neue Services** ✅
+```dockerfile
+# Neue Services verwenden automatisch zentrale Versionen
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+```
+
+### 🔄 Migration bestehender Services
+
+#### Schritt 1: Template-basierte Migration
+```bash
+# Neue Services basieren auf aktualisierten Templates
+cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/new-service/
+```
+
+#### Schritt 2: Automatisierte Version-Synchronisation
+```bash
+# Bestehende Services automatisch aktualisieren
+./scripts/docker-versions-update.sh sync
+```
+
+#### Schritt 3: Build-Integration
+```bash
+# Neue Builds verwenden zentrale Versionen
+./scripts/docker-build.sh services
+```
+
+### 📚 Best Practices für Version 3.0.0
+
+#### **DO: Zentrale Versionskommandos verwenden**
+```bash
+# ✅ RICHTIG - Zentrale Version-Updates
+./scripts/docker-versions-update.sh update java 22
+
+# ✅ RICHTIG - Automatisierte Builds
+./scripts/docker-build.sh all
+```
+
+#### **DON'T: Manuelle Dockerfile-Bearbeitung**
+```dockerfile
+# ❌ FALSCH - Nie mehr hardcodierte Versionen
+ARG GRADLE_VERSION=9.1.0
+
+# ✅ RICHTIG - Zentrale Referenz
+ARG GRADLE_VERSION
+```
+
+#### **Konsistenz-Regeln**
+1. **Niemals** Versionen direkt in Dockerfiles hardcodieren
+2. **Immer** `docker/versions.toml` als Single Source of Truth verwenden
+3. **Automated** Environment-File-Synchronisation via Scripts
+4. **Kategorien-spezifische** Build-Argumente korrekt zuordnen
+
+### 🚀 Entwickler-Workflow mit Version 3.0.0
+
+#### **Neuen Service entwickeln**
+```bash
+# 1. Template kopieren (bereits Version 3.0.0 kompatibel)
+cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/my-service/
+
+# 2. Service-spezifische Parameter anpassen (Port, Name, etc.)
+# 3. Bauen mit zentralen Versionen
+./scripts/docker-build.sh services
+```
+
+#### **Versionen projekt-weit upgraden**
+```bash
+# 1. Java-Version upgraden (betrifft ALLE Services)
+./scripts/docker-versions-update.sh update java 22
+
+# 2. Automatisch alle Services neu bauen
+./scripts/docker-build.sh all
+
+# 3. Testen und committen
+```
+
+#### **Version-Status prüfen**
+```bash
+# Aktuelle zentrale Versionen anzeigen
+./scripts/docker-versions-update.sh show
+
+# Build-Environment-Status prüfen
+./scripts/docker-build.sh --versions
+```
+
+---
+
 ## 🐳 Dockerfile-Standards
 
 ### Template-Struktur
@@ -100,19 +352,104 @@ Alle Dockerfiles folgen einem standardisierten Template-System:
 ```
 dockerfiles/
 ├── templates/
-│   ├── spring-boot-service.Dockerfile     # Backend-Services
+│   ├── spring-boot-service.Dockerfile      # Backend-Services
 │   ├── kotlin-multiplatform-web.Dockerfile # Web-Client
 │   └── monitoring-service.Dockerfile       # Monitoring-Services
+├── clients/
+│   ├── web-app/Dockerfile                  # Web-App (nginx)
+│   └── desktop-app/Dockerfile              # Desktop-App (VNC/X11)
 ├── infrastructure/
-│   ├── gateway/Dockerfile                  # ✅ API Gateway
-│   ├── auth-server/Dockerfile             # Auth Server
-│   └── monitoring-server/Dockerfile       # Monitoring Server
+│   ├── gateway/Dockerfile                  # API Gateway
+│   ├── auth-server/Dockerfile              # Auth Server
+│   └── monitoring-server/Dockerfile        # Monitoring Server
 └── services/
-    ├── members-service/Dockerfile         # Domain Services (wenn reaktiviert)
+    ├── members-service/Dockerfile          # Domain Services (wenn reaktiviert)
     ├── horses-service/Dockerfile
     ├── events-service/Dockerfile
     └── masterdata-service/Dockerfile
 ```
+
+### Dockerfile-Architektur & Konsistenz-Richtlinien ✅ RESOLVED
+
+**AKTUELLER STATUS (Version 2.1):**
+- ✅ Alle Dockerfiles folgen der konsistenten `dockerfiles/` Struktur
+- ✅ API Gateway Dockerfile: `dockerfiles/infrastructure/gateway/Dockerfile`
+- ✅ Keine Architektur-Ausnahmen mehr - alle Services folgen dem gleichen Muster
+- ✅ Docker-Compose Referenzen nutzen konsistent die `dockerfiles/` Pfade
+
+**RICHTLINIEN ZUR VERMEIDUNG VON INKONSISTENZEN:**
+
+1. **Konsistenz-Prinzip:** ALLE Dockerfiles müssen unter `dockerfiles/` organisiert sein
+2. **Keine Ausnahmen:** Kein Service darf außerhalb dieser Struktur platziert werden
+3. **Vorhersagbarkeit:** Entwickler finden Dockerfiles immer am gleichen Ort
+4. **Einheitliche Referenzierung:** Alle docker-compose.yml Dateien referenzieren `dockerfiles/`
+
+**Struktur-Kategorien:**
+- `dockerfiles/templates/` - Wiederverwendbare Templates
+- `dockerfiles/clients/` - Frontend-Anwendungen
+- `dockerfiles/infrastructure/` - Infrastructure Services (inkl. Gateway)
+- `dockerfiles/services/` - Domain Services
+
+**WICHTIG:** Bei neuen Services oder Refactoring IMMER die konsistente Struktur befolgen!
+
+### ✨ Neue Optimierungen (Version 2.0)
+
+#### BuildKit Cache Mounts ✅ IMPLEMENTIERT
+
+Alle Dockerfiles verwenden jetzt **BuildKit cache mounts** für optimale Build-Performance:
+
+```dockerfile
+# Download dependencies with cache mount
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    ./gradlew dependencies --no-daemon --info
+
+# Build application with cache mount
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    ./gradlew bootJar --no-daemon --info
+```
+
+**Vorteile:**
+- Gradle Dependencies werden zwischen Builds gecacht
+- Signifikant reduzierte Build-Zeiten
+- Bessere Resource-Effizienz in CI/CD-Pipelines
+
+#### Tini Init System ✅ IMPLEMENTIERT
+
+Alle Runtime-Container verwenden jetzt **tini** als Init-System:
+
+```dockerfile
+# Installation in Alpine
+RUN apk add --no-cache tini
+
+# Verwendung im Entrypoint
+ENTRYPOINT ["tini", "--", "sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
+```
+
+**Vorteile:**
+- Proper signal handling für Container
+- Zombie-Process cleanup
+- Graceful shutdown support
+
+#### Enhanced Security Hardening ✅ IMPLEMENTIERT
+
+Alle Container implementieren erweiterte Sicherheitspraktiken:
+
+```dockerfile
+# Alpine security updates
+RUN apk update && apk upgrade && \
+    apk add --no-cache curl tzdata tini && \
+    rm -rf /var/cache/apk/*
+
+# Non-root user with proper permissions
+RUN addgroup -g ${APP_GID} -S ${APP_GROUP} && \
+    adduser -u ${APP_UID} -S ${APP_USER} -G ${APP_GROUP} && \
+    chown -R ${APP_USER}:${APP_GROUP} /app && \
+    chmod -R 750 /app
+```
+
+---
 
 ### Spring Boot Service Template
 
@@ -127,7 +464,7 @@ dockerfiles/
 # ===================================================================
 
 # Build arguments for flexibility
-ARG GRADLE_VERSION=8.14
+ARG GRADLE_VERSION=9.0.0
 ARG JAVA_VERSION=21
 ARG SPRING_PROFILES_ACTIVE=default
 ARG SERVICE_PATH=.

@@ -1,32 +1,52 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.8
 
 # ===================================================================
 # Dockerfile for Meldestelle Auth Server
-# Based on spring-boot-service template with auth-server specifics
+# Features: Security hardening, monitoring support, optimal caching, BuildKit cache mounts
+# Version: 2.0.0 - Enhanced optimization and security
 # ===================================================================
 
-# Build arguments
-ARG GRADLE_VERSION=8.14
-ARG JAVA_VERSION=21
-ARG SPRING_PROFILES_ACTIVE=docker
+# === CENTRALIZED BUILD ARGUMENTS ===
+# Values sourced from docker/versions.toml and docker/build-args/
+# Global arguments (docker/build-args/global.env)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+ARG BUILD_DATE
+ARG VERSION
+
+# Infrastructure-specific arguments (docker/build-args/infrastructure.env)
+ARG SPRING_PROFILES_ACTIVE
 
 # ===================================================================
 # Build Stage
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
-LABEL stage=builder
-LABEL service=auth-server
-LABEL maintainer="Meldestelle Development Team"
+# Re-declare build arguments for this stage
+ARG SPRING_PROFILES_ACTIVE=docker
+ARG BUILD_DATE
+ARG VERSION=1.0.0
+
+LABEL stage=builder \
+      service="auth-server" \
+      maintainer="Meldestelle Development Team" \
+      version="${VERSION}" \
+      build.date="${BUILD_DATE}"
 
 WORKDIR /workspace
 
-# Gradle optimizations
+# Gradle optimizations for containerized builds
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -Dorg.gradle.daemon=false \
                  -Dorg.gradle.parallel=true \
                  -Dorg.gradle.configureondemand=true \
-                 -Xmx2g"
+                 -Dorg.gradle.workers.max=2 \
+                 -Dorg.gradle.jvmargs=-Xmx2g \
+                 -XX:+UseParallelGC \
+                 -XX:MaxMetaspaceSize=512m"
+
+# Set Gradle user home for better caching
+ENV GRADLE_USER_HOME=/home/gradle/.gradle
 
 # Copy build files in optimal order for caching
 COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
@@ -42,9 +62,15 @@ COPY infrastructure/auth/auth-client/ infrastructure/auth/auth-client/
 COPY infrastructure/auth/auth-server/build.gradle.kts infrastructure/auth/auth-server/
 COPY infrastructure/auth/auth-server/src/ infrastructure/auth/auth-server/src/
 
-# Build application
-RUN ./gradlew :infrastructure:auth:auth-server:dependencies --no-daemon --info
-RUN ./gradlew :infrastructure:auth:auth-server:bootJar --no-daemon --info \
+# Download and cache dependencies with BuildKit cache mount
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    ./gradlew :infrastructure:auth:auth-server:dependencies --no-daemon --info
+
+# Build application with BuildKit cache mount
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    ./gradlew :infrastructure:auth:auth-server:bootJar --no-daemon --info \
     -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
 
 # ===================================================================
@@ -52,13 +78,29 @@ RUN ./gradlew :infrastructure:auth:auth-server:bootJar --no-daemon --info \
 # ===================================================================
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
 
-# Comprehensive metadata
+# Build arguments for runtime stage
+ARG BUILD_DATE
+ARG VERSION=1.0.0
+ARG JAVA_VERSION=21
+ARG SPRING_PROFILES_ACTIVE=docker
+
+# Convert build arguments to environment variables
+ENV JAVA_VERSION=${JAVA_VERSION} \
+    VERSION=${VERSION} \
+    BUILD_DATE=${BUILD_DATE}
+
+# Enhanced metadata
 LABEL service="auth-server" \
-      version="1.0.0" \
+      version="${VERSION}" \
       description="Authentication and Authorization Server for Meldestelle" \
       maintainer="Meldestelle Development Team" \
       java.version="${JAVA_VERSION}" \
-      spring.profiles.active="${SPRING_PROFILES_ACTIVE}"
+      spring.profiles.active="${SPRING_PROFILES_ACTIVE}" \
+      build.date="${BUILD_DATE}" \
+      org.opencontainers.image.title="Meldestelle Auth Server" \
+      org.opencontainers.image.description="Spring Boot authentication service with Keycloak integration" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.created="${BUILD_DATE}"
 
 # Build arguments for user configuration
 ARG APP_USER=authuser
@@ -68,10 +110,15 @@ ARG APP_GID=1002
 
 WORKDIR /app
 
-# System setup with security updates
+# Enhanced Alpine setup with security hardening
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache curl jq tzdata ca-certificates && \
+    apk add --no-cache \
+        curl \
+        jq \
+        tzdata \
+        ca-certificates \
+        tini && \
     rm -rf /var/cache/apk/*
 
 # Create non-root user for auth-server
@@ -118,14 +165,18 @@ ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
     LOGGING_LEVEL_ROOT=INFO \
     LOGGING_LEVEL_AT_MOCODE=DEBUG
 
-# Security-focused startup command with debug support
-ENTRYPOINT ["sh", "-c", "\
-    echo 'Starting Meldestelle Auth Server on port 8081...'; \
+# Enhanced entrypoint with tini init system and conditional debug support
+ENTRYPOINT ["tini", "--", "sh", "-c", "\
+    echo 'Starting Meldestelle Auth Server with Java ${JAVA_VERSION}...'; \
+    echo 'Active Spring profiles: ${SPRING_PROFILES_ACTIVE}'; \
+    echo 'Auth server port: 8081'; \
+    echo 'Container memory: '$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || echo 'unlimited'); \
     if [ \"${DEBUG:-false}\" = \"true\" ]; then \
-        echo 'Debug mode enabled on port 5005'; \
-        exec java $JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar app.jar; \
+        echo 'DEBUG mode enabled - remote debugging available on port 5005'; \
+        exec java ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar app.jar; \
     else \
-        exec java $JAVA_OPTS -jar app.jar; \
+        echo 'Starting auth server in production mode'; \
+        exec java ${JAVA_OPTS} -jar app.jar; \
     fi"]
 
 # ===================================================================

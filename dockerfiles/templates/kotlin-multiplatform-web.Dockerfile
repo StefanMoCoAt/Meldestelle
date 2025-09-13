@@ -1,13 +1,22 @@
 # ===================================================================
 # Multi-stage Dockerfile Template for Kotlin Multiplatform Web Client
-# Features: Kotlin/JS compilation, Nginx serving, development support
+# Features: Kotlin/JS compilation, Nginx serving, development support, centralized version management
+# Version: 3.0.0 - Central Version Management Implementation
 # ===================================================================
+# IMPORTANT: Build arguments are now managed centrally via docker/versions.toml
+# Use: docker-compose build or scripts/docker-build.sh for automated version injection
 
-# Build arguments
-ARG GRADLE_VERSION=8.14
-ARG JAVA_VERSION=21
-ARG NGINX_VERSION=alpine
-ARG NODE_VERSION=20.11.0
+# === CENTRALIZED BUILD ARGUMENTS ===
+# Values sourced from docker/versions.toml and docker/build-args/
+# Global arguments (docker/build-args/global.env)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+ARG BUILD_DATE
+ARG VERSION
+
+# Client-specific arguments (docker/build-args/clients.env)
+ARG NODE_VERSION
+ARG NGINX_VERSION
 
 # Client-specific build arguments (can be overridden at build time)
 ARG CLIENT_PATH=client/web-app

@@ -2,14 +2,22 @@
 
 # ===================================================================
 # Multi-stage Dockerfile Template for Spring Boot Services
-# Features: Security hardening, monitoring support, optimal caching
+# Features: Security hardening, monitoring support, optimal caching, centralized version management
+# Version: 3.0.0 - Central Version Management Implementation
 # ===================================================================
+# IMPORTANT: Build arguments are now managed centrally via docker/versions.toml
+# Use: docker-compose build or scripts/docker-build.sh for automated version injection
 
-# Build arguments
-ARG GRADLE_VERSION=8.14
-ARG JAVA_VERSION=21
-ARG ALPINE_VERSION=3.19
-ARG SPRING_PROFILES_ACTIVE=default
+# === CENTRALIZED BUILD ARGUMENTS ===
+# Values sourced from docker/versions.toml and docker/build-args/
+# Global arguments (docker/build-args/global.env)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+ARG BUILD_DATE
+ARG VERSION
+
+# Service-specific arguments (docker/build-args/services.env or infrastructure.env)
+ARG SPRING_PROFILES_ACTIVE
 ARG SERVICE_PATH=.
 ARG SERVICE_NAME=spring-boot-service
 ARG SERVICE_PORT=8080

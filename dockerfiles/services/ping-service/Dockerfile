@@ -6,12 +6,16 @@
 # Version: 2.0.0 - Enhanced optimization and security
 # ===================================================================
 
-# Build arguments for flexibility
-ARG GRADLE_VERSION=9.0.0
-ARG JAVA_VERSION=21
-ARG SPRING_PROFILES_ACTIVE=default
+# === CENTRALIZED BUILD ARGUMENTS ===
+# Values sourced from docker/versions.toml and docker/build-args/
+# Global arguments (docker/build-args/global.env)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
 ARG BUILD_DATE
-ARG VERSION=1.0.0
+ARG VERSION
+
+# Service-specific arguments (docker/build-args/services.env)
+ARG SPRING_PROFILES_ACTIVE
 
 # Build stage: compile the ping-service JAR inside Docker
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder

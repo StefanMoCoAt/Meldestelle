@@ -1,0 +1,94 @@
+# ===================================================================
+# Docker Versions Catalog - Single Source of Truth
+# Analogous to gradle/libs.versions.toml for centralized version management
+# ===================================================================
+# Last updated: 2025-09-13
+# Eliminates version redundancy across 12+ Dockerfiles
+
+[versions]
+# --- Build Tools ---
+gradle = "9.0.0"
+java = "21"
+node = "20.12.0"
+
+# --- Base Images ---
+nginx = "1.25-alpine"
+alpine = "3.19"
+eclipse-temurin-jdk = "21-jdk-alpine"
+eclipse-temurin-jre = "21-jre-alpine"
+
+# --- Spring Configuration ---
+spring-profiles-default = "default"
+spring-profiles-docker = "docker"
+spring-profiles-prod = "prod"
+
+# --- Application Versions ---
+app-version = "1.0.0"
+
+[build-args]
+# --- Global Build Arguments (used across all categories) ---
+global = [
+    "GRADLE_VERSION",
+    "JAVA_VERSION",
+    "BUILD_DATE",
+    "VERSION"
+]
+
+# --- Spring Boot Services (dockerfiles/services/* and infrastructure/*) ---
+spring-services = [
+    "SPRING_PROFILES_ACTIVE",
+    "SERVICE_PATH",
+    "SERVICE_NAME",
+    "SERVICE_PORT"
+]
+
+# --- Kotlin/JS Web Clients (dockerfiles/clients/*) ---
+web-clients = [
+    "NODE_VERSION",
+    "NGINX_VERSION",
+    "CLIENT_PATH",
+    "CLIENT_MODULE",
+    "CLIENT_NAME"
+]
+
+[categories]
+# --- Services Configuration ---
+[categories.services]
+default-spring-profile = "docker"
+default-port-start = 8082
+services = [
+    "ping-service",
+    "members-service",
+    "horses-service",
+    "events-service",
+    "masterdata-service"
+]
+
+# --- Infrastructure Configuration ---
+[categories.infrastructure]
+default-spring-profile = "default"
+services = [
+    "gateway",
+    "auth-server",
+    "monitoring-server"
+]
+
+# --- Client Applications Configuration ---
+[categories.clients]
+default-node-version = "20.11.0"
+default-nginx-version = "1.25-alpine"
+clients = [
+    "web-app",
+    "desktop-app"
+]
+
+[environment-mapping]
+# --- Environment Variable Names for Docker Compose ---
+# Maps internal version names to environment variable names
+gradle-version = "DOCKER_GRADLE_VERSION"
+java-version = "DOCKER_JAVA_VERSION"
+node-version = "DOCKER_NODE_VERSION"
+nginx-version = "DOCKER_NGINX_VERSION"
+spring-profiles-default = "DOCKER_SPRING_PROFILES_DEFAULT"
+spring-profiles-docker = "DOCKER_SPRING_PROFILES_DOCKER"
+app-version = "DOCKER_APP_VERSION"

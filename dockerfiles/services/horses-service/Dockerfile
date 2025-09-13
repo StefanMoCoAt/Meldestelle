@@ -5,14 +5,19 @@
 # Based on Spring Boot Service Template with Horses-specific configuration
 # ===================================================================
 
-# Build arguments
-ARG GRADLE_VERSION=8.14
-ARG JAVA_VERSION=21
-ARG ALPINE_VERSION=3.19
-ARG SPRING_PROFILES_ACTIVE=docker
+# === CENTRALIZED BUILD ARGUMENTS ===
+# Values sourced from docker/versions.toml and docker/build-args/
+# Global arguments (docker/build-args/global.env)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+ARG BUILD_DATE
+ARG VERSION
+
+# Service-specific arguments (docker/build-args/services.env)
+ARG SPRING_PROFILES_ACTIVE
 ARG SERVICE_PATH=horses/horses-service
 ARG SERVICE_NAME=horses-service
-ARG SERVICE_PORT=8085
+ARG SERVICE_PORT=8084
 
 # ===================================================================
 # Build Stage

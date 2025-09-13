@@ -1,12 +1,22 @@
-# Multi-stage build for Meldestelle Compose for Web Application
-# Builds Kotlin/JS (Compose for Web) client and serves via Nginx
+# syntax=docker/dockerfile:1.8
 
 # ===================================================================
-# Arguments (can be overridden during build)
+# Multi-stage Dockerfile for Meldestelle Compose for Web Application
+# Features: BuildKit cache mounts, security hardening, optimal layer caching
+# Version: 2.0.0 - Enhanced optimization and security
 # ===================================================================
-ARG JVM_VERSION=21
-ARG GRADLE_VERSION=9.0
-ARG NGINX_VERSION=1.25-alpine
+
+# === CENTRALIZED BUILD ARGUMENTS ===
+# Values sourced from docker/versions.toml and docker/build-args/
+# Global arguments (docker/build-args/global.env)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+ARG BUILD_DATE
+ARG VERSION
+
+# Client-specific arguments (docker/build-args/clients.env)
+ARG NGINX_VERSION
+ARG NODE_VERSION
 
 # ===================================================================
 # Build Arguments for Client Configuration
@@ -17,17 +27,35 @@ ARG CLIENT_MODULE=client
 # ===================================================================
 # Build Stage - Kotlin/JS (Compose for Web) Compilation
 # ===================================================================
-FROM gradle:${GRADLE_VERSION}-jdk${JVM_VERSION} AS builder
+FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
 ARG CLIENT_PATH=client
 ARG CLIENT_MODULE=client
+ARG BUILD_DATE
+ARG VERSION=1.0.0
+
+# Enhanced metadata
+LABEL stage=builder \
+      service="web-app" \
+      maintainer="Meldestelle Development Team" \
+      version="${VERSION}" \
+      build.date="${BUILD_DATE}"
 
 # Set working directory
 WORKDIR /build
 
-# Set build labels
-LABEL service=web-app
-LABEL stage=build
+# Gradle optimizations for containerized builds
+ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
+                 -Dorg.gradle.daemon=false \
+                 -Dorg.gradle.parallel=true \
+                 -Dorg.gradle.configureondemand=true \
+                 -Dorg.gradle.workers.max=2 \
+                 -Dorg.gradle.jvmargs=-Xmx2g \
+                 -XX:+UseParallelGC \
+                 -XX:MaxMetaspaceSize=512m"
+
+# Set Gradle user home for better caching
+ENV GRADLE_USER_HOME=/home/gradle/.gradle
 
 # Copy Gradle files first for better layer caching
 COPY gradle/ gradle/
@@ -55,9 +83,16 @@ COPY docs/ docs/
 # Make Gradle wrapper executable
 RUN chmod +x gradlew
 
-# Build client application
+# Download and cache dependencies with BuildKit cache mount
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    ./gradlew ${CLIENT_MODULE}:dependencies --no-daemon --info
+
+# Build client application with BuildKit cache mount
 # For Compose Multiplatform Web (WASM), wasmJsBrowserDistribution produces static assets
-RUN echo "Building ${CLIENT_MODULE} module..." && \
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    echo "Building ${CLIENT_MODULE} module..." && \
     ./gradlew ${CLIENT_MODULE}:wasmJsBrowserDistribution --no-daemon --stacktrace --info
 
 # ===================================================================
@@ -66,14 +101,28 @@ RUN echo "Building ${CLIENT_MODULE} module..." && \
 FROM nginx:${NGINX_VERSION} AS production
 
 ARG CLIENT_PATH=client
+ARG BUILD_DATE
+ARG VERSION=1.0.0
 
-# Set production labels
+# Enhanced metadata
 LABEL service="web-app" \
+      version="${VERSION}" \
       environment="production" \
-      description="Meldestelle Compose for Web Application"
+      description="Meldestelle Compose for Web Application served via Nginx" \
+      maintainer="Meldestelle Development Team" \
+      build.date="${BUILD_DATE}" \
+      org.opencontainers.image.title="Meldestelle Web App" \
+      org.opencontainers.image.description="Kotlin Multiplatform Web application with WASM" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.created="${BUILD_DATE}"
 
-# Install curl for health checks and create nginx user
-RUN apk add --no-cache curl && \
+# Enhanced Alpine setup with security hardening
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache \
+        curl \
+        tzdata && \
+    rm -rf /var/cache/apk/* && \
     addgroup -g 1001 -S nginx-group && \
     adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx-group -g nginx nginx-user
 

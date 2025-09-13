@@ -5,10 +5,16 @@
 # Based on spring-boot-service template with monitoring specifics
 # ===================================================================
 
-# Build arguments
-ARG GRADLE_VERSION=8.14
-ARG JAVA_VERSION=21
-ARG SPRING_PROFILES_ACTIVE=docker
+# === CENTRALIZED BUILD ARGUMENTS ===
+# Values sourced from docker/versions.toml and docker/build-args/
+# Global arguments (docker/build-args/global.env)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+ARG BUILD_DATE
+ARG VERSION
+
+# Infrastructure-specific arguments (docker/build-args/infrastructure.env)
+ARG SPRING_PROFILES_ACTIVE
 
 # ===================================================================
 # Build Stage
