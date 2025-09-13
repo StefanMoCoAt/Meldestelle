@@ -43,6 +43,7 @@ COPY build.gradle.kts ./
 
 # Copy monitoring dependencies
 COPY infrastructure/monitoring/monitoring-client/ infrastructure/monitoring/monitoring-client/
+COPY infrastructure/cache/ infrastructure/cache/
 
 # Copy monitoring-server specific files
 COPY infrastructure/monitoring/monitoring-server/build.gradle.kts infrastructure/monitoring/monitoring-server/

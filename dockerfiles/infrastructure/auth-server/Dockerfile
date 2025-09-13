@@ -57,6 +57,7 @@ COPY build.gradle.kts ./
 
 # Copy infrastructure dependencies
 COPY infrastructure/auth/auth-client/ infrastructure/auth/auth-client/
+COPY infrastructure/cache/ infrastructure/cache/
 
 # Copy auth-server specific files
 COPY infrastructure/auth/auth-server/build.gradle.kts infrastructure/auth/auth-server/
