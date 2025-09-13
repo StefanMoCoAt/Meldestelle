@@ -1,9 +1,26 @@
 # Guideline: Zyklus "Tracer Bullet"
 
+---
+guideline_type: "process-guide"
+scope: "trace-bullet-development-cycle"
+audience: ["developers", "ai-assistants", "project-managers"]
+last_updated: "2025-09-13"
+dependencies: ["master-guideline.md", "web-app-guideline.md"]
+related_files: ["docker-compose.yml", "temp/ping-service/**", "client/**"]
+ai_context: "End-to-end architecture validation cycle, infrastructure testing, ping service implementation"
+---
+
 * **Zyklus-Start:** 15. August 2025
 * **Status:** In Arbeit
-* **Basis:** Diese Guideline erweitert die [Master-Guideline](./master-guideline.md)
-* **Frontend-Standard:** Alle Web-Frontend-Entwicklung erfolgt gemäß der [`web-app-guideline.md`](./web-app-guideline.md), die ab sofort der verbindliche Standard ist.
+* **Basis:** Diese Guideline erweitert die [Master-Guideline](../master-guideline.md)
+* **Frontend-Standard:** Alle Web-Frontend-Entwicklung erfolgt gemäß der [Web-App-Guideline](../technology-guides/web-app-guideline.md), die ab sofort der verbindliche Standard ist.
+
+> **🤖 AI-Assistant Hinweis:**
+> Der Tracer Bullet Zyklus validiert die End-to-End-Architektur:
+> - **Ziel:** Technische Infrastruktur von Client bis Backend testen
+> - **Ping-Service:** Minimaler Test-Service für Architektur-Validierung
+> - **MVVM:** Client folgt strikt dem MVVM-Pattern mit Compose Multiplatform
+> - **Definition of Done:** Vollständiger E2E-Test muss erfolgreich sein
 
 ## 1. Ziel des Zyklus
 
@@ -108,3 +125,12 @@ Dieser Zyklus ist abgeschlossen, wenn **alle** der folgenden Kriterien erfüllt 
 - [ ] Was hat gut funktioniert?
 - [ ] Was würden wir beim nächsten Zyklus anders machen?
 - [ ] Welche Standards müssen in die Master-Guideline übernommen werden?
+
+---
+
+**Navigation:**
+- [Master-Guideline](../master-guideline.md) - Übergeordnete Projektrichtlinien
+- [Web-App-Guideline](../technology-guides/web-app-guideline.md) - Frontend-Entwicklungsstandard
+- [Architecture-Principles](../project-standards/architecture-principles.md) - Architektur-Grundsätze
+- [Docker Guidelines](../technology-guides/docker/) - Infrastructure und Deployment
+- [Testing-Standards](../project-standards/testing-standards.md) - Test-Qualitätssicherung

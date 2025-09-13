@@ -71,6 +71,9 @@ sync_to_env_files() {
     local spring_default=$(get_version "spring-profiles-default")
     local spring_docker=$(get_version "spring-profiles-docker")
     local alpine_version=$(get_version "alpine")
+    local prometheus_version=$(get_version "prometheus")
+    local grafana_version=$(get_version "grafana")
+    local keycloak_version=$(get_version "keycloak")
 
     # Update global.env
     cat > "$BUILD_ARGS_DIR/global.env" << EOF
@@ -92,6 +95,11 @@ VERSION=$app_version
 ALPINE_VERSION=$alpine_version
 ECLIPSE_TEMURIN_JDK_VERSION=$java_version-jdk-alpine
 ECLIPSE_TEMURIN_JRE_VERSION=$java_version-jre-alpine
+
+# --- Monitoring & Infrastructure Services ---
+DOCKER_PROMETHEUS_VERSION=$prometheus_version
+DOCKER_GRAFANA_VERSION=$grafana_version
+DOCKER_KEYCLOAK_VERSION=$keycloak_version
 EOF
     print_success "Updated global.env"
 
@@ -220,6 +228,9 @@ show_current_versions() {
     echo "  Node.js: $(get_version "node")"
     echo "  Nginx: $(get_version "nginx")"
     echo "  Alpine: $(get_version "alpine")"
+    echo "  Prometheus: $(get_version "prometheus")"
+    echo "  Grafana: $(get_version "grafana")"
+    echo "  Keycloak: $(get_version "keycloak")"
     echo "  App Version: $(get_version "app-version")"
     echo "  Spring Profile (Default): $(get_version "spring-profiles-default")"
     echo "  Spring Profile (Docker): $(get_version "spring-profiles-docker")"
@@ -242,6 +253,9 @@ show_help() {
     echo "  node                         Node.js version"
     echo "  nginx                        Nginx version"
     echo "  alpine                       Alpine Linux version"
+    echo "  prometheus                   Prometheus version"
+    echo "  grafana                      Grafana version"
+    echo "  keycloak                     Keycloak version"
     echo "  app-version                  Application version"
     echo "  spring-profiles-default      Default Spring profile"
     echo "  spring-profiles-docker       Docker Spring profile"

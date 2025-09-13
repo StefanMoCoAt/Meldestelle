@@ -1,0 +1,126 @@
+{
+  "yaml.schemas": {
+    "./docker/schemas/versions-schema.json": "docker/versions.toml"
+  },
+  "files.associations": {
+    "docker/versions.toml": "toml",
+    "*.toml": "toml",
+    "docker-compose*.yml": "dockercompose",
+    "Dockerfile*": "dockerfile"
+  },
+  "toml.schema.enabled": true,
+  "toml.schema.associations": {
+    "docker/versions.toml": "./docker/schemas/versions-schema.json"
+  },
+  "editor.quickSuggestions": {
+    "other": "on",
+    "comments": "off",
+    "strings": "on"
+  },
+  "editor.suggest.insertMode": "replace",
+  "editor.acceptSuggestionOnCommitCharacter": true,
+  "editor.acceptSuggestionOnEnter": "on",
+  "docker.defaultRegistry": "",
+  "docker.commands.build": "${workspaceFolder}/scripts/docker-build.sh",
+  "docker.commands.compose": "docker-compose",
+  "yaml.format.enable": true,
+  "yaml.validate": true,
+  "yaml.completion": true,
+  "yaml.hover": true,
+  "dockerfile.format.instructionCase": "upper",
+  "dockerfile.format.instructionCasing": "upper",
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.gradle": true,
+    "**/build": true,
+    "**/.git": true,
+    "**/*.class": true,
+    "**/*.jar": false,
+    "**/kotlin-js-store": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.gradle": true,
+    "**/build": true,
+    "**/kotlin-js-store": true,
+    "**/*.jar": true
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit"
+    }
+  },
+  "[dockercompose]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true
+  },
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true
+  },
+  "tasks.version": "2.0.0",
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "terminal.integrated.env.linux": {
+    "DOCKER_BUILDKIT": "1"
+  },
+  "terminal.integrated.env.osx": {
+    "DOCKER_BUILDKIT": "1"
+  },
+  "terminal.integrated.env.windows": {
+    "DOCKER_BUILDKIT": "1"
+  },
+  "extensions.recommendations": [
+    "tamasfe.even-better-toml",
+    "ms-azuretools.vscode-docker",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-json",
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "formulahendry.docker-explorer"
+  ],
+  "json.validate.enable": true,
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "docker/versions.toml"
+      ],
+      "url": "./docker/schemas/versions-schema.json"
+    }
+  ],
+  "git.ignoreLimitWarning": true,
+  "git.detectSubmodules": false,
+  "shellcheck.enable": true,
+  "shellcheck.executablePath": "shellcheck",
+  "shellcheck.run": "onType",
+  "editor.snippetSuggestions": "top",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "breadcrumbs.enabled": true,
+  "breadcrumbs.showFiles": true,
+  "breadcrumbs.showModules": true,
+  "problems.decorations.enabled": true,
+  "security.workspace.trust.untrustedFiles": "open",
+  "command-runner.commands": {
+    "docker-versions-show": "scripts/docker-versions-update.sh show",
+    "docker-versions-sync": "scripts/docker-versions-update.sh sync",
+    "docker-validate": "scripts/validate-docker-consistency.sh",
+    "docker-generate-compose": "scripts/generate-compose-files.sh all development",
+    "docker-build-all": "scripts/docker-build.sh all",
+    "docker-up-dev": "docker-compose -f docker-compose.yml -f docker-compose.services.yml up -d",
+    "docker-down": "docker-compose -f docker-compose.yml -f docker-compose.services.yml down",
+    "docker-logs": "docker-compose -f docker-compose.yml -f docker-compose.services.yml logs -f"
+  }
+}

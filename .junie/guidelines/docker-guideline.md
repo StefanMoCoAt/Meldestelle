@@ -1,9 +1,9 @@
 # Docker-Guidelines für das Meldestelle-Projekt
 
-> **Version:** 3.0.0
+> **Version:** 3.0.1
 > **Datum:** 13. September 2025
 > **Autor:** Meldestelle Development Team
-> **Letzte Aktualisierung:** 🎯 ZENTRALE DOCKER-VERSIONSVERWALTUNG implementiert - Single Source of Truth für alle Build-Argumente, eliminiert Redundanz in 12+ Dockerfiles, automatisierte Build-Scripts und Version-Update-Utilities
+> **Letzte Aktualisierung:** 🎯 ZENTRALE DOCKER-VERSIONSVERWALTUNG vollständig optimiert - Single Source of Truth mit neuesten Monitoring-Versionen (Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7), erweiterte Script-Funktionalität und vollautomatisierte Version-Updates
 
 ---
 
@@ -23,13 +23,18 @@ Das Meldestelle-Projekt implementiert eine **moderne, sicherheitsorientierte Con
 
 1. [Architektur-Überblick](#architektur-überblick)
 2. [Zentrale Docker-Versionsverwaltung](#zentrale-docker-versionsverwaltung) 🆕
-3. [Dockerfile-Standards](#dockerfile-standards)
-4. [Docker-Compose Organisation](#docker-compose-organisation)
-5. [Development-Workflow](#development-workflow)
-6. [Production-Deployment](#production-deployment)
-7. [Monitoring und Observability](#monitoring-und-observability)
-8. [Troubleshooting](#troubleshooting)
-9. [Best Practices](#best-practices)
+3. [Zentrale Port-Verwaltung](#zentrale-port-verwaltung) 🆕
+4. [Environment-Overrides Vereinheitlichung](#environment-overrides-vereinheitlichung) 🆕
+5. [Docker-Compose Template-System](#docker-compose-template-system) 🆕
+6. [Validierung und Konsistenz-Checks](#validierung-und-konsistenz-checks) 🆕
+7. [IDE-Integration](#ide-integration) 🆕
+8. [Dockerfile-Standards](#dockerfile-standards)
+9. [Docker-Compose Organisation](#docker-compose-organisation)
+10. [Development-Workflow](#development-workflow)
+11. [Production-Deployment](#production-deployment)
+12. [Monitoring und Observability](#monitoring-und-observability)
+13. [Troubleshooting](#troubleshooting)
+14. [Best Practices](#best-practices)
 
 ---
 
@@ -74,21 +79,20 @@ graph TB
 
 ### Service-Ports Matrix
 
-| Service | Development | Production | Health Check | Debug Port |
-|---------|------------|------------|--------------|------------|
-| PostgreSQL | 5432 | Internal | pg_isready -U meldestelle -d meldestelle | - |
-| Redis | 6379 | Internal | redis-cli ping | - |
-| Keycloak | 8180 | 8443 (HTTPS) | /health/ready | - |
-| Kafka | 9092 | Internal | kafka-topics --bootstrap-server localhost:9092 --list | - |
-| Zookeeper | 2181 | Internal | nc -z localhost 2181 | - |
-| Zipkin | 9411 | Internal | /health | - |
-| Consul | 8500 | Internal | /v1/status/leader | - |
-| Auth Server | 8081 | Internal | /actuator/health/readiness | 5005 |
-| Ping Service | 8082 | Internal | /actuator/health/readiness | 5005 |
-| Monitoring Server | 8083 | Internal | /actuator/health/readiness | 5005 |
-| Prometheus | 9090 | Internal | /-/healthy | - |
-| Grafana | 3000 | 3443 (HTTPS) | /api/health | - |
-| Nginx | - | 80/443 | /health | - |
+| Service | Development | Production | Health Check | Debug Port | Version |
+|---------|------------|------------|--------------|------------|---------|
+| PostgreSQL | 5432 | Internal | pg_isready -U meldestelle -d meldestelle | - | 16-alpine |
+| Redis | 6379 | Internal | redis-cli ping | - | 7-alpine |
+| Keycloak | 8180 | 8443 (HTTPS) | /health/ready | - | 26.0.7 |
+| Kafka | 9092 | Internal | kafka-topics --bootstrap-server localhost:9092 --list | - | 7.4.0 |
+| Zookeeper | 2181 | Internal | nc -z localhost 2181 | - | 7.4.0 |
+| Consul | 8500 | Internal | /v1/status/leader | - | 1.15 |
+| Auth Server | 8081 | Internal | /actuator/health/readiness | 5005 | 1.0.0 |
+| Ping Service | 8082 | Internal | /actuator/health/readiness | 5005 | 1.0.0 |
+| Monitoring Server | 8083 | Internal | /actuator/health/readiness | 5005 | 1.0.0 |
+| Prometheus | 9090 | Internal | /-/healthy | - | v2.54.1 |
+| Grafana | 3000 | 3443 (HTTPS) | /api/health | - | 11.3.0 |
+| Nginx | - | 80/443 | /health | - | 1.25-alpine |
 
 ---
 
@@ -115,8 +119,11 @@ ARG GRADLE_VERSION=9.0.0
 [versions]
 gradle = "9.0.0"
 java = "21"
-node = "20.11.0"
+node = "20.12.0"
 nginx = "1.25-alpine"
+prometheus = "v2.54.1"
+grafana = "11.3.0"
+keycloak = "26.0.7"
 ```
 
 ### 🏗️ Architektur der zentralen Versionsverwaltung
@@ -137,10 +144,23 @@ docker/
 #### 1. **Globale Versionen** (`docker/build-args/global.env`)
 Verwendet von **allen** Dockerfiles:
 ```bash
+# --- Build Tools ---
 GRADLE_VERSION=9.0.0
 JAVA_VERSION=21
+
+# --- Build Metadata ---
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 VERSION=1.0.0
+
+# --- Common Base Images ---
+ALPINE_VERSION=3.19
+ECLIPSE_TEMURIN_JDK_VERSION=21-jdk-alpine
+ECLIPSE_TEMURIN_JRE_VERSION=21-jre-alpine
+
+# --- Monitoring & Infrastructure Services ---
+DOCKER_PROMETHEUS_VERSION=v2.54.1
+DOCKER_GRAFANA_VERSION=11.3.0
+DOCKER_KEYCLOAK_VERSION=26.0.7
 ```
 
 #### 2. **Kategorie-spezifische Versionen**
@@ -197,6 +217,15 @@ AUTH_SERVER_PORT=8087
 
 # Gradle auf 9.1.0 upgraden
 ./scripts/docker-versions-update.sh update gradle 9.1.0
+
+# Prometheus auf neueste Version upgraden
+./scripts/docker-versions-update.sh update prometheus v2.54.1
+
+# Grafana auf neueste Version upgraden
+./scripts/docker-versions-update.sh update grafana 11.3.0
+
+# Keycloak auf neueste Version upgraden
+./scripts/docker-versions-update.sh update keycloak 26.0.7
 
 # Alle Environment-Dateien synchronisieren
 ./scripts/docker-versions-update.sh sync
@@ -339,6 +368,560 @@ cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/my-
 
 # Build-Environment-Status prüfen
 ./scripts/docker-build.sh --versions
+```
+
+---
+
+## 🔌 Zentrale Port-Verwaltung
+
+### Überblick
+
+Mit **Version 3.1.0** führen wir ein revolutionäres Feature ein: die **zentrale Port-Verwaltung** über `docker/versions.toml`. Dieses System eliminiert Port-Konflikte und schafft eine einheitliche Port-Registry für alle Services.
+
+### 🎯 Single Source of Truth für Ports
+
+```toml
+# docker/versions.toml - Port-Registry
+[service-ports]
+# --- Infrastructure Services ---
+api-gateway = 8081
+auth-server = 8087
+monitoring-server = 8088
+
+# --- Application Services ---
+ping-service = 8082
+members-service = 8083
+horses-service = 8084
+events-service = 8085
+masterdata-service = 8086
+
+# --- External Services ---
+postgres = 5432
+redis = 6379
+keycloak = 8180
+consul = 8500
+zookeeper = 2181
+kafka = 9092
+
+# --- Monitoring Stack ---
+prometheus = 9090
+grafana = 3000
+
+# --- Client Applications ---
+web-app = 4000
+desktop-app-vnc = 5901
+desktop-app-novnc = 6080
+```
+
+### 🏗️ Port-Range-Management
+
+```toml
+[port-ranges]
+# --- Automatische Port-Zuweisung ---
+infrastructure = "8081-8088"
+services = "8082-8099"
+monitoring = "9090-9099"
+clients = "4000-4099"
+vnc = "5901-5999"
+debug = "5005-5009"
+
+# --- Reserved Ranges ---
+system-reserved = "0-1023"
+ephemeral = "32768-65535"
+```
+
+### ⚡ Automatische Port-Integration
+
+#### Docker-Compose Integration
+```yaml
+# Ports werden automatisch aus versions.toml gelesen
+api-gateway:
+  ports:
+    - "${GATEWAY_PORT:-8081}:8081"
+  environment:
+    - SERVER_PORT=${GATEWAY_PORT:-8081}
+
+ping-service:
+  ports:
+    - "${PING_SERVICE_PORT:-8082}:8082"
+  environment:
+    - SERVER_PORT=${PING_SERVICE_PORT:-8082}
+```
+
+#### Script-basierte Port-Validierung
+```bash
+# scripts/validate-port-conflicts.sh
+#!/bin/bash
+validate_port_conflicts() {
+    local used_ports=($(grep -o '[0-9]\{4,5\}' docker/versions.toml | sort -n))
+
+    for port in "${used_ports[@]}"; do
+        if netstat -tulpn 2>/dev/null | grep -q ":$port "; then
+            echo "⚠️  Port $port ist bereits belegt!"
+        fi
+    done
+}
+```
+
+### 📊 Port-Registry Vorteile
+
+1. **Keine Konflikte**: Automatische Port-Konflikt-Erkennung
+2. **Skalierbarkeit**: Einfaches Hinzufügen neuer Services
+3. **Dokumentation**: Selbst-dokumentierende Port-Zuweisungen
+4. **Konsistenz**: Einheitliche Port-Konventionen
+5. **Automatisierung**: Script-basierte Port-Verwaltung
+
+---
+
+## ⚙️ Environment-Overrides Vereinheitlichung
+
+### Zentrale Environment-Konfiguration
+
+**Version 3.1.0** standardisiert Environment-Overrides für verschiedene Deployment-Szenarien:
+
+```toml
+# docker/versions.toml - Environment-spezifische Konfigurationen
+[environments.development]
+spring-profiles = "dev"
+debug-enabled = true
+log-level = "DEBUG"
+health-check-interval = "30s"
+health-check-timeout = "5s"
+health-check-retries = 3
+health-check-start-period = "40s"
+resource-limits = false
+jvm-debug-port = 5005
+hot-reload = true
+
+[environments.production]
+spring-profiles = "prod"
+debug-enabled = false
+log-level = "INFO"
+health-check-interval = "15s"
+health-check-timeout = "3s"
+health-check-retries = 3
+health-check-start-period = "30s"
+resource-limits = true
+jvm-debug-port = false
+hot-reload = false
+security-headers = true
+tls-enabled = true
+
+[environments.testing]
+spring-profiles = "test"
+debug-enabled = true
+log-level = "DEBUG"
+health-check-interval = "10s"
+health-check-timeout = "5s"
+health-check-retries = 2
+health-check-start-period = "20s"
+resource-limits = false
+jvm-debug-port = 5005
+hot-reload = false
+ephemeral-storage = true
+test-containers = true
+```
+
+### 🚀 Environment-basierte Deployments
+
+#### Development Environment
+```bash
+# Development mit Hot-Reload und Debug
+export DOCKER_ENVIRONMENT=development
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+```
+
+#### Production Environment
+```bash
+# Production mit Security und Resource-Limits
+export DOCKER_ENVIRONMENT=production
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+#### Testing Environment
+```bash
+# Testing mit schnellen Health-Checks
+export DOCKER_ENVIRONMENT=testing
+docker-compose -f docker-compose.test.yml up -d
+```
+
+### ⚙️ Automatische Environment-Anpassung
+
+```bash
+# scripts/apply-environment.sh
+#!/bin/bash
+apply_environment_settings() {
+    local env=${1:-development}
+
+    # Aus versions.toml lesen und anwenden
+    case $env in
+        "development")
+            export DEBUG=true
+            export LOG_LEVEL=DEBUG
+            export SPRING_PROFILES_ACTIVE=dev
+            ;;
+        "production")
+            export DEBUG=false
+            export LOG_LEVEL=INFO
+            export SPRING_PROFILES_ACTIVE=prod
+            ;;
+        "testing")
+            export DEBUG=true
+            export LOG_LEVEL=DEBUG
+            export SPRING_PROFILES_ACTIVE=test
+            ;;
+    esac
+}
+```
+
+---
+
+## 📝 Docker-Compose Template-System
+
+### Template-basierte Compose-Generierung
+
+**Version 3.1.0** führt ein mächtiges Template-System ein, das Docker-Compose-Dateien aus zentralen Konfigurationen generiert:
+
+```bash
+# scripts/generate-compose-files.sh
+#!/bin/bash
+generate_service_definition() {
+    local service=$1
+    local category=$2
+    local port=$(get_service_port $service)
+
+    cat << EOF
+  $service:
+    build:
+      context: .
+      dockerfile: dockerfiles/$category/$service/Dockerfile
+      args:
+$(generate_build_args_for_category $category)
+    container_name: meldestelle-$service
+    ports:
+      - "$port:$port"
+    environment:
+$(generate_environment_vars_for_service $service)
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:$port/actuator/health"]
+      interval: \${HEALTH_CHECK_INTERVAL:-15s}
+      timeout: \${HEALTH_CHECK_TIMEOUT:-3s}
+      retries: \${HEALTH_CHECK_RETRIES:-3}
+      start_period: \${HEALTH_CHECK_START_PERIOD:-30s}
+    restart: unless-stopped
+EOF
+}
+```
+
+### 🎯 Service-Kategorien Templates
+
+#### Services Template
+```bash
+generate_services_compose() {
+    local services=($(get_services_from_toml))
+
+    echo "# Generated from docker/versions.toml"
+    echo "services:"
+
+    for service in "${services[@]}"; do
+        generate_service_definition "$service" "services"
+    done
+}
+```
+
+#### Infrastructure Template
+```bash
+generate_infrastructure_compose() {
+    local infrastructure=($(get_infrastructure_from_toml))
+
+    for infra in "${infrastructure[@]}"; do
+        generate_service_definition "$infra" "infrastructure"
+    done
+}
+```
+
+### 📊 Template-System Vorteile
+
+1. **DRY-Prinzip**: Keine Duplikation in Compose-Dateien
+2. **Konsistenz**: Einheitliche Service-Definitionen
+3. **Skalierbarkeit**: Einfaches Hinzufügen neuer Services
+4. **Wartbarkeit**: Zentrale Template-Verwaltung
+5. **Automatisierung**: Script-basierte Generierung
+
+---
+
+## ✅ Validierung und Konsistenz-Checks
+
+### Automatisierte Docker-Konsistenz-Prüfung
+
+**Version 3.1.0** implementiert umfassende Validierungstools:
+
+```bash
+# scripts/validate-docker-consistency.sh
+#!/bin/bash
+validate_dockerfile_args() {
+    echo "🔍 Validating Dockerfile ARG usage..."
+
+    for dockerfile in $(find dockerfiles -name "Dockerfile"); do
+        echo "Checking $dockerfile..."
+
+        # Prüfe ARG-Deklarationen
+        grep "^ARG " "$dockerfile" | while read arg_line; do
+            local arg_name=$(echo "$arg_line" | cut -d' ' -f2 | cut -d'=' -f1)
+            validate_arg_in_toml "$arg_name" "$dockerfile"
+        done
+    done
+}
+
+validate_compose_versions() {
+    echo "🔍 Validating docker-compose version references..."
+
+    for compose_file in docker-compose*.yml; do
+        echo "Checking $compose_file..."
+
+        # Prüfe ${DOCKER_*_VERSION} Referenzen
+        grep -o '\${DOCKER_[^}]*}' "$compose_file" | sort -u | while read var_ref; do
+            validate_version_mapping "$var_ref" "$compose_file"
+        done
+    done
+}
+
+validate_port_assignments() {
+    echo "🔍 Validating port assignments..."
+
+    # Prüfe Port-Duplikate
+    local ports=($(grep -o '[0-9]\{4,5\}' docker/versions.toml | sort))
+    local unique_ports=($(printf '%s\n' "${ports[@]}" | sort -u))
+
+    if [ ${#ports[@]} -ne ${#unique_ports[@]} ]; then
+        echo "❌ Duplicate ports found in versions.toml!"
+        return 1
+    fi
+
+    echo "✅ No port conflicts detected"
+}
+```
+
+### 🏗️ Build-Validierung
+
+```bash
+validate_build_consistency() {
+    echo "🔍 Validating build consistency..."
+
+    # Template-Konsistenz prüfen
+    for template in dockerfiles/templates/*.Dockerfile; do
+        validate_template_args "$template"
+    done
+
+    # Service-spezifische Dockerfiles prüfen
+    for service_dockerfile in dockerfiles/{services,infrastructure,clients}/*/Dockerfile; do
+        validate_service_dockerfile "$service_dockerfile"
+    done
+
+    echo "✅ Build consistency validation complete"
+}
+```
+
+### 🛠️ Kontinuierliche Validierung
+
+```bash
+# .github/workflows/docker-validation.yml (Beispiel)
+name: Docker Consistency Validation
+
+on: [push, pull_request]
+
+jobs:
+  validate-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Validate Docker Consistency
+        run: |
+          chmod +x scripts/validate-docker-consistency.sh
+          ./scripts/validate-docker-consistency.sh
+      - name: Validate Build Args
+        run: |
+          ./scripts/docker-versions-update.sh sync
+          git diff --exit-code docker/build-args/
+```
+
+---
+
+## 🔧 IDE-Integration
+
+### VS Code Integration
+
+**Version 3.1.0** bietet umfassende IDE-Unterstützung:
+
+**Datei:** `.vscode/settings.json`
+
+```json
+{
+    "yaml.schemas": {
+        "./docker/schemas/versions-schema.json": "docker/versions.toml"
+    },
+    "files.associations": {
+        "docker/versions.toml": "toml",
+        "docker-compose*.yml": "dockercompose"
+    },
+    "docker.defaultBuildArgs": {
+        "GRADLE_VERSION": "${config:docker.gradleVersion}",
+        "JAVA_VERSION": "${config:docker.javaVersion}"
+    },
+    "docker.composeCommand": "docker-compose",
+    "docker.composeFiles": [
+        "docker-compose.yml",
+        "docker-compose.services.yml",
+        "docker-compose.clients.yml"
+    ]
+}
+```
+
+### 📋 JSON Schema für TOML-Validierung
+
+**Datei:** `docker/schemas/versions-schema.json`
+
+```json
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Docker Versions TOML Schema",
+    "type": "object",
+    "properties": {
+        "versions": {
+            "type": "object",
+            "properties": {
+                "gradle": {
+                    "type": "string",
+                    "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+                    "description": "Gradle version"
+                },
+                "java": {
+                    "type": "string",
+                    "enum": ["17", "21", "22"],
+                    "description": "Java LTS version"
+                },
+                "prometheus": {
+                    "type": "string",
+                    "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$",
+                    "description": "Prometheus version with 'v' prefix"
+                },
+                "grafana": {
+                    "type": "string",
+                    "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+                    "description": "Grafana version"
+                }
+            },
+            "required": ["gradle", "java"],
+            "additionalProperties": true
+        },
+        "service-ports": {
+            "type": "object",
+            "patternProperties": {
+                ".*": {
+                    "type": "integer",
+                    "minimum": 1024,
+                    "maximum": 65535
+                }
+            }
+        },
+        "environments": {
+            "type": "object",
+            "properties": {
+                "development": {"$ref": "#/definitions/environment"},
+                "production": {"$ref": "#/definitions/environment"},
+                "testing": {"$ref": "#/definitions/environment"}
+            }
+        }
+    },
+    "definitions": {
+        "environment": {
+            "type": "object",
+            "properties": {
+                "spring-profiles": {"type": "string"},
+                "debug-enabled": {"type": "boolean"},
+                "log-level": {"enum": ["DEBUG", "INFO", "WARN", "ERROR"]},
+                "resource-limits": {"type": "boolean"}
+            }
+        }
+    }
+}
+```
+
+### 🚀 IntelliJ IDEA Integration
+
+```xml
+<!-- .idea/docker.xml -->
+<project version="4">
+  <component name="DockerConfiguration">
+    <option name="composeFiles">
+      <list>
+        <option value="$PROJECT_DIR$/docker-compose.yml" />
+        <option value="$PROJECT_DIR$/docker-compose.services.yml" />
+      </list>
+    </option>
+    <option name="buildKitEnabled" value="true" />
+  </component>
+</project>
+```
+
+### ⚡ Auto-Completion und Hints
+
+#### VS Code Tasks
+
+**Datei:** `.vscode/tasks.json`
+
+```json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Docker: Show Versions",
+            "type": "shell",
+            "command": "./scripts/docker-versions-update.sh",
+            "args": ["show"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Docker: Validate Consistency",
+            "type": "shell",
+            "command": "./scripts/validate-docker-consistency.sh",
+            "group": "build"
+        },
+        {
+            "label": "Docker: Build All Services",
+            "type": "shell",
+            "command": "./scripts/docker-build.sh",
+            "args": ["all"],
+            "group": "build"
+        }
+    ]
+}
+```
+
+### 🔧 Development Shortcuts
+
+#### Command Palette Commands
+
+**Datei:** `.vscode/settings.json` (erweiterte Konfiguration)
+
+```json
+{
+    "workbench.commandPalette.history": 100,
+    "terminal.integrated.profiles.linux": {
+        "Docker Commands": {
+            "path": "bash",
+            "args": ["-c", "echo 'Docker utilities loaded'; bash"]
+        }
+    },
+    "docker.enableDockerComposeLanguageService": true,
+    "docker.enableDockerfileLanguageService": true
+}
 ```
 
 ---
@@ -1214,6 +1797,169 @@ docker-compose logs -f --tail=50 SERVICE_NAME
 4. **Documentation**: Aktuelle README-Dateien pro Service
 5. **Testing**: Automatisierte Container-Tests
 
+### 🎯 Zentrale Verwaltung Best Practices (Version 3.2.0)
+
+#### **Single Source of Truth Prinzipien**
+
+```bash
+# ✅ RICHTIG - Zentrale Version-Updates
+./scripts/docker-versions-update.sh update java 22
+./scripts/docker-versions-update.sh sync
+
+# ❌ FALSCH - Manuelle Bearbeitung von Dockerfiles
+vim dockerfiles/services/ping-service/Dockerfile  # Version hardcoden
+```
+
+#### **Port-Verwaltung Richtlinien**
+
+1. **Immer zentrale Port-Registry verwenden**:
+   ```toml
+   # docker/versions.toml - Port-Definitionen
+   [service-ports]
+   new-service = 8089  # Nächster verfügbarer Port
+   ```
+
+2. **Port-Konflikte vor Deployment prüfen**:
+   ```bash
+   ./scripts/validate-docker-consistency.sh
+   ```
+
+3. **Port-Ranges einhalten**:
+   - Infrastructure: 8081-8088
+   - Services: 8082-8099
+   - Monitoring: 9090-9099
+   - Clients: 4000-4099
+
+#### **Environment-Overrides Standards**
+
+1. **Environment-spezifische Konfigurationen nutzen**:
+   ```bash
+   # Development
+   export DOCKER_ENVIRONMENT=development
+
+   # Production
+   export DOCKER_ENVIRONMENT=production
+   ```
+
+2. **Konsistente Health-Check-Konfigurationen**:
+   ```toml
+   [environments.production]
+   health-check-interval = "15s"
+   health-check-timeout = "3s"
+   health-check-retries = 3
+   ```
+
+#### **Template-System Richtlinien**
+
+1. **Compose-Files aus Templates generieren**:
+   ```bash
+   # Automatische Generierung bevorzugen
+   ./scripts/generate-compose-files.sh
+
+   # Manuelle Bearbeitung nur bei spezifischen Anpassungen
+   ```
+
+2. **Service-Kategorien korrekt zuordnen**:
+   - `services/`: Domain-Services (ping, members, horses)
+   - `infrastructure/`: Platform-Services (gateway, auth, monitoring)
+   - `clients/`: Frontend-Anwendungen (web-app, desktop-app)
+
+#### **Validierung und Konsistenz**
+
+1. **Regelmäßige Konsistenz-Prüfungen**:
+   ```bash
+   # Bei jedem Build
+   ./scripts/validate-docker-consistency.sh
+
+   # In CI/CD Pipeline integrieren
+   ```
+
+2. **Build-Args Konsistenz**:
+   ```dockerfile
+   # ✅ RICHTIG - Zentrale Referenz
+   ARG GRADLE_VERSION
+   ARG JAVA_VERSION
+
+   # ❌ FALSCH - Hardcodierte Versionen
+   ARG GRADLE_VERSION=9.0.0
+   ```
+
+#### **IDE-Integration Best Practices**
+
+1. **JSON Schema für Validierung aktivieren**:
+   ```json
+   {
+       "yaml.schemas": {
+           "./docker/schemas/versions-schema.json": "docker/versions.toml"
+       }
+   }
+   ```
+
+2. **Automatisierte Tasks nutzen**:
+   - Docker: Show Versions
+   - Docker: Validate Consistency
+   - Docker: Build All Services
+
+### 🚀 Entwickler-Workflow Best Practices (Version 3.2.0)
+
+#### **Neuen Service hinzufügen**
+
+```bash
+# 1. Port in versions.toml reservieren
+echo "new-service = 8089" >> docker/versions.toml
+
+# 2. Template-basierten Service erstellen
+cp dockerfiles/templates/spring-boot-service.Dockerfile \
+   dockerfiles/services/new-service/Dockerfile
+
+# 3. Compose-Definition generieren
+./scripts/generate-compose-files.sh
+
+# 4. Konsistenz validieren
+./scripts/validate-docker-consistency.sh
+
+# 5. Build und Test
+./scripts/docker-build.sh services
+```
+
+#### **Version-Updates Workflow**
+
+```bash
+# 1. Zentrale Version aktualisieren
+./scripts/docker-versions-update.sh update java 22
+
+# 2. Environment-Files synchronisieren (automatisch)
+# 3. Alle Services neu bauen
+./scripts/docker-build.sh all
+
+# 4. Tests ausführen
+docker-compose -f docker-compose.test.yml up -d
+./gradlew test
+
+# 5. Commit und Deploy
+git add docker/versions.toml docker/build-args/
+git commit -m "Update Java to version 22"
+```
+
+#### **Production-Deployment Workflow**
+
+```bash
+# 1. Environment auf Production setzen
+export DOCKER_ENVIRONMENT=production
+
+# 2. Production-spezifische Validierung
+./scripts/validate-docker-consistency.sh
+
+# 3. Security-Konfiguration anwenden
+./scripts/apply-environment.sh production
+
+# 4. Production-Build
+docker-compose -f docker-compose.prod.yml build
+
+# 5. Health-Check-basiertes Deployment
+docker-compose -f docker-compose.prod.yml up -d
+```
+
 ### 📦 Build Best Practices
 
 ```dockerfile
@@ -1269,6 +2015,27 @@ brew install ctop  # Container-Monitoring-Tool
 
 | Version | Datum | Änderungen |
 |---------|-------|------------|
+| 3.2.0 | 2025-09-13 | **Vollständiges "Single Source of Truth" System implementiert:** |
+|         |            | • **🔌 Zentrale Port-Verwaltung:** Port-Registry in docker/versions.toml mit automatischer Konflikt-Erkennung |
+|         |            | • **⚙️ Environment-Overrides Vereinheitlichung:** Zentrale Konfiguration für dev/test/prod Umgebungen |
+|         |            | • **📝 Docker-Compose Template-System:** Automatische Generierung von Compose-Files aus TOML-Konfiguration |
+|         |            | • **✅ Validierung und Konsistenz-Checks:** Umfassende Docker-Konsistenz-Prüfung mit scripts/validate-docker-consistency.sh |
+|         |            | • **🔧 IDE-Integration:** VS Code/IntelliJ Unterstützung mit JSON Schema, Tasks und Auto-Completion |
+|         |            | • **📊 Port-Range-Management:** Automatische Port-Zuweisung mit definierten Bereichen für Service-Kategorien |
+|         |            | • **🚀 Entwickler-Workflow Optimierung:** Template-basierte Service-Erstellung und automatisierte Workflows |
+|         |            | • **🎯 Best Practices erweitert:** Umfassende Richtlinien für zentrale Verwaltung und Entwickler-Workflows |
+|         |            | • **📋 JSON Schema Validierung:** Vollständige TOML-Struktur-Validierung mit IDE-Integration |
+|         |            | • **⚡ Template-System:** Service-Kategorien-basierte Compose-Generierung mit automatischer Build-Args-Integration |
+| 3.0.1 | 2025-09-13 | **Zentrale Docker-Versionsverwaltung - Vollständige Optimierung:** |
+|         |            | • **Monitoring-Tool-Updates:** Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7 |
+|         |            | • **Erweiterte Script-Funktionalität:** docker-versions-update.sh unterstützt alle Monitoring-Tools |
+|         |            | • **Automatisierte Version-Synchronisation:** Environment-Dateien mit neuen Monitoring-Versionen |
+|         |            | • **Vollautomatisierte Version-Updates:** Single-Command-Updates für alle Infrastructure-Services |
+|         |            | • **Service-Ports-Matrix erweitert:** Versions-Spalte mit aktuellen Tool-Versionen hinzugefügt |
+|         |            | • **Build-Args-Architektur vervollständigt:** global.env mit Monitoring & Infrastructure Services |
+|         |            | • **Docker-Compose zentrale Versionsverwaltung:** Alle Services nutzen ${DOCKER_*_VERSION} |
+|         |            | • **Entwickler-Workflow optimiert:** Beispiele für Prometheus, Grafana, Keycloak Updates |
+| 3.0.0 | 2025-09-13 | **Zentrale Docker-Versionsverwaltung implementiert** |
 | 1.1.0 | 2025-08-16 | **Umfassende Überarbeitung und Optimierung:** |
 |         |            | • Aktualisierung aller Dockerfile-Templates auf aktuelle Implementierung |
 |         |            | • Integration von BuildKit Cache Mounts für optimale Build-Performance |

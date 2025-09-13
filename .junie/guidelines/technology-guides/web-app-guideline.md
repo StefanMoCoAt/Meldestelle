@@ -1,10 +1,27 @@
 # Client-App-Richtlinie (Compose Multiplatform)
 
+---
+guideline_type: "technology"
+scope: "web-app-multiplatform"
+audience: ["developers", "ai-assistants", "frontend-developers"]
+last_updated: "2025-09-13"
+dependencies: ["master-guideline.md", "architecture-principles.md"]
+related_files: ["client/build.gradle.kts", "client/src/commonMain/**", "client/src/wasmJsMain/**", "client/src/jvmMain/**"]
+ai_context: "Compose Multiplatform development, MVVM pattern, KMP architecture, desktop and web client development"
+---
+
 ## 1. Einleitung
 
 Diese Richtlinie beschreibt die Architektur und die Best Practices für die Entwicklung der Client-Anwendungen für das "Meldestelle"-Projekt. Die Client-Anwendungen werden mit **Compose Multiplatform** für Desktop und Web entwickelt.
 
 Das Hauptziel ist die maximale Wiederverwendung von Code zwischen den Desktop- und Web-Plattformen durch die konsequente Nutzung des `commonMain`-Source-Sets von Kotlin Multiplatform (KMP). Die Anwendung läuft sowohl als native Desktop-Anwendung (JVM) als auch als Web-Anwendung (WebAssembly).
+
+> **🤖 AI-Assistant Hinweis:**
+> Compose Multiplatform Entwicklung folgt diesen Kernprinzipien:
+> - **commonMain:** Geteilte UI-Logik und Business-Logic
+> - **MVVM-Pattern:** ViewModels in commonMain, UI-Components plattformübergreifend
+> - **@Composable-Funktionen:** Deklarative UI mit State Hoisting
+> - **expect/actual:** Plattformspezifische Implementierungen nur wo nötig
 
 ## 2. Grundprinzipien
 
@@ -171,7 +188,11 @@ Das Docker-Image für die Web-Produktion (`Dockerfile` im `client`-Verzeichnis) 
 - **DON'T**: Annahmen über die Zielplattform in `commonMain` machen.
 
 ---
-_Letzte Aktualisierung: 2025-01-10_
 
-Diese Richtlinie bietet eine solide Grundlage für die Entwicklung Ihrer Desktop- und Web-Anwendungen mit Compose Multiplatform und stellt sicher, dass neue Teammitglieder die Multiplatform-Architektur und die erwarteten Konventionen schnell verstehen.
+**Navigation:**
+- [Master-Guideline](../master-guideline.md) - Übergeordnete Projektrichtlinien
+- [Architecture-Principles](../project-standards/architecture-principles.md) - Architektur-Grundsätze
+- [Coding-Standards](../project-standards/coding-standards.md) - Code-Qualitätsstandards
+- [Testing-Standards](../project-standards/testing-standards.md) - Test-Qualitätssicherung
+- [Trace-Bullet-Guideline](../process-guides/trace-bullet-guideline.md) - Entwicklungszyklus
 

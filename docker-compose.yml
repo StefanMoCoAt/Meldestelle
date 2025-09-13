@@ -57,7 +57,7 @@ services:
   # Authentifizierung
   # ===================================================================
   keycloak:
-    image: quay.io/keycloak/keycloak:25.0.6
+    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.0.7}
     container_name: meldestelle-keycloak
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
@@ -153,7 +153,7 @@ services:
   # Monitoring (Prometheus & Grafana)
   # ===================================================================
   prometheus:
-    image: prom/prometheus:v2.47.0
+    image: prom/prometheus:${DOCKER_PROMETHEUS_VERSION:-v2.54.1}
     container_name: meldestelle-prometheus
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
@@ -178,7 +178,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:10.1.0
+    image: grafana/grafana:${DOCKER_GRAFANA_VERSION:-11.3.0}
     container_name: meldestelle-grafana
     environment:
       GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
