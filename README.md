@@ -9,9 +9,9 @@ Das Projekt wurde kürzlich auf eine modulare Architektur migriert, um die Wartb
 ## Systemanforderungen
 
 - Java 21
-- Kotlin 2.1.21
-- Gradle 8.14
-- Docker und Docker Compose
+- Kotlin 2.2.10
+- Gradle 8.11+ (automatischer Download über Gradle Wrapper)
+- Docker und Docker Compose (v2.0+)
 
 ## Infrastruktur
 
@@ -90,13 +90,13 @@ Das System bietet verschiedene Docker-Konfigurationen für unterschiedliche Umge
 
 ```bash
 # Infrastruktur starten
-docker-compose up -d
+docker compose up -d
 
 # Status überprüfen
-docker-compose ps
+docker compose ps
 
 # Logs anzeigen
-docker-compose logs -f
+docker compose logs -f
 ```
 
 Dies startet alle erforderlichen Dienste wie PostgreSQL, Redis, Keycloak, Kafka, Zipkin und optional Prometheus und Grafana.
@@ -203,14 +203,14 @@ Es gibt noch einige offene Probleme, insbesondere bei den Client-Modulen, die Ko
 #### 1. Services starten nicht
 ```bash
 # Alle Services stoppen und neu starten
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 
 # Einzelnen Service neu starten
-docker-compose restart [service-name]
+docker compose restart [service-name]
 
 # Service-Logs überprüfen
-docker-compose logs [service-name]
+docker compose logs [service-name]
 ```
 
 #### 2. Port bereits belegt
@@ -228,39 +228,39 @@ nano .env
 #### 3. Datenbank-Verbindungsfehler
 ```bash
 # PostgreSQL-Status prüfen
-docker-compose exec postgres pg_isready -U meldestelle
+docker compose exec postgres pg_isready -U meldestelle
 
 # Datenbank-Logs anzeigen
-docker-compose logs postgres
+docker compose logs postgres
 
 # Verbindung manuell testen
-docker-compose exec postgres psql -U meldestelle -d meldestelle
+docker compose exec postgres psql -U meldestelle -d meldestelle
 ```
 
 #### 4. Keycloak-Authentifizierung fehlgeschlagen
 ```bash
 # Keycloak-Status prüfen
-docker-compose logs keycloak
+docker compose logs keycloak
 
 # Keycloak Admin-Console öffnen
 # http://localhost:8180/admin (admin/admin)
 
 # Keycloak-Datenbank zurücksetzen
-docker-compose down
+docker compose down
 docker volume rm meldestelle_postgres-data
-docker-compose up -d
+docker compose up -d
 ```
 
 #### 5. Kafka-Verbindungsprobleme
 ```bash
 # Kafka-Status prüfen
-docker-compose exec kafka kafka-topics --bootstrap-server localhost:9092 --list
+docker compose exec kafka kafka-topics --bootstrap-server localhost:9092 --list
 
 # Zookeeper-Status prüfen
-docker-compose exec zookeeper nc -z localhost 2181
+docker compose exec zookeeper nc -z localhost 2181
 
 # Kafka-Logs anzeigen
-docker-compose logs kafka zookeeper
+docker compose logs kafka zookeeper
 ```
 
 #### 6. Speicherplatz-Probleme
@@ -292,39 +292,39 @@ docker stats
 
 ```bash
 # Alle Services mit Logs starten
-docker-compose up
+docker compose up
 
 # Services im Hintergrund starten
-docker-compose up -d
+docker compose up -d
 
 # Bestimmte Services starten
-docker-compose up postgres redis
+docker compose up postgres redis
 
 # Services stoppen
-docker-compose stop
+docker compose stop
 
 # Services stoppen und Container entfernen
-docker-compose down
+docker compose down
 
 # Services mit Volume-Bereinigung stoppen
-docker-compose down -v
+docker compose down -v
 
 # Container-Shell öffnen
-docker-compose exec [service-name] /bin/bash
+docker compose exec [service-name] /bin/bash
 # oder für Alpine-basierte Images:
-docker-compose exec [service-name] /bin/sh
+docker compose exec [service-name] /bin/sh
 
 # Konfiguration validieren
-docker-compose config
+docker compose config
 
 # Service-Status anzeigen
-docker-compose ps
+docker compose ps
 
 # Logs aller Services anzeigen
-docker-compose logs
+docker compose logs
 
 # Logs eines bestimmten Services verfolgen
-docker-compose logs -f [service-name]
+docker compose logs -f [service-name]
 ```
 
 ## Dokumentation
@@ -344,4 +344,4 @@ Siehe [LICENSE](LICENSE) Datei.
 
 ## Stand
 
-Letzte Aktualisierung: 22. Juli 2025
+Letzte Aktualisierung: 14. September 2025

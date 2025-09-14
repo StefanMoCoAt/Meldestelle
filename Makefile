@@ -13,16 +13,9 @@
 
 .ONESHELL:
 
-# Choose docker compose CLI (prefers new plugin)
-DOCKER_COMPOSE_PLUGIN := $(shell docker compose version >/dev/null 2>&1 && echo 1 || echo 0)
-DOCKER_COMPOSE_LEGACY := $(shell command -v docker-compose >/dev/null 2>&1 && echo 1 || echo 0)
-ifeq ($(DOCKER_COMPOSE_PLUGIN),1)
+# Modern Docker Compose CLI (plugin-based)
+# Defaults to 'docker compose' as the legacy standalone tool is deprecated
 COMPOSE = docker compose
-else ifeq ($(DOCKER_COMPOSE_LEGACY),1)
-COMPOSE = docker-compose
-else
-COMPOSE = docker compose
-endif
 
 # Default target
 .DEFAULT_GOAL := help
@@ -189,6 +182,13 @@ env-test: ## Switch to test environment
 	@ln -sf config/.env.test .env
 	@echo "✅ Test environment activated (.env -> config/.env.test)"
 	@echo "Optimized for automated testing with alternative ports"
+
+validate: ## Validate Docker Compose configuration and environment
+	@echo "🔍 Validating configuration..."
+	@if [ ! -f .env ]; then echo "❌ No .env file found! Run 'make env-dev' first."; exit 1; fi
+	@echo "✅ Environment file exists"
+	@$(COMPOSE) config --quiet && echo "✅ Docker Compose configuration is valid" || echo "❌ Docker Compose configuration has errors"
+	@echo "✅ Validation completed"
 
 # ===================================================================
 # Production Commands

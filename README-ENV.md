@@ -61,12 +61,12 @@ Die folgenden Services sind vollständig konfiguriert:
 
 2. **Services starten:**
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 3. **Services überprüfen:**
    ```bash
-   docker-compose ps
+   docker compose ps
    ```
 
 ### Anpassungen
@@ -92,8 +92,8 @@ Vollständige Dokumentation finden Sie in:
 
 Bei Problemen:
 1. Überprüfen Sie die aktive Umgebungskonfiguration: `ls -la .env`
-2. Validieren Sie die Docker-Compose-Konfiguration: `docker-compose config`
-3. Überprüfen Sie die Service-Logs: `docker-compose logs -f`
+2. Validieren Sie die Docker-Compose-Konfiguration: `docker compose config`
+3. Überprüfen Sie die Service-Logs: `docker compose logs -f`
 4. Konsultieren Sie `config/README.md` für detaillierte Konfigurationsrichtlinien
 
 ## Nächste Schritte

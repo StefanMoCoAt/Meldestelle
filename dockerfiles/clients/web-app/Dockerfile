@@ -58,19 +58,19 @@ ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
 ENV GRADLE_USER_HOME=/home/gradle/.gradle
 
 # Install Node.js for Kotlin/Wasm npm operations
-ARG NODE_VERSION
-RUN apk add --no-cache \
-        nodejs \
-        npm \
-        curl && \
-    # Verify installation \
-    node --version && \
-    npm --version && \
-    # Create Gradle Node.js directory structure and symlinks \
-    mkdir -p /home/gradle/.gradle/nodejs/node-v22.0.0-linux-x64/bin && \
-    ln -sf /usr/bin/node /home/gradle/.gradle/nodejs/node-v22.0.0-linux-x64/bin/node && \
-    ln -sf /usr/bin/npm /home/gradle/.gradle/nodejs/node-v22.0.0-linux-x64/bin/npm && \
-    chown -R gradle:gradle /home/gradle/.gradle
+#ARG NODE_VERSION
+#RUN apk add --no-cache \
+#        nodejs \
+#        npm \
+#        curl && \
+#    # Verify installation \
+#    node --version && \
+#    npm --version && \
+#    # Create Gradle Node.js directory structure and symlinks \
+#    mkdir -p /home/gradle/.gradle/nodejs/node-v22.0.0-linux-x64/bin && \
+#    ln -sf /usr/bin/node /home/gradle/.gradle/nodejs/node-v22.0.0-linux-x64/bin/node && \
+#    ln -sf /usr/bin/npm /home/gradle/.gradle/nodejs/node-v22.0.0-linux-x64/bin/npm && \
+#    chown -R gradle:gradle /home/gradle/.gradle
 
 # Copy Gradle files first for better layer caching
 COPY gradle/ gradle/

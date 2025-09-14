@@ -255,6 +255,8 @@ volumes:
     driver: local
   grafana-data:
     driver: local
+  api-gateway-gradle-cache:
+    driver: local
 
 # ===================================================================
 # Networks

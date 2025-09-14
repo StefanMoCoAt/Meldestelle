@@ -81,6 +81,10 @@ LABEL service="desktop-app" \
       environment="production" \
       description="Meldestelle Compose Desktop Application with VNC"
 
+# Set non-interactive mode and timezone for package installations
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     openjdk-21-jre-headless \
@@ -92,15 +96,16 @@ RUN apt-get update && apt-get install -y \
     curl \
     wget \
     supervisor \
+    tigervnc-common \
+    tigervnc-standalone-server \
     && rm -rf /var/lib/apt/lists/*
 
 # Create application user
 RUN useradd -m -s /bin/bash appuser && \
     mkdir -p /home/appuser/.vnc
 
-# Set up VNC
-RUN mkdir -p /home/appuser/.vnc && \
-    echo "meldestelle" | vncpasswd -f > /home/appuser/.vnc/passwd && \
+# Set up VNC password using a separate RUN command
+RUN echo "meldestelle" | vncpasswd -f > /home/appuser/.vnc/passwd && \
     chmod 600 /home/appuser/.vnc/passwd && \
     chown -R appuser:appuser /home/appuser/.vnc
 
@@ -125,7 +130,7 @@ RUN echo '#!/bin/bash' > /opt/start-vnc.sh && \
     echo 'sleep 2' >> /opt/start-vnc.sh && \
     echo '' >> /opt/start-vnc.sh && \
     echo '# Start VNC server' >> /opt/start-vnc.sh && \
-    echo 'x11vnc -display :99 -nopw -listen localhost -xkb -ncache 10 -ncache_cr -rfbport $VNC_PORT &' >> /opt/start-vnc.sh && \
+    echo 'x11vnc -display :99 -rfbauth /home/appuser/.vnc/passwd -listen localhost -xkb -ncache 10 -ncache_cr -rfbport $VNC_PORT &' >> /opt/start-vnc.sh && \
     echo 'sleep 2' >> /opt/start-vnc.sh && \
     echo '' >> /opt/start-vnc.sh && \
     echo '# Start noVNC' >> /opt/start-vnc.sh && \

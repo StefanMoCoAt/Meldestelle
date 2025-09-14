@@ -134,13 +134,13 @@ PROMETHEUS_HOSTNAME=metrics.ihredomain.com
 
 ```bash
 # Produktionsumgebung starten
-docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
 
 # Status überprüfen
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 # Logs überwachen
-docker-compose -f docker-compose.prod.yml logs -f
+docker compose -f docker-compose.prod.yml logs -f
 ```
 
 ## 🔧 Konfiguration
@@ -230,10 +230,10 @@ Standard-Dashboards für:
 
 ```bash
 # Service-Logs anzeigen
-docker-compose -f docker-compose.prod.yml logs [service-name]
+docker compose -f docker-compose.prod.yml logs [service-name]
 
 # Logs in Echtzeit verfolgen
-docker-compose -f docker-compose.prod.yml logs -f [service-name]
+docker compose -f docker-compose.prod.yml logs -f [service-name]
 
 # Log-Rotation konfigurieren
 # Fügen Sie zu /etc/docker/daemon.json hinzu:
@@ -277,7 +277,7 @@ docker-compose -f docker-compose.prod.yml logs -f [service-name]
 cat > backup-db.sh << 'EOF'
 #!/bin/bash
 DATE=$(date +%Y%m%d_%H%M%S)
-docker-compose -f docker-compose.prod.yml exec -T postgres \
+docker compose -f docker-compose.prod.yml exec -T postgres \
   pg_dump -U meldestelle_prod meldestelle_prod | \
   gzip > backups/db_backup_$DATE.sql.gz
 find backups/ -name "db_backup_*.sql.gz" -mtime +30 -delete
@@ -293,11 +293,11 @@ echo "0 2 * * * /path/to/backup-db.sh" | crontab -
 
 ```bash
 # Redis-Daten sichern
-docker-compose -f docker-compose.prod.yml exec redis \
+docker compose -f docker-compose.prod.yml exec redis \
   redis-cli --rdb /data/backup.rdb
 
 # Backup kopieren
-docker cp $(docker-compose -f docker-compose.prod.yml ps -q redis):/data/backup.rdb \
+docker cp $(docker compose -f docker-compose.prod.yml ps -q redis):/data/backup.rdb \
   backups/redis_backup_$(date +%Y%m%d_%H%M%S).rdb
 ```
 
@@ -306,14 +306,14 @@ docker cp $(docker-compose -f docker-compose.prod.yml ps -q redis):/data/backup.
 ```bash
 # Datenbank wiederherstellen
 gunzip -c backups/db_backup_YYYYMMDD_HHMMSS.sql.gz | \
-docker-compose -f docker-compose.prod.yml exec -T postgres \
+docker compose -f docker-compose.prod.yml exec -T postgres \
   psql -U meldestelle_prod -d meldestelle_prod
 
 # Redis wiederherstellen
-docker-compose -f docker-compose.prod.yml stop redis
+docker compose -f docker-compose.prod.yml stop redis
 docker cp backups/redis_backup_YYYYMMDD_HHMMSS.rdb \
-  $(docker-compose -f docker-compose.prod.yml ps -q redis):/data/dump.rdb
-docker-compose -f docker-compose.prod.yml start redis
+  $(docker compose -f docker-compose.prod.yml ps -q redis):/data/dump.rdb
+docker compose -f docker-compose.prod.yml start redis
 ```
 
 ## 🔄 Updates und Wartung
@@ -322,23 +322,23 @@ docker-compose -f docker-compose.prod.yml start redis
 
 ```bash
 # Service einzeln aktualisieren
-docker-compose -f docker-compose.prod.yml pull [service-name]
-docker-compose -f docker-compose.prod.yml up -d --no-deps [service-name]
+docker compose -f docker-compose.prod.yml pull [service-name]
+docker compose -f docker-compose.prod.yml up -d --no-deps [service-name]
 
 # Alle Services aktualisieren
-docker-compose -f docker-compose.prod.yml pull
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 ### Wartungsmodus
 
 ```bash
 # Wartungsseite aktivieren
-docker-compose -f docker-compose.prod.yml stop nginx
+docker compose -f docker-compose.prod.yml stop nginx
 # Wartungs-Nginx Container starten (mit Wartungsseite)
 
 # Nach Wartung: Normalen Betrieb wiederherstellen
-docker-compose -f docker-compose.prod.yml start nginx
+docker compose -f docker-compose.prod.yml start nginx
 ```
 
 ## 🚨 Troubleshooting

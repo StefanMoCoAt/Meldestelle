@@ -60,6 +60,10 @@ subprojects {
         environment("NODE_OPTIONS", merged)
         // Also set the legacy switch to silence warnings entirely
         environment("NODE_NO_WARNINGS", "1")
+        // Set Chrome binary path to avoid snap permission issues
+        environment("CHROME_BIN", "/usr/bin/google-chrome")
+        environment("CHROMIUM_BIN", "/usr/bin/google-chrome")
+        environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/google-chrome")
     }
 }
 
@@ -82,6 +86,10 @@ tasks.withType<Exec>().configureEach {
     val merged = if (current.isNullOrBlank()) "--no-deprecation" else "$current --no-deprecation"
     environment("NODE_OPTIONS", merged)
     environment("NODE_NO_WARNINGS", "1")
+    // Set Chrome binary path to avoid snap permission issues
+    environment("CHROME_BIN", "/usr/bin/google-chrome")
+    environment("CHROMIUM_BIN", "/usr/bin/google-chrome")
+    environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/google-chrome")
 }
 
 tasks.wrapper {
