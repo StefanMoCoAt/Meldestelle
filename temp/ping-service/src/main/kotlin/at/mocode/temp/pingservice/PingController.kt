@@ -1,12 +1,12 @@
 package at.mocode.temp.pingservice
 
-import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 @RestController
-@CrossOrigin(origins = ["http://localhost:8080"])
 class PingController(
     private val pingService: PingServiceCircuitBreaker
 ) {
@@ -17,7 +17,12 @@ class PingController(
      */
     @GetMapping("/ping", "/ping/ping")
     fun ping(): Map<String, String> {
-        return mapOf("status" to "pong")
+        val now = OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        return mapOf(
+            "status" to "pong",
+            "timestamp" to now,
+            "service" to "ping-service"
+        )
     }
 
     /**

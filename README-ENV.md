@@ -102,3 +102,23 @@ Bei Problemen:
 - Wählen Sie die gewünschte Umgebung mit den Symlink-Befehlen oben
 - Passen Sie Konfigurationswerte in den `config/.env.*` Dateien nach Bedarf an
 - Für neue Umgebungen verwenden Sie `config/.env.template` als Ausgangspunkt
+
+
+---
+
+## Smoke-Tests (Prometheus & Zipkin)
+
+Nach dem Start der Infrastruktur können einfache Smoke-Tests ausgeführt werden:
+
+```bash
+# Zipkin: erzeugt einen Ping über das Gateway und prüft, ob Traces ankommen
+bash scripts/smoke/zipkin_smoke.sh
+
+# Prometheus: prüft, ob Gateway und Ping-Service Metriken exponieren
+bash scripts/smoke/prometheus_smoke.sh
+```
+
+Variablen:
+- GATEWAY_URL (Default: http://localhost:8081)
+- ZIPKIN_URL (Default: http://localhost:9411)
+- PING_SERVICE_URL (Default: http://localhost:8082)

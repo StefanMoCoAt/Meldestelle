@@ -92,3 +92,29 @@ Phase 4: Gesamtsystem testen und aufräumen
 [ ] Wenn alles funktioniert, den aktuellen Stand in Git committen (z.B. "feat: Add stable infrastructure baseline").
 
 [ ] Das :temp:ping-service-Modul und das :client:web-app-Modul in settings.gradle.kts wieder auskommentieren, um den Boden für den ersten echten Fach-Service vorzubereiten.
+
+
+---
+
+## Status-Update (September 2025)
+
+Ergebnis: Der Trace-Bullet ist abgeschlossen. Folgende Punkte sind erledigt:
+- [x] Gateway konfiguriert und startbar (inkl. Actuator/Prometheus, Tracing via monitoring-client)
+- [x] Ping-Service implementiert, bei Consul registriert und via Gateway erreichbar
+- [x] Circuit Breaker (Resilience4j) aktiv inkl. Fallbacks
+- [x] Client (Desktop/Web) führt Ping über Gateway aus
+- [x] Micrometer Tracing + Zipkin im Ping-Service und Gateway aktiv
+- [x] CORS zentral im Gateway (globalcors) aktiv, service-lokales CORS entfernt
+- [x] Einheitliches Logging-Pattern (traceId/spanId) über Logback
+- [x] Prometheus-Scrapes für Gateway und Ping-Service
+
+Zusätzlich eingeführt:
+- Smoke-Skripte: `scripts/smoke/zipkin_smoke.sh` und `scripts/smoke/prometheus_smoke.sh`
+- API-Härtung: `/ping` liefert nun status, timestamp, service
+- Health Probes: Actuator-Probes für liveness/readiness aktiviert
+
+Nächste Schritte (optional):
+- [ ] Client-Auth (Keycloak) integrieren und End-to-End testen
+- [ ] Weitere Services (members, horses, events) sukzessive ans Gateway hängen und observability prüfen
+- [ ] Sampling-Rate für Produktion reduzieren (TRACING_SAMPLING_PROBABILITY=0.1)
+- [ ] Optional: JSON-Logging für Containerbetrieb

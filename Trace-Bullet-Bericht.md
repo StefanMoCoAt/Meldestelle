@@ -94,3 +94,23 @@ Der erfolgreiche End-to-End-Test kann jederzeit wie folgt reproduziert werden:
 4. **Test ausführen:**
    Ein Klick auf den **"Ping Backend"**-Button in der Anwendung bestätigt den erfolgreichen Kommunikationsfluss durch
    die Anzeige der "✅ Ping erfolgreich!"-Meldung.
+
+
+---
+
+### 6. Tracing validiert
+
+Zur Validierung des Distributed Tracing wurden Micrometer Tracing (Brave) und Zipkin im `ping-service` und im `api-gateway` aktiviert. So lässt sich der vollständige Pfad einer Anfrage nachvollziehen.
+
+Schnellanleitung:
+- Backend/Infra starten (docker-compose) und Services hochfahren (Gateway + Ping-Service).
+- Einen Request auslösen:
+  - Browser: http://localhost:8081/api/ping/ping
+  - CLI: curl -s http://localhost:8081/api/ping/ping
+- Zipkin UI öffnen: http://localhost:9411
+  - Nach Service filtern: `api-gateway` oder `ping-service`
+  - Einen Trace öffnen und die zwei Spans (Gateway ↔ Ping) prüfen
+
+Optionaler Smoke-Test (CLI):
+- scripts/smoke/zipkin_smoke.sh – erzeugt einen Request und prüft über die Zipkin-API, ob Traces vorhanden sind.
+- scripts/smoke/prometheus_smoke.sh – prüft `/actuator/prometheus` am Gateway und am Ping-Service.

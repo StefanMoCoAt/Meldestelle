@@ -3,6 +3,10 @@
 
 // Enable bundle analysis based on environment variable
 const enableAnalyzer = process.env.ANALYZE_BUNDLE === 'true';
+// Ensure mutable config sections exist to avoid spread on undefined
+config.plugins = config.plugins || [];
+config.resolve = config.resolve || {};
+config.module = config.module || {};
 
 if (enableAnalyzer) {
     console.log('📊 Bundle analyzer enabled - generating bundle report...');
@@ -14,7 +18,8 @@ if (enableAnalyzer) {
     config.plugins.push({
         apply: (compiler) => {
             compiler.hooks.done.tap('BundleSizeLogger', (stats) => {
-                const assets = stats.toJson().assets;
+                const json = stats.toJson({ all: false, assets: true });
+                const assets = (json && json.assets) ? json.assets : [];
 
                 console.log('\n📦 WASM Bundle Analysis Report:');
                 console.log('=====================================');
@@ -68,14 +73,14 @@ if (enableAnalyzer) {
                     console.log('=====================================');
 
                     if (wasmAsset.size > 5 * 1024 * 1024) { // > 5MB
-                        console.log('⚠️  WASM binary is large (${wasmSizeMB}MB). Consider:');
+                        console.log(`⚠️  WASM binary is large (${wasmSizeMB}MB). Consider:`);
                         console.log('   - Reducing Compose UI components');
                         console.log('   - Lazy loading features');
                         console.log('   - Tree-shaking unused dependencies');
                     }
 
                     if (jsAsset.size > 500 * 1024) { // > 500KB
-                        console.log('⚠️  JS bundle is large (${jsSizeKB}KB). Consider:');
+                        console.log(`⚠️  JS bundle is large (${jsSizeKB}KB). Consider:`);
                         console.log('   - Code splitting');
                         console.log('   - Dynamic imports');
                         console.log('   - Removing unused imports');
@@ -95,7 +100,7 @@ if (enableAnalyzer) {
 
 // Additional tree-shaking optimizations
 config.resolve = {
-    ...config.resolve,
+    ...(config.resolve || {}),
     // Prioritize ES6 modules for better tree-shaking
     mainFields: ['module', 'browser', 'main'],
     // Add extensions for better resolution
@@ -104,9 +109,9 @@ config.resolve = {
 
 // Mark packages as side-effect-free for better tree-shaking
 config.module = {
-    ...config.module,
+    ...(config.module || {}),
     rules: [
-        ...config.module.rules || [],
+        ...(config.module && config.module.rules ? config.module.rules : []),
         {
             // Mark Kotlin-generated code as side-effect-free where possible
             test: /\.js$/,

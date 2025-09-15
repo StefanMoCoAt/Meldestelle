@@ -5,7 +5,7 @@ const path = require('path');
 
 // Bundle size optimization configuration
 config.optimization = {
-    ...config.optimization,
+    ...(config.optimization || {}),
     // Enable aggressive tree shaking
     usedExports: true,
     sideEffects: false,
@@ -64,7 +64,7 @@ config.optimization = {
 
 // Performance optimization
 config.performance = {
-    ...config.performance,
+    ...(config.performance || {}),
     // Increase hint limits for WASM (which is naturally larger)
     maxAssetSize: 2000000, // 2MB for individual assets
     maxEntrypointSize: 2000000, // 2MB for entrypoints
@@ -73,7 +73,7 @@ config.performance = {
 
 // Resolve optimization for faster builds
 config.resolve = {
-    ...config.resolve,
+    ...(config.resolve || {}),
     // Skip looking in these directories to speed up resolution
     modules: ['node_modules'],
     // Cache module resolution
@@ -82,7 +82,7 @@ config.resolve = {
 
 // Module optimization
 config.module = {
-    ...config.module,
+    ...(config.module || {}),
     // Disable parsing for known pre-built modules
     noParse: [
         /kotlin\.js$/,
@@ -94,7 +94,7 @@ config.module = {
 if (config.mode === 'production') {
     // Production-specific optimizations
     config.output = {
-        ...config.output,
+        ...(config.output || {}),
         // Better file names for caching
         filename: '[name].[contenthash:8].js',
         chunkFilename: '[name].[contenthash:8].chunk.js'
@@ -102,7 +102,7 @@ if (config.mode === 'production') {
 
     // Additional production optimizations
     config.optimization = {
-        ...config.optimization,
+        ...(config.optimization || {}),
         // Enable module concatenation (scope hoisting)
         concatenateModules: true,
         // Remove empty chunks

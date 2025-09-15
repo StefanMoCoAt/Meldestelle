@@ -250,13 +250,14 @@ management:
       enabled: true
     java:
       enabled: true
-  # Tracing-Konfiguration - Zipkin deaktiviert da kein Service verfügbar
+  # Tracing-Konfiguration - Aktiviert (Micrometer Tracing + Zipkin)
   tracing:
+    enabled: true
     sampling:
-      probability: 0.0  # Deaktiviert Tracing komplett
+      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
   zipkin:
     tracing:
-      endpoint: ""  # Leer um Zipkin zu deaktivieren
+      endpoint: ${ZIPKIN_TRACING_ENDPOINT:http://zipkin:9411/api/v2/spans}
 
 # Erweiterte Logging-Konfiguration
 logging:

@@ -34,6 +34,9 @@ dependencies {
     // Provide common Kotlin dependencies (coroutines, serialization, logging)
     implementation(projects.platform.platformDependencies)
 
+    // Monitoring client: tracing + zipkin + defaults
+    implementation(projects.infrastructure.monitoring.monitoringClient)
+
     // === Core Spring Boot Dependencies ===
     // Web starter for REST endpoints
     implementation(libs.spring.boot.starter.web)
