@@ -1,0 +1,381 @@
+# ===================================================================
+# Central Configuration - Single Source of Truth
+# Master file for all project configuration values
+# ===================================================================
+# Version: 1.0.0
+# Last updated: 2025-09-15
+# Author: Meldestelle Development Team
+#
+# This file serves as the SINGLE SOURCE OF TRUTH for all configuration
+# values in the Meldestelle project, eliminating redundancy across
+# 38+ files and ensuring consistency.
+
+[metadata]
+project-name = "Meldestelle"
+version = "1.0.0"
+description = "Pferdesport Meldestelle System"
+author = "Österreichischer Pferdesportverband"
+license = "Proprietary"
+
+# ===================================================================
+# PORT MANAGEMENT - Single Source of Truth
+# Eliminates 38+ redundant port definitions
+# ===================================================================
+
+[ports]
+# --- Infrastructure Services ---
+api-gateway = 8081
+auth-server = 8087
+monitoring-server = 8088
+
+# --- Application Services ---
+ping-service = 8082
+members-service = 8083
+horses-service = 8084
+events-service = 8085
+masterdata-service = 8086
+
+# --- External Infrastructure ---
+postgres = 5432
+redis = 6379
+keycloak = 8180
+consul = 8500
+zookeeper = 2181
+kafka = 9092
+
+# --- Monitoring Stack ---
+prometheus = 9090
+grafana = 3000
+alertmanager = 9093
+
+# --- Client Applications ---
+web-app = 4000
+desktop-app-vnc = 5901
+desktop-app-novnc = 6080
+
+# --- Debug Ports (Development) ---
+gateway-debug = 5005
+ping-debug = 5005
+members-debug = 5004
+horses-debug = 5005
+events-debug = 5006
+masterdata-debug = 5007
+auth-debug = 5005
+
+[port-ranges]
+# --- Port Range Definitions ---
+infrastructure = "8081-8089"
+services = "8082-8099"
+monitoring = "9090-9099"
+clients = "4000-4099"
+debug = "5005-5009"
+vnc = "5901-5999"
+
+# ===================================================================
+# SPRING PROFILE MANAGEMENT - Single Source of Truth
+# Eliminates 72+ redundant SPRING_PROFILES_ACTIVE definitions
+# ===================================================================
+
+[spring-profiles]
+# --- Standard Profile Names ---
+default = "default"
+development = "dev"
+docker = "docker"
+production = "prod"
+test = "test"
+
+# --- Category-Specific Default Profiles ---
+[spring-profiles.defaults]
+infrastructure = "default"
+services = "docker"
+clients = "dev"
+
+# --- Environment Mapping ---
+[spring-profiles.environment-mapping]
+development = "dev"
+staging = "prod"
+production = "prod"
+testing = "test"
+local = "dev"
+
+# ===================================================================
+# SERVICE DISCOVERY - Single Source of Truth
+# Standardizes service URLs and hostnames
+# ===================================================================
+
+[services]
+[services.ping-service]
+name = "ping-service"
+port = 8082
+internal-host = "ping-service"
+external-host = "localhost"
+internal-url = "http://ping-service:8082"
+external-url = "http://localhost:8082"
+health-endpoint = "/actuator/health/readiness"
+metrics-endpoint = "/actuator/prometheus"
+info-endpoint = "/actuator/info"
+swagger-endpoint = "/swagger-ui.html"
+
+[services.members-service]
+name = "members-service"
+port = 8083
+internal-host = "members-service"
+external-host = "localhost"
+internal-url = "http://members-service:8083"
+external-url = "http://localhost:8083"
+health-endpoint = "/actuator/health/readiness"
+metrics-endpoint = "/actuator/prometheus"
+info-endpoint = "/actuator/info"
+
+[services.horses-service]
+name = "horses-service"
+port = 8084
+internal-host = "horses-service"
+external-host = "localhost"
+internal-url = "http://horses-service:8084"
+external-url = "http://localhost:8084"
+health-endpoint = "/actuator/health/readiness"
+metrics-endpoint = "/actuator/prometheus"
+info-endpoint = "/actuator/info"
+
+[services.events-service]
+name = "events-service"
+port = 8085
+internal-host = "events-service"
+external-host = "localhost"
+internal-url = "http://events-service:8085"
+external-url = "http://localhost:8085"
+health-endpoint = "/actuator/health/readiness"
+metrics-endpoint = "/actuator/prometheus"
+info-endpoint = "/actuator/info"
+
+[services.masterdata-service]
+name = "masterdata-service"
+port = 8086
+internal-host = "masterdata-service"
+external-host = "localhost"
+internal-url = "http://masterdata-service:8086"
+external-url = "http://localhost:8086"
+health-endpoint = "/actuator/health/readiness"
+metrics-endpoint = "/actuator/prometheus"
+info-endpoint = "/actuator/info"
+
+[services.api-gateway]
+name = "api-gateway"
+port = 8081
+internal-host = "api-gateway"
+external-host = "localhost"
+internal-url = "http://api-gateway:8081"
+external-url = "http://localhost:8081"
+health-endpoint = "/actuator/health/readiness"
+metrics-endpoint = "/actuator/prometheus"
+info-endpoint = "/actuator/info"
+gateway-endpoint = "/actuator/gateway"
+
+[services.auth-server]
+name = "auth-server"
+port = 8087
+internal-host = "auth-server"
+external-host = "localhost"
+internal-url = "http://auth-server:8087"
+external-url = "http://localhost:8087"
+health-endpoint = "/actuator/health/readiness"
+metrics-endpoint = "/actuator/prometheus"
+info-endpoint = "/actuator/info"
+
+# ===================================================================
+# INFRASTRUCTURE SERVICES
+# ===================================================================
+
+[infrastructure]
+[infrastructure.postgres]
+host = "postgres"
+port = 5432
+database = "meldestelle"
+user = "meldestelle"
+external-port = 5432
+health-check = "pg_isready -U meldestelle -d meldestelle"
+
+[infrastructure.redis]
+host = "redis"
+port = 6379
+external-port = 6379
+health-check = "redis-cli ping"
+
+[infrastructure.consul]
+host = "consul"
+port = 8500
+external-port = 8500
+health-check = "/v1/status/leader"
+
+[infrastructure.keycloak]
+host = "keycloak"
+port = 8080
+external-port = 8180
+admin-user = "admin"
+health-check = "/"
+
+[infrastructure.kafka]
+host = "kafka"
+port = 9092
+external-port = 9092
+zookeeper-port = 2181
+health-check = "kafka-broker-api-versions --bootstrap-server localhost:9092"
+
+# ===================================================================
+# MONITORING CONFIGURATION
+# ===================================================================
+
+[monitoring]
+[monitoring.prometheus]
+host = "prometheus"
+port = 9090
+external-port = 9090
+config-path = "/etc/prometheus/prometheus.yml"
+health-check = "/-/healthy"
+retention = "200h"
+
+[monitoring.grafana]
+host = "grafana"
+port = 3000
+external-port = 3000
+admin-user = "admin"
+health-check = "/api/health"
+datasource-url = "http://prometheus:9090"
+
+[monitoring.alertmanager]
+host = "alertmanager"
+port = 9093
+external-port = 9093
+health-check = "/-/healthy"
+
+# ===================================================================
+# ENVIRONMENT VARIABLES - Single Source of Truth
+# Consolidates variables from .env.template and compose files
+# ===================================================================
+
+[environment]
+[environment.application]
+name = "Meldestelle"
+version = "1.0.0"
+description = "Pferdesport Meldestelle System"
+environment = "development"
+debug-mode = true
+hot-reload = true
+
+[environment.database]
+host = "localhost"
+port = 5432
+name = "meldestelle"
+user = "meldestelle"
+password = "meldestelle"
+max-pool-size = 10
+min-pool-size = 5
+auto-migrate = true
+
+[environment.redis]
+host = "localhost"
+port = 6379
+password = ""
+database = 0
+connection-timeout = 2000
+read-timeout = 2000
+use-pooling = true
+max-pool-size = 8
+min-pool-size = 2
+
+[environment.security]
+jwt-secret = "meldestelle-jwt-secret-key-for-development-change-in-production"
+jwt-issuer = "meldestelle-api"
+jwt-audience = "meldestelle-clients"
+jwt-realm = "meldestelle"
+api-key = "meldestelle-api-key-for-development"
+
+[environment.logging]
+level = "DEBUG"
+structured = true
+correlation-id = true
+request-id-header = "X-Request-ID"
+
+# ===================================================================
+# HEALTH CHECK CONFIGURATION
+# Standardizes health check endpoints and timeouts
+# ===================================================================
+
+[health-checks]
+[health-checks.defaults]
+interval = "15s"
+timeout = "5s"
+retries = 3
+start-period = "30s"
+
+[health-checks.development]
+interval = "30s"
+timeout = "5s"
+retries = 3
+start-period = "40s"
+
+[health-checks.production]
+interval = "10s"
+timeout = "3s"
+retries = 3
+start-period = "20s"
+
+# ===================================================================
+# CLIENT APPLICATIONS
+# ===================================================================
+
+[clients]
+[clients.web-app]
+name = "web-app"
+port = 4000
+external-port = 4000
+build-target = "wasmJsBrowserDistribution"
+nginx-port = 4000
+health-endpoint = "/health"
+
+[clients.desktop-app]
+name = "desktop-app"
+vnc-port = 5901
+novnc-port = 6080
+build-target = "composeDesktop"
+health-endpoint = "/health"
+
+# ===================================================================
+# BUILD CONFIGURATION
+# Integration with existing Docker version management
+# ===================================================================
+
+[build]
+gradle-version = "9.0.0"
+java-version = "21"
+node-version = "20.12.0"
+nginx-version = "1.25-alpine"
+docker-version = "1.0.0"
+
+# ===================================================================
+# ENVIRONMENT-SPECIFIC OVERRIDES
+# ===================================================================
+
+[environments]
+[environments.development]
+debug-enabled = true
+log-level = "DEBUG"
+hot-reload = true
+cors-enabled = true
+cors-origins = ["*"]
+
+[environments.production]
+debug-enabled = false
+log-level = "INFO"
+hot-reload = false
+cors-enabled = true
+cors-origins = ["https://meldestelle.at"]
+tls-enabled = true
+security-headers = true
+
+[environments.testing]
+debug-enabled = true
+log-level = "DEBUG"
+ephemeral-storage = true
+test-containers = true

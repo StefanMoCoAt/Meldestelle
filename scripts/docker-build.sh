@@ -42,6 +42,7 @@ load_env_files() {
 
     # Load global environment variables
     if [[ -f "$BUILD_ARGS_DIR/global.env" ]]; then
+        # shellcheck disable=SC2046
         export $(grep -v '^#' "$BUILD_ARGS_DIR/global.env" | xargs)
         print_info "✓ Loaded global.env"
     else
@@ -52,6 +53,7 @@ load_env_files() {
     # Load category-specific environment variables
     for env_file in services.env clients.env infrastructure.env; do
         if [[ -f "$BUILD_ARGS_DIR/$env_file" ]]; then
+            # shellcheck disable=SC2046
             export $(grep -v '^#' "$BUILD_ARGS_DIR/$env_file" | xargs)
             print_info "✓ Loaded $env_file"
         else

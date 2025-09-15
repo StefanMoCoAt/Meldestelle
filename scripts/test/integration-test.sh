@@ -20,22 +20,26 @@ source "$SCRIPT_DIR/../utils/common.sh" || {
 # =============================================================================
 
 readonly COMPOSE_FILES="-f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml"
+# shellcheck disable=SC2034
 readonly TIMEOUT_SECONDS=300
+# shellcheck disable=SC2034
 readonly HEALTH_CHECK_INTERVAL=10
 readonly MAX_RETRIES=30
 
 # Project root and Docker configuration
+# shellcheck disable=SC2155
 readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 readonly DOCKER_DIR="$PROJECT_ROOT/docker"
 readonly BUILD_ARGS_DIR="$DOCKER_DIR/build-args"
 
 # Service endpoints (from common configuration)
+# shellcheck disable=SC2034
 readonly SERVICES_CONFIG=(
     "postgres:5432:PostgreSQL:pg_isready -U meldestelle"
     "redis:6379:Redis:redis-cli ping"
     "consul:8500:Consul:http://localhost:8500/v1/status/leader"
-    "api-gateway:8081:API Gateway:http://localhost:8081/actuator/health"
-    "ping-service:8082:Ping Service:http://localhost:8082/actuator/health"
+    "api-gateway:8081:API Gateway:http://localhost:8082/actuator/health"
+    "ping-service:8082Ping Service:http://localhost:8082actuator/health"
 )
 
 # Integration with central Docker version management
@@ -89,6 +93,7 @@ check_service_logs() {
     log_info "Checking $service_name logs for errors..."
 
     # Get last 50 lines of logs
+    # shellcheck disable=SC2155
     local logs=$(docker logs --tail 50 "$container_name" 2>&1 || echo "")
 
     # Check for common error patterns
@@ -113,6 +118,7 @@ test_infrastructure_services() {
 
     # Start infrastructure services only
     log_info "Starting infrastructure services..."
+    # shellcheck disable=SC2164
     cd "$PROJECT_ROOT"
     docker compose -f docker-compose.yml up -d
 
@@ -153,6 +159,7 @@ test_application_services() {
 
     # Start application services
     log_info "Starting application services..."
+    # shellcheck disable=SC2164
     cd "$PROJECT_ROOT"
     docker compose $COMPOSE_FILES up -d
 
@@ -162,11 +169,11 @@ test_application_services() {
 
     # Test API Gateway
     log_info "Testing API Gateway..."
-    wait_for_service_with_retry "API Gateway" "http_health_check http://localhost:8081/actuator/health" || return 1
+    wait_for_service_with_retry "API Gateway" "http_health_check http://localhost:8082/actuator/health" || return 1
 
     # Test Ping Service
     log_info "Testing Ping Service..."
-    wait_for_service_with_retry "Ping Service" "http_health_check http://localhost:8082/actuator/health" || return 1
+    wait_for_service_with_retry "Ping Service" "http_health_check http://localhost:8082actuator/health" || return 1
 
     log_success "All application services are healthy!"
 }
@@ -177,6 +184,7 @@ test_client_applications() {
 
     # Start client applications
     log_info "Starting client applications..."
+    # shellcheck disable=SC2164
     cd "$PROJECT_ROOT"
     docker compose -f docker-compose.yml -f docker-compose.clients.yml up -d
 
@@ -203,7 +211,7 @@ test_network_connectivity() {
     log_info "Testing service-to-service connectivity..."
 
     # Test API Gateway can reach backend services
-    if docker exec meldestelle-api-gateway curl -f -s --max-time 5 http://ping-service:8082/actuator/health > /dev/null 2>&1; then
+    if docker exec meldestelle-api-gateway curl -f -s --max-time 5 http://ping-service:8082actuator/health > /dev/null 2>&1; then
         log_success "API Gateway can reach Ping Service"
     else
         log_error "API Gateway cannot reach Ping Service"
@@ -235,9 +243,11 @@ generate_integration_report() {
 
     # Performance metrics
     log_info "Performance Metrics:"
+    # shellcheck disable=SC2046
     docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" $(docker ps -q --filter "name=meldestelle") 2>/dev/null || true
 
     # Resource usage summary
+    # shellcheck disable=SC2155
     local containers=$(docker ps --filter "name=meldestelle" --format "{{.Names}}" | wc -l)
     log_info "Total running containers: $containers"
 
@@ -250,10 +260,11 @@ cleanup() {
     log_section "Cleaning up test environment"
 
     log_info "Stopping and removing all test containers..."
+    # shellcheck disable=SC2164
     cd "$PROJECT_ROOT"
 
     # Use the same files to tear down the environment
-    docker compose $COMPOSE_FILES down --remove-orphans -v 2>/dev/null || true
+    docker compose "$COMPOSE_FILES" down --remove-orphans -v 2>/dev/null || true
 
     # Remove network if it exists
     docker network rm meldestelle-network >/dev/null 2>&1 || true
@@ -270,8 +281,9 @@ run_full_integration_test() {
 
     # Start ALL services using all compose files
     log_info "Starting full environment with all services..."
+    # shellcheck disable=SC2164
     cd "$PROJECT_ROOT"
-    docker compose $COMPOSE_FILES up -d
+    docker compose "$COMPOSE_FILES" up -d
 
     # Give services time to initialize
     log_info "Waiting 60 seconds for all services to initialize..."

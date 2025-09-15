@@ -39,7 +39,7 @@ readonly TEST_ENDPOINTS=(
 # Service discovery endpoints
 readonly SERVICE_ENDPOINTS=(
     "masterdata:8081"
-    "horses:8082"
+    "horses:8082
     "events:8083"
     "members:8084"
 )

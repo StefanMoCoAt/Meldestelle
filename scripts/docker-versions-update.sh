@@ -63,13 +63,21 @@ sync_to_env_files() {
     print_info "Syncing versions.toml to environment files..."
 
     # Get current versions from TOML
+    # shellcheck disable=SC2155
     local gradle_version=$(get_version "gradle")
+    # shellcheck disable=SC2155
     local java_version=$(get_version "java")
+    # shellcheck disable=SC2155
     local node_version=$(get_version "node")
+    # shellcheck disable=SC2155
     local nginx_version=$(get_version "nginx")
+    # shellcheck disable=SC2155
     local app_version=$(get_version "app-version")
+    # shellcheck disable=SC2155
     local spring_default=$(get_version "spring-profiles-default")
+    # shellcheck disable=SC2155
     local spring_docker=$(get_version "spring-profiles-docker")
+    # shellcheck disable=SC2155
     local alpine_version=$(get_version "alpine")
     local prometheus_version=$(get_version "prometheus")
     local grafana_version=$(get_version "grafana")

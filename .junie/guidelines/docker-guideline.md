@@ -22,19 +22,20 @@ Das Meldestelle-Projekt implementiert eine **moderne, sicherheitsorientierte Con
 ## 📋 Inhaltsverzeichnis
 
 1. [Architektur-Überblick](#architektur-überblick)
-2. [Zentrale Docker-Versionsverwaltung](#zentrale-docker-versionsverwaltung) 🆕
-3. [Zentrale Port-Verwaltung](#zentrale-port-verwaltung) 🆕
-4. [Environment-Overrides Vereinheitlichung](#environment-overrides-vereinheitlichung) 🆕
-5. [Docker-Compose Template-System](#docker-compose-template-system) 🆕
-6. [Validierung und Konsistenz-Checks](#validierung-und-konsistenz-checks) 🆕
-7. [IDE-Integration](#ide-integration) 🆕
-8. [Dockerfile-Standards](#dockerfile-standards)
-9. [Docker-Compose Organisation](#docker-compose-organisation)
-10. [Development-Workflow](#development-workflow)
-11. [Production-Deployment](#production-deployment)
-12. [Monitoring und Observability](#monitoring-und-observability)
-13. [Troubleshooting](#troubleshooting)
-14. [Best Practices](#best-practices)
+2. [Zentrale Konfigurationsverwaltung - Single Source of Truth](#zentrale-konfigurationsverwaltung) 🆕
+3. [Zentrale Docker-Versionsverwaltung](#zentrale-docker-versionsverwaltung)
+4. [Zentrale Port-Verwaltung](#zentrale-port-verwaltung)
+5. [Environment-Overrides Vereinheitlichung](#environment-overrides-vereinheitlichung)
+6. [Docker-Compose Template-System](#docker-compose-template-system)
+7. [Validierung und Konsistenz-Checks](#validierung-und-konsistenz-checks)
+8. [IDE-Integration](#ide-integration)
+9. [Dockerfile-Standards](#dockerfile-standards)
+10. [Docker-Compose Organisation](#docker-compose-organisation)
+11. [Development-Workflow](#development-workflow)
+12. [Production-Deployment](#production-deployment)
+13. [Monitoring und Observability](#monitoring-und-observability)
+14. [Troubleshooting](#troubleshooting)
+15. [Best Practices](#best-practices)
 
 ---
 
@@ -93,6 +94,354 @@ graph TB
 | Prometheus | 9090 | Internal | /-/healthy | - | v2.54.1 |
 | Grafana | 3000 | 3443 (HTTPS) | /api/health | - | 11.3.0 |
 | Nginx | - | 80/443 | /health | - | 1.25-alpine |
+
+---
+
+## 🎯 Zentrale Konfigurationsverwaltung - Single Source of Truth
+
+### Überblick und Revolution
+
+**Version 4.0.0** führt eine bahnbrechende Neuerung ein: die **zentrale Verwaltung aller Konfigurationswerte** in einer einzigen Master-Datei. Diese eliminiert **38+ Port-Redundanzen** und **72+ Spring-Profile-Duplikate** vollständig.
+
+#### Das Problem vor Version 4.0.0
+
+```bash
+# Massive Redundanz über 100+ Dateien verteilt:
+gradle.properties:              services.port.ping=8082
+docker-compose.services.yml:    SERVER_PORT: ${PING_SERVICE_PORT:-8082}
+dockerfiles/services/ping:     EXPOSE 8082
+scripts/test/integration:       ping-service:8082
+config/monitoring/prometheus:   - targets: ['ping-service:8082']
+infrastructure/README:          port = 8082
+# ... und 32 weitere Stellen!
+```
+
+#### Die Lösung: Zentrale Master-Konfiguration
+
+```toml
+# config/central.toml - ABSOLUTE SINGLE SOURCE OF TRUTH
+[ports]
+ping-service = 8082
+members-service = 8083
+horses-service = 8084
+# Einmalig definiert, überall verfügbar
+
+[spring-profiles.defaults]
+infrastructure = "default"
+services = "docker"
+clients = "dev"
+# Nie wieder inkonsistente Profile-Namen
+```
+
+### 🏗️ Architektur der zentralen Konfigurationsverwaltung
+
+```
+config/
+├── central.toml                    # 🎯 ABSOLUTE SINGLE SOURCE OF TRUTH
+├── README.md                       # Dokumentation
+└── examples/                       # Verwendungsbeispiele
+
+scripts/
+└── config-sync.sh                 # ⚙️ Automatische Synchronisation
+
+# Synchronisierte Dateien (automatisch aktualisiert):
+├── gradle.properties              # ✓ Ports synchronisiert
+├── docker-compose*.yml            # ✓ Alle Ports + Profile
+├── config/.env.template           # ✓ Environment Variables
+├── docker/build-args/*.env        # ✓ Build Arguments
+├── config/monitoring/*.yml        # ✓ Prometheus Targets
+└── scripts/test/*.sh              # ✓ Test-Endpunkte
+```
+
+### 📊 Konfigurationsbereiche
+
+#### 1. **Port-Management** - Eliminiert 38+ Redundanzen
+```toml
+[ports]
+# --- Infrastructure Services ---
+api-gateway = 8081
+auth-server = 8087
+monitoring-server = 8088
+
+# --- Application Services ---
+ping-service = 8082
+members-service = 8083
+horses-service = 8084
+events-service = 8085
+masterdata-service = 8086
+
+# --- External Infrastructure ---
+postgres = 5432
+redis = 6379
+consul = 8500
+prometheus = 9090
+grafana = 3000
+```
+
+#### 2. **Spring-Profile-Management** - Eliminiert 72+ Duplikate
+```toml
+[spring-profiles]
+default = "default"
+development = "dev"
+docker = "docker"
+production = "prod"
+test = "test"
+
+[spring-profiles.defaults]
+infrastructure = "default"
+services = "docker"
+clients = "dev"
+```
+
+#### 3. **Service-Discovery** - Standardisiert URLs
+```toml
+[services.ping-service]
+name = "ping-service"
+port = 8082
+internal-host = "ping-service"
+external-host = "localhost"
+internal-url = "http://ping-service:8082"
+external-url = "http://localhost:8082"
+health-endpoint = "/actuator/health/readiness"
+metrics-endpoint = "/actuator/prometheus"
+```
+
+#### 4. **Health-Check-Standardisierung**
+```toml
+[health-checks.defaults]
+interval = "15s"
+timeout = "5s"
+retries = 3
+start-period = "30s"
+
+[health-checks.production]
+interval = "10s"
+timeout = "3s"
+retries = 3
+start-period = "20s"
+```
+
+### 🛠️ Verwendung der zentralen Konfigurationsverwaltung
+
+#### Automatisierte Synchronisation mit `scripts/config-sync.sh`
+
+```bash
+# Alle Konfigurationsdateien synchronisieren
+./scripts/config-sync.sh sync
+
+# Aktuelle Konfiguration anzeigen
+./scripts/config-sync.sh status
+
+# Nur gradle.properties synchronisieren
+./scripts/config-sync.sh gradle
+
+# Nur Docker Compose Dateien synchronisieren
+./scripts/config-sync.sh compose
+
+# Validierung der zentralen Konfiguration
+./scripts/config-sync.sh validate
+```
+
+#### Ports ändern - Ein Befehl, überall aktualisiert
+
+```bash
+# 1. config/central.toml bearbeiten
+[ports]
+ping-service = 8092  # Geändert von 8082
+
+# 2. Alle Dateien automatisch synchronisieren
+./scripts/config-sync.sh sync
+
+# Ergebnis: 38+ Dateien automatisch aktualisiert:
+# ✓ gradle.properties: services.port.ping=8092
+# ✓ docker-compose.services.yml: SERVER_PORT: ${PING_SERVICE_PORT:-8092}
+# ✓ dockerfiles/services/ping-service/Dockerfile: EXPOSE 8092
+# ✓ scripts/test/integration-test.sh: ping-service:8092
+# ✓ config/monitoring/prometheus.dev.yml: - targets: ['ping-service:8092']
+# ✓ Und 33 weitere Dateien automatisch!
+```
+
+#### Spring-Profile ändern - Konsistenz garantiert
+
+```bash
+# 1. Zentral in config/central.toml ändern
+[spring-profiles.defaults]
+services = "production"  # Geändert von "docker"
+
+# 2. Synchronisieren
+./scripts/config-sync.sh sync
+
+# Ergebnis: 72+ Referenzen automatisch aktualisiert:
+# ✓ Alle Dockerfiles mit korrektem SPRING_PROFILES_ACTIVE
+# ✓ Docker Compose Dateien mit richtigen Defaults
+# ✓ Build-Argument-Dateien synchronisiert
+# ✓ Keine inkonsistenten Profile-Namen mehr möglich!
+```
+
+### 🔄 Entwickler-Workflow mit zentraler Konfiguration
+
+#### **Neuen Service hinzufügen**
+```bash
+# 1. Port in central.toml definieren
+[ports]
+new-service = 8090
+
+[services.new-service]
+name = "new-service"
+port = 8090
+# ... weitere Service-Eigenschaften
+
+# 2. Alle Konfigurationen synchronisieren
+./scripts/config-sync.sh sync
+
+# 3. Service ist jetzt überall verfügbar!
+```
+
+#### **Umgebung wechseln**
+```bash
+# Development → Production Profile-Wechsel
+# 1. config/central.toml anpassen
+[spring-profiles.defaults]
+services = "prod"
+
+# 2. Synchronisieren
+./scripts/config-sync.sh sync
+
+# Alle Services verwenden jetzt "prod" Profile!
+```
+
+#### **Monitoring hinzufügen**
+```bash
+# Neuer Service automatisch in Prometheus überwacht:
+# 1. Service in central.toml definieren
+# 2. config-sync.sh sync ausführen
+# 3. Prometheus-Konfiguration automatisch aktualisiert!
+```
+
+### 🎉 Vorteile der zentralen Konfigurationsverwaltung
+
+#### **DRY-Prinzip auf Projekt-Ebene** ✅
+- **Vor Version 4.0.0**: Port 8082 in 38 Dateien
+- **Ab Version 4.0.0**: Port einmalig in `config/central.toml`
+
+#### **Wartungsaufwand drastisch reduziert** ✅
+```bash
+# BEFORE: 38 Dateien manuell editieren für Port-Änderung
+# AFTER: Ein Befehl für alle Dateien
+./scripts/config-sync.sh sync
+```
+
+#### **Konsistenz absolut garantiert** ✅
+- Keine Port-Konflikte mehr möglich
+- Keine inkonsistenten Spring-Profile
+- Automatische Validierung bei Synchronisation
+
+#### **Skalierbarkeit für neue Services** ✅
+```bash
+# Neuer Service: Einmal definieren, überall verfügbar
+[ports]
+future-service = 8099
+
+# Nach Synchronisation automatisch in:
+# - gradle.properties
+# - docker-compose.yml
+# - Monitoring-Konfiguration
+# - Test-Scripts
+# - Environment-Files
+```
+
+#### **Fehlerreduktion** ✅
+- Keine Tippfehler bei Port-Definitionen
+- Keine vergessenen Aktualisierungen
+- Automatische Backup-Erstellung vor Änderungen
+- Rollback-Möglichkeiten durch Backups
+
+### 📚 Best Practices für zentrale Konfigurationsverwaltung
+
+#### **DO: Zentrale Konfiguration verwenden**
+```bash
+# ✅ RICHTIG - Zentrale Konfiguration
+./scripts/config-sync.sh sync
+
+# ✅ RICHTIG - Status vor Änderungen prüfen
+./scripts/config-sync.sh status
+
+# ✅ RICHTIG - Validierung vor Deployment
+./scripts/config-sync.sh validate
+```
+
+#### **DON'T: Manuelle Datei-Bearbeitung**
+```bash
+# ❌ FALSCH - Nie mehr manuelle Port-Änderungen
+vim docker-compose.yml  # Änderungen gehen verloren!
+
+# ✅ RICHTIG - Zentrale Änderung + Synchronisation
+vim config/central.toml
+./scripts/config-sync.sh sync
+```
+
+#### **Konsistenz-Regeln**
+1. **Niemals** Ports direkt in abhängigen Dateien ändern
+2. **Immer** `config/central.toml` als Single Source of Truth verwenden
+3. **Automatisch** mit `config-sync.sh` synchronisieren
+4. **Validieren** vor wichtigen Deployments
+5. **Backup-Dateien** bei Problemen für Rollback nutzen
+
+### 🔧 Erweiterte Funktionen
+
+#### **Selective Synchronisation**
+```bash
+# Nur bestimmte Bereiche synchronisieren
+./scripts/config-sync.sh gradle      # Nur gradle.properties
+./scripts/config-sync.sh compose     # Nur Docker Compose
+./scripts/config-sync.sh env         # Nur Environment-Dateien
+./scripts/config-sync.sh monitoring  # Nur Monitoring-Config
+./scripts/config-sync.sh tests       # Nur Test-Scripts
+```
+
+#### **Backup und Rollback**
+```bash
+# Alle Backups anzeigen
+ls -la *.bak.*
+
+# Rollback bei Problemen
+cp gradle.properties.bak.20250915_103927 gradle.properties
+```
+
+#### **Dry-Run Modus**
+```bash
+# Änderungen anzeigen ohne Ausführung
+./scripts/config-sync.sh sync --dry-run
+```
+
+### 🚀 Integration in CI/CD
+
+#### **Automatische Konsistenz-Checks**
+```yaml
+# GitHub Actions Pipeline
+- name: Validate Configuration Consistency
+  run: |
+    ./scripts/config-sync.sh validate
+    ./scripts/config-sync.sh sync --dry-run
+```
+
+#### **Pre-Commit Hooks**
+```bash
+# .git/hooks/pre-commit
+#!/bin/bash
+./scripts/config-sync.sh validate || exit 1
+```
+
+### 🎯 Migration bestehender Projekte
+
+Die zentrale Konfigurationsverwaltung ist **rückwärtskompatibel** und kann schrittweise eingeführt werden:
+
+1. **config/central.toml** erstellen
+2. **scripts/config-sync.sh** ausführen
+3. **Backups prüfen** und validieren
+4. **Entwickler-Workflow** anpassen
+
+Das System integriert sich nahtlos in die bestehende Docker-Versionsverwaltung und erweitert diese um umfassende Konfigurationsverwaltung.
 
 ---
 

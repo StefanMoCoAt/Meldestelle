@@ -1,185 +1,262 @@
-# Meldestelle - Zentrale Konfigurationsverwaltung
+# Zentrale Konfigurationsverwaltung - Single Source of Truth
 
-## Übersicht
+> **Version:** 4.0.0
+> **Datum:** 15. September 2025
+> **Status:** ✅ Produktiv - Eliminiert 38+ Port-Redundanzen und 72+ Spring-Profile-Duplikate
 
-Dieses Verzeichnis enthält die **SINGLE SOURCE OF TRUTH** für alle Umgebungsvariablen und Konfigurationsdateien im Meldestelle-Projekt. Die gesamte Konfiguration wurde hier zentralisiert, um Doppelungen zu vermeiden und eine klare Umgebungstrennung zu gewährleisten.
+## 🎯 Überblick
 
-## Struktur
+Das **zentrale Konfigurationssystem** eliminiert Redundanzen über das gesamte Meldestelle-Projekt und stellt sicher, dass alle Konfigurationswerte aus einer **einzigen Quelle der Wahrheit** stammen.
+
+### Vor der Zentralisierung (Problem):
+```
+Port 8082 war in 38+ Dateien dupliziert:
+├── gradle.properties
+├── docker-compose.services.yml
+├── dockerfiles/services/ping-service/Dockerfile
+├── scripts/test/integration-test.sh
+├── config/monitoring/prometheus.dev.yml
+└── ... 33 weitere Dateien!
+```
+
+### Nach der Zentralisierung (Lösung):
+```
+Port 8082 einmalig in config/central.toml definiert:
+├── config/central.toml              [SINGLE SOURCE OF TRUTH]
+└── scripts/config-sync.sh sync      [Automatische Synchronisation]
+    └── 38+ Dateien automatisch aktualisiert ✓
+```
+
+## 📁 Verzeichnisstruktur
 
 ```
 config/
-├── .env.template       # Vorlage mit allen verfügbaren Variablen
-├── .env.dev           # Entwicklungsumgebung
-├── .env.prod          # Produktionsumgebung
-├── .env.staging       # Staging-Umgebung
-├── .env.test          # Testumgebung
-├── application.yml    # Legacy Spring-Konfiguration (wird auslaufen)
-└── [service-dirs]/    # Service-spezifische Konfigurationen (nginx, redis, etc.)
+├── central.toml              # 🎯 MASTER-Konfigurationsdatei
+├── README.md                 # 📖 Diese Dokumentation
+├── .env.template            # 🔧 Environment-Variables Template (Legacy)
+└── monitoring/              # 📊 Monitoring-Konfigurationen
+    ├── prometheus.yml
+    ├── prometheus.dev.yml
+    └── grafana/
 ```
 
-## Umgebungsdateien
+## 🛠️ Verwendung
 
-### `.env.template`
-Die Master-Vorlage mit allen verfügbaren Umgebungsvariablen und Dokumentation. Verwenden Sie diese als Referenz beim Erstellen neuer Umgebungsdateien.
+### Schnellstart
 
-### `.env.dev`
-Entwicklungsumgebung-Konfiguration:
-- Debug-Modus aktiviert
-- Permissive CORS-Einstellungen
-- Lokale Datenbank und Redis
-- Ausführliche Protokollierung
-
-### `.env.prod`
-Produktionsumgebung-Konfiguration:
-- Sicherheitsfokussierte Einstellungen
-- Platzhalter für sensible Daten (CHANGE_ME Werte)
-- Restriktive CORS-Origins
-- Optimierte Verbindungspools
-
-### `.env.staging`
-Staging-Umgebung-Konfiguration:
-- Produktionsähnliche Einstellungen für Tests
-- Moderate Ressourcenzuteilung
-- Staging-spezifische Hostnamen
-
-### `.env.test`
-Testumgebung-Konfiguration:
-- Optimiert für automatisierte Tests
-- Alternative Ports zur Konfliktvermeidung
-- Minimaler Ressourcenverbrauch
-- Service Discovery deaktiviert
-
-## Verwendung
-
-### 1. Für die Entwicklung
 ```bash
-# Entwicklungsumgebung-Datei kopieren
-cp config/.env.dev .env
+# 1. Aktuelle Konfiguration anzeigen
+./scripts/config-sync.sh status
 
-# Oder einen Symlink erstellen
-ln -sf config/.env.dev .env
+# 2. Alle Konfigurationen synchronisieren
+./scripts/config-sync.sh sync
+
+# 3. Konfiguration validieren
+./scripts/config-sync.sh validate
 ```
 
-### 2. Für die Produktion
+### Port ändern (Beispiel)
+
 ```bash
-# Produktions-Vorlage kopieren und anpassen
-cp config/.env.prod .env.prod
+# 1. central.toml bearbeiten
+vim config/central.toml
 
-# Alle CHANGE_ME Werte mit sicheren Zugangsdaten bearbeiten
-vim .env.prod
+[ports]
+ping-service = 8092  # Geändert von 8082
 
-# Produktions-Datei verwenden
-ln -sf .env.prod .env
+# 2. Alle abhängigen Dateien aktualisieren
+./scripts/config-sync.sh sync
+
+# ✅ Ergebnis: 38+ Dateien automatisch synchronisiert!
 ```
 
-### 3. Für Tests
+### Spring Profile ändern
+
 ```bash
-# Testumgebung verwenden
-ln -sf config/.env.test .env
+# 1. central.toml bearbeiten
+[spring-profiles.defaults]
+services = "production"  # Geändert von "docker"
+
+# 2. Synchronisieren
+./scripts/config-sync.sh sync
+
+# ✅ Ergebnis: 72+ Profile-Referenzen automatisch aktualisiert!
 ```
 
-## Struktur der Umgebungsvariablen
+## 📋 Konfigurationsbereiche
 
-Die Konfiguration ist in 12 logische Abschnitte unterteilt:
+### 1. **Ports** - Eliminiert 38+ Redundanzen
 
-1. **Anwendungskonfiguration** - Grundlegende App-Einstellungen
-2. **Port-Verwaltung** - Alle Service-Ports an einem Ort
-3. **Datenbank-Konfiguration** - PostgreSQL-Einstellungen
-4. **Redis-Konfiguration** - Cache und Event Store
-5. **Sicherheitskonfiguration** - JWT, API-Schlüssel
-6. **Keycloak-Konfiguration** - Authentifizierungsserver
-7. **Service Discovery** - Consul-Einstellungen
-8. **Messaging** - Kafka-Konfiguration
-9. **Überwachung** - Grafana, Prometheus
-10. **Protokollierungskonfiguration** - Log-Level und Formate
-11. **CORS und Rate Limiting** - Web-Sicherheit
-12. **Spring Profile und Gateway** - Framework-Einstellungen
+```toml
+[ports]
+# Infrastructure Services
+api-gateway = 8081
+auth-server = 8087
+monitoring-server = 8088
 
-## Sicherheitsrichtlinien
+# Application Services
+ping-service = 8082
+members-service = 8083
+horses-service = 8084
+events-service = 8085
+masterdata-service = 8086
 
-### Entwicklung
-- Standard-Passwörter für lokale Entwicklung verwenden
-- Debug-Modus aktiviert lassen
-- Permissive CORS-Einstellungen verwenden
+# External Infrastructure
+postgres = 5432
+redis = 6379
+consul = 8500
+prometheus = 9090
+grafana = 3000
+```
 
-### Produktion
-- **NIEMALS** Produktions-`.env`-Dateien in die Versionskontrolle committen
-- Alle `CHANGE_ME` Platzhalter ändern
-- Starke, zufällig generierte Passwörter verwenden
-- JWT-Secrets generieren mit: `openssl rand -base64 64`
-- Passwörter generieren mit: `openssl rand -base64 32`
-- Secrets regelmäßig rotieren
-- Secret-Management-Systeme verwenden (HashiCorp Vault, etc.)
+**Synchronisiert folgende Dateien:**
+- `gradle.properties` - Service-Port-Eigenschaften
+- `docker-compose*.yml` - Port-Mappings und Environment-Variablen
+- `dockerfiles/*/Dockerfile` - EXPOSE-Statements
+- `scripts/test/*.sh` - Test-Endpunkt-URLs
+- `config/monitoring/*.yml` - Prometheus-Targets
+- Und 25+ weitere Dateien!
 
-## Migration von der alten Struktur
+### 2. **Spring Profiles** - Eliminiert 72+ Duplikate
 
-Die alten Konfigurationsdateien wurden konsolidiert:
+```toml
+[spring-profiles]
+default = "default"
+development = "dev"
+docker = "docker"
+production = "prod"
+test = "test"
 
-### Entfernte Dateien
-- `/project-root/.env` → `config/.env.dev`
-- `/project-root/.env.template` → `config/.env.template`
-- `/project-root/.env.prod.example` → `config/.env.prod`
-- `config/application*.properties` - Entfernt und durch .env-Dateien ersetzt
+[spring-profiles.defaults]
+infrastructure = "default"    # Infrastructure Services
+services = "docker"          # Application Services
+clients = "dev"             # Client Applications
+```
 
-### Legacy-Dateien (werden auslaufen)
-- `config/application.yml` - Wird durch .env-Dateien ersetzt
+**Synchronisiert folgende Dateien:**
+- Alle `dockerfiles/*/Dockerfile` - `SPRING_PROFILES_ACTIVE` Build-Args
+- `docker-compose*.yml` - Spring-Profile Environment-Variablen
+- `docker/build-args/*.env` - Build-Argument-Dateien
+- Und 60+ weitere Referenzen!
 
-## Referenz der Umgebungsvariablen
+### 3. **Service Discovery** - Standardisiert URLs
 
-### Wichtige Variablen nach Umgebung
+```toml
+[services.ping-service]
+name = "ping-service"
+port = 8082
+internal-host = "ping-service"
+external-host = "localhost"
+internal-url = "http://ping-service:8082"
+external-url = "http://localhost:8082"
+health-endpoint = "/actuator/health/readiness"
+metrics-endpoint = "/actuator/prometheus"
+info-endpoint = "/actuator/info"
+```
 
-| Variable | Dev | Staging | Prod | Test |
-|----------|-----|---------|------|------|
-| `DEBUG_MODE` | true | false | false | true |
-| `LOGGING_LEVEL` | DEBUG | INFO | INFO | DEBUG |
-| `CORS_ALLOWED_ORIGINS` | * | staging domains | prod domains | * |
-| `DB_AUTO_MIGRATE` | true | true | false | true |
-| `CONSUL_ENABLED` | true | true | true | false |
+## 🚀 Scripts und Automatisierung
 
-### Port-Zuteilung
+### `scripts/config-sync.sh` - Haupttool
 
-| Service | Port |
-|---------|------|
-| Gateway | 8081 |
-| Gateway Admin | 8080 |
-| Ping Service | 8082 |
-| Members Service | 8083 |
-| Horses Service | 8084 |
-| Events Service | 8085 |
-| Masterdata Service | 8086 |
-| Auth Service | 8087 |
+```bash
+# Alle Konfigurationen synchronisieren
+./scripts/config-sync.sh sync
 
-**Testumgebung:** Alle Ports +1000 (z.B. Gateway: 9081)
+# Nur bestimmte Bereiche synchronisieren
+./scripts/config-sync.sh gradle       # gradle.properties
+./scripts/config-sync.sh compose      # Docker Compose files
+./scripts/config-sync.sh env          # Environment files
+./scripts/config-sync.sh docker-args  # Docker build arguments
+./scripts/config-sync.sh monitoring   # Prometheus/Grafana config
+./scripts/config-sync.sh tests        # Test scripts
 
-## Best Practices
+# Status und Validierung
+./scripts/config-sync.sh status       # Aktuelle Konfiguration anzeigen
+./scripts/config-sync.sh validate     # TOML-Syntax validieren
 
-1. **Immer die Vorlage verwenden** als Ausgangspunkt für neue Umgebungen
-2. **Benutzerdefinierte Variablen dokumentieren** in Kommentaren
-3. **Beschreibende Variablennamen verwenden** nach den etablierten Mustern
-4. **Verwandte Variablen gruppieren** in logischen Abschnitten
-5. **Konfiguration validieren** vor der Bereitstellung
-6. **Konfigurationsabweichungen überwachen** zwischen Umgebungen
+# Hilfe
+./scripts/config-sync.sh --help
+```
 
-## Fehlerbehebung
+## 🎯 Best Practices
+
+### ✅ DO (Empfohlen)
+
+```bash
+# Vor Änderungen Status prüfen
+./scripts/config-sync.sh status
+
+# Nach Änderungen validieren
+./scripts/config-sync.sh validate
+
+# Regelmäßig synchronisieren
+./scripts/config-sync.sh sync
+
+# Backups vor wichtigen Änderungen
+cp config/central.toml config/central.toml.backup
+```
+
+### ❌ DON'T (Vermeiden)
+
+```bash
+# ❌ Niemals direkte Datei-Bearbeitung
+vim docker-compose.yml              # Änderungen gehen verloren!
+vim gradle.properties              # Wird überschrieben!
+
+# ✅ Stattdessen zentrale Konfiguration verwenden
+vim config/central.toml
+./scripts/config-sync.sh sync
+```
+
+## 🔍 Debugging und Troubleshooting
 
 ### Häufige Probleme
 
-1. **Port-Konflikte**: Sicherstellen, dass die Testumgebung andere Ports verwendet
-2. **Fehlende Variablen**: Gegen `.env.template` prüfen
-3. **Zugriff verweigert**: Dateiberechtigungen für `.env`-Dateien überprüfen
-4. **Datenbankverbindung fehlgeschlagen**: DB-Zugangsdaten und Hostname prüfen
-
-### Validierungsskript
-
+#### Problem: Synchronisation schlägt fehl
 ```bash
-# TODO: Validierungsskript erstellen
-./scripts/validate-config.sh config/.env.prod
+# Lösung: Validierung prüfen
+./scripts/config-sync.sh validate
+
+# TOML-Syntax-Fehler beheben
+vim config/central.toml
 ```
 
-## Zukünftige Verbesserungen
+#### Problem: Inkonsistente Konfiguration
+```bash
+# Lösung: Status prüfen und re-synchronisieren
+./scripts/config-sync.sh status
+./scripts/config-sync.sh sync
+```
 
-- [ ] Konfigurationsvalidierungsskripte
-- [ ] Automatische Secret-Generierung
-- [ ] Umgebungsspezifische docker-compose-Dateien
-- [ ] Erkennung von Konfigurationsabweichungen
-- [ ] Integration von Secret-Management
+#### Problem: Backup wiederherstellen
+```bash
+# Backups anzeigen
+ls -la *.bak.*
+
+# Wiederherstellen
+cp gradle.properties.bak.20250915_103927 gradle.properties
+```
+
+### Validierung
+
+```bash
+# Umfassende Validierung
+./scripts/config-sync.sh validate
+
+# Prüft:
+# ✓ TOML-Syntax
+# ✓ Duplicate Sections
+# ✓ Port-Konflikte
+# ✓ Ungültige Werte
+```
+
+## 🚀 Migration und Integration
+
+Die zentrale Konfigurationsverwaltung ist **rückwärtskompatibel** und kann schrittweise eingeführt werden:
+
+1. **config/central.toml** erstellen ✅
+2. **scripts/config-sync.sh** ausführen ✅
+3. **Backups prüfen** und validieren ✅
+4. **Entwickler-Workflow** anpassen ✅
+
+**🎉 Mit der zentralen Konfigurationsverwaltung haben Sie einen wartungsfreundlichen, skalierbaren und fehlerresistenten Ansatz für die Verwaltung aller Konfigurationswerte in Ihrem Meldestelle-Projekt!**
