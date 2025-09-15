@@ -16,7 +16,8 @@ import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import at.mocode.components.*
+import at.mocode.http.GlobalHttpClient
 
 @Serializable
 data class PingResponse(
@@ -33,26 +34,19 @@ sealed class PingState {
 }
 
 @Composable
-@Preview
 fun App() {
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         var pingState by remember { mutableStateOf<PingState>(PingState.Idle) }
         val coroutineScope = rememberCoroutineScope()
 
-        // Create HTTP client
-        val httpClient = remember {
-            HttpClient {
-                install(ContentNegotiation) {
-                    json()
-                }
-            }
-        }
+        // Use optimized global HTTP client for minimal bundle size
+        val httpClient = GlobalHttpClient.client
 
-        // Cleanup client on disposal
+        // Cleanup global client on disposal
         DisposableEffect(Unit) {
             onDispose {
-                httpClient.close()
+                GlobalHttpClient.cleanup()
             }
         }
 
@@ -84,10 +78,8 @@ fun App() {
                     coroutineScope.launch {
                         pingState = PingState.Loading
                         try {
-                            // Direkter Aufruf des Ping-Service
-                            //val response: PingResponse = httpClient.get("http://localhost:8082/ping").body()
-                            // NEU: Aufruf über das Gateway
-                            val response: PingResponse = httpClient.get("http://localhost:8081/api/ping").body()
+                            // Konfigurierbare API-URL basierend auf Deployment-Umgebung
+                            val response: PingResponse = httpClient.get(ApiConfig.pingEndpoint).body()
                             pingState = PingState.Success(response)
                         } catch (e: Exception) {
                             pingState = PingState.Error(e.message ?: "Unknown error occurred")
@@ -190,6 +182,16 @@ fun App() {
                     )
                 }
             }
+
+            // Feature Control Panel für conditional loading
+            Spacer(modifier = Modifier.height(16.dp))
+            FeatureControlPanel()
+
+            // Conditional Features - nur laden wenn aktiviert
+            Spacer(modifier = Modifier.height(8.dp))
+            ConditionalDebugPanel()
+            ConditionalAdminPanel()
+            ConditionalAdvancedFeatures()
         }
     }
 }

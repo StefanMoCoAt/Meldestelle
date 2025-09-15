@@ -11,12 +11,54 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+// Project version configuration
+version = "1.0.0"
+group = "at.mocode"
+
+// Build performance optimizations
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xjvm-default=all"     // Generate default methods for interfaces (JVM performance)
+        )
+    }
+}
+
 kotlin {
-    jvm()
+    // Configure JVM toolchain for all JVM targets
+    jvmToolchain(21)
+
+    // Global compiler options for all targets
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
+    jvm {
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+                    freeCompilerArgs.addAll(
+                        "-Xjsr305=strict",
+                        "-Xcontext-parameters"
+                    )
+                }
+            }
+        }
+    }
 
     js(IR) {
         // Disable browser-based tests (Karma/Chrome) to avoid ChromeHeadless issues
         browser {
+            commonWebpackConfig {
+                outputFileName = "meldestelle-client.js"
+                // Enable CSS support and optimization
+                cssSupport {
+                    enabled.set(true)
+                }
+            }
             testTask {
                 // Prevent launching ChromeHeadless (snap permission issues on some systems)
                 enabled = false
@@ -36,25 +78,47 @@ kotlin {
         // Disable browser-based tests for WASM as well to avoid Karma/Chrome
         browser {
             commonWebpackConfig {
-                outputFileName = "composeApp.js"
+                outputFileName = "meldestelle-wasm.js"
+                // Enable CSS support for better bundling
+                cssSupport {
+                    enabled.set(true)
+                }
             }
             testTask {
                 enabled = false
             }
         }
         binaries.executable()
+        // WASM-specific compiler optimizations for smaller bundles
+        compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.addAll(
+                        "-Xwasm-use-new-exception-proposal",  // Use efficient WASM exception handling
+                        "-Xwasm-debugger-custom-formatters",  // Optimize debug info for smaller size
+                        "-Xwasm-enable-array-range-checks",   // Optimize array bounds checking
+                        "-Xwasm-generate-wat=false",          // Skip WAT generation for smaller output
+                        "-Xwasm-target=wasm32",               // Explicit WASM32 target
+                        "-opt-in=kotlin.ExperimentalStdlibApi", // Enable stdlib optimizations
+                        "-opt-in=kotlin.js.ExperimentalJsExport" // Enable JS export optimizations
+                    )
+                }
+            }
+        }
     }
 
     sourceSets {
         commonMain.dependencies {
+            // Core Compose Dependencies - minimiert für kleinere Bundle-Größe
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            // UiToolingPreview nur für Development, nicht für Production WASM
+            // implementation(compose.components.uiToolingPreview)
 
-            // HTTP client dependencies for ping-service
+            // HTTP client dependencies for ping-service - optimiert
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.contentNegotiation)
             implementation(libs.ktor.client.serialization.kotlinx.json)
@@ -67,6 +131,9 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.ktor.client.cio)
+        }
+        jsMain.dependencies {
+            implementation(libs.ktor.client.js)
         }
         wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)
@@ -112,8 +179,38 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "at.mocode"
+            packageName = "Meldestelle"
             packageVersion = "1.0.0"
+
+            // Application metadata
+            description = "Pferdesport Meldestelle System - Client Application"
+            copyright = "© 2025 Meldestelle Project"
+            vendor = "at.mocode"
+
+            // Platform-specific configurations
+            linux {
+                iconFile.set(project.file("src/commonMain/resources/icon.png"))
+                packageName = "meldestelle"
+                debMaintainer = "stefan@mocode.at"
+                menuGroup = "Office"
+            }
+
+            windows {
+                iconFile.set(project.file("src/commonMain/resources/icon.ico"))
+                menuGroup = "Meldestelle"
+                upgradeUuid = "61DAB35E-17CB-43B8-8A72-39876CF0E021"
+            }
+
+            macOS {
+                iconFile.set(project.file("src/commonMain/resources/icon.icns"))
+                bundleID = "at.mocode.meldestelle"
+                packageBuildVersion = "1.0.0"
+                packageVersion = "1.0.0"
+            }
+        }
+
+        buildTypes.release.proguard {
+            configurationFiles.from(project.file("compose-desktop.pro"))
         }
     }
 }
