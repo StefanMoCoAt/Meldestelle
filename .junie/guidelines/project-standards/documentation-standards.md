@@ -4,7 +4,7 @@
 guideline_type: "project-standards"
 scope: "documentation-standards"
 audience: ["developers", "ai-assistants", "technical-writers"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["master-guideline.md"]
 related_files: ["README*.md", "docs/**", "*.md", "openapi.yaml"]
 ai_context: "Documentation language standards, README structure, API documentation, and technical writing guidelines"

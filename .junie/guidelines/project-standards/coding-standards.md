@@ -4,7 +4,7 @@
 guideline_type: "project-standards"
 scope: "coding-standards"
 audience: ["developers", "ai-assistants"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["master-guideline.md"]
 related_files: ["build.gradle.kts", "detekt.yml", "*.kt"]
 ai_context: "Coding conventions, naming standards, type safety, error handling, and logging practices"

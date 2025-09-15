@@ -4,10 +4,10 @@
 guideline_type: "project-standards"
 scope: "architecture-principles"
 audience: ["developers", "architects", "ai-assistants"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["master-guideline.md"]
 related_files: ["build.gradle.kts", "settings.gradle.kts", "docker-compose.yml"]
-ai_context: "Architectural foundations, microservices patterns, DDD principles, event-driven architecture, and multiplatform strategy"
+ai_context: "Architektonische Grundlagen, Microservices-Pattern, DDD-Prinzipien, ereignisgesteuerte Architektur und Multiplatform-Strategie"
 ---
 
 ## 🏗️ Vision & Architektonische Grundpfeiler

@@ -4,10 +4,10 @@
 guideline_type: "technology"
 scope: "docker-architecture"
 audience: ["developers", "ai-assistants", "devops"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "master-guideline.md"]
 related_files: ["docker-compose.yml", "docker/versions.toml", "scripts/docker-versions-update.sh"]
-ai_context: "Docker container architecture, service definitions, and centralized version management"
+ai_context: "Docker-Container-Architektur, Service-Definitionen und zentrale Versionsverwaltung"
 ---
 
 ## 🏗️ Architektur-Überblick

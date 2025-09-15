@@ -1,0 +1,217 @@
+{
+  "meta": {
+    "last_updated": "2025-09-15",
+    "description": "Cross-Referenz-Matrix für Meldestelle Guidelines",
+    "purpose": "Link-Validierung und Abhängigkeits-Management"
+  },
+  "cross_references": {
+    "master-guideline.md": {
+      "references_to": [
+        "project-standards/coding-standards.md",
+        "project-standards/architecture-principles.md",
+        "technology-guides/web-app-guideline.md",
+        "project-standards/testing-standards.md",
+        "technology-guides/docker/",
+        "project-standards/documentation-standards.md"
+      ],
+      "referenced_by": [
+        "project-standards/architecture-principles.md",
+        "project-standards/coding-standards.md",
+        "project-standards/documentation-standards.md",
+        "project-standards/testing-standards.md",
+        "technology-guides/web-app-guideline.md",
+        "technology-guides/docker/docker-overview.md",
+        "process-guides/trace-bullet-guideline.md"
+      ]
+    },
+    "README.md": {
+      "references_to": [
+        "master-guideline.md",
+        "project-standards/coding-standards.md",
+        "project-standards/testing-standards.md",
+        "project-standards/documentation-standards.md",
+        "project-standards/architecture-principles.md",
+        "technology-guides/web-app-guideline.md",
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-architecture.md",
+        "technology-guides/docker/docker-development.md",
+        "technology-guides/docker/docker-production.md",
+        "technology-guides/docker/docker-monitoring.md",
+        "technology-guides/docker/docker-troubleshooting.md",
+        "process-guides/trace-bullet-guideline.md"
+      ],
+      "referenced_by": []
+    },
+    "project-standards/architecture-principles.md": {
+      "references_to": [
+        "master-guideline.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "master-guideline.md",
+        "technology-guides/web-app-guideline.md"
+      ]
+    },
+    "project-standards/coding-standards.md": {
+      "references_to": [
+        "master-guideline.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "master-guideline.md"
+      ]
+    },
+    "project-standards/documentation-standards.md": {
+      "references_to": [
+        "master-guideline.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "master-guideline.md"
+      ]
+    },
+    "project-standards/testing-standards.md": {
+      "references_to": [
+        "master-guideline.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "master-guideline.md"
+      ]
+    },
+    "technology-guides/web-app-guideline.md": {
+      "references_to": [
+        "master-guideline.md",
+        "project-standards/architecture-principles.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "master-guideline.md",
+        "process-guides/trace-bullet-guideline.md"
+      ]
+    },
+    "technology-guides/docker/docker-overview.md": {
+      "references_to": [
+        "master-guideline.md",
+        "technology-guides/docker/docker-architecture.md",
+        "technology-guides/docker/docker-development.md",
+        "technology-guides/docker/docker-production.md",
+        "technology-guides/docker/docker-monitoring.md",
+        "technology-guides/docker/docker-troubleshooting.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "master-guideline.md",
+        "technology-guides/docker/docker-architecture.md",
+        "technology-guides/docker/docker-development.md",
+        "technology-guides/docker/docker-production.md",
+        "technology-guides/docker/docker-monitoring.md",
+        "technology-guides/docker/docker-troubleshooting.md"
+      ]
+    },
+    "technology-guides/docker/docker-architecture.md": {
+      "references_to": [
+        "technology-guides/docker/docker-overview.md",
+        "master-guideline.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-development.md",
+        "technology-guides/docker/docker-production.md",
+        "technology-guides/docker/docker-monitoring.md",
+        "technology-guides/docker/docker-troubleshooting.md"
+      ]
+    },
+    "technology-guides/docker/docker-development.md": {
+      "references_to": [
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-architecture.md",
+        "technology-guides/docker/docker-production.md",
+        "technology-guides/docker/docker-monitoring.md",
+        "technology-guides/docker/docker-troubleshooting.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-troubleshooting.md"
+      ]
+    },
+    "technology-guides/docker/docker-production.md": {
+      "references_to": [
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-architecture.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-development.md"
+      ]
+    },
+    "technology-guides/docker/docker-monitoring.md": {
+      "references_to": [
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-architecture.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-development.md"
+      ]
+    },
+    "technology-guides/docker/docker-troubleshooting.md": {
+      "references_to": [
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-architecture.md",
+        "technology-guides/docker/docker-development.md"
+      ],
+      "referenced_by": [
+        "README.md",
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-development.md"
+      ]
+    },
+    "process-guides/trace-bullet-guideline.md": {
+      "references_to": [
+        "master-guideline.md",
+        "technology-guides/web-app-guideline.md"
+      ],
+      "referenced_by": [
+        "README.md"
+      ]
+    }
+  },
+  "link_validation": {
+    "last_check": "2025-09-15",
+    "broken_links": [],
+    "orphaned_guidelines": [],
+    "circular_dependencies": [],
+    "validation_status": "OK"
+  },
+  "navigation_paths": {
+    "common_workflows": {
+      "new_developer_onboarding": [
+        "README.md",
+        "master-guideline.md",
+        "project-standards/architecture-principles.md",
+        "project-standards/coding-standards.md",
+        "technology-guides/docker/docker-development.md"
+      ],
+      "frontend_development": [
+        "technology-guides/web-app-guideline.md",
+        "project-standards/architecture-principles.md",
+        "project-standards/coding-standards.md"
+      ],
+      "docker_setup": [
+        "technology-guides/docker/docker-overview.md",
+        "technology-guides/docker/docker-architecture.md",
+        "technology-guides/docker/docker-development.md"
+      ],
+      "troubleshooting": [
+        "technology-guides/docker/docker-troubleshooting.md",
+        "technology-guides/docker/docker-development.md",
+        "technology-guides/docker/docker-monitoring.md"
+      ]
+    }
+  }
+}

@@ -4,10 +4,10 @@
 guideline_type: "technology"
 scope: "docker-troubleshooting"
 audience: ["developers", "devops", "ai-assistants"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "docker-architecture.md", "docker-development.md"]
 related_files: ["docker-compose.yml", "scripts/validate-docker-consistency.sh", "scripts/docker-versions-update.sh"]
-ai_context: "Troubleshooting common Docker issues, debug commands, and comprehensive best practices"
+ai_context: "Fehlerbehebung häufiger Docker-Probleme, Debug-Kommandos und umfassende Best Practices"
 ---
 
 ## 🔧 Troubleshooting

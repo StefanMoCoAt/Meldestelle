@@ -3,11 +3,11 @@
 ---
 guideline_type: "technology"
 scope: "docker-overview"
-audience: ["developers", "ai-assistants"]
-last_updated: "2025-09-13"
+audience: ["developers", "ai-assistants", "devops"]
+last_updated: "2025-09-15"
 dependencies: ["master-guideline.md"]
 related_files: ["docker-compose.yml", "docker/versions.toml"]
-ai_context: "Docker philosophy and general principles for Meldestelle project"
+ai_context: "Docker-Philosophie und allgemeine Prinzipien für das Meldestelle-Projekt"
 ---
 
 ## 🚀 Überblick und Philosophie

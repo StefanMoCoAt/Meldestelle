@@ -4,10 +4,10 @@
 guideline_type: "technology"
 scope: "docker-monitoring"
 audience: ["developers", "devops", "ai-assistants"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "docker-architecture.md"]
 related_files: ["docker-compose.yml", "config/monitoring/*", "config/grafana/*", "config/prometheus/*"]
-ai_context: "Monitoring setup, Prometheus metrics, Grafana dashboards, health checks, and log aggregation"
+ai_context: "Monitoring-Setup, Prometheus-Metriken, Grafana-Dashboards, Health-Checks und Log-Aggregation"
 ---
 
 ## 📊 Monitoring und Observability

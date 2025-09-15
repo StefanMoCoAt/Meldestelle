@@ -1,7 +1,7 @@
 # Meldestelle Project Guidelines
 
-**Version:** 2.0.0
-**Last Updated:** 2025-09-13
+**Version:** 2.1.0
+**Last Updated:** 2025-09-15
 **Status:** Reorganized & AI-Optimized
 
 ---
@@ -105,13 +105,30 @@ Development process and workflow guidelines:
 2. [Master-Guideline](./master-guideline.md) for project standards overview
 3. Individual guidelines for specific team coordination
 
+## 🤖 Automatisierung und Validierung
+
+Das Guidelines-System verfügt über umfassende Automatisierungsfeatures:
+
+### 🔗 Automatische Validierung
+- **Link-Validierung:** `.junie/scripts/validate-links.sh` - Cross-Referenzen und YAML-Konsistenz
+- **Template-System:** `.junie/scripts/create-guideline.sh` - Automatische Guideline-Erstellung
+- **Pre-commit Hook:** `.junie/scripts/pre-commit-guidelines.sh` - Lokale Validierung vor Commits
+- **CI/CD-Integration:** `.github/workflows/guidelines-validation.yml` - Automatische Pipeline-Validierung
+
+### 📋 Verfügbare Templates
+- **Project-Standards:** `project-standard-template.md`
+- **Technology-Guides:** `technology-guideline-template.md`
+- **Process-Guides:** `process-guide-template.md`
+
+**Detaillierte Dokumentation:** [AUTOMATION-FEATURES.md](../AUTOMATION-FEATURES.md)
+
 ## 📝 Guideline Metadata Format
 
 All guidelines follow this metadata structure for AI optimization:
 
 ```yaml
 ---
-guideline_type: "project-standards" | "technology" | "process-guide"
+guideline_type: "project-standards"  # oder "technology" oder "process-guide"
 scope: "specific-area-identifier"
 audience: ["developers", "ai-assistants", "architects", "devops", "project-managers"]
 last_updated: "YYYY-MM-DD"

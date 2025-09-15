@@ -4,10 +4,10 @@
 guideline_type: "technology"
 scope: "docker-production"
 audience: ["developers", "devops", "ai-assistants"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "docker-architecture.md"]
 related_files: ["docker-compose.yml", "config/nginx/nginx.prod.conf", "config/ssl/*"]
-ai_context: "Production deployment, security hardening, SSL/TLS configuration, and resource management"
+ai_context: "Production-Deployment, Security-Hardening, SSL/TLS-Konfiguration und Ressourcenverwaltung"
 ---
 
 ## 🚀 Production-Deployment

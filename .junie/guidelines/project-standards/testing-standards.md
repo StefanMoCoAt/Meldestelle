@@ -4,7 +4,7 @@
 guideline_type: "project-standards"
 scope: "testing-standards"
 audience: ["developers", "ai-assistants"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["master-guideline.md", "coding-standards.md"]
 related_files: ["build.gradle.kts", "src/test/**", "testcontainers.properties"]
 ai_context: "Testing strategies, test pyramid, tools, coverage requirements, and debugging practices"

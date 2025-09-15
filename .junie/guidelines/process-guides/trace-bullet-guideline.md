@@ -4,10 +4,10 @@
 guideline_type: "process-guide"
 scope: "trace-bullet-development-cycle"
 audience: ["developers", "ai-assistants", "project-managers"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["master-guideline.md", "web-app-guideline.md"]
 related_files: ["docker-compose.yml", "temp/ping-service/**", "client/**"]
-ai_context: "End-to-end architecture validation cycle, infrastructure testing, ping service implementation"
+ai_context: "End-to-End-Architektur-Validierungszyklus, Infrastruktur-Tests, Ping-Service-Implementierung"
 ---
 
 * **Zyklus-Start:** 15. August 2025

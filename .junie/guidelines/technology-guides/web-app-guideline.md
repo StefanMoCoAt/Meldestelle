@@ -4,10 +4,10 @@
 guideline_type: "technology"
 scope: "web-app-multiplatform"
 audience: ["developers", "ai-assistants", "frontend-developers"]
-last_updated: "2025-09-13"
-dependencies: ["master-guideline.md", "architecture-principles.md"]
-related_files: ["client/build.gradle.kts", "client/src/commonMain/**", "client/src/wasmJsMain/**", "client/src/jvmMain/**"]
-ai_context: "Compose Multiplatform development, MVVM pattern, KMP architecture, desktop and web client development"
+last_updated: "2025-09-15"
+dependencies: ["master-guideline.md", "project-standards/architecture-principles.md"]
+related_files: ["client/build.gradle.kts", "client/src/commonMain/", "client/src/wasmJsMain/", "client/src/jvmMain/"]
+ai_context: "Compose Multiplatform-Entwicklung, MVVM-Pattern, KMP-Architektur, Desktop- und Web-Client-Entwicklung"
 ---
 
 ## 1. Einleitung

@@ -370,4 +370,5 @@ main() {
 }
 
 # Run main function
+# shellcheck disable=SC1073
 main "$@"

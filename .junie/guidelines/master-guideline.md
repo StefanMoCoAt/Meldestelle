@@ -1,8 +1,8 @@
 # Meldestelle_Pro: Entwicklungs-Guideline
 
 **Status:** Finalisiert & Verbindlich
-**Version:** 1.0
-**Stand:** 15. August 2025
+**Version:** 2.1.0
+**Stand:** 15. September 2025
 
 ## 1. Vision & Architektonische Grundpfeiler
 

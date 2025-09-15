@@ -4,10 +4,10 @@
 guideline_type: "technology"
 scope: "docker-development"
 audience: ["developers", "ai-assistants"]
-last_updated: "2025-09-13"
+last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "docker-architecture.md"]
 related_files: ["docker-compose.yml", "docker-compose.override.yml", "Makefile"]
-ai_context: "Development workflow, debugging, and local development setup with Docker"
+ai_context: "Entwicklungs-Workflow, Debugging und lokale Entwicklungsumgebung mit Docker"
 ---
 
 ## 🛠️ Development-Workflow
