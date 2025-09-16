@@ -122,7 +122,7 @@ springdoc-openapi-starter-common = { module = "org.springdoc:springdoc-openapi-s
 springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 
 # --- Spring Cloud ---
-spring-cloud-starter-gateway = { module = "org.springframework.cloud:spring-cloud-starter-gateway" }
+spring-cloud-starter-gateway-server-webflux = { module = "org.springframework.cloud:spring-cloud-starter-gateway-server-webflux" }
 spring-cloud-starter-consul-discovery = { module = "org.springframework.cloud:spring-cloud-starter-consul-discovery" }
 
 # --- Database & Persistence ---
@@ -271,7 +271,7 @@ monitoring-client = [
 ]
 # Bündelt die Kernabhängigkeiten für das Spring Cloud Gateway.
 spring-cloud-gateway = [
-    "spring-cloud-starter-gateway",
+    "spring-cloud-starter-gateway-server-webflux",
     "spring-cloud-starter-consul-discovery"
 ]
 

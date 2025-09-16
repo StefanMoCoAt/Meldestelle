@@ -173,7 +173,7 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -Dspring.backgroundpreinitializer.ignore=true \
     -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus,gateway \
     -Dmanagement.endpoint.health.show-details=always \
-    -Dmanagement.metrics.export.prometheus.enabled=true"
+    -Dmanagement.prometheus.metrics.export.enabled=true"
 
 # Spring Boot configuration
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \

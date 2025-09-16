@@ -29,7 +29,7 @@ class GatewayMetricsConfig {
 
     companion object {
         // Metric Namen als Konstanten für bessere Wartbarkeit
-        const val GATEWAY_REQUEST_TIMER = "gateway_request_duration"
+        const val GATEWAY_REQUEST_TIMER = "gateway_custom_request_duration"
         const val GATEWAY_ERROR_COUNTER = "gateway_errors_total"
         const val GATEWAY_REQUESTS_COUNTER = "gateway_requests_total"
         const val GATEWAY_CIRCUIT_BREAKER_COUNTER = "gateway_circuit_breaker_events_total"
@@ -72,15 +72,11 @@ class GatewayMetricsConfig {
     }
 
     /**
-     * Bean für Request Duration Timer - ermöglicht manuelle Messungen.
+     * Bean für Request Duration Timer - entfernt um Konflikte mit dem WebFilter zu vermeiden.
+     * Die Request-Zeiten werden automatisch im GatewayMetricsWebFilter erfasst.
      */
-    @Bean
-    fun requestTimer(meterRegistry: MeterRegistry): Timer {
-        return Timer.builder(GATEWAY_REQUEST_TIMER)
-            .description("Gateway Request-Verarbeitungszeit")
-            .tag("type", "http")
-            .register(meterRegistry)
-    }
+    // @Bean - Entfernt um Prometheus Meter-Konflikte zu vermeiden
+    // fun requestTimer(meterRegistry: MeterRegistry): Timer { ... }
 
     /**
      * Bean für Error Counter - ermöglicht manuelles Error Tracking.

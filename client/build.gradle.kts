@@ -98,7 +98,6 @@ kotlin {
                         "-Xwasm-debugger-custom-formatters",  // Optimize debug info for smaller size
                         "-Xwasm-enable-array-range-checks",   // Optimize array bounds checking
                         "-Xwasm-generate-wat=false",          // Skip WAT generation for smaller output
-                        "-Xwasm-target=wasm32",               // Explicit WASM32 target
                         "-opt-in=kotlin.ExperimentalStdlibApi", // Enable stdlib optimizations
                         "-opt-in=kotlin.js.ExperimentalJsExport" // Enable JS export optimizations
                     )
