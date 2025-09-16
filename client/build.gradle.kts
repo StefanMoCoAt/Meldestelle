@@ -1,6 +1,5 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
-import jdk.jfr.Experimental
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
@@ -89,7 +88,6 @@ kotlin {
         binaries.executable()
     }
 
-    @OptIn(Experimental::class)
     wasmJs {
         browser {
             commonWebpackConfig {
