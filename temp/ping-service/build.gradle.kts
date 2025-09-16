@@ -54,6 +54,11 @@ dependencies {
     // Spring Cloud Consul for service registration and discovery
     implementation(libs.spring.cloud.starter.consul.discovery)
 
+    // === Caching ===
+    // Caffeine cache for Spring Cloud LoadBalancer (resolves production cache warning)
+    implementation("com.github.ben-manes.caffeine:caffeine")
+    implementation("org.springframework:spring-context-support")
+
     // === Resilience & Fault Tolerance ===
     // Resilience4j Circuit Breaker for fault tolerance
     implementation(libs.resilience4j.spring.boot3)

@@ -25,12 +25,17 @@ management:
       probes:
         enabled: true
   tracing:
-    enabled: true
+    # Disable tracing by default to avoid Zipkin connection errors
+    enabled: ${TRACING_ENABLED:false}
     sampling:
-      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
+      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}
   zipkin:
     tracing:
-      endpoint: ${ZIPKIN_TRACING_ENDPOINT:http://zipkin:9411/api/v2/spans}
+      # Only configure endpoint if tracing is explicitly enabled
+      endpoint: ${ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
+      # Configure timeout and connection settings to handle missing Zipkin gracefully
+      connect-timeout: 1s
+      read-timeout: 5s
 
 # Resilience4j Circuit Breaker Configuration
 resilience4j:
