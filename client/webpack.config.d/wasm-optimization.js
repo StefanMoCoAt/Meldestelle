@@ -65,10 +65,10 @@ config.optimization = {
 // Performance optimization
 config.performance = {
     ...(config.performance || {}),
-    // Increase hint limits for WASM (which is naturally larger)
-    maxAssetSize: 2000000, // 2MB for individual assets
-    maxEntrypointSize: 2000000, // 2MB for entrypoints
-    hints: 'warning'
+    // Realistic hint limits for WASM bundles (which are naturally larger)
+    maxAssetSize: 20000000, // 20MB for individual assets (WASM files can be large)
+    maxEntrypointSize: 5000000, // 5MB for entrypoints
+    hints: 'warning' // Show warnings but don't fail the build
 };
 
 // Resolve optimization for faster builds
@@ -95,8 +95,10 @@ if (config.mode === 'production') {
     // Production-specific optimizations
     config.output = {
         ...(config.output || {}),
-        // Better file names for caching
-        filename: '[name].[contenthash:8].js',
+        // Use conditional filename to match HTML template expectations for main chunk only
+        filename: (chunkData) => {
+            return chunkData.chunk.name === 'main' ? 'meldestelle-wasm.js' : '[name].[contenthash:8].js';
+        },
         chunkFilename: '[name].[contenthash:8].chunk.js'
     };
 

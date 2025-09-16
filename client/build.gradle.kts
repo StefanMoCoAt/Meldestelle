@@ -1,8 +1,8 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import jdk.jfr.Experimental
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.Sync
-import org.gradle.api.file.DuplicatesStrategy
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -50,60 +50,83 @@ kotlin {
     }
 
     js(IR) {
-        // Disable browser-based tests (Karma/Chrome) to avoid ChromeHeadless issues
         browser {
             commonWebpackConfig {
                 outputFileName = "meldestelle-client.js"
-                // Enable CSS support and optimization
                 cssSupport {
                     enabled.set(true)
                 }
+                // Webpack performance optimizations for smaller bundles
+                devServer?.apply {
+                    open = false
+                    port = 8080
+                }
             }
             testTask {
-                // Prevent launching ChromeHeadless (snap permission issues on some systems)
+                // Disable browser tests due to ChromeHeadless permission issues
                 enabled = false
             }
-        }
-        // Run JS tests in Node.js instead (no browser needed)
-        nodejs {
-            testTask {
-                useMocha()
+            webpackTask {
+                // Production optimizations
+                args.add("--mode=production")
+                args.add("--optimization-minimize")
+            }
+            runTask {
+                // Development optimizations
+                args.add("--mode=development")
             }
         }
+
+        // Use Node.js for testing instead of browser
+        nodejs {
+            testTask {
+                useMocha {
+                    timeout = "10s"
+                }
+            }
+        }
+
         binaries.executable()
     }
 
-    @OptIn(ExperimentalWasmDsl::class)
+    @OptIn(Experimental::class)
     wasmJs {
-        // Disable browser-based tests for WASM as well to avoid Karma/Chrome
         browser {
             commonWebpackConfig {
                 outputFileName = "meldestelle-wasm.js"
-                // Enable CSS support for better bundling
                 cssSupport {
                     enabled.set(true)
                 }
+                // WASM-specific webpack optimizations handled by webpack.config.d files
             }
             testTask {
+                // Disable WASM browser tests due to environment issues
                 enabled = false
             }
+            webpackTask {
+                // Production optimizations for WASM
+                args.add("--mode=production")
+                args.add("--optimization-minimize")
+            }
         }
-        binaries.executable()
+
         // WASM-specific compiler optimizations for smaller bundles
         compilations.all {
             compileTaskProvider.configure {
                 compilerOptions {
                     freeCompilerArgs.addAll(
-                        "-Xwasm-use-new-exception-proposal",  // Use efficient WASM exception handling
-                        "-Xwasm-debugger-custom-formatters",  // Optimize debug info for smaller size
-                        "-Xwasm-enable-array-range-checks",   // Optimize array bounds checking
-                        "-Xwasm-generate-wat=false",          // Skip WAT generation for smaller output
-                        "-opt-in=kotlin.ExperimentalStdlibApi", // Enable stdlib optimizations
-                        "-opt-in=kotlin.js.ExperimentalJsExport" // Enable JS export optimizations
+                        "-Xwasm-use-new-exception-proposal",
+                        "-Xwasm-debugger-custom-formatters",
+                        "-Xwasm-enable-array-range-checks",
+                        "-Xwasm-generate-wat=false",
+                        "-opt-in=kotlin.ExperimentalStdlibApi",
+                        "-opt-in=kotlin.js.ExperimentalJsExport"
                     )
                 }
             }
         }
+
+        binaries.executable()
     }
 
     sourceSets {

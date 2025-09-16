@@ -8,11 +8,10 @@ import kotlinx.browser.document
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
 
-//    ComposeViewport(document.getElementById("ComposeTarget")!!) {
-//        App()
-//    }
-
-    CanvasBasedWindow(canvasElementId = "ComposeTarget") {
+    ComposeViewport(document.getElementById("ComposeTarget")!!) {
         App()
     }
+//    CanvasBasedWindow(canvasElementId = "ComposeTarget") {
+//        App()
+//    }
 }

@@ -28,8 +28,8 @@ RUN chmod +x ./gradlew
 # Dependencies downloaden (für besseres Caching)
 RUN ./gradlew :client:dependencies --no-configure-on-demand
 
-# Kotlin/JS Web-App kompilieren
-RUN ./gradlew :client:jsBrowserDistribution --no-configure-on-demand
+# Kotlin/WASM Web-App kompilieren
+RUN ./gradlew :client:wasmJsBrowserDistribution --no-configure-on-demand
 
 # ===================================================================
 # Stage 2: Runtime Stage - Nginx für Static Files + API Proxy
@@ -40,7 +40,7 @@ FROM nginx:1.25-alpine
 RUN apk add --no-cache curl
 
 # Kopiere kompilierte Web-App von Build-Stage
-COPY --from=builder /app/client/build/dist/js/productionExecutable/ /usr/share/nginx/html/
+COPY --from=builder /app/client/build/dist/wasmJs/productionExecutable/ /usr/share/nginx/html/
 
 # Kopiere Nginx-Konfiguration
 COPY dockerfiles/clients/web-app/nginx.conf /etc/nginx/nginx.conf
