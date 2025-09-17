@@ -106,6 +106,11 @@ kotlin {
                 args.add("--mode=production")
                 args.add("--optimization-minimize")
             }
+            runTask {
+                // Development optimizations for WASM
+                args.add("--mode=development")
+                // Dev server settings handled by webpack.config.d/dev-server.js
+            }
         }
 
         // WASM-specific compiler optimizations for smaller bundles

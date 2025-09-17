@@ -57,8 +57,8 @@ config.optimization = {
         }
     },
 
-    // Minimize bundle size
-    minimize: true
+    // Minimize bundle size - conditional based on mode
+    minimize: config.mode === 'production'
     // Note: minimizer is automatically configured by Kotlin/JS
 };
 
