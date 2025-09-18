@@ -33,11 +33,11 @@ if (config.mode !== 'production') {
         },
 
         // Static files configuration
-        static: {
+      /*  static: {
             directory: path.resolve(__dirname, '../../build/dist/wasmJs/developmentExecutable'),
             serveIndex: true,
             watch: true
-        },
+        },*/
 
         // CORS settings for development
         allowedHosts: 'all',
