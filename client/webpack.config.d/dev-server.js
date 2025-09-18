@@ -1,5 +1,6 @@
 // Development server configuration with API proxy
 // This forwards API requests from webpack-dev-server to the gateway
+const path = require('path');
 
 if (config.mode !== 'production') {
     config.devServer = {
@@ -33,7 +34,7 @@ if (config.mode !== 'production') {
 
         // Static files configuration
         static: {
-            directory: 'src/commonMain/resources',
+            directory: path.resolve(__dirname, '../../build/dist/wasmJs/developmentExecutable'),
             serveIndex: true,
             watch: true
         },

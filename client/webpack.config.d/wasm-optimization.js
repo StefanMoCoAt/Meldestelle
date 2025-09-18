@@ -1,14 +1,13 @@
 // WASM Bundle Size Optimization Configuration
 // Advanced Webpack configuration for smaller WASM bundles
-
-const path = require('path');
+//const path = require('path');
 
 // Bundle size optimization configuration
 config.optimization = {
     ...(config.optimization || {}),
     // Enable aggressive tree shaking
     usedExports: true,
-    sideEffects: false,
+    sideEffects: true,
 
     // Split chunks for better caching and smaller initial bundle
     splitChunks: {

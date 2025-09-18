@@ -61,18 +61,19 @@ kotlin {
                     port = 8080
                 }
             }
-            testTask {
-                // Disable browser tests due to ChromeHeadless permission issues
-                enabled = false
+            runTask {
+                // Development optimizations
+                args.add("--mode=development")
+                //args.add("--optimization-minimize=false")
             }
             webpackTask {
                 // Production optimizations
                 args.add("--mode=production")
                 args.add("--optimization-minimize")
             }
-            runTask {
-                // Development optimizations
-                args.add("--mode=development")
+            testTask {
+                // Disable browser tests due to ChromeHeadless permission issues
+                enabled = false
             }
         }
 
@@ -96,20 +97,25 @@ kotlin {
                     enabled.set(true)
                 }
                 // WASM-specific webpack optimizations handled by webpack.config.d files
+                devServer?.apply {
+                    open = false
+                    port = 8080
+                }
             }
-            testTask {
-                // Disable WASM browser tests due to environment issues
-                enabled = false
+            runTask {
+                // Development optimizations for WASM
+                args.add("--mode=development")
+                //args.add("--optimization-minimize=false")
+                // Dev server settings handled by webpack.config.d/dev-server.js
             }
             webpackTask {
                 // Production optimizations for WASM
                 args.add("--mode=production")
                 args.add("--optimization-minimize")
             }
-            runTask {
-                // Development optimizations for WASM
-                args.add("--mode=development")
-                // Dev server settings handled by webpack.config.d/dev-server.js
+            testTask {
+                // Disable WASM browser tests due to environment issues
+                enabled = false
             }
         }
 
