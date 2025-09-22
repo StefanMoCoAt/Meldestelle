@@ -2,8 +2,8 @@
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
-    alias(libs.plugins.compose.multiplatform) apply false
-    alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.composeMultiplatform) apply false
+    alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.spring.boot) apply false
     alias(libs.plugins.spring.dependencyManagement) apply false
 }
@@ -26,6 +26,14 @@ subprojects {
         maxHeapSize = "2g"
         // Removed byte-buddy-agent configuration to fix Gradle 9.0.0 deprecation warning
         // The agent configuration was causing Task.project access at execution time
+    }
+
+    // Erzwinge eine stabile Version von kotlinx-serialization-json für alle Konfigurationen,
+    // um Auflösungsfehler (z.B. 1.10.2, nicht verfügbar auf Maven Central) zu vermeiden
+    configurations.configureEach {
+        resolutionStrategy {
+            force("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+        }
     }
 
     // Dedicated performance test task per JVM subproject
