@@ -59,6 +59,8 @@ include(":temp:ping-service")
 
 // Client modules
 include(":client")
+include(":client:composeApp")
+include(":client:shared")
 
 // Documentation module
 include(":docs")
