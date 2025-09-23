@@ -1,8 +1,8 @@
 // Optimized Spring Boot ping service for testing microservice architecture
 // This service demonstrates circuit breaker patterns, service discovery, and monitoring
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }

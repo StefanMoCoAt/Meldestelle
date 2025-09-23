@@ -1,8 +1,8 @@
 // Dieses Modul stellt eine konkrete Implementierung der `cache-api`
 // unter Verwendung von Redis als Caching-Backend bereit.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
     // Als Bibliothek benötigt dieses Modul das Spring Boot Plugin nicht.
     alias(libs.plugins.spring.dependencyManagement)
 }

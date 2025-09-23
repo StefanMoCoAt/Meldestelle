@@ -1,8 +1,8 @@
 // Dieses Modul ist das API-Gateway und der einzige öffentliche Einstiegspunkt
 // für alle externen Anfragen an das Meldestelle-System.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }

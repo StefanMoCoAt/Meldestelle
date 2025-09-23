@@ -1,8 +1,8 @@
 // Dieses Modul stellt High-Level-Clients (Producer/Consumer) für die
 // Interaktion mit Apache Kafka bereit. Es baut auf der `messaging-config` auf.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }

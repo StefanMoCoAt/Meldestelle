@@ -1,8 +1,8 @@
 // Dieses Modul ist ein eigenständiger Spring Boot Service, der den
 // Zipkin-Server mit seiner UI hostet, um Tracing-Daten zu visualisieren.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }

@@ -1,10 +1,14 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlinMultiplatform)
 }
 
 kotlin {
+
+    // Configure JVM toolchain for all JVM targets
+    jvmToolchain(21)
+
     jvm()
 
     js {

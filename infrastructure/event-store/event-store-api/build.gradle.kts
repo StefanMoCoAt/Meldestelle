@@ -2,7 +2,7 @@
 // Es enthält die Interfaces (z.B. `EventStore`, `EventSerializer`) und die
 // Domänen-Events aus `core-domain`, die gespeichert und publiziert werden.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinJvm)
     // Für bessere IDE-Unterstützung und Dokumentation
     `java-library`
 }

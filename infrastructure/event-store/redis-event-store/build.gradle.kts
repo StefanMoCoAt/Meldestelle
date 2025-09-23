@@ -1,8 +1,8 @@
 // Dieses Modul stellt eine konkrete Implementierung der `event-store-api`
 // unter Verwendung von Redis Streams als Event-Store-Backend bereit.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }

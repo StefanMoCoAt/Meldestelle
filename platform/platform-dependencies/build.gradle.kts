@@ -2,7 +2,7 @@
 // Es hat keinen eigenen Code, sondern bündelt nur gemeinsame Laufzeit-Abhängigkeiten,
 // die von den meisten JVM-Modulen benötigt werden.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinJvm)
 }
 
 dependencies {

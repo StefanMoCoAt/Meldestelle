@@ -3,9 +3,9 @@
 // wie Keycloak zu interagieren und JWTs zu validieren.
 plugins {
     `java-library`
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.spring)
-    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.spring.dependencyManagement)
 }
 

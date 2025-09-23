@@ -1,7 +1,7 @@
 // Dieses Modul stellt gemeinsame technische Hilfsfunktionen bereit,
 // wie z.B. Konfigurations-Management, Datenbank-Verbindungen und Service Discovery.
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.kotlinMultiplatform)
 }
 
 kotlin {

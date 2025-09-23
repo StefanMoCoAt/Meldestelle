@@ -1,7 +1,7 @@
 // Dieses Modul bündelt alle für JVM-Tests notwendigen Abhängigkeiten.
 // Jedes Modul, das Tests enthält, sollte dieses Modul mit `testImplementation` einbinden.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinJvm)
 }
 
 dependencies {

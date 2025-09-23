@@ -2,9 +2,9 @@
 // zentraler Authentifizierung- und Autorisierungs-Server agiert.
 // Er kommuniziert mit Keycloak und stellt Endpunkte für die Benutzerverwaltung bereit.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.spring)
-    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
 }

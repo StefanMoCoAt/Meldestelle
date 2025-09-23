@@ -2,11 +2,11 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeHotReload)
+//    alias(libs.plugins.composeHotReload)
 }
 
 // Project version configuration
@@ -15,6 +15,9 @@ group = "at.mocode"
 
 
 kotlin {
+
+    // Configure JVM toolchain for all JVM targets
+    jvmToolchain(21)
 
     jvm()
 
@@ -31,6 +34,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+
+            implementation(projects.client.shared)
             // Core Compose Dependencies - minimiert für kleinere Bundle-Größe
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -38,9 +43,8 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             // UiToolingPreview nur für Development, nicht für Production WASM
-            // implementation(compose.components.uiToolingPreview)
-
             implementation(compose.components.uiToolingPreview)
+
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
 
@@ -59,12 +63,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.cio)
         }
-        jsMain.dependencies {
-            implementation(libs.ktor.client.js)
-        }
-        wasmJsMain.dependencies {
-            implementation(libs.ktor.client.js)
-        }
+
     }
 }
 

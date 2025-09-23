@@ -2,7 +2,7 @@
 // Es enthält nur Interfaces (z.B. `CacheService`) und Datenmodelle,
 // aber keine konkrete Implementierung.
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlinJvm)
 }
 
 java {
