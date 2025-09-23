@@ -1,12 +1,20 @@
 package at.mocode.temp.pingservice
 
+import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 @RestController
+@CrossOrigin(
+    origins = ["http://localhost:8080", "http://localhost:8083", "http://localhost:4000"],
+    methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS],
+    allowedHeaders = ["*"],
+    allowCredentials = "true"
+)
 class PingController(
     private val pingService: PingServiceCircuitBreaker
 ) {
