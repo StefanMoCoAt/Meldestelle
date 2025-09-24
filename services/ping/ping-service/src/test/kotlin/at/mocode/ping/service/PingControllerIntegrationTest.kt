@@ -46,7 +46,7 @@ class PingControllerIntegrationTest {
     @Test
     fun `should return basic ping response from standard endpoint`() {
         // When
-        val response = restTemplate.getForEntity(getUrl("/ping"), Map::class.java)
+        val response = restTemplate.getForEntity(getUrl("/ping/simple"), Map::class.java)
 
         // Then
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -71,7 +71,7 @@ class PingControllerIntegrationTest {
         val body = response.body!!
         assertThat(body["status"]).isEqualTo("pong")
         assertThat(body["service"]).isEqualTo("ping-service")
-        assertThat(body["circuitBreaker"]).isEqualTo("CLOSED")
+        assertThat(body["circuitBreakerState"]).isEqualTo("CLOSED")
         assertThat(body["timestamp"]).isNotNull()
 
         logger.info("Enhanced ping response: {}", body)
@@ -89,7 +89,7 @@ class PingControllerIntegrationTest {
         val body = response.body!!
         assertThat(body["status"]).isEqualTo("pong")
         assertThat(body["service"]).isEqualTo("ping-service")
-        assertThat(body["circuitBreaker"]).isEqualTo("CLOSED")
+        assertThat(body["circuitBreakerState"]).isEqualTo("CLOSED")
 
         logger.info("Enhanced ping without simulation: {}", body)
     }
@@ -125,8 +125,9 @@ class PingControllerIntegrationTest {
         assertThat(response.body).isNotNull
 
         val body = response.body!!
-        assertThat(body["status"]).isEqualTo("UP")
-        assertThat(body["circuitBreaker"]).isEqualTo("CLOSED")
+        assertThat(body["status"]).isEqualTo("pong")
+        assertThat(body["service"]).isEqualTo("ping-service")
+        assertThat(body["healthy"]).isEqualTo(true)
         assertThat(body["timestamp"]).isNotNull()
 
         logger.info("Health check response: {}", body)
@@ -146,39 +147,13 @@ class PingControllerIntegrationTest {
         assertThat(response.body).isNotNull
 
         val body = response.body!!
-        assertThat(body["status"]).isEqualTo("DOWN")
-        assertThat(body["circuitBreaker"]).isEqualTo("OPEN")
-        assertThat(body["message"]).isEqualTo("Health check temporarily unavailable")
+        assertThat(body["status"]).isEqualTo("down")
+        assertThat(body["service"]).isEqualTo("ping-service")
+        assertThat(body["healthy"]).isEqualTo(false)
 
         logger.info("Fallback health check response: {}", body)
     }
 
-    @Test
-    fun `should return response from test-failure endpoint`() {
-        // When
-        val response = restTemplate.getForEntity(getUrl("/ping/test-failure"), Map::class.java)
-
-        // Then
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body).isNotNull
-
-        val body = response.body!!
-
-        // Due to 60% failure simulation, we expect either success or fallback
-        assertThat(body["status"]).isIn("pong", "fallback")
-
-        if (body["status"] == "fallback") {
-            assertThat(body["service"]).isEqualTo("ping-service-fallback")
-            assertThat(body["circuitBreaker"]).isEqualTo("OPEN")
-            assertThat(body["message"]).isEqualTo("Service temporarily unavailable")
-            assertThat(body["error"]).isNotNull()
-        } else {
-            assertThat(body["service"]).isEqualTo("ping-service")
-            assertThat(body["circuitBreaker"]).isEqualTo("CLOSED")
-        }
-
-        logger.info("Test failure endpoint response: {}", body)
-    }
 
     @Test
     fun `should handle multiple rapid requests correctly`() {
@@ -219,7 +194,7 @@ class PingControllerIntegrationTest {
 
             // All should return fallback responses while circuit breaker is open
             assertThat(body["status"]).isEqualTo("fallback")
-            assertThat(body["circuitBreaker"]).isEqualTo("OPEN")
+            assertThat(body["circuitBreakerState"]).isEqualTo("OPEN")
 
             logger.info("Request {} with OPEN circuit breaker: {}", i + 1, body["status"])
         }
@@ -228,12 +203,11 @@ class PingControllerIntegrationTest {
     }
 
     @Test
-    fun `should test all endpoints return valid responses`() {
+    fun `should test all existing endpoints return valid responses`() {
         val endpoints = listOf(
-            "/ping",
+            "/ping/simple",
             "/ping/enhanced",
-            "/ping/health",
-            "/ping/test-failure"
+            "/ping/health"
         )
 
         endpoints.forEach { endpoint ->

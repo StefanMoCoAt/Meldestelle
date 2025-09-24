@@ -20,7 +20,7 @@ class PingController(
 ) : PingApi {
 
     // Contract endpoints
-    @GetMapping("/api/ping/simple")
+    @GetMapping("/ping/simple")
     override suspend fun simplePing(): PingResponse {
         val now = OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
         return PingResponse(
@@ -30,11 +30,11 @@ class PingController(
         )
     }
 
-    @GetMapping("/api/ping/enhanced")
+    @GetMapping("/ping/enhanced")
     override suspend fun enhancedPing(
         @RequestParam(required = false, defaultValue = "false") simulate: Boolean
     ): EnhancedPingResponse = pingService.ping(simulate)
 
-    @GetMapping("/api/ping/health")
+    @GetMapping("/ping/health")
     override suspend fun healthCheck(): HealthResponse = pingService.healthCheck()
 }
