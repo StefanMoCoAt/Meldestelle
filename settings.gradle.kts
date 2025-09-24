@@ -55,12 +55,11 @@ include(":infrastructure:monitoring:monitoring-client")
 include(":infrastructure:monitoring:monitoring-server")
 
 // Temporary modules
-include(":temp:ping-service")
+include(":services:ping:ping-api")
+include(":services:ping:ping-service")
 
 // Client modules
-include(":client")
-include(":client:composeApp")
-include(":client:shared")
+include(":clients:ping-client")
 
 // Documentation module
 include(":docs")

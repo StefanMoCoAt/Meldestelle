@@ -50,7 +50,7 @@ COPY gradle/ gradle/
 COPY platform/ platform/
 
 # Copy client directories (required by settings.gradle.kts)
-COPY client/ client/
+COPY clients/ clients/
 
 # Copy core directories (required by settings.gradle.kts)
 COPY core/ core/
@@ -64,19 +64,19 @@ COPY docs/ docs/
 # Copy root build configuration
 COPY build.gradle.kts ./
 
-# Copy ping-service specific files last (changes most frequently)
-COPY temp/ping-service/build.gradle.kts temp/ping-service/
-COPY temp/ping-service/src/ temp/ping-service/src/
+# Copy ping modules (changes most frequently)
+COPY services/ping/ping-api/ services/ping/ping-api/
+COPY services/ping/ping-service/ services/ping/ping-service/
 
 # Download and cache dependencies in a separate layer with build cache
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
-    ./gradlew :temp:ping-service:dependencies --no-daemon --info
+    ./gradlew :services:ping:ping-service:dependencies --no-daemon --info
 
 # Build the application with optimizations and build cache
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
-    ./gradlew :temp:ping-service:bootJar --no-daemon --info \
+    ./gradlew :services:ping:ping-service:bootJar --no-daemon --info \
     -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
 
 # ===================================================================
@@ -133,7 +133,7 @@ RUN apk update && \
 
 # Copy the built JAR from builder stage with proper ownership
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} \
-     /workspace/temp/ping-service/build/libs/*.jar app.jar
+     /workspace/services/ping/ping-service/build/libs/*.jar app.jar
 
 # Switch to non-root user
 USER ${APP_USER}

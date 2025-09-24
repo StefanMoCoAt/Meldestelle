@@ -24,11 +24,12 @@ services:
         SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
     container_name: meldestelle-ping-service
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
       SERVER_PORT: ${PING_SERVICE_PORT:-8082}
       CONSUL_HOST: consul
       CONSUL_PORT: ${CONSUL_PORT:-8500}
-      CONSUL_ENABLED: true
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED: ${CONSUL_ENABLED:-true}
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: ${POSTGRES_DB:-meldestelle}
@@ -41,8 +42,15 @@ services:
       - "${PING_SERVICE_PORT:-8082}:8082"
     networks:
       - meldestelle-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://localhost:${PING_SERVICE_PORT:-8082}/actuator/health" ]
+      test: [ "CMD", "curl", "--fail", "http://localhost:8082/actuator/health/readiness" ]
       interval: 15s
       timeout: 5s
       retries: 3

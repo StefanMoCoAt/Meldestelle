@@ -94,7 +94,7 @@ temp-data/
 **/temp/
 **/.temp/
 # Exception: Allow temp/ping-service for Docker builds
-!temp/ping-service/
+!services/ping/ping-service/
 
 # ===================================================================
 # Gradle wrapper executable (keep gradle wrapper jar)
