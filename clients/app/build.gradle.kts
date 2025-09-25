@@ -26,6 +26,11 @@ kotlin {
     js(IR) {
         outputModuleName = "web-app"
         browser {
+            commonWebpackConfig {
+                cssSupport {
+                    enabled.set(true)
+                }
+            }
             testTask {
                 enabled = false
             }
