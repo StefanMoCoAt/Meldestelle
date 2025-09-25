@@ -17,7 +17,10 @@ class PingServiceApplication {
             override fun addCorsMappings(registry: CorsRegistry) {
                 registry.addMapping("/**")
                     .allowedOriginPatterns("http://localhost:*")
-                    .allowedOrigins("http://localhost:8080", "http://localhost:8083", "http://localhost:4000")
+                    .allowedOrigins("http://localhost:8080",
+                        "http://localhost:8083",
+                        "http://localhost:4000"
+                    )
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     .allowedHeaders("*")
                     .allowCredentials(true)

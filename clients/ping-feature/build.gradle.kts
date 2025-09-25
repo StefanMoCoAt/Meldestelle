@@ -63,5 +63,10 @@ kotlin {
                 implementation(libs.ktor.client.cio)
             }
         }
+        val jsMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
+        }
     }
 }

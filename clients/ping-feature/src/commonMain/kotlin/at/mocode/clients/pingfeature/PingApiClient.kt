@@ -12,7 +12,7 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
 class PingApiClient(
-    private val baseUrl: String = "http://localhost:8080"
+    private val baseUrl: String = "http://localhost:8081"
 ) : PingApi {
 
     private val client = HttpClient {
