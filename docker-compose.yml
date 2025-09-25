@@ -217,7 +217,13 @@ services:
         VERSION: ${DOCKER_APP_VERSION:-1.0.0}
         # Infrastructure-specific arguments (from docker/build-args/infrastructure.env)
         SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DEFAULT:-default}
+      # Enable BuildKit for better caching and performance
+      platforms:
+        - linux/amd64
     container_name: meldestelle-api-gateway
+    volumes:
+      # Mount Gradle cache for better build performance
+      - api-gateway-gradle-cache:/home/gradle/.gradle
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       CONSUL_HOST: consul

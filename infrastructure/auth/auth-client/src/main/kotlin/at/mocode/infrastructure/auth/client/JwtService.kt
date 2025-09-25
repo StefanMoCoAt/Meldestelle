@@ -58,7 +58,14 @@ class JwtService(
      */
     fun validateToken(token: String): Result<Boolean> {
         return try {
-            // The library verifier already performs signature validation, so no need for redundant pre-check
+            // Strict pre-check to ensure the exact Base64URL signature matches before decoding.
+            // This defends against edge cases where Base64URL decoders may ignore insignificant bits
+            // in the last character, which could allow certain tamperings to slip through.
+            if (!hasValidSignature(token)) {
+                throw JWTVerificationException("Invalid token signature")
+            }
+
+            // Library verifier performs cryptographic verification and claim checks (issuer, audience, exp, ...)
             verifier.verify(token)
             Result.success(true)
         } catch (e: JWTVerificationException) {

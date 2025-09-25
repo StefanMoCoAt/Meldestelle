@@ -1,9 +1,9 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.8
 
 # ===================================================================
-# Optimized Dockerfile for Spring Boot Ping Service
-# Features: Multi-stage build, security hardening, monitoring support, enhanced caching
-# Version: 2.0.0 - Enhanced optimization and security
+# Multi-stage Dockerfile for Meldestelle Ping Service
+# Features: Security hardening, monitoring support, optimal caching, BuildKit cache mounts
+# Version: 2.1.0 - Optimized and corrected version
 # ===================================================================
 
 # === CENTRALIZED BUILD ARGUMENTS ===
@@ -29,13 +29,12 @@ LABEL stage=builder \
 
 WORKDIR /workspace
 
-# Optimize Gradle build settings for containerized builds
+# Gradle optimizations for containerized builds (removed deprecated configureondemand)
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -Dorg.gradle.daemon=false \
                  -Dorg.gradle.parallel=true \
-                 -Dorg.gradle.configureondemand=true \
                  -Dorg.gradle.workers.max=2 \
-                 -Dorg.gradle.jvmargs=-Xmx1536m \
+                 -Dorg.gradle.jvmargs=-Xmx2g \
                  -XX:+UseParallelGC \
                  -XX:MaxMetaspaceSize=512m"
 
@@ -57,6 +56,9 @@ COPY core/ core/
 
 # Copy infrastructure directories (required by settings.gradle.kts)
 COPY infrastructure/ infrastructure/
+
+# Copy services directories (required by settings.gradle.kts)
+COPY services/ services/
 
 # Copy docs directory (required by settings.gradle.kts)
 COPY docs/ docs/
@@ -145,7 +147,8 @@ EXPOSE 8082 5005
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=3 \
     CMD curl -fsS --max-time 2 http://localhost:8082/actuator/health/readiness || exit 1
 
-# Optimized JVM settings for Java 21 with enhanced container support
+# Optimized JVM settings for Spring Boot microservice with Java 21
+# Removed deprecated UseTransparentHugePages flag for better compatibility
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
     -XX:+UseG1GC \
     -XX:+UseStringDeduplication \
@@ -153,8 +156,6 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
     -XX:G1HeapRegionSize=16m \
     -XX:G1ReservePercent=25 \
     -XX:InitiatingHeapOccupancyPercent=30 \
-    -XX:+UnlockExperimentalVMOptions \
-    -XX:+UseTransparentHugePages \
     -XX:+AlwaysPreTouch \
     -XX:+DisableExplicitGC \
     -Djava.security.egd=file:/dev/./urandom \
@@ -173,14 +174,17 @@ ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
     LOGGING_LEVEL_ROOT=INFO
 
 # Enhanced entrypoint with tini init system and conditional debug support
+# Fixed memory cgroup path for better compatibility with different container runtimes
 ENTRYPOINT ["tini", "--", "sh", "-c", "\
-    echo 'Starting ping-service with Java ${JAVA_VERSION}...'; \
+    echo 'Starting Ping Service with Java ${JAVA_VERSION}...'; \
     echo 'Active Spring profiles: ${SPRING_PROFILES_ACTIVE}'; \
-    echo 'Container memory: '$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || echo 'unlimited'); \
+    echo 'Service port: ${SERVER_PORT}'; \
+    MEMORY_LIMIT=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || echo 'unlimited'); \
+    echo \"Container memory limit: $MEMORY_LIMIT\"; \
     if [ \"${DEBUG:-false}\" = \"true\" ]; then \
         echo 'DEBUG mode enabled - remote debugging available on port 5005'; \
         exec java ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar app.jar; \
     else \
-        echo 'Starting application in production mode'; \
+        echo 'Starting Ping Service in production mode'; \
         exec java ${JAVA_OPTS} -jar app.jar; \
     fi"]

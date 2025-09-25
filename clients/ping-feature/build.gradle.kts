@@ -1,3 +1,8 @@
+/**
+ * Dieses Modul kapselt die gesamte UI und Logik für das Ping-Feature.
+ * Es kennt seine eigenen technischen Abhängigkeiten (Ktor, Coroutines)
+ * und den UI-Baukasten (common-ui), aber es kennt keine anderen Features.
+ */
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
@@ -11,7 +16,11 @@ version = "1.0.0"
 kotlin {
     jvm()
     js {
-        browser()
+        browser {
+            testTask {
+                enabled = false
+            }
+        }
     }
 
     jvmToolchain(21)

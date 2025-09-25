@@ -1,3 +1,7 @@
+/**
+ * Dieses Modul definiert nur die Navigationsrouten.
+ * Es ist noch simpler.
+ */
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
