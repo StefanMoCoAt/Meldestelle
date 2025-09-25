@@ -24,6 +24,7 @@ kotlin {
         }
     }
     js(IR) {
+        outputModuleName = "web-app"
         browser {
             testTask {
                 enabled = false
