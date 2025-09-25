@@ -59,7 +59,10 @@ include(":services:ping:ping-api")
 include(":services:ping:ping-service")
 
 // Client modules
-include(":clients:ping-client")
+include(":clients:app")
+include(":clients:ping-feature")
+include(":clients:shared:common-ui")
+include(":clients:shared:navigation")
 
 // Documentation module
 include(":docs")

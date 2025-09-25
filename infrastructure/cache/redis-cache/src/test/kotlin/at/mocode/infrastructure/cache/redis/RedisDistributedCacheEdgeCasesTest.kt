@@ -80,11 +80,14 @@ class RedisDistributedCacheEdgeCasesTest {
         try {
             cache.set("circular-reference", circularObject as Any)
             logger.info { "Circular reference object was handled (possibly with Jackson's circular reference handling)" }
-        } catch (e: Exception) {
-            logger.info { "Circular reference object caused expected serialization issue: ${e::class.simpleName}" }
-            assertTrue(e is com.fasterxml.jackson.databind.JsonMappingException ||
-                      e is StackOverflowError ||
-                      e is RuntimeException, "Expected serialization-related exception")
+        } catch (t: Throwable) {
+            logger.info { "Circular reference object caused expected serialization issue: ${t::class.simpleName}" }
+            assertTrue(
+                t is com.fasterxml.jackson.databind.JsonMappingException ||
+                    t is StackOverflowError ||
+                    t is RuntimeException,
+                "Expected serialization-related exception"
+            )
         }
 
         // Test 2: Very deep nesting that might cause issues
@@ -93,8 +96,8 @@ class RedisDistributedCacheEdgeCasesTest {
             cache.set("deep-nested", deepObject as Any)
             cache.get("deep-nested", DeeplyNestedObject::class.java)
             logger.info { "Deep nested object serialized successfully" }
-        } catch (e: Exception) {
-            logger.info { "Deep nested object caused expected issues: ${e::class.simpleName}" }
+        } catch (t: Throwable) {
+            logger.info { "Deep nested object caused expected issues: ${t::class.simpleName}" }
         }
 
         // Verify that the cache remains stable after problematic serialization attempts
