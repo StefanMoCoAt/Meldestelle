@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import at.mocode.clients.shared.commonui.components.AppHeader
 import at.mocode.clients.shared.commonui.components.AppScaffold
 import at.mocode.clients.shared.commonui.theme.AppTheme
@@ -15,6 +14,8 @@ import at.mocode.clients.pingfeature.PingViewModel
 @Composable
 fun App() {
     var currentScreen: AppScreen by remember { mutableStateOf(AppScreen.Home) }
+    // Create a single PingViewModel instance for the lifetime of the App composition.
+    val pingViewModel: PingViewModel = remember { PingViewModel() }
 
     AppTheme {
         AppScaffold(
@@ -31,7 +32,6 @@ fun App() {
                         LandingScreen()
                     }
                     is AppScreen.Ping -> {
-                        val pingViewModel: PingViewModel = viewModel()
                         PingScreen(viewModel = pingViewModel)
                     }
                 }

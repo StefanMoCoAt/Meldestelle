@@ -7,14 +7,23 @@
     <meta name="theme-color" content="#0f172a">
     <link type="text/css" rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
 </head>
 <body>
 <div id="ComposeTarget"></div>
 <script>
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(console.error);
-    });
+    const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
+    if (isLocalhost) {
+      // Unregister any existing service workers to avoid dev reload loops
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const reg of regs) reg.unregister();
+      }).catch(console.error);
+    } else {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(console.error);
+      });
+    }
   }
 </script>
 </body>
