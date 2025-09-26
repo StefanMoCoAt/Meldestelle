@@ -28,24 +28,18 @@ java {
 dependencies {
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen.
     implementation(platform(projects.platform.platformBom))
-
     // Stellt gemeinsame Abhängigkeiten wie Coroutines und Logging bereit.
     implementation(projects.platform.platformDependencies)
-
     // Stellt Domänenobjekte und technische Utilities bereit.
     implementation(projects.core.coreUtils)
-
     // Spring Security für OAuth2-Client-Funktionalität und JWT-Verarbeitung.
     implementation(libs.spring.boot.starter.oauth2.client)
     implementation(libs.spring.boot.starter.security)
     implementation(libs.spring.security.oauth2.jose)
-
     // Bibliothek zur einfachen Handhabung von JWTs.
     implementation(libs.auth0.java.jwt)
-
     // JSON-Serialization für konsistente API-Datenverarbeitung.
     implementation(libs.kotlinx.serialization.json)
-
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
 }

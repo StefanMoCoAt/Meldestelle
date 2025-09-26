@@ -17,16 +17,13 @@ dependencies {
     implementation(platform(projects.platform.platformBom))
     // Stellt gemeinsame Abhängigkeiten bereit.
     implementation(projects.platform.platformDependencies)
-
     // Spring Boot Starter für einen einfachen Web-Service.
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.actuator)
-
     // Abhängigkeiten für den Zipkin-Server (UI ist via zipkin-lens bereits enthalten).
     implementation(libs.zipkin.server)
     // Prometheus client für Zipkin Metriken
     implementation(libs.micrometer.prometheus)
-
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.logback.classic)  // SLF4J provider for tests

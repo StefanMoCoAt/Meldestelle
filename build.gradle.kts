@@ -9,7 +9,6 @@ plugins {
 }
 
 subprojects {
-
     // Wende gemeinsame Einstellungen an
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
         compilerOptions {

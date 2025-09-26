@@ -13,7 +13,11 @@ version = "1.0.0"
 
 kotlin {
     val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
+
+    jvmToolchain(21)
+
     jvm()
+
     js {
         browser {
             testTask {
@@ -29,22 +33,16 @@ kotlin {
         }
     }
 
-    jvmToolchain(21)
-
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                implementation(compose.ui)
-                implementation(compose.components.resources)
-            }
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
         }
-        commonTest {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }

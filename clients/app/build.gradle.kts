@@ -18,7 +18,6 @@ group = "at.mocode.clients"
 version = "1.0.0"
 
 kotlin {
-
     val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
     jvmToolchain(21)
@@ -33,21 +32,6 @@ kotlin {
     js(IR) {
         outputModuleName = "web-app"
         browser {
-            webpackTask {
-                mainOutputFileName = "web-app.js"
-                output.libraryTarget = "commonjs2"
-            }
-
-            // Development Server konfigurieren
-            runTask {
-                mainOutputFileName.set("web-app.js")
-            }
-
-            // Browser-Tests komplett deaktivieren (Configuration Cache kompatibel)
-            testTask {
-                enabled = false
-            }
-
             commonWebpackConfig {
                 cssSupport { enabled = true }
                 // Webpack-Mode abhängig von Build-Typ
@@ -56,7 +40,18 @@ kotlin {
                 else
                     KotlinWebpackConfig.Mode.DEVELOPMENT
             }
-
+            webpackTask {
+                mainOutputFileName = "web-app.js"
+                output.libraryTarget = "commonjs2"
+            }
+            // Development Server konfigurieren
+            runTask {
+                mainOutputFileName.set("web-app.js")
+            }
+            // Browser-Tests komplett deaktivieren (Configuration Cache kompatibel)
+            testTask {
+                enabled = false
+            }
         }
         binaries.executable()
     }
@@ -72,21 +67,17 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     sourceSets {
-
         commonMain.dependencies {
             // Feature modules
             implementation(project(":clients:ping-feature"))
-
             // Shared modules
             implementation(project(":clients:shared:common-ui"))
             implementation(project(":clients:shared:navigation"))
-
             // Compose dependencies
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
-
             // ViewModel lifecycle
             implementation(libs.androidx.lifecycle.viewmodelCompose)
         }
@@ -95,19 +86,14 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.kotlinx.coroutines.core)
         }
-
         jsMain.dependencies {
             implementation(npm("html-webpack-plugin", "5.6.4"))
         }
-
         if (enableWasm) {
-            val wasmJsMain by getting {
-                dependencies {
-                    implementation(npm("html-webpack-plugin", "5.6.4"))
-                }
+            wasmJsMain.dependencies {
+                implementation(npm("html-webpack-plugin", "5.6.4"))
             }
         }
-
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
@@ -124,7 +110,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
-
 // Configure duplicate handling strategy for distribution tasks
 tasks.withType<Tar> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -138,6 +123,7 @@ tasks.withType<Zip> {
 tasks.withType<Copy> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+
 tasks.withType<Sync> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

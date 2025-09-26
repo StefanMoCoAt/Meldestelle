@@ -27,7 +27,6 @@ dependencies {
     api(platform(projects.platform.platformBom))
     // Stellt gemeinsame Abhängigkeiten wie Logging bereit und exportiert sie für Konsumenten der API.
     api(projects.platform.platformDependencies)
-
     // Stellt Test-Abhängigkeiten bereit.
     testImplementation(projects.platform.platformTesting)
 }

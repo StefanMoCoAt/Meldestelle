@@ -28,10 +28,8 @@ dependencies {
     implementation(projects.platform.platformDependencies)
     // Baut auf der zentralen Kafka-Konfiguration auf und erbt deren Abhängigkeiten.
     implementation(projects.infrastructure.messaging.messagingConfig)
-
     // Fügt die reaktive Kafka-Implementierung hinzu (Project Reactor).
     implementation(libs.reactor.kafka)
-
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
 }

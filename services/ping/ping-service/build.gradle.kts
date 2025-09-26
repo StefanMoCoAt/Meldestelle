@@ -33,51 +33,39 @@ dependencies {
     implementation(platform(projects.platform.platformBom))
     // Provide common Kotlin dependencies (coroutines, serialization, logging)
     implementation(projects.platform.platformDependencies)
-
     // Contract module for type-safe DTOs and API interface
     implementation(projects.services.ping.pingApi)
-
     // Monitoring client: tracing + zipkin + defaults
     implementation(projects.infrastructure.monitoring.monitoringClient)
-
     // === Core Spring Boot Dependencies ===
     // Web starter for REST endpoints
     implementation(libs.spring.boot.starter.web)
     // Jackson Kotlin module for data classes and Kotlin features
     implementation(libs.jackson.module.kotlin)
-
     // Kotlin reflection for Spring Boot Kotlin serialization
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-
     // Validation for request/response validation
     implementation(libs.spring.boot.starter.validation)
-
     // Actuator for health checks and metrics
     implementation(libs.spring.boot.starter.actuator)
-
     // === Service Discovery ===
     // Spring Cloud Consul for service registration and discovery
     implementation(libs.spring.cloud.starter.consul.discovery)
-
     // === Caching ===
     // Caffeine cache for Spring Cloud LoadBalancer (resolves production cache warning)
     implementation("com.github.ben-manes.caffeine:caffeine")
     implementation("org.springframework:spring-context-support")
-
     // === Resilience & Fault Tolerance ===
     // Resilience4j Circuit Breaker for fault tolerance
     implementation(libs.resilience4j.spring.boot3)
     implementation(libs.resilience4j.reactor)
     implementation(libs.spring.boot.starter.aop)
-
     // === Monitoring & Metrics ===
     // Micrometer for metrics collection and Prometheus integration
     implementation(libs.micrometer.prometheus)
-
     // === Documentation ===
     // OpenAPI 3 documentation generation
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
-
     // === Testing Dependencies ===
     // Platform testing utilities
     testImplementation(projects.platform.platformTesting)

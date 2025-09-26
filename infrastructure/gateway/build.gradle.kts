@@ -31,7 +31,6 @@ dependencies {
     implementation(projects.core.coreUtils)
     // Stellt gemeinsame Abhängigkeiten bereit.
     implementation(projects.platform.platformDependencies)
-
     // Stellt die Spring Cloud Gateway und Consul Discovery Abhängigkeiten bereit
     implementation(libs.bundles.spring.cloud.gateway)
     // Circuit Breaker (Resilience4j) für Gateway Filter - optimiert mit libs reference
@@ -44,21 +43,17 @@ dependencies {
     implementation(libs.spring.boot.starter.webflux)
     // Spring Security (WebFlux) – benötigt für SecurityWebFilterChain-Konfiguration
     implementation(libs.spring.boot.starter.security)
-
     // Bindet die wiederverwendbare Logik zur JWT-Validierung ein.
     implementation(projects.infrastructure.auth.authClient)
-
     // Bindet die wiederverwendbare Logik für Metriken und Tracing ein.
     implementation(projects.infrastructure.monitoring.monitoringClient)
     // Explizite Actuator-Abhängigkeit für Health Indicators (benötigt für GatewayHealthIndicator)
     // Obwohl bereits im monitoring-client Bundle, wird durch 'implementation' nicht transitiv verfügbar
     implementation(libs.spring.boot.starter.actuator)
-
     // Logback-Abhängigkeiten - Versionen werden von Spring Boot BOM verwaltet
     implementation("ch.qos.logback:logback-classic")
     implementation("ch.qos.logback:logback-core")
     implementation("org.slf4j:slf4j-api")
-
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
@@ -67,7 +62,6 @@ dependencies {
     testImplementation("ch.qos.logback:logback-core")
     testImplementation("org.slf4j:slf4j-api")
     // Redundante Security-Abhängigkeit im Testkontext entfernt (bereits durch platform-testing abgedeckt)
-
 }
 
 tasks.test {

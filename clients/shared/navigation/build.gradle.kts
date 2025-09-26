@@ -11,10 +11,15 @@ version = "1.0.0"
 
 kotlin {
     val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
+
+    jvmToolchain(21)
+
     jvm()
+
     js {
         browser()
     }
+
     if (enableWasm) {
         @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
         wasmJs {
@@ -22,18 +27,12 @@ kotlin {
         }
     }
 
-    jvmToolchain(21)
-
     sourceSets {
-        commonMain {
-            dependencies {
-                // No specific dependencies needed for navigation routes
-            }
+        commonMain.dependencies {
+            // No specific dependencies needed for navigation routes
         }
-        commonTest {
-            dependencies {
-                implementation(libs.kotlin.test)
-            }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }

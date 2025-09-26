@@ -8,7 +8,6 @@ plugins {
 dependencies {
     // Importiert die zentrale BOM, um konsistente Versionen zu gewährleisten.
     api(platform(projects.platform.platformBom))
-
     // Stellt die wichtigsten Kotlin(x)-Bibliotheken via `api` bereit,
     // damit jedes Modul, das von `platform-dependencies` abhängt, diese automatisch erhält.
     api(libs.kotlinx.coroutines.core)

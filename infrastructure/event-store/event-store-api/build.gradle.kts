@@ -27,17 +27,14 @@ dependencies {
     // === Core Dependencies ===
     // Stellt sicher, dass alle Versionen aus der zentralen BOM kommen
     implementation(platform(projects.platform.platformBom))
-
     // Abhängigkeit zu den Core-Modulen, um auf Domänenobjekte (Events)
     // und technische Hilfsklassen zugreifen zu können
     api(projects.core.coreDomain)
     implementation(projects.core.coreUtils)
-
     // === Test Dependencies ===
     // Stellt alle Test-Abhängigkeiten gebündelt bereit
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
-
     // Für erweiterte Test-Unterstützung bei API-Tests
     testImplementation(libs.kotlinx.coroutines.test)
 }
@@ -46,7 +43,6 @@ dependencies {
 // Optimiert die Test-Ausführung
 tasks.test {
     useJUnitPlatform()
-
     // Parallelisierung für bessere Performance
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
 }

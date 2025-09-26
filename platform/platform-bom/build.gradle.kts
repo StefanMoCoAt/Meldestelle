@@ -19,7 +19,6 @@ dependencies {
     api(platform(libs.spring.cloud.dependencies)) // NEU: Spring Cloud BOM hinzugefügt
     api(platform(libs.kotlin.bom))
     api(platform(libs.kotlinx.coroutines.bom))
-
     // `constraints` erzwingt spezifische Versionen für einzelne Bibliotheken.
     // Alle Versionen werden sicher aus `libs.versions.toml` bezogen.
     constraints {
@@ -35,11 +34,9 @@ dependencies {
         api(libs.jakarta.annotation.api)
         api(libs.auth0.java.jwt)
         api(libs.logback.classic)
-
         // --- Spring & SpringDoc ---
         api(libs.springdoc.openapi.starter.common)
         api(libs.springdoc.openapi.starter.webmvc.ui)
-
         // --- Database & Persistence ---
         api(libs.bundles.exposed)
         api(libs.bundles.flyway)
@@ -47,15 +44,12 @@ dependencies {
         api(libs.hikari.cp)
         api(libs.h2.driver)
         api(libs.lettuce.core)
-
         // --- Kotlinx Libraries ---
         api(libs.kotlinx.serialization.json)
         api(libs.kotlinx.datetime)
-
         // --- Jackson Modules ---
         api(libs.jackson.module.kotlin)
         api(libs.jackson.datatype.jsr310)
-
         // --- Testcontainers ---
         api(libs.bundles.testcontainers)
     }
