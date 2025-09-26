@@ -12,6 +12,7 @@ group = "at.mocode.clients.shared"
 version = "1.0.0"
 
 kotlin {
+    val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
     jvm()
     js {
         browser {
@@ -21,10 +22,17 @@ kotlin {
         }
     }
 
+    if (enableWasm) {
+        @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+        wasmJs {
+            browser()
+        }
+    }
+
     jvmToolchain(21)
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
@@ -33,7 +41,7 @@ kotlin {
                 implementation(compose.components.resources)
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
             }

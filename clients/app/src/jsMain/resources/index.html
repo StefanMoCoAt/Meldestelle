@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meldestelle</title>
+    <meta name="theme-color" content="#0f172a">
     <link type="text/css" rel="stylesheet" href="styles.css">
-<!--    <script src="web-app.js"></script>-->
+    <link rel="manifest" href="manifest.webmanifest">
 </head>
 <body>
 <div id="ComposeTarget"></div>
-<!--<script src="skiko.js"></script>-->
-<!--<script src="Meldestelle-client.js"></script>-->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    });
+  }
+</script>
 </body>
 </html>

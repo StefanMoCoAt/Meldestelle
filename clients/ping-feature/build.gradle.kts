@@ -14,6 +14,7 @@ group = "at.mocode.clients"
 version = "1.0.0"
 
 kotlin {
+    val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
     jvm()
     js {
         browser {
@@ -23,10 +24,17 @@ kotlin {
         }
     }
 
+    if (enableWasm) {
+        @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+        wasmJs {
+            browser()
+        }
+    }
+
     jvmToolchain(21)
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 // Contract from backend
                 implementation(projects.services.ping.pingApi)
@@ -53,17 +61,17 @@ kotlin {
                 implementation(libs.androidx.lifecycle.viewmodelCompose)
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
             }
         }
-        val jvmMain by getting {
+        jvmMain {
             dependencies {
                 implementation(libs.ktor.client.cio)
             }
         }
-        val jsMain by getting {
+        jsMain {
             dependencies {
                 implementation(libs.ktor.client.js)
             }
