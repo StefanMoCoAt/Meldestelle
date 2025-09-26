@@ -1,6 +1,8 @@
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /**
  * Dieses Modul ist der "Host". Es kennt alle Features und die Shared-Module und
@@ -31,12 +33,30 @@ kotlin {
     js(IR) {
         outputModuleName = "web-app"
         browser {
-            commonWebpackConfig {
-                cssSupport { enabled = true }
+            webpackTask {
+                mainOutputFileName = "web-app.js"
+                output.libraryTarget = "commonjs2"
             }
+
+            // Development Server konfigurieren
+            runTask {
+                mainOutputFileName.set("web-app.js")
+            }
+
+            // Browser-Tests komplett deaktivieren (Configuration Cache kompatibel)
             testTask {
                 enabled = false
             }
+
+            commonWebpackConfig {
+                cssSupport { enabled = true }
+                // Webpack-Mode abhängig von Build-Typ
+                mode = if (project.hasProperty("production"))
+                    KotlinWebpackConfig.Mode.PRODUCTION
+                else
+                    KotlinWebpackConfig.Mode.DEVELOPMENT
+            }
+
         }
         binaries.executable()
     }
@@ -93,6 +113,17 @@ kotlin {
         }
     }
 }
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+        freeCompilerArgs.addAll(
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xskip-metadata-version-check" // Für bleeding-edge Versionen
+        )
+    }
+}
+
 
 // Configure duplicate handling strategy for distribution tasks
 tasks.withType<Tar> {
