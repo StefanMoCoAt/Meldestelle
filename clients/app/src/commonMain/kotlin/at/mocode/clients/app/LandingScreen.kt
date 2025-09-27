@@ -13,10 +13,10 @@ import androidx.compose.ui.unit.dp
 fun LandingScreen() {
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
         Text(
             text = "Willkommen bei Meldestelle",

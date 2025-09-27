@@ -20,7 +20,7 @@ fun AppFooter() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "© 2024 Meldestelle - Built with Kotlin Multiplatform",
+            text = "© 2025 Meldestelle - Built with Kotlin Multiplatform",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center

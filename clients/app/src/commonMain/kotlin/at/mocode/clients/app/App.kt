@@ -24,18 +24,20 @@ fun App() {
                     title = "Meldestelle",
                     onNavigateToPing = { currentScreen = AppScreen.Ping }
                 )
-            }
-        ) { paddingValues ->
-            Box(modifier = Modifier.padding(paddingValues)) {
-                when (currentScreen) {
-                    is AppScreen.Home -> {
-                        LandingScreen()
-                    }
-                    is AppScreen.Ping -> {
-                        PingScreen(viewModel = pingViewModel)
+            },
+            { paddingValues ->
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    when (currentScreen) {
+                        is AppScreen.Home -> {
+                            LandingScreen()
+                        }
+
+                        is AppScreen.Ping -> {
+                            PingScreen(viewModel = pingViewModel)
+                        }
                     }
                 }
             }
-        }
+        )
     }
 }

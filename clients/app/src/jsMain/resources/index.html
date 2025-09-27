@@ -15,7 +15,6 @@
   if ('serviceWorker' in navigator) {
     const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
     if (isLocalhost) {
-      // Unregister any existing service workers to avoid dev reload loops
       navigator.serviceWorker.getRegistrations().then(regs => {
         for (const reg of regs) reg.unregister();
       }).catch(console.error);

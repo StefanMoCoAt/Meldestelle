@@ -14,20 +14,16 @@ fun AppScaffold(
     header: @Composable () -> Unit = {
         AppHeader(title = "Meldestelle")
     },
+    content: @Composable (PaddingValues) -> Unit,
     footer: @Composable () -> Unit = {
         AppFooter()
     },
-    content: @Composable (PaddingValues) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            topBar = header,
-            modifier = Modifier.weight(1f)
-        ) {
-            paddingValues ->
-            content(paddingValues)
-        }
-        footer()
+    Scaffold(
+        topBar = header,
+        bottomBar = footer,
+        modifier = Modifier.fillMaxSize()
+    ) { paddingValues ->
+        content(paddingValues)
     }
-
 }
