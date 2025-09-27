@@ -15,21 +15,20 @@ COPY gradle ./gradle
 COPY gradlew ./
 
 # Kopiere alle notwendigen Module für Multi-Modul-Projekt
-COPY client ./client
+COPY clients ./clients
 COPY core ./core
 COPY platform ./platform
 COPY infrastructure ./infrastructure
-COPY temp ./temp
-COPY docs ./docs
+COPY services ./services
 
 # Setze Gradle-Wrapper Berechtigung
 RUN chmod +x ./gradlew
 
 # Dependencies downloaden (für besseres Caching)
-RUN ./gradlew :client:dependencies --no-configure-on-demand
+RUN ./gradlew :clients:app:dependencies --no-configure-on-demand
 
-# Kotlin/WASM Web-App kompilieren
-RUN ./gradlew :client:wasmJsBrowserDistribution --no-configure-on-demand
+# Kotlin/JS Web-App kompilieren (PRODUCTION Build)
+RUN ./gradlew :clients:app:jsBrowserDistribution --no-configure-on-demand -Pproduction=true
 
 # ===================================================================
 # Stage 2: Runtime Stage - Nginx für Static Files + API Proxy
@@ -40,7 +39,7 @@ FROM nginx:1.25-alpine
 RUN apk add --no-cache curl
 
 # Kopiere kompilierte Web-App von Build-Stage
-COPY --from=builder /app/client/build/dist/wasmJs/productionExecutable/ /usr/share/nginx/html/
+COPY --from=builder /app/clients/app/build/dist/js/productionExecutable/ /usr/share/nginx/html/
 
 # Kopiere Nginx-Konfiguration
 COPY dockerfiles/clients/web-app/nginx.conf /etc/nginx/nginx.conf
