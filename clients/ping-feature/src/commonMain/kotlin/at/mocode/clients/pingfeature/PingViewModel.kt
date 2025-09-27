@@ -3,6 +3,7 @@ package at.mocode.clients.pingfeature
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import at.mocode.ping.api.PingApi
 import at.mocode.ping.api.PingResponse
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
@@ -16,8 +17,9 @@ data class PingUiState(
     val errorMessage: String? = null
 )
 
-class PingViewModel : ViewModel() {
-    private val apiClient = PingApiClient()
+class PingViewModel(
+    private val apiClient: PingApi = PingApiClient()
+) : ViewModel() {
 
     var uiState by mutableStateOf(PingUiState())
         private set

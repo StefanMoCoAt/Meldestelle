@@ -59,6 +59,12 @@ kotlin {
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.mockk)
         }
 
         jvmMain.dependencies {

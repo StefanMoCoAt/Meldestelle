@@ -5,7 +5,13 @@
 # ===================================================================
 # Stage 1: Build Stage - Kotlin/JS kompilieren
 # ===================================================================
-FROM gradle:8-jdk21-alpine AS builder
+FROM gradle:8-jdk21 AS builder
+
+# Install Node.js and npm for Kotlin/JS builds (Ubuntu-based image has better Node.js compatibility)
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -20,6 +26,7 @@ COPY core ./core
 COPY platform ./platform
 COPY infrastructure ./infrastructure
 COPY services ./services
+COPY docs ./docs
 
 # Setze Gradle-Wrapper Berechtigung
 RUN chmod +x ./gradlew

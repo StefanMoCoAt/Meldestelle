@@ -9,23 +9,27 @@ FROM gradle:8-jdk21-alpine AS builder
 
 WORKDIR /app
 
-# Kopiere Gradle-Konfiguration
+# Kopiere Gradle-Konfiguration und Wrapper
 COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 COPY gradle ./gradle
+COPY gradlew ./
 
 # Kopiere alle notwendigen Module für Multi-Modul-Projekt
-COPY client ./client
+COPY clients ./clients
 COPY core ./core
 COPY platform ./platform
 COPY infrastructure ./infrastructure
-COPY temp ./temp
+COPY services ./services
 COPY docs ./docs
 
+# Setze Gradle-Wrapper Berechtigung
+RUN chmod +x ./gradlew
+
 # Dependencies downloaden (für besseres Caching)
-RUN gradle :client:dependencies --no-configure-on-demand
+RUN ./gradlew :clients:app:dependencies --no-configure-on-demand
 
 # Desktop-App kompilieren (createDistributable für native Distribution)
-RUN gradle :client:createDistributable --no-configure-on-demand
+RUN ./gradlew :clients:app:createDistributable --no-configure-on-demand
 
 # ===================================================================
 # Stage 2: Runtime Stage - Ubuntu mit VNC + noVNC
@@ -54,7 +58,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Kopiere kompilierte Desktop-App von Build-Stage
-COPY --from=builder /app/client/build/compose/binaries/main/desktop/ ./desktop-app/
+COPY --from=builder /app/clients/app/build/compose/binaries/main/desktop/ ./desktop-app/
 
 # Kopiere Scripts
 COPY dockerfiles/clients/desktop-app/entrypoint.sh /entrypoint.sh
