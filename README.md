@@ -161,7 +161,8 @@ docker-compose logs [service-name]
 
 Die Client-Anwendungen sind als ein gemeinsames Kotlin Multiplatform (KMP) Modul `:client` organisiert und liefern:
 - Desktop (JVM) über Compose Desktop
-- Web (WASM im Browser) über Compose HTML/WASM
+- Web (Kotlin/JS im Browser) über Compose Multiplatform
+- Optional: WASM mit Flag -PenableWasm=true
 
 ```bash
 # Desktop (JVM) starten

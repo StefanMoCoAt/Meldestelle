@@ -1,16 +1,15 @@
 package at.mocode.clients.pingfeature
 
-import at.mocode.ping.api.PingResponse
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
+import at.mocode.ping.api.PingResponse
 import io.ktor.client.engine.mock.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.utils.io.*
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
 class PingApiClientTest {
 
     private fun createMockApiClient(mockEngine: MockEngine): PingApiClient {
