@@ -9,8 +9,10 @@ config.plugins.push(new HtmlWebpackPlugin({
     template: templatePath,
     filename: 'index.html',
     inject: 'body',
+    scriptLoading: 'blocking',
     // Optimierung hinzufügen
-    minify: {
+    minify: false
+    /*{
         removeComments: true,
         collapseWhitespace: true,
         removeRedundantAttributes: true,
@@ -21,7 +23,7 @@ config.plugins.push(new HtmlWebpackPlugin({
         minifyJS: true,
         minifyCSS: true,
         minifyURLs: true,
-    }
+    }*/
 }));
 
 // Bundle-Analyse für Development

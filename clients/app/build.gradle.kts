@@ -121,7 +121,7 @@ tasks.withType<Zip> {
 
 // Ensure copy/sync-based distribution tasks exclude duplicates (e.g., index.html from resources and HtmlWebpackPlugin)
 tasks.withType<Copy> {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.WARN // Statt EXCLUDE
 }
 
 tasks.withType<Sync> {
