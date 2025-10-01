@@ -23,8 +23,8 @@ services:
         # Service-specific arguments (from docker/build-args/services.env)
         SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
       # Enable BuildKit for better caching and performance
-      platforms:
-        - linux/amd64
+      # platforms:
+      #   - linux/amd64
     container_name: meldestelle-ping-service
     volumes:
       # Mount Gradle cache for better build performance

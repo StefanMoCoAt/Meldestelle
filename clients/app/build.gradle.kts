@@ -50,7 +50,12 @@ kotlin {
             }
             // Browser-Tests komplett deaktivieren (Configuration Cache kompatibel)
             testTask {
-                enabled = false
+                //enabled = false
+
+                useKarma {
+                    useChromeHeadless()
+                    environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
+                }
             }
         }
         binaries.executable()

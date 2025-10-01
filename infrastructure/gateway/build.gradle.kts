@@ -43,6 +43,10 @@ dependencies {
     implementation(libs.spring.boot.starter.webflux)
     // Spring Security (WebFlux) – benötigt für SecurityWebFilterChain-Konfiguration
     implementation(libs.spring.boot.starter.security)
+    // OAuth2 Resource Server für JWT-Token-Validierung mit Keycloak
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    // Jackson Kotlin Module für JSON-Parsing in KeycloakJwtAuthenticationFilter
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     // Bindet die wiederverwendbare Logik zur JWT-Validierung ein.
     implementation(projects.infrastructure.auth.authClient)
     // Bindet die wiederverwendbare Logik für Metriken und Tracing ein.

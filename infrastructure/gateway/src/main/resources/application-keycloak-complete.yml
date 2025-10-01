@@ -1,0 +1,187 @@
+# ===================================================================
+# Meldestelle API Gateway Configuration
+# ===================================================================
+
+server:
+  port: ${GATEWAY_PORT:8081}
+
+spring:
+  application:
+    name: meldestelle-api-gateway
+
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev,keycloak}
+
+  # Security Configuration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/meldestelle}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs}
+
+  # Spring Cloud Gateway Configuration
+  cloud:
+    gateway:
+      routes:
+        # Ping Service Route
+        - id: ping-service
+          uri: lb://ping-service
+          predicates:
+            - Path=/api/ping/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: ping-service-cb
+                fallbackUri: forward:/fallback/ping
+
+        # Auth Service Route
+        - id: auth-service
+          uri: lb://auth-server
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: auth-service-cb
+                fallbackUri: forward:/fallback/auth
+
+      # Global CORS Configuration
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "http://localhost:*"
+              - "http://127.0.0.1:*"
+              - "http://web-app:*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
+            exposedHeaders:
+              - Authorization
+              - X-User-ID
+              - X-User-Name
+              - X-User-Role
+
+# Keycloak Integration Settings
+keycloak:
+  server-url: ${KEYCLOAK_SERVER_URL:http://keycloak:8080}
+  realm: ${KEYCLOAK_REALM:meldestelle}
+  client-id: ${KEYCLOAK_CLIENT_ID:api-gateway}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:api-gateway-secret-key-change-in-production}
+  issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/meldestelle}
+  jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs}
+
+# Gateway Security Settings
+gateway:
+  security:
+    keycloak:
+      enabled: ${GATEWAY_SECURITY_KEYCLOAK_ENABLED:true}
+    public-paths: >
+      /,
+      /health/**,
+      /actuator/**,
+      /api/ping/health,
+      /api/auth/login,
+      /api/auth/register,
+      /api/auth/refresh,
+      /fallback/**,
+      /docs/**,
+      /swagger-ui/**
+
+# Consul Service Discovery
+consul:
+  host: ${CONSUL_HOST:consul}
+  port: ${CONSUL_PORT:8500}
+  enabled: ${CONSUL_ENABLED:true}
+
+# Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      ping-service-cb:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+      auth-service-cb:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+
+# Actuator Management
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Logging Configuration
+logging:
+  level:
+    at.mocode.infrastructure.gateway: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+keycloak:
+  server-url: http://localhost:8180
+  issuer-uri: http://localhost:8180/realms/meldestelle
+  jwk-set-uri: http://localhost:8180/realms/meldestelle/protocol/openid-connect/certs
+
+logging:
+  level:
+    root: INFO
+    at.mocode: DEBUG
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+keycloak:
+  server-url: ${KEYCLOAK_SERVER_URL}
+  issuer-uri: ${KEYCLOAK_ISSUER_URI}
+  jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+
+logging:
+  level:
+    root: WARN
+    at.mocode: INFO
+
+gateway:
+  security:
+    public-paths: >
+      /,
+      /health,
+      /api/auth/login,
+      /api/auth/register

@@ -68,9 +68,9 @@ subprojects {
         // Also set the legacy switch to silence warnings entirely
         environment("NODE_NO_WARNINGS", "1")
         // Set Chrome binary path to avoid snap permission issues
-        environment("CHROME_BIN", "/usr/bin/google-chrome")
-        environment("CHROMIUM_BIN", "/usr/bin/google-chrome")
-        environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/google-chrome")
+        environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
+        environment("CHROMIUM_BIN", "/usr/bin/chromium")
+        environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/chromium")
     }
 }
 
@@ -94,9 +94,9 @@ tasks.withType<Exec>().configureEach {
     environment("NODE_OPTIONS", merged)
     environment("NODE_NO_WARNINGS", "1")
     // Set Chrome binary path to avoid snap permission issues
-    environment("CHROME_BIN", "/usr/bin/google-chrome")
-    environment("CHROMIUM_BIN", "/usr/bin/google-chrome")
-    environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/google-chrome")
+    environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
+    environment("CHROMIUM_BIN", "/usr/bin/chromium")
+    environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/chromium")
 }
 
 tasks.wrapper {

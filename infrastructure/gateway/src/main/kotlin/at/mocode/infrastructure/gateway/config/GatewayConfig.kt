@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap
  * Global Filter für Korrelations-IDs zur Request-Verfolgung.
  */
 @Component
-@org.springframework.context.annotation.Profile("!test")
 class CorrelationIdFilter : GlobalFilter, Ordered {
 
     companion object {
@@ -54,7 +53,6 @@ class CorrelationIdFilter : GlobalFilter, Ordered {
  * Enhanced Logging Filter für strukturiertes Logging mit Request/Response Details.
  */
 @Component
-@org.springframework.context.annotation.Profile("!test")
 class EnhancedLoggingFilter : GlobalFilter, Ordered {
 
     private val logger = LoggerFactory.getLogger(EnhancedLoggingFilter::class.java)
@@ -130,7 +128,6 @@ class EnhancedLoggingFilter : GlobalFilter, Ordered {
  * - Bessere Verteilung der Rate-Limits basierend auf Benutzerrollen
  */
 @Component
-@org.springframework.context.annotation.Profile("!test")
 class RateLimitingFilter : GlobalFilter, Ordered {
 
     private val requestCounts = ConcurrentHashMap<String, RequestCounter>()

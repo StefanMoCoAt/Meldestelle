@@ -1,10 +1,14 @@
 package at.mocode.infrastructure.gateway.security
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
@@ -57,10 +61,17 @@ import java.time.Duration
  * - Eine permissive Autorisierung stellt sicher, dass Tests sich auf die Sicherheit der Filterebene konzentrieren können
  */
 @Configuration
+@EnableWebFluxSecurity
 @EnableConfigurationProperties(GatewaySecurityProperties::class)
 class SecurityConfig(
     private val securityProperties: GatewaySecurityProperties
 ) {
+
+    @Value("\${keycloak.issuer-uri:http://keycloak:8080/realms/meldestelle}")
+    private lateinit var issuerUri: String
+
+    @Value("\${keycloak.jwk-set-uri:http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs}")
+    private lateinit var jwkSetUri: String
 
     /**
      * Hauptkonfiguration der Spring-Security-Filterkette.
@@ -74,34 +85,46 @@ class SecurityConfig(
      * und bietet zugleich bessere CORS-Steuerung und Konfigurierbarkeit.
      */
     @Bean
-    fun springSecurityFilterChain(): SecurityWebFilterChain {
-        return ServerHttpSecurity.http()
-            .csrf { csrf ->
-                // CSRF für zustandsloses API-Gateway deaktivieren
-                // CSRF-Schutz ist für JWT-basierte zustandslose Authentifizierung nicht erforderlich
-                // Das Gateway arbeitet als zustandsloser Proxy ohne Session-Zustand
-                csrf.disable()
-            }
-            .cors { cors ->
-                // Explizite CORS-Konfiguration anstelle des Defaults verwenden
-                // Dies ermöglicht eine bessere Kontrolle über Cross-Origin-Zugriffsrichtlinien
-                cors.configurationSource(corsConfigurationSource())
-            }
-            .httpBasic { basic ->
-                // HTTP Basic Auth für zustandslose API deaktivieren
-                basic.disable()
-            }
-            .formLogin { form ->
-                // Formular-Login für API-Gateway deaktivieren
-                form.disable()
-            }
+    fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+        return http
+            .cors { it.configurationSource(corsConfigurationSource()) }
+            .csrf { it.disable() }
             .authorizeExchange { exchanges ->
-                // Alle Anfragen durch Spring Security erlauben
-                // Authentifizierung und Autorisierung erfolgen durch den JwtAuthenticationFilter
-                // Dieser Ansatz bewahrt die bestehende Sicherheitsarchitektur und
-                // ermöglicht dem JWT-Filter granulare Zugriffskontroll-Entscheidungen
-                exchanges.anyExchange().permitAll()
+                exchanges
+                    // Public paths
+                    .pathMatchers(
+                        "/",
+                        "/health/**",
+                        "/actuator/**",
+                        "/api/ping/**",
+                        "/api/auth/**",     // All auth endpoints (includes test endpoints)
+                        "/api/auth/login",
+                        "/api/auth/register",
+                        "/api/auth/refresh",
+                        "/fallback/**",
+                        "/docs/**",
+                        "/swagger-ui/**",
+                        "/test/**",     // Test paths for integration tests
+                        "/mock/**"      // Mock controller paths for tests
+                    ).permitAll()
+                    // Admin paths
+                    .pathMatchers("/api/admin/**").hasRole("ADMIN")
+                    // Monitoring paths
+                    .pathMatchers("/api/monitoring/**").hasAnyRole("ADMIN", "MONITORING")
+                    // All other requests require authentication
+                    .anyExchange().authenticated()
             }
+            .oauth2ResourceServer { oauth2 ->
+                oauth2.jwt { jwt ->
+                    jwt.jwtDecoder(jwtDecoder())
+                }
+            }
+            .build()
+    }
+
+    @Bean
+    fun jwtDecoder(): ReactiveJwtDecoder {
+        return NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri)
             .build()
     }
 
