@@ -51,6 +51,10 @@ ENV GRADLE_USER_HOME=/home/gradle/.gradle
 # Copy build files in optimal order for caching
 COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
 COPY gradle/ gradle/
+
+# Make gradlew executable (required on Linux/Unix systems)
+RUN chmod +x gradlew
+
 COPY platform/ platform/
 COPY core/ core/
 COPY build.gradle.kts ./

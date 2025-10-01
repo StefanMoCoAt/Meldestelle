@@ -51,6 +51,9 @@ ENV GRADLE_USER_HOME=/home/gradle/.gradle
 COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
 COPY gradle/ gradle/
 
+# Make gradlew executable (required on Linux/Unix systems)
+RUN chmod +x gradlew
+
 # Copy platform dependencies (changes less frequently)
 COPY platform/ platform/
 COPY core/ core/

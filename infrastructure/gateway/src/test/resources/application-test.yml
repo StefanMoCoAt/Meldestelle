@@ -6,6 +6,11 @@ spring:
     name: api-gateway-test
   main:
     web-application-type: reactive
+  autoconfigure:
+    exclude:
+      # Disable OAuth2 ResourceServer auto-configuration in tests
+      # Tests use mock JwtAuthenticationFilter instead of real JWT validation
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration
   cloud:
     discovery:
       enabled: false
@@ -63,8 +68,3 @@ logging:
   level:
     org.springframework.cloud.gateway: WARN
     at.mocode.infrastructure.gateway: DEBUG
-
-gateway:
-  security:
-    jwt:
-      enabled: false

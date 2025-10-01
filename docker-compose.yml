@@ -54,13 +54,15 @@ services:
     restart: unless-stopped
 
   # ===================================================================
-  # Authentifizierung
+  # Authentifizierung - Keycloak
+  # ===================================================================
+  # Production-ready Keycloak configuration with optimized settings
   # ===================================================================
   keycloak:
-    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.0.7}
+    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.0}
     container_name: meldestelle-keycloak
     environment:
-      # Admin Configuration
+      # Admin Configuration - CHANGE IN PRODUCTION!
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
 
@@ -70,21 +72,43 @@ services:
       KC_DB_USERNAME: ${POSTGRES_USER:-meldestelle}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
       KC_DB_SCHEMA: keycloak
+      # Database connection pool optimization
+      KC_DB_POOL_INITIAL_SIZE: ${KC_DB_POOL_INITIAL_SIZE:-5}
+      KC_DB_POOL_MIN_SIZE: ${KC_DB_POOL_MIN_SIZE:-5}
+      KC_DB_POOL_MAX_SIZE: ${KC_DB_POOL_MAX_SIZE:-20}
 
-      # Keycloak Configuration
+      # Keycloak Server Configuration
       KC_HTTP_PORT: 8080
-      KC_HOSTNAME_STRICT: false
-      KC_HOSTNAME_STRICT_HTTPS: false
-      KC_HTTP_ENABLED: true
-      KC_PROXY: edge
+      KC_HOSTNAME_STRICT: ${KC_HOSTNAME_STRICT:-false}
+      KC_HOSTNAME_STRICT_HTTPS: ${KC_HOSTNAME_STRICT_HTTPS:-false}
+      KC_HTTP_ENABLED: ${KC_HTTP_ENABLED:-true}
+      KC_PROXY: ${KC_PROXY:-edge}
+      KC_PROXY_HEADERS: ${KC_PROXY_HEADERS:-xforwarded}
 
-      # Development Settings
-      KC_LOG_LEVEL: ${KEYCLOAK_LOG_LEVEL:-INFO}
-      KC_METRICS_ENABLED: true
-      KC_HEALTH_ENABLED: true
+      # Logging Configuration
+      KC_LOG_LEVEL: ${KEYCLOAK_LOG_LEVEL:-info}
+      KC_LOG_CONSOLE_COLOR: ${KC_LOG_CONSOLE_COLOR:-false}
+      KC_LOG_CONSOLE_FORMAT: ${KC_LOG_CONSOLE_FORMAT:-json}
+
+      # Metrics and Health
+      KC_METRICS_ENABLED: ${KC_METRICS_ENABLED:-true}
+      KC_HEALTH_ENABLED: ${KC_HEALTH_ENABLED:-true}
+
+      # Cache Configuration (Infinispan)
+      KC_CACHE: ${KC_CACHE:-ispn}
+      KC_CACHE_STACK: ${KC_CACHE_STACK:-tcp}
+
+      # JVM Optimization for containers
+      JAVA_OPTS_APPEND: >-
+        -XX:MaxRAMPercentage=75.0
+        -XX:+UseG1GC
+        -XX:+UseStringDeduplication
+        -XX:+DisableExplicitGC
+        -Djava.net.preferIPv4Stack=true
+        -Duser.timezone=Europe/Vienna
 
     ports:
-      - "8180:8080"
+      - "${KEYCLOAK_PORT:-8180}:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -92,17 +116,20 @@ services:
       - ./docker/services/keycloak:/opt/keycloak/data/import
       - keycloak-data:/opt/keycloak/data
     command:
-      - start-dev
+      # Production mode with optimizations
+      - start
+      - --optimized
       - --import-realm
       - --http-port=8080
+#      - --http-relative-path=/auth
     networks:
       - meldestelle-network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'" ]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 90s
     restart: unless-stopped
 
   # ===================================================================
@@ -251,13 +278,14 @@ services:
       CONSUL_PORT: ${CONSUL_PORT:-8500}
       CONSUL_ENABLED: "true"
       GATEWAY_PORT: ${GATEWAY_PORT:-8081}
-      # Keycloak-Integration
+      # Keycloak OAuth2 Integration (using Spring Security oauth2ResourceServer)
       KEYCLOAK_SERVER_URL: http://keycloak:8080
       KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/meldestelle
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs
       KEYCLOAK_REALM: meldestelle
       KEYCLOAK_CLIENT_ID: api-gateway
-      GATEWAY_SECURITY_KEYCLOAK_ENABLED: "true"
+      # Custom JWT filter disabled - using oauth2ResourceServer instead
+      GATEWAY_SECURITY_KEYCLOAK_ENABLED: "false"
     ports:
       - "${GATEWAY_PORT:-8081}:8081"
     depends_on:
@@ -266,6 +294,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      keycloak:
         condition: service_healthy
     networks:
       - meldestelle-network

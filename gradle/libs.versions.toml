@@ -47,7 +47,7 @@ zipkinReporter = "3.5.1"
 
 # --- Authentication ---
 auth0Jwt = "4.5.0"
-keycloak = "25.0.6"
+keycloak = "26.4.0"
 
 # --- Testing ---
 junitJupiter = "5.12.2"

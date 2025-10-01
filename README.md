@@ -10,7 +10,7 @@ Das Projekt wurde kürzlich auf eine modulare Architektur migriert, um die Wartb
 
 - Java 21
 - Kotlin 2.2.10
-- Gradle 8.11+ (automatischer Download über Gradle Wrapper)
+- Gradle 9.0.0 (automatischer Download über Gradle Wrapper)
 - Docker und Docker Compose (v2.0+)
 
 ## Infrastruktur

@@ -1,16 +1,29 @@
+# ===================================================================
+# Keycloak Profile Configuration
+# ===================================================================
+# This profile configures OAuth2/JWT authentication with Keycloak.
+# Uses Spring Security's oauth2ResourceServer for secure JWT validation.
+# ===================================================================
+
 spring:
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/meldestelle}
-          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/meldestelle/protocol/openid-connect/certs}
+          # Issuer URI for JWT validation - Docker internal: keycloak:8080, External: localhost:8180
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/meldestelle}
+          # JWK Set URI for fetching public keys to validate JWT signatures
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs}
 
 # Keycloak-spezifische Konfiguration
 keycloak:
-  server-url: ${KEYCLOAK_SERVER_URL:http://localhost:8180}
+  # Internal Docker service name, external via port 8180
+  server-url: ${KEYCLOAK_SERVER_URL:http://keycloak:8080}
+  issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/meldestelle}
+  jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs}
   realm: ${KEYCLOAK_REALM:meldestelle}
   resource: ${KEYCLOAK_CLIENT_ID:api-gateway}
+  client-id: ${KEYCLOAK_CLIENT_ID:api-gateway}
   public-client: false
   bearer-only: true
 
@@ -18,19 +31,11 @@ keycloak:
 gateway:
   security:
     jwt:
+      # Enable JWT validation via Spring Security OAuth2 Resource Server
       enabled: true
     keycloak:
-      enabled: true
-      server-url: ${KEYCLOAK_SERVER_URL:http://localhost:8180}
+      # Custom JWT filter DISABLED - using Spring Security oauth2ResourceServer instead
+      # This prevents duplicate authentication and ensures proper JWT signature validation
+      enabled: false
+      server-url: ${KEYCLOAK_SERVER_URL:http://keycloak:8080}
       realm: ${KEYCLOAK_REALM:meldestelle}
-    public-paths:
-      - "/"
-      - "/health"
-      - "/actuator/**"
-      - "/api/ping/**"        # Ping-Service öffentlich zugänglich
-      - "/api/auth/login"
-      - "/api/auth/register"
-      - "/api/auth/refresh"
-      - "/fallback/**"
-      - "/docs/**"
-      - "/swagger-ui/**"

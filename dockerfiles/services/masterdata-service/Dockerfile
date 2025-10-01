@@ -45,6 +45,10 @@ ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
 # Copy build files in optimal order for caching
 COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
 COPY gradle/ gradle/
+
+# Make gradlew executable (required on Linux/Unix systems)
+RUN chmod +x gradlew
+
 COPY platform/ platform/
 COPY core/ core/
 COPY build.gradle.kts ./
