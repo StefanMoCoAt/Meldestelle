@@ -116,12 +116,14 @@ services:
       - ./docker/services/keycloak:/opt/keycloak/data/import
       - keycloak-data:/opt/keycloak/data
     command:
-      # Production mode with optimizations
+      # Development mode - removed --optimized for first-time startup
+      # For production, use --optimized after building: docker exec keycloak /opt/keycloak/bin/kc.sh build
       - start
-      - --optimized
       - --import-realm
       - --http-port=8080
 #      - --http-relative-path=/auth
+      # Uncomment for production after initial setup and build:
+      # - --optimized
     networks:
       - meldestelle-network
     healthcheck:
