@@ -47,7 +47,7 @@ zipkinReporter = "3.5.1"
 
 # --- Authentication ---
 auth0Jwt = "4.5.0"
-keycloak = "26.4.0"
+keycloakAdminClient = "26.0.7"
 
 # --- Testing ---
 junitJupiter = "5.12.2"
@@ -55,7 +55,7 @@ junitPlatform = "1.12.2"
 mockk = "1.14.5"
 assertj = "3.27.4"
 testcontainers = "1.21.3"
-testcontainersKeycloak = "3.8.0"
+testcontainersKeycloak = "3.9.0"
 
 # --- Resilience4j ---
 resilience4j = "2.3.0"
@@ -162,7 +162,7 @@ spring-boot-starter-aop = { module = "org.springframework.boot:spring-boot-start
 
 # --- Authentication ---
 auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "auth0Jwt" }
-keycloak-admin-client = { module = "org.keycloak:keycloak-admin-client", version.ref = "keycloak" }
+keycloak-admin-client = { module = "org.keycloak:keycloak-admin-client", version.ref = "keycloakAdminClient" }
 
 # --- Utilities ---
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
@@ -272,7 +272,8 @@ testing-jvm = [
 testcontainers = [
     "testcontainers-core",
     "testcontainers-junit-jupiter",
-    "testcontainers-postgresql"
+    "testcontainers-postgresql",
+    "testcontainers-keycloak"
 ]
 # Bündelt alle Abhängigkeiten, die ein Service für Metriken und Tracing benötigt.
 monitoring-client = [

@@ -29,7 +29,7 @@ import java.time.Duration
 class KeycloakIntegrationTest {
 
     companion object {
-        private const val KEYCLOAK_VERSION = "25.0.2"
+        private const val KEYCLOAK_VERSION = "26.4.0"
         private const val KEYCLOAK_PORT = 8080
         private const val KEYCLOAK_ADMIN_USER = "admin"
         private const val KEYCLOAK_ADMIN_PASSWORD = "admin"

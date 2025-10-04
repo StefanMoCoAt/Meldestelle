@@ -33,8 +33,10 @@ dependencies {
     // Spring Security für die Absicherung des Servers.
     implementation(libs.spring.boot.starter.security)
     implementation(libs.spring.boot.starter.oauth2.resource.server)
+
     // Keycloak Admin Client zur Verwaltung von Benutzern und Realms.
     implementation(libs.keycloak.admin.client)
+
     // API-Dokumentation mit OpenAPI/Swagger.
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
     // Monitoring und Metriken für Production-Readiness.

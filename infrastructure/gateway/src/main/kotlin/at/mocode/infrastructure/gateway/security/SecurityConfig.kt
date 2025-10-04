@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
@@ -66,8 +66,8 @@ import java.time.Duration
 @EnableConfigurationProperties(GatewaySecurityProperties::class)
 class SecurityConfig(
     private val securityProperties: GatewaySecurityProperties,
-    @Value("\${keycloak.issuer-uri:}") private val issuerUri: String,
-    @Value("\${keycloak.jwk-set-uri:}") private val jwkSetUri: String
+    @Value($$"${keycloak.issuer-uri:}") private val issuerUri: String,
+    @Value($$"${keycloak.jwk-set-uri:}") private val jwkSetUri: String
 ) {
 
     /**
@@ -75,7 +75,7 @@ class SecurityConfig(
      *
      * Diese Methode konfiguriert die reaktive Sicherheits-Filterkette mit:
      * - CSRF deaktiviert für zustandslosen API-Betrieb
-     * - Expliziter CORS-Konfiguration für Cross-Origin-Unterstützung
+     * - Explizite CORS-Konfiguration für Cross-Origin-Unterstützung
      * - Permissiver Autorisierung (Authentifizierung durch den JWT-Filter)
      *
      * Die Konfiguration bleibt kompatibel mit der bestehenden Filterarchitektur

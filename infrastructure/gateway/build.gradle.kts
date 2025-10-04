@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 // Dieses Modul ist das API-Gateway und der einzige öffentliche Einstiegspunkt
 // für alle externen Anfragen an das Meldestelle-System.
 plugins {
@@ -103,4 +105,8 @@ tasks.register<Test>("integrationTest") {
         showStackTraces = true
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
 }
