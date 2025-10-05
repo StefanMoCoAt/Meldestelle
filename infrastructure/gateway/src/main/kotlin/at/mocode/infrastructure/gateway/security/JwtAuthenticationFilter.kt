@@ -1,5 +1,7 @@
 package at.mocode.infrastructure.gateway.security
 
+import at.mocode.infrastructure.auth.client.JwtService
+import at.mocode.infrastructure.auth.client.model.BerechtigungE
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
 import org.springframework.cloud.gateway.filter.GlobalFilter
@@ -17,7 +19,9 @@ import reactor.core.publisher.Mono
  */
 @Component
 @ConditionalOnProperty(value = ["gateway.security.jwt.enabled"], havingValue = "true", matchIfMissing = true)
-class JwtAuthenticationFilter : GlobalFilter, Ordered {
+class JwtAuthenticationFilter(
+    private val jwtService: JwtService
+) : GlobalFilter, Ordered {
 
     private val pathMatcher = AntPathMatcher()
 
@@ -70,28 +74,33 @@ class JwtAuthenticationFilter : GlobalFilter, Ordered {
         chain: GatewayFilterChain
     ): Mono<Void> {
 
-        // Verbesserte Token-Validierung mit grundlegenden Sicherheitsprüfungen
-        // TODO: Integration mit auth-client für vollständige JWT-Validierung
+        // Use auth-client JwtService for comprehensive JWT validation
+        val validationResult = jwtService.validateToken(token)
 
-        // Grundlegende JWT-Format-Validierung
-        if (!isValidJwtFormat(token)) {
-            return handleUnauthorized(exchange, "Invalid JWT token format")
+        if (validationResult.isFailure) {
+            return handleUnauthorized(exchange, "Invalid JWT token: ${validationResult.exceptionOrNull()?.message}")
         }
 
         try {
-            // Extrahiere Claims aus dem JWT (vereinfacht für Demo)
-            val claims = parseJwtClaims(token)
-            val userRole = claims["role"] ?: "GUEST"
-            val userId = claims["sub"] ?: generateSecureUserId(token)
-
-            // Validiere Token-Inhalt
-            if (!isValidClaims(claims)) {
-                return handleUnauthorized(exchange, "Invalid JWT claims")
+            // Extract user ID using auth-client
+            val userIdResult = jwtService.getUserIdFromToken(token)
+            if (userIdResult.isFailure) {
+                return handleUnauthorized(exchange, "Failed to extract user ID from token")
             }
+            val userId = userIdResult.getOrThrow()
+
+            // Extract permissions using auth-client
+            val permissionsResult = jwtService.getPermissionsFromToken(token)
+            val permissions = permissionsResult.getOrElse { emptyList() }
+
+            // Convert permissions to role for backward compatibility
+            val userRole = determineRoleFromPermissions(permissions)
+            val permissionsHeader = permissions.joinToString(",") { it.name }
 
             val mutatedRequest = exchange.request.mutate()
                 .header("X-User-ID", userId)
                 .header("X-User-Role", userRole)
+                .header("X-User-Permissions", permissionsHeader)
                 .build()
 
             val mutatedExchange = exchange.mutate()
@@ -101,53 +110,22 @@ class JwtAuthenticationFilter : GlobalFilter, Ordered {
             return chain.filter(mutatedExchange)
 
         } catch (e: Exception) {
-            return handleUnauthorized(exchange, "JWT parsing failed: ${e.message}")
+            return handleUnauthorized(exchange, "JWT processing failed: ${e.message}")
         }
     }
 
     /**
-     * Validiert das grundlegende JWT-Format (Header.Payload.Signature)
+     * Determines the user role based on permissions for backward compatibility.
+     * Maps permissions to traditional role-based access control.
      */
-    private fun isValidJwtFormat(token: String): Boolean {
-        val parts = token.split(".")
-        return parts.size == 3 && parts.all { it.isNotEmpty() }
-    }
-
-    /**
-     * Vereinfachte JWT-Claims-Extraktion für Demo-Zwecke.
-     * In der Produktion sollte hier der auth-client verwendet werden.
-     */
-    private fun parseJwtClaims(token: String): Map<String, String> {
-        // Simulierte Claims basierend auf Token-Inhalt (nur für Demo)
-        // In der Realität würde hier Base64-Decoding und JSON-Parsing stattfinden
+    private fun determineRoleFromPermissions(permissions: List<BerechtigungE>): String {
         return when {
-            token.length > 100 && token.contains("admin", ignoreCase = true) ->
-                mapOf("role" to "ADMIN", "sub" to "admin-user")
-            token.length > 50 ->
-                mapOf("role" to "USER", "sub" to "regular-user")
-            else ->
-                mapOf("role" to "GUEST", "sub" to "guest-user")
+            permissions.any { it.name.contains("ADMIN", ignoreCase = true) } -> "ADMIN"
+            permissions.any { it.name.contains("DELETE") } -> "ADMIN" // DELETE permissions indicate admin-level access
+            permissions.any { it.name.contains("WRITE") || it.name.contains("CREATE") } -> "USER"
+            permissions.isNotEmpty() -> "USER"
+            else -> "GUEST"
         }
-    }
-
-    /**
-     * Validiert JWT-Claims auf grundlegende Korrektheit
-     */
-    private fun isValidClaims(claims: Map<String, String>): Boolean {
-        val role = claims["role"]
-        val subject = claims["sub"]
-
-        return !role.isNullOrBlank() &&
-               !subject.isNullOrBlank() &&
-               role in listOf("ADMIN", "USER", "GUEST")
-    }
-
-    /**
-     * Generiert eine sichere User-ID basierend auf Token-Hash
-     */
-    private fun generateSecureUserId(token: String): String {
-        // Verwende einen stabileren Hash als einfaches hashCode()
-        return "user-${token.takeLast(20).hashCode().toString(16)}"
     }
 
     private fun handleUnauthorized(exchange: ServerWebExchange, message: String): Mono<Void> {

@@ -61,6 +61,7 @@ include(":services:ping:ping-service")
 // Client modules
 include(":clients:app")
 include(":clients:ping-feature")
+include(":clients:auth-feature")
 include(":clients:shared:common-ui")
 include(":clients:shared:navigation")
 

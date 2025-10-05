@@ -18,7 +18,7 @@ services:
         # Global build arguments (from docker/build-args/global.env)
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
         JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
-        BUILD_DATE: ${BUILD_DATE}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
         VERSION: ${DOCKER_APP_VERSION:-1.0.0}
         # Service-specific arguments (from docker/build-args/services.env)
         SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}

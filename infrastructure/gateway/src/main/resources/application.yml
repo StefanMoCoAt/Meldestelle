@@ -283,4 +283,19 @@ logging:
       total-size-cap: 1GB
       max-history: 30
 
+# Gateway Security Configuration - JWT Authentication with auth-client
+gateway:
+  security:
+    jwt:
+      # Enable JWT authentication via auth-client
+      enabled: ${GATEWAY_JWT_ENABLED:true}
+      # JWT secret key for token validation (must match auth-server secret)
+      secret: ${JWT_SECRET:default-secret-for-development-only-please-change-in-production}
+      # JWT issuer (must match auth-server issuer)
+      issuer: ${JWT_ISSUER:meldestelle-auth-server}
+      # JWT audience (must match auth-server audience)
+      audience: ${JWT_AUDIENCE:meldestelle-services}
+      # JWT expiration in minutes
+      expiration: ${JWT_EXPIRATION:60}
+
 

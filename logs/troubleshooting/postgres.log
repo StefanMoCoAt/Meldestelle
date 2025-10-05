@@ -1,0 +1,74 @@
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.utf8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... posix
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default time zone ... UTC
+creating configuration files ... ok
+running bootstrap script ... ok
+sh: locale: not found
+2025-10-05 16:36:24.554 UTC [35] WARNING:  no usable system locales were found
+performing post-bootstrap initialization ... ok
+initdb: warning: enabling "trust" authentication for local connections
+initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+syncing data to disk ... ok
+
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /var/lib/postgresql/data -l logfile start
+
+waiting for server to start....2025-10-05 16:36:26.874 UTC [41] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+2025-10-05 16:36:26.877 UTC [41] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-10-05 16:36:26.888 UTC [44] LOG:  database system was shut down at 2025-10-05 16:36:24 UTC
+2025-10-05 16:36:26.895 UTC [41] LOG:  database system is ready to accept connections
+ done
+server started
+CREATE DATABASE
+
+
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/01-init-keycloak-schema.sql
+CREATE SCHEMA
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+psql:/docker-entrypoint-initdb.d/01-init-keycloak-schema.sql:31: NOTICE:  Keycloak schema created successfully
+psql:/docker-entrypoint-initdb.d/01-init-keycloak-schema.sql:31: NOTICE:  Schema: keycloak
+psql:/docker-entrypoint-initdb.d/01-init-keycloak-schema.sql:31: NOTICE:  Owner: meldestelle
+DO
+
+
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/02-init-keycloak-schema.sql
+psql:/docker-entrypoint-initdb.d/02-init-keycloak-schema.sql:11: NOTICE:  02-init-keycloak-schema.sql is a no-op (handled by 01-init-keycloak-schema.sql)
+DO
+
+
+waiting for server to shut down....2025-10-05 16:36:27.075 UTC [41] LOG:  received fast shutdown request
+2025-10-05 16:36:27.078 UTC [41] LOG:  aborting any active transactions
+2025-10-05 16:36:27.081 UTC [41] LOG:  background worker "logical replication launcher" (PID 47) exited with exit code 1
+2025-10-05 16:36:27.081 UTC [42] LOG:  shutting down
+2025-10-05 16:36:27.084 UTC [42] LOG:  checkpoint starting: shutdown immediate
+2025-10-05 16:36:27.671 UTC [42] LOG:  checkpoint complete: wrote 929 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.022 s, sync=0.550 s, total=0.590 s; sync files=301, longest=0.003 s, average=0.002 s; distance=4275 kB, estimate=4275 kB; lsn=0/191F358, redo lsn=0/191F358
+2025-10-05 16:36:27.682 UTC [41] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2025-10-05 16:36:27.805 UTC [1] LOG:  starting PostgreSQL 16.10 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+2025-10-05 16:36:27.805 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2025-10-05 16:36:27.805 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2025-10-05 16:36:27.811 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-10-05 16:36:27.818 UTC [61] LOG:  database system was shut down at 2025-10-05 16:36:27 UTC
+2025-10-05 16:36:27.826 UTC [1] LOG:  database system is ready to accept connections

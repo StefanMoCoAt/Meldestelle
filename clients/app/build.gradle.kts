@@ -75,6 +75,7 @@ kotlin {
         commonMain.dependencies {
             // Feature modules
             implementation(project(":clients:ping-feature"))
+            implementation(project(":clients:auth-feature"))
             // Shared modules
             implementation(project(":clients:shared:common-ui"))
             implementation(project(":clients:shared:navigation"))
@@ -109,7 +110,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_21)
         freeCompilerArgs.addAll(
-            "-Xopt-in=kotlin.RequiresOptIn",
+            "-opt-in=kotlin.RequiresOptIn",
             "-Xskip-metadata-version-check" // Für bleeding-edge Versionen
         )
     }

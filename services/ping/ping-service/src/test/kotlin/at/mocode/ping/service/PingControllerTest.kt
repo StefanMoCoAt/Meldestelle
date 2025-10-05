@@ -20,7 +20,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
  * Unit tests for PingController
  * Tests REST endpoints with mocked dependencies
  */
-@WebMvcTest(PingController::class)
+@WebMvcTest(
+    controllers = [PingController::class],
+    excludeAutoConfiguration = [
+        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration::class,
+        org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration::class
+    ]
+)
 @Import(PingControllerTest.TestConfig::class)
 class PingControllerTest {
 

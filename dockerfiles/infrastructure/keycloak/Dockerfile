@@ -2,7 +2,7 @@
 # ===================================================================
 # Production-Ready Keycloak Dockerfile
 # ===================================================================
-# Based on: quay.io/keycloak/keycloak:26.0.7
+# Based on: quay.io/keycloak/keycloak:26.4.0
 # Features:
 # - Pre-built optimized image (faster startup)
 # - Security hardening
@@ -12,9 +12,13 @@
 
 ARG KEYCLOAK_VERSION=26.4.0
 
-# Build stage - optimize Keycloak
-FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION} AS builder
+FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
 
+LABEL maintainer="Meldestelle Development Team"
+LABEL description="Production-ready Keycloak for Meldestelle authentication"
+LABEL version="${KEYCLOAK_VERSION}"
+
+# Set environment variables for build
 ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true
 ENV KC_DB=postgres
@@ -25,19 +29,7 @@ WORKDIR /opt/keycloak
 RUN /opt/keycloak/bin/kc.sh build \
     --db=postgres \
     --health-enabled=true \
-    --metrics-enabled=true \
-    --cache=ispn \
-    --cache-stack=tcp
-
-# Production stage
-FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
-
-LABEL maintainer="Meldestelle Development Team"
-LABEL description="Production-ready Keycloak for Meldestelle authentication"
-LABEL version="${KEYCLOAK_VERSION}"
-
-# Copy pre-built Keycloak
-COPY --from=builder /opt/keycloak/ /opt/keycloak/
+    --metrics-enabled=true
 
 # Set user
 USER 1000

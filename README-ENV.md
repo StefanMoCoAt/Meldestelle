@@ -96,6 +96,59 @@ Bei Problemen:
 3. Überprüfen Sie die Service-Logs: `docker compose logs -f`
 4. Konsultieren Sie `config/README.md` für detaillierte Konfigurationsrichtlinien
 
+### Keycloak startet neu (Restart-Loop) oder beendet sich mit Code 1
+Das Problem tritt häufig auf, wenn das Keycloak-DB-Schema fehlt oder nicht zur aktuell gesetzten `KC_DB_SCHEMA` passt.
+
+So gehen Sie vor:
+
+- Logs erfassen (bitte im Fehlerfall mitschicken):
+  - Keycloak: `docker compose logs -f keycloak`
+  - Postgres: `docker compose logs -f postgres`
+
+- Schema-Status prüfen und ggf. manuell anlegen (nur wenn das Volume bereits existierte, als die Init-Skripte eingeführt wurden):
+  1. In die Datenbank einloggen:
+     ```bash
+     docker exec -it meldestelle-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+     ```
+  2. Folgende Befehle ausführen (ersetzen Sie den Benutzer bei Bedarf):
+     ```sql
+     CREATE SCHEMA IF NOT EXISTS keycloak;
+     GRANT ALL PRIVILEGES ON SCHEMA keycloak TO "$POSTGRES_USER";
+     GRANT USAGE ON SCHEMA keycloak TO "$POSTGRES_USER";
+     ALTER DEFAULT PRIVILEGES IN SCHEMA keycloak GRANT ALL ON TABLES TO "$POSTGRES_USER";
+     ALTER DEFAULT PRIVILEGES IN SCHEMA keycloak GRANT ALL ON SEQUENCES TO "$POSTGRES_USER";
+     ```
+
+- Alternativ: Volumes zurücksetzen (Achtung: Datenverlust in Postgres und Keycloak-Volume!)
+  ```bash
+  docker compose down -v
+  docker compose up -d postgres keycloak
+  ```
+  Hinweis: Bei frischen Volumes legt Postgres via `docker/services/postgres/01-init-keycloak-schema.sql` das Schema automatisch an. Die Datei `02-init-keycloak-schema.sql` ist absichtlich ein No-Op, um Doppel-Initialisierungen zu vermeiden.
+
+- Konfiguration prüfen:
+  - `KC_DB_SCHEMA` ist in `docker-compose.yml` parametrisiert und standardmäßig auf `keycloak` gesetzt. Sie können es in Ihrer `.env`-Datei überschreiben.
+  - In Staging/Prod muss `KC_DB_URL`, `KC_DB_USERNAME`, `KC_DB_PASSWORD` auf die jeweilige DB/Benutzer zeigen (siehe `config/.env.staging`, `config/.env.prod`).
+
+### Postgres Healthcheck schlägt fehl
+Der Healthcheck ist jetzt vollständig über Umgebungsvariablen parametrisiert und passt sich Dev/Staging/Prod automatisch an:
+```yaml
+healthcheck:
+  test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meldestelle} -d ${POSTGRES_DB:-meldestelle}" ]
+```
+Stellen Sie sicher, dass `POSTGRES_USER` und `POSTGRES_DB` korrekt gesetzt sind.
+
+### Compose-Warnung "The BUILD_DATE variable is not set"
+Die Warnung ist in `docker-compose.yml` behoben. Für Build-Argumente wird nun ein Fallback verwendet:
+```yaml
+BUILD_DATE: ${BUILD_DATE:-unknown}
+```
+Wenn Sie ein Datum setzen möchten, fügen Sie `BUILD_DATE=2025-10-05T16:55:00Z` Ihrer `.env` hinzu.
+
+### Logging/Health Optimierungen (optional)
+- Aktuell ist `KC_LOG_CONSOLE_FORMAT` auf `plain` gesetzt, um Standard-Logs auszugeben. Für strukturierte Logs können Sie `KC_LOG_CONSOLE_FORMAT=json` setzen.
+- `KC_HEALTH_ENABLED=true` und ein großzügiges `start_period` (180s) sind aktiv, um Realm-Importe abwarten zu können.
+
 ## Nächste Schritte
 
 - Die zentrale Konfiguration ist bereits vollständig implementiert
@@ -122,3 +175,13 @@ Variablen:
 - GATEWAY_URL (Default: http://localhost:8081)
 - ZIPKIN_URL (Default: http://localhost:9411)
 - PING_SERVICE_URL (Default: http://localhost:8082)
+
+
+## Keycloak Healthcheck
+
+- Der Keycloak-Container verwendet nun einen robusten Healthcheck, der nicht von curl abhängt.
+- Ablauf: Zuerst wird curl verwendet, falls vorhanden; alternativ wget; fehlt beides, wird ein Bash-/dev/tcp-Fallback genutzt. In diesem Fall wird eine klare Fehlermeldung in den Healthcheck-Logs ausgegeben.
+- Zeitparameter: interval 15s, timeout 30s, retries 10, start_period 180s – ausreichend, um längere Realm-Imports (30+ Sekunden) abzuwarten.
+- Beispiel (vereinfacht):
+  - test: CMD-SHELL
+  - if curl vorhanden → GET /health/ready prüfen; sonst wget; sonst Bash /dev/tcp mit HTTP-Status „200 OK“ prüfen.

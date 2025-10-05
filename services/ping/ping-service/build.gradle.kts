@@ -46,6 +46,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     // Validation for request/response validation
     implementation(libs.spring.boot.starter.validation)
+    // Spring Security for method-level authorization
+    implementation("org.springframework.boot:spring-boot-starter-security")
     // Actuator for health checks and metrics
     implementation(libs.spring.boot.starter.actuator)
     // === Service Discovery ===

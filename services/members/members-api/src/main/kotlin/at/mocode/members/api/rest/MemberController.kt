@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.security.access.prepost.PreAuthorize
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 
 /**
@@ -116,6 +117,7 @@ class MemberController(
         ]
     )
     @GetMapping
+    @PreAuthorize("hasAuthority('PERSON_READ')")
     fun getAllMembers(
         @Parameter(description = "Nur nach aktiven Mitgliedern filtern", example = "true")
         @RequestParam(defaultValue = "true") activeOnly: Boolean,
@@ -157,6 +159,7 @@ class MemberController(
         ]
     )
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('PERSON_READ')")
     fun getMemberById(
         @Parameter(description = "Member unique identifier", example = "123e4567-e89b-12d3-a456-426614174000")
         @PathVariable id: String
@@ -175,6 +178,7 @@ class MemberController(
      * Get member by membership number
      */
     @GetMapping("/by-membership-number/{membershipNumber}")
+    @PreAuthorize("hasAuthority('PERSON_READ')")
     fun getMemberByMembershipNumber(@PathVariable membershipNumber: String): ResponseEntity<ApiResponse<*>> {
         return try {
             val response = runBlocking { getMemberUseCase.getByMembershipNumber(membershipNumber) }
@@ -195,6 +199,7 @@ class MemberController(
      * Get member by email
      */
     @GetMapping("/by-email/{email}")
+    @PreAuthorize("hasAuthority('PERSON_READ')")
     fun getMemberByEmail(@PathVariable email: String): ResponseEntity<ApiResponse<*>> {
         return try {
             val response = runBlocking { getMemberUseCase.getByEmail(email) }
@@ -215,6 +220,7 @@ class MemberController(
      * Get member statistics
      */
     @GetMapping("/stats")
+    @PreAuthorize("hasAuthority('PERSON_READ')")
     fun getMemberStats(): ResponseEntity<ApiResponse<MemberStats>> {
         return try {
             val activeCount = runBlocking { memberRepository.countActive() }
@@ -247,6 +253,7 @@ class MemberController(
         ]
     )
     @PostMapping
+    @PreAuthorize("hasAuthority('PERSON_CREATE')")
     fun createMember(
         @Parameter(description = "Member creation request data")
         @RequestBody createRequest: CreateMemberRequest
@@ -277,6 +284,7 @@ class MemberController(
      * Update member
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('PERSON_UPDATE')")
     fun updateMember(@PathVariable id: String, @RequestBody updateRequest: UpdateMemberRequest): ResponseEntity<ApiResponse<*>> {
         return try {
             val memberId = uuidFrom(id)
@@ -320,6 +328,7 @@ class MemberController(
      * Get members with expiring memberships
      */
     @GetMapping("/expiring-memberships")
+    @PreAuthorize("hasAuthority('PERSON_READ')")
     fun getExpiringMemberships(
         @RequestParam(defaultValue = "30") daysAhead: Int
     ): ResponseEntity<ApiResponse<*>> {
@@ -343,6 +352,7 @@ class MemberController(
      * Get members by date range
      */
     @GetMapping("/by-date-range")
+    @PreAuthorize("hasAuthority('PERSON_READ')")
     fun getMembersByDateRange(
         @RequestParam startDate: String,
         @RequestParam endDate: String,
@@ -379,6 +389,7 @@ class MemberController(
      * Validate email uniqueness
      */
     @GetMapping("/validate/email/{email}")
+    @PreAuthorize("hasAuthority('PERSON_READ')")
     fun validateEmail(
         @PathVariable email: String,
         @RequestParam(required = false) excludeMemberId: String?
@@ -407,6 +418,7 @@ class MemberController(
      * Validate membership number uniqueness
      */
     @GetMapping("/validate/membership-number/{membershipNumber}")
+    @PreAuthorize("hasAuthority('PERSON_READ')")
     fun validateMembershipNumber(
         @PathVariable membershipNumber: String,
         @RequestParam(required = false) excludeMemberId: String?
@@ -435,6 +447,7 @@ class MemberController(
      * Delete member
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('PERSON_DELETE')")
     fun deleteMember(@PathVariable id: String): ResponseEntity<ApiResponse<String>> {
         return try {
             val memberId = uuidFrom(id)

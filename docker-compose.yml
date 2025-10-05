@@ -25,7 +25,7 @@ services:
     networks:
       - meldestelle-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U meldestelle -d meldestelle" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meldestelle} -d ${POSTGRES_DB:-meldestelle}" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -61,51 +61,22 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.0}
     container_name: meldestelle-keycloak
+    # Using base image directly instead of custom Dockerfile
     environment:
-      # Admin Configuration - CHANGE IN PRODUCTION!
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      # Admin Configuration
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
 
       # Database Configuration
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
-      KC_DB_USERNAME: ${POSTGRES_USER:-meldestelle}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+      KC_DB_URL: jdbc:postgresql://postgres:5432/meldestelle
+      KC_DB_USERNAME: meldestelle
+      KC_DB_PASSWORD: meldestelle
       KC_DB_SCHEMA: keycloak
-      # Database connection pool optimization
-      KC_DB_POOL_INITIAL_SIZE: ${KC_DB_POOL_INITIAL_SIZE:-5}
-      KC_DB_POOL_MIN_SIZE: ${KC_DB_POOL_MIN_SIZE:-5}
-      KC_DB_POOL_MAX_SIZE: ${KC_DB_POOL_MAX_SIZE:-20}
 
-      # Keycloak Server Configuration
-      KC_HTTP_PORT: 8080
-      KC_HOSTNAME_STRICT: ${KC_HOSTNAME_STRICT:-false}
-      KC_HOSTNAME_STRICT_HTTPS: ${KC_HOSTNAME_STRICT_HTTPS:-false}
-      KC_HTTP_ENABLED: ${KC_HTTP_ENABLED:-true}
-      KC_PROXY: ${KC_PROXY:-edge}
-      KC_PROXY_HEADERS: ${KC_PROXY_HEADERS:-xforwarded}
-
-      # Logging Configuration
-      KC_LOG_LEVEL: ${KEYCLOAK_LOG_LEVEL:-info}
-      KC_LOG_CONSOLE_COLOR: ${KC_LOG_CONSOLE_COLOR:-false}
-      KC_LOG_CONSOLE_FORMAT: ${KC_LOG_CONSOLE_FORMAT:-json}
-
-      # Metrics and Health
-      KC_METRICS_ENABLED: ${KC_METRICS_ENABLED:-true}
-      KC_HEALTH_ENABLED: ${KC_HEALTH_ENABLED:-true}
-
-      # Cache Configuration (Infinispan)
-      KC_CACHE: ${KC_CACHE:-ispn}
-      KC_CACHE_STACK: ${KC_CACHE_STACK:-tcp}
-
-      # JVM Optimization for containers
-      JAVA_OPTS_APPEND: >-
-        -XX:MaxRAMPercentage=75.0
-        -XX:+UseG1GC
-        -XX:+UseStringDeduplication
-        -XX:+DisableExplicitGC
-        -Djava.net.preferIPv4Stack=true
-        -Duser.timezone=Europe/Vienna
+      # HTTP Configuration - Let Keycloak auto-detect hostname for OpenID discovery
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
 
     ports:
       - "${KEYCLOAK_PORT:-8180}:8080"
@@ -116,22 +87,17 @@ services:
       - ./docker/services/keycloak:/opt/keycloak/data/import
       - keycloak-data:/opt/keycloak/data
     command:
-      # Development mode - removed --optimized for first-time startup
-      # For production, use --optimized after building: docker exec keycloak /opt/keycloak/bin/kc.sh build
-      - start
+      # Development mode with realm import enabled
+      - start-dev
       - --import-realm
-      - --http-port=8080
-#      - --http-relative-path=/auth
-      # Uncomment for production after initial setup and build:
-      # - --optimized
     networks:
       - meldestelle-network
     healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'" ]
-      interval: 30s
+      test: [ 'CMD-SHELL', 'curl -s http://localhost:8080/ >/dev/null 2>&1 || exit 1' ]
+      interval: 15s
       timeout: 10s
       retries: 5
-      start_period: 90s
+      start_period: 60s
     restart: unless-stopped
 
   # ===================================================================
@@ -263,7 +229,7 @@ services:
         # Global build arguments (from docker/build-args/global.env)
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
         JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
-        BUILD_DATE: ${BUILD_DATE}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
         VERSION: ${DOCKER_APP_VERSION:-1.0.0}
         # Infrastructure-specific arguments (from docker/build-args/infrastructure.env)
         SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DEFAULT:-default}
@@ -286,6 +252,7 @@ services:
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs
       KEYCLOAK_REALM: meldestelle
       KEYCLOAK_CLIENT_ID: api-gateway
+      KEYCLOAK_CLIENT_SECRET: K5RqonwVOaxPKaXVH4mbthSRbjRh5tOK
       # Custom JWT filter disabled - using oauth2ResourceServer instead
       GATEWAY_SECURITY_KEYCLOAK_ENABLED: "false"
     ports:
@@ -298,7 +265,7 @@ services:
       redis:
         condition: service_healthy
       keycloak:
-        condition: service_healthy
+        condition: service_started
     networks:
       - meldestelle-network
     healthcheck:

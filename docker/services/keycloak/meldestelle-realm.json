@@ -74,7 +74,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "K5RqonwVOaxPKaXVH4mbthSRbjRh5tOK",
       "redirectUris": [
         "http://localhost:8081/*",
         "http://localhost:3000/*",
@@ -219,7 +219,7 @@
   "groups": [],
   "defaultRoles": ["USER", "GUEST"],
   "requiredCredentials": ["password"],
-  "passwordPolicy": "length(8) and digits(1) and lowerCase(1) and upperCase(1) and specialChars(1) and notUsername",
+  "passwordPolicy": "length(8)",
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyInitialCounter": 0,
@@ -274,9 +274,6 @@
       }
     ]
   },
-  "internationalizationEnabled": true,
-  "supportedLocales": ["de", "en"],
-  "defaultLocale": "de",
   "authenticationFlows": [],
   "authenticatorConfig": [],
   "requiredActions": [],

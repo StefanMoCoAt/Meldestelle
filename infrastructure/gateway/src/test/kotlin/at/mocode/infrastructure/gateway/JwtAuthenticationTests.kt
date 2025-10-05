@@ -1,5 +1,7 @@
 package at.mocode.infrastructure.gateway
 
+import at.mocode.infrastructure.auth.client.JwtService
+import at.mocode.infrastructure.auth.client.model.BerechtigungE
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -50,6 +52,9 @@ class JwtAuthenticationTests {
     @Autowired
     lateinit var webTestClient: WebTestClient
 
+    @Autowired
+    lateinit var jwtService: JwtService
+
     @Test
     fun `should allow access to public paths without authentication`() {
         listOf("/", "/health", "/actuator/health", "/api/auth/login", "/api/ping/health", "/fallback/test").forEach { path ->
@@ -93,13 +98,17 @@ class JwtAuthenticationTests {
             .expectStatus().isUnauthorized
             .expectBody()
             .jsonPath("$.error").isEqualTo("UNAUTHORIZED")
-            .jsonPath("$.message").isEqualTo("Invalid JWT token format")
+            .jsonPath("$.message").exists() // Auth-client provides detailed error messages
     }
 
     @Test
     fun `should allow access with valid JWT token and inject user headers`() {
-        // Create a mock JWT token with proper format (header.payload.signature) and length >50 for USER role
-        val validToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNjAwMDAwMDAwfQ.mockSignatureForUserTokenThatIsLongEnoughForValidation"
+        // Generate a real JWT token using the JwtService with USER permissions
+        val validToken = jwtService.generateToken(
+            userId = "user-123",
+            username = "testuser",
+            permissions = listOf(BerechtigungE.PERSON_READ)
+        )
 
         webTestClient.get()
             .uri("/api/members/protected")
@@ -117,8 +126,13 @@ class JwtAuthenticationTests {
 
     @Test
     fun `should extract admin role from JWT token`() {
-        // Create a mock JWT token with proper format, length >100, and "admin" in the token for ADMIN role
-        val adminToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbi11c2VyLTEyMyIsInJvbGUiOiJBRE1JTiIsImFkbWluIjp0cnVlLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MTYwMDAwMDAwMH0.mockSignatureForAdminTokenThatIsVeryLongEnoughToMeetTheRequiredLengthForAdminValidation"
+        // Generate a real JWT token using the JwtService with admin-level permissions
+        // Using DELETE permissions which map to ADMIN role according to determineRoleFromPermissions logic
+        val adminToken = jwtService.generateToken(
+            userId = "admin-user-123",
+            username = "adminuser",
+            permissions = listOf(BerechtigungE.PERSON_DELETE, BerechtigungE.VEREIN_DELETE)
+        )
 
         webTestClient.get()
             .uri("/api/members/protected")
@@ -134,8 +148,12 @@ class JwtAuthenticationTests {
 
     @Test
     fun `should extract user role from JWT token`() {
-        // Create a mock JWT token with proper format and length >50 for USER role
-        val userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTQ1NiIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNjAwMDAwMDAwfQ.mockSignatureForUserRoleTokenThatIsLongEnoughForValidation"
+        // Generate a real JWT token using the JwtService with user-level permissions
+        val userToken = jwtService.generateToken(
+            userId = "user-456",
+            username = "regularuser",
+            permissions = listOf(BerechtigungE.PERSON_READ, BerechtigungE.PFERD_READ)
+        )
 
         webTestClient.get()
             .uri("/api/members/protected")
@@ -151,8 +169,12 @@ class JwtAuthenticationTests {
 
     @Test
     fun `should handle POST requests to protected endpoints`() {
-        // Create a mock JWT token with proper format and length >50 for USER role
-        val validToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTc4OSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNjAwMDAwMDAwfQ.mockSignatureForPostRequestTokenThatIsLongEnoughForValidation"
+        // Generate a real JWT token using the JwtService for POST request test
+        val validToken = jwtService.generateToken(
+            userId = "user-789",
+            username = "postuser",
+            permissions = listOf(BerechtigungE.PERSON_CREATE, BerechtigungE.VEREIN_READ)
+        )
 
         webTestClient.post()
             .uri("/api/members/protected")
