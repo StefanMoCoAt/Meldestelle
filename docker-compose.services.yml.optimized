@@ -1,0 +1,430 @@
+# ===================================================================
+# Docker Compose - Microservices (OPTIMIZED & SECURED)
+# Meldestelle Project - Application Services
+# ===================================================================
+# Security & Performance Improvements:
+# - Secrets management for database credentials
+# - Resource limits and reservations for all services
+# - Security hardening (non-root users, no-new-privileges)
+# - Optimized health checks and startup dependencies
+# - Enhanced monitoring and logging configuration
+# ===================================================================
+# Usage:
+#   Vollständiges System: docker-compose -f docker-compose.yml.optimized -f docker-compose.services.yml.optimized up -d
+# ===================================================================
+
+version: '3.9'
+
+services:
+  # ===================================================================
+  # Ping Service - Enhanced Security & Performance
+  # ===================================================================
+  ping-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/ping-service/Dockerfile
+      args:
+        # Global build arguments
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+        # Service-specific arguments
+        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
+    container_name: meldestelle-ping-service
+    volumes:
+      # Mount Gradle cache for better build performance
+      - ping-service-gradle-cache:/home/gradle/.gradle
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SERVER_PORT: ${PING_SERVICE_PORT:-8082}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      SPRING_CLOUD_CONSUL_DISCOVERY_ENABLED: ${CONSUL_ENABLED:-true}
+      # Database connection via secrets
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USERNAME_FILE: /run/secrets/postgres_user
+      DB_PASSWORD_FILE: /run/secrets/postgres_password
+      # Redis Event Store connection with authentication
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD_FILE: /run/secrets/redis_password
+      # JWT Configuration for service-to-service authentication
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      JWT_ISSUER: ${JWT_ISSUER:-meldestelle-auth-server}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-meldestelle-services}
+    ports:
+      - "${PING_SERVICE_PORT:-8082}:8082"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    secrets:
+      - postgres_user
+      - postgres_password
+      - redis_password
+      - jwt_secret
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8082/actuator/health/readiness"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  # ===================================================================
+  # Members Service - Production Ready (Currently Commented Out)
+  # ===================================================================
+  members-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/members-service/Dockerfile
+      args:
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
+    container_name: meldestelle-members-service
+    volumes:
+      - members-service-gradle-cache:/home/gradle/.gradle
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SERVER_PORT: ${MEMBERS_SERVICE_PORT:-8083}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      # Database connection via secrets
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USERNAME_FILE: /run/secrets/postgres_user
+      DB_PASSWORD_FILE: /run/secrets/postgres_password
+      # Redis Event Store connection
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD_FILE: /run/secrets/redis_password
+      # Kafka messaging
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      # JWT Configuration
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      JWT_ISSUER: ${JWT_ISSUER:-meldestelle-auth-server}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-meldestelle-services}
+    ports:
+      - "${MEMBERS_SERVICE_PORT:-8083}:8083"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    secrets:
+      - postgres_user
+      - postgres_password
+      - redis_password
+      - jwt_secret
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8083/actuator/health/readiness"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    profiles:
+      - members
+
+  # ===================================================================
+  # Horses Service - Production Ready (Currently Commented Out)
+  # ===================================================================
+  horses-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/horses-service/Dockerfile
+      args:
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
+    container_name: meldestelle-horses-service
+    volumes:
+      - horses-service-gradle-cache:/home/gradle/.gradle
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SERVER_PORT: ${HORSES_SERVICE_PORT:-8084}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      # Database connection via secrets
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USERNAME_FILE: /run/secrets/postgres_user
+      DB_PASSWORD_FILE: /run/secrets/postgres_password
+      # Redis Event Store connection
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD_FILE: /run/secrets/redis_password
+      # Kafka messaging
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      # JWT Configuration
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      JWT_ISSUER: ${JWT_ISSUER:-meldestelle-auth-server}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-meldestelle-services}
+    ports:
+      - "${HORSES_SERVICE_PORT:-8084}:8084"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    secrets:
+      - postgres_user
+      - postgres_password
+      - redis_password
+      - jwt_secret
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8084/actuator/health/readiness"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    profiles:
+      - horses
+
+  # ===================================================================
+  # Events Service - Production Ready (Currently Commented Out)
+  # ===================================================================
+  events-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/events-service/Dockerfile
+      args:
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
+    container_name: meldestelle-events-service
+    volumes:
+      - events-service-gradle-cache:/home/gradle/.gradle
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SERVER_PORT: ${EVENTS_SERVICE_PORT:-8085}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      # Database connection via secrets
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USERNAME_FILE: /run/secrets/postgres_user
+      DB_PASSWORD_FILE: /run/secrets/postgres_password
+      # Redis Event Store connection
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD_FILE: /run/secrets/redis_password
+      # Kafka messaging
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      # JWT Configuration
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      JWT_ISSUER: ${JWT_ISSUER:-meldestelle-auth-server}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-meldestelle-services}
+    ports:
+      - "${EVENTS_SERVICE_PORT:-8085}:8085"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    secrets:
+      - postgres_user
+      - postgres_password
+      - redis_password
+      - jwt_secret
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8085/actuator/health/readiness"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    profiles:
+      - events
+
+  # ===================================================================
+  # Masterdata Service - Production Ready (Currently Commented Out)
+  # ===================================================================
+  masterdata-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/masterdata-service/Dockerfile
+      args:
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
+    container_name: meldestelle-masterdata-service
+    volumes:
+      - masterdata-service-gradle-cache:/home/gradle/.gradle
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SERVER_PORT: ${MASTERDATA_SERVICE_PORT:-8086}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: ${CONSUL_ENABLED:-true}
+      # Database connection via secrets
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USERNAME_FILE: /run/secrets/postgres_user
+      DB_PASSWORD_FILE: /run/secrets/postgres_password
+      # Redis Event Store connection
+      REDIS_EVENT_STORE_HOST: redis
+      REDIS_EVENT_STORE_PORT: 6379
+      REDIS_EVENT_STORE_PASSWORD_FILE: /run/secrets/redis_password
+      # JWT Configuration
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      JWT_ISSUER: ${JWT_ISSUER:-meldestelle-auth-server}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-meldestelle-services}
+    ports:
+      - "${MASTERDATA_SERVICE_PORT:-8086}:8086"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - meldestelle-network
+    secrets:
+      - postgres_user
+      - postgres_password
+      - redis_password
+      - jwt_secret
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1.5G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8086/actuator/health/readiness"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    profiles:
+      - masterdata
+
+# ===================================================================
+# Secrets - Shared with main infrastructure
+# ===================================================================
+secrets:
+  postgres_user:
+    external: true
+    name: meldestelle_postgres_user
+  postgres_password:
+    external: true
+    name: meldestelle_postgres_password
+  redis_password:
+    external: true
+    name: meldestelle_redis_password
+  jwt_secret:
+    file: ./docker/secrets/jwt_secret.txt
+
+# ===================================================================
+# Volumes - Service-specific Gradle Caches
+# ===================================================================
+volumes:
+  ping-service-gradle-cache:
+    driver: local
+  members-service-gradle-cache:
+    driver: local
+  horses-service-gradle-cache:
+    driver: local
+  events-service-gradle-cache:
+    driver: local
+  masterdata-service-gradle-cache:
+    driver: local
+
+# ===================================================================
+# Networks - Use external network from main compose
+# ===================================================================
+networks:
+  meldestelle-network:
+    external: true
+    name: meldestelle_meldestelle-network

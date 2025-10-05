@@ -1,0 +1,27 @@
+2025-10-05 21:49:40.525 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2025-10-05 21:49:40.564 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.8 with PID 783949 (/home/stefan-mo/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan-mo in /home/stefan-mo/WsMeldestelle/Meldestelle)
+2025-10-05 21:49:40.565 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.5, Spring v6.2.10
+2025-10-05 21:49:40.565 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 1 profile is active: "dev"
+2025-10-05 21:49:41.913 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=548af07a-4d4c-30b3-8388-eaf5c0d95d23
+2025-10-05 21:49:44.188 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
+2025-10-05 21:49:44.188 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
+2025-10-05 21:49:44.188 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
+2025-10-05 21:49:44.189 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-10-05 21:49:44.880 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
+2025-10-05 21:49:45.585 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2025-10-05 21:49:45.714 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
+2025-10-05 21:49:45.716 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-2567c504-f48c-4f6e-918e-23b80c37675e', name='meldestelle', tags=[], address='10.0.0.18', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://10.0.0.18:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
+2025-10-05 21:49:45.865 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Started GatewayApplicationKt in 5.753 seconds (process running for 6.365)
+2025-10-05 21:53:53.365 [SpringApplicationShutdownHook] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-10-05 21:53:53.367 [netty-shutdown] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Graceful shutdown complete
+2025-10-05 21:53:55.378 [SpringApplicationShutdownHook] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Deregistering service with consul: meldestelle-8080-2567c504-f48c-4f6e-918e-23b80c37675e

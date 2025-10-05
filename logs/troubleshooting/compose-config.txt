@@ -1,0 +1,371 @@
+# docker compose config output
+name: meldestelle
+services:
+  api-gateway:
+    build:
+      context: /home/stefan-mo/WsMeldestelle/Meldestelle
+      dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
+      args:
+        BUILD_DATE: unknown
+        GRADLE_VERSION: 9.0.0
+        JAVA_VERSION: "21"
+        SPRING_PROFILES_ACTIVE: default
+        VERSION: 1.0.0
+    container_name: meldestelle-api-gateway
+    depends_on:
+      consul:
+        condition: service_healthy
+        required: true
+      keycloak:
+        condition: service_healthy
+        required: true
+      postgres:
+        condition: service_healthy
+        required: true
+      redis:
+        condition: service_healthy
+        required: true
+    environment:
+      CONSUL_ENABLED: "true"
+      CONSUL_HOST: consul
+      CONSUL_PORT: "8500"
+      GATEWAY_PORT: "8081"
+      GATEWAY_SECURITY_KEYCLOAK_ENABLED: "false"
+      KEYCLOAK_CLIENT_ID: api-gateway
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/meldestelle
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs
+      KEYCLOAK_REALM: meldestelle
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+      SPRING_PROFILES_ACTIVE: dev,keycloak
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - http://localhost:8081/actuator/health
+      timeout: 5s
+      interval: 15s
+      retries: 3
+      start_period: 30s
+    networks:
+      meldestelle-network: null
+    ports:
+      - mode: ingress
+        target: 8081
+        published: "8081"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: api-gateway-gradle-cache
+        target: /home/gradle/.gradle
+        volume: {}
+  consul:
+    command:
+      - agent
+      - -server
+      - -ui
+      - -node=server-1
+      - -bootstrap-expect=1
+      - -client=0.0.0.0
+    container_name: meldestelle-consul
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:8500/v1/status/leader
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 20s
+    image: hashicorp/consul:1.15
+    networks:
+      meldestelle-network: null
+    ports:
+      - mode: ingress
+        target: 8500
+        published: "8500"
+        protocol: tcp
+    restart: unless-stopped
+  grafana:
+    container_name: meldestelle-grafana
+    depends_on:
+      prometheus:
+        condition: service_started
+        required: true
+    environment:
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - http://localhost:3000/api/health
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 20s
+    image: grafana/grafana:11.3.0
+    networks:
+      meldestelle-network: null
+    ports:
+      - mode: ingress
+        target: 3000
+        published: "3000"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: grafana-data
+        target: /var/lib/grafana
+        volume: {}
+      - type: bind
+        source: /home/stefan-mo/WsMeldestelle/Meldestelle/docker/monitoring/grafana
+        target: /etc/grafana/provisioning
+        read_only: true
+        bind:
+          create_host_path: true
+  kafka:
+    container_name: meldestelle-kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+        required: true
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_BROKER_ID: "1"
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    healthcheck:
+      test:
+        - CMD
+        - kafka-broker-api-versions
+        - --bootstrap-server
+        - localhost:9092
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 20s
+    image: confluentinc/cp-kafka:7.4.0
+    networks:
+      meldestelle-network: null
+    ports:
+      - mode: ingress
+        target: 9092
+        published: "9092"
+        protocol: tcp
+    restart: unless-stopped
+  keycloak:
+    command:
+      - start-dev
+      - --import-realm
+    container_name: meldestelle-keycloak
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    environment:
+      JAVA_OPTS_APPEND: -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+DisableExplicitGC -Djava.net.preferIPv4Stack=true -Duser.timezone=Europe/Vienna
+      KC_CACHE: ispn
+      KC_DB: postgres
+      KC_DB_PASSWORD: meldestelle
+      KC_DB_POOL_INITIAL_SIZE: "5"
+      KC_DB_POOL_MAX_SIZE: "20"
+      KC_DB_POOL_MIN_SIZE: "5"
+      KC_DB_SCHEMA: keycloak
+      KC_DB_URL: jdbc:postgresql://postgres:5432/meldestelle
+      KC_DB_USERNAME: meldestelle
+      KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HTTP_PORT: "8080"
+      KC_LOG_CONSOLE_COLOR: "false"
+      KC_LOG_CONSOLE_FORMAT: plain
+      KC_LOG_LEVEL: info
+      KC_METRICS_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'if command -v curl >/dev/null 2>&1; then curl -fsS http://localhost:8080/health/ready | grep -q "\"status\":\"UP\""; elif command -v wget >/dev/null 2>&1; then wget -q -O - http://localhost:8080/health/ready | grep -q "\"status\":\"UP\""; else echo "Healthcheck: curl/wget not found, using bash /dev/tcp fallback" >&2; timeout 25 bash -lc "exec 3<>/dev/tcp/127.0.0.1/8080 && printf \"GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n\" >&3 && head -n 1 <&3 | grep -q \"200 OK\""; fi'
+      timeout: 30s
+      interval: 15s
+      retries: 10
+      start_period: 3m0s
+    image: quay.io/keycloak/keycloak:26.4.0
+    networks:
+      meldestelle-network: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "8180"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/stefan-mo/WsMeldestelle/Meldestelle/docker/services/keycloak
+        target: /opt/keycloak/data/import
+        bind:
+          create_host_path: true
+      - type: volume
+        source: keycloak-data
+        target: /opt/keycloak/data
+        volume: {}
+  postgres:
+    container_name: meldestelle-postgres
+    environment:
+      POSTGRES_DB: meldestelle
+      POSTGRES_PASSWORD: meldestelle
+      POSTGRES_USER: meldestelle
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U meldestelle -d meldestelle
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 20s
+    image: postgres:16-alpine
+    networks:
+      meldestelle-network: null
+    ports:
+      - mode: ingress
+        target: 5432
+        published: "5432"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: postgres-data
+        target: /var/lib/postgresql/data
+        volume: {}
+      - type: bind
+        source: /home/stefan-mo/WsMeldestelle/Meldestelle/docker/services/postgres
+        target: /docker-entrypoint-initdb.d
+        bind:
+          create_host_path: true
+  prometheus:
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --storage.tsdb.retention.time=200h
+      - --web.enable-lifecycle
+    container_name: meldestelle-prometheus
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://localhost:9090/-/healthy
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 20s
+    image: prom/prometheus:v2.54.1
+    networks:
+      meldestelle-network: null
+    ports:
+      - mode: ingress
+        target: 9090
+        published: "9090"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: prometheus-data
+        target: /prometheus
+        volume: {}
+      - type: bind
+        source: /home/stefan-mo/WsMeldestelle/Meldestelle/docker/monitoring/prometheus
+        target: /etc/prometheus
+        read_only: true
+        bind:
+          create_host_path: true
+  redis:
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+    container_name: meldestelle-redis
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 20s
+    image: redis:7-alpine
+    networks:
+      meldestelle-network: null
+    ports:
+      - mode: ingress
+        target: 6379
+        published: "6379"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: redis-data
+        target: /data
+        volume: {}
+  zookeeper:
+    container_name: meldestelle-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+    healthcheck:
+      test:
+        - CMD
+        - bash
+        - -c
+        - echo 'ruok' | nc localhost 2181
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 20s
+    image: confluentinc/cp-zookeeper:7.4.0
+    networks:
+      meldestelle-network: null
+    ports:
+      - mode: ingress
+        target: 2181
+        published: "2181"
+        protocol: tcp
+    restart: unless-stopped
+networks:
+  meldestelle-network:
+    name: meldestelle_meldestelle-network
+    driver: bridge
+volumes:
+  api-gateway-gradle-cache:
+    name: meldestelle_api-gateway-gradle-cache
+    driver: local
+  grafana-data:
+    name: meldestelle_grafana-data
+    driver: local
+  keycloak-data:
+    name: meldestelle_keycloak-data
+    driver: local
+  postgres-data:
+    name: meldestelle_postgres-data
+    driver: local
+  prometheus-data:
+    name: meldestelle_prometheus-data
+    driver: local
+  redis-data:
+    name: meldestelle_redis-data
+    driver: local

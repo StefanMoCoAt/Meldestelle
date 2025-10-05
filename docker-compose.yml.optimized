@@ -1,0 +1,522 @@
+# ===================================================================
+# Docker Compose - Basis-Infrastruktur (OPTIMIZED & SECURED)
+# Meldestelle Project - Essentielle Services
+# ===================================================================
+# Security & Performance Improvements:
+# - Secrets management for sensitive data
+# - Resource limits and reservations
+# - Security hardening (read-only volumes, non-root users)
+# - Optimized health checks and startup
+# - Production-ready configurations
+# ===================================================================
+
+version: '3.9'
+
+services:
+  # ===================================================================
+  # Datenbank - PostgreSQL with Security Hardening
+  # ===================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: meldestelle-postgres
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: ${POSTGRES_DB:-meldestelle}
+      # Security hardening
+      POSTGRES_INITDB_ARGS: "--auth-local=trust --auth-host=scram-sha-256"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/services/postgres:/docker-entrypoint-initdb.d:ro
+    networks:
+      - meldestelle-network
+    secrets:
+      - postgres_user
+      - postgres_password
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $(cat /run/secrets/postgres_user) -d ${POSTGRES_DB:-meldestelle}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    # Security: Run as postgres user (built into image)
+    security_opt:
+      - no-new-privileges:true
+
+  # ===================================================================
+  # Cache - Redis with Authentication
+  # ===================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: meldestelle-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass "$(cat /run/secrets/redis_password)"
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+    networks:
+      - meldestelle-network
+    secrets:
+      - redis_password
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$(cat /run/secrets/redis_password)", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  # ===================================================================
+  # Authentifizierung - Keycloak with Enhanced Security
+  # ===================================================================
+  keycloak:
+    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.0}
+    container_name: meldestelle-keycloak
+    environment:
+      # Admin Configuration - Using secrets
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD_FILE: /run/secrets/keycloak_admin_password
+
+      # Database Configuration - Using secrets
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/meldestelle
+      KC_DB_USERNAME_FILE: /run/secrets/postgres_user
+      KC_DB_PASSWORD_FILE: /run/secrets/postgres_password
+      KC_DB_SCHEMA: keycloak
+
+      # HTTP Configuration - Production settings
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
+      KC_PROXY: edge
+
+      # Security Configuration
+      KC_FEATURES: token-exchange,admin-fine-grained-authz
+      KC_LOG_LEVEL: ${KEYCLOAK_LOG_LEVEL:-INFO}
+
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./docker/services/keycloak:/opt/keycloak/data/import:ro
+      - keycloak-data:/opt/keycloak/data
+    command:
+      # Development mode with realm import enabled
+      - start-dev
+      - --import-realm
+    networks:
+      - meldestelle-network
+    secrets:
+      - keycloak_admin_password
+      - postgres_user
+      - postgres_password
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS --max-time 5 http://localhost:8080/health/ready || exit 1']
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  # ===================================================================
+  # Service Discovery - Consul
+  # ===================================================================
+  consul:
+    image: hashicorp/consul:1.15
+    container_name: meldestelle-consul
+    ports:
+      - "${CONSUL_PORT:-8500}:8500"
+    command: >
+      agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
+      -encrypt=$(consul keygen)
+      -datacenter=meldestelle-dc
+    networks:
+      - meldestelle-network
+    volumes:
+      - consul-data:/consul/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "consul", "members", "-http-addr=localhost:8500"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  # ===================================================================
+  # Messaging - Zookeeper & Kafka with Resource Limits
+  # ===================================================================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: meldestelle-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT:-2181}
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      KAFKA_OPTS: "-Xmx512m -Xms256m"
+    ports:
+      - "${ZOOKEEPER_CLIENT_PORT:-2181}:2181"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - meldestelle-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: meldestelle-kafka
+    environment:
+      KAFKA_BROKER_ID: ${KAFKA_BROKER_ID:-1}
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:${KAFKA_PORT:-9092}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:-1}
+      # JVM Settings
+      KAFKA_HEAP_OPTS: "-Xmx1G -Xms512m"
+      KAFKA_JVM_PERFORMANCE_OPTS: "-XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35"
+    ports:
+      - "${KAFKA_PORT:-9092}:9092"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - meldestelle-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  # ===================================================================
+  # Monitoring - Prometheus with Security
+  # ===================================================================
+  prometheus:
+    image: prom/prometheus:${DOCKER_PROMETHEUS_VERSION:-v2.54.1}
+    container_name: meldestelle-prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - prometheus-data:/prometheus
+      - ./docker/monitoring/prometheus:/etc/prometheus:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--storage.tsdb.retention.size=20GB'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    networks:
+      - meldestelle-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "promtool", "query", "instant", "localhost:9090", "up"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:65534" # nobody:nobody
+
+  # ===================================================================
+  # Monitoring - Grafana with Enhanced Security
+  # ===================================================================
+  grafana:
+    image: grafana/grafana:${DOCKER_GRAFANA_VERSION:-11.3.0}
+    container_name: meldestelle-grafana
+    environment:
+      # Use secrets for admin credentials
+      GF_SECURITY_ADMIN_USER__FILE: /run/secrets/grafana_admin_user
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+      # Security settings
+      GF_SECURITY_COOKIE_SECURE: true
+      GF_SECURITY_COOKIE_SAMESITE: strict
+      GF_SECURITY_DISABLE_GRAVATAR: true
+      GF_ANALYTICS_REPORTING_ENABLED: false
+      GF_ANALYTICS_CHECK_FOR_UPDATES: false
+      GF_SNAPSHOTS_EXTERNAL_ENABLED: false
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/monitoring/grafana:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - meldestelle-network
+    secrets:
+      - grafana_admin_user
+      - grafana_admin_password
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    user: "472:0" # grafana user
+
+  # ===================================================================
+  # API Gateway - Enhanced Security & Resource Management
+  # ===================================================================
+  api-gateway:
+    build:
+      context: .
+      dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
+      args:
+        # Global build arguments
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+        # Infrastructure-specific arguments
+        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DEFAULT:-default}
+    container_name: meldestelle-api-gateway
+    volumes:
+      # Mount Gradle cache for better build performance
+      - api-gateway-gradle-cache:/home/gradle/.gradle
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev,keycloak}
+      CONSUL_HOST: consul
+      CONSUL_PORT: ${CONSUL_PORT:-8500}
+      CONSUL_ENABLED: "true"
+      GATEWAY_PORT: ${GATEWAY_PORT:-8081}
+      # Keycloak OAuth2 Integration - Using internal network
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/meldestelle
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs
+      KEYCLOAK_REALM: meldestelle
+      KEYCLOAK_CLIENT_ID: api-gateway
+      # Security: Client secret via file
+      KEYCLOAK_CLIENT_SECRET_FILE: /run/secrets/keycloak_client_secret
+      # Custom JWT filter disabled - using oauth2ResourceServer instead
+      GATEWAY_SECURITY_KEYCLOAK_ENABLED: "false"
+      # Database connection via secrets
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-meldestelle}
+      DB_USERNAME_FILE: /run/secrets/postgres_user
+      DB_PASSWORD_FILE: /run/secrets/postgres_password
+      # Redis connection with auth
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD_FILE: /run/secrets/redis_password
+    ports:
+      - "${GATEWAY_PORT:-8081}:8081"
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    networks:
+      - meldestelle-network
+    secrets:
+      - keycloak_client_secret
+      - postgres_user
+      - postgres_password
+      - redis_password
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${GATEWAY_PORT:-8081}/actuator/health/readiness"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+# ===================================================================
+# Secrets Management - Production Ready
+# ===================================================================
+secrets:
+  postgres_user:
+    file: ./docker/secrets/postgres_user.txt
+  postgres_password:
+    file: ./docker/secrets/postgres_password.txt
+  redis_password:
+    file: ./docker/secrets/redis_password.txt
+  keycloak_admin_password:
+    file: ./docker/secrets/keycloak_admin_password.txt
+  keycloak_client_secret:
+    file: ./docker/secrets/keycloak_client_secret.txt
+  grafana_admin_user:
+    file: ./docker/secrets/grafana_admin_user.txt
+  grafana_admin_password:
+    file: ./docker/secrets/grafana_admin_password.txt
+
+# ===================================================================
+# Volumes - Enhanced with Better Drivers
+# ===================================================================
+volumes:
+  postgres-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/postgres
+  redis-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/redis
+  prometheus-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/prometheus
+  grafana-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/grafana
+  keycloak-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/keycloak
+  consul-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/consul
+  zookeeper-data:
+    driver: local
+  zookeeper-logs:
+    driver: local
+  kafka-data:
+    driver: local
+  api-gateway-gradle-cache:
+    driver: local
+
+# ===================================================================
+# Networks - Enhanced Security
+# ===================================================================
+networks:
+  meldestelle-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.mtu: "1500"
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
