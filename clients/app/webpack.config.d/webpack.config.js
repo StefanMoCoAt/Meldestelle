@@ -1,39 +1,19 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const path = require('path');
+// HTML template will be handled by Kotlin/JS build system
+// No need for custom HtmlWebpackPlugin configuration
 
-// Template-Pfad für deine index.html
-const templatePath = path.resolve(__dirname, '../../../../clients/app/src/jsMain/resources/index.html');
-
-// Erweitere die bestehende Kotlin/JS Webpack-Konfiguration
-config.plugins.push(new HtmlWebpackPlugin({
-    template: templatePath,
-    filename: 'index.html',
-    inject: 'body',
-    scriptLoading: 'blocking',
-    // Optimierung hinzufügen
-    minify: false
-    /*{
-        removeComments: true,
-        collapseWhitespace: true,
-        removeRedundantAttributes: true,
-        removeEmptyAttributes: true,
-        useShortDoctype: true,
-        removeStyleLinkTypeAttributes: true,
-        keepClosingSlash: true,
-        minifyJS: true,
-        minifyCSS: true,
-        minifyURLs: true,
-    }*/
-}));
-
-// Bundle-Analyse für Development
+// Bundle-Analyse für Development (optional, only if package is available)
 if (process.env.ANALYZE_BUNDLE === 'true') {
-    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-    config.plugins.push(new BundleAnalyzerPlugin({
-        analyzerMode: 'static',
-        openAnalyzer: false,
-        reportFilename: 'bundle-report.html'
-    }));
+    try {
+        const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+        config.plugins.push(new BundleAnalyzerPlugin({
+            analyzerMode: 'static',
+            openAnalyzer: false,
+            reportFilename: 'bundle-report.html'
+        }));
+        console.log('Bundle analyzer enabled');
+    } catch (e) {
+        console.log('Bundle analyzer not available (webpack-bundle-analyzer not installed)');
+    }
 }
 
 // Weitere Optimierungen hinzufügen (erweitert bestehende config)
