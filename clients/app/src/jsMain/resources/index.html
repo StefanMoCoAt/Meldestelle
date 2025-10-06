@@ -1,30 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
+    <title>Meldestelle - Web Development</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meldestelle</title>
-    <meta name="theme-color" content="#0f172a">
-    <link type="text/css" rel="stylesheet" href="styles.css">
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #fafafa;
+        }
+        #ComposeTarget {
+            width: 100vw;
+            height: 100vh;
+        }
+        #root {
+            width: 100vw;
+            height: 100vh;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-<div id="ComposeTarget"></div>
-<script src="web-app.js"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(location.hostname);
-    if (isLocalhost) {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        for (const reg of regs) reg.unregister();
-      }).catch(console.error);
-    } else {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(console.error);
-      });
-    }
-  }
-</script>
+    <div id="root">
+        <canvas id="ComposeTarget"></canvas>
+        <div class="loading">🚀 Loading Meldestelle...</div>
+    </div>
+    <script src="web-app.js"></script>
 </body>
 </html>

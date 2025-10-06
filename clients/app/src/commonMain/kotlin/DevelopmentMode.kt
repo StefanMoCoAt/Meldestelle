@@ -1,0 +1,1 @@
+expect fun isDevelopmentMode(): Boolean
