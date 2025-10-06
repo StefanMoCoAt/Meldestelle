@@ -1,14 +1,23 @@
 package at.mocode.clients.pingfeature
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import at.mocode.clients.pingfeature.model.ReitsportRole
+import at.mocode.clients.pingfeature.model.ReitsportRoles
+import at.mocode.clients.pingfeature.model.RoleCategory
 
 @Composable
 fun PingScreen(viewModel: PingViewModel) {
@@ -134,6 +143,14 @@ fun PingScreen(viewModel: PingViewModel) {
                 )
             )
         }
+
+        // Neue Reitsport-Authentication-Sektion
+        Spacer(modifier = Modifier.height(24.dp))
+
+        ReitsportTestingSection(
+            viewModel = viewModel,
+            uiState = uiState
+        )
     }
 }
 
@@ -183,5 +200,109 @@ private fun InfoRow(label: String, value: String) {
             fontWeight = FontWeight.Medium
         )
         Text(text = value)
+    }
+}
+
+@Composable
+private fun ReitsportTestingSection(
+    viewModel: PingViewModel,
+    uiState: PingUiState
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "🐎",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Reitsport-Authentication-Testing",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Text(
+                text = "Teste verschiedene Benutzerrollen und ihre Berechtigungen im Meldestelle_Pro System",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+            )
+
+            // Rollen-Grid
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 120.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.height(200.dp) // Feste Höhe für 2 Reihen
+            ) {
+                items(ReitsportRoles.ALL_ROLES) { role ->
+                    RoleTestButton(
+                        role = role,
+                        onClick = { viewModel.testReitsportRole(role) },
+                        isLoading = uiState.isLoading
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RoleTestButton(
+    role: ReitsportRole,
+    onClick: () -> Unit,
+    isLoading: Boolean
+) {
+    OutlinedButton(
+        onClick = onClick,
+        enabled = !isLoading,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = Color.Transparent,
+            contentColor = when (role.category) {
+                RoleCategory.SYSTEM -> Color(0xFFFF5722)
+                RoleCategory.OFFICIAL -> Color(0xFF3F51B5)
+                RoleCategory.ACTIVE -> Color(0xFF4CAF50)
+                RoleCategory.PASSIVE -> Color(0xFF9E9E9E)
+            }
+        )
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = role.icon,
+                fontSize = 20.sp
+            )
+            Text(
+                text = role.displayName.split(" ").first(), // Erstes Wort nur
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
+            Text(
+                text = "${role.permissions.size} Rechte",
+                fontSize = 8.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }

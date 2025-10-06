@@ -16,7 +16,7 @@ springBoot {
 }
 
 // Optimiert Kotlin-Compiler-Einstellungen für bessere Performance.
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+tasks.withType<KotlinCompile> {
     compilerOptions {
         freeCompilerArgs.addAll(
             "-Xjsr305=strict",

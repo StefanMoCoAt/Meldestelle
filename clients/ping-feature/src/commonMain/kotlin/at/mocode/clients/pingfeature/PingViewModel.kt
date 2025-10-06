@@ -1,12 +1,16 @@
 package at.mocode.clients.pingfeature
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import at.mocode.ping.api.PingApi
-import at.mocode.ping.api.PingResponse
+import at.mocode.clients.pingfeature.model.ReitsportRole
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
+import at.mocode.ping.api.PingApi
+import at.mocode.ping.api.PingResponse
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class PingUiState(
@@ -80,5 +84,48 @@ class PingViewModel(
 
     fun clearError() {
         uiState = uiState.copy(errorMessage = null)
+    }
+
+    /**
+     * Neue Methode: Teste eine Reitsport-Rolle
+     */
+    fun testReitsportRole(role: ReitsportRole) {
+        viewModelScope.launch {
+            uiState = uiState.copy(
+                isLoading = true,
+                errorMessage = null,
+                // Hier erweitern wir später den UiState für Reitsport-Tests
+            )
+
+            try {
+                // Phase 2: Erstmal nur ein einfacher Test
+                delay(1000) // Simuliere API-Call
+
+                val testResult = "✅ ${role.displayName} getestet!\n" +
+                        "Berechtigungen: ${role.permissions.size}\n" +
+                        "Kategorie: ${role.category.displayName}"
+
+                // Erstelle ein Mock-PingResponse für die Anzeige
+                val mockResponse = PingResponse(
+                    status = testResult,
+                    timestamp = "Test completed",
+                    service = "Reitsport-Auth-Test"
+                )
+
+                uiState = uiState.copy(
+                    isLoading = false,
+                    // Zeige Ergebnis in der bestehenden simplePingResponse
+                    simplePingResponse = mockResponse
+                )
+
+                println("[DEBUG] Reitsport-Test: ${role.displayName} mit ${role.permissions.size} Berechtigungen")
+
+            } catch (e: Exception) {
+                uiState = uiState.copy(
+                    isLoading = false,
+                    errorMessage = "Reitsport-Test fehlgeschlagen: ${e.message}"
+                )
+            }
+        }
     }
 }

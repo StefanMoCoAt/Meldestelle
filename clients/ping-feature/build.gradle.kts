@@ -52,6 +52,7 @@ kotlin {
             implementation(libs.ktor.client.serialization.kotlinx.json)
             // Coroutines and serialization
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
             // ViewModel lifecycle
             implementation(libs.androidx.lifecycle.viewmodelCompose)
@@ -69,6 +70,8 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(libs.ktor.client.cio)
+            // Auth-Models Zugriff (nur für JVM)
+            implementation(project(":infrastructure:auth:auth-client"))
         }
 
         jsMain.dependencies {
