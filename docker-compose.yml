@@ -64,8 +64,10 @@ services:
     # Using base image directly instead of custom Dockerfile
     environment:
       # Admin Configuration
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+#      KEYCLOAK_ADMIN: admin # is deprecated
+#      KEYCLOAK_ADMIN_PASSWORD: admin # is deprecated
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
 
       # Database Configuration
       KC_DB: postgres

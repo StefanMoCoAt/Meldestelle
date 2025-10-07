@@ -61,7 +61,7 @@ testcontainersKeycloak = "3.9.0"
 resilience4j = "2.3.0"
 
 # --- Utilities ---
-uuid = "0.8.4"
+#uuid = "0.9.0"
 bignum = "0.3.10"
 logback = "1.5.18"
 caffeine = "3.2.2"
@@ -167,8 +167,8 @@ auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "auth0Jwt" }
 keycloak-admin-client = { module = "org.keycloak:keycloak-admin-client", version.ref = "keycloakAdminClient" }
 
 # --- Utilities ---
-uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
-uuid-jvm = { module = "com.benasher44:uuid-jvm", version.ref = "uuid" }
+#uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
+#uuid-jvm = { module = "com.benasher44:uuid-jvm", version.ref = "uuid" }
 bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "bignum" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }

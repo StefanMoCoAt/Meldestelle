@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.events.api.rest
 
 import at.mocode.core.domain.model.ApiResponse
@@ -9,8 +10,7 @@ import at.mocode.events.application.usecase.UpdateVeranstaltungUseCase
 import at.mocode.events.domain.repository.VeranstaltungRepository
 import at.mocode.core.domain.serialization.UuidSerializer
 import at.mocode.core.utils.validation.ApiValidationUtils
-import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuidFrom
+import kotlin.uuid.Uuid
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -91,7 +91,7 @@ class VeranstaltungController(
             // GET /api/events/{id} - Get event by ID
             get("/{id}") {
                 try {
-                    val eventId = uuidFrom(call.parameters["id"]!!)
+                    val eventId = Uuid.parse(call.parameters["id"]!!)
                     val request = GetVeranstaltungUseCase.GetVeranstaltungRequest(eventId)
                     val response = getVeranstaltungUseCase.execute(request)
 
@@ -180,7 +180,7 @@ class VeranstaltungController(
             // PUT /api/events/{id} - Update event
             put("/{id}") {
                 try {
-                    val eventId = uuidFrom(call.parameters["id"]!!)
+                    val eventId = Uuid.parse(call.parameters["id"]!!)
                     val updateRequest = call.receive<UpdateEventRequest>()
 
                     // Validate input using shared validation utilities

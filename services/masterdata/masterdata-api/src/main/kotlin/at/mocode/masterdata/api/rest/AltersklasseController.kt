@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.api.rest
 
 import at.mocode.core.domain.model.ApiResponse
@@ -6,7 +7,7 @@ import at.mocode.masterdata.application.usecase.CreateAltersklasseUseCase
 import at.mocode.masterdata.application.usecase.GetAltersklasseUseCase
 import at.mocode.masterdata.domain.model.AltersklasseDefinition
 import at.mocode.core.utils.validation.ApiValidationUtils
-import com.benasher44.uuid.uuidFrom
+import kotlin.uuid.Uuid
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -119,7 +120,7 @@ class AltersklasseController(
             // GET /api/masterdata/altersklassen/{id} - Get age class by ID
             get("/{id}") {
                 try {
-                    val altersklasseId = call.parameters["id"]?.let { uuidFrom(it) }
+                    val altersklasseId = call.parameters["id"]?.let { Uuid.parse(it) }
                         ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<AltersklasseDto>("Invalid age class ID"))
 
                     val altersklasse = getAltersklasseUseCase.getById(altersklasseId)
@@ -285,7 +286,7 @@ class AltersklasseController(
 
                     val oetoRegelReferenzId = createDto.oetoRegelReferenzId?.let {
                         try {
-                            uuidFrom(it)
+                            Uuid.parse(it)
                         } catch (_: Exception) {
                             return@post call.respond(
                                 HttpStatusCode.BadRequest,
@@ -320,7 +321,7 @@ class AltersklasseController(
             // PUT /api/masterdata/altersklassen/{id} - Update existing age class
             put("/{id}") {
                 try {
-                    val altersklasseId = call.parameters["id"]?.let { uuidFrom(it) }
+                    val altersklasseId = call.parameters["id"]?.let { Uuid.parse(it) }
                         ?: return@put call.respond(HttpStatusCode.BadRequest, ApiResponse.error<AltersklasseDto>("Invalid age class ID"))
 
                     val updateDto = call.receive<UpdateAltersklasseDto>()
@@ -366,7 +367,7 @@ class AltersklasseController(
 
                     val oetoRegelReferenzId = updateDto.oetoRegelReferenzId?.let {
                         try {
-                            uuidFrom(it)
+                            Uuid.parse(it)
                         } catch (_: Exception) {
                             return@put call.respond(
                                 HttpStatusCode.BadRequest,
@@ -402,7 +403,7 @@ class AltersklasseController(
             // DELETE /api/masterdata/altersklassen/{id} - Delete age class
             delete("/{id}") {
                 try {
-                    val altersklasseId = call.parameters["id"]?.let { uuidFrom(it) }
+                    val altersklasseId = call.parameters["id"]?.let { Uuid.parse(it) }
                         ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Unit>("Invalid age class ID"))
 
                     val result = createAltersklasseUseCase.deleteAltersklasse(altersklasseId)
@@ -419,7 +420,7 @@ class AltersklasseController(
             // GET /api/masterdata/altersklassen/eligible/{id} - Check eligibility for age class
             get("/eligible/{id}") {
                 try {
-                    val altersklasseId = call.parameters["id"]?.let { uuidFrom(it) }
+                    val altersklasseId = call.parameters["id"]?.let { Uuid.parse(it) }
                         ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<Boolean>("Invalid age class ID"))
 
                     val ageParam = call.request.queryParameters["age"]?.toIntOrNull()

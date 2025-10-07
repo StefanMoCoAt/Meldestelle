@@ -1,12 +1,13 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.core.domain.event
 
 import at.mocode.core.domain.model.*
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
-import com.benasher44.uuid.uuid4
+import kotlinx.serialization.Serializable
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
 
 /**
  * Basis-Interface für alle Domain-Events im System.
@@ -32,7 +33,7 @@ abstract class BaseDomainEvent(
     override val aggregateId: AggregateId,
     override val eventType: EventType,
     override val version: EventVersion,
-    override val eventId: EventId = EventId(uuid4()),
+    override val eventId: EventId = EventId(Uuid.random()),
     @Serializable(with = KotlinInstantSerializer::class)
     override val timestamp: Instant,
     override val correlationId: CorrelationId? = null,
@@ -43,7 +44,7 @@ abstract class BaseDomainEvent(
         aggregateId: AggregateId,
         eventType: EventType,
         version: EventVersion,
-        eventId: EventId = EventId(uuid4()),
+        eventId: EventId = EventId(Uuid.random()),
         correlationId: CorrelationId? = null,
         causationId: CausationId? = null
     ) : this(

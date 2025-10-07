@@ -21,12 +21,20 @@ kotlin {
     }
 
     sourceSets {
+        // Opt-in to experimental Kotlin UUID API across all source sets
+        all {
+            languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
+        }
+
         commonMain.dependencies {
             // Core dependencies (that aren't included in platform-dependencies)
-            api(libs.uuid)
+            api(projects.core.coreUtils)
+            api(projects.core.coreDomain)
+
             // Serialization and date-time for commonMain
             api(libs.kotlinx.serialization.json)
             api(libs.kotlinx.datetime)
+
         }
 
         commonTest.dependencies {

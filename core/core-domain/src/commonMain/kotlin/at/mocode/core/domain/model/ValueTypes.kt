@@ -1,9 +1,10 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.core.domain.model
 
 import at.mocode.core.domain.serialization.UuidSerializer
-import com.benasher44.uuid.Uuid
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
+import kotlin.uuid.Uuid
 
 /**
  * Value-Classes für stark typisierte IDs und Fachwerte.

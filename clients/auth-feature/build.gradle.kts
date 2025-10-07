@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 /**
  * Dieses Modul kapselt die gesamte UI und Logik für das Authentication-Feature.
  * Es kennt seine eigenen technischen Abhängigkeiten (Ktor, Coroutines)
@@ -28,33 +30,43 @@ kotlin {
         }
     }
 
+    // WASM, nur wenn explizit aktiviert
     if (enableWasm) {
         @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-        wasmJs {
-            browser()
-        }
+        wasmJs { browser() }
     }
 
     sourceSets {
         commonMain.dependencies {
             // UI Kit
             implementation(project(":clients:shared:common-ui"))
+
             // Compose dependencies
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(compose.materialIconsExtended)
+
             // Ktor client for HTTP calls
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.contentNegotiation)
             implementation(libs.ktor.client.serialization.kotlinx.json)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.auth)
+
             // Coroutines and serialization
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
+
             // DateTime for multiplatform time handling
             implementation(libs.kotlinx.datetime)
+
             // ViewModel lifecycle
             implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+
         }
 
         commonTest.dependencies {
@@ -65,6 +77,8 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(libs.mockk)
+            implementation(projects.platform.platformTesting)
+            implementation(libs.bundles.testing.jvm)
         }
 
         jvmMain.dependencies {
@@ -73,6 +87,33 @@ kotlin {
 
         jsMain.dependencies {
             implementation(libs.ktor.client.js)
+            implementation(libs.ktor.client.auth)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
         }
+
+        // WASM SourceSet, nur wenn aktiviert
+        if (enableWasm) {
+            val wasmJsMain = getByName("wasmJsMain")
+            wasmJsMain.dependencies {
+                implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
+
+                // ✅ HINZUFÜGEN: Compose für shared UI components für WASM
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+            }
+        }
+    }
+}
+
+// KMP Compile-Optionen
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn"
+        )
     }
 }

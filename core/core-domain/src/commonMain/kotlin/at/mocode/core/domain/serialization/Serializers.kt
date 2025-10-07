@@ -1,7 +1,5 @@
 package at.mocode.core.domain.serialization
 
-import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuidFrom
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -13,6 +11,8 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * Serializer für kotlin.time. Instant Objekte.
@@ -35,6 +35,7 @@ object KotlinInstantSerializer : KSerializer<Instant> {
  * Serializer für UUID Objekte.
  * Konvertiert UUID zu/von String-Repräsentation.
  */
+@OptIn(ExperimentalUuidApi::class)
 object UuidSerializer : KSerializer<Uuid> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
 
@@ -43,7 +44,7 @@ object UuidSerializer : KSerializer<Uuid> {
     }
 
     override fun deserialize(decoder: Decoder): Uuid {
-        return uuidFrom(decoder.decodeString())
+        return Uuid.parse(decoder.decodeString())
     }
 }
 

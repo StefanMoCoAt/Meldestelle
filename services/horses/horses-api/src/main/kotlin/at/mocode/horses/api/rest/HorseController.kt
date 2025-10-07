@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.horses.api.rest
 
 import at.mocode.core.domain.model.ApiResponse
@@ -8,8 +9,7 @@ import at.mocode.horses.application.usecase.GetHorseUseCase
 import at.mocode.horses.application.usecase.UpdateHorseUseCase
 import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.core.utils.validation.ApiValidationUtils
-import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuidFrom
+import kotlin.uuid.Uuid
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -93,7 +93,7 @@ class HorseController(
             // GET /api/horses/{id} - Get horse by ID
             get("/{id}") {
                 try {
-                    val horseId = uuidFrom(call.parameters["id"]!!)
+                    val horseId = Uuid.parse(call.parameters["id"]!!)
                     val horse = getHorseUseCase.getById(horseId)
 
                     if (horse != null) {
@@ -266,7 +266,7 @@ class HorseController(
             // PUT /api/horses/{id} - Update horse
             put("/{id}") {
                 try {
-                    val horseId = uuidFrom(call.parameters["id"]!!)
+                    val horseId = Uuid.parse(call.parameters["id"]!!)
                     val updateData = call.receive<UpdateHorseRequest>()
 
                     // Validate input using shared validation utilities
@@ -328,7 +328,7 @@ class HorseController(
             // DELETE /api/horses/{id} - Delete horse
             delete("/{id}") {
                 try {
-                    val horseId = uuidFrom(call.parameters["id"]!!)
+                    val horseId = Uuid.parse(call.parameters["id"]!!)
                     val forceDelete = call.request.queryParameters["force"]?.toBoolean() ?: false
 
                     val deleteRequest = DeleteHorseUseCase.DeleteHorseRequest(horseId, forceDelete)
@@ -354,7 +354,7 @@ class HorseController(
             // POST /api/horses/{id}/soft-delete - Soft delete horse (mark as inactive)
             post("/{id}/soft-delete") {
                 try {
-                    val horseId = uuidFrom(call.parameters["id"]!!)
+                    val horseId = Uuid.parse(call.parameters["id"]!!)
                     val response = deleteHorseUseCase.softDelete(horseId)
 
                     if (response.success) {

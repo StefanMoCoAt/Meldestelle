@@ -26,7 +26,7 @@ dependencies {
         api(libs.caffeine)
         api(libs.reactor.kafka)
         api(libs.redisson)
-        api(libs.uuid)
+        // Removed legacy UUID library constraint (com.benasher44:uuid) since project uses Kotlin stdlib UUID
         api(libs.bignum)
         // api(libs.consul.client) wird getauscht mir spring-cloud-starter-consul-discovery
         api(libs.spring.cloud.starter.consul.discovery)

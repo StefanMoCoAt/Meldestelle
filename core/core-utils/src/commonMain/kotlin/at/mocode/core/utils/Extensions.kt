@@ -1,10 +1,11 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.core.utils
 
 import at.mocode.core.domain.model.*
-import com.benasher44.uuid.uuid4
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
-import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 /**
  * Extension-Funktionen für häufig verwendete Operationen im gesamten System.
@@ -15,27 +16,27 @@ import kotlin.time.Clock
 /**
  * Erstellt eine neue EntityId mit einer zufälligen UUID.
  */
-fun EntityId.Companion.random(): EntityId = EntityId(uuid4())
+fun EntityId.Companion.random(): EntityId = EntityId(Uuid.random())
 
 /**
  * Erstellt eine neue EventId mit einer zufälligen UUID.
  */
-fun EventId.Companion.random(): EventId = EventId(uuid4())
+fun EventId.Companion.random(): EventId = EventId(Uuid.random())
 
 /**
  * Erstellt eine neue AggregateId mit einer zufälligen UUID.
  */
-fun AggregateId.Companion.random(): AggregateId = AggregateId(uuid4())
+fun AggregateId.Companion.random(): AggregateId = AggregateId(Uuid.random())
 
 /**
  * Erstellt eine neue CorrelationId mit einer zufälligen UUID.
  */
-fun CorrelationId.Companion.random(): CorrelationId = CorrelationId(uuid4())
+fun CorrelationId.Companion.random(): CorrelationId = CorrelationId(Uuid.random())
 
 /**
  * Erstellt eine neue CausationId mit einer zufälligen UUID.
  */
-fun CausationId.Companion.random(): CausationId = CausationId(uuid4())
+fun CausationId.Companion.random(): CausationId = CausationId(Uuid.random())
 
 // === String Extensions ===
 

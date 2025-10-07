@@ -1,5 +1,14 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+
+/**
+ * Dieses Modul ist der "Host". Es kennt alle Features und die Shared-Module und
+ * setzt sie zu einer lauffähigen Anwendung zusammen.
+ */
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeCompiler)
@@ -8,17 +17,57 @@ plugins {
 }
 
 kotlin {
+    val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
+
+    jvmToolchain(21)
+
     // JVM Target für Desktop
-    jvm()
+    jvm {
+        binaries {
+            executable {
+                mainClass.set("MainKt")
+            }
+        }
+    }
 
     // JavaScript Target für Web
     js(IR) {
         browser {
+            commonWebpackConfig {
+                cssSupport { enabled = true }
+                // Webpack-Mode abhängig von Build-Typ
+                mode = if (project.hasProperty("production"))
+                    KotlinWebpackConfig.Mode.PRODUCTION
+                else
+                    KotlinWebpackConfig.Mode.DEVELOPMENT
+            }
+
             webpackTask {
                 mainOutputFileName = "web-app.js"
+                output.libraryTarget = "commonjs2"
+            }
+
+            // Development Server konfigurieren
+            runTask {
+                mainOutputFileName.set("web-app.js")
+            }
+            // Browser-Tests komplett deaktivieren (Configuration Cache kompatibel)
+            testTask {
+//                enabled = false
+
+                useKarma {
+                    useChromeHeadless()
+                    environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
+                }
             }
         }
         binaries.executable()
+    }
+
+    // WASM, nur wenn explizit aktiviert
+    if (enableWasm) {
+        @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+        wasmJs { browser() }
     }
 
     sourceSets {
@@ -35,6 +84,10 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
+            implementation(compose.materialIconsExtended)
+
+            // ViewModel lifecycle
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
 
             // Coroutines
             implementation(libs.kotlinx.coroutines.core)
@@ -46,12 +99,59 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+            implementation(libs.kotlinx.coroutines.core)
         }
 
         jsMain.dependencies {
             implementation(compose.html.core)
         }
+
+        // WASM SourceSet, nur wenn aktiviert
+        if (enableWasm) {
+            val wasmJsMain = getByName("wasmJsMain")
+            wasmJsMain.dependencies {
+                implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
+
+                // ✅ HINZUFÜGEN: Compose für shared UI components für WASM
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+            }
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
     }
+}
+
+// KMP Compile-Optionen
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xskip-metadata-version-check" // Für bleeding-edge Versionen
+        )
+    }
+}
+
+//// Configure duplicate handling strategy for distribution tasks
+//tasks.withType<Tar> {
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//}
+//
+//tasks.withType<Zip> {
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//}
+
+// Duplicate-Handling für Distribution
+tasks.withType<Copy> {
+    duplicatesStrategy = DuplicatesStrategy.WARN // Statt EXCLUDE
+}
+
+tasks.withType<Sync> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // Desktop Application Configuration
