@@ -9,7 +9,7 @@ agp = "8.1.4"
 # --- Kotlin Ecosystem ---
 kotlin = "2.2.20"
 kotlin-logging = "7.0.3"
-kotlinx = "1.9.0"
+kotlinx = "1.10.2"
 kotlinx-serialization-json = "1.7.3"
 kotlinx-datetime = "0.7.1"
 kotlinx-coroutines = "1.10.2"
@@ -174,9 +174,9 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
-reactor-kafka = { module = "io.projectreactor.kafka:reactor-kafka", version.ref = "reactorKafka" }
-jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
-jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+reactor-kafka = { module = "io.projectreactor.kafka:reactor-kafka" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakartaAnnotation" }
 
 # --- Compose UI ---
@@ -265,7 +265,7 @@ testing-jvm = [
     "junit-jupiter-api",
     "junit-jupiter-engine",
     "junit-jupiter-params",
-    "junit-platform-launcher",  # <- DIESE ABHÄNGIGKEIT FEHLT!
+    "junit-platform-launcher",
     "mockk",
     "assertj-core",
     "kotlinx-coroutines-test"

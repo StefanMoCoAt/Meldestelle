@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.events.application.usecase
 
 import at.mocode.core.domain.model.ApiResponse
@@ -7,7 +8,7 @@ import at.mocode.events.domain.repository.VeranstaltungRepository
 import at.mocode.core.domain.model.SparteE
 import at.mocode.core.domain.model.ValidationResult
 import at.mocode.core.domain.model.ValidationError
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 

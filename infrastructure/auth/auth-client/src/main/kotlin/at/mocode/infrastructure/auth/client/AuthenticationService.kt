@@ -1,8 +1,9 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.infrastructure.auth.client
 
 import at.mocode.infrastructure.auth.client.model.BerechtigungE
-import com.benasher44.uuid.Uuid
 import java.time.LocalDateTime
+import kotlin.uuid.Uuid
 
 /**
  * Service für Benutzerauthentifizierung und Passwortverwaltung.

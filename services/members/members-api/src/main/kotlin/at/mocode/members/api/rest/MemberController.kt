@@ -1,10 +1,11 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.members.api.rest
 
 import at.mocode.core.domain.model.ApiResponse
 import at.mocode.infrastructure.messaging.client.EventPublisher
 import at.mocode.members.application.usecase.*
 import at.mocode.members.domain.repository.MemberRepository
-import com.benasher44.uuid.uuidFrom
+import kotlin.uuid.Uuid
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponses
@@ -166,7 +167,7 @@ class MemberController(
     ): ResponseEntity<ApiResponse<*>> {
         return handleUseCaseExecution(
             operation = {
-                val memberId = uuidFrom(id)
+                val memberId = Uuid.parse(id)
                 val request = GetMemberUseCase.GetMemberRequest(memberId)
                 getMemberUseCase.execute(request)
             },
@@ -287,7 +288,7 @@ class MemberController(
     @PreAuthorize("hasAuthority('PERSON_UPDATE')")
     fun updateMember(@PathVariable id: String, @RequestBody updateRequest: UpdateMemberRequest): ResponseEntity<ApiResponse<*>> {
         return try {
-            val memberId = uuidFrom(id)
+            val memberId = Uuid.parse(id)
             val useCaseRequest = UpdateMemberUseCase.UpdateMemberRequest(
                 memberId = memberId,
                 firstName = updateRequest.firstName,
@@ -395,7 +396,7 @@ class MemberController(
         @RequestParam(required = false) excludeMemberId: String?
     ): ResponseEntity<ApiResponse<*>> {
         return try {
-            val excludeId = excludeMemberId?.let { uuidFrom(it) }
+            val excludeId = excludeMemberId?.let { Uuid.parse(it) }
             val request = ValidateMemberDataUseCase.ValidateEmailRequest(email, excludeId)
             val response = runBlocking { validateMemberDataUseCase.validateEmail(request) }
 

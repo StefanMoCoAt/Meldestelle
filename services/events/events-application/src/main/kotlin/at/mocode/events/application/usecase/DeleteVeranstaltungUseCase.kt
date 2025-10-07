@@ -1,9 +1,10 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.events.application.usecase
 
 import at.mocode.core.domain.model.ApiResponse
 import at.mocode.core.domain.model.ErrorDto
 import at.mocode.events.domain.repository.VeranstaltungRepository
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 
 /**
  * Use case for deleting events (Veranstaltung).

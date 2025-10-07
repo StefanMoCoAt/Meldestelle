@@ -1,7 +1,8 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.events.domain.repository
 
 import at.mocode.events.domain.model.Veranstaltung
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 import kotlinx.datetime.LocalDate
 
 /**

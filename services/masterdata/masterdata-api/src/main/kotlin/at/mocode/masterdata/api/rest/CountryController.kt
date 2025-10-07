@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.api.rest
 
 import at.mocode.core.domain.model.ApiResponse
@@ -5,7 +6,7 @@ import at.mocode.masterdata.application.usecase.CreateCountryUseCase
 import at.mocode.masterdata.application.usecase.GetCountryUseCase
 import at.mocode.masterdata.domain.model.LandDefinition
 import at.mocode.core.utils.validation.ApiValidationUtils
-import com.benasher44.uuid.uuidFrom
+import kotlin.uuid.Uuid
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -111,7 +112,7 @@ class CountryController(
             // GET /api/masterdata/countries/{id} - Get country by ID
             get("/{id}") {
                 try {
-                    val countryId = call.parameters["id"]?.let { uuidFrom(it) }
+                    val countryId = call.parameters["id"]?.let { Uuid.parse(it) }
                         ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<CountryDto>("Invalid country ID"))
 
                     val country = getCountryUseCase.getById(countryId)

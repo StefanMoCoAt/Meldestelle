@@ -1,7 +1,8 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.horses.application.usecase
 
 import at.mocode.horses.domain.repository.HorseRepository
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 
 /**
  * Use case for deleting a horse from the registry.

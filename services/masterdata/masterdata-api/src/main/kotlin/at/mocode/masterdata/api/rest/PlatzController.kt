@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.api.rest
 
 import at.mocode.core.domain.model.ApiResponse
@@ -6,7 +7,7 @@ import at.mocode.masterdata.application.usecase.CreatePlatzUseCase
 import at.mocode.masterdata.application.usecase.GetPlatzUseCase
 import at.mocode.masterdata.domain.model.Platz
 import at.mocode.core.utils.validation.ApiValidationUtils
-import com.benasher44.uuid.uuidFrom
+import kotlin.uuid.Uuid
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -78,7 +79,7 @@ class PlatzController(
             // GET /api/masterdata/plaetze/{id} - Get venue by ID
             get("/{id}") {
                 try {
-                    val platzId = call.parameters["id"]?.let { uuidFrom(it) }
+                    val platzId = call.parameters["id"]?.let { Uuid.parse(it) }
                         ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<PlatzDto>("Invalid venue ID"))
 
                     val platz = getPlatzUseCase.getById(platzId)
@@ -95,7 +96,7 @@ class PlatzController(
             // GET /api/masterdata/plaetze/tournament/{turnierId} - Get venues by tournament
             get("/tournament/{turnierId}") {
                 try {
-                    val turnierId = call.parameters["turnierId"]?.let { uuidFrom(it) }
+                    val turnierId = call.parameters["turnierId"]?.let { Uuid.parse(it) }
                         ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<List<PlatzDto>>("Invalid tournament ID"))
 
                     val activeOnlyParam = call.request.queryParameters["activeOnly"]

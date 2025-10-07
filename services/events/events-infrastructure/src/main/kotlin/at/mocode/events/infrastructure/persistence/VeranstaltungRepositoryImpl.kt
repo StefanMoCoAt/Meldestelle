@@ -1,10 +1,11 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.events.infrastructure.persistence
 
 import at.mocode.core.domain.model.SparteE
 import at.mocode.events.domain.model.Veranstaltung
 import at.mocode.events.domain.repository.VeranstaltungRepository
 import at.mocode.core.utils.database.DatabaseFactory
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json

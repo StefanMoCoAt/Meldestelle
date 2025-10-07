@@ -1,9 +1,9 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.domain.model
 
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
 import at.mocode.core.domain.serialization.UuidSerializer
-import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuid4
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -31,7 +31,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LandDefinition(
     @Serializable(with = UuidSerializer::class)
-    val landId: Uuid = uuid4(),
+    val landId: Uuid = Uuid.random(),
 
     var isoAlpha2Code: String, // z.B. "AT" → Fachlicher PK oder Unique Constraint
     var isoAlpha3Code: String, // z.B. "AUT" -> Unique Constraint

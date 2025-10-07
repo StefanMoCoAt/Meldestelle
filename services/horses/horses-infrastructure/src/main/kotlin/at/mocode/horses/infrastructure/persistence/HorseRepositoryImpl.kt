@@ -1,10 +1,11 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.horses.infrastructure.persistence
 
 import at.mocode.core.domain.model.PferdeGeschlechtE
 import at.mocode.horses.domain.model.DomPferd
 import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.core.utils.database.DatabaseFactory
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq

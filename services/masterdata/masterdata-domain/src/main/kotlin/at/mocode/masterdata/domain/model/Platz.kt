@@ -1,10 +1,10 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.domain.model
 
 import at.mocode.core.domain.model.PlatzTypE
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
 import at.mocode.core.domain.serialization.UuidSerializer
-import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuid4
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
@@ -29,7 +29,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Platz(
     @Serializable(with = UuidSerializer::class)
-    val id: Uuid = uuid4(),
+    val id: Uuid = Uuid.random(),
 
     @Serializable(with = UuidSerializer::class)
     var turnierId: Uuid,

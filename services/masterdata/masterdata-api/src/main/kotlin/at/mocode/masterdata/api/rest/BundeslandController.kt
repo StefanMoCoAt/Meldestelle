@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.api.rest
 
 import at.mocode.core.domain.model.ApiResponse
@@ -5,7 +6,7 @@ import at.mocode.masterdata.application.usecase.CreateBundeslandUseCase
 import at.mocode.masterdata.application.usecase.GetBundeslandUseCase
 import at.mocode.masterdata.domain.model.BundeslandDefinition
 import at.mocode.core.utils.validation.ApiValidationUtils
-import com.benasher44.uuid.uuidFrom
+import kotlin.uuid.Uuid
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -105,7 +106,7 @@ class BundeslandController(
             // GET /api/masterdata/bundeslaender/{id} - Get federal state by ID
             get("/{id}") {
                 try {
-                    val bundeslandId = call.parameters["id"]?.let { uuidFrom(it) }
+                    val bundeslandId = call.parameters["id"]?.let { Uuid.parse(it) }
                         ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<BundeslandDto>("Invalid federal state ID"))
 
                     val bundesland = getBundeslandUseCase.getById(bundeslandId)
@@ -129,7 +130,7 @@ class BundeslandController(
                         ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<BundeslandDto>("Country ID (landId) is required"))
 
                     val landId = try {
-                        uuidFrom(landIdParam)
+                        Uuid.parse(landIdParam)
                     } catch (_: Exception) {
                         return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<BundeslandDto>("Invalid country ID format"))
                     }
@@ -169,7 +170,7 @@ class BundeslandController(
             // GET /api/masterdata/bundeslaender/country/{countryId} - Get federal states by country
             get("/country/{countryId}") {
                 try {
-                    val landId = call.parameters["countryId"]?.let { uuidFrom(it) }
+                    val landId = call.parameters["countryId"]?.let { Uuid.parse(it) }
                         ?: return@get call.respond(HttpStatusCode.BadRequest, ApiResponse.error<List<BundeslandDto>>("Invalid country ID"))
 
                     val activeOnlyParam = call.request.queryParameters["activeOnly"]
@@ -207,7 +208,7 @@ class BundeslandController(
 
                     val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
                     val landIdParam = call.request.queryParameters["landId"]
-                    val landId = landIdParam?.let { uuidFrom(it) }
+                    val landId = landIdParam?.let { Uuid.parse(it) }
 
                     val bundeslaender = getBundeslandUseCase.searchByName(searchTerm, landId, limit)
                     val bundeslandDtos = bundeslaender.map { it.toDto() }

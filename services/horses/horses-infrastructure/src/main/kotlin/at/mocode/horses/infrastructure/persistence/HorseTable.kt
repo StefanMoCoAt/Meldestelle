@@ -2,7 +2,6 @@ package at.mocode.horses.infrastructure.persistence
 
 import at.mocode.core.domain.model.PferdeGeschlechtE
 import at.mocode.core.domain.model.DatenQuelleE
-import com.benasher44.uuid.Uuid
 import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.timestamp

@@ -1,10 +1,10 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.members.domain.model
 
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
 import at.mocode.core.domain.serialization.KotlinLocalDateSerializer
 import at.mocode.core.domain.serialization.UuidSerializer
-import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuid4
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -36,7 +36,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Member(
     @Serializable(with = UuidSerializer::class)
-    val memberId: Uuid = uuid4(),
+    val memberId: Uuid = Uuid.random(),
 
     // Personal Information
     var firstName: String,

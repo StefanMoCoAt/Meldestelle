@@ -1,11 +1,11 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.horses.domain.model
 
 import at.mocode.core.domain.model.PferdeGeschlechtE
 import at.mocode.core.domain.model.DatenQuelleE
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
 import at.mocode.core.domain.serialization.UuidSerializer
-import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuid4
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -47,7 +47,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DomPferd(
     @Serializable(with = UuidSerializer::class)
-    val pferdId: Uuid = uuid4(),
+    val pferdId: Uuid = Uuid.random(),
 
     // Basic Information
     var pferdeName: String,
