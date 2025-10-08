@@ -71,6 +71,9 @@ jakartaAnnotation = "3.0.0"
 roomCommonJvm = "2.7.2"
 uiDesktop = "1.7.0"
 
+# --- Logging ---
+slf4j = "2.0.16"
+
 # --- Gradle Plugins ---
 foojayResolver = "1.0.0"
 
@@ -83,6 +86,7 @@ spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-d
 
 # --- Kotlin & Coroutines ---
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
@@ -174,6 +178,7 @@ keycloak-admin-client = { module = "org.keycloak:keycloak-admin-client", version
 #uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
 #uuid-jvm = { module = "com.benasher44:uuid-jvm", version.ref = "uuid" }
 bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "bignum" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
 kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
@@ -397,6 +402,78 @@ logging = [
     "kotlin-logging-jvm",
     "logback-classic",
     "logback-core"
+]
+
+# --- COMPLETE BUNDLES (Phase 1) ---
+
+# Complete Ktor Server bundle - combines all server bundles for full-featured Ktor services
+ktor-server-complete = [
+    "ktor-server-core",
+    "ktor-server-netty",
+    "ktor-server-contentNegotiation",
+    "ktor-server-serialization-kotlinx-json",
+    "ktor-server-statusPages",
+    "ktor-server-cors",
+    "ktor-server-defaultHeaders",
+    "ktor-server-auth",
+    "ktor-server-authJwt",
+    "ktor-server-callLogging",
+    "ktor-server-metrics-micrometer",
+    "ktor-server-openapi",
+    "ktor-server-swagger",
+    "ktor-server-rateLimit"
+]
+
+# Complete Spring Boot Service bundle - combines all Spring Boot bundles for full-featured services
+spring-boot-service-complete = [
+    "spring-boot-starter-web",
+    "spring-boot-starter-validation",
+    "spring-boot-starter-actuator",
+    "spring-boot-starter-security",
+    "spring-boot-starter-oauth2-client",
+    "spring-boot-starter-oauth2-resource-server",
+    "spring-security-oauth2-jose",
+    "spring-boot-starter-data-jpa",
+    "spring-boot-starter-data-redis",
+    "micrometer-prometheus",
+    "micrometer-tracing-bridge-brave",
+    "zipkin-reporter-brave"
+]
+
+# Complete Database bundle - all database and persistence dependencies
+database-complete = [
+    "exposed-core",
+    "exposed-dao",
+    "exposed-jdbc",
+    "exposed-kotlin-datetime",
+    "postgresql-driver",
+    "hikari-cp",
+    "flyway-core",
+    "flyway-postgresql"
+]
+
+# Complete KMP Testing bundle - comprehensive testing for Kotlin Multiplatform
+testing-kmp = [
+    "kotlin-test",
+    "junit-jupiter-api",
+    "junit-jupiter-engine",
+    "junit-jupiter-params",
+    "junit-platform-launcher",
+    "mockk",
+    "assertj-core",
+    "kotlinx-coroutines-test"
+]
+
+# Complete Monitoring bundle - comprehensive monitoring and observability
+monitoring-complete = [
+    "spring-boot-starter-actuator",
+    "micrometer-prometheus",
+    "micrometer-tracing-bridge-brave",
+    "zipkin-reporter-brave",
+    "zipkin-sender-okhttp3",
+    "kotlin-logging-jvm",
+    "logback-classic",
+    "slf4j-api"
 ]
 
 

@@ -3,76 +3,51 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kotlinSpring)
+    alias(libs.plugins.kotlinJpa)
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependencyManagement)
-}
-
-// Build optimization settings
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
-    }
 }
 
 // Configure the main class for the executable JAR
 springBoot {
     mainClass.set("at.mocode.ping.service.PingServiceApplicationKt")
-    buildInfo()
 }
 
 dependencies {
-    // === Platform Dependencies ===
-    // Ensure all versions come from the central BOM
+    // Platform BOM für zentrale Versionsverwaltung
     implementation(platform(projects.platform.platformBom))
-    // Provide common Kotlin dependencies (coroutines, serialization, logging)
+
+    // Platform und Core Dependencies
     implementation(projects.platform.platformDependencies)
-    // Contract module for type-safe DTOs and API interface
     implementation(projects.services.ping.pingApi)
-    // Monitoring client: tracing + zipkin + defaults
     implementation(projects.infrastructure.monitoring.monitoringClient)
-    // === Core Spring Boot Dependencies ===
-    // Web starter for REST endpoints
-    implementation(libs.spring.boot.starter.web)
-    // Jackson Kotlin module for data classes and Kotlin features
-    implementation(libs.jackson.module.kotlin)
-    // Kotlin reflection for Spring Boot Kotlin serialization
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    // Validation for request/response validation
-    implementation(libs.spring.boot.starter.validation)
-    // Spring Security for method-level authorization
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    // Actuator for health checks and metrics
-    implementation(libs.spring.boot.starter.actuator)
-    // === Service Discovery ===
-    // Spring Cloud Consul for service registration and discovery
+
+    // Spring Boot Service Complete Bundle
+    // Provides: web, validation, actuator, security, oauth2-client, oauth2-resource-server,
+    //           data-jpa, data-redis, micrometer-prometheus, tracing, zipkin
+    implementation(libs.bundles.spring.boot.service.complete)
+
+    // Jackson Kotlin Support Bundle
+    implementation(libs.bundles.jackson.kotlin)
+
+    // Kotlin Reflection (now from version catalog)
+    implementation(libs.kotlin.reflect)
+
+    // Service Discovery
     implementation(libs.spring.cloud.starter.consul.discovery)
-    // === Caching ===
-    // Caffeine cache for Spring Cloud LoadBalancer (resolves production cache warning)
-    implementation("com.github.ben-manes.caffeine:caffeine")
-    implementation("org.springframework:spring-context-support")
-    // === Resilience & Fault Tolerance ===
-    // Resilience4j Circuit Breaker for fault tolerance
-    implementation(libs.resilience4j.spring.boot3)
-    implementation(libs.resilience4j.reactor)
-    implementation(libs.spring.boot.starter.aop)
-    // === Monitoring & Metrics ===
-    // Micrometer for metrics collection and Prometheus integration
-    implementation(libs.micrometer.prometheus)
-    // === Documentation ===
-    // OpenAPI 3 documentation generation
+
+    // Caching (Caffeine for Spring Cloud LoadBalancer)
+    implementation(libs.caffeine)
+    implementation(libs.spring.web) // Provides spring-context-support
+
+    // Resilience4j Bundle (Circuit Breaker, Reactor, AOP)
+    implementation(libs.bundles.resilience)
+
+    // OpenAPI Documentation
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
-    // === Testing Dependencies ===
-    // Platform testing utilities
+
+    // Test Dependencies
     testImplementation(projects.platform.platformTesting)
-    // JVM testing bundle (JUnit, AssertJ, Mockk)
     testImplementation(libs.bundles.testing.jvm)
-    // Spring Boot testing starter
     testImplementation(libs.spring.boot.starter.test)
 }

@@ -1,20 +1,45 @@
 
 plugins {
+    // Version management plugin for dependency updates
+    id("com.github.ben-manes.versions") version "0.51.0"
+
+    // Kotlin plugins declared here with 'apply false' to centralize version management
+    // This prevents "plugin loaded multiple times" errors in Gradle 9.1.0+
+    // Subprojects apply these plugins via version catalog: alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.kotlinSerialization) apply false
+    alias(libs.plugins.kotlinSpring) apply false
+    alias(libs.plugins.kotlinJpa) apply false
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.spring.boot) apply false
     alias(libs.plugins.spring.dependencyManagement) apply false
 }
 
-subprojects {
-    // Wende gemeinsame Einstellungen an
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
-        }
+// ##################################################################
+// ###                  ALLPROJECTS CONFIGURATION                 ###
+// ##################################################################
+
+allprojects {
+    group = "at.mocode"
+    version = "1.0.0-SNAPSHOT"
+
+    // Apply common repository configuration
+    repositories {
+        mavenCentral()
+        google()
+        maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
+        maven { url = uri("https://us-central1-maven.pkg.dev/varabyte-repos/public") }
     }
+}
+
+subprojects {
+    // Note: Kotlin compiler configuration is handled by individual modules
+    // Root project doesn't apply Kotlin plugins, so we can't configure KotlinCompile tasks here
+
     tasks.withType<Test>().configureEach {
         useJUnitPlatform {
             excludeTags("perf")
@@ -100,6 +125,6 @@ tasks.withType<Exec>().configureEach {
 }
 
 tasks.wrapper {
-    gradleVersion = "9.0.0"
+    gradleVersion = "9.1.0"
     distributionType = Wrapper.DistributionType.BIN
 }
