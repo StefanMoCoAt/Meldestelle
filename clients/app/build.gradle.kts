@@ -87,13 +87,10 @@ kotlin {
             implementation(compose.materialIconsExtended)
 
             // ViewModel lifecycle
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.bundles.compose.common)
 
-            // Coroutines
-            implementation(libs.kotlinx.coroutines.core)
-
-            // Serialization
-            implementation(libs.kotlinx.serialization.json)
+            // Coroutines, Serialization, DateTime
+            implementation(libs.bundles.kotlinx.core)
         }
 
         jvmMain.dependencies {

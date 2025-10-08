@@ -71,6 +71,9 @@ jakartaAnnotation = "3.0.0"
 roomCommonJvm = "2.7.2"
 uiDesktop = "1.7.0"
 
+# --- Gradle Plugins ---
+foojayResolver = "1.0.0"
+
 [libraries]
 # --- Platform BOMs (Bill of Materials) ---
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
@@ -114,6 +117,7 @@ ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotia
 ktor-client-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 
 # --- Spring Boot (Versions from spring-boot-dependencies BOM) ---
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
@@ -291,6 +295,110 @@ spring-cloud-gateway = [
     "spring-cloud-starter-consul-discovery"
 ]
 
+# --- NEW BUNDLES ---
+
+# Ktor Server bundles
+ktor-server-common = [
+    "ktor-server-core",
+    "ktor-server-netty",
+    "ktor-server-contentNegotiation",
+    "ktor-server-serialization-kotlinx-json",
+    "ktor-server-statusPages",
+    "ktor-server-cors",
+    "ktor-server-defaultHeaders"
+]
+
+ktor-server-security = [
+    "ktor-server-auth",
+    "ktor-server-authJwt"
+]
+
+ktor-server-observability = [
+    "ktor-server-callLogging",
+    "ktor-server-metrics-micrometer"
+]
+
+ktor-server-docs = [
+    "ktor-server-openapi",
+    "ktor-server-swagger"
+]
+
+# Ktor Client bundles
+ktor-client-common = [
+    "ktor-client-core",
+    "ktor-client-contentNegotiation",
+    "ktor-client-serialization-kotlinx-json",
+    "ktor-client-logging",
+    "ktor-client-auth"
+]
+
+# Spring Boot bundles
+spring-boot-web = [
+    "spring-boot-starter-web",
+    "spring-boot-starter-validation",
+    "spring-boot-starter-actuator"
+]
+
+spring-boot-security = [
+    "spring-boot-starter-security",
+    "spring-boot-starter-oauth2-client",
+    "spring-boot-starter-oauth2-resource-server",
+    "spring-security-oauth2-jose"
+]
+
+spring-boot-data = [
+    "spring-boot-starter-data-jpa",
+    "spring-boot-starter-data-redis"
+]
+
+spring-boot-observability = [
+    "spring-boot-starter-actuator",
+    "micrometer-prometheus",
+    "micrometer-tracing-bridge-brave",
+    "zipkin-reporter-brave"
+]
+
+# Compose bundles
+compose-common = [
+    "androidx-lifecycle-viewmodelCompose",
+    "androidx-lifecycle-runtimeCompose"
+]
+
+# Jackson bundles
+jackson-kotlin = [
+    "jackson-module-kotlin",
+    "jackson-datatype-jsr310"
+]
+
+# Kotlinx bundles
+kotlinx-core = [
+    "kotlinx-coroutines-core",
+    "kotlinx-serialization-json",
+    "kotlinx-datetime"
+]
+
+# Persistence bundles
+persistence-postgres = [
+    "exposed-core",
+    "exposed-dao",
+    "exposed-jdbc",
+    "postgresql-driver"
+]
+
+# Resilience bundles
+resilience = [
+    "resilience4j-spring-boot3",
+    "resilience4j-reactor",
+    "spring-boot-starter-aop"
+]
+
+# Logging bundles
+logging = [
+    "kotlin-logging-jvm",
+    "logback-classic",
+    "logback-core"
+]
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -308,3 +416,5 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 
 spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
 spring-dependencyManagement = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
+
+foojayResolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "foojayResolver" }

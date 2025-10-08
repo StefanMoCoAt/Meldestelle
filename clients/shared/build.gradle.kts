@@ -35,11 +35,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Coroutines für asynchrone Programmierung
-            implementation(libs.kotlinx.coroutines.core)
-
-            // Serialization für JSON
-            implementation(libs.kotlinx.serialization.json)
+            // Kotlinx core dependencies (coroutines, serialization, datetime)
+            implementation(libs.bundles.kotlinx.core)
 
             // HTTP Client
 //            implementation(libs.ktor.client.core)
@@ -47,9 +44,6 @@ kotlin {
 //            implementation(libs.ktor.client.serialization.kotlinx.json)
 //            implementation(libs.ktor.client.logging)
 //            implementation(libs.ktor.client.auth)
-
-            // DateTime
-            implementation(libs.kotlinx.datetime)
 
         }
 
