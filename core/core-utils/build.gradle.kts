@@ -2,6 +2,7 @@
 // wie z.B. Konfigurations-Management, Datenbank-Verbindungen und Service Discovery.
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -23,9 +24,16 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings.optIn("kotlin.uuid.ExperimentalUuidApi")
+        }
+
         commonMain.dependencies {
-            // Dependency on core-domain module to use its types
+            // Domain models and types (core-utils depends on core-domain, not vice versa)
             api(projects.core.coreDomain)
+
+            api(libs.kotlinx.serialization.json)
+            api(libs.kotlinx.datetime)
             // Async support (available for all platforms)
             api(libs.kotlinx.coroutines.core)
             // Utilities (multiplatform compatible)

@@ -2,10 +2,10 @@ package at.mocode.core.domain
 
 import at.mocode.core.domain.event.BaseDomainEvent
 import at.mocode.core.domain.model.*
-import com.benasher44.uuid.uuid4
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.uuid.Uuid
 
 @OptIn(kotlin.time.ExperimentalTime::class)
 class BaseDomainEventTest {
@@ -27,7 +27,7 @@ class BaseDomainEventTest {
 
     @Test
     fun `secondary constructor generates id and timestamp`() {
-        val aggId = AggregateId(uuid4())
+        val aggId = AggregateId(Uuid.random())
         val ev = object : BaseDomainEvent(
             aggregateId = aggId,
             eventType = EventType("TestEvent"),
@@ -43,8 +43,8 @@ class BaseDomainEventTest {
 
     @Test
     fun `primary constructor uses provided id and timestamp`() {
-        val aggId = AggregateId(uuid4())
-        val eid = EventId(uuid4())
+        val aggId = AggregateId(Uuid.random())
+        val eid = EventId(Uuid.random())
         val ts = kotlin.time.Instant.parse("2025-01-01T00:00:00Z")
         val base = object : BaseDomainEvent(
             aggregateId = aggId,
@@ -52,8 +52,8 @@ class BaseDomainEventTest {
             version = EventVersion(2),
             eventId = eid,
             timestamp = ts,
-            correlationId = CorrelationId(uuid4()),
-            causationId = CausationId(uuid4())
+            correlationId = CorrelationId(Uuid.random()),
+            causationId = CausationId(Uuid.random())
         ) {}
 
         assertEquals(eid, base.eventId)

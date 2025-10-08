@@ -1,6 +1,7 @@
-@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class, ExperimentalWasmDsl::class)
 
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /**
@@ -35,6 +36,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+
+            api(projects.core.coreUtils)
+            api(projects.core.coreDomain)
+
             // Kotlinx core dependencies (coroutines, serialization, datetime)
             implementation(libs.bundles.kotlinx.core)
 
@@ -52,8 +57,8 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
 
-        jsMain.dependencies {
-            implementation(libs.ktor.client.js)
+        jvmMain.dependencies {
+            implementation(libs.ktor.client.cio)
 
             // Compose für shared UI components
             implementation(compose.runtime)
@@ -61,8 +66,8 @@ kotlin {
             implementation(compose.material3)
         }
 
-        jvmMain.dependencies {
-            implementation(libs.ktor.client.cio)
+        jsMain.dependencies {
+            implementation(libs.ktor.client.js)
 
             // Compose für shared UI components
             implementation(compose.runtime)

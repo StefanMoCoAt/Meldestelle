@@ -1,13 +1,13 @@
 package at.mocode.core.domain
 
 import at.mocode.core.domain.serialization.*
-import com.benasher44.uuid.uuid4
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.uuid.Uuid
 
 @OptIn(kotlin.time.ExperimentalTime::class)
 class SerializersTest {
@@ -22,7 +22,7 @@ class SerializersTest {
 
     @Test
     fun `UUID roundtrip`() {
-        val uuid = uuid4()
+        val uuid = Uuid.random()
         val json = Json.encodeToString(UuidSerializer, uuid)
         val decoded = Json.decodeFromString(UuidSerializer, json)
         assertEquals(uuid, decoded)

@@ -28,8 +28,8 @@ kotlin {
 
         commonMain.dependencies {
             // Core dependencies (that aren't included in platform-dependencies)
-            api(projects.core.coreUtils)
-            api(projects.core.coreDomain)
+            // Note: core-domain should NOT depend on core-utils to avoid circular dependencies
+            // core-utils depends on core-domain, not the other way around
 
             // Serialization and date-time for commonMain
             api(libs.kotlinx.serialization.json)
