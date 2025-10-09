@@ -32,14 +32,14 @@ import org.springframework.web.bind.annotation.*
         // Disable circuit breaker for JWT tests
         "resilience4j.circuitbreaker.configs.default.registerHealthIndicator=false",
         "management.health.circuitbreakers.enabled=false",
-        // Disable Redis health indicator for tests (no Redis in test environment)
+        // Disable Redis health indicator for tests (no Redis in the test environment)
         "management.health.redis.enabled=false",
         // Enable JWT authentication for testing
         "gateway.security.jwt.enabled=true",
         // Use reactive web application type
         "spring.main.web-application-type=reactive",
         // Disable gateway discovery - use explicit routes
-        "spring.cloud.gateway.discovery.locator.enabled=false",
+        "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false",
         // Disable actuator security
         "management.security.enabled=false",
         // Set random port
@@ -129,7 +129,7 @@ class JwtAuthenticationTests {
     @Test
     fun `should extract admin role from JWT token`() {
         // Generate a real JWT token using the JwtService with admin-level permissions
-        // Using DELETE permissions which map to ADMIN role according to determineRoleFromPermissions logic
+        // Using DELETE permissions which map to an ADMIN role according to determineRoleFromPermissions logic
         val adminToken = jwtService.generateToken(
             userId = "admin-user-123",
             username = "adminuser",
