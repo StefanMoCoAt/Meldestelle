@@ -44,11 +44,11 @@ kotlin {
             implementation(libs.bundles.kotlinx.core)
 
             // HTTP Client
-//            implementation(libs.ktor.client.core)
-//            implementation(libs.ktor.client.contentNegotiation)
-//            implementation(libs.ktor.client.serialization.kotlinx.json)
-//            implementation(libs.ktor.client.logging)
-//            implementation(libs.ktor.client.auth)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.contentNegotiation)
+            implementation(libs.ktor.client.serialization.kotlinx.json)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.auth)
 
         }
 

@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.members.application.usecase
 
 import at.mocode.core.domain.model.ApiResponse
@@ -8,7 +9,7 @@ import at.mocode.members.domain.events.MemberCreatedEvent
 import at.mocode.infrastructure.messaging.client.EventPublisher
 import at.mocode.core.domain.model.ValidationResult
 import at.mocode.core.domain.model.ValidationError
-import com.benasher44.uuid.uuid4
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 
@@ -129,7 +130,7 @@ class CreateMemberUseCase(
             // Publish member created event
             try {
                 val event = MemberCreatedEvent(
-                    eventId = uuid4().toString(),
+                    eventId = Uuid.random().toString(),
                     memberId = savedMember.memberId,
                     timestamp = Clock.System.now(),
                     firstName = savedMember.firstName,

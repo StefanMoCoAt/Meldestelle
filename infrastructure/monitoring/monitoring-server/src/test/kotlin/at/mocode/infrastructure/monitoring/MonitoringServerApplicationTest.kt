@@ -11,7 +11,7 @@ import org.springframework.context.ApplicationContext
  * erfolgreich geladen werden kann.
  *
  * Mit der Armeria Auto-Configuration Ausschluss-Konfiguration sollte der Context erfolgreich laden.
- * Verwendet RANDOM_PORT um Konflikte mit bootRun-Tasks zu vermeiden.
+ * Verwendet RANDOM_PORT, um Konflikte mit bootRun-Tasks zu vermeiden.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MonitoringServerApplicationTest {

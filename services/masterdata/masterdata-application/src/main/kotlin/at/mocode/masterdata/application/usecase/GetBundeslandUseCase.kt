@@ -1,8 +1,9 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.application.usecase
 
 import at.mocode.masterdata.domain.model.BundeslandDefinition
 import at.mocode.masterdata.domain.repository.BundeslandRepository
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 
 /**
  * Use case for retrieving federal state information.

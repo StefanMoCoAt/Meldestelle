@@ -1,9 +1,10 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.horses.service.integration
 
 import at.mocode.horses.application.usecase.TransactionalCreateHorseUseCase
 import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.core.domain.model.PferdeGeschlechtE
-import com.benasher44.uuid.uuid4
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.*
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Test
@@ -54,7 +55,7 @@ class TransactionalContextTest {
         val chipNummer = "TRANS-CHIP-001"
 
         // Create two identical horse creation requests
-        val ownerId = uuid4()
+        val ownerId = Uuid.random()
         val request1 = TransactionalCreateHorseUseCase.CreateHorseRequest(
             pferdeName = "Transactional Race Horse 1",
             geschlecht = PferdeGeschlechtE.WALLACH,
@@ -131,7 +132,7 @@ class TransactionalContextTest {
             geschlecht = PferdeGeschlechtE.HENGST,
             lebensnummer = "VALIDATION-TEST-001",
             stockmass = 300, // Invalid height should fail validation
-            besitzerId = uuid4() // Add owner to pass basic validation
+            besitzerId = Uuid.random() // Add owner to pass basic validation
         )
 
         println("[DEBUG_LOG] Executing transactional create with invalid data")
@@ -162,7 +163,7 @@ class TransactionalContextTest {
             chipNummer = "SUCCESS-CHIP-001",
             rasse = "Warmblut",
             stockmass = 165,
-            besitzerId = uuid4() // Add required owner
+            besitzerId = Uuid.random() // Add required owner
         )
 
         println("[DEBUG_LOG] Executing transactional create with valid data")

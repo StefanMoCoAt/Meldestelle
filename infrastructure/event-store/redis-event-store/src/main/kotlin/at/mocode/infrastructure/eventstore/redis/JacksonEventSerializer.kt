@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.DomainEvent
@@ -7,8 +9,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.kotlinModule
 import org.slf4j.LoggerFactory
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.uuid.Uuid
 
 /**
  * Jackson-basierte Implementierung des EventSerializer.
@@ -77,16 +79,16 @@ class JacksonEventSerializer : EventSerializer {
         logger.debug("Registered event type: {} for class: {}", eventType, eventClass.name)
     }
 
-    override fun getAggregateId(data: Map<String, String>): UUID {
+    override fun getAggregateId(data: Map<String, String>): Uuid {
         val aggregateIdStr = data[AGGREGATE_ID_FIELD]
             ?: throw IllegalArgumentException("Aggregate ID is missing")
-        return UUID.fromString(aggregateIdStr)
+        return Uuid.parse(aggregateIdStr)
     }
 
-    override fun getEventId(data: Map<String, String>): UUID {
+    override fun getEventId(data: Map<String, String>): Uuid {
         val eventIdStr = data[EVENT_ID_FIELD]
             ?: throw IllegalArgumentException("Event ID is missing")
-        return UUID.fromString(eventIdStr)
+        return Uuid.parse(eventIdStr)
     }
 
     override fun getVersion(data: Map<String, String>): Long {

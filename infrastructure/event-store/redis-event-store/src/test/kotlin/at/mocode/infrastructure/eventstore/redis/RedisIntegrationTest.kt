@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.BaseDomainEvent
@@ -7,7 +8,6 @@ import at.mocode.core.domain.model.EventType
 import at.mocode.core.domain.model.EventVersion
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
-import com.benasher44.uuid.uuid4
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.junit.jupiter.api.AfterEach
@@ -21,6 +21,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
+import kotlin.uuid.Uuid
 
 @Testcontainers
 class RedisIntegrationTest {
@@ -79,7 +80,7 @@ class RedisIntegrationTest {
 
     @Test
     fun `event publishing and consuming should be fast and reliable`() {
-        val aggregateId = uuid4()
+        val aggregateId = Uuid.random()
         val event1 = TestCreatedEvent(AggregateId(aggregateId), EventVersion(1L), "Test Entity")
         val event2 = TestUpdatedEvent(AggregateId(aggregateId), EventVersion(2L), "Updated Test Entity")
 
@@ -104,14 +105,14 @@ class RedisIntegrationTest {
 
     @Serializable
     data class TestCreatedEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(uuid4()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val name: String
     ) : BaseDomainEvent(aggregateId, EventType("TestCreated"), version)
 
     @Serializable
     data class TestUpdatedEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(uuid4()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val name: String
     ) : BaseDomainEvent(aggregateId, EventType("TestUpdated"), version)

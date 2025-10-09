@@ -1,7 +1,9 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package at.mocode.infrastructure.eventstore.api
 
 import at.mocode.core.domain.event.DomainEvent
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 /**
  * Schnittstelle für die Serialisierung und Deserialisierung von Domain-Events.
@@ -56,7 +58,7 @@ interface EventSerializer {
      * @param data Die serialisierten Event-Daten
      * @return Die Aggregat-ID
      */
-    fun getAggregateId(data: Map<String, String>): UUID
+    fun getAggregateId(data: Map<String, String>): Uuid
 
     /**
      * Ermittelt die Event-ID aus einem serialisierten Event.
@@ -64,7 +66,7 @@ interface EventSerializer {
      * @param data Die serialisierten Event-Daten
      * @return Die Event-ID
      */
-    fun getEventId(data: Map<String, String>): UUID
+    fun getEventId(data: Map<String, String>): Uuid
 
     /**
      * Ermittelt die Version aus einem serialisierten Event.

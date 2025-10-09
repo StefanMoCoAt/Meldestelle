@@ -1,10 +1,11 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.members.application.usecase
 
 import at.mocode.core.domain.model.ApiResponse
 import at.mocode.core.domain.model.ErrorDto
 import at.mocode.members.domain.model.Member
 import at.mocode.members.domain.repository.MemberRepository
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 
 /**
  * Use case for retrieving members.

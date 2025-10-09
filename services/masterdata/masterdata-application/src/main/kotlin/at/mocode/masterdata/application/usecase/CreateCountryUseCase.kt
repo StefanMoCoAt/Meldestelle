@@ -1,10 +1,11 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.application.usecase
 
 import at.mocode.masterdata.domain.model.LandDefinition
 import at.mocode.masterdata.domain.repository.LandRepository
 import at.mocode.core.domain.model.ValidationResult
 import at.mocode.core.domain.model.ValidationError
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 
 /**

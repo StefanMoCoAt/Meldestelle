@@ -1,9 +1,10 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.application.usecase
 
 import at.mocode.core.domain.model.PlatzTypE
 import at.mocode.masterdata.domain.model.Platz
 import at.mocode.masterdata.domain.repository.PlatzRepository
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 
 /**
  * Use case for retrieving venue/arena information.

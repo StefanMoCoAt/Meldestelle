@@ -10,6 +10,8 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.time.Clock
 import kotlin.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * Tests for JacksonEventSerializer - Critical for data integrity.
@@ -26,10 +28,11 @@ class JacksonEventSerializerTest {
         serializer.registerEventType(SimpleTestEvent::class.java, "SimpleTestEvent")
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     @Test
     fun `should serialize and deserialize simple event correctly`() {
-        val aggregateId = UUID.randomUUID()
-        val eventId = UUID.randomUUID()
+        val aggregateId: Uuid = UUID.randomUUID()
+        val eventId: UUID? = UUID.randomUUID()
         val timestamp = Clock.System.now()
 
         val event = SimpleTestEvent(

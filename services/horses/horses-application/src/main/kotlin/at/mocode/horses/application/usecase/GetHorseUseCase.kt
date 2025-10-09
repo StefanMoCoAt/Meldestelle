@@ -1,9 +1,10 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.horses.application.usecase
 
 import at.mocode.horses.domain.model.DomPferd
 import at.mocode.horses.domain.repository.HorseRepository
 import at.mocode.core.domain.model.PferdeGeschlechtE
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 import kotlinx.datetime.todayIn
 
 /**

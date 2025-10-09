@@ -1,9 +1,10 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.members.infrastructure.persistence
 
 import at.mocode.core.utils.database.DatabaseFactory
 import at.mocode.members.domain.model.Member
 import at.mocode.members.domain.repository.MemberRepository
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone

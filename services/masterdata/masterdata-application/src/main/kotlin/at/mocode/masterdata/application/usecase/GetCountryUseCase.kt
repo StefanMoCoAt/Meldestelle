@@ -1,8 +1,9 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.application.usecase
 
 import at.mocode.masterdata.domain.model.LandDefinition
 import at.mocode.masterdata.domain.repository.LandRepository
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 
 /**
  * Use case for retrieving country information.

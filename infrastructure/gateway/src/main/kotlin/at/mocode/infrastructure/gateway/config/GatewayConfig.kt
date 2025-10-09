@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package at.mocode.infrastructure.gateway.config
 
 import org.slf4j.LoggerFactory
@@ -10,8 +12,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.uuid.Uuid
 
 /**
  * Gateway-Konfiguration für erweiterte Funktionalitäten wie Logging, Rate Limiting und Security.
@@ -30,7 +32,7 @@ class CorrelationIdFilter : GlobalFilter, Ordered {
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
         val request = exchange.request
         val correlationId = request.headers.getFirst(CORRELATION_ID_HEADER)
-            ?: UUID.randomUUID().toString()
+            ?: Uuid.random().toString()
 
         val mutatedRequest = request.mutate()
             .header(CORRELATION_ID_HEADER, correlationId)

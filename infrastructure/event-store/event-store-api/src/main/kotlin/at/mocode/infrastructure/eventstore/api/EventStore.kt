@@ -1,7 +1,9 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package at.mocode.infrastructure.eventstore.api
 
 import at.mocode.core.domain.event.DomainEvent
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 /**
  * Schnittstelle für einen Event Store, der Domain-Events persistiert.
@@ -16,7 +18,7 @@ interface EventStore {
      * @return Die neue Version des Streams
      * @throws ConcurrencyException wenn die erwartete Version nicht mit der tatsächlichen Version übereinstimmt
      */
-    fun appendToStream(event: DomainEvent, streamId: UUID, expectedVersion: Long): Long
+    fun appendToStream(event: DomainEvent, streamId: Uuid, expectedVersion: Long): Long
 
     /**
      * Fügt mehrere Events zum Event Store hinzu.
@@ -27,7 +29,7 @@ interface EventStore {
      * @return Die neue Version des Streams
      * @throws ConcurrencyException wenn die erwartete Version nicht mit der tatsächlichen Version übereinstimmt
      */
-    fun appendToStream(events: List<DomainEvent>, streamId: UUID, expectedVersion: Long): Long
+    fun appendToStream(events: List<DomainEvent>, streamId: Uuid, expectedVersion: Long): Long
 
     /**
      * Liest Events aus einem Stream.
@@ -37,7 +39,7 @@ interface EventStore {
      * @param toVersion Die Version, bis zu der gelesen werden soll (inklusive), oder null um alle Events zu lesen
      * @return Die Events im Stream
      */
-    fun readFromStream(streamId: UUID, fromVersion: Long = 0, toVersion: Long? = null): List<DomainEvent>
+    fun readFromStream(streamId: Uuid, fromVersion: Long = 0, toVersion: Long? = null): List<DomainEvent>
 
     /**
      * Liest alle Events aus allen Streams.
@@ -54,7 +56,7 @@ interface EventStore {
      * @param streamId Die ID des Event-Streams
      * @return Die aktuelle Version des Streams, oder -1 wenn der Stream nicht existiert
      */
-    fun getStreamVersion(streamId: UUID): Long
+    fun getStreamVersion(streamId: Uuid): Long
 
     /**
      * Abonniert Events von einem spezifischen Stream.
@@ -64,7 +66,7 @@ interface EventStore {
      * @param handler Der Handler, der für jedes Event aufgerufen wird
      * @return Ein Abonnement, das zum Abbestellen verwendet werden kann
      */
-    fun subscribeToStream(streamId: UUID, fromVersion: Long = 0, handler: (DomainEvent) -> Unit): Subscription
+    fun subscribeToStream(streamId: Uuid, fromVersion: Long = 0, handler: (DomainEvent) -> Unit): Subscription
 
     /**
      * Abonniert alle Events von allen Streams.

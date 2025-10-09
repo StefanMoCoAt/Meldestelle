@@ -1,7 +1,8 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.masterdata.domain.repository
 
 import at.mocode.masterdata.domain.model.LandDefinition
-import com.benasher44.uuid.Uuid
+import kotlin.uuid.Uuid
 
 /**
  * Repository interface for LandDefinition (Country) domain operations.

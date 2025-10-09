@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.DomainEvent
@@ -11,8 +13,8 @@ import org.springframework.dao.DataAccessException
 import org.springframework.data.domain.Range
 import org.springframework.data.redis.core.SessionCallback
 import org.springframework.data.redis.core.StringRedisTemplate
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.uuid.Uuid
 
 class RedisEventStore(
     private val redisTemplate: StringRedisTemplate,
@@ -20,10 +22,10 @@ class RedisEventStore(
     private val properties: RedisEventStoreProperties
 ) : EventStore {
     private val logger = LoggerFactory.getLogger(RedisEventStore::class.java)
-    private val streamVersionCache = ConcurrentHashMap<UUID, Long>()
+    private val streamVersionCache = ConcurrentHashMap<Uuid, Long>()
     private val metrics = EventStoreMetrics()
 
-    override fun appendToStream(events: List<DomainEvent>, streamId: UUID, expectedVersion: Long): Long {
+    override fun appendToStream(events: List<DomainEvent>, streamId: Uuid, expectedVersion: Long): Long {
         val operationId = "batch-append-${System.nanoTime()}"
         metrics.startOperation(operationId)
 
@@ -62,7 +64,7 @@ class RedisEventStore(
         }
     }
 
-    override fun appendToStream(event: DomainEvent, streamId: UUID, expectedVersion: Long): Long {
+    override fun appendToStream(event: DomainEvent, streamId: Uuid, expectedVersion: Long): Long {
         val operationId = "single-append-${System.nanoTime()}"
         metrics.startOperation(operationId)
 
@@ -88,7 +90,7 @@ class RedisEventStore(
     /**
      * Validiert die erwartete Version und gibt die aktuelle Version zurück, behandelt Cache-Invalidierung bei Konflikten.
      */
-    private fun validateAndGetCurrentVersion(streamId: UUID, expectedVersion: Long): Long {
+    private fun validateAndGetCurrentVersion(streamId: Uuid, expectedVersion: Long): Long {
         var currentVersion = getStreamVersion(streamId)
 
         if (currentVersion != expectedVersion) {
@@ -107,7 +109,7 @@ class RedisEventStore(
     /**
      * Fügt mehrere Events in einer einzigen Redis-Transaktion hinzu für optimale Performance.
      */
-    private fun appendEventsInBatch(events: List<DomainEvent>, streamId: UUID, currentVersion: Long): Long {
+    private fun appendEventsInBatch(events: List<DomainEvent>, streamId: Uuid, currentVersion: Long): Long {
         val streamKey = getStreamKey(streamId)
         val allEventsStreamKey = getAllEventsStreamKey()
 
@@ -152,7 +154,7 @@ class RedisEventStore(
         }
     }
 
-    private fun appendToStreamInternal(event: DomainEvent, streamId: UUID, currentVersion: Long): Long {
+    private fun appendToStreamInternal(event: DomainEvent, streamId: Uuid, currentVersion: Long): Long {
         val newVersion = currentVersion + 1
         require(event.version.value == newVersion) {
             "Event version ${event.version.value} does not match expected new version $newVersion for stream $streamId"
@@ -188,7 +190,7 @@ class RedisEventStore(
         }
     }
 
-    override fun readFromStream(streamId: UUID, fromVersion: Long, toVersion: Long?): List<DomainEvent> {
+    override fun readFromStream(streamId: Uuid, fromVersion: Long, toVersion: Long?): List<DomainEvent> {
         val operationId = "read-stream-${System.nanoTime()}"
         metrics.startOperation(operationId)
 
@@ -217,7 +219,7 @@ class RedisEventStore(
         }
     }
 
-    override fun getStreamVersion(streamId: UUID): Long {
+    override fun getStreamVersion(streamId: Uuid): Long {
         streamVersionCache[streamId]?.let {
             metrics.recordCacheHit()
             return it
@@ -230,7 +232,7 @@ class RedisEventStore(
         return size
     }
 
-    private fun getStreamKey(streamId: UUID): String {
+    private fun getStreamKey(streamId: Uuid): String {
         return "${properties.streamPrefix}$streamId"
     }
 
@@ -272,7 +274,7 @@ class RedisEventStore(
         }
     }
 
-    override fun subscribeToStream(streamId: UUID, fromVersion: Long, handler: (DomainEvent) -> Unit): Subscription {
+    override fun subscribeToStream(streamId: Uuid, fromVersion: Long, handler: (DomainEvent) -> Unit): Subscription {
         // Basic implementation - for full functionality, integrate with RedisEventConsumer
         logger.info("Stream subscription for streamId {} from version {} - basic implementation", streamId, fromVersion)
         metrics.recordSubscription()

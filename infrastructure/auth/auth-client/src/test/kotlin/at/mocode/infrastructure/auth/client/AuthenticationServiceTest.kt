@@ -1,7 +1,9 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class) // <-- HINZUGEFÜGT: Für die neue Kotlin UUID API
+
 package at.mocode.infrastructure.auth.client
 
+// import com.benasher44.uuid.uuid4 // <-- ENTFERNT: Alter Import
 import at.mocode.infrastructure.auth.client.model.BerechtigungE
-import com.benasher44.uuid.uuid4
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import kotlin.uuid.Uuid
 
 /**
  * Tests for the AuthenticationService interface using mocks.
@@ -17,8 +20,8 @@ import java.time.LocalDateTime
 class AuthenticationServiceTest {
 
     private lateinit var authService: AuthenticationService
-    private val testUserId = uuid4()
-    private val testPersonId = uuid4()
+    private val testUserId = Uuid.random() // <-- GEÄNDERT: von uuid4() zu Uuid.random()
+    private val testPersonId = Uuid.random() // <-- GEÄNDERT: von uuid4() zu Uuid.random()
 
     @BeforeEach
     fun setUp() {
@@ -206,7 +209,7 @@ class AuthenticationServiceTest {
     @Test
     fun `changePassword should handle user not found scenario`() = runTest {
         // Arrange
-        val nonExistentUserId = uuid4()
+        val nonExistentUserId = Uuid.random() // <-- GEÄNDERT: von uuid4() zu Uuid.random()
         val currentPassword = "password"
         val newPassword = "newpassword123"
 
@@ -282,6 +285,8 @@ class AuthenticationServiceTest {
                 assertNotNull(successResult.token)
                 assertNotNull(successResult.user)
             }
+
+            else -> fail("Should have been a Success result")
         }
 
         // Test Failure result
@@ -289,6 +294,8 @@ class AuthenticationServiceTest {
             is AuthenticationService.AuthResult.Failure -> {
                 assertEquals("Failed", failureResult.reason)
             }
+
+            else -> fail("Should have been a Failure result")
         }
 
         // Test Locked result
@@ -296,6 +303,8 @@ class AuthenticationServiceTest {
             is AuthenticationService.AuthResult.Locked -> {
                 assertNotNull(lockedResult.lockedUntil)
             }
+
+            else -> fail("Should have been a Locked result")
         }
     }
 
@@ -312,6 +321,8 @@ class AuthenticationServiceTest {
             is AuthenticationService.PasswordChangeResult.Success -> {
                 // Success case verified
             }
+
+            else -> fail("Should have been a Success result")
         }
 
         // Test Failure result
@@ -319,6 +330,8 @@ class AuthenticationServiceTest {
             is AuthenticationService.PasswordChangeResult.Failure -> {
                 assertEquals("Failed", failureResult.reason)
             }
+
+            else -> fail("Should have been a Failure result")
         }
 
         // Test WeakPassword result
@@ -326,6 +339,8 @@ class AuthenticationServiceTest {
             is AuthenticationService.PasswordChangeResult.WeakPassword -> {
                 // WeakPassword case verified
             }
+
+            else -> fail("Should have been a WeakPassword result")
         }
     }
 }

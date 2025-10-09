@@ -26,7 +26,7 @@ interface AuthenticationService {
      * @param newPassword Das neue Passwort
      * @return Das Ergebnis der Passwortänderung
      */
-    suspend fun changePassword(userId: Uuid, currentPassword: String, newPassword: String): PasswordChangeResult
+    suspend fun changePassword(userId: Uuid?, currentPassword: String, newPassword: String): PasswordChangeResult
 
     /**
      * Mögliche Ergebnisse eines Authentifizierungsversuchs.
@@ -81,8 +81,8 @@ interface AuthenticationService {
      * Represents an authenticated user.
      */
     data class AuthenticatedUser(
-        val userId: Uuid,
-        val personId: Uuid,
+        val userId: Uuid?,
+        val personId: Uuid?,
         val username: String,
         val email: String,
         val permissions: List<BerechtigungE>

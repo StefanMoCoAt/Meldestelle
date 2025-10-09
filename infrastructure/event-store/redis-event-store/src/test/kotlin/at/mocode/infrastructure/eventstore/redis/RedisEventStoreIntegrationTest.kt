@@ -1,3 +1,4 @@
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 package at.mocode.infrastructure.eventstore.redis
 
 import at.mocode.core.domain.event.BaseDomainEvent
@@ -5,7 +6,6 @@ import at.mocode.core.domain.event.DomainEvent
 import at.mocode.core.domain.model.*
 import at.mocode.infrastructure.eventstore.api.EventSerializer
 import at.mocode.infrastructure.eventstore.api.EventStore
-import com.benasher44.uuid.uuid4
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Clock
 import kotlin.time.Instant
+import kotlin.uuid.Uuid
 
 @Testcontainers
 class RedisEventStoreIntegrationTest {
@@ -84,7 +85,7 @@ class RedisEventStoreIntegrationTest {
 
     @Test
     fun `event publishing and consuming with consumer groups should work`() {
-        val aggregateId = uuid4()
+        val aggregateId = Uuid.random()
         val event1 = TestCreatedEvent(aggregateId = AggregateId(aggregateId), version = EventVersion(1L), name = "Test Entity")
         val event2 = TestUpdatedEvent(aggregateId = AggregateId(aggregateId), version = EventVersion(2L), name = "Updated Test Entity")
 
@@ -126,7 +127,7 @@ class RedisEventStoreIntegrationTest {
         override val version: EventVersion,
         val name: String,
         override val eventType: EventType = EventType("TestCreated"),
-        override val eventId: EventId = EventId(uuid4()),
+        override val eventId: EventId = EventId(Uuid.random()),
         override val timestamp: Instant = Clock.System.now(),
         override val correlationId: CorrelationId? = null,
         override val causationId: CausationId? = null
@@ -137,7 +138,7 @@ class RedisEventStoreIntegrationTest {
         override val version: EventVersion,
         val name: String,
         override val eventType: EventType = EventType("TestUpdated"),
-        override val eventId: EventId = EventId(uuid4()),
+        override val eventId: EventId = EventId(Uuid.random()),
         override val timestamp: Instant = Clock.System.now(),
         override val correlationId: CorrelationId? = null,
         override val causationId: CausationId? = null
