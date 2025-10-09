@@ -19,7 +19,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.util.*
+import kotlin.uuid.Uuid
 
 /**
  * Stream-specific tests for RedisEventStore - Core functionality validation.
@@ -75,7 +75,7 @@ class RedisEventStoreStreamTest {
 
     @Test
     fun `readFromStream should respect fromVersion and toVersion parameters`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val events = (1..10).map { i ->
             StreamTestEvent(
                 aggregateId = AggregateId(aggregateId),
@@ -111,8 +111,8 @@ class RedisEventStoreStreamTest {
 
     @Test
     fun `readAllEvents should handle pagination correctly`() {
-        val aggregateId1 = UUID.randomUUID()
-        val aggregateId2 = UUID.randomUUID()
+        val aggregateId1 = Uuid.random()
+        val aggregateId2 = Uuid.random()
 
         val events1 = (1..5).map { i ->
             StreamTestEvent(
@@ -157,14 +157,14 @@ class RedisEventStoreStreamTest {
 
     @Test
     fun `getStreamVersion should return -1 for non-existent streams`() {
-        val nonExistentStreamId = UUID.randomUUID()
+        val nonExistentStreamId = Uuid.random()
         val version = eventStore.getStreamVersion(nonExistentStreamId)
         assertEquals(0L, version) // Redis streams return 0 for non-existent streams, not -1
     }
 
     @Test
     fun `should handle empty streams correctly`() {
-        val emptyStreamId = UUID.randomUUID()
+        val emptyStreamId = Uuid.random()
 
         // Reading from an empty stream should return an empty list
         val emptyEvents = eventStore.readFromStream(emptyStreamId)
@@ -181,7 +181,7 @@ class RedisEventStoreStreamTest {
 
     @Test
     fun `should handle concurrent version conflicts properly using optimistic locking`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
 
         // Add initial event
         val initialEvent = OrderTestEvent(
@@ -230,7 +230,7 @@ class RedisEventStoreStreamTest {
 
     @Test
     fun `should handle version gaps correctly in stream reading`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
 
         // Create events with non-sequential versions (simulating gaps)
         val event1 = StreamTestEvent(AggregateId(aggregateId), EventVersion(1L), "Event 1")
@@ -254,7 +254,7 @@ class RedisEventStoreStreamTest {
 
     @Test
     fun `should handle large streams efficiently`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val numberOfEvents = 1000
 
         // Create and append a large number of events
@@ -299,7 +299,7 @@ class RedisEventStoreStreamTest {
 
     @Test
     fun `subscribeToStream and subscribeToAll should return working subscriptions`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         var streamEventReceived = false
         var allEventReceived = false
 
@@ -329,14 +329,14 @@ class RedisEventStoreStreamTest {
     // Test event classes
     @Serializable
     data class StreamTestEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val data: String
     ) : BaseDomainEvent(aggregateId, EventType("StreamTestEvent"), version)
 
     @Serializable
     data class OrderTestEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val threadId: Int,
         val eventIndex: Int,

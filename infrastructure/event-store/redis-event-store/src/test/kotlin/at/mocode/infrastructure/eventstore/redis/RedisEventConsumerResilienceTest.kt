@@ -21,9 +21,9 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.util.*
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.uuid.Uuid
 
 /**
  * Consumer Resilience Tests - Important for Event-Processing reliability.
@@ -167,7 +167,7 @@ class RedisEventConsumerResilienceTest {
 
     @Test
     fun `should handle multiple consumers processing events without conflicts`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val latch = CountDownLatch(2)
         val processedEvents = CopyOnWriteArrayList<DomainEvent>()
 
@@ -232,7 +232,7 @@ class RedisEventConsumerResilienceTest {
     @Test
     fun `should handle consumer group creation and recovery`() {
         // Test that a consumer group is created automatically during init()
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val latch = CountDownLatch(1)
         val receivedEvents = CopyOnWriteArrayList<DomainEvent>()
 
@@ -263,7 +263,7 @@ class RedisEventConsumerResilienceTest {
 
     @Test
     fun `should process events exactly once in consumer group`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val numberOfEvents = 10
         val processedEvents = ConcurrentHashMap<String, AtomicInteger>()
         val latch = CountDownLatch(numberOfEvents)
@@ -326,7 +326,7 @@ class RedisEventConsumerResilienceTest {
 
     @Test
     fun `should handle slow event handlers gracefully`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val processedEvents = CopyOnWriteArrayList<String>()
         val latch = CountDownLatch(3)
 
@@ -373,7 +373,7 @@ class RedisEventConsumerResilienceTest {
 
     @Test
     fun `should handle consumer restart correctly`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val firstPhaseEvents = mutableListOf<DomainEvent>()
         val secondPhaseEvents = mutableListOf<DomainEvent>()
 
@@ -434,7 +434,7 @@ class RedisEventConsumerResilienceTest {
         // Ensure clean state for this test
         cleanupRedis()
 
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val processedEvents = CopyOnWriteArrayList<String>()
         val latch = CountDownLatch(3) // Expecting 3 events to be processed (2 success + 1 failure)
 
@@ -486,14 +486,14 @@ class RedisEventConsumerResilienceTest {
     // Test event classes
     @Serializable
     data class ResilienceTestEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val data: String
     ) : BaseDomainEvent(aggregateId, EventType("ResilienceTestEvent"), version)
 
     @Serializable
     data class SlowTestEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val data: String,
         val processingTimeMs: Long
@@ -501,7 +501,7 @@ class RedisEventConsumerResilienceTest {
 
     @Serializable
     data class FailingTestEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val data: String,
         val shouldFail: Boolean

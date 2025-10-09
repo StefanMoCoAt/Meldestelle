@@ -133,18 +133,18 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
-//// Configure duplicate handling strategy for distribution tasks
-//tasks.withType<Tar> {
-//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//}
-//
-//tasks.withType<Zip> {
-//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//}
+// Configure a duplicate handling strategy for distribution tasks
+tasks.withType<Tar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType<Zip> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
 // Duplicate-Handling für Distribution
 tasks.withType<Copy> {
-    duplicatesStrategy = DuplicatesStrategy.WARN // Statt EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Statt EXCLUDE
 }
 
 tasks.withType<Sync> {

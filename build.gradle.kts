@@ -38,7 +38,7 @@ allprojects {
 
 subprojects {
     // Note: Kotlin compiler configuration is handled by individual modules
-    // Root project doesn't apply Kotlin plugins, so we can't configure KotlinCompile tasks here
+    // a Root project doesn't apply Kotlin plugins, so we can't configure KotlinCompile tasks here
 
     tasks.withType<Test>().configureEach {
         useJUnitPlatform {
@@ -47,7 +47,10 @@ subprojects {
         // Configure CDS in auto-mode to prevent bootstrap classpath warnings
         jvmArgs("-Xshare:auto", "-Djdk.instrument.traceUsage=false")
         // Increase test JVM memory with a stable configuration
+        minHeapSize = "512m"
         maxHeapSize = "2g"
+        // Parallel test execution for better performance
+        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
         // Removed byte-buddy-agent configuration to fix Gradle 9.0.0 deprecation warning
         // The agent configuration was causing Task.project access at execution time
     }

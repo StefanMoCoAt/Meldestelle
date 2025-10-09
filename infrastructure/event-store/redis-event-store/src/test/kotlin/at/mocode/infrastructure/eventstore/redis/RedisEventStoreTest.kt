@@ -6,7 +6,6 @@ import at.mocode.core.domain.model.EventType
 import at.mocode.core.domain.model.EventVersion
 import at.mocode.infrastructure.eventstore.api.ConcurrencyException
 import at.mocode.infrastructure.eventstore.api.EventSerializer
-import java.util.UUID
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.junit.jupiter.api.AfterEach
@@ -21,6 +20,7 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
+import kotlin.uuid.Uuid
 
 @Testcontainers
 class RedisEventStoreTest {
@@ -71,7 +71,7 @@ class RedisEventStoreTest {
 
     @Test
     fun `append and read events should work correctly for new stream`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val event1 = TestCreatedEvent(AggregateId(aggregateId), EventVersion(1L), "Test Entity")
         val event2 = TestUpdatedEvent(AggregateId(aggregateId), EventVersion(2L), "Updated Test Entity")
 
@@ -91,7 +91,7 @@ class RedisEventStoreTest {
 
     @Test
     fun `appending with wrong expected version should throw ConcurrencyException`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val event1 = TestCreatedEvent(AggregateId(aggregateId), EventVersion(1L), "Test Entity")
         eventStore.appendToStream(listOf(event1), aggregateId, 0) // Stream is now at version 1
 
@@ -103,14 +103,14 @@ class RedisEventStoreTest {
 
     @Serializable
     data class TestCreatedEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val name: String
     ) : BaseDomainEvent(aggregateId, EventType("TestCreated"), version)
 
     @Serializable
     data class TestUpdatedEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val name: String
     ) : BaseDomainEvent(aggregateId, EventType("TestUpdated"), version)

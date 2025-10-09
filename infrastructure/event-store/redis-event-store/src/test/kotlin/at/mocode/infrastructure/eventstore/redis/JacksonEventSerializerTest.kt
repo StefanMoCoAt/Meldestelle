@@ -7,10 +7,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.util.*
 import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 /**
@@ -28,11 +26,10 @@ class JacksonEventSerializerTest {
         serializer.registerEventType(SimpleTestEvent::class.java, "SimpleTestEvent")
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     @Test
     fun `should serialize and deserialize simple event correctly`() {
-        val aggregateId: Uuid = UUID.randomUUID()
-        val eventId: UUID? = UUID.randomUUID()
+        val aggregateId = Uuid.random()
+        val eventId = Uuid.random()
         val timestamp = Clock.System.now()
 
         val event = SimpleTestEvent(
@@ -55,10 +52,10 @@ class JacksonEventSerializerTest {
 
     @Test
     fun `should handle serialization of complex event types with nested objects`() {
-        val aggregateId = UUID.randomUUID()
-        val eventId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
+        val eventId = Uuid.random()
         val timestamp = Clock.System.now()
-        val correlationId = UUID.randomUUID()
+        val correlationId = Uuid.random()
 
         val event = ComplexTestEvent(
             aggregateId = AggregateId(aggregateId),
@@ -88,7 +85,7 @@ class JacksonEventSerializerTest {
 
     @Test
     fun `should throw exception for unregistered event types during deserialization`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val unregisteredEvent = UnregisteredTestEvent(
             aggregateId = AggregateId(aggregateId),
             version = EventVersion(1L),
@@ -109,7 +106,7 @@ class JacksonEventSerializerTest {
 
     @Test
     fun `should handle null optional values gracefully`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val event = SimpleTestEvent(
             aggregateId = AggregateId(aggregateId),
             version = EventVersion(1L),
@@ -130,11 +127,11 @@ class JacksonEventSerializerTest {
 
     @Test
     fun `should preserve event metadata correctly in serialization`() {
-        val aggregateId = UUID.randomUUID()
-        val eventId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
+        val eventId = Uuid.random()
         val timestamp = Clock.System.now()
-        val correlationId = UUID.randomUUID()
-        val causationId = UUID.randomUUID()
+        val correlationId = Uuid.random()
+        val causationId = Uuid.random()
 
         val event = SimpleTestEvent(
             aggregateId = AggregateId(aggregateId),
@@ -187,7 +184,7 @@ class JacksonEventSerializerTest {
     @Test
     fun `should auto-register event types during serialization`() {
         val newSerializer = JacksonEventSerializer()
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
 
         val event = SimpleTestEvent(
             aggregateId = AggregateId(aggregateId),
@@ -215,8 +212,8 @@ class JacksonEventSerializerTest {
         val eventId = serializer.getEventId(testMap)
         val version = serializer.getVersion(testMap)
 
-        assertEquals(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"), aggregateId)
-        assertEquals(UUID.fromString("987fcdeb-51a2-43d1-9f12-123456789abc"), eventId)
+        assertEquals(Uuid.parse("123e4567-e89b-12d3-a456-426614174000"), aggregateId)
+        assertEquals(Uuid.parse("987fcdeb-51a2-43d1-9f12-123456789abc"), eventId)
         assertEquals(42L, version)
     }
 
@@ -243,7 +240,7 @@ class JacksonEventSerializerTest {
         override val version: EventVersion,
         val name: String,
         override val eventType: EventType = EventType("SimpleTestEvent"),
-        override val eventId: EventId = EventId(UUID.randomUUID()),
+        override val eventId: EventId = EventId(Uuid.random()),
         override val timestamp: Instant = Clock.System.now(),
         override val correlationId: CorrelationId? = null,
         override val causationId: CausationId? = null
@@ -254,7 +251,7 @@ class JacksonEventSerializerTest {
         override val version: EventVersion,
         val complexData: ComplexData,
         override val eventType: EventType = EventType("ComplexTestEvent"),
-        override val eventId: EventId = EventId(UUID.randomUUID()),
+        override val eventId: EventId = EventId(Uuid.random()),
         override val timestamp: Instant = Clock.System.now(),
         override val correlationId: CorrelationId? = null,
         override val causationId: CausationId? = null
@@ -265,7 +262,7 @@ class JacksonEventSerializerTest {
         override val version: EventVersion,
         val data: String,
         override val eventType: EventType = EventType("UnregisteredTestEvent"),
-        override val eventId: EventId = EventId(UUID.randomUUID()),
+        override val eventId: EventId = EventId(Uuid.random()),
         override val timestamp: Instant = Clock.System.now(),
         override val correlationId: CorrelationId? = null,
         override val causationId: CausationId? = null

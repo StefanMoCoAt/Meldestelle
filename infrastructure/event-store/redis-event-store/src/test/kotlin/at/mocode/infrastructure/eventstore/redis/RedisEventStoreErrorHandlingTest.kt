@@ -20,8 +20,8 @@ import org.testcontainers.containers.GenericContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
-import java.util.*
 import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 /**
  * Simplified error handling tests for RedisEventStore using Testcontainers.
@@ -79,7 +79,7 @@ class RedisEventStoreErrorHandlingTest {
 
     @Test
     fun `should handle large event payloads correctly without memory issues`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
 
         // Create an event with a very large payload (1MB)
         val largeData = "X".repeat(1024 * 1024) // 1MB of data
@@ -110,7 +110,7 @@ class RedisEventStoreErrorHandlingTest {
 
     @Test
     fun `should handle multiple large events in sequence`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val numberOfLargeEvents = 10
         val sizePerEvent = 100 * 1024 // 100KB per event
 
@@ -144,7 +144,7 @@ class RedisEventStoreErrorHandlingTest {
 
     @Test
     fun `should handle corrupted data gracefully during deserialization by skipping bad events`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val streamKey = "test-stream:$aggregateId"
 
         // First, add a valid event
@@ -161,7 +161,7 @@ class RedisEventStoreErrorHandlingTest {
             "eventData" to "{\"corrupted\":\"json\",\"missing\":", // Invalid JSON - missing closing brace
             "aggregateId" to aggregateId.toString(),
             "version" to "2",
-            "eventId" to UUID.randomUUID().toString(),
+            "eventId" to Uuid.random().toString(),
             "timestamp" to Clock.System.now().toString()
         )
 
@@ -193,7 +193,7 @@ class RedisEventStoreErrorHandlingTest {
 
     @Test
     fun `should handle unregistered event types gracefully during read operations`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
         val streamKey = "test-stream:$aggregateId"
 
         // Add a valid registered event first
@@ -210,7 +210,7 @@ class RedisEventStoreErrorHandlingTest {
             "eventData" to """{"someField": "someValue", "aggregateId": {"value": "$aggregateId"}, "version": {"value": 2}}""",
             "aggregateId" to aggregateId.toString(),
             "version" to "2",
-            "eventId" to UUID.randomUUID().toString(),
+            "eventId" to Uuid.random().toString(),
             "timestamp" to Clock.System.now().toString()
         )
 
@@ -234,7 +234,7 @@ class RedisEventStoreErrorHandlingTest {
 
     @Test
     fun `should handle concurrent version conflicts properly with retry logic`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
 
         // Create an initial event
         val event1 = TestErrorEvent(
@@ -279,7 +279,7 @@ class RedisEventStoreErrorHandlingTest {
 
     @Test
     fun `should handle complex nested object serialization correctly`() {
-        val aggregateId = UUID.randomUUID()
+        val aggregateId = Uuid.random()
 
         val complexEvent = ComplexErrorEvent(
             aggregateId = AggregateId(aggregateId),
@@ -319,14 +319,14 @@ class RedisEventStoreErrorHandlingTest {
     // Test event classes
     @Serializable
     data class TestErrorEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val data: String
     ) : BaseDomainEvent(aggregateId, EventType("TestErrorEvent"), version)
 
     @Serializable
     data class LargePayloadEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val largeData: String,
         val metadata: Map<String, String>
@@ -334,7 +334,7 @@ class RedisEventStoreErrorHandlingTest {
 
     @Serializable
     data class ComplexErrorEvent(
-        @Transient override val aggregateId: AggregateId = AggregateId(UUID.randomUUID()),
+        @Transient override val aggregateId: AggregateId = AggregateId(Uuid.random()),
         @Transient override val version: EventVersion = EventVersion(0),
         val nestedData: ComplexNestedData
     ) : BaseDomainEvent(aggregateId, EventType("ComplexErrorEvent"), version)

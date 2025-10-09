@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.*
         // Disable circuit breaker for JWT tests
         "resilience4j.circuitbreaker.configs.default.registerHealthIndicator=false",
         "management.health.circuitbreakers.enabled=false",
+        // Disable Redis health indicator for tests (no Redis in test environment)
+        "management.health.redis.enabled=false",
         // Enable JWT authentication for testing
         "gateway.security.jwt.enabled=true",
         // Use reactive web application type
@@ -260,23 +262,23 @@ class JwtAuthenticationTests {
             return "Protected endpoint accessed - User ID: $userId, Role: $userRole"
         }
 
-        @GetMapping("/health")
+        @GetMapping("/health", "/health/**")
         fun healthEndpoint(): String = "Health OK"
 
-        @GetMapping("/ping")
+        @GetMapping("/ping", "/ping/**")
         fun pingEndpoint(): String = "Ping OK"
 
-        @GetMapping("/auth")
-        @PostMapping("/auth")
+        @GetMapping("/auth", "/auth/**")
+        @PostMapping("/auth", "/auth/**")
         fun authEndpoint(): String = "Auth endpoint"
 
-        @GetMapping("/fallback")
+        @GetMapping("/fallback", "/fallback/**")
         fun fallbackEndpoint(): String = "Fallback OK"
 
-        @GetMapping("/docs")
+        @GetMapping("/docs", "/docs/**")
         fun docsEndpoint(): String = "Documentation OK"
 
-        @GetMapping("/actuator")
+        @GetMapping("/actuator", "/actuator/**")
         fun actuatorEndpoint(): String = "Actuator OK"
 
         @GetMapping("/root")
