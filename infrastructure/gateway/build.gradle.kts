@@ -29,7 +29,7 @@ dependencies {
     // 2. Spring Boot Security (ersetzt das "service.complete"-Bundle)
     // Dieses Bundle sollte spring-boot-starter-security, oauth2-client, oauth2-resource-server etc. enthalten
     // Temporär auskommentieren, um das Bundle als Fehlerquelle auszuschließen
-    // implementation(libs.bundles.spring.boot.security)
+     //implementation(libs.bundles.spring.boot.security)
 
     // Stattdessen die Abhängigkeiten direkt hinzufügen:
     implementation(libs.spring.boot.starter.security)
