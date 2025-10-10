@@ -1,328 +1,100 @@
 package at.mocode.infrastructure.gateway.security
 
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
+import org.springframework.security.config.web.server.invoke
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import java.time.Duration
 
-/**
- * Erweiterte reaktive Sicherheitskonfiguration für das Gateway.
- *
- * ARCHITEKTUR-ÜBERBLICK:
- * ======================
- * Diese Konfiguration stellt die grundlegende Sicherheits-Schicht für das Spring Cloud Gateway bereit.
- * Sie arbeitet zusammen mit mehreren weiteren Sicherheitskomponenten:
- *
- * 1. JwtAuthenticationFilter (GlobalFilter) – Validiert JWT-Tokens und authentifiziert Benutzer
- * 2. RateLimitingFilter (GlobalFilter) – Bietet IP-basiertes Rate-Limiting mit benutzerbezogenen Limits
- * 3. CorrelationIdFilter (GlobalFilter) – Fügt Request-Tracing-Fähigkeiten hinzu
- * 4. EnhancedLoggingFilter (GlobalFilter) – Liefert strukturiertes Request/Response-Logging
- *
- * SICHERHEITSSTRATEGIE:
- * =====================
- * Das Gateway verwendet einen mehrschichtigen Sicherheitsansatz:
- * - Diese SecurityWebFilterChain liefert grundlegende Einstellungen (CORS, CSRF, Basis-Header)
- * - Der JwtAuthenticationFilter übernimmt die eigentliche Authentifizierung, wenn per Property aktiviert
- * - Die SecurityWebFilterChain bleibt permissiv (permitAll), damit der JWT-Filter den Zugriff steuert
- * - Rate-Limiting- und Logging-Filter liefern operative Sicherheit und Monitoring
- *
- * ENTWURFSBEGRÜNDUNG:
- * ===================
- * - Während Tests ist Spring Security auf dem Classpath (testImplementation), was
- *   die Auto-Konfiguration aktiviert und alle Endpunkte sperren kann, sofern keine SecurityWebFilterChain bereitgestellt wird
- * - Das Gateway erzwingt Authentifizierung über den JwtAuthenticationFilter (falls per Property aktiviert),
- *   daher sollte die SecurityWebFilterChain permissiv bleiben und sich auf grundlegende Belange konzentrieren
- * - Explizite CORS-Konfiguration stellt eine korrekte Behandlung von Cross-Origin-Anfragen aus Web-Clients sicher
- * - Konfigurierbare Properties erlauben umgebungsspezifische Sicherheitseinstellungen ohne Codeänderungen
- * - CSRF-Schutz ist deaktiviert, da er für zustandslose JWT-basierte Authentifizierung nicht benötigt wird
- *
- * CORS-INTEGRATION:
- * =================
- * Die CORS-Konfiguration arbeitet mit der bestehenden Filterkette zusammen:
- * - Erlaubt Anfragen von konfigurierten Ursprüngen (Dev/Prod-Umgebungen)
- * - Gibt benutzerdefinierte Header aus Gateway-Filtern frei (Korrelations-IDs, Rate-Limits)
- * - Unterstützt Credentials für JWT-Authentifizierung
- * - Cacht Preflight-Antworten für bessere Performance
- *
- * TESTHINWEISE:
- * =============
- * - Die Konfiguration ist so gestaltet, dass sie nahtlos mit bestehenden Sicherheitstests funktioniert
- * - Das Test-Profil kann CORS-Einstellungen bei Bedarf überschreiben
- * - Eine permissive Autorisierung stellt sicher, dass Tests sich auf die Sicherheit der Filterebene konzentrieren können
- */
 @Configuration
 @EnableWebFluxSecurity
 @EnableConfigurationProperties(GatewaySecurityProperties::class)
 class SecurityConfig(
-    private val securityProperties: GatewaySecurityProperties,
-    @Value($$"${keycloak.issuer-uri:}") private val issuerUri: String,
-    @Value($$"${keycloak.jwk-set-uri:}") private val jwkSetUri: String
+    private val securityProperties: GatewaySecurityProperties
 ) {
 
     /**
-     * Hauptkonfiguration der Spring-Security-Filterkette.
+     * Konfiguriert die zentrale Security-Filter-Kette für das Gateway.
      *
-     * Diese Methode konfiguriert die reaktive Sicherheits-Filterkette mit:
-     * - CSRF deaktiviert für zustandslosen API-Betrieb
-     * - Explizite CORS-Konfiguration für Cross-Origin-Unterstützung
-     * - Permissiver Autorisierung (Authentifizierung durch den JWT-Filter)
-     *
-     * Die Konfiguration bleibt kompatibel mit der bestehenden Filterarchitektur
-     * und bietet zugleich bessere CORS-Steuerung und Konfigurierbarkeit.
+     * Diese Konfiguration nutzt den Standard-OAuth2-Resource-Server von Spring Security,
+     * um JWTs (z.B. von Keycloak) automatisch zu validieren.
      */
     @Bean
     fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-        val httpSecurity = http
-            .cors { it.configurationSource(corsConfigurationSource()) }
-            .csrf { it.disable() }
-            .authorizeExchange { exchanges ->
-                exchanges
-                    // Public paths
-                    .pathMatchers(
-                        "/",
-                        "/health/**",
-                        "/actuator/**",
-                        "/api/ping/**",
-                        "/api/auth/**",     // All auth endpoints (includes test endpoints)
-                        "/api/auth/login",
-                        "/api/auth/register",
-                        "/api/auth/refresh",
-                        "/fallback/**",
-                        "/docs/**",
-                        "/swagger-ui/**",
-                        "/test/**",     // Test paths for integration tests
-                        "/mock/**"      // Mock controller paths for tests
-                    ).permitAll()
-                    .apply {
-                        // Only enforce role-based authorization when oauth2ResourceServer is active
-                        // In tests without oauth2, JwtAuthenticationFilter handles auth via GlobalFilter
-                        if (jwkSetUri.isNotBlank()) {
-                            // Admin paths
-                            pathMatchers("/api/admin/**").hasRole("ADMIN")
-                            // Monitoring paths
-                            pathMatchers("/api/monitoring/**").hasAnyRole("ADMIN", "MONITORING")
-                            // All other requests require authentication
-                            anyExchange().authenticated()
-                        } else {
-                            // Permissive mode for tests - JwtAuthenticationFilter handles auth
-                            anyExchange().permitAll()
-                        }
-                    }
+        return http { // Start der modernen Kotlin-DSL
+            // 1. CORS-Konfiguration anwenden
+            cors { }
+
+            // 2. CSRF deaktivieren (für zustandslose APIs)
+            csrf { disable() }
+
+            // 3. Routen-Berechtigungen definieren
+            authorizeExchange {
+                // Öffentlich zugängliche Pfade aus der .yml-Datei laden
+                pathMatchers(*securityProperties.publicPaths.toTypedArray()).permitAll()
+
+                // Alle anderen Pfade erfordern eine Authentifizierung
+                anyExchange.authenticated()
             }
 
-        // Only configure oauth2ResourceServer if Keycloak JWK URI is configured
-        // In tests, this will be empty, allowing JwtAuthenticationFilter to handle auth
-        if (jwkSetUri.isNotBlank()) {
-            httpSecurity.oauth2ResourceServer { oauth2 ->
-                oauth2.jwt { jwt ->
-                    jwt.jwtDecoder(jwtDecoder())
-                }
+            // 4. JWT-Validierung via Keycloak aktivieren
+            oauth2ResourceServer {
+                jwt { }
             }
         }
-
-        return httpSecurity.build()
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = ["keycloak.jwk-set-uri"])
-    fun jwtDecoder(): ReactiveJwtDecoder {
-        return NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri)
-            .build()
     }
 
     /**
-     * Explizite CORS-Konfigurationsquelle.
-     *
-     * Dieser Bean bietet eine detaillierte Steuerung der Cross-Origin-Resource-Sharing-Einstellungen
-     * und ersetzt die leere Standard-CORS-Konfiguration durch explizite, konfigurierbare Einstellungen.
-     *
-     * Schlüsselfunktionen:
-     * - Umgebungsspezifische erlaubte Ursprünge (Allowed Origins)
-     * - Umfassende Unterstützung für HTTP-Methoden
-     * - JWT-bewusste Header-Konfiguration
-     * - Integration mit Headern aus Gateway-Filtern
-     * - Performance-optimiertes Preflight-Caching
-     *
-     * Die Konfiguration ist darauf ausgelegt, mit typischen Webanwendungs-Architekturen zu funktionieren,
-     * bei denen ein JavaScript-Frontend API-Aufrufe an das Gateway sendet.
+     * Definiert die zentrale und einzige CORS-Konfiguration für das Gateway.
      */
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration().apply {
-            // Erlaubte Ursprünge – pro Umgebung konfigurierbar
-            // Entwicklung: localhost-URLs für lokale Tests
-            // Produktion: domainspezifische URLs für ausgelieferte Anwendungen
-            allowedOrigins = securityProperties.cors.allowedOrigins.toList()
-
-
-            // Erlaubte HTTP-Methoden – umfassende REST-API-Unterstützung
-            // Enthält alle Standardmethoden plus OPTIONS für Preflight-Anfragen
+            allowedOriginPatterns = securityProperties.cors.allowedOriginPatterns.toList()
             allowedMethods = securityProperties.cors.allowedMethods.toList()
-
-            // Erlaubte Request-Header – beinhaltet JWT und benutzerdefinierte Header
-            // Authorization: für JWT Bearer Tokens
-            // X-Correlation-ID: für Request-Tracing
-            // Standard-Header: Content-Type, Accept, etc.
             allowedHeaders = securityProperties.cors.allowedHeaders.toList()
-
-            // Sichtbare Response-Header – ermöglicht Client-Zugriff auf benutzerdefinierte Header
-            // Beinhaltet Header, die von Gateway-Filtern hinzugefügt werden:
-            // - X-Correlation-ID vom CorrelationIdFilter
-            // - X-RateLimit-* vom RateLimitingFilter
             exposedHeaders = securityProperties.cors.exposedHeaders.toList()
-
-            // Credentials erlauben – erforderlich für JWT-Authentifizierung
-            // Aktiviert Cookies und Authorization-Header in Cross-Origin-Anfragen
             allowCredentials = securityProperties.cors.allowCredentials
-
-            // Preflight-Cache-Dauer – Performance-Optimierung
-            // Reduziert die Anzahl an OPTIONS-Anfragen für wiederholte API-Aufrufe
             maxAge = securityProperties.cors.maxAge.seconds
         }
 
         return UrlBasedCorsConfigurationSource().apply {
-            // CORS-Konfiguration auf alle Gateway-Routen anwenden
             registerCorsConfiguration("/**", configuration)
         }
     }
 }
 
 /**
- * Konfigurationseigenschaften für die Sicherheits-Einstellungen des Gateways.
- *
- * Ermöglicht umgebungsspezifische Sicherheitskonfiguration über application.yml/-properties.
- * Dieser Ansatz erlaubt unterschiedliche Sicherheitseinstellungen für Entwicklung, Test und
- * Produktion, ohne Codeänderungen vornehmen zu müssen.
- *
- * Beispielkonfiguration in application.yml:
- * ```yaml
- * gateway:
- *   security:
- *     cors:
- *       allowed-origins:
- *         - http://localhost:3000
- *         - https://app.meldestelle.at
- *       allowed-methods:
- *         - GET
- *         - POST
- *         - PUT
- *         - DELETE
- *       allow-credentials: true
- *       max-age: PT2H
- * ```
+ * Konfigurations-Properties für alle sicherheitsrelevanten Einstellungen des Gateways.
  */
 @ConfigurationProperties(prefix = "gateway.security")
 data class GatewaySecurityProperties(
-    val cors: CorsProperties = CorsProperties()
+    val cors: CorsProperties = CorsProperties(),
+    val publicPaths: List<String> = listOf(
+        "/",
+        "/fallback/**",
+        "/actuator/**",
+        "/webjars/**",
+        "/v3/api-docs/**",
+        "/api/auth/**" // Alle Auth-Endpunkte
+    )
 )
 
 /**
- * CORS-spezifische Konfigurationseigenschaften mit sinnvollen Defaults.
- *
- * Die Default-Werte sind so gewählt, dass sie mit typischen Entwicklungs- und Produktions-Setups funktionieren:
- * - Übliche Entwicklungs-URLs (localhost mit Standardports)
- * - Produktions-Domain-Muster
- * - Volle Unterstützung der REST-API-Methoden
- * - Unterstützung für JWT- und Gateway-Filter-Header
- * - Sinnvolle Preflight-Cache-Dauer
+ * DTO für CORS-Properties mit sinnvollen Standardwerten.
  */
 data class CorsProperties(
-    /**
-     * Erlaubte Ursprünge (Allowed Origins) für CORS-Anfragen.
-     *
-     * Defaults unterstützen gängige Entwicklungs- und Produktionsszenarien:
-     * - localhost:3000 – typischer React-Entwicklungsserver
-     * - localhost:8080 – gängiger alternativer Entwicklungsport
-     * - localhost:4200 – typischer Angular-Entwicklungsserver
-     * - Spezifische Subdomains von meldestelle.at für die Produktion
-     *
-     * Kann je Umgebung bei Bedarf überschrieben werden.
-     */
-    val allowedOrigins: Set<String> = setOf(
-        "http://localhost:3000",
-        "http://localhost:8080",
-        "http://localhost:4200",
-        "https://app.meldestelle.at",
-        "https://frontend.meldestelle.at",
-        "https://www.meldestelle.at"
-    ),
-
-
-    /**
-     * Erlaubte HTTP-Methoden für CORS-Anfragen.
-     *
-     * Enthält alle Standard-REST-API-Methoden sowie OPTIONS für Preflight-
-     * und HEAD für Metadaten-Anfragen.
-     */
-    val allowedMethods: Set<String> = setOf(
-        "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"
-    ),
-
-    /**
-     * Erlaubte Request-Header für CORS-Anfragen.
-     *
-     * Beinhaltet:
-     * - Standard-Header: Content-Type, Accept, etc.
-     * - JWT-Authentifizierung: Authorization
-     * - Gateway-Tracing: X-Correlation-ID
-     * - Cache-Steuerung: Cache-Control, Pragma
-     */
-    val allowedHeaders: Set<String> = setOf(
-        "Authorization",
-        "Content-Type",
-        "X-Requested-With",
-        "X-Correlation-ID",
-        "Accept",
-        "Origin",
-        "Cache-Control",
-        "Pragma"
-    ),
-
-    /**
-     * Sichtbare Response-Header für CORS-Anfragen.
-     *
-     * Header, auf die Client-JavaScript in Antworten zugreifen darf.
-     * Beinhaltet benutzerdefinierte Header, die von Gateway-Filtern hinzugefügt werden:
-     * - X-Correlation-ID: Request-Tracing (CorrelationIdFilter)
-     * - X-RateLimit-*: Informationen zum Rate-Limiting (RateLimitingFilter)
-     * - Standard-Header: Content-Length, Date
-     */
-    val exposedHeaders: Set<String> = setOf(
-        "X-Correlation-ID",
-        "X-RateLimit-Limit",
-        "X-RateLimit-Remaining",
-        "X-RateLimit-Enabled",
-        "Content-Length",
-        "Date"
-    ),
-
-    /**
-     * Credentials in CORS-Anfragen erlauben.
-     *
-     * Auf true setzen, um zu unterstützen:
-     * - JWT Bearer Tokens im Authorization-Header
-     * - Cookies (falls verwendet)
-     * - Client-Zertifikate (falls verwendet)
-     */
+    val allowedOriginPatterns: Set<String> = setOf("http://localhost:[*]", "https://*.meldestelle.at"),
+    val allowedMethods: Set<String> = setOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"),
+    val allowedHeaders: Set<String> = setOf("*"),
+    val exposedHeaders: Set<String> = setOf("X-Correlation-ID", "X-RateLimit-Limit", "X-RateLimit-Remaining"),
     val allowCredentials: Boolean = true,
-
-    /**
-     * Maximales Alter für das Caching von Preflight-Anfragen.
-     *
-     * Dauer, für die Browser Preflight-Antworten cachen können, wodurch
-     * die Anzahl der OPTIONS-Anfragen für wiederholte API-Aufrufe reduziert wird.
-     * Default: 1 Stunde (guter Kompromiss zwischen Performance und Flexibilität)
-     */
     val maxAge: Duration = Duration.ofHours(1)
 )

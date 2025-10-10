@@ -79,7 +79,7 @@ subprojects {
                 includeTags("perf")
             }
             shouldRunAfter("test")
-            // Keep same JVM settings for consistency
+            // Keep the same JVM settings for consistency
             jvmArgs("-Xshare:auto", "-Djdk.instrument.traceUsage=false")
             maxHeapSize = "2g"
             dependsOn("testClasses")
@@ -99,6 +99,12 @@ subprojects {
         environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
         environment("CHROMIUM_BIN", "/usr/bin/chromium")
         environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/chromium")
+    }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        compilerOptions {
+            freeCompilerArgs.add("-Xannotation-default-target=param-property")
+        }
     }
 }
 

@@ -17,42 +17,45 @@ dependencies {
     // Platform BOM für zentrale Versionsverwaltung
     implementation(platform(projects.platform.platformBom))
 
-    // Core project dependencies
+    // Core project dependencies (sind korrekt)
     implementation(projects.core.coreUtils)
     implementation(projects.platform.platformDependencies)
 
-    // Spring Cloud Gateway und Service Discovery (Bundle)
+    // === BEREINIGTE ABHÄNGIGKEITEN ===
+
+    // 1. Spring Cloud Gateway & Service Discovery (dies ist die KERN-Abhängigkeit)
     implementation(libs.bundles.spring.cloud.gateway)
 
-    // Spring Boot Service Complete Bundle (Web, Security, Data, Observability)
-    // Provides: spring-boot-starter-web, validation, actuator, security,
-    //           oauth2-client, oauth2-resource-server, data-jpa, data-redis,
-    //           micrometer-prometheus, tracing-bridge-brave, zipkin-reporter-brave
-    implementation(libs.bundles.spring.boot.service.complete)
+    // 2. Spring Boot Security (ersetzt das "service.complete"-Bundle)
+    // Dieses Bundle sollte spring-boot-starter-security, oauth2-client, oauth2-resource-server etc. enthalten
+    // Temporär auskommentieren, um das Bundle als Fehlerquelle auszuschließen
+    // implementation(libs.bundles.spring.boot.security)
 
-    // Reactive WebFlux for Gateway
-    implementation(libs.spring.boot.starter.webflux)
+    // Stattdessen die Abhängigkeiten direkt hinzufügen:
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.boot.starter.oauth2.resource.server)
 
-    // Resilience4j Bundle (Circuit Breaker support)
+
+    // 3. Resilience4j & AOP für Circuit Breaker
     implementation(libs.bundles.resilience)
-
-    // Spring Cloud CircuitBreaker for Gateway Filter Integration
     implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
 
-    // Jackson Kotlin support
-    implementation(libs.bundles.jackson.kotlin)
-
-    // Logging Bundle (kotlin-logging, logback-classic, logback-core, slf4j-api)
-    implementation(libs.bundles.logging)
-
-    // Infrastructure dependencies
-    implementation(projects.infrastructure.auth.authClient)
+    // 4. Monitoring-Client (ist korrekt)
     implementation(projects.infrastructure.monitoring.monitoringClient)
 
-    // Test dependencies
+    // 5. Auth-Client für JWT-Erstellung/Service (falls noch benötigt nach Schritt 2)
+    implementation(projects.infrastructure.auth.authClient)
+
+    // 6. Logging & Jackson (sind korrekt)
+    implementation(libs.bundles.logging)
+    implementation(libs.bundles.jackson.kotlin)
+
+    // FÜGEN SIE DIESE ZEILE HINZU, UM DIE FEHLER ZU BEHEBEN:
+    implementation(libs.spring.boot.starter.actuator)
+
+    // Test-Abhängigkeiten (sind korrekt)
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
-    testImplementation(libs.bundles.logging)
 }
 
 tasks.test {

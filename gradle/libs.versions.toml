@@ -251,7 +251,7 @@ flyway = [
 ]
 
 spring-boot-essentials = [
-    "spring-boot-starter-web",
+#    "spring-boot-starter-web",
     "spring-boot-starter-validation",
     "spring-boot-starter-actuator"
 ]
@@ -426,7 +426,7 @@ ktor-server-complete = [
 
 # Complete Spring Boot Service bundle - combines all Spring Boot bundles for full-featured services
 spring-boot-service-complete = [
-    "spring-boot-starter-web",
+#    "spring-boot-starter-web",
     "spring-boot-starter-validation",
     "spring-boot-starter-actuator",
     "spring-boot-starter-security",
