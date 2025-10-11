@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController
         // Use reactive web application type
         "spring.main.web-application-type=reactive",
         // Disable gateway discovery - use explicit routes
-        "spring.cloud.gateway.discovery.locator.enabled=false",
+        "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false",
         // Disable actuator security
         "management.security.enabled=false",
         // Set random port
