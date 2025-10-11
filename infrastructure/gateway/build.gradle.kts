@@ -14,46 +14,26 @@ springBoot {
 }
 
 dependencies {
-    // Platform BOM für zentrale Versionsverwaltung
     implementation(platform(projects.platform.platformBom))
 
-    // Core project dependencies (sind korrekt)
+    // === Core Dependencies ===
     implementation(projects.core.coreUtils)
     implementation(projects.platform.platformDependencies)
-
-    // === BEREINIGTE ABHÄNGIGKEITEN ===
-
-    // 1. Spring Cloud Gateway & Service Discovery (dies ist die KERN-Abhängigkeit)
-    implementation(libs.bundles.spring.cloud.gateway)
-
-    // 2. Spring Boot Security (ersetzt das "service.complete"-Bundle)
-    // Dieses Bundle sollte spring-boot-starter-security, oauth2-client, oauth2-resource-server etc. enthalten
-    // Temporär auskommentieren, um das Bundle als Fehlerquelle auszuschließen
-     //implementation(libs.bundles.spring.boot.security)
-
-    // Stattdessen die Abhängigkeiten direkt hinzufügen:
-    implementation(libs.spring.boot.starter.security)
-    implementation(libs.spring.boot.starter.oauth2.resource.server)
-
-
-    // 3. Resilience4j & AOP für Circuit Breaker
-    implementation(libs.bundles.resilience)
-    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
-
-    // 4. Monitoring-Client (ist korrekt)
+    implementation(projects.infrastructure.auth.authClient)
     implementation(projects.infrastructure.monitoring.monitoringClient)
 
-    // 5. Auth-Client für JWT-Erstellung/Service (falls noch benötigt nach Schritt 2)
-    implementation(projects.infrastructure.auth.authClient)
-
-    // 6. Logging & Jackson (sind korrekt)
+    // === GATEWAY-SPEZIFISCHE ABHÄNGIGKEITEN ===
+    implementation(libs.bundles.spring.cloud.gateway)
+    implementation(libs.bundles.spring.boot.security)
+    implementation(libs.bundles.resilience)
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
+    implementation(libs.spring.boot.starter.actuator) // Wichtig für Health & Metrics
     implementation(libs.bundles.logging)
     implementation(libs.bundles.jackson.kotlin)
+    implementation(project(":infrastructure:event-store:redis-event-store"))
+    implementation(project(":infrastructure:event-store:redis-event-store"))
 
-    // FÜGEN SIE DIESE ZEILE HINZU, UM DIE FEHLER ZU BEHEBEN:
-    implementation(libs.spring.boot.starter.actuator)
-
-    // Test-Abhängigkeiten (sind korrekt)
+    // === Test Dependencies ===
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
 }

@@ -1,5 +1,6 @@
 package at.mocode.infrastructure.gateway
 
+import at.mocode.infrastructure.gateway.config.TestSecurityConfig
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -9,7 +10,6 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.bind.annotation.GetMapping
@@ -48,7 +48,7 @@ import org.springframework.web.bind.annotation.RestController
 )
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
-@Import(GatewayRoutingTests.TestRoutesConfig::class)
+@Import(TestSecurityConfig::class, GatewayRoutingTests.TestRoutesConfig::class)
 class GatewayRoutingTests {
 
     @Autowired

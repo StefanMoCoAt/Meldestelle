@@ -50,4 +50,5 @@ dependencies {
     testImplementation(projects.platform.platformTesting)
     testImplementation(libs.bundles.testing.jvm)
     testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.boot.starter.web)
 }

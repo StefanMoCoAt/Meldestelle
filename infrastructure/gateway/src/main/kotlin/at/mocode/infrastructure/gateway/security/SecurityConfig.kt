@@ -6,11 +6,12 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.config.web.server.authenticated
+
 import org.springframework.security.config.web.server.invoke
-import org.springframework.security.config.web.server.pathMatchers
-import org.springframework.security.config.web.server.permitAll
+
+
 import org.springframework.security.web.server.SecurityWebFilterChain
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
@@ -41,10 +42,12 @@ class SecurityConfig(
             // 3. Routen-Berechtigungen definieren
             authorizeExchange {
                 // Öffentlich zugängliche Pfade aus der .yml-Datei laden
-                pathMatchers(*securityProperties.publicPaths.toTypedArray()).permitAll()
-
+                authorize(
+                    pathMatchers(*securityProperties.publicPaths.toTypedArray()),
+                    permitAll
+                )
                 // Alle anderen Pfade erfordern eine Authentifizierung
-                anyExchange.authenticated()
+                authorize(anyExchange, authenticated)
             }
 
             // 4. JWT-Validierung via Keycloak aktivieren

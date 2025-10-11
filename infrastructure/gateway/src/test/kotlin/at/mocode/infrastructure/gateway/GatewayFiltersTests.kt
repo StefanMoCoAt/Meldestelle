@@ -1,5 +1,6 @@
 package at.mocode.infrastructure.gateway
 
+import at.mocode.infrastructure.gateway.config.TestSecurityConfig
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -46,7 +47,7 @@ import org.springframework.web.bind.annotation.RestController
 )
 @ActiveProfiles("dev") // Use dev profile to enable filters
 @AutoConfigureWebTestClient
-@Import(GatewayFiltersTests.TestFilterConfig::class)
+@Import(TestSecurityConfig::class, GatewayFiltersTests.TestFilterConfig::class)
 class GatewayFiltersTests {
 
     @Autowired

@@ -1,7 +1,9 @@
 package at.mocode.infrastructure.gateway
 
+import at.mocode.infrastructure.gateway.config.TestSecurityConfig
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 
@@ -24,6 +26,7 @@ import org.springframework.test.context.TestPropertySource
         "management.security.enabled=false"
     ]
 )
+@Import(TestSecurityConfig::class)
 class KeycloakGatewayIntegrationTest {
 
     @Test

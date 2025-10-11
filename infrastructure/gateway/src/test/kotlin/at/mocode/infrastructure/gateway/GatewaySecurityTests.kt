@@ -1,5 +1,6 @@
 package at.mocode.infrastructure.gateway
 
+import at.mocode.infrastructure.gateway.config.TestSecurityConfig
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,7 +47,7 @@ import org.springframework.web.bind.annotation.*
 )
 @ActiveProfiles("test") // Use test profile to disable unrelated global filters; CORS config is present in application-test.yml
 @AutoConfigureWebTestClient
-@Import(GatewaySecurityTests.TestSecurityConfig::class)
+@Import(TestSecurityConfig::class, GatewaySecurityTests.TestSecurityConfig::class)
 class GatewaySecurityTests {
 
     @Autowired

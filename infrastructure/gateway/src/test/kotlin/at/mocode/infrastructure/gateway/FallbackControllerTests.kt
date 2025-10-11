@@ -1,8 +1,10 @@
 package at.mocode.infrastructure.gateway
 
+import at.mocode.infrastructure.gateway.config.TestSecurityConfig
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
@@ -37,6 +39,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
     ]
 )
 @ActiveProfiles("test")
+@Import(TestSecurityConfig::class)
 class FallbackControllerTests {
 
     @Autowired
