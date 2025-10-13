@@ -1,15 +1,15 @@
 package at.mocode.infrastructure.gateway.security
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
-
 import org.springframework.security.config.web.server.invoke
-
-
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
 import org.springframework.web.cors.CorsConfiguration
@@ -54,6 +54,42 @@ class SecurityConfig(
             oauth2ResourceServer {
                 jwt { }
             }
+        }
+    }
+
+    /**
+     * Erstellt einen ReactiveJwtDecoder für die JWT-Validierung.
+     *
+     * Verwendet die JWK Set URI aus der Konfiguration, um die öffentlichen Schlüssel
+     * von Keycloak zu laden. Falls die URI nicht konfiguriert ist oder Keycloak
+     * nicht erreichbar ist, wird trotzdem ein Bean erstellt, um Startfehler zu vermeiden.
+     */
+    @Bean
+    fun reactiveJwtDecoder(
+        @Value("\${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}") jwkSetUri: String
+    ): ReactiveJwtDecoder {
+        return if (jwkSetUri.isNotBlank()) {
+            try {
+                NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build()
+            } catch (e: Exception) {
+                // Log warning and return a no-op decoder to allow startup
+                println("WARN: Failed to configure JWT decoder with JWK Set URI: $jwkSetUri - ${e.message}")
+                println("WARN: JWT authentication will not work until Keycloak is available")
+                createNoOpJwtDecoder()
+            }
+        } else {
+            println("INFO: No JWK Set URI configured, using no-op JWT decoder")
+            createNoOpJwtDecoder()
+        }
+    }
+
+    /**
+     * Erstellt einen No-Op JWT Decoder für Fälle, in denen Keycloak nicht verfügbar ist.
+     * Dieser Decoder lehnt alle Token ab, erlaubt aber den Anwendungsstart.
+     */
+    private fun createNoOpJwtDecoder(): ReactiveJwtDecoder {
+        return ReactiveJwtDecoder { token ->
+            throw IllegalStateException("JWT validation is not available - Keycloak may not be running")
         }
     }
 
