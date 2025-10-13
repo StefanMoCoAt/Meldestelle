@@ -26,16 +26,3 @@ keycloak:
   client-id: ${KEYCLOAK_CLIENT_ID:api-gateway}
   public-client: false
   bearer-only: true
-
-# Gateway-spezifische Sicherheitskonfiguration
-gateway:
-  security:
-    jwt:
-      # Enable JWT validation via Spring Security OAuth2 Resource Server
-      enabled: true
-    keycloak:
-      # Custom JWT filter DISABLED - using Spring Security oauth2ResourceServer instead
-      # This prevents duplicate authentication and ensures proper JWT signature validation
-      enabled: false
-      server-url: ${KEYCLOAK_SERVER_URL:http://keycloak:8080}
-      realm: ${KEYCLOAK_REALM:meldestelle}

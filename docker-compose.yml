@@ -255,8 +255,6 @@ services:
       KEYCLOAK_REALM: meldestelle
       KEYCLOAK_CLIENT_ID: api-gateway
       KEYCLOAK_CLIENT_SECRET: K5RqonwVOaxPKaXVH4mbthSRbjRh5tOK
-      # Custom JWT filter disabled - using oauth2ResourceServer instead
-      GATEWAY_SECURITY_KEYCLOAK_ENABLED: "false"
     ports:
       - "${GATEWAY_PORT:-8081}:8081"
     depends_on:

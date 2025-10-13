@@ -11,7 +11,7 @@ import org.springframework.test.context.TestPropertySource
  * Simplified integration test for Keycloak Gateway integration.
  * This test verifies that the Spring context can initialize properly with Keycloak configuration
  * without requiring actual Testcontainers, focusing on resolving the OAuth2 ResourceServer
- * auto-configuration timing issue.
+ * autoconfiguration timing issue.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("keycloak-integration-test")

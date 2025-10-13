@@ -19,7 +19,6 @@ dependencies {
     // === Core Dependencies ===
     implementation(projects.core.coreUtils)
     implementation(projects.platform.platformDependencies)
-    implementation(projects.infrastructure.auth.authClient)
     implementation(projects.infrastructure.monitoring.monitoringClient)
 
     // === GATEWAY-SPEZIFISCHE ABHÄNGIGKEITEN ===
@@ -30,7 +29,6 @@ dependencies {
     implementation(libs.spring.boot.starter.actuator) // Wichtig für Health & Metrics
     implementation(libs.bundles.logging)
     implementation(libs.bundles.jackson.kotlin)
-    implementation(project(":infrastructure:event-store:redis-event-store"))
     implementation(project(":infrastructure:event-store:redis-event-store"))
 
     // === Test Dependencies ===

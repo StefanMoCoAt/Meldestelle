@@ -43,7 +43,6 @@ include(":platform:platform-testing")
 
 // Infrastructure modules
 include(":infrastructure:gateway")
-include(":infrastructure:auth:auth-client")
 include(":infrastructure:auth:auth-server")
 include(":infrastructure:messaging:messaging-client")
 include(":infrastructure:messaging:messaging-config")

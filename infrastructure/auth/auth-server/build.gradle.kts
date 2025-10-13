@@ -25,8 +25,6 @@ dependencies {
     implementation(platform(projects.platform.platformBom))
     // Stellt gemeinsame Abhängigkeiten bereit.
     implementation(projects.platform.platformDependencies)
-    // Nutzt die Client-Logik für die Kommunikation mit Keycloak.
-    implementation(projects.infrastructure.auth.authClient)
     // Spring Boot Starter für einen Web-Service.
     // OPTIMIERUNG: Verwendung des `spring-boot-essentials`-Bundles.
     implementation(libs.bundles.spring.boot.essentials)
