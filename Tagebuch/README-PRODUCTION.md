@@ -72,7 +72,7 @@ ln -sf config/.env.prod .env
 
 ### 3. SSL-Zertifikate einrichten
 
-Siehe [SSL-Zertifikat Setup Anleitung](config/ssl/README-de.md) für detaillierte Anweisungen.
+Siehe [SSL-Zertifikat Setup Anleitung](../config/ssl/README-de.md) für detaillierte Anweisungen.
 
 #### Schnellstart mit Let's Encrypt
 

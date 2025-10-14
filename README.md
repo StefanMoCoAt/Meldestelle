@@ -103,7 +103,7 @@ Dies startet alle erforderlichen Dienste wie PostgreSQL, Redis, Keycloak, Kafka,
 
 #### Produktionsumgebung
 
-Für die Produktionsumgebung siehe **[README-PRODUCTION.md](README-PRODUCTION.md)** - enthält:
+Für die Produktionsumgebung siehe **[README-PRODUCTION.md](Tagebuch/README-PRODUCTION.md)** - enthält:
 - Umfassende Sicherheitskonfiguration
 - SSL/TLS-Setup
 - Detaillierte Troubleshooting-Anleitung
@@ -111,7 +111,7 @@ Für die Produktionsumgebung siehe **[README-PRODUCTION.md](README-PRODUCTION.md
 
 #### Umgebungsvariablen
 
-Für die Konfiguration von Umgebungsvariablen siehe **[README-ENV.md](README-ENV.md)** - enthält:
+Für die Konfiguration von Umgebungsvariablen siehe **[README-ENV.md](Tagebuch/README-ENV.md)** - enthält:
 - Vollständige Umgebungsvariablen-Dokumentation
 - Validierungsskripte
 - Konfigurationsbeispiele
