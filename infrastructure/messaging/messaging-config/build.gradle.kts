@@ -8,17 +8,13 @@ plugins {
 }
 
 // Deaktiviert die Erstellung eines ausführbaren Jars für dieses Bibliotheks-Modul.
-tasks.getByName("bootJar") {
+tasks.bootJar {
     enabled = false
 }
 
-// Deaktiviert bootRun und bootTestRun für dieses Bibliotheks-Modul, da es keine ausführbare Anwendung ist.
-tasks.getByName("bootRun") {
-    enabled = false
-}
-
-tasks.getByName("bootTestRun") {
-    enabled = false
+// Stellt sicher, dass stattdessen ein reguläres Jar gebaut wird
+tasks.jar {
+    enabled = true
 }
 
 dependencies {

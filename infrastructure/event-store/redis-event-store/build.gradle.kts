@@ -42,6 +42,9 @@ dependencies {
     // Zusätzliche Test-Dependencies für erweiterte Event-Store-Tests
     testImplementation(libs.kotlinx.serialization.json)
     testImplementation(libs.reactor.test)
+    // Für Integration Tests mit beiden Redis-Modulen
+    testImplementation(projects.infrastructure.cache.cacheApi)
+    testImplementation(projects.infrastructure.cache.redisCache)
 }
 
 // === Task Configuration ===

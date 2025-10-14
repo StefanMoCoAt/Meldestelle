@@ -29,7 +29,6 @@ dependencies {
     implementation(libs.spring.boot.starter.actuator) // Wichtig für Health & Metrics
     implementation(libs.bundles.logging)
     implementation(libs.bundles.jackson.kotlin)
-    implementation(project(":infrastructure:event-store:redis-event-store"))
 
     // === Test Dependencies ===
     testImplementation(projects.platform.platformTesting)
