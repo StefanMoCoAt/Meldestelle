@@ -3,6 +3,7 @@ package at.mocode.infrastructure.cache.redis
 import at.mocode.infrastructure.cache.api.CacheConfiguration
 import at.mocode.infrastructure.cache.api.CacheSerializer
 import at.mocode.infrastructure.cache.api.DefaultCacheConfiguration
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -66,7 +67,9 @@ class RedisConfiguration {
      * @return Redis template
      */
     @Bean
-    fun redisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, ByteArray> {
+    fun redisTemplate(
+        @Qualifier("redisConnectionFactory") connectionFactory: RedisConnectionFactory
+    ): RedisTemplate<String, ByteArray> {
         return RedisTemplate<String, ByteArray>().apply {
             setConnectionFactory(connectionFactory)
             keySerializer = StringRedisSerializer()

@@ -96,7 +96,7 @@ class RedisCacheAndEventStoreIntegrationTest {
     class TestConfig {
         @Bean
         fun distributedCache(
-            redisTemplate: RedisTemplate<String, ByteArray>,
+            @Qualifier("redisTemplate") redisTemplate: RedisTemplate<String, ByteArray>,
             cacheConfiguration: CacheConfiguration
         ): DistributedCache {
             return RedisDistributedCache(
@@ -148,7 +148,7 @@ class RedisCacheAndEventStoreIntegrationTest {
         )
 
         println("[DEBUG_LOG] EventStore: Appending event for aggregateId=$aggregateId")
-        eventStore.appendToStream(event, aggregateId, -1L)
+        eventStore.appendToStream(event, aggregateId, 0L)
 
         val loadedEvents = eventStore.readFromStream(aggregateId)
         println("[DEBUG_LOG] EventStore: Loaded ${loadedEvents.size} events")
@@ -216,7 +216,7 @@ class RedisCacheAndEventStoreIntegrationTest {
             eventType = EventType("TestEvent"),
             data = mapOf("key" to sharedKey)
         )
-        eventStore.appendToStream(event, aggregateId, -1L)
+        eventStore.appendToStream(event, aggregateId, 0L)
         println("[DEBUG_LOG] Stored event in event store with aggregateId=$aggregateId")
 
         // Both should be retrievable independently
@@ -244,7 +244,7 @@ class RedisCacheAndEventStoreIntegrationTest {
         val data: Map<String, String>,
         override val eventId: EventId = EventId(Uuid.random()),
         override val timestamp: kotlin.time.Instant = kotlin.time.Clock.System.now(),
-        override val version: EventVersion = EventVersion(0),
+        override val version: EventVersion = EventVersion(1),
         override val correlationId: CorrelationId? = null,
         override val causationId: CausationId? = null
     ) : DomainEvent
