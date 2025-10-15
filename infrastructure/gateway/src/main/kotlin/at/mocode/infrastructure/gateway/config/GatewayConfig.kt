@@ -20,7 +20,7 @@ import kotlin.uuid.Uuid
  */
 
 /**
- * Global Filter für Korrelations-IDs zur Request-Verfolgung.
+ * Global Filter für Correlations-IDs zur Request-Verfolgung.
  */
 @Component
 class CorrelationIdFilter : GlobalFilter, Ordered {

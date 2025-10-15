@@ -1,23 +1,23 @@
 # Database Diagnostic Report - Exposed Framework Initialization
 
-## Diagnose Ergebnisse
+## Diagnostic Results
 
-### ✅ Database.connect() Aufrufe identifiziert
+### ✅ Database.connect() Calls Identified
 
-**Zentrale Implementierung:**
-- **DatabaseFactory.kt** (Zeile 66): `Database.connect(dataSource!!)`
-  - Verwendet HikariCP Connection Pooling
-  - Singleton-Pattern mit proper Konfiguration
-  - Unterstützt Verbindungsvalidierung und Leak-Detection
+**Central Implementation:**
+- **DatabaseFactory.kt** (Line 66): `Database.connect(dataSource!!)`
+  - Uses HikariCP Connection Pooling
+  - Singleton pattern with proper configuration
+  - Supports connection validation and leak detection
 
-**Service-spezifische Konfigurationen:**
-- **Events Service**: EventsDatabaseConfiguration.kt - verwendet DatabaseFactory.init()
-- **Horses Service**: DatabaseConfiguration.kt - verwendet DatabaseFactory.init()
-- **Members Service**: MembersDatabaseConfiguration.kt - verwendet DatabaseFactory.init()
-- **Masterdata Service**: MasterdataDatabaseConfiguration.kt - verwendet DatabaseFactory.init()
+**Service-specific Configurations:**
+- **Events Service**: EventsDatabaseConfiguration.kt - uses DatabaseFactory.init()
+- **Horses Service**: DatabaseConfiguration.kt - uses DatabaseFactory.init()
+- **Members Service**: MembersDatabaseConfiguration.kt - uses DatabaseFactory.init()
+- **Masterdata Service**: MasterdataDatabaseConfiguration.kt - uses DatabaseFactory.init()
 
-**⚠️ PROBLEM IDENTIFIZIERT - Gateway Konfiguration:**
-- **Gateway**: DatabaseConfig.kt (Zeile 25-30) - **direkter Database.connect() Aufruf**
+**⚠️ PROBLEM IDENTIFIED - Gateway Configuration:**
+- **Gateway**: DatabaseConfig.kt (Lines 25-30) - **direct Database.connect() call**
   ```kotlin
   Database.connect(
       url = databaseUrl,
@@ -27,75 +27,75 @@
   )
   ```
 
-### ✅ Exposed-Operationen (Transaktionen, Queries) lokalisiert
+### ✅ Exposed Operations (Transactions, Queries) Located
 
-**Schema-Initialisierung (in @PostConstruct):**
-- Alle Services: `transaction { SchemaUtils.createMissingTablesAndColumns(...) }`
-- Gateway: `transaction { SchemaUtils.createMissingTablesAndColumns(...) }` für alle Kontexte
+**Schema Initialization (in @PostConstruct):**
+- All Services: `transaction { SchemaUtils.createMissingTablesAndColumns(...) }`
+- Gateway: `transaction { SchemaUtils.createMissingTablesAndColumns(...) }` for all contexts
 
-**Business Logic Transaktionen:**
-- **TransactionalCreateHorseUseCase**: Verwendet `DatabaseFactory.dbQuery { ... }`
-- **DatabaseMigrator**: Verwendet `transaction { ... }` für Migrationen
+**Business Logic Transactions:**
+- **TransactionalCreateHorseUseCase**: Uses `DatabaseFactory.dbQuery { ... }`
+- **DatabaseMigrator**: Uses `transaction { ... }` for migrations
 
-**Test-Transaktionen:**
-- SimpleDatabaseTest.kt: Direkte `transaction { ... }` Aufrufe in Tests
+**Test Transactions:**
+- SimpleDatabaseTest.kt: Direct `transaction { ... }` calls in tests
 
-### ✅ Initialisierungsreihenfolge analysiert
+### ✅ Initialization Order Analyzed
 
-**Korrekte Reihenfolge in Services:**
+**Correct Order in Services:**
 1. `@PostConstruct` → `DatabaseFactory.init(config)` → `Database.connect()`
-2. Sofort danach: `transaction { SchemaUtils.createMissingTablesAndColumns(...) }`
-3. Business Logic: `DatabaseFactory.dbQuery { ... }` für Transaktionen
+2. Immediately after: `transaction { SchemaUtils.createMissingTablesAndColumns(...) }`
+3. Business Logic: `DatabaseFactory.dbQuery { ... }` for transactions
 
-**⚠️ PROBLEM - Gateway Initialisierung:**
-1. Ktor Application.configureDatabase() → direkter `Database.connect()`
-2. Sofort danach: `transaction { ... }` für alle Service-Schemas
+**⚠️ PROBLEM - Gateway Initialization:**
+1. Ktor Application.configureDatabase() → direct `Database.connect()`
+2. Immediately after: `transaction { ... }` for all service schemas
 
-## 🚨 Identifizierte Probleme
+## 🚨 Identified Problems
 
-### 1. **Inkonsistente Database.connect() Implementierung**
-- **Services**: Verwenden zentralen DatabaseFactory mit Connection Pooling
-- **Gateway**: Direkter Database.connect() ohne Connection Pooling
-- **Risiko**: Unterschiedliche Verbindungsqualität und -management
+### 1. **Inconsistent Database.connect() Implementation**
+- **Services**: Use central DatabaseFactory with Connection Pooling
+- **Gateway**: Direct Database.connect() without Connection Pooling
+- **Risk**: Different connection quality and management
 
-### 2. **Potentielle Race Conditions**
-- Gateway und Services initialisieren unabhängig voneinander
-- Beide versuchen, Schemas für dieselben Tabellen zu erstellen
-- **Risiko**: Konflikte bei paralleler Initialisierung
+### 2. **Potential Race Conditions**
+- Gateway and services initialize independently
+- Both attempt to create schemas for the same tables
+- **Risk**: Conflicts during parallel initialization
 
-### 3. **Verletzung der Separation of Concerns**
-- Gateway verwaltet Schemas für alle Services
-- Services verwalten ihre eigenen Schemas
-- **Risiko**: Doppelte Schema-Initialisierung
+### 3. **Violation of Separation of Concerns**
+- Gateway manages schemas for all services
+- Services manage their own schemas
+- **Risk**: Duplicate schema initialization
 
-### 4. **Fehlende Initialisierungsreihenfolge-Garantien**
-- Keine explizite Abhängigkeitsreihenfolge zwischen Gateway und Services
-- **Risiko**: Exposed-Operationen vor Database.connect()
+### 4. **Missing Initialization Order Guarantees**
+- No explicit dependency order between Gateway and Services
+- **Risk**: Exposed operations before Database.connect()
 
-## ✅ Empfehlungen
+## ✅ Recommendations
 
-### 1. **Gateway auf DatabaseFactory umstellen**
+### 1. **Switch Gateway to DatabaseFactory**
 ```kotlin
-// Statt direktem Database.connect():
+// Instead of direct Database.connect():
 fun Application.configureDatabase() {
-    val config = DatabaseConfig.fromEnv() // oder aus Ktor Config
+    val config = DatabaseConfig.fromEnv() // or from Ktor Config
     DatabaseFactory.init(config)
-    // Schema-Initialisierung entfernen oder koordinieren
+    // Remove or coordinate schema initialization
 }
 ```
 
-### 2. **Schema-Initialisierung koordinieren**
-**Option A**: Nur Services verwalten ihre Schemas (empfohlen)
+### 2. **Coordinate Schema Initialization**
+**Option A**: Only services manage their schemas (recommended)
 ```kotlin
-// Gateway: Nur Verbindung, keine Schema-Initialisierung
+// Gateway: Only connection, no schema initialization
 fun Application.configureDatabase() {
     DatabaseFactory.init(DatabaseConfig.fromEnv())
 }
 ```
 
-**Option B**: Zentralisierte Schema-Verwaltung
+**Option B**: Centralized schema management
 ```kotlin
-// Separater DatabaseSchemaInitializer mit @Order Annotation
+// Separate DatabaseSchemaInitializer with @Order annotation
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class DatabaseSchemaInitializer {
@@ -106,9 +106,9 @@ class DatabaseSchemaInitializer {
 }
 ```
 
-### 3. **Startup-Reihenfolge sicherstellen**
+### 3. **Ensure Startup Order**
 ```kotlin
-// Services mit @DependsOn
+// Services with @DependsOn
 @Configuration
 @DependsOn("databaseInitializer")
 class HorsesDatabaseConfiguration {
@@ -116,9 +116,9 @@ class HorsesDatabaseConfiguration {
 }
 ```
 
-### 4. **Einheitliche Konfiguration**
+### 4. **Unified Configuration**
 ```kotlin
-// Alle Komponenten verwenden DatabaseFactory
+// All components use DatabaseFactory
 class SomeService {
     suspend fun doSomething() {
         DatabaseFactory.dbQuery {
@@ -128,21 +128,25 @@ class SomeService {
 }
 ```
 
-## 📋 Zusammenfassung
+## 📋 Summary
 
-**✅ Korrekt implementiert:**
-- Alle Services verwenden proper @PostConstruct → Database.connect() → Exposed operations Reihenfolge
-- DatabaseFactory bietet robuste Connection Pool Konfiguration
-- Business Logic verwendet korrekte Transaktionsmuster
+**✅ Correctly implemented:**
+- All services use proper @PostConstruct → Database.connect() → Exposed operations sequence
+- DatabaseFactory provides robust Connection Pool configuration
+- Business logic uses correct transaction patterns
 
-**⚠️ Zu beheben:**
-- Gateway Database.connect() Inkonsistenz
-- Potentielle Race Conditions bei Schema-Initialisierung
-- Fehlende Startup-Reihenfolge-Koordination
+**⚠️ To be fixed:**
+- Gateway Database.connect() inconsistency
+- Potential race conditions in schema initialization
+- Missing startup order coordination
 
-**🎯 Priorität:**
-1. **Hoch**: Gateway auf DatabaseFactory umstellen
-2. **Mittel**: Schema-Initialisierung koordinieren
-3. **Niedrig**: Startup-Reihenfolge explizit definieren
+**🎯 Priority:**
+1. **High**: Switch Gateway to DatabaseFactory
+2. **Medium**: Coordinate schema initialization
+3. **Low**: Explicitly define startup order
 
-Die Reihenfolge der Initialisierung ist grundsätzlich korrekt, aber die Inkonsistenz zwischen Gateway und Services sollte behoben werden, um potentielle Probleme zu vermeiden.
+The initialization sequence is fundamentally correct, but the inconsistency between Gateway and Services should be resolved to avoid potential problems.
+
+---
+
+*Last updated: July 25, 2025*

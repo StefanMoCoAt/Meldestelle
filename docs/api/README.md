@@ -36,12 +36,12 @@ API Services
 
 ### Entwicklungsumgebung
 ```
-Base URL: http://localhost:8080/api
+Base URL: http://localhost:8081/api
 ```
 
 ### Produktionsumgebung
 ```
-Base URL: https://api.meldestelle.at/api
+Base URL: https://api.meldestelle.yourdomain.com/api
 ```
 
 ## API-Module Übersicht

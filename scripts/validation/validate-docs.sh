@@ -197,6 +197,39 @@ calculate_completeness_score() {
     fi
 }
 
+# Optional external link check (lychee)
+link_check() {
+    log_info "Running external link check (if 'lychee' is available)..."
+    ((CHECKS++))
+    if command -v lychee &> /dev/null; then
+        # Allow common transient codes and skip localhost links
+        lychee --no-progress --accept 200,204,301,302,429 --exclude "localhost|127.0.0.1|yourdomain.com" docs/**/*.md || {
+            log_error "Lychee reported broken external links"
+        }
+    else
+        log_warning "'lychee' not found, skipping external link check"
+    fi
+}
+
+# Optional PlantUML render check
+plantuml_check() {
+    log_info "Rendering PlantUML diagrams to validate syntax (if 'plantuml' is available)..."
+    ((CHECKS++))
+    if command -v plantuml &> /dev/null; then
+        # Render to SVG; failures should surface as non-zero exit
+        # Note: This may produce SVGs next to the .puml files in CI workspace
+        if compgen -G "docs/architecture/**/*.puml" > /dev/null; then
+            plantuml -tsvg -failfast2 docs/architecture/**/*.puml || log_error "PlantUML rendering failed"
+        elif compgen -G "docs/**/*.puml" > /dev/null; then
+            plantuml -tsvg -failfast2 docs/**/*.puml || log_error "PlantUML rendering failed"
+        else
+            log_warning "No .puml files found to render"
+        fi
+    else
+        log_warning "'plantuml' not found, skipping diagram rendering"
+    fi
+}
+
 # Main execution
 main() {
     echo "📚 Meldestelle Documentation Validation"
@@ -208,6 +241,8 @@ main() {
     check_documentation_consistency
     check_api_documentation
     check_code_examples
+    link_check
+    plantuml_check
     calculate_completeness_score
 
     echo ""

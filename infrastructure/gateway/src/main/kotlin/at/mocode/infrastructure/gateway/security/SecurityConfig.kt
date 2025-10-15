@@ -66,7 +66,7 @@ class SecurityConfig(
      */
     @Bean
     fun reactiveJwtDecoder(
-        @Value("\${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}") jwkSetUri: String
+        @Value($$"${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}") jwkSetUri: String
     ): ReactiveJwtDecoder {
         return if (jwkSetUri.isNotBlank()) {
             try {
@@ -114,7 +114,7 @@ class SecurityConfig(
 }
 
 /**
- * Konfigurations-Properties für alle sicherheitsrelevanten Einstellungen des Gateways.
+ * Configurations-Properties für alle sicherheitsrelevanten Einstellungen des Gateways.
  */
 @ConfigurationProperties(prefix = "gateway.security")
 data class GatewaySecurityProperties(

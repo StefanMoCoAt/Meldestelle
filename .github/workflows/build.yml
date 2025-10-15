@@ -25,3 +25,6 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew build
+
+    - name: Validate documentation
+      run: scripts/validation/validate-docs.sh

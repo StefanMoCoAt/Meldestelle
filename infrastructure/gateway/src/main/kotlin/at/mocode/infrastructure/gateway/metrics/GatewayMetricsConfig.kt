@@ -75,7 +75,7 @@ class GatewayMetricsConfig {
      * Bean für Request Duration Timer - entfernt um Konflikte mit dem WebFilter zu vermeiden.
      * Die Request-Zeiten werden automatisch im GatewayMetricsWebFilter erfasst.
      */
-    // @Bean - Entfernt um Prometheus Meter-Konflikte zu vermeiden
+    // @Bean - entfernt, um Prometheus Meter-Konflikte zu vermeiden,
     // fun requestTimer(meterRegistry: MeterRegistry): Timer { ... }
 
     /**
