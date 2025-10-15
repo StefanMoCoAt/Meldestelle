@@ -30,18 +30,18 @@ log_success() {
 
 log_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
-    ((WARNINGS++))
+    ((++WARNINGS))
 }
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
-    ((ERRORS++))
+    ((++ERRORS))
 }
 
 # Check if required directories exist
 check_directory_structure() {
     log_info "Checking documentation directory structure..."
-    ((CHECKS++))
+    ((++CHECKS))
 
     required_dirs=(
         "docs"
@@ -62,7 +62,7 @@ check_directory_structure() {
 # Check if all modules have README files
 check_module_readmes() {
     log_info "Checking module README files..."
-    ((CHECKS++))
+    ((++CHECKS))
 
     modules=(
         "members"
@@ -86,7 +86,7 @@ check_module_readmes() {
 # Check for German translations
 check_german_translations() {
     log_info "Checking German translations..."
-    ((CHECKS++))
+    ((++CHECKS))
 
     # Find English docs that should have German translations
     english_docs=$(find docs -name "*.md" | grep -v "\-de\.md$" | grep -v "README.md")
@@ -104,7 +104,7 @@ check_german_translations() {
 # Check documentation consistency
 check_documentation_consistency() {
     log_info "Checking documentation consistency..."
-    ((CHECKS++))
+    ((++CHECKS))
 
     # Check for consistent date format
     inconsistent_dates=$(grep -r "Letzte Aktualisierung" docs/ | grep -v "25. Juli 2025" || true)
@@ -141,7 +141,7 @@ check_documentation_consistency() {
 # Check API documentation completeness
 check_api_documentation() {
     log_info "Checking API documentation..."
-    ((CHECKS++))
+    ((++CHECKS))
 
     # Check if API controllers have corresponding documentation
     controllers=$(find . -name "*Controller.kt" -type f | grep -E "(members|horses|events|masterdata)" | wc -l)
@@ -157,7 +157,7 @@ check_api_documentation() {
 # Check code examples in documentation
 check_code_examples() {
     log_info "Checking code examples in documentation..."
-    ((CHECKS++))
+    ((++CHECKS))
 
     # Find Kotlin code blocks and check basic syntax
     kotlin_blocks=$(grep -r "```kotlin" docs/ | wc -l)
@@ -200,7 +200,7 @@ calculate_completeness_score() {
 # Optional external link check (lychee)
 link_check() {
     log_info "Running external link check (if 'lychee' is available)..."
-    ((CHECKS++))
+    ((++CHECKS))
     if command -v lychee &> /dev/null; then
         # Allow common transient codes and skip localhost links
         lychee --no-progress --accept 200,204,301,302,429 --exclude "localhost|127.0.0.1|yourdomain.com" docs/**/*.md || {
