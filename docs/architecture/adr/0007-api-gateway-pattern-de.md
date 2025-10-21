@@ -19,22 +19,22 @@ Wir benötigten eine Lösung, die die Client-Service-Kommunikation vereinfachen 
 
 ## Entscheidung
 
-Wir haben uns entschieden, das API-Gateway-Muster mit Ktor als Framework zu implementieren. Das API-Gateway dient als einziger Eingangspunkt für alle Client-Anfragen und bietet die folgenden Funktionen:
+Wir haben uns entschieden, das API-Gateway-Muster mit Spring Cloud Gateway (Spring Boot) zu implementieren. Das API-Gateway dient als einziger Eingangspunkt für alle Client-Anfragen und bietet die folgenden Funktionen:
 
-1. **Anfrage-Routing**: Leitet Anfragen an die entsprechenden Microservices weiter
-2. **Authentifizierung und Autorisierung**: Integriert sich mit Keycloak ([ADR-0006](0006-authentication-authorization-keycloak-de.md)), um Benutzer zu authentifizieren und Tokens zu validieren
-3. **Rate-Limiting**: Verhindert Missbrauch durch Begrenzung der Anzahl von Anfragen von einem einzelnen Client
-4. **Anfrage/Antwort-Transformation**: Transformiert Anfragen und Antworten nach Bedarf für verschiedene Clients
-5. **Logging und Monitoring**: Bietet zentralisiertes Logging und Monitoring aller API-Anfragen
-6. **Caching**: Speichert Antworten im Cache, um die Leistung zu verbessern
-7. **API-Dokumentation**: Hostet OpenAPI-Dokumentation für alle Dienste
-8. **Service-Discovery**: Entdeckt Dienstinstanzen dynamisch
+1. **Anfrage-Routing**: Deklaratives Routing auf Basis von Prädikaten und Filtern
+2. **Authentifizierung und Autorisierung**: Integration mit Keycloak ([ADR-0006](0006-authentication-authorization-keycloak-de.md)), Validierung über JWKs; Kontext-Propagation zu Backends
+3. **Rate-Limiting**: Token-Bucket/Burst-Limits via Gateway-Filter (optional Redis-gestützt)
+4. **Anfrage/Antwort-Transformation**: Manipulation von Headern/Body per Global/Gateway-Filtern
+5. **Logging und Monitoring**: Micrometer/Prometheus, strukturierte Logs, verteiltes Tracing
+6. **Caching**: Selektiv per Downstream oder Reverse-Proxy; Gateway-seitig per Filter möglich
+7. **API-Dokumentation**: Aggregation/Weiterleitung von OpenAPI-Dokumentation
+8. **Service-Discovery**: Integration mit Consul/Eureka
 
 Unsere Implementierung umfasst:
-- Ein Ktor-basiertes API-Gateway, das als containerisierter Dienst bereitgestellt wird
+- Eine Spring-Cloud-Gateway-Applikation (Spring Boot), containerisiert
 - Integration mit Keycloak für Authentifizierung und Autorisierung
-- Benutzerdefinierte Plugins für Rate-Limiting, Logging und Monitoring
-- OpenAPI-Dokumentationsgenerierung
+- Benutzerdefinierte Global/Gateway-Filter für Rate-Limiting, Logging, Monitoring
+- Micrometer/Actuator für Metriken und Health
 - Service-Discovery-Integration
 
 ## Konsequenzen
@@ -74,8 +74,7 @@ Wir haben die Implementierung separater Backend for Frontend (BFF)-Dienste für 
 Wir haben die Verwendung eines Service Mesh wie Istio oder Linkerd zur Handhabung der Service-zu-Service-Kommunikation in Betracht gezogen. Dies hätte viele der gleichen Vorteile für die Service-zu-Service-Kommunikation geboten, hätte aber die Herausforderungen der Client-zu-Service-Kommunikation nicht so effektiv adressiert.
 
 ## Referenzen
-
-- [API-Gateway-Muster](https://microservices.io/patterns/apigateway.html)
-- [Ktor-Dokumentation](https://ktor.io/docs/)
-- [Gateway-Routing-Muster](https://docs.microsoft.com/de-de/azure/architecture/patterns/gateway-routing)
-- [Backend for Frontend-Muster](https://samnewman.io/patterns/architectural/bff/)
+- https://spring.io/projects/spring-cloud-gateway
+- https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html
+- https://www.keycloak.org/documentation
+- https://microservices.io/patterns/apigateway.html

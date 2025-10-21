@@ -12,7 +12,7 @@ System_Boundary(meldestelle, "Meldestelle") {
     Container(desktopApp, "Desktop-Anwendung", "Kotlin, Compose Multiplatform", "Bietet eine umfangreiche Benutzeroberfläche für Administratoren und Veranstaltungsorganisatoren")
     Container(webApp, "Web-Anwendung", "Kotlin, Compose Multiplatform", "Bietet eine Weboberfläche für Mitglieder und Pferdebesitzer")
 
-    Container(apiGateway, "API-Gateway", "Kotlin, Ktor", "Leitet Anfragen an entsprechende Dienste weiter, verwaltet Authentifizierung und Autorisierung")
+    Container(apiGateway, "API-Gateway", "Kotlin, Spring Cloud Gateway", "Leitet Anfragen an entsprechende Dienste weiter, verwaltet Authentifizierung und Autorisierung")
 
     Container(masterdataService, "Stammdaten-Dienst", "Kotlin, Spring Boot", "Verwaltet Stammdaten wie Standorte, Disziplinen usw.")
     Container(membersService, "Mitglieder-Dienst", "Kotlin, Spring Boot", "Verwaltet Mitgliederregistrierung und -profile")
