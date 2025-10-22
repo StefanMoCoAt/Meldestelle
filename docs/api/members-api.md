@@ -1,4 +1,15 @@
-# Members API Documentation
+---
+modul: members-api
+status: active
+last_reviewed: 2025-10-22
+review_cycle: 180d
+summary: Dokumentation der Members‑API (Endpunkte, Parameter, Beispiele).
+yt_epic: MP-1
+yt_issues: []
+tags: [api, members]
+---
+
+# Members‑API – Dokumentation
 
 ## Überblick
 

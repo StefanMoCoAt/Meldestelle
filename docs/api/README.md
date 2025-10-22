@@ -1,4 +1,15 @@
-# Meldestelle REST API Documentation
+---
+modul: api-overview
+status: active
+last_reviewed: 2025-10-22
+review_cycle: 180d
+summary: Überblick und Einstieg in die REST‑APIs der Meldestelle.
+yt_epic: MP-1
+yt_issues: [MP-7]
+tags: [api, overview]
+---
+
+# Meldestelle – REST‑API Dokumentation
 
 ## Überblick
 

@@ -1,0 +1,3 @@
+default: true
+MD013: false  # Zeilenlänge entspannt
+MD033: false  # Inline-HTML erlaubt
