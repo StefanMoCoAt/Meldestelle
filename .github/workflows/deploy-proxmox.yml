@@ -3,13 +3,9 @@
 # Meldestelle Project - CI/CD Pipeline
 # ===================================================================
 
-name: Deploy to Proxmox Server
+name: Deploy Proxmox (manual)
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
   workflow_dispatch: # Manueller Trigger
 
 env:

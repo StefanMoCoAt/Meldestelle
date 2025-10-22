@@ -330,3 +330,28 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 **Geschätzter Gesamtaufwand:** 6-8 Wochen (bei 1 Vollzeit-Entwickler)
 
 **Empfohlener Start:** Sofort mit Phase 1, dann iterativ durch die Phasen
+
+
+---
+### Dokumentations-Sprachbereinigung (2025-10-22)
+Im Zuge der Vereinheitlichung auf ausschließlich deutschsprachige Dokumentation wurden folgende Dateien entfernt:
+
+Gelöschte ADRs (englische Varianten):
+- docs/architecture/adr/0000-adr-template.md
+- docs/architecture/adr/0001-modular-architecture.md
+- docs/architecture/adr/0002-domain-driven-design.md
+- docs/architecture/adr/0003-microservices-architecture.md
+- docs/architecture/adr/0004-event-driven-communication.md
+- docs/architecture/adr/0005-polyglot-persistence.md
+- docs/architecture/adr/0006-authentication-authorization-keycloak.md
+- docs/architecture/adr/0007-api-gateway-pattern.md
+- docs/architecture/adr/0008-multiplatform-client-applications.md
+
+Gelöschte C4-Diagramme (englische Varianten):
+- docs/architecture/c4/01-context.puml
+- docs/architecture/c4/02-container.puml
+- docs/architecture/c4/03-component-events-service.puml
+
+Hinweis:
+- Alle verbleibenden ADRs und C4-Diagramme sind in deutscher Sprache vorhanden (Suffix -de) und verlinkt.
+- Weitere Doku-Dateien in docs/ sind deutsch (Front-Matter/Sprachindizien geprüft).

@@ -1,20 +1,27 @@
-*.iml
-.kotlin
-.gradle
+# General build artifacts
+build/
+out/
+.gradle/
 **/build/
-xcuserdata
-!src/**/build/
-local.properties
-.idea
+
+# IDE
+.idea/
+*.iml
+
+# Node
+node_modules/
+**/node_modules/
+
+# OS files
 .DS_Store
-captures
-.externalNativeBuild
-.cxx
-*.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-!*.xcodeproj/xcshareddata/
-!*.xcodeproj/project.xcworkspace/
-!*.xcworkspace/contents.xcworkspacedata
-**/xcshareddata/WorkspaceSettings.xcsettings
-/.env
-/kotlin-js-store/
+Thumbs.db
+
+# Logs
+logs/
+**/*.log
+
+# Kotlin/Java
+*.class
+
+# Generated diagrams
+build/diagrams/
