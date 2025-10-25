@@ -20,10 +20,11 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U meldestelle -d $${POSTGRES_DB}"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 12
+          --health-start-period 20s
 
       redis:
         image: redis:7-alpine
@@ -36,12 +37,13 @@ jobs:
           --health-retries 5
 
       keycloak:
-        image: quay.io/keycloak/keycloak:23.0
+        image: quay.io/keycloak/keycloak:24.0
         env:
           KEYCLOAK_ADMIN: admin
           KEYCLOAK_ADMIN_PASSWORD: admin
           KC_DB: postgres
-          KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+          # Nutze die existierende DB "meldestelle" statt "keycloak"
+          KC_DB_URL: jdbc:postgresql://postgres:5432/meldestelle
           KC_DB_USERNAME: meldestelle
           KC_DB_PASSWORD: meldestelle
         ports:
@@ -50,8 +52,9 @@ jobs:
           --health-cmd "curl --fail http://localhost:8080/health/ready || exit 1"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
-          --health-start-period 30s
+          --health-retries 12
+          --health-start-period 60s
+        command: [ "start-dev" ]
 
       zookeeper:
         image: confluentinc/cp-zookeeper:7.5.0
@@ -96,45 +99,55 @@ jobs:
           --health-start-period 10s
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
-    - name: Set up JDK 21
-      uses: actions/setup-java@v3
-      with:
-        java-version: 21
-        distribution: 'temurin'
-        cache: 'gradle'
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          cache: 'gradle'
 
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: wrapper
-        cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
-        cache-overwrite-existing: true
-        gradle-home-cache-includes: |
-          caches
-          notifications
-          jdks
-          wrapper
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: wrapper
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
+          cache-overwrite-existing: true
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+            wrapper
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-    - name: Run integration tests
-      run: ./gradlew integrationTest --no-daemon --parallel
-      env:
-        # Environment variables for Redis connection
-        REDIS_HOST: localhost
-        REDIS_PORT: 6379
-        # Spring profile for integration tests
-        SPRING_PROFILES_ACTIVE: integration-test
+      - name: Run integration tests
+        run: ./gradlew integrationTest --no-daemon --parallel
+        env:
+          # Environment variables for Redis connection
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          # Spring profile for integration tests
+          SPRING_PROFILES_ACTIVE: integration-test
 
-    - name: Upload test reports
-      uses: actions/upload-artifact@v5
-      if: always()
-      with:
-        name: integration-test-reports
-        path: |
-          **/build/reports/tests/integrationTest/
-          **/build/test-results/integrationTest/
-        retention-days: 7
+      - name: Upload test reports
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: integration-test-reports
+          path: |
+            **/build/reports/tests/integrationTest/
+            **/build/test-results/integrationTest/
+          retention-days: 7
+
+      - name: Dump service logs on failure (Keycloak, Postgres)
+        if: failure()
+        run: |
+          echo "=== Docker ps ==="
+          docker ps -a
+          echo "=== Keycloak logs ==="
+          docker logs $(docker ps -a --filter "name=keycloak" --format "{{.ID}}") || true
+          echo "=== Postgres logs ==="
+          docker logs $(docker ps -a --filter "name=postgres" --format "{{.ID}}") || true
