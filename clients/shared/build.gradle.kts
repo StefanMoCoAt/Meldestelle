@@ -38,7 +38,7 @@ kotlin {
 
   // WASM, nur wenn explizit aktiviert
   if (enableWasm) {
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    @OptIn(ExperimentalWasmDsl::class)
     wasmJs { browser() }
   }
 
