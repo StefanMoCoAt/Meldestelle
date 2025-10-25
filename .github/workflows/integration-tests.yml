@@ -54,7 +54,7 @@ jobs:
           --health-timeout 5s
           --health-retries 12
           --health-start-period 60s
-        command: [ "start-dev" ]
+        #command: [ "start-dev" ]
 
       zookeeper:
         image: confluentinc/cp-zookeeper:7.5.0
