@@ -46,6 +46,7 @@ jobs:
           KC_DB_URL: jdbc:postgresql://postgres:5432/meldestelle
           KC_DB_USERNAME: meldestelle
           KC_DB_PASSWORD: meldestelle
+          KC_DEV_MODE: "true"
         ports:
           - 8180:8080
         options: >-
@@ -54,7 +55,6 @@ jobs:
           --health-timeout 5s
           --health-retries 12
           --health-start-period 60s
-        #command: [ "start-dev" ]
 
       zookeeper:
         image: confluentinc/cp-zookeeper:7.5.0
