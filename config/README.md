@@ -8,7 +8,8 @@
 
 Das **zentrale Konfigurationssystem** eliminiert Redundanzen über das gesamte Meldestelle-Projekt und stellt sicher, dass alle Konfigurationswerte aus einer **einzigen Quelle der Wahrheit** stammen.
 
-### Vor der Zentralisierung (Problem):
+### Vor der Zentralisierung (Problem)
+
 ```
 Port 8082 war in 38+ Dateien dupliziert:
 ├── gradle.properties
@@ -19,7 +20,8 @@ Port 8082 war in 38+ Dateien dupliziert:
 └── ... 33 weitere Dateien!
 ```
 
-### Nach der Zentralisierung (Lösung):
+### Nach der Zentralisierung (Lösung)
+
 ```
 Port 8082 einmalig in config/central.toml definiert:
 ├── config/central.toml              [SINGLE SOURCE OF TRUTH]
@@ -110,6 +112,7 @@ grafana = 3000
 ```
 
 **Synchronisiert folgende Dateien:**
+
 - `gradle.properties` - Service-Port-Eigenschaften
 - `docker-compose*.yml` - Port-Mappings und Environment-Variablen
 - `dockerfiles/*/Dockerfile` - EXPOSE-Statements
@@ -134,6 +137,7 @@ clients = "dev"             # Client Applications
 ```
 
 **Synchronisiert folgende Dateien:**
+
 - Alle `dockerfiles/*/Dockerfile` - `SPRING_PROFILES_ACTIVE` Build-Args
 - `docker-compose*.yml` - Spring-Profile Environment-Variablen
 - `docker/build-args/*.env` - Build-Argument-Dateien
@@ -213,6 +217,7 @@ vim config/central.toml
 ### Häufige Probleme
 
 #### Problem: Synchronisation schlägt fehl
+
 ```bash
 # Lösung: Validierung prüfen
 ./scripts/config-sync.sh validate
@@ -222,6 +227,7 @@ vim config/central.toml
 ```
 
 #### Problem: Inkonsistente Konfiguration
+
 ```bash
 # Lösung: Status prüfen und re-synchronisieren
 ./scripts/config-sync.sh status
@@ -229,6 +235,7 @@ vim config/central.toml
 ```
 
 #### Problem: Backup wiederherstellen
+
 ```bash
 # Backups anzeigen
 ls -la *.bak.*

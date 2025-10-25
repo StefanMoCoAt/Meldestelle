@@ -18,36 +18,48 @@ config/ssl/
 ## Zertifikat-Anforderungen
 
 ### 1. PostgreSQL SSL-Zertifikate
+
 Platzieren Sie die folgenden Dateien in `config/ssl/postgres/`:
+
 - `server.crt` - Server-Zertifikat
 - `server.key` - Privater Server-Schlüssel
 - `ca.crt` - Certificate Authority-Zertifikat
 
 ### 2. Redis TLS-Zertifikate
+
 Platzieren Sie die folgenden Dateien in `config/ssl/redis/`:
+
 - `redis.crt` - Redis Server-Zertifikat
 - `redis.key` - Privater Redis Server-Schlüssel
 - `ca.crt` - Certificate Authority-Zertifikat
 - `redis.dh` - Diffie-Hellman Parameter
 
 ### 3. Keycloak HTTPS-Zertifikate
+
 Platzieren Sie die folgenden Dateien in `config/ssl/keycloak/`:
+
 - `server.crt.pem` - Server-Zertifikat im PEM-Format
 - `server.key.pem` - Privater Server-Schlüssel im PEM-Format
 
 ### 4. Prometheus HTTPS-Zertifikate
+
 Platzieren Sie die folgenden Dateien in `config/ssl/prometheus/`:
+
 - `prometheus.crt` - Prometheus Server-Zertifikat
 - `prometheus.key` - Privater Prometheus Server-Schlüssel
 - `web.yml` - Prometheus Web-Konfigurationsdatei
 
 ### 5. Grafana HTTPS-Zertifikate
+
 Platzieren Sie die folgenden Dateien in `config/ssl/grafana/`:
+
 - `server.crt` - Grafana Server-Zertifikat
 - `server.key` - Privater Grafana Server-Schlüssel
 
 ### 6. Nginx SSL-Zertifikate
+
 Platzieren Sie die folgenden Dateien in `config/ssl/nginx/`:
+
 - `server.crt` - Haupt-SSL-Zertifikat
 - `server.key` - Privater Haupt-SSL-Schlüssel
 - `dhparam.pem` - Diffie-Hellman Parameter
@@ -57,6 +69,7 @@ Platzieren Sie die folgenden Dateien in `config/ssl/nginx/`:
 ⚠️ **Warnung**: Verwenden Sie selbstsignierte Zertifikate nur für Entwicklung und Tests. Nutzen Sie ordnungsgemäß von einer CA signierte Zertifikate in der Produktion.
 
 ### CA-Zertifikat generieren
+
 ```bash
 # CA privaten Schlüssel erstellen
 openssl genrsa -out ca.key 4096
@@ -67,6 +80,7 @@ openssl req -new -x509 -days 365 -key ca.key -out ca.crt \
 ```
 
 ### Server-Zertifikate generieren
+
 ```bash
 # Für jeden Service privaten Schlüssel und Certificate Signing Request generieren
 openssl genrsa -out server.key 2048
@@ -82,6 +96,7 @@ rm server.csr
 ```
 
 ### Diffie-Hellman Parameter generieren
+
 ```bash
 openssl dhparam -out dhparam.pem 2048
 ```
@@ -89,6 +104,7 @@ openssl dhparam -out dhparam.pem 2048
 ## Produktions-Zertifikat Setup
 
 ### Option 1: Let's Encrypt (Empfohlen)
+
 Verwenden Sie Certbot, um kostenlose SSL-Zertifikate zu erhalten:
 
 ```bash
@@ -104,13 +120,16 @@ sudo cp /etc/letsencrypt/live/ihre-domain.com/privkey.pem config/ssl/nginx/serve
 ```
 
 ### Option 2: Kommerzielle CA
+
 1. Certificate Signing Requests (CSRs) generieren
 2. CSRs an Ihre Certificate Authority übermitteln
 3. Signierte Zertifikate herunterladen
 4. Zertifikate in entsprechende Verzeichnisse platzieren
 
 ### Option 3: Interne CA
+
 Bei Verwendung einer internen Certificate Authority:
+
 1. CSRs für jeden Service generieren
 2. Zertifikate mit Ihrer internen CA signieren
 3. CA-Zertifikat an alle Clients verteilen
@@ -147,6 +166,7 @@ volumes:
 ## Zertifikat-Erneuerung
 
 ### Automatisierte Erneuerung (Let's Encrypt)
+
 Richten Sie einen Cron-Job für automatische Erneuerung ein:
 
 ```bash
@@ -155,9 +175,11 @@ Richten Sie einen Cron-Job für automatische Erneuerung ein:
 ```
 
 ### Manuelle Erneuerung
+
 1. Neue Zertifikate generieren
 2. Alte Zertifikate in SSL-Verzeichnissen ersetzen
 3. Betroffene Services neu starten:
+
    ```bash
    docker-compose -f docker-compose.prod.yml restart nginx keycloak grafana prometheus
    ```
@@ -177,6 +199,7 @@ Richten Sie einen Cron-Job für automatische Erneuerung ein:
 ### Häufige Probleme
 
 1. **Berechtigung verweigert**
+
    ```bash
    # Dateiberechtigungen korrigieren
    sudo chown -R $USER:$USER config/ssl/
@@ -185,6 +208,7 @@ Richten Sie einen Cron-Job für automatische Erneuerung ein:
    ```
 
 2. **Zertifikat-Verifizierung fehlgeschlagen**
+
    ```bash
    # Zertifikat verifizieren
    openssl x509 -in config/ssl/nginx/server.crt -text -noout
@@ -217,13 +241,16 @@ openssl x509 -in config/ssl/nginx/server.crt -text -noout
 ## Monitoring und Wartung
 
 ### Zertifikat-Überwachung
+
 Implementieren Sie Überwachung für:
+
 - Zertifikat-Ablaufdaten
 - Zertifikat-Gültigkeit
 - SSL/TLS-Handshake-Erfolg
 - Cipher-Suite-Verwendung
 
 ### Wartungsaufgaben
+
 - Regelmäßige Überprüfung der Zertifikat-Gültigkeit
 - Aktualisierung der Cipher-Suites
 - Überwachung der Sicherheitsupdates

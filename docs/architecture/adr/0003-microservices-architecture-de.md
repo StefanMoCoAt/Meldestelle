@@ -24,12 +24,14 @@ Wir haben uns entschieden, eine Microservices-Architektur zu implementieren, bei
 - **events-service**: Verwaltet Veranstaltungserstellung, -planung und -anmeldungen
 
 Jeder Dienst:
+
 - Hat sein eigenes Datenbankschema
 - Ist unabhängig bereitstellbar
 - Kommuniziert mit anderen Diensten über klar definierte APIs und nachrichtenbasierte Kommunikation
 - Ist für seine eigene Domänenlogik gemäß DDD-Prinzipien verantwortlich
 
 Wir haben auch unterstützende Infrastrukturdienste implementiert:
+
 - **gateway**: API-Gateway für Routing und Authentifizierung
 - **auth**: Authentifizierungs- und Autorisierungsdienst (Keycloak)
 - **cache**: Caching-Dienst (Redis)

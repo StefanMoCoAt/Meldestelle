@@ -11,16 +11,20 @@ summary: Schlanker Einstiegspunkt in die Dokumentation der Meldestelle. Nur die 
 Willkommen! Das ist der zentrale Einstieg in die Projektdokumentation. Starte hier.
 
 ## Start
+
 - Schnellstart lokal: how-to/start-local.md
 - Gesamtüberblick: overview/system-overview.md
 
 ## API
+
 - API-Übersicht: api/README.md
 
 ## Betrieb
+
 - Produktion (Proxmox/Nginx): how-to/deploy-proxmox-nginx.md
 
 ## Aktuelles Vorhaben
+
 - Now-Page: now/current.md
 
 Hinweis: Diese Seite ist der einzige offizielle Einstiegspunkt. Ältere Indizes (z. B. INDEX.md oder bilingualer Index) sind historisch bzw. entfernt.

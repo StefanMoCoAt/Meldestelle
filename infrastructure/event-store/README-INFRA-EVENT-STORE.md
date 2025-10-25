@@ -67,36 +67,36 @@ Das Modul folgt streng dem **Port-Adapter-Muster** (Hexagonal Architecture), um 
 ## Schlüsselfunktionen
 
 ### 🔒 Garantierte Konsistenz
-- **Atomare Transaktionen**: Schreibvorgänge in aggregatspezifische Streams und den globalen "all-events"-Stream werden innerhalb einer **Redis-Transaktion (`MULTI`/`EXEC`)** ausgeführt
-- **Optimistische Concurrency Control**: Verhindert Race Conditions durch `expectedVersion`-Prüfung mit `ConcurrencyException` bei Konflikten
-- **Eventual Consistency**: Garantiert, dass alle Events sowohl in aggregatspezifischen als auch globalen Streams verfügbar sind
+* **Atomare Transaktionen**: Schreibvorgänge in aggregatspezifische Streams und den globalen "all-events"-Stream werden innerhalb einer **Redis-Transaktion (`MULTI`/`EXEC`)** ausgeführt
+* **Optimistische Concurrency Control**: Verhindert Race Conditions durch `expectedVersion`-Prüfung mit `ConcurrencyException` bei Konflikten
+* **Eventual Consistency**: Garantiert, dass alle Events sowohl in aggregatspezifischen als auch globalen Streams verfügbar sind
 
 ### 🛡️ Resiliente Event-Verarbeitung
-- **Redis Consumer Groups**: Skalierbare und ausfallsichere Event-Verarbeitung mit automatischer Last-Verteilung
-- **Pending Message Recovery**: Robuste Logik zum "Claimen" von Nachrichten ausgefallener Consumer
-- **Retry-Mechanismen**: Automatische Wiederholung bei temporären Fehlern
-- **Graceful Degradation**: Kontinuierliche Funktion auch bei partiellen Ausfällen
+* **Redis Consumer Groups**: Skalierbare und ausfallsichere Event-Verarbeitung mit automatischer Last-Verteilung
+* **Pending Message Recovery**: Robuste Logik zum "Claimen" von Nachrichten ausgefallener Consumer
+* **Retry-Mechanismen**: Automatische Wiederholung bei temporären Fehlern
+* **Graceful Degradation**: Kontinuierliche Funktion auch bei partiellen Ausfällen
 
 ### 📊 Intelligente Serialisierung
-- **Metadata Separation**: Event-Metadaten und Nutzlast werden getrennt gespeichert für effiziente Stream-Analyse
-- **Type Registry**: Dynamische Event-Type-Registrierung für polymorphe Deserialisierung
-- **JSON-basiert**: Verwendung von Jackson für robuste, schema-flexible Serialisierung
+* **Metadata Separation**: Event-Metadaten und Nutzlast werden getrennt gespeichert für effiziente Stream-Analyse
+* **Type Registry**: Dynamische Event-Type-Registrierung für polymorphe Deserialisierung
+* **JSON-basiert**: Verwendung von Jackson für robuste, schema-flexible Serialisierung
 
 ### 🚀 Performance-Optimierung
-- **Stream-basierte Speicherung**: Optimale Performance durch Redis Streams
-- **Optimierte Batch-Operationen**: Alle Events einer Batch werden in einer einzigen Redis-Transaktion verarbeitet (bis zu 90% Performance-Verbesserung)
-- **Intelligente Version-Cache**: Thread-sicherer Cache mit Hit/Miss-Tracking für Stream-Versionen
-- **Connection Pooling**: Konfigurierbare Verbindungspools für optimale Resource-Nutzung
-- **Asynchrone Verarbeitung**: Non-blocking Event-Processing
+* **Stream-basierte Speicherung**: Optimale Performance durch Redis Streams
+* **Optimierte Batch-Operationen**: Alle Events einer Batch werden in einer einzigen Redis-Transaktion verarbeitet (bis zu 90% Performance-Verbesserung)
+* **Intelligente Version-Cache**: Thread-sicherer Cache mit Hit/Miss-Tracking für Stream-Versionen
+* **Connection Pooling**: Konfigurierbare Verbindungspools für optimale Resource-Nutzung
+* **Asynchrone Verarbeitung**: Non-blocking Event-Processing
 
 ### 📊 Enhanced Monitoring & Performance Tracking (NEW)
-- **Real-time Metrics Collection**: Automatisches Tracking aller Event-Store-Operationen mit detaillierten Performance-Metriken
-- **Comprehensive Operation Tracking**: Einzelne und Batch-Appends, Read-Operationen, Subscriptions mit Erfolgsraten
-- **Cache Performance Monitoring**: Detaillierte Hit/Miss-Ratios für optimale Cache-Tuning
-- **Concurrency Conflict Detection**: Spezifisches Tracking von Optimistic-Locking-Konflikten
-- **Automated Performance Logging**: Periodische Performance-Reports alle 5 Minuten mit strukturierten Metriken
-- **Event Throughput Analytics**: Tracking von Events/Sekunde für Capacity Planning
-- **Error Rate Monitoring**: Detaillierte Fehlerklassifizierung und -tracking
+* **Real-time Metrics Collection**: Automatisches Tracking aller Event-Store-Operationen mit detaillierten Performance-Metriken
+* **Comprehensive Operation Tracking**: Einzelne und Batch-Appends, Read-Operationen, Subscriptions mit Erfolgsraten
+* **Cache Performance Monitoring**: Detaillierte Hit/Miss-Ratios für optimale Cache-Tuning
+* **Concurrency Conflict Detection**: Spezifisches Tracking von Optimistic-Locking-Konflikten
+* **Automated Performance Logging**: Periodische Performance-Reports alle 5 Minuten mit strukturierten Metriken
+* **Event Throughput Analytics**: Tracking von Events/Sekunde für Capacity Planning
+* **Error Rate Monitoring**: Detaillierte Fehlerklassifizierung und -tracking
 
 ## Konfiguration
 
@@ -449,19 +449,19 @@ fun `consumer should process events reliably`() {
 
 ### Test-Features
 
-- **Testcontainers Integration**: Echte Redis-Instanz für Integrationstests
-- **Deterministische Tests**: Manueller Polling-Trigger statt Thread.sleep
-- **Saubere Test-Daten**: @Transient-Annotation für Event-Klassen
-- **Umfassende Szenarien**: Configuration, Error Handling, Stream, Resilience Tests
+* **Testcontainers Integration**: Echte Redis-Instanz für Integrationstests
+* **Deterministische Tests**: Manueller Polling-Trigger statt Thread.sleep
+* **Saubere Test-Daten**: @Transient-Annotation für Event-Klassen
+* **Umfassende Szenarien**: Configuration, Error Handling, Stream, Resilience Tests
 
 ## Performance & Monitoring
 
 ### Performance-Charakteristiken
 
-- **Durchsatz**: >10 000 Events/Sekunde bei optimaler Konfiguration
-- **Latenz**: <10ms für Event-Appending, <50ms für Event-Reading
-- **Skalierung**: Horizontal skalierbar durch Consumer Groups
-- **Speicher**: Effiziente Stream-basierte Speicherung
+* **Durchsatz**: >10 000 Events/Sekunde bei optimaler Konfiguration
+* **Latenz**: <10ms für Event-Appending, <50ms für Event-Reading
+* **Skalierung**: Horizontal skalierbar durch Consumer Groups
+* **Speicher**: Effiziente Stream-basierte Speicherung
 
 ### Monitoring-Metriken
 
@@ -514,6 +514,7 @@ class EventStoreHealthIndicator(
 ### Häufige Probleme
 
 #### 1. ConcurrencyException
+
 ```kotlin
 // Problem: Race Condition bei parallel Schreibvorgängen
 // Lösung: Retry-Logic mit exponential backoff
@@ -524,6 +525,7 @@ fun appendWithRetry(event: DomainEvent, streamId: UUID, expectedVersion: Long) {
 ```
 
 #### 2. Consumer Lag
+
 ```bash
 # Redis CLI - Check consumer group info
 XINFO GROUPS event-stream:aggregate-id
@@ -536,6 +538,7 @@ XCLAIM event-stream:aggregate-id event-processors consumer-name 60000 message-id
 ```
 
 #### 3. Speicher-Issues
+
 ```yaml
 # Redis Memory Optimization
 redis:
@@ -548,6 +551,7 @@ redis:
 ```
 
 #### 4. Verbindungsprobleme
+
 ```yaml
 # Connection troubleshooting
 redis:
@@ -584,12 +588,12 @@ redis-cli INFO memory
 
 ### Deployment Checklist
 
-- [ ] Redis Cluster verfügbar und erreichbar
-- [ ] Konfiguration für Umgebung angepasst
-- [ ] Consumer Groups erstellt (automatisch oder manuell)
-- [ ] Monitoring und Alerting konfiguriert
-- [ ] Health Checks implementiert
-- [ ] Backup-Strategie definiert
+* [ ] Redis Cluster verfügbar und erreichbar
+* [ ] Konfiguration für Umgebung angepasst
+* [ ] Consumer Groups erstellt (automatisch oder manuell)
+* [ ] Monitoring und Alerting konfiguriert
+* [ ] Health Checks implementiert
+* [ ] Backup-Strategie definiert
 
 ### Migration zwischen Versionen
 

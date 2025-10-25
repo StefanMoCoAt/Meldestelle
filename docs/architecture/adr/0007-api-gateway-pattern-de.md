@@ -31,6 +31,7 @@ Wir haben uns entschieden, das API-Gateway-Muster mit Spring Cloud Gateway (Spri
 8. **Service-Discovery**: Integration mit Consul/Eureka
 
 Unsere Implementierung umfasst:
+
 - Eine Spring-Cloud-Gateway-Applikation (Spring Boot), containerisiert
 - Integration mit Keycloak für Authentifizierung und Autorisierung
 - Benutzerdefinierte Global/Gateway-Filter für Rate-Limiting, Logging, Monitoring
@@ -74,7 +75,8 @@ Wir haben die Implementierung separater Backend for Frontend (BFF)-Dienste für 
 Wir haben die Verwendung eines Service Mesh wie Istio oder Linkerd zur Handhabung der Service-zu-Service-Kommunikation in Betracht gezogen. Dies hätte viele der gleichen Vorteile für die Service-zu-Service-Kommunikation geboten, hätte aber die Herausforderungen der Client-zu-Service-Kommunikation nicht so effektiv adressiert.
 
 ## Referenzen
-- https://spring.io/projects/spring-cloud-gateway
-- https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html
-- https://www.keycloak.org/documentation
-- https://microservices.io/patterns/apigateway.html
+
+- <https://spring.io/projects/spring-cloud-gateway>
+- <https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html>
+- <https://www.keycloak.org/documentation>
+- <https://microservices.io/patterns/apigateway.html>

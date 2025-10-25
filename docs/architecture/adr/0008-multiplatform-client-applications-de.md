@@ -13,6 +13,7 @@ Unser System benötigt Client-Anwendungen für verschiedene Benutzerrollen und P
 3. Potenzielle zukünftige mobile Anwendungen für den Zugriff unterwegs
 
 Die Entwicklung und Wartung separater Codebasen für jede Plattform würde erfordern:
+
 - Doppelte Implementierung von Geschäftslogik und UI-Komponenten
 - Mehrere Teams mit unterschiedlicher Plattformexpertise
 - Koordination, um eine konsistente Benutzererfahrung über Plattformen hinweg zu gewährleisten
@@ -28,11 +29,13 @@ Wir haben uns entschieden, Kotlin Multiplatform und Compose Multiplatform für u
 2. **Compose Multiplatform**: Bietet ein deklaratives UI-Framework, das auf Desktop-, Web- und mobilen Plattformen funktioniert
 
 Unsere Implementierung umfasst:
+
 - **common-ui**: Gemeinsame UI-Komponenten und Geschäftslogik
 - **desktop-app**: Desktop-Anwendung für Administratoren und Veranstaltungsorganisatoren
 - **web-app**: Web-Anwendung für Mitglieder und Pferdebesitzer
 
 Die Architektur folgt einem Model-View-ViewModel (MVVM)-Muster:
+
 - **Model**: Gemeinsame Datenmodelle und Repository-Implementierungen
 - **ViewModel**: Gemeinsame Geschäftslogik und Zustandsverwaltung
 - **View**: Plattformspezifische UI-Implementierungen mit Compose Multiplatform

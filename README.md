@@ -105,6 +105,7 @@ Dies startet alle erforderlichen Dienste wie PostgreSQL, Redis, Keycloak, Kafka,
 #### Produktionsumgebung
 
 Für die Produktionsumgebung siehe **[README-PRODUCTION.md](Tagebuch/README-PRODUCTION.md)** - enthält:
+
 - Umfassende Sicherheitskonfiguration
 - SSL/TLS-Setup
 - Detaillierte Troubleshooting-Anleitung
@@ -113,6 +114,7 @@ Für die Produktionsumgebung siehe **[README-PRODUCTION.md](Tagebuch/README-PROD
 #### Umgebungsvariablen
 
 Für die Konfiguration von Umgebungsvariablen siehe **[README-ENV.md](Tagebuch/README-ENV.md)** - enthält:
+
 - Vollständige Umgebungsvariablen-Dokumentation
 - Validierungsskripte
 - Konfigurationsbeispiele
@@ -161,6 +163,7 @@ docker-compose logs [service-name]
 ### Client-Anwendungen starten
 
 Die Client-Anwendungen sind als ein gemeinsames Kotlin Multiplatform (KMP) Modul `:client` organisiert und liefern:
+
 - Desktop (JVM) über Compose Desktop
 - Web (Kotlin/JS im Browser) über Compose Multiplatform
 - Optional: WASM mit Flag -PenableWasm=true
@@ -177,6 +180,7 @@ ANALYZE_BUNDLE=true ./gradlew :client:wasmJsBrowserProductionWebpack
 ```
 
 Ausgabeorte (Build-Artefakte):
+
 - Desktop-Distributionen: client/build/compose/binaries
 - WASM Production Build: client/build/dist/wasmJs/productionExecutable
 
@@ -197,18 +201,21 @@ Das Projekt wurde kürzlich von einer monolithischen Struktur zu einer modularen
 Es gibt noch einige offene Probleme, insbesondere bei den Client-Modulen, die Kotlin Multiplatform und Compose Multiplatform verwenden.
 
 #### Status der Client-Module (nach Migration)
+
 - Build-Status: :client baut erfolgreich für JVM, JS und WASM (Chrome/Karma-Tests sind bewusst deaktiviert, siehe unten)
-- Desktop: Compose Desktop App startet über :client:run; API-Basisadresse via Umgebungsvariable API_BASE_URL (Default: http://localhost:8081)
+- Desktop: Compose Desktop App startet über :client:run; API-Basisadresse via Umgebungsvariable API_BASE_URL (Default: <http://localhost:8081>)
 - Web/WASM: Development-Server (:client:wasmJsBrowserDevelopmentRun) und Production-Build (:client:wasmJsBrowserProductionWebpack) funktionieren; API-Aufruf erfolgt same-origin über /api/ping (hinter dem Gateway)
 - HTTP-Client: Minimaler Ktor-Client (ohne überflüssige Plugins) zur Reduzierung der Bundle-Größe
 - UI: Platzhalter-/Demo-Features (Ping, Platform-Info, Conditional Panels) vorhanden; Domänenseiten für masterdata/members/horses/events noch ausständig
 
 Bekannte Einschränkungen & offene Punkte:
+
 - End-to-End-Navigation zu allen Domänen (masterdata, members, horses, events) fehlt noch
 - Authentifizierung/Session-Handling im Client noch nicht integriert (Gateway/Keycloak folgt)
 - Browser-basierte Unit-Tests (Karma/ChromeHeadless) sind abgeschaltet, um lokale Sandbox-Probleme zu vermeiden; JS-Tests laufen unter Node/Mocha
 
 #### WASM-Bundle-Analyse & Optimierung
+
 - Aktivieren über Umgebungsvariable ANALYZE_BUNDLE=true beim Production-WebBuild:
 
   ANALYZE_BUNDLE=true ./gradlew :client:wasmJsBrowserProductionWebpack
@@ -218,6 +225,7 @@ Bekannte Einschränkungen & offene Punkte:
 - Weitere Tipps: Reduktion schwerer UI-Komponenten, Lazy Loading, Entfernen ungenutzter Abhängigkeiten
 
 #### Integrationstests und E2E-Hinweise
+
 - Vorhandene Modul-Integrationstests können per ./gradlew test ausgeführt werden
 - Für manuelles E2E:
   1) docker compose up -d (Gateway + Services)
@@ -242,6 +250,7 @@ Bekannte Einschränkungen & offene Punkte:
 ### Häufige Probleme und Lösungen
 
 #### 1. Services starten nicht
+
 ```bash
 # Alle Services stoppen und neu starten
 docker compose down
@@ -255,6 +264,7 @@ docker compose logs [service-name]
 ```
 
 #### 2. Port bereits belegt
+
 ```bash
 # Verwendete Ports prüfen
 netstat -tulpn | grep :[port]
@@ -267,6 +277,7 @@ nano .env
 ```
 
 #### 3. Datenbank-Verbindungsfehler
+
 ```bash
 # PostgreSQL-Status prüfen
 docker compose exec postgres pg_isready -U meldestelle
@@ -279,6 +290,7 @@ docker compose exec postgres psql -U meldestelle -d meldestelle
 ```
 
 #### 4. Keycloak-Authentifizierung fehlgeschlagen
+
 ```bash
 # Keycloak-Status prüfen
 docker compose logs keycloak
@@ -293,6 +305,7 @@ docker compose up -d
 ```
 
 #### 5. Kafka-Verbindungsprobleme
+
 ```bash
 # Kafka-Status prüfen
 docker compose exec kafka kafka-topics --bootstrap-server localhost:9092 --list
@@ -305,6 +318,7 @@ docker compose logs kafka zookeeper
 ```
 
 #### 6. Speicherplatz-Probleme
+
 ```bash
 # Docker-Speicherverbrauch prüfen
 docker system df
@@ -317,6 +331,7 @@ docker system prune -f --volumes
 ```
 
 #### 7. Performance-Probleme
+
 ```bash
 # Ressourcenverbrauch überwachen
 docker stats
@@ -387,8 +402,6 @@ Siehe [LICENSE](LICENSE) Datei.
 
 Letzte Aktualisierung: 14. September 2025
 
-
-
 ## CI – Integrationstests (Keycloak)
 
 Um flakey Starts des Keycloak-Containers in GitHub Actions zu vermeiden, laufen die Integrationstests in einer Matrix mit zwei Varianten:
@@ -397,6 +410,7 @@ Um flakey Starts des Keycloak-Containers in GitHub Actions zu vermeiden, laufen 
 - keycloak_db=dev-file: Keycloak nutzt die Dateibackend-Variante ohne externe DB (stabiler im CI)
 
 Hinweise:
+
 - Beide Varianten werden im Workflow `.github/workflows/integration-tests.yml` automatisch ausgeführt (fail-fast deaktiviert).
 - Die Variante `dev-file` entkoppelt die Tests von Postgres und dient als Fallback, falls der Start mit externer DB im Runner-Umfeld instabil ist.
 - Bei Fehlern prüfe die automatisch angehängten Logs im Step „Dump service logs (Keycloak, Postgres)“.

@@ -195,4 +195,3 @@ Das Docker-Image für die Web-Produktion (`Dockerfile` im `client`-Verzeichnis) 
 - [Coding-Standards](../project-standards/coding-standards.md) - Code-Qualitätsstandards
 - [Testing-Standards](../project-standards/testing-standards.md) - Test-Qualitätssicherung
 - [Trace-Bullet-Guideline](../process-guides/trace-bullet-guideline.md) - Entwicklungszyklus
-

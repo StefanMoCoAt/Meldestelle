@@ -38,6 +38,7 @@ infrastructure/
 Zentrale Authentifizierungs- und Autorisierungskomponente basierend auf OAuth 2.0 und JWT.
 
 #### Features
+
 - **JWT Token Management** - Erstellung, Validierung und Refresh von JWT-Tokens
 - **OAuth 2.0 Integration** - Unterstützung für OAuth 2.0 Flows
 - **Role-Based Access Control (RBAC)** - Rollenbasierte Zugriffskontrolle
@@ -45,10 +46,12 @@ Zentrale Authentifizierungs- und Autorisierungskomponente basierend auf OAuth 2.
 - **Session Management** - Sichere Session-Verwaltung
 
 #### Komponenten
+
 - **auth-client**: Client-seitige Authentifizierungslogik
 - **auth-server**: Server-seitige Authentifizierungsdienste
 
 #### Verwendung
+
 ```kotlin
 // JWT Token validieren
 val tokenValidator = JwtTokenValidator()
@@ -64,6 +67,7 @@ val user = authService.authenticate(credentials)
 Hochperformante Caching-Lösung für verbesserte Anwendungsleistung.
 
 #### Features
+
 - **Redis Integration** - Redis als primärer Cache-Store
 - **Multi-Level Caching** - L1 (In-Memory) und L2 (Redis) Cache
 - **Cache Invalidation** - Intelligente Cache-Invalidierungsstrategien
@@ -71,10 +75,12 @@ Hochperformante Caching-Lösung für verbesserte Anwendungsleistung.
 - **Cache Statistics** - Monitoring und Metriken
 
 #### Komponenten
+
 - **cache-api**: Cache-Abstraktionen und Interfaces
 - **redis-cache**: Redis-basierte Cache-Implementierung
 
 #### Verwendung
+
 ```kotlin
 // Cache-Service verwenden
 val cacheService = RedisCacheService()
@@ -90,6 +96,7 @@ cacheService.invalidate("pattern:*")
 Event Sourcing Infrastruktur für Domain Events und CQRS-Pattern.
 
 #### Features
+
 - **Event Sourcing** - Persistierung von Domain Events
 - **Event Replay** - Wiederherstellung von Aggregaten aus Events
 - **Snapshots** - Performance-Optimierung durch Snapshots
@@ -97,10 +104,12 @@ Event Sourcing Infrastruktur für Domain Events und CQRS-Pattern.
 - **Stream Processing** - Event-Stream-Verarbeitung
 
 #### Komponenten
+
 - **event-store-api**: Event Store Abstraktionen
 - **redis-event-store**: Redis-basierte Event Store Implementierung
 
 #### Verwendung
+
 ```kotlin
 // Events speichern
 val eventStore = RedisEventStore()
@@ -120,6 +129,7 @@ eventStore.subscribeToStream("member-events") { event ->
 Zentraler Eingangspoint für alle API-Anfragen mit Routing, Load Balancing und Sicherheit.
 
 #### Features
+
 - **Request Routing** - Intelligentes Routing zu Microservices
 - **Load Balancing** - Lastverteilung zwischen Service-Instanzen
 - **Rate Limiting** - Schutz vor Überlastung
@@ -129,6 +139,7 @@ Zentraler Eingangspoint für alle API-Anfragen mit Routing, Load Balancing und S
 - **Monitoring** - Request-Tracking und Metriken
 
 #### Konfiguration
+
 ```yaml
 # gateway-config.yml
 routes:
@@ -146,6 +157,7 @@ routes:
 Asynchrone Kommunikation zwischen Services über Message Queues.
 
 #### Features
+
 - **Apache Kafka Integration** - Kafka als Message Broker
 - **Event-Driven Architecture** - Unterstützung für Event-driven Patterns
 - **Message Serialization** - JSON und Avro Serialisierung
@@ -153,10 +165,12 @@ Asynchrone Kommunikation zwischen Services über Message Queues.
 - **Consumer Groups** - Skalierbare Message-Verarbeitung
 
 #### Komponenten
+
 - **messaging-client**: Kafka-Client-Bibliothek
 - **messaging-config**: Messaging-Konfiguration
 
 #### Verwendung
+
 ```kotlin
 // Message Producer
 val producer = KafkaMessageProducer()
@@ -174,6 +188,7 @@ consumer.subscribe("member-events") { message ->
 Umfassende Monitoring- und Observability-Lösung.
 
 #### Features
+
 - **Metrics Collection** - Sammlung von Anwendungsmetriken
 - **Distributed Tracing** - Zipkin-Integration für Request-Tracing
 - **Health Checks** - Service-Gesundheitsprüfungen
@@ -181,10 +196,12 @@ Umfassende Monitoring- und Observability-Lösung.
 - **Dashboards** - Grafana-Integration für Visualisierung
 
 #### Komponenten
+
 - **monitoring-client**: Client-seitige Monitoring-Bibliothek
 - **monitoring-server**: Monitoring-Server und Aggregation
 
 #### Metriken
+
 ```kotlin
 // Custom Metrics
 val meterRegistry = PrometheusMeterRegistry()
@@ -202,22 +219,27 @@ Timer.Sample.start(meterRegistry)
 ## Technologie-Stack
 
 ### Datenbanken und Speicher
+
 - **Redis 7.0** - Caching und Event Store
 - **PostgreSQL 16** - Relationale Datenbank (über Domain-Module)
 
 ### Message Broker
+
 - **Apache Kafka 7.5.0** - Event Streaming und Messaging
 
 ### Monitoring und Observability
+
 - **Prometheus** - Metriken-Sammlung
 - **Grafana** - Dashboards und Visualisierung
 - **Zipkin** - Distributed Tracing
 
 ### Security
+
 - **Keycloak 26.4.2** - Identity und Access Management
 - **JWT** - Token-basierte Authentifizierung
 
 ### API Gateway
+
 - **Spring Cloud Gateway** - API Gateway Implementierung
 - **Nginx** - Reverse Proxy und Load Balancer
 
@@ -490,6 +512,7 @@ class InfrastructureIntegrationTest {
 ### Häufige Probleme
 
 #### Redis Connection Issues
+
 ```bash
 # Redis Verbindung testen
 redis-cli -h localhost -p 6379 ping
@@ -499,6 +522,7 @@ docker logs redis-container
 ```
 
 #### Kafka Connection Issues
+
 ```bash
 # Kafka Topics auflisten
 kafka-topics --bootstrap-server localhost:9092 --list
@@ -508,6 +532,7 @@ kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group melde
 ```
 
 #### Gateway Routing Issues
+
 ```bash
 # Gateway Health Check
 curl http://localhost:8080/actuator/health
@@ -519,18 +544,21 @@ curl http://localhost:8080/actuator/gateway/routes
 ## Best Practices
 
 ### Caching
+
 1. **Cache Warming** - Wichtige Daten beim Start vorwärmen
 2. **Cache Invalidation** - Konsistente Invalidierungsstrategien
 3. **TTL Configuration** - Angemessene Time-To-Live Werte
 4. **Cache Monitoring** - Hit/Miss Ratios überwachen
 
 ### Messaging
+
 1. **Idempotenz** - Message-Handler idempotent implementieren
 2. **Error Handling** - Retry-Mechanismen und Dead Letter Queues
 3. **Schema Evolution** - Backward-kompatible Schema-Änderungen
 4. **Monitoring** - Message-Durchsatz und Latenz überwachen
 
 ### Security
+
 1. **Token Rotation** - Regelmäßige JWT-Token-Rotation
 2. **HTTPS Only** - Ausschließlich verschlüsselte Verbindungen
 3. **Rate Limiting** - Schutz vor Brute-Force-Angriffen

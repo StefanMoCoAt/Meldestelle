@@ -25,6 +25,7 @@ Wir haben uns entschieden, ein ereignisgesteuertes Kommunikationsmuster mit Apac
 5. **Ereignis-Schema-Registry**: Wir führen eine Registry von Ereignis-Schemas, um Kompatibilität zu gewährleisten
 
 Die Implementierung umfasst:
+
 - Kafka als zentraler Message Broker
 - Schema-Registry zur Verwaltung von Ereignis-Schemas
 - Ereignis-Handler in jedem Dienst zur Verarbeitung von Ereignissen aus anderen Diensten

@@ -1,0 +1,40 @@
+name: Markdown Auto-Fix
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint-cli
+        run: npm i -g markdownlint-cli
+
+      - name: Run markdownlint --fix over all Markdown files
+        run: |
+          echo "Running markdownlint --fix ..."
+          markdownlint --version
+          # Use ignore file and repo config
+          markdownlint \
+            --fix \
+            --config .markdownlint.yaml \
+            --ignore-path .markdownlintignore \
+            "**/*.md"
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore(docs): markdown auto-fix via markdownlint"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          commit_author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"

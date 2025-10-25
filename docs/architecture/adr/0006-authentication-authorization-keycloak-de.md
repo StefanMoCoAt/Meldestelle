@@ -31,6 +31,7 @@ Wir haben uns entschieden, Keycloak (Version 26.4.2) als unsere Identitäts- und
 7. **Token-basierte Authentifizierung**: JWT-Tokens für die Kommunikation zwischen Diensten
 
 Unsere Implementierung umfasst:
+
 - Keycloak-Server, der als containerisierter Dienst bereitgestellt wird
 - Integration mit unserem API-Gateway für die Token-Validierung
 - Client-Adapter für unsere Dienste und Anwendungen

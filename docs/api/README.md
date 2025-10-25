@@ -46,11 +46,13 @@ API Services
 ## Basis-URL und Endpunkte
 
 ### Entwicklungsumgebung
+
 ```
 Base URL: http://localhost:8081/api
 ```
 
 ### Produktionsumgebung
+
 ```
 Base URL: https://api.meldestelle.yourdomain.com/api
 ```
@@ -58,11 +60,13 @@ Base URL: https://api.meldestelle.yourdomain.com/api
 ## API-Module Übersicht
 
 ### 1. Members API
+
 **Basis-Pfad**: `/api/members`
 
 Verwaltung von Vereinsmitgliedern und deren Mitgliedschaftsdaten.
 
 **Hauptfunktionen**:
+
 - Mitgliederverwaltung (CRUD)
 - Mitgliedschaftsstatus-Tracking
 - Ablaufende Mitgliedschaften
@@ -73,11 +77,13 @@ Verwaltung von Vereinsmitgliedern und deren Mitgliedschaftsdaten.
 **Dokumentation**: [Members API](members-api.md)
 
 ### 2. Horses API
+
 **Basis-Pfad**: `/api/horses`
 
 Registrierung und Verwaltung von Pferden mit umfassenden Identifikationsdaten.
 
 **Hauptfunktionen**:
+
 - Pferderegistrierung (CRUD)
 - Identifikationsnummern-Verwaltung
 - OEPS/FEI-Registrierung
@@ -87,11 +93,13 @@ Registrierung und Verwaltung von Pferden mit umfassenden Identifikationsdaten.
 **Endpunkte**: 15+ REST-Endpunkte
 
 ### 3. Events API
+
 **Basis-Pfad**: `/api/events`
 
 Planung und Verwaltung von Pferdesportveranstaltungen.
 
 **Hauptfunktionen**:
+
 - Veranstaltungsplanung (CRUD)
 - Terminverwaltung
 - Teilnehmerverwaltung
@@ -101,30 +109,39 @@ Planung und Verwaltung von Pferdesportveranstaltungen.
 **Endpunkte**: 10+ REST-Endpunkte
 
 ### 4. Masterdata API
+
 **Basis-Pfad**: `/api/masterdata`
 
 Verwaltung von Stammdaten für das gesamte System.
 
 #### 4.1 Countries API
+
 **Pfad**: `/api/masterdata/countries`
+
 - Länderverwaltung mit ISO-Codes
 - EU/EWR-Mitgliedschaft
 - Mehrsprachige Ländernamen
 
 #### 4.2 States API
+
 **Pfad**: `/api/masterdata/states`
+
 - Bundesländer/Kantone/Regionen
 - OEPS-Codes für österreichische Bundesländer
 - ISO 3166-2 Codes
 
 #### 4.3 Age Classes API
+
 **Pfad**: `/api/masterdata/age-classes`
+
 - Altersklassen für verschiedene Sparten
 - Teilnahmeberechtigung
 - Geschlechts- und Spartenfilter
 
 #### 4.4 Venues API
+
 **Pfad**: `/api/masterdata/venues`
+
 - Turnierplätze und Austragungsorte
 - Platztypen und Abmessungen
 - Bodenarten und Eignung
@@ -164,6 +181,7 @@ Alle API-Endpunkte verwenden ein einheitliches Response-Format:
 ```
 
 #### Erfolgreiche Antwort
+
 ```json
 {
   "data": {
@@ -180,6 +198,7 @@ Alle API-Endpunkte verwenden ein einheitliches Response-Format:
 ```
 
 #### Fehler-Antwort
+
 ```json
 {
   "data": null,
@@ -198,15 +217,18 @@ Alle API-Endpunkte verwenden ein einheitliches Response-Format:
 Für Listen-Endpunkte wird standardmäßig Paginierung unterstützt:
 
 **Query-Parameter**:
+
 - `limit`: Maximale Anzahl Ergebnisse (Standard: 100, Maximum: 1000)
 - `offset`: Anzahl zu überspringende Ergebnisse (Standard: 0)
 
 **Beispiel-Anfrage**:
+
 ```
 GET /api/members?limit=50&offset=100
 ```
 
 **Paginierte Antwort**:
+
 ```json
 {
   "data": {
@@ -228,11 +250,13 @@ GET /api/members?limit=50&offset=100
 Viele Endpunkte unterstützen Suchfunktionalität:
 
 **Query-Parameter**:
+
 - `search`: Suchbegriff für Textfelder
 - `name`: Suche nach Namen (Teilübereinstimmung)
 - `active`: Filter für aktive/inaktive Einträge
 
 **Beispiel**:
+
 ```
 GET /api/members?search=Schmidt&active=true&limit=20
 ```
@@ -242,10 +266,12 @@ GET /api/members?search=Schmidt&active=true&limit=20
 Sortierung wird über Query-Parameter gesteuert:
 
 **Query-Parameter**:
+
 - `sort`: Sortierfeld (z.B. `name`, `createdAt`)
 - `order`: Sortierrichtung (`asc` oder `desc`)
 
 **Beispiel**:
+
 ```
 GET /api/members?sort=lastName&order=asc
 ```
@@ -324,12 +350,13 @@ Bei Überschreitung wird HTTP 429 (Too Many Requests) zurückgegeben.
 
 Die vollständige API-Dokumentation ist über Swagger UI verfügbar:
 
-- **Entwicklung**: http://localhost:8080/swagger-ui.html
-- **Produktion**: https://api.meldestelle.at/swagger-ui.html
+- **Entwicklung**: <http://localhost:8080/swagger-ui.html>
+- **Produktion**: <https://api.meldestelle.at/swagger-ui.html>
 
 ### Postman Collections
 
 Postman Collections für alle API-Endpunkte sind verfügbar unter:
+
 - [docs/postman/](../postman/)
 
 ## Versionierung
@@ -391,7 +418,7 @@ newman run docs/postman/meldestelle-api.postman_collection.json
 
 - **Dokumentation**: [docs/api/](.)
 - **Issue Tracker**: GitHub Issues
-- **API-Status**: https://status.meldestelle.at
+- **API-Status**: <https://status.meldestelle.at>
 
 ---
 

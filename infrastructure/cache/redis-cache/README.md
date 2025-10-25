@@ -7,6 +7,7 @@ Dieses Modul stellt eine konkrete Implementierung der `cache-api` unter Verwendu
 ## Architektur
 
 Das Modul folgt dem Provider-Pattern:
+
 - **cache-api**: Provider-agnostische Interfaces (`CacheService`, `DistributedCache`)
 - **redis-cache**: Redis-spezifische Implementierung
 
@@ -90,7 +91,9 @@ redis:
   host: localhost
   port: 6379
   database: 0  # Cache verwendet Database 0
+```
 
+```yaml
 # Redis Event Store Konfiguration
 redis:
   event-store:
@@ -112,6 +115,7 @@ Die Module verwenden unterschiedliche Bean-Namen:
 ### Keine Konflikte
 
 ✅ Die Module sind so designed, dass sie **ohne Konflikte** gleichzeitig verwendet werden können:
+
 - Separate ConnectionFactories mit `@Qualifier`
 - Separate Property-Prefixes (`redis` vs `redis.event-store`)
 - Unterschiedliche Database-Nummern
@@ -120,6 +124,7 @@ Die Module verwenden unterschiedliche Bean-Namen:
 ## Serialisierung
 
 Das Modul verwendet Jackson für die Serialisierung:
+
 - Automatische Kotlin-Modul Integration
 - Java 8 Date/Time Support
 - Custom Serializer können via `@Bean` überschrieben werden
@@ -127,6 +132,7 @@ Das Modul verwendet Jackson für die Serialisierung:
 ## Health Checks
 
 Das Modul tracked automatisch den Redis-Verbindungsstatus:
+
 - Connection State (CONNECTED, DISCONNECTED, CONNECTING)
 - Connection State Listeners für Benachrichtigungen
 - Automatische Reconnect-Versuche

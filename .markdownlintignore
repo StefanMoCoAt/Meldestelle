@@ -1,0 +1,19 @@
+# Ignore common build/output and vendor directories
+node_modules/
+**/node_modules/
+build/
+**/build/
+out/
+logs/
+**/*.log
+
+# Ignore generated diagrams
+build/diagrams/
+
+# Ignore IDE metadata
+.idea/
+*.iml
+
+# Ignore potential external docs folder names (none by default)
+dist/
+public/

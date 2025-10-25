@@ -7,6 +7,7 @@ Dieses Modul stellt eine konkrete Implementierung der `event-store-api` unter Ve
 ## Architektur
 
 Das Modul folgt dem Provider-Pattern:
+
 - **event-store-api**: Provider-agnostische Interfaces (`EventStore`, `EventSerializer`)
 - **redis-event-store**: Redis Streams-spezifische Implementierung
 
@@ -150,6 +151,7 @@ Die Module verwenden unterschiedliche Bean-Namen zur Vermeidung von Konflikten:
 ### Keine Konflikte
 
 ✅ Die Module sind so designed, dass sie **ohne Konflikte** gleichzeitig verwendet werden können:
+
 - **Separate ConnectionFactories** mit `@Qualifier` Annotations
 - **Separate Property-Prefixes**: `redis` vs `redis.event-store`
 - **Unterschiedliche Database-Nummern**: 0 vs 1
@@ -219,6 +221,7 @@ val eventsFromVersion = eventStore.loadEvents(
 ## Serialisierung
 
 Das Modul verwendet Jackson für Event-Serialisierung:
+
 - Automatische Kotlin-Modul Integration
 - Polymorphe Serialisierung für verschiedene Event-Typen
 - Custom Serializer können via `@Bean` überschrieben werden
@@ -274,4 +277,4 @@ Wenn Sie Fehler wie "Multiple beans of type RedisConnectionFactory" erhalten:
 
 - Siehe auch: [cache-api README](../../cache/cache-api/README.md)
 - Siehe auch: [redis-cache README](../../cache/redis-cache/README.md)
-- Redis Streams Dokumentation: https://redis.io/docs/data-types/streams/
+- Redis Streams Dokumentation: <https://redis.io/docs/data-types/streams/>

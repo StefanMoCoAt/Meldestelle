@@ -7,15 +7,17 @@ Basierend auf der Analyse des aktuellen Zustands (Stand: 11. Oktober 2025) habe 
 ### 🔴 Phase 1: SOFORT (Diese Woche)
 
 #### 1.1 Gateway-Tests reparieren (Höchste Priorität)
+
 **Problem:** Tests sind komplett defekt - nur ~47% funktionieren noch (25/53 Tests).
 
 **Aktionen:**
+
 - ❌ **Löschen:** `JwtAuthenticationTests.kt` - testet nicht-existierende Custom-Filter
 - ✅ **Behalten:** `FallbackControllerTests.kt`, `GatewayApplicationTests.kt`
 - ✏️ **Überarbeiten:** `GatewayRoutingTests.kt`, `GatewaySecurityTests.kt`, `GatewayFiltersTests.kt`
-    - Option A: Tests mit MockJWT-Tokens ausstatten (siehe `TestSecurityConfig.kt`)
-    - Option B: Tests auf Public Paths verlegen (`/actuator/**`, `/fallback/**`)
-    - Option C: Security in Tests deaktivieren
+  - Option A: Tests mit MockJWT-Tokens ausstatten (siehe `TestSecurityConfig.kt`)
+  - Option B: Tests auf Public Paths verlegen (`/actuator/**`, `/fallback/**`)
+  - Option C: Security in Tests deaktivieren
 
 **Warum jetzt:** Tests geben keine Sicherheit mehr - blockiert Entwicklung.
 
@@ -24,9 +26,11 @@ Basierend auf der Analyse des aktuellen Zustands (Stand: 11. Oktober 2025) habe 
 ---
 
 #### 1.2 Gateway Build-Datei bereinigen
+
 **Problem:** Duplizierte Dependency in `gateway/build.gradle.kts` (Zeile 33-34).
 
 **Aktion:**
+
 ```kotlin
 // ENTFERNEN: Zeile 34
 implementation(project(":infrastructure:event-store:redis-event-store"))  // ← Duplikat!
@@ -39,6 +43,7 @@ implementation(project(":infrastructure:event-store:redis-event-store"))  // ←
 ### 🟡 Phase 2: KURZFRISTIG (Nächste 2 Wochen)
 
 #### 2.1 Dependency-Versionen aktualisieren
+
 **Problem:** Versionen von Juli 2025 - teilweise veraltet.
 
 **Zu prüfen und aktualisieren:**
@@ -53,6 +58,7 @@ implementation(project(":infrastructure:event-store:redis-event-store"))  // ←
 | PostgreSQL Driver | 42.7.7 | 42.7.x | Niedrig |
 
 **Aktion:**
+
 1. `gradle/libs.versions.toml` aktualisieren
 2. Tests nach jedem Update ausführen
 3. Breaking Changes dokumentieren
@@ -62,6 +68,7 @@ implementation(project(":infrastructure:event-store:redis-event-store"))  // ←
 ---
 
 #### 2.2 Docker-Images aktualisieren
+
 **Problem:** Einige Docker-Images sind möglicherweise veraltet.
 
 **Zu prüfen:**
@@ -78,6 +85,7 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ```
 
 **Aktion:**
+
 1. Versions-Check durchführen
 2. Schrittweise aktualisieren (einzeln testen!)
 3. `.env`-Datei mit Versions-Variablen anlegen
@@ -87,15 +95,18 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ---
 
 #### 2.3 Monitoring-Modul vervollständigen
+
 **Problem:** Nur 3 Kotlin-Files - deutlich unterimplementiert im Vergleich zur Dokumentation.
 
 **Dokumentiert aber fehlt:**
+
 - Distributed Tracing (Zipkin) - Docker-Container fehlt!
 - Custom Metrics Implementation
 - Health Check Aggregation
 - Alerting Rules Implementation
 
 **Aktion:**
+
 1. Zipkin zu `docker-compose.yml` hinzufügen
 2. Tracing-Integration in Gateway testen
 3. Custom Metrics-Library erstellen
@@ -108,11 +119,13 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ### 🟢 Phase 3: MITTELFRISTIG (Nächste 4-6 Wochen)
 
 #### 3.1 Dokumentation aktualisieren
+
 **Problem:** README von Juli 2025 - nicht mehr aktuell.
 
 **Zu aktualisieren:**
 
 **`README-INFRASTRUCTURE.md`:**
+
 - Zeile 552: "Letzte Aktualisierung: 25. Juli 2025" → Oktober 2025
 - Security-Sektion: OAuth2 Resource Server statt Custom JWT Filter
 - Keycloak Version: 23.0 → 26.4.0
@@ -120,8 +133,11 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 - Monitoring: Zipkin-Konfiguration ergänzen
 
 **Neue Sections hinzufügen:**
+
 - #### Bekannte Limitierungen
+
 - #### Migration Notes (Juli → Oktober 2025)
+
 - #### Troubleshooting erweitern
 
 **Zeitaufwand:** 1 Tag
@@ -129,14 +145,17 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ---
 
 #### 3.2 Auth-Module überarbeiten
+
 **Problem:** Vermutlich veraltet - Custom JWT vs. OAuth2 Resource Server Diskrepanz.
 
 **Zu klären:**
+
 - Werden `auth-client` und `auth-server` noch verwendet?
 - Redundanz mit Gateway's OAuth2 Resource Server?
 - Keycloak-Integration vereinheitlichen
 
 **Aktion:**
+
 1. Abhängigkeiten zu auth-Modulen analysieren
 2. Entscheiden: Refactoring oder Deprecation
 3. Wenn deprecated: Migration Path dokumentieren
@@ -146,15 +165,18 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ---
 
 #### 3.3 Cache-Module modernisieren
+
 **Problem:** Redis 7 ist aktuell, aber Implementation-Patterns könnten veraltet sein.
 
 **Zu prüfen:**
+
 - Multi-Level Caching tatsächlich implementiert?
 - Cache Statistics vorhanden?
 - TTL Management korrekt?
 - Integration mit Spring Cache Abstraction?
 
 **Aktion:**
+
 1. Cache-Tests erweitern
 2. Performance-Metriken hinzufügen
 3. Cache-Warming Strategy implementieren
@@ -164,14 +186,17 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ---
 
 #### 3.4 Event-Store Performance-Optimierung
+
 **Problem:** Redis-basiert - für Production ggf. nicht optimal.
 
 **Zu evaluieren:**
+
 - Ist Redis der richtige Event Store für Production?
 - Alternative: PostgreSQL mit Event Store Pattern?
 - Snapshot-Strategie tatsächlich implementiert?
 
 **Aktion:**
+
 1. Performance-Tests durchführen
 2. Event Store Benchmark (Redis vs. PostgreSQL)
 3. Dokumentation aktualisieren mit Pros/Cons
@@ -183,9 +208,11 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ### 🔵 Phase 4: LANGFRISTIG (Nächste 2-3 Monate)
 
 #### 4.1 Service Mesh evaluieren
+
 **Dokumentiert in "Zukünftige Erweiterungen"** - noch nicht implementiert.
 
 **Optionen:**
+
 - Istio (komplex, feature-reich)
 - Linkerd (leichtgewichtig)
 - Consul Connect (bereits Consul vorhanden!)
@@ -197,9 +224,11 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ---
 
 #### 4.2 OpenTelemetry statt Zipkin
+
 **Problem:** Zipkin ist veraltet - OpenTelemetry ist der moderne Standard.
 
 **Migration Path:**
+
 1. OpenTelemetry Collector aufsetzen
 2. Spring Boot Auto-Instrumentation aktivieren
 3. Zipkin als Backend behalten (kompatibel!)
@@ -210,13 +239,16 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ---
 
 #### 4.3 Security Hardening
+
 **Aktuelle Gaps:**
+
 - JWT Token Rotation nicht implementiert
 - Rate Limiting nur dokumentiert, nicht konfiguriert
 - Audit Logging fehlt
 - HTTPS/TLS noch nicht erzwungen
 
 **Aktion:**
+
 1. Rate Limiting im Gateway aktivieren
 2. Audit Log Framework implementieren
 3. TLS für Service-zu-Service Kommunikation
@@ -227,9 +259,11 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ---
 
 #### 4.4 Infrastructure as Code (IaC)
+
 **Problem:** Nur Docker Compose - für Production nicht ausreichend.
 
 **Zu erstellen:**
+
 - Kubernetes Manifests (aktualisieren - Zeile 393+)
 - Helm Charts (aktualisieren - Zeile 420+)
 - Terraform für Cloud-Ressourcen
@@ -261,27 +295,32 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 
 ### 🎯 Empfohlene Reihenfolge
 
-#### Woche 1-2:
+#### Woche 1-2
+
 1. Gateway-Tests reparieren
 2. Build-Datei bereinigen
 3. Dependencies aktualisieren
 
-#### Woche 3-4:
+#### Woche 3-4
+
 4. Docker-Images aktualisieren
 5. Monitoring vervollständigen
 6. Dokumentation aktualisieren
 
-#### Woche 5-8:
+#### Woche 5-8
+
 7. Auth-Module evaluieren/refactoren
 8. Cache-Module modernisieren
 9. Event-Store Performance-Tests
 
-#### Monat 3-4:
+#### Monat 3-4
+
 10. Security Hardening
 11. OpenTelemetry Migration
 12. Service Mesh Evaluation
 
-#### Monat 5-6:
+#### Monat 5-6
+
 13. Infrastructure as Code
 14. Production Readiness Assessment
 
@@ -290,15 +329,18 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ### 🛠️ Tooling-Empfehlungen
 
 **Für Dependency-Management:**
+
 - Renovate Bot oder Dependabot für automatische Updates
 - `./gradlew dependencyUpdates` Plugin verwenden
 
 **Für Security:**
+
 - OWASP Dependency Check
 - Trivy für Container-Scanning
 - SonarQube für Code-Qualität
 
 **Für Monitoring:**
+
 - Grafana Dashboards aus Community importieren
 - Prometheus Alertmanager konfigurieren
 
@@ -316,11 +358,13 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 ### ⚠️ Risiken & Abhängigkeiten
 
 **Kritische Pfade:**
+
 - Gateway-Tests müssen ZUERST behoben werden
 - Dependency-Updates können Breaking Changes haben
 - Auth-Refactoring könnte alle Services betreffen
 
 **Externe Abhängigkeiten:**
+
 - Keycloak Breaking Changes bei Major Updates
 - Spring Boot/Cloud Release Schedule beachten
 - Kubernetes Cluster für IaC-Phase benötigt
@@ -331,12 +375,14 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 
 **Empfohlener Start:** Sofort mit Phase 1, dann iterativ durch die Phasen
 
-
 ---
+
 ### Dokumentations-Sprachbereinigung (2025-10-22)
+
 Im Zuge der Vereinheitlichung auf ausschließlich deutschsprachige Dokumentation wurden folgende Dateien entfernt:
 
 Gelöschte ADRs (englische Varianten):
+
 - docs/architecture/adr/0000-adr-template.md
 - docs/architecture/adr/0001-modular-architecture.md
 - docs/architecture/adr/0002-domain-driven-design.md
@@ -348,21 +394,24 @@ Gelöschte ADRs (englische Varianten):
 - docs/architecture/adr/0008-multiplatform-client-applications.md
 
 Gelöschte C4-Diagramme (englische Varianten):
+
 - docs/architecture/c4/01-context.puml
 - docs/architecture/c4/02-container.puml
 - docs/architecture/c4/03-component-events-service.puml
 
 Hinweis:
+
 - Alle verbleibenden ADRs und C4-Diagramme sind in deutscher Sprache vorhanden (Suffix -de) und verlinkt.
 - Weitere Doku-Dateien in docs/ sind deutsch (Front-Matter/Sprachindizien geprüft).
 
-
 ---
+
 ## CI‑Stabilisierung Keycloak (2025‑10‑25)
 
 Hintergrund: In GitHub Actions startete Keycloak zeitweise nicht zuverlässig. Ziel: Integrationstests stabilisieren, ohne produktive Architektur zu ändern.
 
 Änderungen:
+
 - Integration‑Workflow (`.github/workflows/integration-tests.yml`) auf Matrixbetrieb umgestellt:
   - `keycloak_db=postgres` (produktnäher, mit externer Postgres‑DB)
   - `keycloak_db=dev-file` (Dateibackend, ohne Postgres; stabiler im CI)
@@ -374,14 +423,18 @@ Hintergrund: In GitHub Actions startete Keycloak zeitweise nicht zuverlässig. Z
 - Fail‑fast deaktiviert; beide Matrix‑Jobs laufen unabhängig.
 
 Nutzung/Operative Hinweise:
+
 - In PRs beide Matrix‑Runs beachten; bei Flakes in `postgres` sichert `dev-file` die Tests ab.
 - Logs bei Fehlschlag: Step „Dump service logs (Keycloak, Postgres)“ am Jobende öffnen.
 - Produktiv bleibt Postgres maßgeblich (siehe `docker-compose.yml`).
 
 ADR‑Konsistenz:
+
 - ADR‑0006 (Keycloak) bleibt gültig und unverändert; die `dev-file`‑Variante betrifft ausschließlich CI‑Tests.
 
 Next Steps (optional):
+
 - Falls `postgres` im CI dauerhaft flakey: Required Checks vorübergehend auf `dev-file` begrenzen.
 - Langfristig: Ursachenanalyse für Postgres‑Variante (Runner‑Leistung/Timeouts/Schema‑Setup) und Re‑Enable als Required Check nach Stabilisierung.
+
 ---
