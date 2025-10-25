@@ -355,3 +355,33 @@ Gelöschte C4-Diagramme (englische Varianten):
 Hinweis:
 - Alle verbleibenden ADRs und C4-Diagramme sind in deutscher Sprache vorhanden (Suffix -de) und verlinkt.
 - Weitere Doku-Dateien in docs/ sind deutsch (Front-Matter/Sprachindizien geprüft).
+
+
+---
+## CI‑Stabilisierung Keycloak (2025‑10‑25)
+
+Hintergrund: In GitHub Actions startete Keycloak zeitweise nicht zuverlässig. Ziel: Integrationstests stabilisieren, ohne produktive Architektur zu ändern.
+
+Änderungen:
+- Integration‑Workflow (`.github/workflows/integration-tests.yml`) auf Matrixbetrieb umgestellt:
+  - `keycloak_db=postgres` (produktnäher, mit externer Postgres‑DB)
+  - `keycloak_db=dev-file` (Dateibackend, ohne Postgres; stabiler im CI)
+- Robuste Startlogik:
+  - Aktives Warten auf Postgres (nur in `postgres`‑Variante)
+  - Keycloak‑Start per `docker run … start-dev` (26.4.2) mit `KC_HEALTH_ENABLED=true`
+  - Health‑Checks gegen `/`, `/health`, `/q/health`, `/health/ready`, Admin‑Konsole
+  - Ausführliche Log‑Ausgabe bei Fehlern (Keycloak & Postgres)
+- Fail‑fast deaktiviert; beide Matrix‑Jobs laufen unabhängig.
+
+Nutzung/Operative Hinweise:
+- In PRs beide Matrix‑Runs beachten; bei Flakes in `postgres` sichert `dev-file` die Tests ab.
+- Logs bei Fehlschlag: Step „Dump service logs (Keycloak, Postgres)“ am Jobende öffnen.
+- Produktiv bleibt Postgres maßgeblich (siehe `docker-compose.yml`).
+
+ADR‑Konsistenz:
+- ADR‑0006 (Keycloak) bleibt gültig und unverändert; die `dev-file`‑Variante betrifft ausschließlich CI‑Tests.
+
+Next Steps (optional):
+- Falls `postgres` im CI dauerhaft flakey: Required Checks vorübergehend auf `dev-file` begrenzen.
+- Langfristig: Ursachenanalyse für Postgres‑Variante (Runner‑Leistung/Timeouts/Schema‑Setup) und Re‑Enable als Required Check nach Stabilisierung.
+---

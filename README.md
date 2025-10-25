@@ -386,3 +386,18 @@ Siehe [LICENSE](LICENSE) Datei.
 ## Stand
 
 Letzte Aktualisierung: 14. September 2025
+
+
+
+## CI – Integrationstests (Keycloak)
+
+Um flakey Starts des Keycloak-Containers in GitHub Actions zu vermeiden, laufen die Integrationstests in einer Matrix mit zwei Varianten:
+
+- keycloak_db=postgres: Keycloak nutzt Postgres (produktnäher)
+- keycloak_db=dev-file: Keycloak nutzt die Dateibackend-Variante ohne externe DB (stabiler im CI)
+
+Hinweise:
+- Beide Varianten werden im Workflow `.github/workflows/integration-tests.yml` automatisch ausgeführt (fail-fast deaktiviert).
+- Die Variante `dev-file` entkoppelt die Tests von Postgres und dient als Fallback, falls der Start mit externer DB im Runner-Umfeld instabil ist.
+- Bei Fehlern prüfe die automatisch angehängten Logs im Step „Dump service logs (Keycloak, Postgres)“.
+- Produktiv weiterhin Postgres (siehe docker-compose und ADR-0006). Keycloak-Version: 26.4.2.

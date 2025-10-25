@@ -9,6 +9,10 @@ on:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        keycloak_db: [postgres, dev-file]
     env:
       KEYCLOAK_VERSION: "26.4.2"
 
@@ -91,21 +95,23 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-version: wrapper
-          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
-          cache-overwrite-existing: true
-          gradle-home-cache-includes: |
-            caches
-            notifications
-            jdks
-            wrapper
+      - name: Setup Gradle (modern)
+        uses: gradle/actions/setup-gradle@v5
 
-      - name: Start Keycloak Container manually
+      - name: Wait for Postgres to be ready (pg_isready in service network)
+        if: ${{ matrix.keycloak_db == 'postgres' }}
         run: |
-          echo "Starting Keycloak..."
+          echo "Waiting for Postgres..."
+          for i in {1..40}; do
+            if docker run --rm --network ${{ job.services.postgres.network }} \
+              postgres:16-alpine pg_isready -h postgres -p 5432 -U meldestelle -d meldestelle; then
+              echo "Postgres is ready"; break; fi; echo -n "."; sleep 3; done
+
+      - name: Start Keycloak with Postgres (dev) and wait for readiness
+        if: ${{ matrix.keycloak_db == 'postgres' }}
+        run: |
+          set -euo pipefail
+          echo "Starting Keycloak (DB=postgres)..."
           docker run -d --name keycloak \
             --network ${{ job.services.postgres.network }} \
             -p 8180:8080 \
@@ -120,16 +126,66 @@ jobs:
             quay.io/keycloak/keycloak:${{ env.KEYCLOAK_VERSION }} \
             start-dev
 
-          echo "Giving Keycloak time to initialize..."
-          sleep 30
+          echo "Giving Keycloak 30s to initialize..."; sleep 30
 
-          echo "Waiting for Keycloak /health..."
-          timeout 180s bash -c 'until curl --fail --silent --output /dev/null http://localhost:8180/health; do echo -n "."; sleep 5; done'
+          wait_for() {
+            local url="$1"; local label="$2"; local timeout="${3:-180}"; local interval="${4:-5}"
+            echo "Waiting for $label ($url) ..."
+            if ! timeout ${timeout}s bash -c 'until curl -fsS --output /dev/null '"$url"'; do echo -n "."; sleep '"$interval"'; done'; then
+              echo "\n[WAIT] Timeout on $url"
+              return 1
+            fi
+            echo "\n[WAIT] $label is up"
+          }
 
-          echo "Waiting for Keycloak /health/ready..."
-          timeout 180s bash -c 'until curl --fail --silent --output /dev/null http://localhost:8180/health/ready; do echo -n "."; sleep 5; done'
+          if ! wait_for http://localhost:8180/ "root" 180 5; then
+            docker logs --tail=200 keycloak || true
+            exit 1
+          fi
+          if ! wait_for http://localhost:8180/health "health" 180 5; then
+            echo "[INFO] /health nicht erreichbar – versuche /q/health (Quarkus default)"
+            wait_for http://localhost:8180/q/health "q-health" 180 5 || true
+          fi
+          wait_for http://localhost:8180/health/ready "health-ready" 300 5 || true
+          wait_for http://localhost:8180/admin/master/console/ "admin-console" 300 5 || (docker logs --tail=400 keycloak && exit 1)
 
-          echo "Keycloak is ready!"
+      - name: Start Keycloak with dev-file (no Postgres) and wait for readiness
+        if: ${{ matrix.keycloak_db == 'dev-file' }}
+        run: |
+          set -euo pipefail
+          echo "Starting Keycloak (DB=dev-file, no Postgres)..."
+          docker run -d --name keycloak \
+            -p 8180:8080 \
+            -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+            -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+            -e KC_DB=dev-file \
+            -e KC_HEALTH_ENABLED=true \
+            -e JAVA_OPTS="-Xms256m -Xmx1024m -XX:MaxRAMPercentage=60" \
+            quay.io/keycloak/keycloak:${{ env.KEYCLOAK_VERSION }} \
+            start-dev
+
+          echo "Giving Keycloak 20s to initialize..."; sleep 20
+
+          wait_for() {
+            local url="$1"; local label="$2"; local timeout="${3:-180}"; local interval="${4:-5}"
+            echo "Waiting for $label ($url) ..."
+            if ! timeout ${timeout}s bash -c 'until curl -fsS --output /dev/null '"$url"'; do echo -n "."; sleep '"$interval"'; done'; then
+              echo "\n[WAIT] Timeout on $url"
+              return 1
+            fi
+            echo "\n[WAIT] $label is up"
+          }
+
+          if ! wait_for http://localhost:8180/ "root" 180 5; then
+            docker logs --tail=200 keycloak || true
+            exit 1
+          fi
+          if ! wait_for http://localhost:8180/health "health" 180 5; then
+            echo "[INFO] /health nicht erreichbar – versuche /q/health (Quarkus default)"
+            wait_for http://localhost:8180/q/health "q-health" 180 5 || true
+          fi
+          wait_for http://localhost:8180/health/ready "health-ready" 300 5 || true
+          wait_for http://localhost:8180/admin/master/console/ "admin-console" 300 5 || (docker logs --tail=400 keycloak && exit 1)
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -155,12 +211,9 @@ jobs:
             **/build/test-results/integrationTest/
           retention-days: 7
 
-      - name: Dump service logs on failure (Keycloak, Postgres)
-        if: failure()
+      - name: Dump service logs (Keycloak, Postgres)
+        if: always()
         run: |
-          echo "=== Docker ps ==="
-          docker ps -a
-          echo "=== Keycloak logs ==="
-          docker logs $(docker ps -a --filter "name=keycloak" --format "{{.ID}}") || true
-          echo "=== Postgres logs ==="
-          docker logs $(docker ps -a --filter "name=postgres" --format "{{.ID}}") || true
+          echo "=== Docker ps ===" && docker ps -a || true
+          echo "=== Keycloak logs (tail) ===" && docker logs --tail=400 keycloak || true
+          echo "=== Postgres logs (tail) ===" && docker logs --tail=200 $(docker ps -a --filter "name=postgres" --format "{{.ID}}") || true
