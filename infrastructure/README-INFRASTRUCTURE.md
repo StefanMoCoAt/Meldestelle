@@ -214,7 +214,7 @@ Timer.Sample.start(meterRegistry)
 - **Zipkin** - Distributed Tracing
 
 ### Security
-- **Keycloak 23.0** - Identity und Access Management
+- **Keycloak 26.4.2** - Identity und Access Management
 - **JWT** - Token-basierte Authentifizierung
 
 ### API Gateway
@@ -241,10 +241,10 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
 
   keycloak:
-    image: quay.io/keycloak/keycloak:23.0
+    image: quay.io/keycloak/keycloak:26.4.2
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports:
       - "8080:8080"
 ```

@@ -20,7 +20,7 @@ Das System nutzt folgende Dienste:
 
 - **PostgreSQL 16**: Primäre Datenbank
 - **Redis 7**: Caching
-- **Keycloak 24.0**: Authentifizierung und Autorisierung
+- **Keycloak 26.4.2**: Authentifizierung und Autorisierung
 - **Kafka 7.5.0**: Messaging und Event-Streaming
 - **Zipkin**: Distributed Tracing
 - **Prometheus & Grafana**: Monitoring (optional)

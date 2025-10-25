@@ -9,6 +9,8 @@ on:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    env:
+      KEYCLOAK_VERSION: "26.4.2"
 
     services:
       postgres:
@@ -107,17 +109,26 @@ jobs:
           docker run -d --name keycloak \
             --network ${{ job.services.postgres.network }} \
             -p 8180:8080 \
-            -e KEYCLOAK_ADMIN=admin \
-            -e KEYCLOAK_ADMIN_PASSWORD=admin \
+            -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+            -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
             -e KC_DB=postgres \
             -e KC_DB_URL=jdbc:postgresql://postgres:5432/meldestelle \
             -e KC_DB_USERNAME=meldestelle \
             -e KC_DB_PASSWORD=meldestelle \
-            quay.io/keycloak/keycloak:24.0 \
+            -e KC_HEALTH_ENABLED=true \
+            -e JAVA_OPTS="-Xms256m -Xmx1024m -XX:MaxRAMPercentage=60" \
+            quay.io/keycloak/keycloak:${{ env.KEYCLOAK_VERSION }} \
             start-dev
 
-          echo "Waiting for Keycloak to be ready..."
-          timeout 120s bash -c 'until curl --fail http://localhost:8180/health/ready; do sleep 5; done'
+          echo "Giving Keycloak time to initialize..."
+          sleep 30
+
+          echo "Waiting for Keycloak /health..."
+          timeout 180s bash -c 'until curl --fail --silent --output /dev/null http://localhost:8180/health; do echo -n "."; sleep 5; done'
+
+          echo "Waiting for Keycloak /health/ready..."
+          timeout 180s bash -c 'until curl --fail --silent --output /dev/null http://localhost:8180/health/ready; do echo -n "."; sleep 5; done'
+
           echo "Keycloak is ready!"
 
       - name: Grant execute permission for gradlew

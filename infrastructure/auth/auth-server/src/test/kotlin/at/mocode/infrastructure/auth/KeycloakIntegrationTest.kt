@@ -29,7 +29,7 @@ import java.time.Duration
 class KeycloakIntegrationTest {
 
     companion object {
-        private const val KEYCLOAK_VERSION = "26.4.0"
+        private const val KEYCLOAK_VERSION = "26.4.2"
         private const val KEYCLOAK_PORT = 8080
         private const val KEYCLOAK_ADMIN_USER = "admin"
         private const val KEYCLOAK_ADMIN_PASSWORD = "admin"
@@ -41,8 +41,8 @@ class KeycloakIntegrationTest {
         @JvmStatic
         val keycloakContainer: GenericContainer<*> = GenericContainer("quay.io/keycloak/keycloak:$KEYCLOAK_VERSION")
             .withExposedPorts(KEYCLOAK_PORT)
-            .withEnv("KEYCLOAK_ADMIN", KEYCLOAK_ADMIN_USER)
-            .withEnv("KEYCLOAK_ADMIN_PASSWORD", KEYCLOAK_ADMIN_PASSWORD)
+            .withEnv("KC_BOOTSTRAP_ADMIN_USERNAME", KEYCLOAK_ADMIN_USER)
+            .withEnv("KC_BOOTSTRAP_ADMIN_PASSWORD", KEYCLOAK_ADMIN_PASSWORD)
             .withCommand("start-dev")
             .waitingFor(
                 Wait.forHttp("/admin/master/console/")
@@ -197,15 +197,19 @@ class KeycloakIntegrationTest {
         // Verify container environment
         val envVars = keycloakContainer.envMap
 
-        assert(envVars["KEYCLOAK_ADMIN"] == KEYCLOAK_ADMIN_USER) {
+        // Support new KC_BOOTSTRAP_* variables (Keycloak 26+) with fallback to legacy KEYCLOAK_* names
+        val adminUser = envVars["KC_BOOTSTRAP_ADMIN_USERNAME"] ?: envVars["KEYCLOAK_ADMIN"]
+        val adminPass = envVars["KC_BOOTSTRAP_ADMIN_PASSWORD"] ?: envVars["KEYCLOAK_ADMIN_PASSWORD"]
+
+        assert(adminUser == KEYCLOAK_ADMIN_USER) {
             "Admin user should be configured correctly"
         }
-        assert(envVars["KEYCLOAK_ADMIN_PASSWORD"] == KEYCLOAK_ADMIN_PASSWORD) {
+        assert(adminPass == KEYCLOAK_ADMIN_PASSWORD) {
             "Admin password should be configured correctly"
         }
 
         println("[DEBUG_LOG] Environment variables validated")
-        println("[DEBUG_LOG] Admin user: ${envVars["KEYCLOAK_ADMIN"]}")
+        println("[DEBUG_LOG] Admin user: $adminUser")
         println("[DEBUG_LOG] Environment count: ${envVars.size}")
     }
 

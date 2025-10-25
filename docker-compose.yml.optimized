@@ -96,7 +96,7 @@ services:
   # Authentifizierung - Keycloak with Enhanced Security
   # ===================================================================
   keycloak:
-    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.0}
+    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.2}
     container_name: meldestelle-keycloak
     environment:
       # Admin Configuration - Using secrets

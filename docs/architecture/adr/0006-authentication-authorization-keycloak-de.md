@@ -20,7 +20,7 @@ Die Implementierung dieser Funktionen von Grund auf wäre zeitaufwändig und feh
 
 ## Entscheidung
 
-Wir haben uns entschieden, Keycloak (Version 23.0) als unsere Identitäts- und Zugriffsverwaltungslösung zu verwenden. Keycloak ist eine Open-Source-Identitäts- und Zugriffsverwaltungslösung, die Folgendes bietet:
+Wir haben uns entschieden, Keycloak (Version 26.4.2) als unsere Identitäts- und Zugriffsverwaltungslösung zu verwenden. Keycloak ist eine Open-Source-Identitäts- und Zugriffsverwaltungslösung, die Folgendes bietet:
 
 1. **Benutzerauthentifizierung**: Mehrere Authentifizierungsmethoden und -abläufe
 2. **Benutzerföderation**: Integration mit LDAP, Active Directory und anderen Benutzerspeichern

@@ -59,7 +59,7 @@ services:
   # Production-ready Keycloak configuration with optimized settings
   # ===================================================================
   keycloak:
-    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.0}
+    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.2}
     container_name: meldestelle-keycloak
     # Using base image directly instead of custom Dockerfile
     environment:
