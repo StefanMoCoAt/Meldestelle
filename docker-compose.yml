@@ -1,17 +1,16 @@
 # ===================================================================
-# Docker Compose - Basis-Infrastruktur
-# Meldestelle Project - Essentielle Services
-# ===================================================================
-# Usage:
-#   Entwicklung & Standard: docker-compose up -d
+# Docker Compose - Infrastructure Services
+# Generated from docker/versions.toml
+# Environment: development
+# Generated: 2025-10-25 23:26:24 UTC
 # ===================================================================
 
 services:
   # ===================================================================
-  # Datenbank
+  # Database
   # ===================================================================
   postgres:
-    image: postgres:16-alpine
+    image: postgres:${DOCKER_POSTGRES_VERSION:-16-alpine}
     container_name: meldestelle-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-meldestelle}
@@ -25,18 +24,18 @@ services:
     networks:
       - meldestelle-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meldestelle} -d ${POSTGRES_DB:-meldestelle}" ]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U meldestelle -d meldestelle"]
+      interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 20s
+      start_period: 40s
     restart: unless-stopped
 
   # ===================================================================
   # Cache
   # ===================================================================
   redis:
-    image: redis:7-alpine
+    image: redis:${DOCKER_REDIS_VERSION:-7-alpine}
     container_name: meldestelle-redis
     ports:
       - "${REDIS_PORT:-6379}:6379"
@@ -46,129 +45,46 @@ services:
     networks:
       - meldestelle-network
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 20s
+      start_period: 40s
     restart: unless-stopped
 
   # ===================================================================
-  # Authentifizierung - Keycloak
-  # ===================================================================
-  # Production-ready Keycloak configuration with optimized settings
+  # Authentication
   # ===================================================================
   keycloak:
     image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.2}
     container_name: meldestelle-keycloak
-    # Using base image directly instead of custom Dockerfile
     environment:
-      # Admin Configuration
-#      KEYCLOAK_ADMIN: admin # is deprecated
-#      KEYCLOAK_ADMIN_PASSWORD: admin # is deprecated
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
-
-      # Database Configuration
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/meldestelle
-      KC_DB_USERNAME: meldestelle
-      KC_DB_PASSWORD: meldestelle
-      KC_DB_SCHEMA: keycloak
-
-      # HTTP Configuration - Let Keycloak auto-detect hostname for OpenID discovery
-      KC_HTTP_ENABLED: true
-      KC_HOSTNAME_STRICT: false
-
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
+      KC_DB_USERNAME: ${POSTGRES_USER:-meldestelle}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
     ports:
-      - "${KEYCLOAK_PORT:-8180}:8080"
+      - "8180:8080"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - ./docker/services/keycloak:/opt/keycloak/data/import
-      - keycloak-data:/opt/keycloak/data
-    command:
-      # Development mode with realm import enabled
-      - start-dev
-      - --import-realm
+    command: start-dev --import-realm
     networks:
       - meldestelle-network
     healthcheck:
-      test: [ 'CMD-SHELL', 'curl -s http://localhost:8080/ >/dev/null 2>&1 || exit 1' ]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    restart: unless-stopped
-
-  # ===================================================================
-  # Service Discovery
-  # ===================================================================
-  consul:
-    image: hashicorp/consul:1.15
-    container_name: meldestelle-consul
-    ports:
-      - "${CONSUL_PORT:-8500}:8500"
-    command: agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
-    networks:
-      - meldestelle-network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
-      interval: 10s
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 20s
+      start_period: 40s
     restart: unless-stopped
 
   # ===================================================================
-  # Messaging (Kafka & Zookeeper)
-  # ===================================================================
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
-    container_name: meldestelle-zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT:-2181}
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "${ZOOKEEPER_CLIENT_PORT:-2181}:2181"
-    networks:
-      - meldestelle-network
-    healthcheck:
-      test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
-    restart: unless-stopped
-
-  kafka:
-    image: confluentinc/cp-kafka:7.4.0
-    container_name: meldestelle-kafka
-    environment:
-      KAFKA_BROKER_ID: ${KAFKA_BROKER_ID:-1}
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:${KAFKA_PORT:-9092}
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:-1}
-    ports:
-      - "${KAFKA_PORT:-9092}:9092"
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-    networks:
-      - meldestelle-network
-    healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
-    restart: unless-stopped
-
-  # ===================================================================
-  # Monitoring (Prometheus & Grafana)
+  # Monitoring
   # ===================================================================
   prometheus:
     image: prom/prometheus:${DOCKER_PROMETHEUS_VERSION:-v2.54.1}
@@ -189,10 +105,10 @@ services:
       - meldestelle-network
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 20s
+      start_period: 40s
     restart: unless-stopped
 
   grafana:
@@ -214,66 +130,10 @@ services:
       - meldestelle-network
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:3000/api/health"]
-      interval: 10s
+      interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 20s
-    restart: unless-stopped
-
-  # ===================================================================
-  # API Gateway
-  # ===================================================================
-  api-gateway:
-    build:
-      context: .
-      dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
-      args:
-        # Global build arguments (from docker/build-args/global.env)
-        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
-        BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
-        # Infrastructure-specific arguments (from docker/build-args/infrastructure.env)
-        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DEFAULT:-default}
-      # Enable BuildKit for better caching and performance
-      # platforms:
-      #   - linux/amd64
-    container_name: meldestelle-api-gateway
-    volumes:
-      # Mount Gradle cache for better build performance
-      - api-gateway-gradle-cache:/home/gradle/.gradle
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev,keycloak}
-      CONSUL_HOST: consul
-      CONSUL_PORT: ${CONSUL_PORT:-8500}
-      CONSUL_ENABLED: "true"
-      GATEWAY_PORT: ${GATEWAY_PORT:-8081}
-      # Keycloak OAuth2 Integration (using Spring Security oauth2ResourceServer)
-      KEYCLOAK_SERVER_URL: http://keycloak:8080
-      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/meldestelle
-      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs
-      KEYCLOAK_REALM: meldestelle
-      KEYCLOAK_CLIENT_ID: api-gateway
-      KEYCLOAK_CLIENT_SECRET: K5RqonwVOaxPKaXVH4mbthSRbjRh5tOK
-    ports:
-      - "${GATEWAY_PORT:-8081}:8081"
-    depends_on:
-      consul:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      keycloak:
-        condition: service_started
-    networks:
-      - meldestelle-network
-    healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://localhost:${GATEWAY_PORT:-8081}/actuator/health" ]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      start_period: 40s
     restart: unless-stopped
 
 # ===================================================================
@@ -287,10 +147,6 @@ volumes:
   prometheus-data:
     driver: local
   grafana-data:
-    driver: local
-  api-gateway-gradle-cache:
-    driver: local
-  keycloak-data:
     driver: local
 
 # ===================================================================

@@ -9,8 +9,7 @@
 # - Custom theme support
 # - Health monitoring
 # ===================================================================
-# 26.4.2
-ARG KEYCLOAK_VERSION=26.4.2
+ARG KEYCLOAK_VERSION
 
 FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
 

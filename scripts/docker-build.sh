@@ -1,7 +1,9 @@
 #!/bin/bash
 # ===================================================================
 # Docker Build Script with Centralized Version Management
-# Automatically sources versions from docker/versions.toml via environment files
+# Supports two modes:
+#   - compat  (default): load docker/build-args/*.env (current behavior)
+#   - envless: parse docker/versions.toml directly and export DOCKER_* vars
 # ===================================================================
 
 set -e
@@ -11,6 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 DOCKER_DIR="$PROJECT_ROOT/docker"
 BUILD_ARGS_DIR="$DOCKER_DIR/build-args"
+VERSIONS_TOML="$DOCKER_DIR/versions.toml"
 
 # Colors for output
 RED='\033[0;31m'
@@ -36,9 +39,63 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Function to load environment files
+# --- Helpers to read versions.toml directly (POSIX-friendly) ---
+get_version() {
+    local key=$1
+    awk -v k="$key" '
+        /^\[versions\]/ { in_section=1; next }
+        /^\[/ { if (in_section) exit; in_section=0 }
+        in_section && $1 == k && $2 == "=" { v=$3; gsub(/"/ ,"", v); print v; exit }
+    ' "$VERSIONS_TOML" || true
+}
+
+get_env_mappings() {
+    awk '/^\[environment-mapping\]/,/^\[/ { if (/^[a-zA-Z].*= /) { key=$1; val=$3; gsub(/"/,"",val); print key":"val } }' "$VERSIONS_TOML" || true
+}
+
+# Function to load from versions.toml (env-less mode)
+load_from_versions() {
+    if [[ ! -f "$VERSIONS_TOML" ]]; then
+        print_error "versions.toml not found at $VERSIONS_TOML"
+        exit 1
+    fi
+
+    print_info "Loading centralized versions directly from versions.toml (env-less mode)..."
+
+    # Export BUILD_DATE if not already set
+    export BUILD_DATE=${BUILD_DATE:-$(date -u +'%Y-%m-%dT%H:%M:%SZ')}
+
+    # Map all environment-mapping keys to DOCKER_* variables using [versions] values
+    while IFS=: read -r toml_key env_var; do
+        [[ -z "$toml_key" || -z "$env_var" ]] && continue
+        val=$(get_version "$toml_key")
+        if [[ -n "$val" ]]; then
+            export "$env_var"="$val"
+        fi
+    done < <(get_env_mappings)
+
+    # Additional convenience exports used by compose build args
+    export DOCKER_GRADLE_VERSION="${DOCKER_GRADLE_VERSION:-$(get_version gradle)}"
+    export DOCKER_JAVA_VERSION="${DOCKER_JAVA_VERSION:-$(get_version java)}"
+    export DOCKER_NODE_VERSION="${DOCKER_NODE_VERSION:-$(get_version node)}"
+    export DOCKER_NGINX_VERSION="${DOCKER_NGINX_VERSION:-$(get_version nginx)}"
+
+    # Ensure DOCKER_APP_VERSION is derived from app-version
+    local app_ver
+    app_ver=$(get_version "app-version")
+    if [[ -n "$app_ver" ]]; then
+        export DOCKER_APP_VERSION="$app_ver"
+    fi
+
+    # Backwards compatibility for scripts expecting plain names
+    export VERSION="${VERSION:-$app_ver}"
+
+    print_success "versions.toml loaded; DOCKER_* variables exported."
+}
+
+# Function to load environment files (compat mode)
 load_env_files() {
-    print_info "Loading centralized Docker version environment files..."
+    print_info "Loading centralized Docker version environment files (compat mode)..."
 
     # Load global environment variables
     if [[ -f "$BUILD_ARGS_DIR/global.env" ]]; then
@@ -141,21 +198,21 @@ show_help() {
     echo "  -v, --versions  Show current versions"
     echo "  -h, --help      Show this help message"
     echo ""
+    echo "Environment:"
+    echo "  DOCKER_SSOT_MODE=envless|compat  Default: compat"
+    echo ""
     echo "Examples:"
     echo "  $0 services                    # Build all services"
     echo "  $0 clients                     # Build client applications"
     echo "  $0 all                         # Build everything"
     echo "  $0 --versions                  # Show current versions"
-    echo ""
-    echo "The script automatically loads versions from:"
-    echo "  - docker/build-args/global.env"
-    echo "  - docker/build-args/services.env"
-    echo "  - docker/build-args/clients.env"
-    echo "  - docker/build-args/infrastructure.env"
+    echo "  DOCKER_SSOT_MODE=envless $0 --versions  # Use versions.toml directly"
 }
 
 # Main execution
 main() {
+    local MODE="${DOCKER_SSOT_MODE:-compat}"
+
     # Parse command line arguments
     case $1 in
         -h|--help)
@@ -163,7 +220,11 @@ main() {
             exit 0
             ;;
         -v|--versions)
-            load_env_files
+            if [[ "$MODE" == "envless" ]]; then
+                load_from_versions
+            else
+                load_env_files
+            fi
             show_versions
             exit 0
             ;;
@@ -174,7 +235,11 @@ main() {
             ;;
         *)
             # Load environment and build
-            load_env_files
+            if [[ "$MODE" == "envless" ]]; then
+                load_from_versions
+            else
+                load_env_files
+            fi
             show_versions
             echo ""
             build_category "$1"

@@ -109,6 +109,45 @@ clients-logs: ## Show client application logs
 full-up: ## Start complete system (infrastructure + services + clients)
 	@echo "🚀 Starting complete Meldestelle system..."
 	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml up -d
+
+# ===================================================================
+# SSoT Developer UX (optional helpers)
+# ===================================================================
+.PHONY: versions-show versions-update docker-sync docker-validate docker-compose-gen hooks-install
+
+# Show current centralized versions from docker/versions.toml
+versions-show: ## Show centralized versions (docker/versions.toml)
+	@bash scripts/docker-versions-update.sh show
+
+# Update a single version key and sync env files (usage: make versions-update key=gradle value=9.1.0)
+versions-update: ## Update one key in versions.toml and sync env files (key=<k> value=<v>)
+	@if [ -z "$(key)" ] || [ -z "$(value)" ]; then \
+		echo "Usage: make versions-update key=<key> value=<version>"; \
+		echo "Keys: gradle java node nginx alpine prometheus grafana keycloak app-version spring-profiles-default spring-profiles-docker"; \
+		exit 1; \
+	fi
+	@bash scripts/docker-versions-update.sh update $(key) $(value)
+
+# Sync versions.toml into docker/build-args/*.env
+docker-sync: ## Sync versions.toml -> build-args/*.env
+	@bash scripts/docker-versions-update.sh sync
+
+# Generate all compose files for selected environment (ENV=development|production|testing)
+ENV ?= development
+
+docker-compose-gen: ## Generate docker-compose files from SSoT (ENV=development|production|testing)
+	@bash scripts/generate-compose-files.sh all $(ENV)
+
+# Run full Docker SSoT validation
+docker-validate: ## Validate SSoT (dockerfiles, compose, ports, build-args, drift)
+	@bash scripts/validate-docker-consistency.sh all
+
+# Install optional pre-commit hook for SSoT guard
+hooks-install: ## Install pre-commit SSoT guard hook into .git/hooks/pre-commit
+	@mkdir -p .git/hooks
+	@cp scripts/git-hooks/pre-commit-ssot .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
+	@echo "✅ Installed .git/hooks/pre-commit (SSoT guard)"
 	@echo "✅ Complete system started"
 	@echo ""
 	@echo "🌐 Frontend & APIs:"

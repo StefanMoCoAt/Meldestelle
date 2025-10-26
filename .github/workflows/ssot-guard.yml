@@ -1,0 +1,139 @@
+name: Docker SSoT Guard
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docker/**'
+      - 'dockerfiles/**'
+      - 'docker-compose*.yml*'
+      - 'scripts/**'
+      - '.github/workflows/ssot-guard.yml'
+  pull_request:
+    paths:
+      - 'docker/**'
+      - 'dockerfiles/**'
+      - 'docker-compose*.yml*'
+      - 'scripts/**'
+      - '.github/workflows/ssot-guard.yml'
+
+jobs:
+  ssot-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Show environment
+        run: |
+          bash --version
+          docker --version || true
+          compose_ver=$(docker compose version 2>/dev/null || true); echo "docker compose: $compose_ver"
+
+      - name: Sync versions to env files
+        run: bash scripts/docker-versions-update.sh sync
+
+      - name: Generate docker-compose files (all)
+        run: bash scripts/generate-compose-files.sh all development
+
+      - name: Validate Docker SSoT consistency
+        run: bash scripts/validate-docker-consistency.sh all
+
+      - name: Check drift of generated artifacts (ignore timestamps)
+        run: |
+          set -euo pipefail
+          # Gather modified files after sync+generate
+          CHANGED=$(git diff --name-only)
+          if [ -z "$CHANGED" ]; then
+            echo "No drift detected."
+            exit 0
+          fi
+          echo "Changed files:" $CHANGED
+          fail=0
+          for f in $CHANGED; do
+            # Inspect actual content changes but ignore volatile timestamp/comment lines
+            # Ignore lines starting with + or - that are exactly the timestamp markers we generate
+            DIFF_FILTERED=$(git diff --unified=0 -- "$f" \
+              | awk 'BEGIN{show=0} { \
+                   if ($0 ~ /^\+\+\+|^---|^@@/) { next } \
+                   if ($0 ~ /^[+-]# (Generated:|Last updated:)/) { next } \
+                   if ($0 ~ /^[+-]#\s*Generated from docker\/versions.toml/) { next } \
+                   if ($0 ~ /^[+-]#\s*Environment:/) { next } \
+                   if ($0 ~ /^[+-]#\s*Source:/) { next } \
+                   if ($0 ~ /^[+-]$/) { next } \
+                   if ($0 ~ /^[+-]/) { print $0 } \
+                 }')
+            if [ -n "$DIFF_FILTERED" ]; then
+              echo "SSoT drift detected in $f:";
+              echo "$DIFF_FILTERED";
+              fail=1;
+            fi
+          done
+          if [ $fail -ne 0 ]; then
+            echo "\nERROR: Generated artifacts differ from repository (beyond timestamps)."
+            echo "Run:"
+            echo "  bash scripts/docker-versions-update.sh sync"
+            echo "  bash scripts/generate-compose-files.sh all"
+            echo "and commit the changes."
+            exit 1
+          fi
+          echo "No SSoT drift (ignoring timestamps)."
+
+
+  ssot-guard-envless:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Show environment
+        run: |
+          bash --version
+          docker --version || true
+          compose_ver=$(docker compose version 2>/dev/null || true); echo "docker compose: $compose_ver"
+
+      - name: Generate docker-compose files (all)
+        run: bash scripts/generate-compose-files.sh all development
+
+      - name: Validate Docker SSoT consistency (envless)
+        run: DOCKER_SSOT_MODE=envless bash scripts/validate-docker-consistency.sh all
+
+      - name: Check drift of generated artifacts (ignore timestamps)
+        run: |
+          set -euo pipefail
+          CHANGED=$(git diff --name-only)
+          if [ -z "$CHANGED" ]; then
+            echo "No drift detected."
+            exit 0
+          fi
+          echo "Changed files:" $CHANGED
+          fail=0
+          for f in $CHANGED; do
+            DIFF_FILTERED=$(git diff --unified=0 -- "$f" \
+              | awk 'BEGIN{show=0} { \
+                   if ($0 ~ /^\+\+\+|^---|^@@/) { next } \
+                   if ($0 ~ /^[+-]# (Generated:|Last updated:)/) { next } \
+                   if ($0 ~ /^[+-]#\s*Generated from docker\/versions.toml/) { next } \
+                   if ($0 ~ /^[+-]#\s*Environment:/) { next } \
+                   if ($0 ~ /^[+-]#\s*Source:/) { next } \
+                   if ($0 ~ /^[+-]$/) { next } \
+                   if ($0 ~ /^[+-]/) { print $0 } \
+                 }')
+            if [ -n "$DIFF_FILTERED" ]; then
+              echo "SSoT drift detected in $f:";
+              echo "$DIFF_FILTERED";
+              fail=1;
+            fi
+          done
+          if [ $fail -ne 0 ]; then
+            echo "\nERROR: Generated artifacts differ from repository (beyond timestamps)."
+            echo "Run:"
+            echo "  DOCKER_SSOT_MODE=envless bash scripts/generate-compose-files.sh all"
+            echo "and commit the changes."
+            exit 1
+          fi
+          echo "No SSoT drift (ignoring timestamps)."

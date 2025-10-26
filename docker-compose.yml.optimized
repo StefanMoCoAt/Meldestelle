@@ -17,7 +17,7 @@ services:
   # Datenbank - PostgreSQL with Security Hardening
   # ===================================================================
   postgres:
-    image: postgres:16-alpine
+    image: postgres:${DOCKER_POSTGRES_VERSION:-16-alpine}
     container_name: meldestelle-postgres
     environment:
       POSTGRES_USER_FILE: /run/secrets/postgres_user
@@ -58,7 +58,7 @@ services:
   # Cache - Redis with Authentication
   # ===================================================================
   redis:
-    image: redis:7-alpine
+    image: redis:${DOCKER_REDIS_VERSION:-7-alpine}
     container_name: meldestelle-redis
     ports:
       - "${REDIS_PORT:-6379}:6379"
@@ -159,7 +159,7 @@ services:
   # Service Discovery - Consul
   # ===================================================================
   consul:
-    image: hashicorp/consul:1.15
+    image: hashicorp/consul:${DOCKER_CONSUL_VERSION:-1.15}
     container_name: meldestelle-consul
     ports:
       - "${CONSUL_PORT:-8500}:8500"
@@ -193,7 +193,7 @@ services:
   # Messaging - Zookeeper & Kafka with Resource Limits
   # ===================================================================
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
+    image: confluentinc/cp-zookeeper:${DOCKER_ZOOKEEPER_VERSION:-7.4.0}
     container_name: meldestelle-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT:-2181}
@@ -227,7 +227,7 @@ services:
       - no-new-privileges:true
 
   kafka:
-    image: confluentinc/cp-kafka:7.4.0
+    image: confluentinc/cp-kafka:${DOCKER_KAFKA_VERSION:-7.4.0}
     container_name: meldestelle-kafka
     environment:
       KAFKA_BROKER_ID: ${KAFKA_BROKER_ID:-1}
@@ -366,7 +366,7 @@ services:
       dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
       args:
         # Global build arguments
-        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
         JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
         BUILD_DATE: ${BUILD_DATE:-unknown}
         VERSION: ${DOCKER_APP_VERSION:-1.0.0}

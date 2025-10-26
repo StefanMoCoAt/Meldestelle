@@ -23,9 +23,9 @@ ARG SPRING_PROFILES_ACTIVE
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
 # Re-declare build arguments for this stage
-ARG SPRING_PROFILES_ACTIVE=default
+ARG SPRING_PROFILES_ACTIVE
 ARG BUILD_DATE
-ARG VERSION=1.0.0
+ARG VERSION
 
 LABEL stage=builder
 LABEL service="api-gateway"
@@ -95,9 +95,9 @@ FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
 
 # Build arguments for runtime stage
 ARG BUILD_DATE
-ARG VERSION=1.0.0
-ARG JAVA_VERSION=21
-ARG SPRING_PROFILES_ACTIVE=default
+ARG VERSION
+ARG JAVA_VERSION
+ARG SPRING_PROFILES_ACTIVE
 
 # Convert build arguments to environment variables
 ENV JAVA_VERSION=${JAVA_VERSION} \
