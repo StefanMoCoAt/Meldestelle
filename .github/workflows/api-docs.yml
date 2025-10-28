@@ -38,7 +38,8 @@ jobs:
         run: npm install -g @stoplight/spectral-cli
 
       - name: Validate OpenAPI with Spectral
-        run: spectral lint api-gateway/src/jvmMain/resources/openapi/documentation.yaml --ruleset spectral:oas --fail-severity=error
+#        run: spectral lint api-gateway/src/jvmMain/resources/openapi/documentation.yaml --ruleset spectral:oas --fail-severity=error
+        run: spectral lint api-gateway/src/jvmMain/resources/openapi/documentation.yaml --fail-severity=error
 
   generate-api-docs:
     name: Generate API Documentation
