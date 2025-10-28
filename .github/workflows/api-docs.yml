@@ -29,10 +29,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Validate OpenAPI
-        uses: char0n/swagger-editor-validate@v1
+      - name: Set up Node.js # Spectral benötigt Node.js
+        uses: actions/setup-node@v6
         with:
-          definition-file: api-gateway/src/jvmMain/resources/openapi/documentation.yaml
+          node-version: '18' # Oder '20', je nachdem was du bevorzugst
+
+      - name: Install Spectral CLI
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Validate OpenAPI with Spectral
+        # Füge hier ggf. deine Regeldatei hinzu mit --ruleset <datei>.yaml
+        run: spectral lint api-gateway/src/jvmMain/resources/openapi/documentation.yaml --fail-severity=error
 
   generate-api-docs:
     name: Generate API Documentation
