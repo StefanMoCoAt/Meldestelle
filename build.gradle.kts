@@ -155,7 +155,7 @@ val dokkaGfmAll = tasks.register("dokkaGfmAll") {
         subprojects.filter { it.plugins.hasPlugin("org.jetbrains.dokka") }.forEach { p ->
             val out = p.layout.buildDirectory.dir("dokka/gfm").get().asFile
             if (out.exists()) {
-                out.copyRecursively(java.io.File(dest, p.path.trimStart(':').replace(':', '/')), overwrite = true)
+                out.copyRecursively(File(dest, p.path.trimStart(':').replace(':', '/')), overwrite = true)
             }
         }
         println("[DOKKA] Aggregated GFM into ${dest.absolutePath}")
@@ -175,7 +175,7 @@ val dokkaHtmlAll = tasks.register("dokkaHtmlAll") {
         subprojects.filter { it.plugins.hasPlugin("org.jetbrains.dokka") }.forEach { p ->
             val out = p.layout.buildDirectory.dir("dokka/html").get().asFile
             if (out.exists()) {
-                out.copyRecursively(java.io.File(dest, p.path.trimStart(':').replace(':', '/')), overwrite = true)
+                out.copyRecursively(File(dest, p.path.trimStart(':').replace(':', '/')), overwrite = true)
             }
         }
         println("[DOKKA] Aggregated HTML into ${dest.absolutePath}")
