@@ -1,4 +1,94 @@
 
+# Meldestelle
+
+## Überblick
+
+Die Meldestelle ist ein modulares System zur Verwaltung von Pferdesportveranstaltungen. Das System ermöglicht die Registrierung von Pferden, Mitgliedern und Veranstaltungen sowie die Verwaltung von Stammdaten.
+
+Das Projekt wurde kürzlich auf eine modulare Architektur migriert, um die Wartbarkeit und Erweiterbarkeit zu verbessern.
+
+## Systemanforderungen
+
+- Java 21
+- Kotlin 2.2.10
+- Gradle 9.0.0 (automatischer Download über Gradle Wrapper)
+- Docker und Docker Compose (v2.0+)
+
+## Infrastruktur
+
+Das System nutzt folgende Dienste:
+
+- **PostgreSQL 16**: Primäre Datenbank
+- **Redis 7**: Caching
+- **Keycloak 26.4.2**: Authentifizierung und Autorisierung
+- **Kafka 7.5.0**: Messaging und Event-Streaming
+- **Zipkin**: Distributed Tracing
+- **Prometheus & Grafana**: Monitoring (optional)
+
+## Projektstruktur
+
+Das Projekt ist in folgende Hauptmodule unterteilt:
+
+- **core**: Gemeinsame Kernkomponenten
+  - core-domain: Domänenmodelle und Geschäftslogik
+  - core-utils: Allgemeine Hilfsfunktionen
+
+- **masterdata**: Umfassende Verwaltung von Stammdaten für Pferdesportveranstaltungen
+  - **Funktionalität**: Länder (ISO-Codes, EU/EWR-Mitgliedschaft), Bundesländer (OEPS/ISO-Codes), Altersklassen (Teilnahmeberechtigung), Turnierplätze (Typ, Abmessungen, Boden)
+  - **API-Endpunkte**: 37 REST-Endpunkte mit vollständiger CRUD-Funktionalität
+  - **Geschäftslogik**: Validierung, Duplikatsprüfung, Berechtigung, Eignung für Disziplinen
+  - masterdata-api: REST-Controller und DTO-Definitionen
+  - masterdata-application: Use Cases und Geschäftslogik
+  - masterdata-domain: Domänenmodelle und Repository-Interfaces
+  - masterdata-infrastructure: Datenbankzugriff und Persistierung
+  - masterdata-service: Spring Boot Service-Implementierung
+
+- **members**: Mitgliederverwaltung
+  - members-api: API-Definitionen
+  - members-application: Anwendungslogik
+  - members-domain: Domänenmodelle
+  - members-infrastructure: Infrastrukturkomponenten
+  - members-service: Service-Implementierung
+
+- **horses**: Pferderegistrierung
+  - horses-api: API-Definitionen
+  - horses-application: Anwendungslogik
+  - horses-domain: Domänenmodelle
+  - horses-infrastructure: Infrastrukturkomponenten
+  - horses-service: Service-Implementierung
+
+- **events**: Veranstaltungsverwaltung
+  - events-api: API-Definitionen
+  - events-application: Anwendungslogik
+  - events-domain: Domänenmodelle
+  - events-infrastructure: Infrastrukturkomponenten
+  - events-service: Service-Implementierung
+
+- **infrastructure**: Gemeinsame Infrastrukturkomponenten
+  - auth: Authentifizierung
+  - cache: Caching
+  - event-store: Event-Speicher
+  - gateway: API-Gateway
+  - messaging: Messaging-Infrastruktur
+  - monitoring: Monitoring-Komponenten
+
+- **client**: Client-Anwendungen
+  - common-ui: Gemeinsame UI-Komponenten
+  - desktop-app: Desktop-Anwendung
+  - web-app: Web-Anwendung
+
+## Installation und Setup
+
+### Voraussetzungen
+
+Stellen Sie sicher, dass Java 21, Docker und Docker Compose installiert sind.
+
+### Docker-Infrastruktur
+
+Das System bietet verschiedene Docker-Konfigurationen für unterschiedliche Umgebungen:
+
+#### Entwicklungsumgebung (Schnellstart)
+
 
 ## Docker Single Source of Truth (SSoT) – Lokale Nutzung & Troubleshooting
 
@@ -102,3 +192,17 @@ Reproduktion lokal:
   - git diff --name-only  # sollte leer sein (abgesehen von Zeitstempel‑Kommentaren)
 
 Hinweis: Env‑less ist die empfohlene lokale Nutzung; der compat‑Job bleibt für Rückwärtskompatibilität und Sicherheit bestehen.
+
+
+## Dokumentation & YouTrack SSoT
+
+- Single Source of Truth: YouTrack Wissensdatenbank (KB)
+  - Root: "API & Entwicklerdoku"
+  - Direkt: https://meldestelle-pro.youtrack.cloud/knowledge-bases
+- Repo enthält nur Einstiegs-/How‑To‑Seiten, Diagramm‑Quellen und KDoc im Code. Ausführliche Artikel liegen in der KB.
+- KDoc → YouTrack Sync:
+  - Lokal: ./gradlew dokkaGfmAll (Ergebnis unter build/dokka/gfm)
+  - CI/Manuell: Workflow "KDoc → YouTrack KB Sync" (workflow_dispatch) in GitHub Actions starten
+  - Erforderliche Secrets: YT_URL, YT_TOKEN
+  - Workflow-Inputs: KB Root Titel (Standard: "API & Entwicklerdoku"), optional BC-Unterordner (Standard: "BCs")
+

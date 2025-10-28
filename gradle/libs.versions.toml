@@ -495,3 +495,10 @@ spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
 spring-dependencyManagement = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
 
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "foojayResolver" }
+
+# Dokka plugin
+# Version pinned to work with Kotlin 2.2.x
+# See: https://github.com/Kotlin/dokka
+# Note: dokka 2.0.0+ matches Kotlin 2.0+; verify compatibility if bumping Kotlin
+# Using latest stable known compatible as of 2025-10
+dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }

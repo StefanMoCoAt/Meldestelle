@@ -15,6 +15,9 @@ with open(SCHEMA_PATH, encoding='utf-8') as f:
 
 errors = 0
 for path in glob('docs/**/*.md', recursive=True):
+    # ADRs und ggf. generierte Inhalte vorerst ausnehmen (separater Rollout für FM)
+    if path.startswith('docs/architecture/adr/'):
+        continue
     # Skip generated or non-content files if any (none by default)
     with open(path, 'r', encoding='utf-8') as fh:
         content = fh.read()

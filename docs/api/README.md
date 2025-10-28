@@ -7,6 +7,8 @@ summary: Überblick und Einstieg in die REST‑APIs der Meldestelle.
 yt_epic: MP-1
 yt_issues: [MP-7]
 tags: [api, overview]
+bc: infrastructure
+doc_type: api
 ---
 
 # Meldestelle – REST‑API Dokumentation

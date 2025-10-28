@@ -4,6 +4,8 @@ status: active
 review_cycle: 90d
 last_reviewed: 2025-10-15
 summary: Kürzeste Anleitung, um das komplette System lokal zu starten und zu prüfen, ob alles läuft.
+bc: infrastructure
+doc_type: how-to
 ---
 
 # How-To: Lokale Umgebung starten (Quickstart)

@@ -4,6 +4,8 @@ status: active
 review_cycle: 90d
 last_reviewed: 2025-10-15
 summary: Schlanker Einstiegspunkt in die Dokumentation der Meldestelle. Nur die wichtigsten Links für Start, Überblick, API, Produktion und aktuelles Vorhaben.
+bc: infrastructure
+doc_type: readme
 ---
 
 # Meldestelle – Dokumentation (Startseite)

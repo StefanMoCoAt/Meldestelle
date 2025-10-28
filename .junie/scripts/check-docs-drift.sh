@@ -27,4 +27,17 @@ if ls docs/architecture/c4/*.puml 2>/dev/null | grep -E -v '-de\.puml$' >/dev/nu
   err=1
 fi
 
+# ADR-Stubs: max. 40 Zeilen und YouTrack-Link Pflicht, wenn als Stub gekennzeichnet
+for f in $(grep -RIl "^doc_type: adr-link" docs/architecture/adr 2>/dev/null || true); do
+  lines=$(wc -l < "$f" | tr -d ' ')
+  if [ "${lines}" -gt 40 ]; then
+    echo "[DRIFT] ADR-Stub überschreitet 40 Zeilen: $f (${lines})"
+    err=1
+  fi
+  if ! grep -Eiq "https?://[^ ]*youtrack" "$f"; then
+    echo "[DRIFT] ADR-Stub ohne YouTrack-Link: $f"
+    err=1
+  fi
+done
+
 exit $err

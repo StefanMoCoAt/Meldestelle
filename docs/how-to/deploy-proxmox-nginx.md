@@ -4,6 +4,8 @@ status: active
 review_cycle: 180d
 last_reviewed: 2025-10-15
 summary: Anleitung zur Installation und Konfiguration des Nginx Reverse Proxys auf dem Proxmox-Host für die Meldestelle-Services.
+bc: infrastructure
+doc_type: runbook
 ---
 
 # How-To: Proxmox/Nginx Reverse Proxy deployen
@@ -26,25 +28,25 @@ Diese Anleitung beschreibt die Einrichtung des Nginx Reverse Proxys auf dem Prox
 sudo cp docs/proxmox-nginx/meldestelle.conf /etc/nginx/sites-available/
 ```
 
-2) Site aktivieren (Symlink anlegen)
+1) Site aktivieren (Symlink anlegen)
 
 ```bash
 sudo ln -s /etc/nginx/sites-available/meldestelle.conf /etc/nginx/sites-enabled/
 ```
 
-3) Nginx Konfiguration testen und neu laden
+1) Nginx Konfiguration testen und neu laden
 
 ```bash
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-4) DNS konfigurieren (Beispiele)
+1) DNS konfigurieren (Beispiele)
 
 - meldestelle.yourdomain.com → öffentliche IP deines Proxmox-Hosts
 - api.meldestelle.yourdomain.com → öffentliche IP deines Proxmox-Hosts
 - vnc.meldestelle.yourdomain.com → öffentliche IP deines Proxmox-Hosts
 
-5) Health-Checks
+1) Health-Checks
 
 ```bash
 curl -i http://api.meldestelle.yourdomain.com/actuator/health

@@ -10,7 +10,9 @@
     "review_cycle": {"type": "string", "pattern": "^\\d+d$"},
     "yt_epic": {"type": "string", "pattern": "^[A-Z]+-\\d+$"},
     "yt_issues": {"type": "array", "items": {"type": "string", "pattern": "^[A-Z]+-\\d+$"}},
-    "tags": {"type": "array", "items": {"type": "string"}}
+    "tags": {"type": "array", "items": {"type": "string"}},
+    "bc": {"type": "string", "enum": ["members", "horses", "events", "masterdata", "infrastructure"]},
+    "doc_type": {"type": "string", "enum": ["how-to", "readme", "adr-link", "runbook", "api"]}
   },
   "additionalProperties": true
 }

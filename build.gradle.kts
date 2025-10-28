@@ -15,6 +15,9 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.spring.boot) apply false
     alias(libs.plugins.spring.dependencyManagement) apply false
+
+    // Dokka plugin applied at root to create multi-module collector tasks
+    alias(libs.plugins.dokka)
 }
 
 // ##################################################################
@@ -105,6 +108,77 @@ subprojects {
         compilerOptions {
             freeCompilerArgs.add("-Xannotation-default-target=param-property")
         }
+    }
+}
+
+// ##################################################################
+// ###                     DOKKA (Multi-Module)                   ###
+// ##################################################################
+
+// Apply Dokka automatically to Kotlin subprojects to enable per-module docs
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        apply(plugin = "org.jetbrains.dokka")
+    }
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        apply(plugin = "org.jetbrains.dokka")
+    }
+
+    // Minimal sourceLink configuration when running in GitHub Actions
+    tasks.withType(org.jetbrains.dokka.gradle.DokkaTask::class.java).configureEach {
+        dokkaSourceSets.configureEach {
+            val repo = System.getenv("GITHUB_REPOSITORY")
+            if (!repo.isNullOrBlank()) {
+                sourceLink {
+                    localDirectory.set(project.file("src"))
+                    remoteUrl.set(java.net.URI.create("https://github.com/$repo/blob/main/" + project.path.trimStart(':').replace(':', '/') + "/src").toURL())
+                }
+            }
+            // Keep module names short and stable
+            moduleName.set(project.path.trimStart(':'))
+        }
+    }
+}
+
+// Aggregate tasks to build multi-module docs in Markdown (GFM) and HTML
+val dokkaGfmAll = tasks.register("dokkaGfmAll") {
+    group = "documentation"
+    description = "Builds Dokka GFM for all modules and aggregates outputs under build/dokka/gfm"
+    // Depend on all dokkaGfm tasks that exist in subprojects
+    dependsOn(subprojects
+        .filter { it.plugins.hasPlugin("org.jetbrains.dokka") }
+        .map { "${it.path}:dokkaGfm" })
+    doLast {
+        val dest = layout.buildDirectory.dir("dokka/gfm").get().asFile
+        if (dest.exists()) dest.deleteRecursively()
+        dest.mkdirs()
+        subprojects.filter { it.plugins.hasPlugin("org.jetbrains.dokka") }.forEach { p ->
+            val out = p.layout.buildDirectory.dir("dokka/gfm").get().asFile
+            if (out.exists()) {
+                out.copyRecursively(java.io.File(dest, p.path.trimStart(':').replace(':', '/')), overwrite = true)
+            }
+        }
+        println("[DOKKA] Aggregated GFM into ${dest.absolutePath}")
+    }
+}
+
+val dokkaHtmlAll = tasks.register("dokkaHtmlAll") {
+    group = "documentation"
+    description = "Builds Dokka HTML for all modules and aggregates outputs under build/dokka/html"
+    dependsOn(subprojects
+        .filter { it.plugins.hasPlugin("org.jetbrains.dokka") }
+        .map { "${it.path}:dokkaHtml" })
+    doLast {
+        val dest = layout.buildDirectory.dir("dokka/html").get().asFile
+        if (dest.exists()) dest.deleteRecursively()
+        dest.mkdirs()
+        subprojects.filter { it.plugins.hasPlugin("org.jetbrains.dokka") }.forEach { p ->
+            val out = p.layout.buildDirectory.dir("dokka/html").get().asFile
+            if (out.exists()) {
+                out.copyRecursively(java.io.File(dest, p.path.trimStart(':').replace(':', '/')), overwrite = true)
+            }
+        }
+        println("[DOKKA] Aggregated HTML into ${dest.absolutePath}")
     }
 }
 
