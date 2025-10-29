@@ -23,7 +23,7 @@ Die Meldestelle-Anwendung bietet eine umfassende REST API für die Verwaltung vo
 
 Die API ist in folgende Hauptmodule unterteilt:
 
-```
+```text
 API Services
 ├── Members API          # Mitgliederverwaltung
 ├── Horses API           # Pferderegistrierung
@@ -49,13 +49,13 @@ API Services
 
 ### Entwicklungsumgebung
 
-```
+```text
 Base URL: http://localhost:8081/api
 ```
 
 ### Produktionsumgebung
 
-```
+```text
 Base URL: https://api.meldestelle.yourdomain.com/api
 ```
 
@@ -225,7 +225,7 @@ Für Listen-Endpunkte wird standardmäßig Paginierung unterstützt:
 
 **Beispiel-Anfrage**:
 
-```
+```http
 GET /api/members?limit=50&offset=100
 ```
 
@@ -259,7 +259,7 @@ Viele Endpunkte unterstützen Suchfunktionalität:
 
 **Beispiel**:
 
-```
+```http
 GET /api/members?search=Schmidt&active=true&limit=20
 ```
 
@@ -274,7 +274,7 @@ Sortierung wird über Query-Parameter gesteuert:
 
 **Beispiel**:
 
-```
+```http
 GET /api/members?sort=lastName&order=asc
 ```
 
@@ -373,13 +373,13 @@ Die API verwendet URL-basierte Versionierung:
 
 ### Health Checks
 
-```
+```http
 GET /actuator/health
 ```
 
 ### Metriken
 
-```
+```http
 GET /actuator/metrics
 GET /actuator/prometheus
 ```

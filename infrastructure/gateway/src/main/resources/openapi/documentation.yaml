@@ -1517,7 +1517,7 @@ components:
         phone:
           type: string
           pattern: '^\+?[1-9]\d{1,14}$'
-          example: +43123456789
+          example: "+43123456789"
         dateOfBirth:
           type: string
           format: date
@@ -1551,7 +1551,7 @@ components:
         phone:
           type: string
           pattern: '^\+?[1-9]\d{1,14}$'
-          example: +43123456789
+          example: "+43123456789"
         address:
           $ref: '#/components/schemas/Address'
         membershipType:

@@ -123,7 +123,12 @@ validate_cross_references() {
     }
 
     while IFS= read -r guideline; do
-        guideline_file="$GUIDELINES_DIR/$guideline"
+        # Special handling for README.md which is at project root
+        if [[ "$guideline" == "README.md" ]]; then
+            guideline_file="$PROJECT_ROOT/README.md"
+        else
+            guideline_file="$GUIDELINES_DIR/$guideline"
+        fi
 
         # Prüfe ob Guideline-Datei existiert
         if [[ ! -f "$guideline_file" ]]; then
@@ -168,7 +173,8 @@ validate_cross_references() {
             # Prüfe ob der Link tatsächlich im Markdown existiert (nur im vollständigen Modus)
             if [[ "$QUICK_MODE" = false ]]; then
                 ref_basename=$(basename "$ref" .md)
-                if ! grep -q "\[$ref_basename\]" "$guideline_file" && ! grep -q "($ref)" "$guideline_file"; then
+                # Check for link with basename in brackets OR reference path (with or without directory) in parentheses
+                if ! grep -q "\[$ref_basename\]" "$guideline_file" && ! grep -qE "\([^)]*$ref\)" "$guideline_file"; then
                     log_warning "'$guideline' sollte '$ref' referenzieren, aber Link fehlt im Markdown"
                     ((WARNINGS++))
                 fi
