@@ -59,6 +59,8 @@ servers:
     description: Local Development Server
 
 tags:
+  - name: System
+    description: System information and health check endpoints
   - name: Authentication
     description: User authentication, registration, and profile management
   - name: Members
@@ -73,6 +75,8 @@ tags:
 paths:
   /:
     get:
+      tags:
+        - System
       summary: API Gateway Information
       description: Returns basic information about the API Gateway
       operationId: getApiGatewayInfo
@@ -86,6 +90,8 @@ paths:
 
   /health:
     get:
+      tags:
+        - System
       summary: Health Check
       description: Returns the health status of all bounded contexts
       operationId: getHealthStatus
@@ -99,6 +105,8 @@ paths:
 
   /api:
     get:
+      tags:
+        - System
       summary: API Documentation
       description: Returns information about available API endpoints
       operationId: getApiDocumentation
@@ -1509,7 +1517,7 @@ components:
         phone:
           type: string
           pattern: '^\+?[1-9]\d{1,14}$'
-          example: +43 123 456789
+          example: +43123456789
         dateOfBirth:
           type: string
           format: date
@@ -1543,7 +1551,7 @@ components:
         phone:
           type: string
           pattern: '^\+?[1-9]\d{1,14}$'
-          example: +43 123 456789
+          example: +43123456789
         address:
           $ref: '#/components/schemas/Address'
         membershipType:
@@ -1629,7 +1637,7 @@ components:
           example: Wien
         postalCode:
           type: string
-          example: 1010
+          example: "1010"
         state:
           type: string
           example: Wien
@@ -1844,7 +1852,7 @@ components:
           example: AT-LIP-2015-123
         chipNumber:
           type: string
-          example: 040123456789012
+          example: "040123456789012"
         passportNumber:
           type: string
           example: AT-P-2015-123

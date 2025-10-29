@@ -211,3 +211,15 @@ Hinweis: Env‑less ist die empfohlene lokale Nutzung; der compat‑Job bleibt f
 ## Richtlinien
 
 - [Master-Guideline](.junie/guidelines/master-guideline.md)
+- [Coding Standards](.junie/guidelines/project-standards/coding-standards.md)
+- [Testing Standards](.junie/guidelines/project-standards/testing-standards.md)
+- [Documentation Standards](.junie/guidelines/project-standards/documentation-standards.md)
+- [Architecture Principles](.junie/guidelines/project-standards/architecture-principles.md)
+- [Web Application Guideline](.junie/guidelines/technology-guides/web-app-guideline.md)
+- [Docker Overview](.junie/guidelines/technology-guides/docker/docker-overview.md)
+- [Docker Architecture](.junie/guidelines/technology-guides/docker/docker-architecture.md)
+- [Docker Development](.junie/guidelines/technology-guides/docker/docker-development.md)
+- [Docker Production](.junie/guidelines/technology-guides/docker/docker-production.md)
+- [Docker Monitoring](.junie/guidelines/technology-guides/docker/docker-monitoring.md)
+- [Docker Troubleshooting](.junie/guidelines/technology-guides/docker/docker-troubleshooting.md)
+- [Trace Bullet Guideline](.junie/guidelines/process-guides/trace-bullet-guideline.md)
