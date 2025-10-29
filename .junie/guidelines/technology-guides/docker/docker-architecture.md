@@ -12,6 +12,8 @@ ai_context: "Docker-Container-Architektur, Service-Definitionen und zentrale Ver
 
 ## 🏗️ Architektur-Überblick
 
+> **📖 Hinweis:** Für einen allgemeinen Überblick über die Docker-Infrastruktur siehe [docker-overview](docker-overview.md).
+
 ### Container-Kategorien
 
 ```mermaid
@@ -240,6 +242,7 @@ docker-compose restart <service-name>
 ---
 
 **Navigation:**
+- [master-guideline](../../master-guideline.md) - Hauptrichtlinie für das Projekt
 - [Docker-Overview](./docker-overview.md) - Grundlagen und Philosophie
 - [Docker-Development](./docker-development.md) - Entwicklungsworkflow
 - [Docker-Production](./docker-production.md) - Production-Deployment

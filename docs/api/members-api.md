@@ -50,7 +50,7 @@ GET /api/members
 
 Ruft eine Liste aller Mitglieder ab mit optionaler Filterung und Suche.
 
-#### Query-Parameter
+##### Query-Parameter
 
 | Parameter | Typ | Standard | Beschreibung |
 |-----------|-----|----------|--------------|
@@ -59,14 +59,14 @@ Ruft eine Liste aller Mitglieder ab mit optionaler Filterung und Suche.
 | `offset` | integer | `0` | Anzahl zu überspringende Ergebnisse |
 | `search` | string | - | Suchbegriff für Mitgliedernamen |
 
-#### Beispiel-Anfrage
+##### Beispiel-Anfrage
 
 ```http
 GET /api/members?activeOnly=true&limit=50&search=Schmidt
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-#### Erfolgreiche Antwort (200 OK)
+##### Erfolgreiche Antwort (200 OK)
 
 ```json
 {
@@ -95,7 +95,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-#### Fehler-Antworten
+##### Fehler-Antworten
 
 - **500 Internal Server Error**: Serverfehler beim Abrufen der Mitglieder
 
@@ -107,20 +107,20 @@ GET /api/members/{id}
 
 Ruft ein spezifisches Mitglied anhand seiner eindeutigen ID ab.
 
-#### Pfad-Parameter
+##### Pfad-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
 | `id` | UUID | Eindeutige Mitglieder-ID |
 
-#### Beispiel-Anfrage
+##### Beispiel-Anfrage
 
 ```http
 GET /api/members/123e4567-e89b-12d3-a456-426614174000
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-#### Erfolgreiche Antwort (200 OK)
+##### Erfolgreiche Antwort (200 OK)
 
 ```json
 {
@@ -147,7 +147,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-#### Fehler-Antworten
+##### Fehler-Antworten
 
 - **400 Bad Request**: Ungültiges UUID-Format
 - **404 Not Found**: Mitglied nicht gefunden
@@ -159,13 +159,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 GET /api/members/by-membership-number/{membershipNumber}
 ```
 
-#### Pfad-Parameter
+##### Pfad-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
 | `membershipNumber` | string | Mitgliedsnummer |
 
-#### Beispiel-Anfrage
+##### Beispiel-Anfrage
 
 ```http
 GET /api/members/by-membership-number/M2024001
@@ -178,13 +178,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 GET /api/members/by-email/{email}
 ```
 
-#### Pfad-Parameter
+##### Pfad-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
 | `email` | string | E-Mail-Adresse |
 
-#### Beispiel-Anfrage
+##### Beispiel-Anfrage
 
 ```http
 GET /api/members/by-email/max.schmidt@example.com
@@ -199,7 +199,7 @@ GET /api/members/stats
 
 Ruft Statistiken über die Mitgliederdatenbank ab.
 
-#### Erfolgreiche Antwort (200 OK)
+##### Erfolgreiche Antwort (200 OK)
 
 ```json
 {
@@ -222,7 +222,7 @@ POST /api/members
 
 Erstellt ein neues Mitglied mit den bereitgestellten Daten.
 
-#### Request Body
+##### Request Body
 
 ```json
 {
@@ -267,7 +267,7 @@ Erstellt ein neues Mitglied mit den bereitgestellten Daten.
 }
 ```
 
-#### Fehler-Antworten
+##### Fehler-Antworten
 
 - **400 Bad Request**: Ungültige Anfragedaten
 - **409 Conflict**: E-Mail oder Mitgliedsnummer bereits vorhanden
@@ -281,13 +281,13 @@ PUT /api/members/{id}
 
 Aktualisiert ein bestehendes Mitglied.
 
-#### Pfad-Parameter
+##### Pfad-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
 | `id` | UUID | Eindeutige Mitglieder-ID |
 
-#### Request Body
+##### Request Body
 
 ```json
 {
@@ -305,11 +305,11 @@ Aktualisiert ein bestehendes Mitglied.
 }
 ```
 
-#### Erfolgreiche Antwort (200 OK)
+##### Erfolgreiche Antwort (200 OK)
 
 Gleiche Struktur wie bei der Erstellung, aber mit aktualisierten Daten und `updatedAt` Zeitstempel.
 
-#### Fehler-Antworten
+##### Fehler-Antworten
 
 - **400 Bad Request**: Ungültige Anfragedaten oder UUID-Format
 - **404 Not Found**: Mitglied nicht gefunden
@@ -324,20 +324,20 @@ DELETE /api/members/{id}
 
 Löscht ein Mitglied aus dem System.
 
-#### Pfad-Parameter
+##### Pfad-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
 | `id` | UUID | Eindeutige Mitglieder-ID |
 
-#### Beispiel-Anfrage
+##### Beispiel-Anfrage
 
 ```http
 DELETE /api/members/123e4567-e89b-12d3-a456-426614174000
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-#### Erfolgreiche Antwort (200 OK)
+##### Erfolgreiche Antwort (200 OK)
 
 ```json
 {
@@ -349,7 +349,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 }
 ```
 
-#### Fehler-Antworten
+##### Fehler-Antworten
 
 - **400 Bad Request**: Ungültiges UUID-Format
 - **404 Not Found**: Mitglied nicht gefunden
@@ -363,20 +363,20 @@ GET /api/members/expiring-memberships
 
 Ruft Mitglieder ab, deren Mitgliedschaft in den nächsten Tagen abläuft.
 
-#### Query-Parameter
+##### Query-Parameter
 
 | Parameter | Typ | Standard | Beschreibung |
 |-----------|-----|----------|--------------|
 | `daysAhead` | integer | `30` | Anzahl Tage im Voraus |
 
-#### Beispiel-Anfrage
+##### Beispiel-Anfrage
 
 ```http
 GET /api/members/expiring-memberships?daysAhead=14
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-#### Erfolgreiche Antwort (200 OK)
+##### Erfolgreiche Antwort (200 OK)
 
 ```json
 {
@@ -406,7 +406,7 @@ GET /api/members/by-date-range
 
 Ruft Mitglieder basierend auf einem Datumsbereich ab.
 
-#### Query-Parameter
+##### Query-Parameter
 
 | Parameter | Typ | Erforderlich | Beschreibung |
 |-----------|-----|--------------|--------------|
@@ -414,14 +414,14 @@ Ruft Mitglieder basierend auf einem Datumsbereich ab.
 | `endDate` | string (YYYY-MM-DD) | Ja | Enddatum |
 | `dateType` | string | Nein | `MEMBERSHIP_START_DATE` oder `MEMBERSHIP_END_DATE` |
 
-#### Beispiel-Anfrage
+##### Beispiel-Anfrage
 
 ```http
 GET /api/members/by-date-range?startDate=2024-01-01&endDate=2024-12-31&dateType=MEMBERSHIP_START_DATE
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-#### Fehler-Antworten
+##### Fehler-Antworten
 
 - **400 Bad Request**: Ungültiges Datumsformat oder Datumstyp
 
@@ -433,26 +433,26 @@ GET /api/members/validate/email/{email}
 
 Prüft, ob eine E-Mail-Adresse bereits verwendet wird.
 
-#### Pfad-Parameter
+##### Pfad-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
 | `email` | string | Zu prüfende E-Mail-Adresse |
 
-#### Query-Parameter
+##### Query-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
 | `excludeMemberId` | UUID | Mitglieder-ID zum Ausschließen (für Updates) |
 
-#### Beispiel-Anfrage
+##### Beispiel-Anfrage
 
 ```http
 GET /api/members/validate/email/test@example.com?excludeMemberId=123e4567-e89b-12d3-a456-426614174000
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-#### Erfolgreiche Antwort (200 OK)
+##### Erfolgreiche Antwort (200 OK)
 
 ```json
 {
@@ -476,13 +476,13 @@ GET /api/members/validate/membership-number/{membershipNumber}
 
 Prüft, ob eine Mitgliedsnummer bereits verwendet wird.
 
-#### Pfad-Parameter
+##### Pfad-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
 | `membershipNumber` | string | Zu prüfende Mitgliedsnummer |
 
-#### Query-Parameter
+##### Query-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
