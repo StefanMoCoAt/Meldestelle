@@ -20,7 +20,7 @@ This directory contains the comprehensive development guidelines for the Meldest
 ## 🗂️ Guidelines Structure
 
 ### 📊 Master Guideline
-- **[Master-Guideline](./master-guideline.md)** - Central project guidelines and architectural foundations
+- **[Master-Guideline](master-guideline.md)** - Central project guidelines and architectural foundations
 
 ### 🏗️ Project Standards
 Core development standards and quality requirements:

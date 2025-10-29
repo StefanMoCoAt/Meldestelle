@@ -4,18 +4,16 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'api-gateway/src/jvmMain/resources/openapi/**'
-      - 'api-gateway/src/jvmMain/kotlin/at/mocode/gateway/routing/**'
-      - 'api-gateway/src/jvmMain/kotlin/at/mocode/gateway/config/OpenApiConfig.kt'
-      - 'api-gateway/build.gradle.kts'
+      - 'infrastructure/gateway/src/main/resources/openapi/**'
+      - 'infrastructure/gateway/src/main/kotlin/**'
+      - 'infrastructure/gateway/build.gradle.kts'
       - '.github/workflows/api-docs.yml'
   pull_request:
     branches: [ main, master ]
     paths:
-      - 'api-gateway/src/jvmMain/resources/openapi/**'
-      - 'api-gateway/src/jvmMain/kotlin/at/mocode/gateway/routing/**'
-      - 'api-gateway/src/jvmMain/kotlin/at/mocode/gateway/config/OpenApiConfig.kt'
-      - 'api-gateway/build.gradle.kts'
+      - 'infrastructure/gateway/src/main/resources/openapi/**'
+      - 'infrastructure/gateway/src/main/kotlin/**'
+      - 'infrastructure/gateway/build.gradle.kts'
       - '.github/workflows/api-docs.yml'
   workflow_dispatch:  # Allow manual triggering
   schedule:
@@ -39,7 +37,7 @@ jobs:
 
       - name: Validate OpenAPI with Spectral
 #        run: spectral lint api-gateway/src/jvmMain/resources/openapi/documentation.yaml --ruleset spectral:oas --fail-severity=error
-        run: spectral lint api-gateway/src/jvmMain/resources/openapi/documentation.yaml --fail-severity=error
+        run: spectral lint infrastructure/gateway/src/main/resources/openapi/documentation.yaml --ruleset=.spectral.yaml --fail-severity=error
 
   generate-api-docs:
     name: Generate API Documentation
@@ -62,12 +60,12 @@ jobs:
 
       - name: Generate API Documentation
         id: generate-docs
-        run: ./gradlew :api-gateway:generateApiDocs
+        run: ./gradlew :infrastructure:gateway:build
 
       - name: Check for changes
         id: git-check
         run: |
-          if git diff --exit-code api-gateway/src/jvmMain/resources/static/docs/; then
+          if git diff --exit-code infrastructure/gateway/src/main/resources/static/docs/; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -78,7 +76,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add api-gateway/src/jvmMain/resources/static/docs/
+          git add infrastructure/gateway/src/main/resources/static/docs/
           git commit -m "Update API documentation [skip ci]"
           git push
         env:
@@ -88,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: api-documentation
-          path: api-gateway/src/jvmMain/resources/static/docs/
+          path: infrastructure/gateway/src/main/resources/static/docs/
           retention-days: 7
 
       - name: Notify on success

@@ -20,6 +20,7 @@ Dieser Styleguide definiert die wichtigsten Regeln für KDoc-Kommentare in Kotli
 - Beispiele und wichtige Hinweise als kurze Absätze oder Listen, keine Romane.
 
 ## Struktur eines KDoc-Blocks
+
 ```kotlin
 /**
  * Beschreibt prägnant, was das Element macht und warum es existiert.
@@ -47,6 +48,7 @@ fun findMember(id: MemberId): Member?
 - Keine Interna oder Secrets dokumentieren.
 
 ## Beispielschnipsel
+
 ```kotlin
 /** Erstellt einen neuen Event und persistiert ihn transaktional. */
 fun createEvent(cmd: CreateEventCommand): EventId
