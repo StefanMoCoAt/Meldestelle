@@ -12,6 +12,8 @@ ai_context: "Entwicklungs-Workflow, Debugging und lokale Entwicklungsumgebung mi
 
 ## 🛠️ Development-Workflow
 
+> **📖 Hinweis:** Für einen allgemeinen Überblick über die Docker-Infrastruktur siehe [docker-overview](docker-overview.md).
+
 ### Schnellstart-Befehle
 
 ```bash

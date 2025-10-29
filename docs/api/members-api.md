@@ -476,13 +476,13 @@ GET /api/members/validate/membership-number/{membershipNumber}
 
 Prüft, ob eine Mitgliedsnummer bereits verwendet wird.
 
-##### Pfad-Parameter
+#### Pfad-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
 | `membershipNumber` | string | Zu prüfende Mitgliedsnummer |
 
-##### Query-Parameter
+#### Query-Parameter
 
 | Parameter | Typ | Beschreibung |
 |-----------|-----|--------------|
