@@ -12,7 +12,7 @@ doc_type: readme
 
 Die laufenden Schwerpunkte werden in YouTrack gepflegt:
 
-- Dashboard: https://meldestelle-pro.youtrack.cloud/knowledge-bases
+- Dashboard: [YouTrack Wissensdatenbank](https://meldestelle-pro.youtrack.cloud/knowledge-bases)
 - Bereich: „API & Entwicklerdoku“ → Überblick / Now
 
 Hinweis: Diese Seite ist nur ein Verweis (Stub); bitte Inhalte direkt in YouTrack aktualisieren.

@@ -206,3 +206,8 @@ Hinweis: Env‑less ist die empfohlene lokale Nutzung; der compat‑Job bleibt f
   - Erforderliche Secrets: YT_URL, YT_TOKEN
   - Workflow-Inputs: KB Root Titel (Standard: "API & Entwicklerdoku"), optional BC-Unterordner (Standard: "BCs")
 
+
+
+## Richtlinien
+
+- [Master-Guideline](.junie/guidelines/master-guideline.md)
