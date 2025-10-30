@@ -51,9 +51,9 @@ Die Hauptdokumentation befindet sich in der **YouTrack Wissensdatenbank**:
 #### Im Repository:
 
 - [📖 docs/README.md](docs/README.md) - Übersicht aller Repository-Dokumentation
-- [🏛️ Architecture Decision Records](docs/architecture/adr/)
-- [📐 C4-Diagramme](docs/architecture/c4/)
-- [🛠️ Developer Guides](docs/how-to/)
+- [🏛️ Architecture Decision Records](docs/architecture/adr/..)
+- [📐 C4-Diagramme](docs/architecture/c4/..)
+- [🛠️ Developer Guides](docs/how-to/..)
 
 ---
 
@@ -210,10 +210,6 @@ DOCKER_SSOT_MODE=envless
 ```bash
  ./gradlew bootRun
 ```
-
-### Proxmox Produktion
-
-Siehe: [docs/how-to/deploy-proxmox-nginx.md](docs/how-to/deploy-proxmox-nginx.md) (oder YouTrack für Details)
 
 ---
 

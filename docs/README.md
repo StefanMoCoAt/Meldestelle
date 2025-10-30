@@ -23,7 +23,7 @@ Die Hauptdokumentation befindet sich in der **YouTrack Wissensdatenbank**:
 
 Architekturentscheidungen sind Teil der Code-Historie und werden im Repository versioniert:
 
-- [ADR Übersicht](architecture/adr/)
+- [ADR Übersicht](architecture/adr/..)
 - [ADR-0001: Modulare Architektur](architecture/adr/0001-modular-architecture-de.md)
 - [ADR-0002: Domain-Driven Design](architecture/adr/0002-domain-driven-design-de.md)
 - [ADR-0003: Microservices](architecture/adr/0003-microservices-architecture-de.md)
