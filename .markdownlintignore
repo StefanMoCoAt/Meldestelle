@@ -1,19 +1,17 @@
-# Ignore common build/output and vendor directories
-node_modules/
-**/node_modules/
+# Generierte Dateien ignorieren
+docs/api/generated/
 build/
-**/build/
-out/
-logs/
-**/*.log
+node_modules/
+kotlin-js-store/
 
-# Ignore generated diagrams
-build/diagrams/
+# Externe Dokumentation
+.junie/
 
-# Ignore IDE metadata
+# Temporäre/Legacy-Dateien
+.vscode/
 .idea/
-*.iml
+.fleet/
 
-# Ignore potential external docs folder names (none by default)
-dist/
-public/
+# Spezielle Markdown-Dateien
+CHANGELOG.md
+LICENSE
