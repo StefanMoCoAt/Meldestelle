@@ -1,6 +1,7 @@
 # Guideline: Zyklus "Tracer Bullet"
 
 ---
+
 guideline_type: "process-guide"
 scope: "trace-bullet-development-cycle"
 audience: ["developers", "ai-assistants", "project-managers"]
@@ -8,12 +9,13 @@ last_updated: "2025-09-15"
 dependencies: ["master-guideline.md", "web-app-guideline.md"]
 related_files: ["docker-compose.yml", "temp/ping-service/**", "client/**"]
 ai_context: "End-to-End-Architektur-Validierungszyklus, Infrastruktur-Tests, Ping-Service-Implementierung"
+
 ---
 
-* **Zyklus-Start:** 15. August 2025
+* **Zyklus-Start:** 15. August 2025
 * **Status:** In Arbeit
 * **Basis:** Diese Guideline erweitert die [Master-Guideline](../master-guideline.md)
-* **Frontend-Standard:** Alle Web-Frontend-Entwicklung erfolgt gemäß der [Web-App-Guideline](../technology-guides/web-app-guideline.md), die ab sofort der verbindliche Standard ist.
+* **Frontend-Standard:** Alle Web-Frontend-Entwicklungen erfolgen gemäß der [Web-App-Guideline](../technology-guides/web-app-guideline.md), die ab sofort verbindlicher Standard ist.
 
 > **🤖 AI-Assistant Hinweis:**
 > Der Tracer Bullet Zyklus validiert die End-to-End-Architektur:
@@ -51,13 +53,13 @@ Die folgenden Module und Aufgaben sind Teil dieses Zyklus:
 
 ### 2.3. Frontend-Infrastruktur (:client)
 
-* **Aufgabe:** Aufbau einer sauberen Grundstruktur für die Kotlin Multiplatform App nach dem **MVVM-Muster** und Implementierung der **"Ping"**-Funktionalität. Die Umsetzung erfolgt mit **Compose for Web** gemäß der [`web-app-guideline.md`](./web-app-guideline.md).
+* **Aufgabe:** Aufbau einer sauberen Grundstruktur für die Kotlin Multiplatform App nach dem **MVVM-Muster** und Implementierung der **"Ping"**-Funktionalität. Die Umsetzung erfolgt mit **Compose for Web** gemäß der [`web-app-guideline.md`](../technology-guides/web-app-guideline.md).
 * **Status:** 🔳 In Arbeit.
 * **Spezifische Anforderungen & Test-Szenarien:**
     * **UI-Komponenten:** Die UI muss einen Button ("Ping Backend") und ein Textfeld zur Statusanzeige enthalten, umgesetzt als `@Composable`-Funktionen.
         * **Zustands-Management:** Die UI muss vier Zustände klar und visuell unterscheidbar abbilden:
-            1. **Initialzustand:** Neutrale Nachricht ("Klicke auf den Button …"), Button aktiv.
-            2. **Ladezustand:** Lade-Nachricht ("Pinge Backend …"), Button deaktiviert.
+            1. **Initialzustand:** Neutrale Nachricht ("Klicke auf den Button …"), Button aktiv.
+            2. **Ladezustand:** Lade-Nachricht ("Pinge Backend …"), Button deaktiviert.
             3. **Erfolgszustand:** Positive Antwort ("Antwort vom Backend: pong"), Button aktiv.
             4. **Fehlerzustand:** Klare Fehlermeldung ("Fehler: ..."), Button aktiv.
         * **Architektur:** Der API-Aufruf muss nach dem **MVVM-Muster** gekapselt sein, wobei die UI (`jsMain`) das ViewModel aus `commonMain` konsumiert.
@@ -68,8 +70,8 @@ Die folgenden Module und Aufgaben sind Teil dieses Zyklus:
   ausschließlich der Stabilisierung der technischen Infrastruktur. Es wird keine komplexe Geschäftslogik implementiert.
 * **Qualitätsstandards gelten uneingeschränkt:** Auch für diesen technischen Zyklus gelten alle Regeln der
   Master-Guideline. Insbesondere:
-    * **Minimale, aber essentielle Tests:** Für den "Tracer-Bullet"-Zyklus sind nur die **absolut notwendigen Tests** erforderlich, die beweisen, dass die Kernfunktionalität gegeben ist. Komplexere Testsuites sind für die Architektur-Validierung nicht notwendig.
-        * **Beispiel Monitoring:** Nur ein "Smoke-Test" für den monitoring-server (startet er überhaupt?) ist essentiell für den E2E-Test.
+    * **Minimale, aber essenzielle Tests:** Für den "Tracer-Bullet"-Zyklus sind nur die **absolut notwendigen Tests** erforderlich, die beweisen, dass die Kernfunktionalität gegeben ist. Komplexere Testsuites sind für die Architektur-Validierung nicht notwendig.
+        * **Beispiel Monitoring:** Nur ein "Smoke-Test" für den monitoring-server (startet er überhaupt?) ist essenziell für den E2E-Test.
     * **Kein `println`:** Es wird ausschließlich der strukturierte Logger verwendet.
 * **Dokumentation ist Teil der Aufgabe:** Jedes Modul, das wir überarbeiten, wird mit einer aktualisierten und präzisen
   `README.md`-Datei abgeschlossen.
@@ -94,9 +96,10 @@ Dieser Zyklus ist abgeschlossen, wenn **alle** der folgenden Kriterien erfüllt 
 
 ---
 
-## Status-Update (Stand: 16. August 2025, 10:54 Uhr)
+## Status-Update (Stand: 16. August 2025, 10:54 Uhr)
 
 ### ✅ **Bereits erledigt:**
+
 1. **Strukturelle Komponenten sind implementiert:**
    - Alle `:core` Module (core-domain, core-utils) mit README-CORE.md
    - Alle `:infrastructure` Module (auth, cache, event-store, gateway, messaging, monitoring) mit README-INFRASTRUCTURE.md
@@ -104,6 +107,7 @@ Dieser Zyklus ist abgeschlossen, wenn **alle** der folgenden Kriterien erfüllt 
    - `:client` Module (common-ui, desktop-app, web-app) mit ClientModuleDocumentation.md
 
 ### ❌ **Noch offen:**
+
 1. **End-to-End "Tracer Bullet"-Test:** Nicht durchführbar, da docker-compose nicht installiert
 2. **Clean Build ohne Warnungen:**
    - 5 Testfehler (4 in auth-client, 1 in redis-event-store)
@@ -112,6 +116,7 @@ Dieser Zyklus ist abgeschlossen, wenn **alle** der folgenden Kriterien erfüllt 
 4. **Guideline-Finalisierung:** Diese Überprüfung abgeschlossen, aber master-guideline.md Status unbekannt
 
 ### 🔧 **Nächste Schritte:**
+
 1. Testfehler in auth-client (Performance- und Security-Tests) beheben
 2. Testfehler in redis-event-store beheben
 3. Kotlin-Warnungen und Deprecation-Warnings eliminieren
@@ -129,8 +134,8 @@ Dieser Zyklus ist abgeschlossen, wenn **alle** der folgenden Kriterien erfüllt 
 ---
 
 **Navigation:**
-- [Master-Guideline](../master-guideline.md) - Übergeordnete Projektrichtlinien
-- [Web-App-Guideline](../technology-guides/web-app-guideline.md) - Frontend-Entwicklungsstandard
+- [Master-Guideline](../master-guideline.md) - übergeordnete Projektrichtlinien
+- [Web-App-Guideline](../technology-guides/web-app-guideline.md) – Frontend-Entwicklungsstandard
 - [Architecture-Principles](../project-standards/architecture-principles.md) - Architektur-Grundsätze
-- [Docker Guidelines](../technology-guides/docker/) - Infrastructure und Deployment
+- [Docker Guidelines](../technology-guides/docker) - Infrastructure und Deployment
 - [Testing-Standards](../project-standards/testing-standards.md) - Test-Qualitätssicherung

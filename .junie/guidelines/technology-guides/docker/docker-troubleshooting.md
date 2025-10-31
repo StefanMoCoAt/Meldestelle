@@ -87,17 +87,18 @@ docker-compose logs -f --tail=50 SERVICE_NAME
 
 ### Häufige Befehle
 
-| Problem | Befehl | Beschreibung |
-|---------|---------|--------------|
-| Port belegt | `netstat -tulpn \| grep :<port>` | Port-Nutzung prüfen |
-| Service startet nicht | `docker-compose logs <service>` | Service-Logs anzeigen |
-| Container hängt | `docker stats` | Ressourcenverbrauch |
-| DNS-Probleme | `docker-compose exec <service> nslookup <target>` | DNS-Resolution testen |
-| Disk voll | `docker system prune -a --volumes` | Cleanup durchführen |
+| Problem               | Befehl                                            | Beschreibung          |
+|-----------------------|---------------------------------------------------|-----------------------|
+| Port belegt           | `netstat -tulpn \| grep :<port>`                  | Port-Nutzung prüfen   |
+| Service startet nicht | `docker-compose logs <service>`                   | Service-Logs anzeigen |
+| Container hängt       | `docker stats`                                    | Ressourcenverbrauch   |
+| DNS-Probleme          | `docker-compose exec <service> nslookup <target>` | DNS-Resolution testen |
+| Disk voll             | `docker system prune -a --volumes`                | Cleanup durchführen   |
 
 ### Debug-Workflows
 
 #### Service startet nicht
+
 1. `docker-compose ps` - Status prüfen
 2. `docker-compose logs <service>` - Logs analysieren
 3. `docker-compose exec <service> sh` - Container inspizieren

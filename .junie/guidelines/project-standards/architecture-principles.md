@@ -1,16 +1,17 @@
 # Architecture Principles und Grundsätze
 
 ---
-guideline_type: "project-standards"
-scope: "architecture-principles"
+
+guideline_type: "project-standards"scope: "architecture-principles"
 audience: ["developers", "architects", "ai-assistants"]
 last_updated: "2025-09-15"
 dependencies: ["master-guideline.md"]
 related_files: ["build.gradle.kts", "settings.gradle.kts", "docker-compose.yml"]
 ai_context: "Architektonische Grundlagen, Microservices-Pattern, DDD-Prinzipien, ereignisgesteuerte Architektur und Multiplatform-Strategie"
+
 ---
 
-## 🏗️ Vision & Architektonische Grundpfeiler
+## 🏗️ Vision & architektonische Grundpfeiler
 
 Dieses Dokument definiert die verbindlichen technischen Richtlinien und Qualitätsstandards für das Projekt "Meldestelle_Pro". Ziel ist die Schaffung einer modernen, skalierbaren und wartbaren Plattform für den Pferdesport.
 
@@ -34,12 +35,12 @@ Dieses Dokument definiert die verbindlichen technischen Richtlinien und Qualitä
 
 ### Architektur-Säulen im Detail
 
-| Säule | Technologie | Zweck | Umsetzung |
-|-------|------------|-------|-----------|
-| Microservices | Spring Boot, Docker | Modularität & Skalierbarkeit | Service-per-Domain-Pattern |
-| DDD | Kotlin, Clean Architecture | Fachlichkeit im Code | Bounded Contexts, Domain Events |
-| EDA | Kafka, Events | Entkopplung & Resilienz | Asynchrone Kommunikation |
-| KMP | Kotlin Multiplatform | Effizienz & Konsistenz | Shared Business Logic |
+| Säule         | Technologie                | Zweck                        | Umsetzung                       |
+|---------------|----------------------------|------------------------------|---------------------------------|
+| Microservices | Spring Boot, Docker        | Modularität & Skalierbarkeit | Service-per-Domain-Pattern      |
+| DDD           | Kotlin, Clean Architecture | Fachlichkeit im Code         | Bounded Contexts, Domain Events |
+| EDA           | Kafka, Events              | Entkopplung & Resilienz      | Asynchrone Kommunikation        |
+| KMP           | Kotlin Multiplatform       | Effizienz & Konsistenz       | Shared Business Logic           |
 
 ## 🔧 Backend-Entwicklungsrichtlinien
 
@@ -47,7 +48,7 @@ Dieses Dokument definiert die verbindlichen technischen Richtlinien und Qualitä
 
 Jeder fachliche Microservice folgt der 4-Layer-Struktur (`api`, `application`, `domain`, `infrastructure`).
 
-```
+```plaintext
 service-name/
 ├── service-name-api/          # REST-Endpoints, DTOs
 ├── service-name-application/  # Use Cases, Commands, Queries
@@ -120,7 +121,7 @@ value class MemberId(val value: UUID) {
     }
 }
 
-data class Member private constructor(
+data class Member(
     val id: MemberId,
     val name: String,
     val email: Email,
@@ -236,7 +237,7 @@ Das Frontend folgt konsequent dem **Model-View-ViewModel (MVVM)**-Muster und der
 
 ### Multiplatform-Struktur
 
-```
+```plaintext
 client/
 ├── src/commonMain/kotlin/         # Shared Business Logic
 │   ├── domain/                    # Domain Models
@@ -330,7 +331,7 @@ fun MemberListScreen(
 
 ### Bounded Contexts
 
-```
+```plaintext
 Meldestelle-Domain/
 ├── member-context/               # Mitgliederverwaltung
 ├── tournament-context/           # Turnierverwaltung
@@ -489,7 +490,7 @@ fun createMember(@RequestBody request: CreateMemberRequest): ResponseEntity<Memb
 
 **Status:** Akzeptiert
 
-**Kontext:** Code-Sharing zwischen Desktop und Web
+**Kontext:** Codesharing zwischen Desktop und Web
 
 **Entscheidung:** KMP mit Compose Multiplatform
 
@@ -502,7 +503,7 @@ fun createMember(@RequestBody request: CreateMemberRequest): ResponseEntity<Memb
 ---
 
 **Navigation:**
-- [Master-Guideline](../master-guideline.md) - Übergeordnete Projektrichtlinien
+- [Master-Guideline](../master-guideline.md) - übergeordnete Projektrichtlinien
 - [Coding-Standards](./coding-standards.md) - Code-Qualitätsstandards
 - [Testing-Standards](./testing-standards.md) - Test-Qualitätssicherung
 - [Documentation-Standards](./documentation-standards.md) - Dokumentationsrichtlinien

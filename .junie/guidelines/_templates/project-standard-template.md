@@ -1,6 +1,7 @@
 # {{NAME}} - Standards und Richtlinien
 
 ---
+
 guideline_type: "project-standards"
 scope: "{{SCOPE}}"
 audience: ["developers", "ai-assistants", "architects"]
@@ -8,6 +9,7 @@ last_updated: "{{DATE}}"
 dependencies: ["master-guideline.md"]
 related_files: []
 ai_context: "{{SCOPE}}-Standards und Best Practices für das Meldestelle-Projekt"
+
 ---
 
 ## 🎯 Überblick
@@ -23,42 +25,51 @@ Diese Richtlinie definiert die verbindlichen Standards und Best Practices für {
 ## 📋 Grundprinzipien
 
 ### 1. [Prinzip 1]
+
 [Beschreibung des ersten Grundprinzips]
 
 ### 2. [Prinzip 2]
+
 [Beschreibung des zweiten Grundprinzips]
 
 ### 3. [Prinzip 3]
+
 [Beschreibung des dritten Grundprinzips]
 
 ## 🔧 Implementierungsrichtlinien
 
 ### [Bereich 1]
+
 [Konkrete Implementierungsanforderungen]
 
 ### [Bereich 2]
+
 [Weitere Implementierungsrichtlinien]
 
 ## ✅ Qualitätssicherung
 
 ### Überprüfung und Validierung
+
 - **Checkliste:** [Spezifische Prüfpunkte]
 - **Tools:** [Empfohlene Validierungstools]
 - **Tests:** [Erforderliche Testarten]
 
 ### Erfolgskriterien
+
 - **Quantitativ:** [Messbare Ziele]
 - **Qualitativ:** [Qualitätskriterien]
 
 ## 🚨 Häufige Fallstricke
 
-### Problem: [Häufiges Problem]
-**Ursache:** [Warum tritt es auf]
-**Lösung:** [Konkrete Lösung]
+### Problem [häufiges Problem]
 
-### Problem: [Weiteres Problem]
 **Ursache:** [Warum tritt es auf]
-**Lösung:** [Konkrete Lösung]
+**Lösung:** [konkrete Lösung]
+
+### Problem [Weiteres Problem]
+
+**Ursache:** [Warum tritt es auf]
+**Lösung:** [konkrete Lösung]
 
 ## 📊 Checkliste
 
@@ -70,12 +81,12 @@ Diese Richtlinie definiert die verbindlichen Standards und Best Practices für {
 
 ## 🔗 Navigation
 
-- [Master-Guideline](../master-guideline.md) - Übergeordnete Projektrichtlinien
-- [Architecture-Principles](./architecture-principles.md) - Architektur-Grundsätze
-- [Coding-Standards](./coding-standards.md) - Code-Qualitätsstandards
+- [Master-Guideline](../master-guideline.md) - übergeordnete Projektrichtlinien
+- [Architecture-Principles](../project-standards/architecture-principles.md) - Architektur-Grundsätze
+- [Coding-Standards](../project-standards/coding-standards.md) - Code-Qualitätsstandards
 
 ---
 
 **Status:** [Aktiv/In Entwicklung/Überarbeitung]
-**Letzte Überprüfung:** {{DATE}}
+**letzte Überprüfung:** {{DATE}}
 **Nächste Überprüfung:** [Bei Bedarf oder regelmäßig]

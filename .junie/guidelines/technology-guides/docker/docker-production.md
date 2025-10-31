@@ -155,13 +155,13 @@ services:
 
 ### Production-Befehle
 
-| Aufgabe | Befehl | Beschreibung |
-|---------|---------|--------------|
-| Zertifikat erneuern | `certbot renew` | Let's Encrypt Zertifikate |
-| SSL-Status prüfen | `openssl s_client -connect api.meldestelle.at:443` | SSL-Verbindung testen |
-| Resource-Usage | `docker stats` | Container-Ressourcen |
-| Security-Scan | `docker scan <image>` | Vulnerability Check |
-| Log-Rotation | `docker system prune -f` | Alte Logs bereinigen |
+| Aufgabe             | Befehl                                             | Beschreibung              |
+|---------------------|----------------------------------------------------|---------------------------|
+| Zertifikat erneuern | `certbot renew`                                    | Let's Encrypt Zertifikate |
+| SSL-Status prüfen   | `openssl s_client -connect api.meldestelle.at:443` | SSL-Verbindung testen     |
+| Resource-Usage      | `docker stats`                                     | Container-Ressourcen      |
+| Security-Scan       | `docker scan <image>`                              | Vulnerability Check       |
+| Log-Rotation        | `docker system prune -f`                           | Alte Logs bereinigen      |
 
 ### Environment-Variablen Validierung
 

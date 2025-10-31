@@ -1,6 +1,7 @@
 # Documentation Standards
 
 ---
+
 guideline_type: "project-standards"
 scope: "documentation-standards"
 audience: ["developers", "ai-assistants", "technical-writers"]
@@ -8,6 +9,7 @@ last_updated: "2025-09-15"
 dependencies: ["master-guideline.md"]
 related_files: ["README*.md", "docs/**", "*.md", "openapi.yaml"]
 ai_context: "Documentation language standards, README structure, API documentation, and technical writing guidelines"
+
 ---
 
 ## 📝 Dokumentationsstandards
@@ -41,39 +43,50 @@ ai_context: "Documentation language standards, README structure, API documentati
 # [Projekt/Modul Name]
 
 ## Überblick
+
 [Kurze Beschreibung des Zwecks und der Funktionalität]
 
 ## Architektur
+
 [Architektonische Entscheidungen und Komponenten-Übersicht]
 
 ## Entwicklung
+
 [Setup-Anweisungen für lokale Entwicklung]
 
 ### Voraussetzungen
+
 [Erforderliche Tools und Versionen]
 
 ### Installation
+
 [Schritt-für-Schritt Setup-Anleitung]
 
 ### Konfiguration
+
 [Wichtige Konfigurationsoptionen]
 
 ## Tests
+
 [Test-Ausführung und Test-Strategie]
 
 ## Deployment
+
 [Deployment-Anweisungen für verschiedene Umgebungen]
 
 ## API-Dokumentation
+
 [Links zu API-Docs oder eingebettete Dokumentation]
 
 ## Troubleshooting
+
 [Häufige Probleme und Lösungen]
 ```
 
 ### Code-Kommentar-Standards
 
 #### Deutsche Geschäftslogik-Kommentare
+
 ```kotlin
 /**
  * Prüft, ob ein Mitglied für die Anmeldung zu einem Turnier berechtigt ist.
@@ -95,6 +108,7 @@ fun isEligibleForTournament(member: Member, tournament: Tournament): Result<Bool
 ```
 
 #### Englische technische Kommentare
+
 ```kotlin
 /**
  * Cache implementation using Redis with TTL support
@@ -117,6 +131,7 @@ class RedisCache<T>(
 ### OpenAPI-Dokumentation Standards
 
 #### Deutsche API-Beschreibungen
+
 ```yaml
 openapi: 3.0.0
 info:
@@ -181,6 +196,7 @@ components:
 ### Dokumentations-Checkliste
 
 #### README-Dateien
+
 - [ ] **Struktur:** Folgt dem Standard-Template
 - [ ] **Sprache:** Auf Deutsch verfasst
 - [ ] **Aktualität:** Entspricht dem aktuellen Code-Stand
@@ -189,6 +205,7 @@ components:
 - [ ] **Links:** Funktionierende Verweise auf verwandte Dokumentation
 
 #### API-Dokumentation
+
 - [ ] **OpenAPI-Spezifikation:** Vollständig und valide
 - [ ] **Deutsche Beschreibungen:** Für alle Endpunkte und Schemas
 - [ ] **Beispiele:** Realistische Request/Response-Beispiele
@@ -196,6 +213,7 @@ components:
 - [ ] **Authentifizierung:** Sicherheitsanforderungen dokumentiert
 
 #### Code-Kommentare
+
 - [ ] **Geschäftslogik:** Deutsche Kommentare für fachliche Aspekte
 - [ ] **Technische Details:** Englische Kommentare für Framework-/Library-Code
 - [ ] **Komplexität:** Komplexe Algorithmen sind erklärt
@@ -205,10 +223,10 @@ components:
 ### Dokumentations-Patterns
 
 #### Architektur-Diagramme
-```markdown
-## System-Architektur
 
-```mermaid
+### System-Architektur
+
+```plantuml
 graph TB
     subgraph "Client Layer"
         WEB[Web App]
@@ -239,16 +257,17 @@ graph TB
     TS --> PG
     NS --> RD
 ```
-```
 
 #### Feature-Dokumentation
-```markdown
+
 ## Feature: Turnier-Anmeldung
 
 ### Fachlicher Überblick
+
 Die Turnier-Anmeldung ermöglicht es Mitgliedern, sich für Turniere zu registrieren.
 
 ### User Stories
+
 - Als Mitglied möchte ich mich für ein Turnier anmelden können
 - Als Turnierleiter möchte ich Anmeldungen verwalten können
 
@@ -260,20 +279,22 @@ Die Turnier-Anmeldung ermöglicht es Mitgliedern, sich für Turniere zu registri
 - `DELETE /registrations/{id}` - Anmeldung stornieren
 
 #### Domain-Events
+
 - `TournamentRegistrationCreated` - Bei erfolgreicher Anmeldung
 - `TournamentRegistrationCancelled` - Bei Stornierung
 
 ### Business Rules
+
 1. Anmeldung nur für aktive Mitglieder möglich
 2. Anmeldeschluss muss beachtet werden
 3. Maximale Teilnehmerzahl darf nicht überschritten werden
-```
 
 #### Troubleshooting-Dokumentation
-```markdown
+
 ## Häufige Probleme
 
 ### Problem: Service startet nicht
+
 **Symptome:** Container bleibt im Status "Restarting"
 
 **Ursachen:**
@@ -287,6 +308,7 @@ Die Turnier-Anmeldung ermöglicht es Mitgliedern, sich für Turniere zu registri
 3. Port-Konflikte lösen: `netstat -tulpn | grep :8080`
 
 ### Problem: Langsame API-Antworten
+
 **Symptome:** Response-Zeiten > 2 Sekunden
 
 **Debugging:**
@@ -302,16 +324,17 @@ docker-compose exec redis redis-cli info stats
 - Database-Indizes überprüfen
 - Query-Performance analysieren
 - Cache-Hit-Rate optimieren
-```
 
 ### Versionierung und Updates
 
 #### Dokumentations-Versionierung
+
 - README-Dateien werden mit dem Code versioniert
 - API-Dokumentation folgt Semantic Versioning
 - Changelog wird für breaking changes geführt
 
 #### Update-Prozess
+
 1. **Code-Änderungen** → README aktualisieren
 2. **API-Änderungen** → OpenAPI-Spec anpassen
 3. **Architektur-Änderungen** → Diagramme überarbeiten

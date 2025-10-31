@@ -1,6 +1,7 @@
 # Testing Standards und Qualitätssicherung
 
 ---
+
 guideline_type: "project-standards"
 scope: "testing-standards"
 audience: ["developers", "ai-assistants"]
@@ -8,6 +9,7 @@ last_updated: "2025-09-15"
 dependencies: ["master-guideline.md", "coding-standards.md"]
 related_files: ["build.gradle.kts", "src/test/**", "testcontainers.properties"]
 ai_context: "Testing strategies, test pyramid, tools, coverage requirements, and debugging practices"
+
 ---
 
 ## 🧪 Testing Standards
@@ -16,7 +18,7 @@ Tests sind ein integraler Bestandteil jedes Features und müssen einen hohen Sta
 
 > **🤖 AI-Assistant Hinweis:**
 > Testing-Prinzipien für das Meldestelle-Projekt:
-> - **Test-Pyramide:** 80%+ Unit-Tests, Integrationstests für externe Systeme
+> - **Test-Pyramide:** 80 %+ Unit-Tests, Integrationstests für externe Systeme
 > - **Testcontainers:** Goldstandard für Infrastruktur-Tests
 > - **Debug-Logs:** Präfix `[DEBUG_LOG]` für Test-Ausgaben
 > - **Result-Pattern:** Tests müssen auch Error-Handling validieren
@@ -208,15 +210,16 @@ fun `should handle complex business scenario`() {
 
 ### Test-Kategorien und Werkzeuge
 
-| Test-Typ | Coverage-Ziel | Werkzeuge | Verwendung |
-|----------|---------------|-----------|------------|
-| Unit-Tests | 80%+ | JUnit 5, MockK, AssertJ | Domänen- & Anwendungslogik |
-| Integrationstests | Alle Repositories | Testcontainers, JUnit 5 | Externe Integrationen |
-| End-to-End Tests | Kritische User-Journeys | Testcontainers, REST Assured | Vollständige Workflows |
+| Test-Typ          | Coverage-Ziel           | Werkzeuge                    | Verwendung                 |
+|-------------------|-------------------------|------------------------------|----------------------------|
+| Unit-Tests        | 80%+                    | JUnit 5, MockK, AssertJ      | Domänen- & Anwendungslogik |
+| Integrationstests | Alle Repositories       | Testcontainers, JUnit 5      | Externe Integrationen      |
+| End-to-End Tests  | Kritische User-Journeys | Testcontainers, REST Assured | Vollständige Workflows     |
 
 ### Testcontainer-Konfiguration
 
-#### PostgreSQL
+#### PostgresQL
+
 ```kotlin
 @Container
 private val postgresContainer = PostgreSQLContainer("postgres:16-alpine")
@@ -227,6 +230,7 @@ private val postgresContainer = PostgreSQLContainer("postgres:16-alpine")
 ```
 
 #### Redis
+
 ```kotlin
 @Container
 private val redisContainer = GenericContainer<Nothing>("redis:7-alpine")
@@ -235,6 +239,7 @@ private val redisContainer = GenericContainer<Nothing>("redis:7-alpine")
 ```
 
 #### Kafka
+
 ```kotlin
 @Container
 private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"))
@@ -242,6 +247,7 @@ private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/
 ```
 
 #### Keycloak
+
 ```kotlin
 @Container
 private val keycloakContainer = KeycloakContainer("quay.io/keycloak/keycloak:26.0.7")
@@ -373,7 +379,7 @@ fun `should handle high load efficiently`() {
 ---
 
 **Navigation:**
-- [Master-Guideline](../master-guideline.md) - Übergeordnete Projektrichtlinien
+- [Master-Guideline](../master-guideline.md) - übergeordnete Projektrichtlinien
 - [Coding-Standards](./coding-standards.md) - Code-Qualitätsstandards
 - [Documentation-Standards](./documentation-standards.md) - Dokumentationsrichtlinien
 - [Architecture-Principles](./architecture-principles.md) - Architektur-Grundsätze

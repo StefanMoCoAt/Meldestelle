@@ -1,13 +1,13 @@
-# Meldestelle_Pro: Entwicklungs-Guideline
+# Meldestelle_Pro: Entwicklung-Guideline
 
-**Status:** Finalisiert & Verbindlich
+**Status:** Finalisiert & verbindlich
 **Version:** 2.1.0
-**Stand:** 15. September 2025
+**Stand:** 15. September 2025
 
-## 1. Vision & Architektonische Grundpfeiler
+## 1. Vision & architektonische Grundpfeiler
 
-Dieses Dokument definiert die verbindlichen technischen Richtlinien und Qualitätsstandards für das Projekt "
-Meldestelle_Pro". Ziel ist die Schaffung einer modernen, skalierbaren und wartbaren Plattform für den Pferdesport.
+Dieses Dokument definiert die verbindlichen technischen Richtlinien und Qualitätsstandards für das Projekt "Meldestelle_Pro". 
+Ziel ist die Schaffung einer modernen, skalierbaren und wartbaren Plattform für den Pferdesport.
 
 Unsere Architektur basiert auf **vier Säulen**:
 
@@ -50,11 +50,11 @@ Kernpunkte:
 ## 4. Frontend-Entwicklung & Multiplatform
 
 Detaillierte Frontend-Entwicklungsrichtlinien finden Sie in:
-**→ [Web App Guideline](./technology-guides/web-app-guideline.md)**
+**→ [Web-App Guideline](./technology-guides/web-app-guideline.md)**
 
 Kernpunkte:
 - **MVVM-Pattern:** Model-View-ViewModel für UI-Struktur
-- **Kotlin Multiplatform:** Code-Sharing zwischen Desktop und Web
+- **Kotlin Multiplatform:** Codesharing zwischen Desktop und Web
 - **Compose Multiplatform:** Deklarative UI mit @Composable-Funktionen
 - **Feature-basierte Struktur:** Vertikale Schnitte nach Fachlichkeit
 
@@ -66,7 +66,7 @@ Detaillierte Testing-Standards finden Sie in:
 **→ [Testing Standards](./project-standards/testing-standards.md)**
 
 Kernpunkte:
-- **Test-Pyramide:** 80%+ Unit-Tests, Integrationstests für externe Systeme
+- **Test-Pyramide:** 80 %+ Unit-Tests, Integrationstests für externe Systeme
 - **Testcontainers:** Goldstandard für Infrastruktur-Tests
 - **Result-Pattern:** Tests für Success- und Failure-Cases
 - **Debug-Logs:** `[DEBUG_LOG]`-Präfix für Test-Ausgaben
@@ -76,7 +76,7 @@ Kernpunkte:
 ## 6. Docker & Infrastructure
 
 Detaillierte Docker- und Infrastruktur-Richtlinien finden Sie in:
-**→ [Docker Guidelines](./technology-guides/docker/)**
+**→ [Docker Guidelines](./technology-guides/docker)**
 
 Kernpunkte:
 - **Docker-Architektur:** Microservices mit Service Discovery

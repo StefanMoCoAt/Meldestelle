@@ -1,6 +1,7 @@
 # Client-App-Richtlinie (Compose Multiplatform)
 
 ---
+
 guideline_type: "technology"
 scope: "web-app-multiplatform"
 audience: ["developers", "ai-assistants", "frontend-developers"]
@@ -8,6 +9,7 @@ last_updated: "2025-09-15"
 dependencies: ["master-guideline.md", "project-standards/architecture-principles.md"]
 related_files: ["client/build.gradle.kts", "client/src/commonMain/", "client/src/wasmJsMain/", "client/src/jvmMain/"]
 ai_context: "Compose Multiplatform-Entwicklung, MVVM-Pattern, KMP-Architektur, Desktop- und Web-Client-Entwicklung"
+
 ---
 
 ## 1. Einleitung
@@ -25,11 +27,11 @@ Das Hauptziel ist die maximale Wiederverwendung von Code zwischen den Desktop- u
 
 ## 2. Grundprinzipien
 
-### Deklarative UI mit Composables
+### Deklarative UI mit Composable
 
 Die gesamte Benutzeroberfläche wird als Baum von `@Composable`-Funktionen deklariert. Dies ist derselbe Ansatz, der auch bei Jetpack Compose für Android verwendet wird.
 
-- **Zustandslosigkeit:** Composables sollten bevorzugt zustandslos sein. Sie erhalten Daten als Parameter und geben Ereignisse über Lambda-Funktionen (Callbacks) nach oben weiter.
+- **Zustandslosigkeit:** Composable sollten bevorzugt zustandslos sein. Sie erhalten Daten als Parameter und geben Ereignisse über Lambda-Funktionen (Callbacks) nach oben weiter.
 - **Wiederverwendbarkeit:** Erstellen Sie kleine, spezialisierte und wiederverwendbare Composables. Vermeiden Sie monolithische UI-Funktionen.
 - **Vorschau:** Nutzen Sie `@Preview`-Annotationen (sofern von der IDE unterstützt), um UI-Komponenten isoliert zu entwickeln und zu visualisieren.
 
@@ -46,15 +48,18 @@ Der UI-Zustand (State) wird explizit verwaltet.
 Das Styling erfolgt plattformspezifisch, aber mit gemeinsamen Prinzipien:
 
 #### Gemeinsame Styling-Prinzipien (commonMain)
+
 - **Compose Material Design**: Nutzen Sie Material3-Komponenten und Theming für konsistente UI.
-- **Gemeinsame Designsystem**: Definieren Sie gemeinsame Farben, Typografie und Spacing in `commonMain`.
+- **Gemeinsames Designsystem**: Definieren Sie gemeinsame Farben, Typografie und Spacing in `commonMain`.
 - **Responsive Design**: Berücksichtigen Sie verschiedene Bildschirmgrößen (Desktop-Fenster vs. Browser-Viewports).
 
 #### Web-spezifisches Styling (wasmJsMain)
+
 - **CSS-Integration**: Web-spezifische Styling-Anforderungen können über CSS in den Resources behandelt werden.
 - **Browser-Kompatibilität**: Berücksichtigen Sie Web-spezifische Rendering-Unterschiede.
 
 #### Desktop-spezifisches Styling (jvmMain)
+
 - **Native Look & Feel**: Desktop-Anwendungen sollten sich nativ anfühlen.
 - **Fenster-Management**: Berücksichtigen Sie Desktop-spezifische UI-Patterns (Menüleisten, etc.).
 
@@ -71,12 +76,14 @@ fun AppTheme(content: @Composable () -> Unit) {
 ```
 
 ### Navigation
+
 Die Navigation wird plattformunabhängig in `commonMain` implementiert:
 - **ViewModel-basierte Navigation**: Ein `StateFlow` oder `mutableState` im ViewModel repräsentiert die aktuelle Route/Screen.
 - **Gemeinsamer Router**: Ein zentraler `Router`-Composable in `commonMain` reagiert auf Zustandsänderungen und rendert den entsprechenden Screen.
 - **Plattformspezifische Einstiegspunkte**: Desktop und Web haben separate `main.kt`-Dateien, aber nutzen denselben gemeinsamen App-Composable.
 
 ## 3. Projekt- und Code-Struktur
+
 Die Codebasis ist klar zwischen plattformunabhängiger Logik (`commonMain`) und plattformspezifischer Implementation (`jvmMain`, `wasmJsMain`) getrennt.
 
 ### Source Sets
@@ -89,12 +96,12 @@ Die Codebasis ist klar zwischen plattformunabhängiger Logik (`commonMain`) und 
 
 - **`client/src/jvmMain`** (Desktop-Plattform):
     - **`main.kt`**: Der Einstiegspunkt der Desktop-Anwendung.
-    - **Desktop-spezifische Code**: Plattformspezifische Implementierungen und Integrationen.
+    - **Desktop-spezifischer Code**: Plattformspezifische Implementierungen und Integrationen.
     - **Desktop Dependencies**: `compose.desktop.currentOs`, Coroutines für Swing.
 
 - **`client/src/wasmJsMain`** (Web-Plattform):
     - **`main.kt`**: Der Einstiegspunkt der Web-Anwendung (WebAssembly).
-    - **Web-spezifische Code**: Browser-spezifische Implementierungen.
+    - **Web-spezifischer Code**: Browser-spezifische Implementierungen.
     - **Platform-spezifische Implementierungen**: Web-APIs und Browser-Integrationen.
 
 - **`client/src/wasmJsMain/resources`**:
@@ -102,6 +109,7 @@ Die Codebasis ist klar zwischen plattformunabhängiger Logik (`commonMain`) und 
     - **Statische Assets**: Bilder, Schriftarten und andere statische Dateien für die Web-Version.
 
 ### Shared Module Integration
+
 - **`core/commonMain`** (oder äquivalente `shared`-Module):
     - **Repositories/Services**: Code für den Datenzugriff (z.B. Ktor-HTTP-Clients zum Aufrufen des Backends).
     - **Business-Logik**: Plattformunabhängige Geschäftslogik, die von allen Client-Plattformen genutzt wird.
@@ -109,6 +117,7 @@ Die Codebasis ist klar zwischen plattformunabhängiger Logik (`commonMain`) und 
 ## 4. Entwicklung und Ausführung
 
 ### Desktop-Entwicklung
+
 Für die Desktop-Anwendung stehen folgende Gradle-Tasks zur Verfügung:
 
 ```shell script
@@ -123,6 +132,7 @@ Für die Desktop-Anwendung stehen folgende Gradle-Tasks zur Verfügung:
 ```
 
 ### Web-Entwicklung mit Hot-Reload
+
 Für die Web-Anwendung mit automatischer Neuladung bei Änderungen:
 
 ```shell script
@@ -131,6 +141,7 @@ Für die Web-Anwendung mit automatischer Neuladung bei Änderungen:
 ```
 
 #### Docker-Setup für Web-Entwicklung
+
 Das Docker-Setup ist spezifisch für die Web-Entwicklung konfiguriert (wie in `README-DOCKER.md` beschrieben):
 
 ```shell script
@@ -144,26 +155,31 @@ Der Dienst ist dann unter dem in der `docker-compose.clients.yml` konfigurierten
 ### Produktions-Builds
 
 #### Desktop-Distribution
+
 ```shell script
 # Erstellt native Distributionen für alle konfigurierten Plattformen
 ./gradlew :client:packageDistributionForCurrentOS
 ```
 
 #### Web-Distribution
+
 ```shell script
 # Erstellt optimierte WebAssembly-Artefakte für die Produktion
 ./gradlew :client:wasmJsBrowserDistribution
 ```
 
 Das Docker-Image für die Web-Produktion (`Dockerfile` im `client`-Verzeichnis) sollte den `wasmJsBrowserDistribution`-Task nutzen, um die finalen Artefakte zu bauen.
+
 ## 5. Plattformspezifische Besonderheiten
 
 ### Desktop (jvmMain)
+
 - **Fenster-Management**: Nutzen Sie Compose Desktop-APIs für Fensteroperationen.
 - **System-Integration**: Zugriff auf Desktop-spezifische Features (Dateisystem, Notifications, etc.).
 - **Performance**: Desktop-Apps können mehr Ressourcen nutzen als Web-Apps.
 
 ### Web (wasmJsMain)
+
 - **Browser-APIs**: Zugriff auf Web-APIs erfolgt über `external`-Deklarationen.
 - **Bundle-Size**: Achten Sie auf die Größe der WebAssembly-Bundles für optimale Ladezeiten.
 - **SEO und Accessibility**: Berücksichtigen Sie Web-spezifische Anforderungen.
@@ -171,17 +187,20 @@ Das Docker-Image für die Web-Produktion (`Dockerfile` im `client`-Verzeichnis) 
 ## 6. Dos and Don'ts
 
 ### Multiplatform Best Practices
+
 - **DO**: Die gesamte UI-Logik (State-Management, Datenabruf, Validierung) in `commonMain` implementieren.
-- **DO**: Kleine, wiederverwendbare und zustandslose Composables in `commonMain` erstellen.
+- **DO**: Kleine wiederverwendbare und zustandslose Composable in `commonMain` erstellen.
 - **DO**: Material3 und gemeinsames Theming für konsistente UI zwischen Plattformen verwenden.
 - **DO**: Events von der UI über Lambda-Funktionen an die ViewModels in `commonMain` weiterleiten.
 - **DO**: Plattformspezifische Features über `expect`/`actual`-Mechanismus abstrahieren.
 
 ### Platform-Specific Guidelines
+
 - **DO** (Desktop): Native Look & Feel und Desktop-UI-Patterns verwenden.
 - **DO** (Web): Web-Standards und Accessibility-Guidelines befolgen.
 
 ### Don'ts
+
 - **DON'T**: Geschäftslogik, API-Aufrufe oder komplexe Zustandsmanipulationen direkt in `@Composable`-Funktionen schreiben.
 - **DON'T**: Plattformspezifische Code direkt in `commonMain` verwenden ohne `expect`/`actual`.
 - **DON'T** (Web): Den DOM direkt manipulieren. Compose Multiplatform verwaltet das Rendering. Falls Interaktion mit externen Bibliotheken nötig ist, nutzen Sie `external`-Mechanismen sauber gekapselt.
@@ -190,7 +209,7 @@ Das Docker-Image für die Web-Produktion (`Dockerfile` im `client`-Verzeichnis) 
 ---
 
 **Navigation:**
-- [Master-Guideline](../master-guideline.md) - Übergeordnete Projektrichtlinien
+- [Master-Guideline](../master-guideline.md) - übergeordnete Projektrichtlinien
 - [Architecture-Principles](../project-standards/architecture-principles.md) - Architektur-Grundsätze
 - [Coding-Standards](../project-standards/coding-standards.md) - Code-Qualitätsstandards
 - [Testing-Standards](../project-standards/testing-standards.md) - Test-Qualitätssicherung
