@@ -43,7 +43,7 @@ Das Meldestelle-Projekt implementiert eine **moderne, sicherheitsorientierte Con
 
 ### Container-Kategorien
 
-```plantuml
+```mermaid
 graph TB
     subgraph "Infrastructure Services"
         PG[PostgresQL]

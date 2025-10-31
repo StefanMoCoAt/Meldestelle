@@ -226,7 +226,7 @@ components:
 
 ### System-Architektur
 
-```plantuml
+```mermaid
 graph TB
     subgraph "Client Layer"
         WEB[Web App]

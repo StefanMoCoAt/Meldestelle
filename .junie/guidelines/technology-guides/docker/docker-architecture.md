@@ -18,7 +18,7 @@ ai_context: "Docker-Container-Architektur, Service-Definitionen und zentrale Ver
 
 ### Container-Kategorien
 
-```plantuml
+```mermaid
 graph TB
     subgraph "Infrastructure Services"
         PG[PostgresQL]

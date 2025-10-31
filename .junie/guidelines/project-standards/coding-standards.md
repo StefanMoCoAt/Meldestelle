@@ -19,7 +19,7 @@ ai_context: "Coding conventions, naming standards, type safety, error handling, 
 * **Code-Stil:** Offizielle Kotlin Coding Conventions, durch `Detekt` geprüft.
 
 > **🤖 AI-Assistant Hinweis:**
-> Alle Kotlin-Code muss den offiziellen Kotlin Coding Conventions entsprechen:
+> Alle Kotlin-Code müssen den offiziellen Kotlin Coding Conventions entsprechen:
 > - **Detekt-Validierung:** Automatische Code-Style-Prüfung
 > - **Java 21+ Kompatibilität:** Nutze moderne Java-Features wo sinnvoll
 > - **Multiplatform:** Code sollte plattformübergreifend funktionieren
