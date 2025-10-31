@@ -8,7 +8,7 @@
 
 ---
 
-#### 🚀 Quick Start
+## 🚀 Quick Start
 
 ```bash
 # 1) Repository klonen
@@ -47,7 +47,7 @@ Die Hauptdokumentation befindet sich in der **YouTrack Wissensdatenbank**:
 - 🔐 **Infrastruktur-Konfigurationen** (Netzwerk, Datenbanken, Keycloak)
 - 💡 **Roadmap & Visionen**
 
-#### Im Repository:
+#### Im Repository
 
 - [📖 docs/README.md](docs/README.md) - Übersicht aller Repository-Dokumentation
 - [🏛️ Architecture Decision Records](docs/architecture/adr)
@@ -68,6 +68,7 @@ Das System ist in unabhängige Domänen aufgeteilt:
 - **Masterdata**: Stammdaten (Länder, Altersklassen, Turnierplätze)
 
 ### Technische Architektur
+
 - **Microservices**: Unabhängige Services mit API Gateway
 - **Event-Driven**: Apache Kafka für asynchrone Kommunikation
 - **Polyglot Persistence**: PostgreSQL + Redis
@@ -78,6 +79,7 @@ Das System ist in unabhängige Domänen aufgeteilt:
 ---
 
 ## 🛠️ Tech Stack
+
 | Komponente     | Technologie                   | Version |
 |----------------|-------------------------------|---------|
 | **Backend**    | Kotlin + Spring Boot          | 3.x     |
@@ -92,7 +94,8 @@ Das System ist in unabhängige Domänen aufgeteilt:
 
 ---
 
-#### 📦 Projektstruktur
+### 📦 Projektstruktur
+
 ```plaintext
 Meldestelle/
 ├── 🗂️ client/                 # Client-Anwendungen
@@ -130,7 +133,8 @@ Meldestelle/
 
 Alle Versionen zentral in **`docker/versions.toml`**:
 
-#### SSoT – Schnellstart (präzisiert)
+### SSoT – Schnellstart (präzisiert)
+
 ```bash
 # Versionen anzeigen
 bash scripts/docker-build.sh --versions
@@ -142,7 +146,8 @@ bash scripts/generate-compose-files.sh all development
 bash scripts/validate-docker-consistency.sh all
 ```
 
-#### SSoT – Zwei Betriebsmodi (konsistent)
+### SSoT – Zwei Betriebsmodi (konsistent)
+
 ```bash
 # 1) Kompatibilitätsmodus (compat)
 bash scripts/docker-versions-update.sh sync
@@ -156,6 +161,7 @@ DOCKER_SSOT_MODE=envless bash scripts/validate-docker-consistency.sh all
 ```
 
 Alternative (persistente Shell-Variante):
+
 ```bash
 export DOCKER_SSOT_MODE=envless
 bash scripts/docker-build.sh --versions
@@ -164,6 +170,7 @@ bash scripts/validate-docker-consistency.sh all
 ```
 
 #### CI-Schutz – lokal reproduzieren (getrennte/verkettete Befehle)
+
 ```bash
 # Compat
 bash scripts/docker-versions-update.sh sync && \
@@ -183,7 +190,8 @@ bash scripts/generate-compose-files.sh all development && \
   git diff --name-only  # sollte leer sein
 ```
 
-#### Deployment (klarstellen, falls SSoT vorausgeht)
+### Deployment (klarstellen, falls SSoT vorausgeht)
+
 ```bash
 # Nur Infrastruktur
 # Wenn eine handgeschriebene docker-compose.yml existiert:
@@ -249,18 +257,20 @@ Dieser Abschnitt beschreibt den lokalen Workflow für die zentrale Docker-Versio
 ### TL;DR – Zwei Betriebsmodi
 
 - **Kompatibilitätsmodus (Standard)**: `build-args/*.env` werden aus `versions.toml` generiert
-```bash
+
+  ```bash
   bash scripts/docker-versions-update.sh sync
   bash scripts/generate-compose-files.sh all development
   bash scripts/validate-docker-consistency.sh all
-```
+  ```
 
 - **Env-less Modus (Empfohlen)**: Keine `build-args/*.env` nötig – direkter Export aus `versions.toml`
-```bash
+
+  ```bash
   DOCKER_SSOT_MODE=envless bash scripts/docker-build.sh --versions
   DOCKER_SSOT_MODE=envless bash scripts/generate-compose-files.sh all development
   DOCKER_SSOT_MODE=envless bash scripts/validate-docker-consistency.sh all
-```
+  ```
 
 ### Makefile-Shortcuts
 
@@ -292,7 +302,9 @@ Danach: `generate` + `validate` ausführen!
 Die CI validiert Docker SSoT in beiden Modi (Matrix: compat + envless).
 
 **Lokal reproduzieren**:
+
 #### Compat
+
 ```bash
 bash scripts/docker-versions-update.sh sync && \
   bash scripts/generate-compose-files.sh all development && \
@@ -301,6 +313,7 @@ bash scripts/docker-versions-update.sh sync && \
 ```
 
 #### Env-less
+
 ```bash
 DOCKER_SSOT_MODE=envless bash scripts/generate-compose-files.sh all development && \
   DOCKER_SSOT_MODE=envless bash scripts/validate-docker-consistency.sh all && \
@@ -338,6 +351,7 @@ Bitte lies [docs/how-to/branchschutz-und-pr-workflow.md](docs/how-to/branchschut
 - **Bugs**: [GitHub Issues](https://github.com/StefanMoCoAt/meldestelle/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/StefanMoCoAt/meldestelle/discussions)
 - **Dokumentation**: [YouTrack Wissensdatenbank](https://meldestelle-pro.youtrack.cloud/articles/MP-A-24)
+
 ---
 
 **Version**: 2.0.0 (nach Dokumentations-Refactoring)  
