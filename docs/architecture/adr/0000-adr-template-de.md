@@ -4,7 +4,7 @@
 
 [Vorgeschlagen | Akzeptiert | Veraltet | Ersetzt]
 
-Falls ersetzt, fügen Sie einen Verweis auf die neue ADR ein: [ADR-XXXX](XXXX-filename.md)
+Falls sie ersetzt, fügen Sie einen Verweis auf die neue ADR ein: [ADR-XXXX](XXXX-filename.md)
 
 ## Kontext
 

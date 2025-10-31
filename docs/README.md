@@ -4,14 +4,14 @@
 
 Die Hauptdokumentation befindet sich in der **YouTrack Wissensdatenbank**:
 
-👉 **[Meldestelle Command Center](https://meldestelle-pro.youtrack.cloud/knowledge-bases)**
+👉 **[Meldestelle Command Center](https://meldestelle-pro.youtrack.cloud/articles/MP-A-24)**
 
-### Was du in YouTrack findest:
+### Was du in YouTrack findest
 
 - 🏗️ **Bounded Context Dokumentation** (Members, Horses, Events, Masterdata)
 - 📡 **API-Referenz** (automatisch aus KDoc generiert)
 - 🚀 **Deployment-Guides** (Proxmox, Cloudflare, Nginx)
-- 🔐 **Sicherheits-Konfigurationen** (Keycloak, GitHub Secrets)
+- 🔐 **Sicherheit-Konfigurationen** (Keycloak, GitHub Secrets)
 - 💡 **Roadmap & Visionen**
 - 📊 **Architektur-Diagramme** (interaktiv)
 
@@ -23,7 +23,7 @@ Die Hauptdokumentation befindet sich in der **YouTrack Wissensdatenbank**:
 
 Architekturentscheidungen sind Teil der Code-Historie und werden im Repository versioniert:
 
-- [ADR Übersicht](architecture/adr/..)
+- [ADR Übersicht](architecture/adr)
 - [ADR-0001: Modulare Architektur](architecture/adr/0001-modular-architecture-de.md)
 - [ADR-0002: Domain-Driven Design](architecture/adr/0002-domain-driven-design-de.md)
 - [ADR-0003: Microservices](architecture/adr/0003-microservices-architecture-de.md)
@@ -45,9 +45,9 @@ Versionierte Diagramm-Quellen für Architekturdokumentation:
 
 Minimale Anleitungen für lokale Entwicklung:
 
-- **[Lokales Setup](how-to/start-local.md)** - Projekt in 5 Minuten starten
-- **[KDoc Style Guide](how-to/kdoc-style.md)** - Dokumentations-Konventionen im Code
-- **[Branch-Schutz & PR-Workflow](how-to/branchschutz-und-pr-workflow.md)** - Git-Workflow
+- **[Lokales Setup](how-to/start-local.md)** – Projekt in 5 Minuten starten
+- **[KDoc Style Guide](how-to/kdoc-style.md)** – Documentations-Konventionen im Code
+- **[Branch-Schutz & PR-Workflow](how-to/branchschutz-und-pr-workflow.md)** – Git-Workflow
 
 ---
 
@@ -55,28 +55,28 @@ Minimale Anleitungen für lokale Entwicklung:
 
 Das Projekt nutzt automatisierte Workflows für Konsistenz:
 
-- **KDoc → YouTrack**: [docs-kdoc-sync.yml](../.github/workflows/docs-kdoc-sync.yml) - Synchronisiert API-Dokumentation
+- **KDoc → YouTrack**: [docs-kdoc-sync.yml](../.github/workflows/docs-kdoc-sync.yml) – Synchronisiert API-Dokumentation
   aus Code-Kommentaren nach YouTrack
-- **Docker SSoT**: [ssot-guard.yml](../.github/workflows/ssot-guard.yml) - Validiert Docker-Versionskonsistenz
-- **CI Pipeline**: [ci-main.yml](../.github/workflows/ci-main.yml) - Hauptpipeline für Build, Tests, Validierung
+- **Docker SSoT**: [ssot-guard.yml](../.github/workflows/ssot-guard.yml) – Validiert Docker-Versionskonsistenz
+- **CI Pipeline**: [ci-main.yml](../.github/workflows/ci-main.yml) – Hauptpipeline für Build, Tests, Validierung
 
 ---
 
-## 📋 Dokumentations-Workflow
+## 📋 Documentations-Workflow
 
-### Für Code-Änderungen:
+### Für Code-Änderungen
 
 1. KDoc im Code schreiben
 2. PR erstellen → CI validiert
 3. Nach Merge → KDoc-Sync pusht automatisch nach YouTrack
 
-### Für Architektur-Entscheidungen:
+### Für Architektur-Entscheidungen
 
 1. ADR in `docs/architecture/adr/` erstellen
 2. PR mit ADR-Review
 3. Nach Merge → Zusammenfassung in YouTrack verlinken
 
-### Für Infrastruktur/Konfiguration:
+### Für Infrastruktur/Konfiguration
 
 1. Dokumentation direkt in YouTrack erstellen
 2. Bei Code-relevanten Änderungen → im Commit-Message auf YouTrack-Artikel verweisen
@@ -85,12 +85,12 @@ Das Projekt nutzt automatisierte Workflows für Konsistenz:
 
 ## ❓ Fragen & Support
 
-- **Technische Fragen**: [GitHub Discussions](https://github.com/your-org/meldestelle/discussions)
-- **Bugs**: [GitHub Issues](https://github.com/your-org/meldestelle/issues)
+- **Technische Fragen**: [GitHub Discussions](https://github.com/StefanMoCoAt/meldestelle/discussions)
+- **Bugs**: [GitHub Issues](https://github.com/StefanMoCoAt/meldestelle/issues)
 - **Architektur-Diskussionen**: [YouTrack](https://meldestelle-pro.youtrack.cloud)
 - **Projekt-Dokumentation**: [YouTrack Wissensdatenbank](https://meldestelle-pro.youtrack.cloud/knowledge-bases)
 
 ---
 
-**Hinweis**: Diese README wurde am 30. Oktober 2025 aktualisiert im Rahmen der Dokumentations-Migration nach YouTrack (
-siehe ADR-0009 - folgt).
+**Hinweis**: Diese README wurde am 30. Oktober 2025 aktualisiert im Rahmen der Documentations-Migration nach 
+YouTrack (siehe ADR-0009 - folgt).

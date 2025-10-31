@@ -32,7 +32,7 @@ Wir haben uns entschieden, das API-Gateway-Muster mit Spring Cloud Gateway (Spri
 
 Unsere Implementierung umfasst:
 
-- Eine Spring-Cloud-Gateway-Applikation (Spring Boot), containerisiert
+- Eine Spring-Cloud-Gateway-Applikation (Spring Boot), containerized
 - Integration mit Keycloak für Authentifizierung und Autorisierung
 - Benutzerdefinierte Global/Gateway-Filter für Rate-Limiting, Logging, Monitoring
 - Micrometer/Actuator für Metriken und Health
@@ -51,9 +51,9 @@ Unsere Implementierung umfasst:
 ### Negative
 
 - **Single Point of Failure**: Das Gateway wird zu einer kritischen Komponente, die hochverfügbar sein muss
-- **Leistungs-Overhead**: Anfragen durchlaufen einen zusätzlichen Netzwerk-Hop
+- **Leistung-Overhead**: Anfragen durchlaufen einen zusätzlichen Netzwerk-Hop
 - **Komplexität**: Das Gateway muss eine breite Palette von Funktionalitäten handhaben
-- **Entwicklungs-Engpass**: Änderungen am Gateway können Koordination über Teams hinweg erfordern
+- **Entwicklung-Engpass**: Änderungen am Gateway können Koordination über Teams hinweg erfordern
 
 ### Neutral
 
@@ -68,7 +68,7 @@ Wir haben in Betracht gezogen, Clients die direkte Kommunikation mit Diensten zu
 
 ### Backend for Frontend (BFF)-Muster
 
-Wir haben die Implementierung separater Backend for Frontend (BFF)-Dienste für jeden Client-Typ in Betracht gezogen. Dies hätte mehr clientspezifische Optimierungen ermöglicht, hätte aber den Entwicklungs- und Betriebsaufwand erhöht.
+Wir haben die Implementierung separater Backend for Frontend (BFF)-Dienste für jeden Client-Typ in Betracht gezogen. Dies hätte mehr klientenspezifische Optimierungen ermöglicht, hätte aber den Entwicklungs- und Betriebsaufwand erhöht.
 
 ### Service Mesh
 

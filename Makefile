@@ -1,6 +1,6 @@
 # ===================================================================
 # Meldestelle Docker Development Makefile
-# Optimierte Befehle für containerisierte Entwicklungs-Workflows
+# Optimierte Befehle für containerised Entwicklung-Workflows
 # ===================================================================
 
 .PHONY: help dev-up dev-down dev-restart dev-logs build clean test
@@ -52,7 +52,7 @@ infrastructure-up: ## Start only infrastructure services (postgres, redis, keycl
 	@echo "🏗️ Starting infrastructure services..."
 	$(COMPOSE) -f docker-compose.yml up -d
 	@echo "✅ Infrastructure services started"
-	@echo "🗄️ PostgreSQL:      localhost:5432"
+	@echo "🗄️ PostgresQL:      localhost:5432"
 	@echo "🔴 Redis:           localhost:6379"
 	@echo "🔐 Keycloak:        http://localhost:8180"
 	@echo "🧭 Consul:          http://localhost:8500"
@@ -155,7 +155,7 @@ hooks-install: ## Install pre-commit SSoT guard hook into .git/hooks/pre-commit
 	@echo "   API Gateway:     http://localhost:8081"
 	@echo ""
 	@echo "🔧 Infrastructure:"
-	@echo "   PostgreSQL:      localhost:5432"
+	@echo "   PostgresQL:      localhost:5432"
 	@echo "   Redis:           localhost:6379"
 	@echo "   Keycloak:        http://localhost:8180"
 	@echo "   Consul:          http://localhost:8500"
@@ -258,7 +258,7 @@ dev-tools-up: ## Info: development tool containers were removed (use local tools
 	@echo "ℹ️ Development tool containers are not part of the simplified setup."
 	@echo "Use your local tools instead (e.g., pgAdmin, TablePlus, DBeaver, RedisInsight)."
 	@echo "Connection hints:"
-	@echo "  PostgreSQL: localhost:5432 (user/password per .env or defaults)"
+	@echo "  PostgresQL: localhost:5432 (user/password per .env or defaults)"
 	@echo "  Redis:      localhost:6379"
 	@echo "  Consul:     http://localhost:8500"
 	@echo "  Keycloak:   http://localhost:8180"
@@ -310,7 +310,7 @@ health-check: ## Check health of core infrastructure services
 	@$(COMPOSE) ps
 	@echo "-- Postgres --"
 	@$(COMPOSE) exec -T postgres pg_isready -U meldestelle -d meldestelle >/dev/null \
-		&& echo "PostgreSQL: ✅ Ready" || echo "PostgreSQL: ❌ Not ready"
+		&& echo "PostgresQL: ✅ Ready" || echo "PostgresQL: ❌ Not ready"
 	@echo "-- Redis --"
 	@$(COMPOSE) exec -T redis redis-cli ping | grep -q PONG \
 		&& echo "Redis: ✅ PONG" || echo "Redis: ❌ Not responding"
@@ -367,7 +367,7 @@ dev-info: ## Show development environment information
 	@echo "  Keycloak:         http://localhost:8180 (admin/admin by default)"
 	@echo ""
 	@echo "🗄️ Infrastructure:"
-	@echo "  PostgreSQL:       localhost:5432 (default user: meldestelle)"
+	@echo "  PostgresQL:       localhost:5432 (default user: meldestelle)"
 	@echo "  Redis:            localhost:6379"
 	@echo ""
 	@echo "ℹ️ Tips: Use 'make health-check' to verify services, and 'make logs SERVICE=postgres' for logs."

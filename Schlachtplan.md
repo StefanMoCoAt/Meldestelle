@@ -1,6 +1,6 @@
 ### Schlachtplan für das 'infrastructure'-Modul
 
-Basierend auf der Analyse des aktuellen Zustands (Stand: 11. Oktober 2025) habe ich einen strukturierten Aktionsplan erstellt. Die letzte größere Aktualisierung war im Juli 2025, seitdem gab es signifikante Änderungen am Gateway-Modul.
+Basierend auf der Analyse des aktuellen Zustands (Stand: 11. Oktober 2025) habe ich einen strukturierten Aktionsplan erstellt. Die letzte größere Aktualisierung war im Juli 2025, seitdem gab es signifikante Änderungen am Gateway-Modul.
 
 ---
 
@@ -19,13 +19,13 @@ Basierend auf der Analyse des aktuellen Zustands (Stand: 11. Oktober 2025) habe 
   - Option B: Tests auf Public Paths verlegen (`/actuator/**`, `/fallback/**`)
   - Option C: Security in Tests deaktivieren
 
-**Warum jetzt:** Tests geben keine Sicherheit mehr - blockiert Entwicklung.
+**Warum jetzt:** Tests geben keine Sicherheit mehr – blockiert Entwicklung.
 
-**Zeitaufwand:** 4-6 Stunden
+**Zeitaufwand:** 4–6 Stunden
 
 ---
 
-#### 1.2 Gateway Build-Datei bereinigen
+#### 1.2 Gateway-Build-Datei bereinigen
 
 **Problem:** Duplizierte Dependency in `gateway/build.gradle.kts` (Zeile 33-34).
 
@@ -44,18 +44,18 @@ implementation(project(":infrastructure:event-store:redis-event-store"))  // ←
 
 #### 2.1 Dependency-Versionen aktualisieren
 
-**Problem:** Versionen von Juli 2025 - teilweise veraltet.
+**Problem:** Versionen von Juli 2025 – teilweise veraltet.
 
 **Zu prüfen und aktualisieren:**
 
-| Dependency | Aktuell | Latest (Okt 2025) | Priorität |
-|------------|---------|-------------------|-----------|
-| Spring Boot | 3.5.5 | 3.5.x | Mittel |
-| Spring Cloud | 2025.0.0 | 2025.0.x | Mittel |
-| Kotlin | 2.2.20 | 2.2.x | Niedrig |
-| Keycloak | 26.0.7 | 26.x.x | Hoch |
-| Testcontainers | 1.21.3 | 1.21.x | Niedrig |
-| PostgreSQL Driver | 42.7.7 | 42.7.x | Niedrig |
+| Dependency        | Aktuell  | Latest (Okt 2025) | Priorität |
+|-------------------|----------|-------------------|-----------|
+| Spring Boot       | 3.5.5    | 3.5.x             | Mittel    |
+| Spring Cloud      | 2025.0.0 | 2025.0.x          | Mittel    |
+| Kotlin            | 2.2.20   | 2.2.x             | Niedrig   |
+| Keycloak          | 26.0.7   | 26.x.x            | Hoch      |
+| Testcontainers    | 1.21.3   | 1.21.x            | Niedrig   |
+| PostgresQL Driver | 42.7.7   | 42.7.x            | Niedrig   |
 
 **Aktion:**
 
@@ -63,7 +63,7 @@ implementation(project(":infrastructure:event-store:redis-event-store"))  // ←
 2. Tests nach jedem Update ausführen
 3. Breaking Changes dokumentieren
 
-**Zeitaufwand:** 1-2 Tage (mit Testing)
+**Zeitaufwand:** 1–2 Tage (mit Testing)
 
 ---
 
@@ -90,15 +90,15 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 2. Schrittweise aktualisieren (einzeln testen!)
 3. `.env`-Datei mit Versions-Variablen anlegen
 
-**Zeitaufwand:** 3-4 Stunden
+**Zeitaufwand:** 3–4 Stunden
 
 ---
 
 #### 2.3 Monitoring-Modul vervollständigen
 
-**Problem:** Nur 3 Kotlin-Files - deutlich unterimplementiert im Vergleich zur Dokumentation.
+**Problem:** Nur 3 Kotlin-Files – deutlich unter implementiert im Vergleich zur Dokumentation.
 
-**Dokumentiert aber fehlt:**
+**Dokumentiert, aber fehlt:**
 
 - Distributed Tracing (Zipkin) - Docker-Container fehlt!
 - Custom Metrics Implementation
@@ -112,21 +112,21 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 3. Custom Metrics-Library erstellen
 4. Prometheus Alerting Rules konfigurieren
 
-**Zeitaufwand:** 2-3 Tage
+**Zeitaufwand:** 2–3 Tage
 
 ---
 
-### 🟢 Phase 3: MITTELFRISTIG (Nächste 4-6 Wochen)
+### 🟢 Phase 3: MITTELFRISTIG (Nächste 4–6 Wochen)
 
 #### 3.1 Dokumentation aktualisieren
 
-**Problem:** README von Juli 2025 - nicht mehr aktuell.
+**Problem:** README von Juli 2025 – nicht mehr aktuell.
 
 **Zu aktualisieren:**
 
 **`README-INFRASTRUCTURE.md`:**
 
-- Zeile 552: "Letzte Aktualisierung: 25. Juli 2025" → Oktober 2025
+- Zeile 552: "Letzte Aktualisierung: 25. Juli 2025" → Oktober 2025
 - Security-Sektion: OAuth2 Resource Server statt Custom JWT Filter
 - Keycloak Version: 23.0 → 26.4.0
 - Kafka Version: 7.5.0 → 7.4.0 (Downgrade dokumentieren!)
@@ -160,7 +160,7 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 2. Entscheiden: Refactoring oder Deprecation
 3. Wenn deprecated: Migration Path dokumentieren
 
-**Zeitaufwand:** 3-5 Tage
+**Zeitaufwand:** 3–5 Tage
 
 ---
 
@@ -181,7 +181,7 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 2. Performance-Metriken hinzufügen
 3. Cache-Warming Strategy implementieren
 
-**Zeitaufwand:** 2-3 Tage
+**Zeitaufwand:** 2–3 Tage
 
 ---
 
@@ -192,24 +192,24 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 **Zu evaluieren:**
 
 - Ist Redis der richtige Event Store für Production?
-- Alternative: PostgreSQL mit Event Store Pattern?
+- Alternative: PostgresQL mit Event Store Pattern?
 - Snapshot-Strategie tatsächlich implementiert?
 
 **Aktion:**
 
 1. Performance-Tests durchführen
-2. Event Store Benchmark (Redis vs. PostgreSQL)
+2. Event Store Benchmark (Redis vs. PostgresQL)
 3. Dokumentation aktualisieren mit Pros/Cons
 
 **Zeitaufwand:** 1 Woche
 
 ---
 
-### 🔵 Phase 4: LANGFRISTIG (Nächste 2-3 Monate)
+### 🔵 Phase 4: LANGFRISTIG (Nächste 2–3 Monate)
 
 #### 4.1 Service Mesh evaluieren
 
-**Dokumentiert in "Zukünftige Erweiterungen"** - noch nicht implementiert.
+**Dokumentiert in "Zukünftige Erweiterungen"** – noch nicht implementiert.
 
 **Optionen:**
 
@@ -219,13 +219,13 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 
 **Empfehlung:** Start mit Consul Connect - minimaler Overhead.
 
-**Zeitaufwand:** 2-3 Wochen
+**Zeitaufwand:** 2–3 Wochen
 
 ---
 
 #### 4.2 OpenTelemetry statt Zipkin
 
-**Problem:** Zipkin ist veraltet - OpenTelemetry ist der moderne Standard.
+**Problem:** Zipkin ist veraltet – OpenTelemetry ist der moderne Standard.
 
 **Migration Path:**
 
@@ -234,7 +234,7 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 3. Zipkin als Backend behalten (kompatibel!)
 4. Schrittweise migrieren
 
-**Zeitaufwand:** 1-2 Wochen
+**Zeitaufwand:** 1–2 Wochen
 
 ---
 
@@ -251,45 +251,45 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 
 1. Rate Limiting im Gateway aktivieren
 2. Audit Log Framework implementieren
-3. TLS für Service-zu-Service Kommunikation
+3. TLS für Service-zu-Service-Kommunikation
 4. Security Scan mit OWASP Dependency Check
 
-**Zeitaufwand:** 2-3 Wochen
+**Zeitaufwand:** 2–3 Wochen
 
 ---
 
 #### 4.4 Infrastructure as Code (IaC)
 
-**Problem:** Nur Docker Compose - für Production nicht ausreichend.
+**Problem:** Nur Docker Compose – für Production nicht ausreichend.
 
 **Zu erstellen:**
 
 - Kubernetes Manifests (aktualisieren - Zeile 393+)
-- Helm Charts (aktualisieren - Zeile 420+)
+- Helm Charts (aktualisieren – Zeile 420+)
 - Terraform für Cloud-Ressourcen
 - CI/CD Pipelines
 
-**Zeitaufwand:** 4-6 Wochen
+**Zeitaufwand:** 4–6 Wochen
 
 ---
 
-### 📊 Priorisierungs-Matrix
+### 📊 Priorisierung-Matrix
 
-| Phase | Aufgabe | Dringlichkeit | Aufwand | Impact |
-|-------|---------|---------------|---------|--------|
-| 1 | Gateway-Tests | 🔴 Sehr hoch | 4-6h | Hoch |
-| 1 | Build-Datei | 🔴 Sehr hoch | 5min | Niedrig |
-| 2 | Dependencies | 🟡 Hoch | 1-2d | Mittel |
-| 2 | Docker-Images | 🟡 Hoch | 3-4h | Mittel |
-| 2 | Monitoring | 🟡 Mittel | 2-3d | Hoch |
-| 3 | Dokumentation | 🟢 Mittel | 1d | Mittel |
-| 3 | Auth-Module | 🟢 Mittel | 3-5d | Hoch |
-| 3 | Cache | 🟢 Niedrig | 2-3d | Mittel |
-| 3 | Event-Store | 🟢 Niedrig | 1w | Mittel |
-| 4 | Service Mesh | 🔵 Niedrig | 2-3w | Hoch |
-| 4 | OpenTelemetry | 🔵 Niedrig | 1-2w | Mittel |
-| 4 | Security | 🔵 Mittel | 2-3w | Hoch |
-| 4 | IaC | 🔵 Niedrig | 4-6w | Hoch |
+| Phase | Aufgabe       | Dringlichkeit | Aufwand | Impact  |
+|-------|---------------|---------------|---------|---------|
+| 1     | Gateway-Tests | 🔴 Sehr hoch  | 4-6h    | Hoch    |
+| 1     | Build-Datei   | 🔴 Sehr hoch  | 5min    | Niedrig |
+| 2     | Dependencies  | 🟡 Hoch       | 1-2d    | Mittel  |
+| 2     | Docker-Images | 🟡 Hoch       | 3-4h    | Mittel  |
+| 2     | Monitoring    | 🟡 Mittel     | 2-3d    | Hoch    |
+| 3     | Dokumentation | 🟢 Mittel     | 1d      | Mittel  |
+| 3     | Auth-Module   | 🟢 Mittel     | 3-5d    | Hoch    |
+| 3     | Cache         | 🟢 Niedrig    | 2-3d    | Mittel  |
+| 3     | Event-Store   | 🟢 Niedrig    | 1w      | Mittel  |
+| 4     | Service Mesh  | 🔵 Niedrig    | 2-3w    | Hoch    |
+| 4     | OpenTelemetry | 🔵 Niedrig    | 1-2w    | Mittel  |
+| 4     | Security      | 🔵 Mittel     | 2-3w    | Hoch    |
+| 4     | IaC           | 🔵 Niedrig    | 4-6w    | Hoch    |
 
 ---
 
@@ -309,7 +309,7 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 
 #### Woche 5-8
 
-7. Auth-Module evaluieren/refactoren
+7. Auth-Module evaluieren/refactored
 8. Cache-Module modernisieren
 9. Event-Store Performance-Tests
 
@@ -351,7 +351,7 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 1. **Jetzt sofort:** Gateway-Tests fixen (blockiert alles andere)
 2. **Diese Woche:** Dependencies updaten und testen
 3. **Nächste Woche:** Sprint Planning für Phase 2
-4. **Monatlich:** Review des Fortschritts und Reprioritisierung
+4. **Monatlich:** Review des Fortschritts und Repriorisierung
 
 ---
 
@@ -371,13 +371,13 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 
 ---
 
-**Geschätzter Gesamtaufwand:** 6-8 Wochen (bei 1 Vollzeit-Entwickler)
+**Geschätzter Gesamtaufwand:** 6–8 Wochen (bei 1 Vollzeit-Entwickler)
 
 **Empfohlener Start:** Sofort mit Phase 1, dann iterativ durch die Phasen
 
 ---
 
-### Dokumentations-Sprachbereinigung (2025-10-22)
+### Documentations-Sprachbereinigung (2025-10-22)
 
 Im Zuge der Vereinheitlichung auf ausschließlich deutschsprachige Dokumentation wurden folgende Dateien entfernt:
 
@@ -401,7 +401,7 @@ Gelöschte C4-Diagramme (englische Varianten):
 
 Hinweis:
 
-- Alle verbleibenden ADRs und C4-Diagramme sind in deutscher Sprache vorhanden (Suffix -de) und verlinkt.
+- Alle verbleibenden ADRs und C4-Diagramme sind in deutscher Sprache vorhanden (Suffix-de) und verlinkt.
 - Weitere Doku-Dateien in docs/ sind deutsch (Front-Matter/Sprachindizien geprüft).
 
 ---

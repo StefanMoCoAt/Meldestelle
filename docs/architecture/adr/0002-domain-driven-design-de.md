@@ -65,4 +65,4 @@ Wir haben die Verwendung eines anämischen Domänenmodells in Betracht gezogen, 
 
 - [Domain-Driven Design von Eric Evans](https://domainlanguage.com/ddd/)
 - [Implementing Domain-Driven Design von Vaughn Vernon](https://vaughnvernon.co/?page_id=168)
-- [Clean Architecture von Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Clean Architecture von Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)

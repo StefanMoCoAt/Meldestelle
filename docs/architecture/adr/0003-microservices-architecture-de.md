@@ -12,7 +12,7 @@ Nach der Entscheidung, eine modulare Architektur ([ADR-0001](0001-modular-archit
 2. Deployment-Unabhängigkeit, um Teams zu ermöglichen, Änderungen ohne Koordination mit anderen Teams zu veröffentlichen
 3. Technologieunabhängigkeit, um verschiedenen Diensten die Verwendung unterschiedlicher Technologien nach Bedarf zu ermöglichen
 4. Resilienz, um sicherzustellen, dass Ausfälle in einem Teil des Systems nicht das gesamte System beeinträchtigen
-5. Klare Zuständigkeitsgrenzen, die mit den Teamverantwortlichkeiten übereinstimmen
+5. Klare Zuständigkeitsgrenzen, die mit den Team-Verantwortlichkeiten übereinstimmen
 
 ## Entscheidung
 
@@ -33,10 +33,10 @@ Jeder Dienst:
 Wir haben auch unterstützende Infrastrukturdienste implementiert:
 
 - **gateway**: API-Gateway für Routing und Authentifizierung
-- **auth**: Authentifizierungs- und Autorisierungsdienst (Keycloak)
+- **auth**: Authentifizierung- und Autorisierungsdienst (Keycloak)
 - **cache**: Caching-Dienst (Redis)
 - **messaging**: Message Broker für die Kommunikation zwischen Diensten (Kafka)
-- **monitoring**: Überwachungs- und Beobachtbarkeitsdienste
+- **monitoring**: Überwachung- und Beobachtbarkeitsdienste
 
 ## Konsequenzen
 
@@ -46,8 +46,8 @@ Wir haben auch unterstützende Infrastrukturdienste implementiert:
 - **Deployment-Unabhängigkeit**: Teams können Änderungen an ihren Diensten bereitstellen, ohne sich mit anderen Teams abstimmen zu müssen
 - **Technologieflexibilität**: Verschiedene Dienste können je nach Bedarf unterschiedliche Technologien verwenden
 - **Resilienz**: Ausfälle in einem Dienst beeinträchtigen nicht unbedingt andere
-- **Klare Zuständigkeit**: Jeder Dienst hat klare Zuständigkeitsgrenzen, die mit den Teamverantwortlichkeiten übereinstimmen
-- **Kleinere Codebasen**: Jeder Dienst hat eine kleinere, fokussiertere Codebasis
+- **Klare Zuständigkeit**: Jeder Dienst hat klare Zuständigkeitsgrenzen, die mit den Team-Verantwortlichkeiten übereinstimmen
+- **Kleinere Codebasen**: Jeder Dienst hat eine kleinere, fokussierte Codebasis
 
 ### Negative
 
@@ -66,11 +66,11 @@ Wir haben auch unterstützende Infrastrukturdienste implementiert:
 
 ### Modularer Monolith
 
-Wir haben die Implementierung eines modularen Monolithen in Betracht gezogen, bei dem alle Module als eine einzige Anwendung bereitgestellt würden, jedoch mit klaren Modulgrenzen. Dies wäre einfacher bereitzustellen gewesen und hätte die Herausforderungen verteilter Systeme vermieden, hätte aber nicht die Vorteile der unabhängigen Skalierbarkeit und Bereitstellung geboten.
+Wir haben die Implementierung eines modularen Monolithen in Betracht gezogen, bei dem alle Module als eine einzige Anwendung bereitgestellt werden, jedoch mit klaren Modulgrenzen. Dies wäre einfacher bereitzustellen gewesen und hätte die Herausforderungen verteilter Systeme vermieden, hätte aber nicht die Vorteile der unabhängigen Skalierbarkeit und Bereitstellung geboten.
 
 ### Service-basierte Architektur
 
-Wir haben eine dienstbasierte Architektur mit weniger, größeren Diensten in Betracht gezogen, die mehrere Domänenbereiche umfassen würden. Dies hätte den betrieblichen Overhead reduziert, aber es schwieriger gemacht, klare Domänengrenzen und unabhängige Skalierbarkeit aufrechtzuerhalten.
+Wir haben eine Dienst-basierte Architektur mit weniger bzw. größeren Diensten in Betracht gezogen, die mehrere Domänenbereiche umfassen würden. Dies hätte den betrieblichen Overhead reduziert, aber es schwieriger gemacht, klare Domänengrenzen und unabhängige Skalierbarkeit aufrechtzuerhalten.
 
 ## Referenzen
 

@@ -22,7 +22,7 @@ Wir haben uns entschieden, ein ereignisgesteuertes Kommunikationsmuster mit Apac
 2. **Event Sourcing**: Für kritische Daten speichern wir alle Ereignisse, die zum aktuellen Zustand geführt haben
 3. **Nachrichtenbasierte Kommunikation**: Dienste kommunizieren hauptsächlich über asynchrone Nachrichten
 4. **Choreographie**: Komplexe Workflows werden durch Ereignis-Choreographie statt Orchestrierung implementiert
-5. **Ereignis-Schema-Registry**: Wir führen eine Registry von Ereignis-Schemas, um Kompatibilität zu gewährleisten
+5. **Ereignis-Schema-Registry**: Wir führen eine Registry von Ereignis-Schemas durch, um Kompatibilität zu gewährleisten
 
 Die Implementierung umfasst:
 

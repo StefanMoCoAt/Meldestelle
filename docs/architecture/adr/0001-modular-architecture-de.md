@@ -9,11 +9,11 @@ Akzeptiert
 Das Meldestelle-System wurde ursprünglich als monolithische Anwendung entwickelt. Mit zunehmender Komplexität und Größe des Systems traten mehrere Herausforderungen auf:
 
 1. Der Quellcode wurde schwer zu warten und zu verstehen
-2. Entwicklungsteams mussten eng koordinieren, was die Entwicklung verlangsamte
+2. Entwicklungsteams mussten sich eng koordinieren, was die Entwicklung verlangsamte
 3. Die gesamte Anwendung musste skaliert werden, auch wenn nur bestimmte Teile mehr Ressourcen benötigten
 4. Technologieentscheidungen wurden durch die monolithische Architektur eingeschränkt
 
-Das Team musste entscheiden, ob es mit dem monolithischen Ansatz fortfahren oder zu einer modulareren Architektur migrieren sollte.
+Das Team musste entscheiden, ob es mit dem monolithischen Ansatz fortfahren oder zu einer modularenen Architektur migrieren sollte.
 
 ## Entscheidung
 
@@ -27,7 +27,7 @@ Wir haben uns entschieden, von einer monolithischen Struktur zu einer modularen 
 - **infrastructure**: Gemeinsame Infrastrukturkomponenten
 - **client**: Client-Anwendungen
 
-Jedes Domänenmodul (masterdata, members, horses, events) folgt einem Clean-Architecture-Ansatz mit separaten API-, Anwendungs-, Domänen-, Infrastruktur- und Service-Schichten.
+Jedes Domänenmodul (masterdata, members, horses, events) folgt einem Clean-Architecture-Ansatz mit separaten API-, Anwendung-, Domänen-, Infrastruktur- und Service-Schichten.
 
 ## Konsequenzen
 
@@ -59,10 +59,9 @@ Wir haben in Betracht gezogen, die interne Struktur des Monolithen mit besseren 
 
 ### Microservices
 
-Wir haben einen feingranulareren Microservices-Ansatz mit vielen kleineren Diensten in Betracht gezogen. Dies hätte maximale Flexibilität geboten, aber für unsere aktuellen Bedürfnisse übermäßige Komplexität und betrieblichen Overhead eingeführt.
+Wir haben einen feingranularen Microservices-Ansatz mit vielen kleineren Diensten in Betracht gezogen. Dies hätte maximale Flexibilität geboten, aber für unsere aktuellen Bedürfnisse übermäßige Komplexität und betrieblichen Overhead eingeführt.
 
 ## Referenzen
 
-- [Migrationshinweise in README.md](../../../../README.md#aktuelle-migrationshinweise)
 - [Modular Monoliths von Simon Brown](https://simonbrown.je/blog/modularity-and-microservices/)
-- [Clean Architecture von Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Clean Architecture von Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)

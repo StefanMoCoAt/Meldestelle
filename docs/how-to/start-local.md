@@ -32,7 +32,7 @@ make services-up
 make clients-up
 ```
 
-Logs ansehen (z. B. Backend):
+Logs ansehen (z. B. Backend):
 
 ```bash
 make services-logs
@@ -45,7 +45,7 @@ make services-logs
 - Keycloak (Auth): <http://localhost:8180>
 - Consul (Service Discovery): <http://localhost:8500>
 
-Weitere Ports findest du unter: reference/ports-and-urls.md
+Weitere Ports findest du unter: [reference/ports-and-urls.md](../reference/ports-and-urls.md)
 
 ## Health-Checks
 
@@ -66,7 +66,7 @@ curl -i http://localhost:4000/health || true
 
 ## Häufige Probleme
 
-- Dienste nicht erreichbar → Containers laufen? `make full-logs` bzw. `make services-logs` prüfen.
+- Dienste sind nicht erreichbar → Container laufen? `make full-logs` bzw. `make services-logs` prüfen.
 - 401/403 beim API-Aufruf → Prüfen, ob ein gültiges Bearer-Token gesendet wird und Keycloak erreichbar ist.
 - CORS im Browser → API über das Gateway (<http://localhost:8081>) aufrufen und nicht direkt die Services (8082–8086).
 - Port-Kollisionen → Belegte Ports mit `lsof -i :PORT` prüfen oder Ports anpassen.
@@ -74,6 +74,9 @@ curl -i http://localhost:4000/health || true
 ## Stoppen
 
 ```bash
-make full-down
-# oder spezifisch: make services-down / make clients-down / make infrastructure-down
+ make full-down
+ # oder spezifisch: 
+ make services-down 
+ make clients-down 
+ make infrastructure-down
 ```

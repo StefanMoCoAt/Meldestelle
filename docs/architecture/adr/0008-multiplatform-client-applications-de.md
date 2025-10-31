@@ -46,7 +46,7 @@ Wir verwenden einen modularen Ansatz, bei dem plattformspezifischer Code minimie
 
 ### Positive
 
-- **Code-Sharing**: Wesentliche Teile des Codes werden über Plattformen hinweg geteilt, was Duplizierung reduziert
+- **Codesharing**: Wesentliche Teile des Codes werden über Plattformen hinweg geteilt, was Duplizierung reduziert
 - **Konsistente Benutzererfahrung**: UI-Komponenten und Verhalten sind über Plattformen hinweg konsistent
 - **Einheitliche Sprache**: Kotlin wird für alle Plattformen verwendet, was die Entwicklung vereinfacht
 - **Reduzierter Wartungsaufwand**: Fehlerbehebungen und Funktionen können einmal implementiert und über Plattformen hinweg angewendet werden
@@ -56,14 +56,14 @@ Wir verwenden einen modularen Ansatz, bei dem plattformspezifischer Code minimie
 
 - **Lernkurve**: Kotlin Multiplatform und Compose Multiplatform haben eine Lernkurve
 - **Reife**: Compose Multiplatform entwickelt sich noch weiter, besonders für Web-Targets
-- **Leistungsüberlegungen**: Es kann im Vergleich zu plattformnativen Lösungen zu Leistungs-Overhead kommen
+- **Leistungsüberlegungen**: Es kann im Vergleich zu Plattform nativen Lösungen zu Leistungs-Overhead kommen
 - **Plattformspezifische Funktionen**: Einige plattformspezifische Funktionen können schwieriger zu implementieren sein
 - **Debugging-Komplexität**: Das Debugging über Plattformen hinweg kann komplexer sein
 
 ### Neutral
 
 - **Komplexität des Build-Systems**: Das Build-System ist mit Multiplatform-Targets komplexer
-- **Abhängigkeitsverwaltung**: Die Verwaltung von Abhängigkeiten über Plattformen hinweg erfordert sorgfältige Überlegung
+- **Abhängigkeitsverwaltung**: Die Verwaltung von Abhängigkeiten über Plattformen hinweg erfordert sorgfältige Überlegungen
 
 ## Betrachtete Alternativen
 
@@ -73,7 +73,7 @@ Wir haben die Entwicklung separater nativer Anwendungen für jede Plattform in B
 
 ### React Native
 
-Wir haben die Verwendung von React Native für Mobile und Web mit einer separaten Desktop-Anwendung in Betracht gezogen. Dies hätte Code-Sharing zwischen Mobile und Web ermöglicht, hätte aber immer noch eine separate Desktop-Lösung erfordert und hätte JavaScript-Expertise erfordert.
+Wir haben die Verwendung von React Native für Mobile und Web mit einer separaten Desktop-Anwendung in Betracht gezogen. Dies hätte Codesharing zwischen Mobile und Web ermöglicht, hätte aber immer noch eine separate Desktop-Lösung erfordert und hätte JavaScript-Expertise erfordert.
 
 ### Flutter
 

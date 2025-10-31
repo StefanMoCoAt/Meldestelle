@@ -14,7 +14,7 @@ Als Teil unserer Microservices-Architektur ([ADR-0003](0003-microservices-archit
 4. Benutzerverwaltungsfunktionen einschließlich Selbstregistrierung und Profilmanagement
 5. Integration mit externen Identitätsanbietern
 6. Sicherheits-Best-Practices einschließlich Passwortrichtlinien und Kontosperrung
-7. Token-basierte Authentifizierung für die Kommunikation zwischen Diensten
+7. Tokenbasierte Authentifizierung für die Kommunikation zwischen Diensten
 
 Die Implementierung dieser Funktionen von Grund auf wäre zeitaufwändig und fehleranfällig und würde Ressourcen von unserer Kerngeschäftsfunktionalität abziehen.
 
@@ -28,11 +28,11 @@ Wir haben uns entschieden, Keycloak (Version 26.4.2) als unsere Identitäts- und
 4. **Single Sign-On**: Über alle Anwendungen und Dienste hinweg
 5. **Feingranulare Autorisierung**: Rollen- und attributbasierte Zugriffssteuerung
 6. **Benutzerverwaltung**: Selbstregistrierung, Profilmanagement, Passwortrichtlinien
-7. **Token-basierte Authentifizierung**: JWT-Tokens für die Kommunikation zwischen Diensten
+7. **Tokenbasierte Authentifizierung**: JWT-Tokens für die Kommunikation zwischen Diensten
 
 Unsere Implementierung umfasst:
 
-- Keycloak-Server, der als containerisierter Dienst bereitgestellt wird
+- Keycloak-Server, der als containerised Dienst bereitgestellt wird
 - Integration mit unserem API-Gateway für die Token-Validierung
 - Client-Adapter für unsere Dienste und Anwendungen
 - Benutzerdefinierte Themes und E-Mail-Vorlagen

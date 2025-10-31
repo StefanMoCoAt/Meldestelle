@@ -14,7 +14,7 @@ version: '3.9'
 
 services:
   # ===================================================================
-  # Datenbank - PostgreSQL with Security Hardening
+  # Datenbank - PostgresQL with Security Hardening
   # ===================================================================
   postgres:
     image: postgres:${DOCKER_POSTGRES_VERSION:-16-alpine}

@@ -19,7 +19,7 @@ Ein Einheitsansatz für die Datenspeicherung würde Kompromisse erzwingen, die d
 
 Wir haben uns entschieden, eine polyglotte Persistenzstrategie zu implementieren, die verschiedene Datenspeichertechnologien für verschiedene Anwendungsfälle nutzt:
 
-1. **PostgreSQL**: Als primäre relationale Datenbank zur Speicherung strukturierter Daten mit komplexen Beziehungen
+1. **PostgresQL**: Als primäre relationale Datenbank zur Speicherung strukturierter Daten mit komplexen Beziehungen
    - Wird von allen Domänendiensten für ihre primäre Datenspeicherung verwendet
    - Jeder Dienst hat sein eigenes Datenbankschema, um Isolation zu gewährleisten
 
@@ -32,7 +32,7 @@ Wir haben uns entschieden, eine polyglotte Persistenzstrategie zu implementieren
    - Wird zur Speicherung von Domänenereignissen für Event Sourcing verwendet
    - Ermöglicht Event-Replay zum Wiederaufbau des Zustands
 
-4. **Elasticsearch** (geplant): Für Volltextsuchfunktionen
+4. **Elasticsearch** (geplant): für Volltextsuchfunktionen
    - Wird für erweiterte Suchfunktionen über mehrere Domänen hinweg verwendet werden
 
 Jeder Dienst ist für die Verwaltung seiner eigenen Datenspeicherung verantwortlich, und Dienste dürfen nicht direkt auf die Datenbanken anderer Dienste zugreifen.
@@ -62,11 +62,11 @@ Jeder Dienst ist für die Verwaltung seiner eigenen Datenspeicherung verantwortl
 
 ### Einzelne Datenbank für alle Dienste
 
-Wir haben die Verwendung einer einzelnen PostgreSQL-Datenbank mit separaten Schemas für jeden Dienst in Betracht gezogen. Dies hätte den Betrieb vereinfacht, hätte aber einen Single Point of Failure geschaffen und hätte es uns nicht ermöglicht, für verschiedene Datenzugriffsmuster zu optimieren.
+Wir haben die Verwendung einer einzelnen PostgresQL-Datenbank mit separaten Schemas für jeden Dienst in Betracht gezogen. Dies hätte den Betrieb vereinfacht, hätte aber einen Single Point of Failure geschaffen und hätte es uns nicht ermöglicht, für verschiedene Datenzugriffsmuster zu optimieren.
 
 ### Datenbank pro Dienst, gleiche Technologie
 
-Wir haben die Verwendung von PostgreSQL für alle Dienste, aber mit separaten Datenbanken in Betracht gezogen. Dies hätte Dienstisolation geboten und gleichzeitig den Betrieb vereinfacht, hätte es uns aber nicht ermöglicht, für verschiedene Datenzugriffsmuster zu optimieren.
+Wir haben die Verwendung von PostgresQL für alle Dienste, aber mit separaten Datenbanken in Betracht gezogen. Dies hätte Dienstisolation geboten und gleichzeitig den Betrieb vereinfacht, hätte es uns aber nicht ermöglicht, für verschiedene Datenzugriffsmuster zu optimieren.
 
 ### Vollständig verteilter NoSQL-Ansatz
 
@@ -75,7 +75,7 @@ Wir haben die Verwendung eines vollständig verteilten NoSQL-Ansatzes mit Techno
 ## Referenzen
 
 - [Polyglot Persistence von Martin Fowler](https://martinfowler.com/bliki/PolyglotPersistence.html)
-- [PostgreSQL Dokumentation](https://www.postgresql.org/docs/)
+- [PostgresQL Dokumentation](https://www.postgresql.org/docs/)
 - [Redis Dokumentation](https://redis.io/documentation)
 - [Apache Kafka Dokumentation](https://kafka.apache.org/documentation/)
 - [Elasticsearch Dokumentation](https://www.elastic.co/guide/index.html)
