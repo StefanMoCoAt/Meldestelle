@@ -1,6 +1,7 @@
 # Docker-Development Workflow
 
 ---
+
 guideline_type: "technology"
 scope: "docker-development"
 audience: ["developers", "ai-assistants"]
@@ -8,6 +9,7 @@ last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "docker-architecture.md"]
 related_files: ["docker-compose.yml", "docker-compose.override.yml", "Makefile"]
 ai_context: "Entwicklungs-Workflow, Debugging und lokale Entwicklungsumgebung mit Docker"
+
 ---
 
 ## 🛠️ Development-Workflow
@@ -15,6 +17,7 @@ ai_context: "Entwicklungs-Workflow, Debugging und lokale Entwicklungsumgebung mi
 > **📖 Hinweis:** Für einen allgemeinen Überblick über die Docker-Infrastruktur 
 > siehe [docker-overview](docker-overview.md). 
 > Für Details zur Container-Architektur siehe [docker-architecture](docker-architecture.md).
+> Für Production-Deployment siehe [docker-production](docker-production.md).
 
 ### Schnellstart-Befehle
 
@@ -120,15 +123,16 @@ curl -s http://localhost:8080/actuator/health | jq
 
 ### Häufige Entwicklungsaufgaben
 
-| Aufgabe | Befehl | Beschreibung |
-|---------|---------|--------------|
-| Umgebung starten | `make dev-up` | Alle Services für Development |
-| Service debuggen | `docker-compose exec <service> sh` | Shell im Container |
-| Logs verfolgen | `docker-compose logs -f <service>` | Live-Logs anzeigen |
-| Service neu bauen | `make service-build SERVICE=<name>` | Einzelnen Service rebuilden |
-| Health-Check | `curl localhost:<port>/actuator/health` | Service-Status prüfen |
+| Aufgabe           | Befehl                                  | Beschreibung                  |
+|-------------------|-----------------------------------------|-------------------------------|
+| Umgebung starten  | `make dev-up`                           | Alle Services für Development |
+| Service debuggen  | `docker-compose exec <service> sh`      | Shell im Container            |
+| Logs verfolgen    | `docker-compose logs -f <service>`      | Live-Logs anzeigen            |
+| Service neu bauen | `make service-build SERVICE=<name>`     | Einzelnen Service rebuilden   |
+| Health-Check      | `curl localhost:<port>/actuator/health` | Service-Status prüfen         |
 
 ### Development-URLs
+
 - **Grafana:** http://localhost:3000 (admin/admin)
 - **Prometheus:** http://localhost:9090
 - **API Gateway:** http://localhost:8080
@@ -136,6 +140,7 @@ curl -s http://localhost:8080/actuator/health | jq
 - **Keycloak:** http://localhost:8180
 
 ### Debug-Ports
+
 - **Spring-Services:** 5005 (Standard Java Debug)
 - **Web-App:** Hot-Reload über Volume-Mapping
 - **Client-Apps:** Port 4000 (Web), 5901 (Desktop VNC)
@@ -143,6 +148,7 @@ curl -s http://localhost:8080/actuator/health | jq
 ### Troubleshooting Development
 
 #### Container startet nicht
+
 ```bash
 # Container-Status prüfen
 docker-compose ps
@@ -158,6 +164,7 @@ docker-compose build --no-cache <service-name>
 ```
 
 #### Port-Konflikte
+
 ```bash
 # Ports prüfen
 netstat -tulpn | grep :<port>
@@ -167,6 +174,7 @@ docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 ```
 
 #### Volume-Probleme
+
 ```bash
 # Volumes prüfen
 docker volume ls
@@ -181,5 +189,5 @@ docker-compose exec <service> ls -la /path/to/volume
 - [Docker-Overview](./docker-overview.md) - Grundlagen und Philosophie
 - [Docker-Architecture](./docker-architecture.md) - Container-Services und Struktur
 - [Docker-Production](./docker-production.md) - Production-Deployment
-- [Docker-Monitoring](./docker-monitoring.md) - Observability
-- [Docker-Troubleshooting](./docker-troubleshooting.md) - Problemlösung
+- [docker-monitoring](./docker-monitoring.md) - Observability
+- [docker-troubleshooting](./docker-troubleshooting.md) - Problemlösung

@@ -53,6 +53,23 @@ Die Hauptdokumentation befindet sich in der **YouTrack Wissensdatenbank**:
 - [🏛️ Architecture Decision Records](docs/architecture/adr)
 - [📐 C4-Diagramme](docs/architecture/c4)
 - [🛠️ Developer Guides](docs/how-to)
+- [📑 Projekt-Guidelines (Master)](.junie/guidelines/master-guideline.md)
+
+Zusätzliche zentrale Guidelines:
+
+- [Coding Standards](.junie/guidelines/project-standards/coding-standards.md)
+- [Testing Standards](.junie/guidelines/project-standards/testing-standards.md)
+- [Documentation Standards](.junie/guidelines/project-standards/documentation-standards.md)
+- [Architecture Principles](.junie/guidelines/project-standards/architecture-principles.md)
+- [Web App Guideline](.junie/guidelines/technology-guides/web-app-guideline.md)
+- Docker Guides:
+  - [Docker Overview](.junie/guidelines/technology-guides/docker/docker-overview.md)
+  - [Docker Architecture](.junie/guidelines/technology-guides/docker/docker-architecture.md)
+  - [Docker Development](.junie/guidelines/technology-guides/docker/docker-development.md)
+  - [Docker Production](.junie/guidelines/technology-guides/docker/docker-production.md)
+  - [Docker Monitoring](.junie/guidelines/technology-guides/docker/docker-monitoring.md)
+  - [Docker Troubleshooting](.junie/guidelines/technology-guides/docker/docker-troubleshooting.md)
+- Process Guide: [Trace Bullet](.junie/guidelines/process-guides/trace-bullet-guideline.md)
 
 ---
 
@@ -250,7 +267,7 @@ b) Falls unterstützt: alle (oder Aggregator)
 
 ---
 
-## Docker Single Source of Truth (SSoT) - Details
+## Docker Single Source of Truth (SSoT)—Details
 
 Dieser Abschnitt beschreibt den lokalen Workflow für die zentrale Docker-Versionsverwaltung.
 

@@ -1,6 +1,7 @@
 # Docker-Production Deployment
 
 ---
+
 guideline_type: "technology"
 scope: "docker-production"
 audience: ["developers", "devops", "ai-assistants"]
@@ -8,6 +9,7 @@ last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "docker-architecture.md"]
 related_files: ["docker-compose.yml", "config/nginx/nginx.prod.conf", "config/ssl/*"]
 ai_context: "Production-Deployment, Security-Hardening, SSL/TLS-Konfiguration und Ressourcenverwaltung"
+
 ---
 
 ## 🚀 Production-Deployment
@@ -136,12 +138,14 @@ services:
 ## 🎯 AI-Assistenten: Production-Schnellreferenz
 
 ### Production-Domains
+
 - **API:** api.meldestelle.at (HTTPS)
 - **Auth:** auth.meldestelle.at (HTTPS)
 - **Monitoring:** monitor.meldestelle.at (HTTPS)
 - **Metrics:** metrics.meldestelle.at (HTTPS)
 
 ### Security-Checkliste
+
 - [ ] SSL/TLS-Zertifikate installiert und gültig
 - [ ] Alle Passwörter mit `openssl rand -base64 32` generiert
 - [ ] Nginx Security Headers konfiguriert
@@ -219,8 +223,8 @@ curl -s https://monitor.meldestelle.at/api/health | jq '.database'
 ---
 
 **Navigation:**
-- [Docker-Overview](./docker-overview.md) - Grundlagen und Philosophie
-- [Docker-Architecture](./docker-architecture.md) - Container-Services und Struktur
-- [Docker-Development](./docker-development.md) - Entwicklungsworkflow
-- [Docker-Monitoring](./docker-monitoring.md) - Observability
-- [Docker-Troubleshooting](./docker-troubleshooting.md) - Problemlösung
+- [docker-overview](./docker-overview.md) - Grundlagen und Philosophie
+- [docker-architecture](./docker-architecture.md) - Container-Services und Struktur
+- [docker-development](./docker-development.md) - Entwicklungsworkflow
+- [docker-monitoring](./docker-monitoring.md) - Observability
+- [docker-troubleshooting](./docker-troubleshooting.md) - Problemlösung

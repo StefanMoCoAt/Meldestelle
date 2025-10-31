@@ -1,6 +1,7 @@
 # Docker-Monitoring und Observability
 
 ---
+
 guideline_type: "technology"
 scope: "docker-monitoring"
 audience: ["developers", "devops", "ai-assistants"]
@@ -8,6 +9,7 @@ last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "docker-architecture.md"]
 related_files: ["docker-compose.yml", "config/monitoring/*", "config/grafana/*", "config/prometheus/*"]
 ai_context: "Monitoring-Setup, Prometheus-Metriken, Grafana-Dashboards, Health-Checks und Log-Aggregation"
+
 ---
 
 ## 📊 Monitoring und Observability
@@ -115,6 +117,7 @@ docker-compose logs api-gateway | grep -i "took\|duration\|time"
 ### Dashboard-Setup
 
 #### Infrastructure-Dashboard
+
 ```json
 {
   "dashboard": {
@@ -142,6 +145,7 @@ docker-compose logs api-gateway | grep -i "took\|duration\|time"
 ```
 
 #### Application-Dashboard
+
 ```json
 {
   "dashboard": {
@@ -245,8 +249,8 @@ scrape_configs:
 ---
 
 **Navigation:**
-- [Docker-Overview](./docker-overview.md) - Grundlagen und Philosophie
-- [Docker-Architecture](./docker-architecture.md) - Container-Services und Struktur
-- [Docker-Development](./docker-development.md) - Entwicklungsworkflow
-- [Docker-Production](./docker-production.md) - Production-Deployment
-- [Docker-Troubleshooting](./docker-troubleshooting.md) - Problemlösung
+- [docker-overview](./docker-overview.md) - Grundlagen und Philosophie
+- [docker-architecture](./docker-architecture.md) - Container-Services und Struktur
+- [docker-development](./docker-development.md) - Entwicklungsworkflow
+- [docker-production](./docker-production.md) - Production-Deployment
+- [docker-troubleshooting](./docker-troubleshooting.md) - Problemlösung

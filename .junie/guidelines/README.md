@@ -113,7 +113,7 @@ Das Guidelines-System verfügt über umfassende Automatisierungsfeatures:
 - **Link-Validierung:** `.junie/scripts/validate-links.sh` - Cross-Referenzen und YAML-Konsistenz
 - **Template-System:** `.junie/scripts/create-guideline.sh` - Automatische Guideline-Erstellung
 - **Pre-commit Hook:** `.junie/scripts/pre-commit-guidelines.sh` - Lokale Validierung vor Commits
-- **CI/CD-Integration:** `.github/workflows/guidelines-validation.yml` - Automatische Pipeline-Validierung
+- **CI/CD-Integration (optional):** `.github/workflows/ci-main.yml` (Job: `validate-docs`) - Markdown-Lint und Link-Check für kritische Docs
 
 ### 📋 Verfügbare Templates
 - **Project-Standards:** `project-standard-template.md`
