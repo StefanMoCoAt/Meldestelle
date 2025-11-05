@@ -23,13 +23,14 @@ Wir haben uns entschieden, Domain-Driven Design (DDD)-Prinzipien für die Organi
 Gestaltung unseres Systems zu übernehmen. Dies umfasst:
 
 1. **Ubiquitäre Sprache**: Entwicklung einer gemeinsamen Sprache, die von Domänenexperten und Entwicklern geteilt wird
-2. **Bounded Contexts**: Definition expliziter Grenzen zwischen verschiedenen Domänenbereichen (masterdata, members,
-   horses, events)
+2. **Bounded Contexts**: Definition expliziter Grenzen zwischen verschiedenen Domänenbereichen (masterdata, members, horses, events)
 3. **Schichtenarchitektur**: Organisation jedes Domänenmoduls in Schichten:
-  - Domänenschicht: Enthält Domänenmodelle, Entitäten, Wertobjekte und Domänendienste
-  - Anwendungsschicht: Enthält Anwendungsdienste, Anwendungsfälle und Befehls-/Abfragehandler
-  - Infrastrukturschicht: Enthält technische Implementierungen von Repositories, Messaging usw.
-  - API-Schicht: Definiert die Schnittstellen für die Interaktion mit der Domäne
+
+   - Domänenschicht: Enthält Domänenmodelle, Entitäten, Wertobjekte und Domänendienste
+   - Anwendungsschicht: Enthält Anwendungsdienste, Anwendungsfälle und Befehls-/Abfragehandler
+   - Infrastrukturschicht: Enthält technische Implementierungen von Repositories, Messaging usw.
+   - API-Schicht: Definiert die Schnittstellen für die Interaktion mit der Domäne
+   
 4. **Aggregate**: Identifizierung von Aggregat-Roots, die Konsistenzgrenzen aufrechterhalten
 5. **Repositories**: Verwendung des Repository-Musters zur Abstraktion des Datenzugriffs
 6. **Domänen-Events**: Verwendung von Events zur Kommunikation zwischen Bounded Contexts
@@ -39,8 +40,7 @@ Gestaltung unseres Systems zu übernehmen. Dies umfasst:
 ### Positive
 
 - **Business-Technologie-Ausrichtung**: Die Codestruktur spiegelt direkt die Geschäftsdomänen wider
-- **Verbesserte Kommunikation**: Ubiquitäre Sprache erleichtert die Kommunikation zwischen technischen und
-  nicht-technischen Stakeholdern
+- **Verbesserte Kommunikation**: Ubiquitäre Sprache erleichtert die Kommunikation zwischen technischen und nicht-technischen Stakeholdern
 - **Wartbarkeit**: Klare Trennung der Belange macht den Code leichter zu warten
 - **Testbarkeit**: Domänenlogik kann unabhängig von Infrastrukturbelangen getestet werden
 - **Flexibilität**: Änderungen in einem Bounded Context haben minimale Auswirkungen auf andere

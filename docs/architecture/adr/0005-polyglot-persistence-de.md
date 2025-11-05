@@ -24,20 +24,24 @@ Wir haben uns entschieden, eine polyglotte Persistenzstrategie zu implementieren
 Datenspeichertechnologien für verschiedene Anwendungsfälle nutzt:
 
 1. **PostgresQL**: Als primäre relationale Datenbank zur Speicherung strukturierter Daten mit komplexen Beziehungen
-  - Wird von allen Domänendiensten für ihre primäre Datenspeicherung verwendet
-  - Jeder Dienst hat sein eigenes Datenbankschema, um Isolation zu gewährleisten
+
+   - Wird von allen Domänendiensten für ihre primäre Datenspeicherung verwendet
+   - Jeder Dienst hat sein eigenes Datenbankschema, um Isolation zu gewährleisten
 
 2. **Redis**: Als verteilter Cache für schnellen Datenzugriff
-  - Wird für das Caching häufig abgerufener Daten verwendet
-  - Wird für die Sitzungsspeicherung verwendet
-  - Wird für Rate-Limiting verwendet
+
+   - Wird für das Caching häufig abgerufener Daten verwendet
+   - Wird für die Sitzungsspeicherung verwendet
+   - Wird für Rate-Limiting verwendet
 
 3. **Kafka**: Als Event-Store für Event Sourcing
-  - Wird zur Speicherung von Domänenereignissen für Event Sourcing verwendet
-  - Ermöglicht Event-Replay zum Wiederaufbau des Zustands
+
+   - Wird zur Speicherung von Domänenereignissen für Event Sourcing verwendet
+   - Ermöglicht Event-Replay zum Wiederaufbau des Zustands
 
 4. **Elasticsearch** (geplant): für Volltextsuchfunktionen
-  - Wird für erweiterte Suchfunktionen über mehrere Domänen hinweg verwendet werden
+
+   - Wird für erweiterte Suchfunktionen über mehrere Domänen hinweg verwendet werden
 
 Jeder Dienst ist für die Verwaltung seiner eigenen Datenspeicherung verantwortlich, und Dienste dürfen nicht direkt auf
 die Datenbanken anderer Dienste zugreifen.
