@@ -1,14 +1,14 @@
-# ADR-0000: Vorlage für Architekturentscheidungsaufzeichnung
+# ADR-0000: Vorlage für Architekturentscheidungsaufzeichnungen
 
 ## Status
 
 [Vorgeschlagen | Akzeptiert | Veraltet | Ersetzt]
 
-Falls sie ersetzt, fügen Sie einen Verweis auf die neue ADR ein: [ADR-XXXX](XXXX-filename.md)
+Falls sie ersetzt, fügen Sie einen Verweis auf die neue ADR ein: `[ADR-XXX](XXX-filename.md)`
 
 ## Kontext
 
-Beschreiben Sie den Kontext und die Problemstellung, z.B. in freier Form mit zwei bis drei Sätzen. Sie können das Problem auch in Form einer Frage formulieren.
+Beschreiben Sie den Kontext und die Problemstellung, z. B. in freier Form mit zwei bis drei Sätzen. Sie können das Problem auch in Form einer Frage formulieren.
 
 ## Entscheidung
 

@@ -63,6 +63,6 @@ Wir haben die Verwendung eines anämischen Domänenmodells in Betracht gezogen, 
 
 ## Referenzen
 
-- [Domain-Driven Design von Eric Evans](https://www.informit.com/store/domain-driven-design-tackling-complexity-in-the-heart-9780321125217)
-- [Implementing Domain-Driven Design von Vaughn Vernon](https://www.informit.com/store/implementing-domain-driven-design-9780321834577)
-- [Clean Architecture von Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Domain-Driven Design von Eric Evans](https://meldestelle-pro.youtrack.cloud/api/files/526-11?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTExfE9KWGJodXhlT0Q0UEdYREpfNllaV1RXakU4YUZYbXZJb1JIdjJDVWVnZkUNCg&updated=1762339700786)
+- [Implementing Domain-Driven Design von Vaughn Vernon](https://meldestelle-pro.youtrack.cloud/api/files/526-14?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTE0fEx6NXJCT2NrMFNWMHRfc1pIbVRTc04xQ1Q2OEtEdzdMc1djaTNIMmRCNFENCg&updated=1762340142201)
+- [Clean Architecture von Robert C. Martin](https://meldestelle-pro.youtrack.cloud/api/files/526-10?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTEwfF9XbVdSakVpSW5HV1VjalY3UjhCMGFub2NIQXdPTUkyM3FFTnNTdGNIRmsNCg&updated=1762339225451)

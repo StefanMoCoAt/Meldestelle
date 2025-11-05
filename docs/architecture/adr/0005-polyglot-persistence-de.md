@@ -74,8 +74,8 @@ Wir haben die Verwendung eines vollständig verteilten NoSQL-Ansatzes mit Techno
 
 ## Referenzen
 
-- [Polyglot Persistence von Martin Fowler](https://martinfowler.com/bliki/PolyglotPersistence.html)
+- [Polyglot Persistence von Martin Fowler](https://meldestelle-pro.youtrack.cloud/api/files/526-28?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTI4fERaVkFWVmlEbVJJbTVZSFE2SWlrbmRydHNaeDdxZUFaRExpdkNxbk9wVEkNCg&updated=1762343428460)
 - [PostgresQL Dokumentation](https://www.postgresql.org/docs/)
 - [Redis Dokumentation](https://redis.io/documentation)
 - [Apache Kafka Dokumentation](https://kafka.apache.org/documentation/)
-- [Elasticsearch Dokumentation](https://www.elastic.co/guide/index.html)
+- [Elasticsearch Dokumentation](https://www.elastic.co/docs/solutions/search)

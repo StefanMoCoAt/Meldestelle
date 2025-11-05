@@ -63,5 +63,5 @@ Wir haben einen feingranularen Microservices-Ansatz mit vielen kleineren Dienste
 
 ## Referenzen
 
-- [Modular Monoliths von Simon Brown (Vortrag bei InfoQ)](https://www.infoq.com/presentations/modular-monoliths/)
-- [Clean Architecture von Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Modular Monoliths von Simon Brown](https://meldestelle-pro.youtrack.cloud/api/files/526-8?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTh8QldrSXd1MHoyUlE1T3lZSjBDNVh4Ry1zcGZZM1lWSlE0VXN2M2FQSXNDbw0K&updated=1762338956551)
+- [Clean Architecture von Robert C. Martin](https://meldestelle-pro.youtrack.cloud/api/files/526-10?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTEwfF9XbVdSakVpSW5HV1VjalY3UjhCMGFub2NIQXdPTUkyM3FFTnNTdGNIRmsNCg&updated=1762339225451)

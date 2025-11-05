@@ -79,4 +79,3 @@ Wir haben die Verwendung von Spring Security mit JWT-Tokens für Authentifizieru
 - [Keycloak Dokumentation](https://www.keycloak.org/documentation)
 - [OAuth 2.0 und OpenID Connect](https://oauth.net/2/)
 - [JWT (JSON Web Tokens)](https://jwt.io/)
-- [Absicherung von Microservices mit Keycloak](https://www.keycloak.org/docs/latest/securing-apps/)

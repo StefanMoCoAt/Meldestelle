@@ -6,7 +6,9 @@ Akzeptiert
 
 ## Kontext
 
-Nach der Entscheidung, eine modulare Architektur ([ADR-0001](0001-modular-architecture-de.md)) und Domain-Driven Design ([ADR-0002](0002-domain-driven-design-de.md)) zu übernehmen, mussten wir die Deployment-Strategie für unsere Module festlegen. Zu den wichtigsten Überlegungen gehörten:
+Nach der Entscheidung, eine modulare Architektur ([ADR-0001](0001-modular-architecture-de.md)) und 
+Domain-Driven Design ([ADR-0002](0002-domain-driven-design-de.md)) zu übernehmen, mussten wir die 
+Deployment-Strategie für unsere Module festlegen. Zu den wichtigsten Überlegungen gehörten:
 
 1. Unabhängige Skalierbarkeit verschiedener Teile des Systems
 2. Deployment-Unabhängigkeit, um Teams zu ermöglichen, Änderungen ohne Koordination mit anderen Teams zu veröffentlichen
@@ -74,6 +76,6 @@ Wir haben eine Dienst-basierte Architektur mit weniger bzw. größeren Diensten 
 
 ## Referenzen
 
-- [Microservices von Martin Fowler](https://martinfowler.com/articles/microservices.html)
-- [Building Microservices von Sam Newman](https://samnewman.io/books/building_microservices/)
-- [Microservices Patterns von Chris Richardson](https://microservices.io/book)
+- [Microservices von Martin Fowler](https://meldestelle-pro.youtrack.cloud/api/files/526-16?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTE2fFViVXRuTGdXcFhIcFRwdG03ZHlSZEZ5ZEc2MG5VVVB3SGJ4OUFRRG82QlENCg&updated=1762340608616)
+- [Building Microservices von Sam Newman](https://meldestelle-pro.youtrack.cloud/api/files/526-17?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTE3fDdjaXJoZ0NlWlQ1MW9tZ0UwdC1fLVZEZ0pUcFF6QnNScTcxN0Z6YlVUazQNCg&updated=1762340788707)
+- [Microservices Patterns von Chris Richardson](https://meldestelle-pro.youtrack.cloud/api/files/526-20?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTIwfDM5S08yMXVENmFRa1NPaEROQlR1N1Nvc0lWWUJXU0hCR1JYTVJXSDA2RGcNCg&updated=1762340989301)

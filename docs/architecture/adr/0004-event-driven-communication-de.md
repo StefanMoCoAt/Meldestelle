@@ -70,7 +70,7 @@ Wir haben die Verwendung von GraphQL-Federation zur Zusammensetzung von APIs aus
 
 ## Referenzen
 
-- [Enterprise Integration Patterns](https://www.enterpriseintegrationpatterns.com/)
-- [Event-Driven Architecture von Martin Fowler](https://martinfowler.com/articles/201701-event-driven.html)
+- [Enterprise Integration Patterns](https://meldestelle-pro.youtrack.cloud/api/files/526-22?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTIyfGNVMDU5cXJTbi0wRDRvWngwLXhTc0RDTzZZOTZBaTFtQzBpZ3RVYjBxTVkNCg&updated=1762342095790)
+- [Event-Driven Architecture von Martin Fowler](https://meldestelle-pro.youtrack.cloud/api/files/526-24?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTI0fDJsSEFZbnJzRWpCOWlkU3BIZ0ZOTDRIeDlmY0F2NUhMZklseE9WNnBhWkUNCg&updated=1762342654487)
 - [Apache Kafka Dokumentation](https://kafka.apache.org/documentation/)
-- [Event Sourcing Pattern](https://docs.microsoft.com/de-de/azure/architecture/patterns/event-sourcing)
+- [Event Sourcing Pattern](https://meldestelle-pro.youtrack.cloud/api/files/526-26?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTI2fEZURXo4SVVIbmtwcUExVFlab3BLZkVyRFlZS3B1bTFNX1ROMFR4aElBMW8NCg&updated=1762343212733)
