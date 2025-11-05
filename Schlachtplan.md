@@ -1,6 +1,7 @@
 ### Schlachtplan für das 'infrastructure'-Modul
 
-Basierend auf der Analyse des aktuellen Zustands (Stand: 11. Oktober 2025) habe ich einen strukturierten Aktionsplan erstellt. Die letzte größere Aktualisierung war im Juli 2025, seitdem gab es signifikante Änderungen am Gateway-Modul.
+Basierend auf der Analyse des aktuellen Zustands (Stand: 11. Oktober 2025) habe ich einen strukturierten Aktionsplan
+erstellt. Die letzte größere Aktualisierung war im Juli 2025, seitdem gab es signifikante Änderungen am Gateway-Modul.
 
 ---
 
@@ -126,7 +127,7 @@ grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
 
 **`README-INFRASTRUCTURE.md`:**
 
-- Zeile 552: "Letzte Aktualisierung: 25. Juli 2025" → Oktober 2025
+- Zeile 552: "Letzte Aktualisierung: 25. Juli 2025" → Oktober 2025
 - Security-Sektion: OAuth2 Resource Server statt Custom JWT Filter
 - Keycloak Version: 23.0 → 26.4.0
 - Kafka Version: 7.5.0 → 7.4.0 (Downgrade dokumentieren!)
@@ -408,7 +409,8 @@ Hinweis:
 
 ## CI‑Stabilisierung Keycloak (2025‑10‑25)
 
-Hintergrund: In GitHub Actions startete Keycloak zeitweise nicht zuverlässig. Ziel: Integrationstests stabilisieren, ohne produktive Architektur zu ändern.
+Hintergrund: In GitHub Actions startete Keycloak zeitweise nicht zuverlässig. Ziel: Integrationstests stabilisieren,
+ohne produktive Architektur zu ändern.
 
 Änderungen:
 
@@ -435,6 +437,7 @@ ADR‑Konsistenz:
 Next Steps (optional):
 
 - Falls `postgres` im CI dauerhaft flakey: Required Checks vorübergehend auf `dev-file` begrenzen.
-- Langfristig: Ursachenanalyse für Postgres‑Variante (Runner‑Leistung/Timeouts/Schema‑Setup) und Re‑Enable als Required Check nach Stabilisierung.
+- Langfristig: Ursachenanalyse für Postgres‑Variante (Runner‑Leistung/Timeouts/Schema‑Setup) und Re‑Enable als Required
+  Check nach Stabilisierung.
 
 ---

@@ -6,7 +6,8 @@ Akzeptiert
 
 ## Kontext
 
-Mit der Einführung einer Microservices-Architektur ([ADR-0003](0003-microservices-architecture-de.md)) mussten wir die effektivste Art der Kommunikation zwischen den Diensten bestimmen. Zu den wichtigsten Überlegungen gehörten:
+Mit der Einführung einer Microservices-Architektur ([ADR-0003](0003-microservices-architecture-de.md)) mussten wir die
+effektivste Art der Kommunikation zwischen den Diensten bestimmen. Zu den wichtigsten Überlegungen gehörten:
 
 1. Lose Kopplung zwischen Diensten, um ihre Unabhängigkeit zu erhalten
 2. Asynchrone Verarbeitungsfähigkeiten zur Verbesserung der Systemresilienz und Skalierbarkeit
@@ -16,7 +17,8 @@ Mit der Einführung einer Microservices-Architektur ([ADR-0003](0003-microservic
 
 ## Entscheidung
 
-Wir haben uns entschieden, ein ereignisgesteuertes Kommunikationsmuster mit Apache Kafka als Message Broker zu implementieren. Die wichtigsten Aspekte dieses Ansatzes umfassen:
+Wir haben uns entschieden, ein ereignisgesteuertes Kommunikationsmuster mit Apache Kafka als Message Broker zu
+implementieren. Die wichtigsten Aspekte dieses Ansatzes umfassen:
 
 1. **Domänen-Ereignisse**: Dienste veröffentlichen Domänen-Ereignisse, wenn signifikante Zustandsänderungen auftreten
 2. **Event Sourcing**: Für kritische Daten speichern wir alle Ereignisse, die zum aktuellen Zustand geführt haben
@@ -58,15 +60,21 @@ Die Implementierung umfasst:
 
 ### Synchrone REST-APIs
 
-Wir haben die Verwendung synchroner REST-APIs als primären Kommunikationsmechanismus in Betracht gezogen. Dies wäre einfacher zu implementieren und zu debuggen gewesen, hätte aber zu einer engeren Kopplung zwischen Diensten und verringerter Resilienz geführt.
+Wir haben die Verwendung synchroner REST-APIs als primären Kommunikationsmechanismus in Betracht gezogen. Dies wäre
+einfacher zu implementieren und zu debuggen gewesen, hätte aber zu einer engeren Kopplung zwischen Diensten und
+verringerter Resilienz geführt.
 
 ### Request-Response-Messaging
 
-Wir haben ein Request-Response-Messaging-Muster in Betracht gezogen, bei dem Dienste Anfragen senden und auf Antworten warten. Dies hätte einige der Vorteile asynchroner Kommunikation geboten und gleichzeitig ein vertrautes Request-Response-Modell beibehalten, hätte aber das Publish-Subscribe-Muster nicht so effektiv unterstützt.
+Wir haben ein Request-Response-Messaging-Muster in Betracht gezogen, bei dem Dienste Anfragen senden und auf Antworten
+warten. Dies hätte einige der Vorteile asynchroner Kommunikation geboten und gleichzeitig ein vertrautes
+Request-Response-Modell beibehalten, hätte aber das Publish-Subscribe-Muster nicht so effektiv unterstützt.
 
 ### GraphQL-Federation
 
-Wir haben die Verwendung von GraphQL-Federation zur Zusammensetzung von APIs aus mehreren Diensten in Betracht gezogen. Dies hätte eine einheitliche API für Clients geboten, hätte aber eine enge Kopplung zwischen Diensten beibehalten und asynchrone Workflows nicht so effektiv unterstützt.
+Wir haben die Verwendung von GraphQL-Federation zur Zusammensetzung von APIs aus mehreren Diensten in Betracht gezogen.
+Dies hätte eine einheitliche API für Clients geboten, hätte aber eine enge Kopplung zwischen Diensten beibehalten und
+asynchrone Workflows nicht so effektiv unterstützt.
 
 ## Referenzen
 

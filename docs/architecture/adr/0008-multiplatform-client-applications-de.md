@@ -19,14 +19,17 @@ Die Entwicklung und Wartung separater Codebasen für jede Plattform würde erfor
 - Koordination, um eine konsistente Benutzererfahrung über Plattformen hinweg zu gewährleisten
 - Höhere Wartungskosten, da Funktionen und Fehlerbehebungen mehrfach implementiert werden müssten
 
-Wir benötigten eine Lösung, die es uns ermöglicht, Code über Plattformen hinweg zu teilen und gleichzeitig auf jeder Plattform eine native Benutzererfahrung zu bieten.
+Wir benötigten eine Lösung, die es uns ermöglicht, Code über Plattformen hinweg zu teilen und gleichzeitig auf jeder
+Plattform eine native Benutzererfahrung zu bieten.
 
 ## Entscheidung
 
 Wir haben uns entschieden, Kotlin Multiplatform und Compose Multiplatform für unsere Client-Anwendungen zu verwenden:
 
-1. **Kotlin Multiplatform**: Ermöglicht die gemeinsame Nutzung von Geschäftslogik, Datenmodellen und API-Client-Code über Plattformen hinweg
-2. **Compose Multiplatform**: Bietet ein deklaratives UI-Framework, das auf Desktop-, Web- und mobilen Plattformen funktioniert
+1. **Kotlin Multiplatform**: Ermöglicht die gemeinsame Nutzung von Geschäftslogik, Datenmodellen und API-Client-Code
+   über Plattformen hinweg
+2. **Compose Multiplatform**: Bietet ein deklaratives UI-Framework, das auf Desktop-, Web- und mobilen Plattformen
+   funktioniert
 
 Unsere Implementierung umfasst:
 
@@ -40,7 +43,8 @@ Die Architektur folgt einem Model-View-ViewModel (MVVM)-Muster:
 - **ViewModel**: Gemeinsame Geschäftslogik und Zustandsverwaltung
 - **View**: Plattformspezifische UI-Implementierungen mit Compose Multiplatform
 
-Wir verwenden einen modularen Ansatz, bei dem plattformspezifischer Code minimiert wird und der größte Teil des Codes über Plattformen hinweg geteilt wird.
+Wir verwenden einen modularen Ansatz, bei dem plattformspezifischer Code minimiert wird und der größte Teil des Codes
+über Plattformen hinweg geteilt wird.
 
 ## Konsequenzen
 
@@ -49,7 +53,8 @@ Wir verwenden einen modularen Ansatz, bei dem plattformspezifischer Code minimie
 - **Codesharing**: Wesentliche Teile des Codes werden über Plattformen hinweg geteilt, was Duplizierung reduziert
 - **Konsistente Benutzererfahrung**: UI-Komponenten und Verhalten sind über Plattformen hinweg konsistent
 - **Einheitliche Sprache**: Kotlin wird für alle Plattformen verwendet, was die Entwicklung vereinfacht
-- **Reduzierter Wartungsaufwand**: Fehlerbehebungen und Funktionen können einmal implementiert und über Plattformen hinweg angewendet werden
+- **Reduzierter Wartungsaufwand**: Fehlerbehebungen und Funktionen können einmal implementiert und über Plattformen
+  hinweg angewendet werden
 - **Team-Effizienz**: Entwickler können mit demselben Skillset an mehreren Plattformen arbeiten
 
 ### Negative
@@ -63,21 +68,28 @@ Wir verwenden einen modularen Ansatz, bei dem plattformspezifischer Code minimie
 ### Neutral
 
 - **Komplexität des Build-Systems**: Das Build-System ist mit Multiplatform-Targets komplexer
-- **Abhängigkeitsverwaltung**: Die Verwaltung von Abhängigkeiten über Plattformen hinweg erfordert sorgfältige Überlegungen
+- **Abhängigkeitsverwaltung**: Die Verwaltung von Abhängigkeiten über Plattformen hinweg erfordert sorgfältige
+  Überlegungen
 
 ## Betrachtete Alternativen
 
 ### Separate native Anwendungen
 
-Wir haben die Entwicklung separater nativer Anwendungen für jede Plattform in Betracht gezogen (Java/JavaFX für Desktop, JavaScript/React für Web). Dies hätte die beste Leistung und Zugriff auf Plattformfunktionen geboten, hätte aber eine doppelte Implementierung von Geschäftslogik und UI-Komponenten erfordert.
+Wir haben die Entwicklung separater nativer Anwendungen für jede Plattform in Betracht gezogen (Java/JavaFX für Desktop,
+JavaScript/React für Web). Dies hätte die beste Leistung und Zugriff auf Plattformfunktionen geboten, hätte aber eine
+doppelte Implementierung von Geschäftslogik und UI-Komponenten erfordert.
 
 ### React Native
 
-Wir haben die Verwendung von React Native für Mobile und Web mit einer separaten Desktop-Anwendung in Betracht gezogen. Dies hätte Codesharing zwischen Mobile und Web ermöglicht, hätte aber immer noch eine separate Desktop-Lösung erfordert und hätte JavaScript-Expertise erfordert.
+Wir haben die Verwendung von React Native für Mobile und Web mit einer separaten Desktop-Anwendung in Betracht gezogen.
+Dies hätte Codesharing zwischen Mobile und Web ermöglicht, hätte aber immer noch eine separate Desktop-Lösung erfordert
+und hätte JavaScript-Expertise erfordert.
 
 ### Flutter
 
-Wir haben die Verwendung von Flutter für alle Plattformen in Betracht gezogen. Flutter bietet gute plattformübergreifende Unterstützung, hätte aber das Erlernen von Dart erfordert und hätte weniger Integration mit unseren Kotlin-basierten Backend-Diensten gehabt.
+Wir haben die Verwendung von Flutter für alle Plattformen in Betracht gezogen. Flutter bietet gute
+plattformübergreifende Unterstützung, hätte aber das Erlernen von Dart erfordert und hätte weniger Integration mit
+unseren Kotlin-basierten Backend-Diensten gehabt.
 
 ## Referenzen
 

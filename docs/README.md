@@ -92,4 +92,5 @@ Das Projekt nutzt automatisierte Workflows für Konsistenz:
 
 ---
 
-**Hinweis**: Diese README wurde am 30. Oktober 2025 aktualisiert im Rahmen der Documentations-Migration nach YouTrack (siehe ADR-0009 - folgt).
+**Hinweis**: Diese README wurde am 30. Oktober 2025 aktualisiert im Rahmen der Documentations-Migration nach YouTrack (
+siehe ADR-0009 - folgt).

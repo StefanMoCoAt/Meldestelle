@@ -32,7 +32,7 @@ make services-up
 make clients-up
 ```
 
-Logs ansehen (z. B. Backend):
+Logs ansehen (z. B. Backend):
 
 ```bash
 make services-logs

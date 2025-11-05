@@ -359,7 +359,8 @@ DOCKER_SSOT_MODE=envless bash scripts/generate-compose-files.sh all development 
 
 ## 🤝 Contributing
 
-Bitte lies [docs/how-to/branchschutz-und-pr-workflow.md](docs/how-to/branchschutz-und-pr-workflow.md) für den PR-Workflow.
+Bitte lies [docs/how-to/branchschutz-und-pr-workflow.md](docs/how-to/branchschutz-und-pr-workflow.md) für den
+PR-Workflow.
 
 ---
 
@@ -372,4 +373,4 @@ Bitte lies [docs/how-to/branchschutz-und-pr-workflow.md](docs/how-to/branchschut
 ---
 
 **Version**: 2.0.0 (nach Dokumentations-Refactoring)  
-**letzte Aktualisierung**: 31. Oktober 2025
+**letzte Aktualisierung**: 31. Oktober 2025

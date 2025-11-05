@@ -10,7 +10,8 @@ doc_type: how-to
 
 # KDoc-Styleguide (Kurzfassung)
 
-Dieser Styleguide definiert die wichtigsten Regeln für KDoc-Kommentare in Kotlin-Projekten der Meldestelle. Ziel: Verständliche, konsistente API-Dokumentation via Dokka (GFM/HTML).
+Dieser Styleguide definiert die wichtigsten Regeln für KDoc-Kommentare in Kotlin-Projekten der Meldestelle. Ziel:
+Verständliche, konsistente API-Dokumentation via Dokka (GFM/HTML).
 
 ## Grundregeln
 

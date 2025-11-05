@@ -5,12 +5,13 @@ last_reviewed: 2025-10-22
 review_cycle: 180d
 summary: Empfehlungen für Branchschutz, PR-Ablauf und Naming-Konventionen.
 yt_epic: MP-1
-yt_issues: []
+yt_issues: [ ]
 ---
 
 # Branchschutz & Pull-Request Workflow
 
-Diese Anleitung beschreibt einen einfachen, robusten Flow für `main` mit kurzen Feature-Branches und klaren Qualitätschecks.
+Diese Anleitung beschreibt einen einfachen, robusten Flow für `main` mit kurzen Feature-Branches und klaren
+Qualitätschecks.
 
 ## 1) Branch-Naming
 
@@ -40,7 +41,8 @@ Optional: Issue-Key voranstellen, z. B. `feature/MP-7-doku-konsolidieren`.
 
 - Commit-Message enthält Issue-Key (z. B. `MP-7`) → erleichtert Nachverfolgung
 - In Doku-Front‑Matter `yt_epic`/`yt_issues` pflegen
-- Optional: GitHub Secrets `YT_URL`, `YT_TOKEN` setzen → CI validiert verlinkte Issues, und `youtrack-sync.yml` kommentiert beim Merge automatisch ins Issue
+- Optional: GitHub Secrets `YT_URL`, `YT_TOKEN` setzen → CI validiert verlinkte Issues, und `youtrack-sync.yml`
+  kommentiert beim Merge automatisch ins Issue
 
 ## 5) Definition of Done (Auszug)
 

@@ -6,7 +6,8 @@ Akzeptiert
 
 ## Kontext
 
-Als Teil unserer Microservices-Architektur ([ADR-0003](0003-microservices-architecture-de.md)) benötigten wir eine robuste und zentralisierte Lösung für Authentifizierung und Autorisierung. Zu den wichtigsten Anforderungen gehörten:
+Als Teil unserer Microservices-Architektur ([ADR-0003](0003-microservices-architecture-de.md)) benötigten wir eine
+robuste und zentralisierte Lösung für Authentifizierung und Autorisierung. Zu den wichtigsten Anforderungen gehörten:
 
 1. Single Sign-On (SSO) über alle Dienste und Anwendungen hinweg
 2. Unterstützung für mehrere Authentifizierungsmethoden (Benutzername/Passwort, OAuth, SAML)
@@ -16,11 +17,13 @@ Als Teil unserer Microservices-Architektur ([ADR-0003](0003-microservices-archit
 6. Sicherheits-Best-Practices einschließlich Passwortrichtlinien und Kontosperrung
 7. Tokenbasierte Authentifizierung für die Kommunikation zwischen Diensten
 
-Die Implementierung dieser Funktionen von Grund auf wäre zeitaufwändig und fehleranfällig und würde Ressourcen von unserer Kerngeschäftsfunktionalität abziehen.
+Die Implementierung dieser Funktionen von Grund auf wäre zeitaufwändig und fehleranfällig und würde Ressourcen von
+unserer Kerngeschäftsfunktionalität abziehen.
 
 ## Entscheidung
 
-Wir haben uns entschieden, Keycloak (Version 26.4.2) als unsere Identitäts- und Zugriffsverwaltungslösung zu verwenden. Keycloak ist eine Open-Source-Identitäts- und Zugriffsverwaltungslösung, die Folgendes bietet:
+Wir haben uns entschieden, Keycloak (Version 26.4.2) als unsere Identitäts- und Zugriffsverwaltungslösung zu verwenden.
+Keycloak ist eine Open-Source-Identitäts- und Zugriffsverwaltungslösung, die Folgendes bietet:
 
 1. **Benutzerauthentifizierung**: Mehrere Authentifizierungsmethoden und -abläufe
 2. **Benutzerföderation**: Integration mit LDAP, Active Directory und anderen Benutzerspeichern
@@ -57,22 +60,28 @@ Unsere Implementierung umfasst:
 
 ### Neutral
 
-- **Konfigurationsbedarf**: Keycloak erfordert sorgfältige Konfiguration, um mit unseren Sicherheitsanforderungen übereinzustimmen
+- **Konfigurationsbedarf**: Keycloak erfordert sorgfältige Konfiguration, um mit unseren Sicherheitsanforderungen
+  übereinzustimmen
 - **Upgrade-Management**: Keycloak-Upgrades müssen sorgfältig verwaltet werden
 
 ## Betrachtete Alternativen
 
 ### Eigener Authentifizierungsdienst
 
-Wir haben in Betracht gezogen, unseren eigenen Authentifizierungsdienst zu entwickeln. Dies hätte uns vollständige Kontrolle über die Implementierung gegeben, hätte aber erheblichen Entwicklungsaufwand und laufende Wartung erfordert.
+Wir haben in Betracht gezogen, unseren eigenen Authentifizierungsdienst zu entwickeln. Dies hätte uns vollständige
+Kontrolle über die Implementierung gegeben, hätte aber erheblichen Entwicklungsaufwand und laufende Wartung erfordert.
 
 ### Auth0
 
-Wir haben die Verwendung von Auth0, einer kommerziellen Identity-as-a-Service (IDaaS)-Lösung, in Betracht gezogen. Auth0 hätte ähnliche Funktionen wie Keycloak mit weniger betrieblichem Overhead geboten, hätte aber laufende Kosten und potenzielle Anbieterabhängigkeit mit sich gebracht.
+Wir haben die Verwendung von Auth0, einer kommerziellen Identity-as-a-Service (IDaaS)-Lösung, in Betracht gezogen. Auth0
+hätte ähnliche Funktionen wie Keycloak mit weniger betrieblichem Overhead geboten, hätte aber laufende Kosten und
+potenzielle Anbieterabhängigkeit mit sich gebracht.
 
 ### Spring Security mit JWT
 
-Wir haben die Verwendung von Spring Security mit JWT-Tokens für Authentifizierung und Autorisierung in Betracht gezogen. Dies hätte sich gut in unsere Spring-basierten Dienste integriert, hätte aber mehr Entwicklungsaufwand erfordert und hätte nicht die umfassenden Identitätsverwaltungsfunktionen von Keycloak geboten.
+Wir haben die Verwendung von Spring Security mit JWT-Tokens für Authentifizierung und Autorisierung in Betracht gezogen.
+Dies hätte sich gut in unsere Spring-basierten Dienste integriert, hätte aber mehr Entwicklungsaufwand erfordert und
+hätte nicht die umfassenden Identitätsverwaltungsfunktionen von Keycloak geboten.
 
 ## Referenzen
 
