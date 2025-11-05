@@ -30,7 +30,7 @@ Gestaltung unseres Systems zu übernehmen. Dies umfasst:
    - Anwendungsschicht: Enthält Anwendungsdienste, Anwendungsfälle und Befehls-/Abfragehandler
    - Infrastrukturschicht: Enthält technische Implementierungen von Repositories, Messaging usw.
    - API-Schicht: Definiert die Schnittstellen für die Interaktion mit der Domäne
-   
+
 4. **Aggregate**: Identifizierung von Aggregat-Roots, die Konsistenzgrenzen aufrechterhalten
 5. **Repositories**: Verwendung des Repository-Musters zur Abstraktion des Datenzugriffs
 6. **Domänen-Events**: Verwendung von Events zur Kommunikation zwischen Bounded Contexts
