@@ -9,6 +9,12 @@ on:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        keycloak_db: [postgres, dev-file]
+    env:
+      KEYCLOAK_VERSION: "26.4.2"
 
     services:
       postgres:
@@ -20,10 +26,11 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U meldestelle -d $${POSTGRES_DB}"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 12
+          --health-start-period 20s
 
       redis:
         image: redis:7-alpine
@@ -35,23 +42,6 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      keycloak:
-        image: quay.io/keycloak/keycloak:23.0
-        env:
-          KEYCLOAK_ADMIN: admin
-          KEYCLOAK_ADMIN_PASSWORD: admin
-          KC_DB: postgres
-          KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-          KC_DB_USERNAME: meldestelle
-          KC_DB_PASSWORD: meldestelle
-        ports:
-          - 8180:8080
-        options: >-
-          --health-cmd "curl --fail http://localhost:8080/health/ready || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          --health-start-period 30s
 
       zookeeper:
         image: confluentinc/cp-zookeeper:7.5.0
@@ -96,45 +86,134 @@ jobs:
           --health-start-period 10s
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
-    - name: Set up JDK 21
-      uses: actions/setup-java@v3
-      with:
-        java-version: 21
-        distribution: 'temurin'
-        cache: 'gradle'
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: 'temurin'
+          cache: 'gradle'
 
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: wrapper
-        cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
-        cache-overwrite-existing: true
-        gradle-home-cache-includes: |
-          caches
-          notifications
-          jdks
-          wrapper
+      - name: Setup Gradle (modern)
+        uses: gradle/actions/setup-gradle@v5
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      - name: Wait for Postgres to be ready (pg_isready in service network)
+        if: ${{ matrix.keycloak_db == 'postgres' }}
+        run: |
+          echo "Waiting for Postgres..."
+          for i in {1..40}; do
+            if docker run --rm --network ${{ job.services.postgres.network }} \
+              postgres:16-alpine pg_isready -h postgres -p 5432 -U meldestelle -d meldestelle; then
+              echo "Postgres is ready"; break; fi; echo -n "."; sleep 3; done
 
-    - name: Run integration tests
-      run: ./gradlew integrationTest --no-daemon --parallel
-      env:
-        # Environment variables for Redis connection
-        REDIS_HOST: localhost
-        REDIS_PORT: 6379
-        # Spring profile for integration tests
-        SPRING_PROFILES_ACTIVE: integration-test
+      - name: Start Keycloak with Postgres (dev) and wait for readiness
+        if: ${{ matrix.keycloak_db == 'postgres' }}
+        run: |
+          set -euo pipefail
+          echo "Starting Keycloak (DB=postgres)..."
+          docker run -d --name keycloak \
+            --network ${{ job.services.postgres.network }} \
+            -p 8180:8080 \
+            -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+            -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+            -e KC_DB=postgres \
+            -e KC_DB_URL=jdbc:postgresql://postgres:5432/meldestelle \
+            -e KC_DB_USERNAME=meldestelle \
+            -e KC_DB_PASSWORD=meldestelle \
+            -e KC_HEALTH_ENABLED=true \
+            -e JAVA_OPTS="-Xms256m -Xmx1024m -XX:MaxRAMPercentage=60" \
+            quay.io/keycloak/keycloak:${{ env.KEYCLOAK_VERSION }} \
+            start-dev
 
-    - name: Upload test reports
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: integration-test-reports
-        path: |
-          **/build/reports/tests/integrationTest/
-          **/build/test-results/integrationTest/
-        retention-days: 7
+          echo "Giving Keycloak 30s to initialize..."; sleep 30
+
+          wait_for() {
+            local url="$1"; local label="$2"; local timeout="${3:-180}"; local interval="${4:-5}"
+            echo "Waiting for $label ($url) ..."
+            if ! timeout ${timeout}s bash -c 'until curl -fsS --output /dev/null '"$url"'; do echo -n "."; sleep '"$interval"'; done'; then
+              echo "\n[WAIT] Timeout on $url"
+              return 1
+            fi
+            echo "\n[WAIT] $label is up"
+          }
+
+          if ! wait_for http://localhost:8180/ "root" 180 5; then
+            docker logs --tail=200 keycloak || true
+            exit 1
+          fi
+          if ! wait_for http://localhost:8180/health "health" 180 5; then
+            echo "[INFO] /health nicht erreichbar – versuche /q/health (Quarkus default)"
+            wait_for http://localhost:8180/q/health "q-health" 180 5 || true
+          fi
+          wait_for http://localhost:8180/health/ready "health-ready" 300 5 || true
+          wait_for http://localhost:8180/admin/master/console/ "admin-console" 300 5 || (docker logs --tail=400 keycloak && exit 1)
+
+      - name: Start Keycloak with dev-file (no Postgres) and wait for readiness
+        if: ${{ matrix.keycloak_db == 'dev-file' }}
+        run: |
+          set -euo pipefail
+          echo "Starting Keycloak (DB=dev-file, no Postgres)..."
+          docker run -d --name keycloak \
+            -p 8180:8080 \
+            -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+            -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+            -e KC_DB=dev-file \
+            -e KC_HEALTH_ENABLED=true \
+            -e JAVA_OPTS="-Xms256m -Xmx1024m -XX:MaxRAMPercentage=60" \
+            quay.io/keycloak/keycloak:${{ env.KEYCLOAK_VERSION }} \
+            start-dev
+
+          echo "Giving Keycloak 20s to initialize..."; sleep 20
+
+          wait_for() {
+            local url="$1"; local label="$2"; local timeout="${3:-180}"; local interval="${4:-5}"
+            echo "Waiting for $label ($url) ..."
+            if ! timeout ${timeout}s bash -c 'until curl -fsS --output /dev/null '"$url"'; do echo -n "."; sleep '"$interval"'; done'; then
+              echo "\n[WAIT] Timeout on $url"
+              return 1
+            fi
+            echo "\n[WAIT] $label is up"
+          }
+
+          if ! wait_for http://localhost:8180/ "root" 180 5; then
+            docker logs --tail=200 keycloak || true
+            exit 1
+          fi
+          if ! wait_for http://localhost:8180/health "health" 180 5; then
+            echo "[INFO] /health nicht erreichbar – versuche /q/health (Quarkus default)"
+            wait_for http://localhost:8180/q/health "q-health" 180 5 || true
+          fi
+          wait_for http://localhost:8180/health/ready "health-ready" 300 5 || true
+          wait_for http://localhost:8180/admin/master/console/ "admin-console" 300 5 || (docker logs --tail=400 keycloak && exit 1)
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run integration tests
+        run: ./gradlew integrationTest --no-daemon --parallel
+        env:
+          # Environment variables for Redis connection
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          # Keycloak base URL for integration tests (manual container)
+          KEYCLOAK_AUTH_SERVER_URL: http://localhost:8180
+          # Spring profile for integration tests
+          SPRING_PROFILES_ACTIVE: integration-test
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: integration-test-reports
+          path: |
+            **/build/reports/tests/integrationTest/
+            **/build/test-results/integrationTest/
+          retention-days: 7
+
+      - name: Dump service logs (Keycloak, Postgres)
+        if: always()
+        run: |
+          echo "=== Docker ps ===" && docker ps -a || true
+          echo "=== Keycloak logs (tail) ===" && docker logs --tail=400 keycloak || true
+          echo "=== Postgres logs (tail) ===" && docker logs --tail=200 $(docker ps -a --filter "name=postgres" --format "{{.ID}}") || true

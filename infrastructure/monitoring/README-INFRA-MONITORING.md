@@ -49,6 +49,7 @@ management.zipkin.tracing.endpoint=http://zipkin:9411/api/v2/spans
 ```
 
 Hinweise:
+
 - Sampling-Rate: In Entwicklung 1.0 (100%). In Produktion sollte dies reduziert werden (z. B. 0.1).
 - Endpunkte: Der Prometheus-Scrape-Pfad ist einheitlich `/actuator/prometheus`.
 - Überschreibung: Jede Anwendung kann diese Werte über application.yml/-properties anpassen.

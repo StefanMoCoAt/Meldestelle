@@ -6,7 +6,8 @@ Akzeptiert
 
 ## Kontext
 
-Als Teil unserer Microservices-Architektur ([ADR-0003](0003-microservices-architecture-de.md)) benötigten wir eine robuste und zentralisierte Lösung für Authentifizierung und Autorisierung. Zu den wichtigsten Anforderungen gehörten:
+Als Teil unserer Microservices-Architektur ([ADR-0003](0003-microservices-architecture-de.md)) benötigten wir eine
+robuste und zentralisierte Lösung für Authentifizierung und Autorisierung. Zu den wichtigsten Anforderungen gehörten:
 
 1. Single Sign-On (SSO) über alle Dienste und Anwendungen hinweg
 2. Unterstützung für mehrere Authentifizierungsmethoden (Benutzername/Passwort, OAuth, SAML)
@@ -14,13 +15,15 @@ Als Teil unserer Microservices-Architektur ([ADR-0003](0003-microservices-archit
 4. Benutzerverwaltungsfunktionen einschließlich Selbstregistrierung und Profilmanagement
 5. Integration mit externen Identitätsanbietern
 6. Sicherheits-Best-Practices einschließlich Passwortrichtlinien und Kontosperrung
-7. Token-basierte Authentifizierung für die Kommunikation zwischen Diensten
+7. Tokenbasierte Authentifizierung für die Kommunikation zwischen Diensten
 
-Die Implementierung dieser Funktionen von Grund auf wäre zeitaufwändig und fehleranfällig und würde Ressourcen von unserer Kerngeschäftsfunktionalität abziehen.
+Die Implementierung dieser Funktionen von Grund auf wäre zeitaufwändig und fehleranfällig und würde Ressourcen von
+unserer Kerngeschäftsfunktionalität abziehen.
 
 ## Entscheidung
 
-Wir haben uns entschieden, Keycloak (Version 23.0) als unsere Identitäts- und Zugriffsverwaltungslösung zu verwenden. Keycloak ist eine Open-Source-Identitäts- und Zugriffsverwaltungslösung, die Folgendes bietet:
+Wir haben uns entschieden, Keycloak (Version 26.4.2) als unsere Identitäts- und Zugriffsverwaltungslösung zu verwenden.
+Keycloak ist eine Open-Source-Identitäts- und Zugriffsverwaltungslösung, die Folgendes bietet:
 
 1. **Benutzerauthentifizierung**: Mehrere Authentifizierungsmethoden und -abläufe
 2. **Benutzerföderation**: Integration mit LDAP, Active Directory und anderen Benutzerspeichern
@@ -28,10 +31,11 @@ Wir haben uns entschieden, Keycloak (Version 23.0) als unsere Identitäts- und Z
 4. **Single Sign-On**: Über alle Anwendungen und Dienste hinweg
 5. **Feingranulare Autorisierung**: Rollen- und attributbasierte Zugriffssteuerung
 6. **Benutzerverwaltung**: Selbstregistrierung, Profilmanagement, Passwortrichtlinien
-7. **Token-basierte Authentifizierung**: JWT-Tokens für die Kommunikation zwischen Diensten
+7. **Tokenbasierte Authentifizierung**: JWT-Tokens für die Kommunikation zwischen Diensten
 
 Unsere Implementierung umfasst:
-- Keycloak-Server, der als containerisierter Dienst bereitgestellt wird
+
+- Keycloak-Server, der als containerised Dienst bereitgestellt wird
 - Integration mit unserem API-Gateway für die Token-Validierung
 - Client-Adapter für unsere Dienste und Anwendungen
 - Benutzerdefinierte Themes und E-Mail-Vorlagen
@@ -56,26 +60,31 @@ Unsere Implementierung umfasst:
 
 ### Neutral
 
-- **Konfigurationsbedarf**: Keycloak erfordert sorgfältige Konfiguration, um mit unseren Sicherheitsanforderungen übereinzustimmen
+- **Konfigurationsbedarf**: Keycloak erfordert sorgfältige Konfiguration, um mit unseren Sicherheitsanforderungen
+  übereinzustimmen
 - **Upgrade-Management**: Keycloak-Upgrades müssen sorgfältig verwaltet werden
 
 ## Betrachtete Alternativen
 
 ### Eigener Authentifizierungsdienst
 
-Wir haben in Betracht gezogen, unseren eigenen Authentifizierungsdienst zu entwickeln. Dies hätte uns vollständige Kontrolle über die Implementierung gegeben, hätte aber erheblichen Entwicklungsaufwand und laufende Wartung erfordert.
+Wir haben in Betracht gezogen, unseren eigenen Authentifizierungsdienst zu entwickeln. Dies hätte uns vollständige
+Kontrolle über die Implementierung gegeben, hätte aber erheblichen Entwicklungsaufwand und laufende Wartung erfordert.
 
 ### Auth0
 
-Wir haben die Verwendung von Auth0, einer kommerziellen Identity-as-a-Service (IDaaS)-Lösung, in Betracht gezogen. Auth0 hätte ähnliche Funktionen wie Keycloak mit weniger betrieblichem Overhead geboten, hätte aber laufende Kosten und potenzielle Anbieterabhängigkeit mit sich gebracht.
+Wir haben die Verwendung von Auth0, einer kommerziellen Identity-as-a-Service (IDaaS)-Lösung, in Betracht gezogen. Auth0
+hätte ähnliche Funktionen wie Keycloak mit weniger betrieblichem Overhead geboten, hätte aber laufende Kosten und
+potenzielle Anbieterabhängigkeit mit sich gebracht.
 
 ### Spring Security mit JWT
 
-Wir haben die Verwendung von Spring Security mit JWT-Tokens für Authentifizierung und Autorisierung in Betracht gezogen. Dies hätte sich gut in unsere Spring-basierten Dienste integriert, hätte aber mehr Entwicklungsaufwand erfordert und hätte nicht die umfassenden Identitätsverwaltungsfunktionen von Keycloak geboten.
+Wir haben die Verwendung von Spring Security mit JWT-Tokens für Authentifizierung und Autorisierung in Betracht gezogen.
+Dies hätte sich gut in unsere Spring-basierten Dienste integriert, hätte aber mehr Entwicklungsaufwand erfordert und
+hätte nicht die umfassenden Identitätsverwaltungsfunktionen von Keycloak geboten.
 
 ## Referenzen
 
 - [Keycloak Dokumentation](https://www.keycloak.org/documentation)
 - [OAuth 2.0 und OpenID Connect](https://oauth.net/2/)
 - [JWT (JSON Web Tokens)](https://jwt.io/)
-- [Absicherung von Microservices mit Keycloak](https://www.keycloak.org/docs/latest/securing_apps/)

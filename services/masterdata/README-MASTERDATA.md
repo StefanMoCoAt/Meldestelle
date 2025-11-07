@@ -9,18 +9,21 @@ Das Masterdata-Modul ist eine umfassende Lösung zur Verwaltung von Stammdaten f
 ### Verwaltete Entitäten
 
 #### 1. Länder (LandDefinition)
+
 - **ISO-Codes**: Alpha-2, Alpha-3 und numerische Codes nach ISO 3166-1
 - **EU/EWR-Mitgliedschaft**: Tracking der Mitgliedschaft in EU und Europäischem Wirtschaftsraum
 - **Mehrsprachigkeit**: Deutsche und englische Ländernamen
 - **Validierung**: Duplikatsprüfung und ISO-Code-Validierung
 
 #### 2. Bundesländer (BundeslandDefinition)
+
 - **OEPS-Codes**: Spezielle Codes für österreichische Bundesländer
 - **ISO 3166-2 Codes**: Internationale Standardcodes für subnationale Einheiten
 - **Länder-Zuordnung**: Verknüpfung mit übergeordneten Ländern
 - **Flexible Struktur**: Unterstützt Bundesländer, Kantone, Regionen
 
 #### 3. Altersklassen (AltersklasseDefinition)
+
 - **Berechtigung**: Komplexe Regeln für Teilnahmeberechtigung
 - **Sparten-Filter**: Disziplinspezifische Altersklassen (Dressur, Springen, etc.)
 - **Geschlechts-Filter**: Geschlechtsspezifische Kategorien
@@ -28,6 +31,7 @@ Das Masterdata-Modul ist eine umfassende Lösung zur Verwaltung von Stammdaten f
 - **OETO-Integration**: Verknüpfung mit österreichischen Turnierordnungsregeln
 
 #### 4. Turnierplätze (Platz)
+
 - **Platztypen**: Dressurplatz, Springplatz, Geländestrecke, etc.
 - **Abmessungen**: Standardisierte Platzgrößen (20x60m, 20x40m, etc.)
 - **Bodenarten**: Sand, Gras, Kunststoff, etc.
@@ -55,21 +59,25 @@ masterdata/
 ```
 
 ### Domain Layer
+
 - **4 Domain Models** mit reichhaltiger Geschäftslogik
 - **4 Repository Interfaces** mit 60+ Geschäftsoperationen
 - **Keine Abhängigkeiten** zu anderen Layern
 
 ### Application Layer
+
 - **8 Use Cases** mit umfassender Funktionalität
 - **Validierung**: Eingabevalidierung mit spezifischen Fehlercodes
 - **Geschäftslogik**: Duplikatsprüfung, Berechtigungsvalidierung
 
 ### Infrastructure Layer
+
 - **4 Database Tables** mit Indizes und Constraints
 - **Repository Implementierungen** mit vollständigen CRUD-Operationen
 - **Migration Scripts** mit Beispieldaten
 
 ### API Layer
+
 - **4 REST Controllers** mit 37 Endpunkten
 - **DTO Pattern** für saubere API-Verträge
 - **Fehlerbehandlung** mit strukturierten Antworten
@@ -77,6 +85,7 @@ masterdata/
 ## API Endpunkte
 
 ### Countries (Länder)
+
 ```
 GET    /api/masterdata/countries              # Alle aktiven Länder
 GET    /api/masterdata/countries/{id}         # Land nach ID
@@ -91,6 +100,7 @@ DELETE /api/masterdata/countries/{id}         # Land löschen
 ```
 
 ### Federal States (Bundesländer)
+
 ```
 GET    /api/masterdata/bundeslaender                    # Alle aktiven Bundesländer
 GET    /api/masterdata/bundeslaender/{id}               # Bundesland nach ID
@@ -105,6 +115,7 @@ DELETE /api/masterdata/bundeslaender/{id}               # Bundesland löschen
 ```
 
 ### Age Classes (Altersklassen)
+
 ```
 GET    /api/masterdata/altersklassen              # Alle aktiven Altersklassen
 GET    /api/masterdata/altersklassen/{id}         # Altersklasse nach ID
@@ -119,6 +130,7 @@ DELETE /api/masterdata/altersklassen/{id}         # Altersklasse löschen
 ```
 
 ### Venues (Turnierplätze)
+
 ```
 GET    /api/masterdata/plaetze/{id}                           # Platz nach ID
 GET    /api/masterdata/plaetze/tournament/{turnierId}         # Plätze nach Turnier
@@ -139,6 +151,7 @@ DELETE /api/masterdata/plaetze/{id}                           # Platz löschen
 ## Datenbank Schema
 
 ### Land Tabelle
+
 ```sql
 CREATE TABLE land (
     id UUID PRIMARY KEY,
@@ -158,6 +171,7 @@ CREATE TABLE land (
 ```
 
 ### Bundesland Tabelle
+
 ```sql
 CREATE TABLE bundesland (
     id UUID PRIMARY KEY,
@@ -175,6 +189,7 @@ CREATE TABLE bundesland (
 ```
 
 ### Altersklasse Tabelle
+
 ```sql
 CREATE TABLE altersklasse (
     id UUID PRIMARY KEY,
@@ -193,6 +208,7 @@ CREATE TABLE altersklasse (
 ```
 
 ### Platz Tabelle
+
 ```sql
 CREATE TABLE platz (
     id UUID PRIMARY KEY,
@@ -211,6 +227,7 @@ CREATE TABLE platz (
 ## Verwendung
 
 ### Service starten
+
 ```bash
 # Masterdata Service starten
 ./gradlew :masterdata:masterdata-service:bootRun
@@ -222,6 +239,7 @@ CREATE TABLE platz (
 ### API Beispiele
 
 #### Land erstellen
+
 ```bash
 curl -X POST http://localhost:8080/api/masterdata/countries \
   -H "Content-Type: application/json" \
@@ -237,11 +255,13 @@ curl -X POST http://localhost:8080/api/masterdata/countries \
 ```
 
 #### Altersklassen für 16-jährigen Dressurreiter abrufen
+
 ```bash
 curl "http://localhost:8080/api/masterdata/altersklassen/age/16?sparte=DRESSUR"
 ```
 
 #### Geeignete Dressurplätze finden
+
 ```bash
 curl "http://localhost:8080/api/masterdata/plaetze/suitable?typ=DRESSURPLATZ&dimension=20x60m"
 ```
@@ -249,6 +269,7 @@ curl "http://localhost:8080/api/masterdata/plaetze/suitable?typ=DRESSURPLATZ&dim
 ## Konfiguration
 
 ### Umgebungsvariablen
+
 ```bash
 # Database
 MASTERDATA_DB_URL=jdbc:postgresql://localhost:5432/meldestelle
@@ -264,6 +285,7 @@ MASTERDATA_VALIDATION_STRICT=true
 ```
 
 ### Application Properties
+
 ```yaml
 masterdata:
   validation:
@@ -280,16 +302,19 @@ masterdata:
 ## Tests
 
 ### Unit Tests ausführen
+
 ```bash
 ./gradlew :masterdata:test
 ```
 
 ### Integration Tests ausführen
+
 ```bash
 ./gradlew :masterdata:integrationTest
 ```
 
 ### Spezifische Tests
+
 ```bash
 # Repository Tests
 ./gradlew :masterdata:masterdata-infrastructure:test

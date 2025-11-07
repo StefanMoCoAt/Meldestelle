@@ -9,6 +9,7 @@ Das Horses-Modul ist eine umfassende Lösung zur Verwaltung von Pferden für Pfe
 ### Verwaltete Entität
 
 #### Pferd (DomPferd)
+
 - **Grundinformationen**: Name, Geschlecht, Geburtsdatum, Rasse, Farbe
 - **Besitz und Verantwortung**: Besitzer-ID, verantwortliche Person
 - **Zuchtinformationen**: Züchtername, Zuchtbuchnummer
@@ -23,11 +24,13 @@ Das Horses-Modul ist eine umfassende Lösung zur Verwaltung von Pferden für Pfe
 Das Modul bietet 25+ spezialisierte Repository-Operationen:
 
 #### Basis-CRUD-Operationen
+
 - `findById(id)` - Pferd nach UUID suchen
 - `save(horse)` - Pferd speichern (erstellen/aktualisieren)
 - `delete(id)` - Pferd löschen
 
 #### Such-Operationen nach Identifikationsnummern
+
 - `findByLebensnummer(lebensnummer)` - Nach Lebensnummer suchen
 - `findByChipNummer(chipNummer)` - Nach Chipnummer suchen
 - `findByPassNummer(passNummer)` - Nach Passnummer suchen
@@ -35,6 +38,7 @@ Das Modul bietet 25+ spezialisierte Repository-Operationen:
 - `findByFeiNummer(feiNummer)` - Nach FEI-Nummer suchen
 
 #### Such-Operationen nach Eigenschaften
+
 - `findByName(searchTerm, limit)` - Nach Namen suchen (Teilübereinstimmung)
 - `findByOwnerId(ownerId, activeOnly)` - Pferde eines Besitzers
 - `findByResponsiblePersonId(personId, activeOnly)` - Pferde einer verantwortlichen Person
@@ -42,15 +46,18 @@ Das Modul bietet 25+ spezialisierte Repository-Operationen:
 - `findByRasse(rasse, activeOnly, limit)` - Nach Rasse filtern
 
 #### Datumsbasierte Abfragen
+
 - `findByBirthYear(birthYear, activeOnly)` - Pferde nach Geburtsjahr
 - `findByBirthYearRange(fromYear, toYear, activeOnly)` - Pferde nach Geburtsjahr-Bereich
 
 #### Registrierungs-Abfragen
+
 - `findAllActive(limit)` - Alle aktiven Pferde
 - `findOepsRegistered(activeOnly)` - OEPS-registrierte Pferde
 - `findFeiRegistered(activeOnly)` - FEI-registrierte Pferde
 
 #### Validierungs-Operationen
+
 - `existsByLebensnummer(lebensnummer)` - Prüfung auf doppelte Lebensnummer
 - `existsByChipNummer(chipNummer)` - Prüfung auf doppelte Chipnummer
 - `existsByPassNummer(passNummer)` - Prüfung auf doppelte Passnummer
@@ -58,6 +65,7 @@ Das Modul bietet 25+ spezialisierte Repository-Operationen:
 - `existsByFeiNummer(feiNummer)` - Prüfung auf doppelte FEI-Nummer
 
 #### Zähl-Operationen
+
 - `countActive()` - Anzahl aktiver Pferde
 - `countByOwnerId(ownerId, activeOnly)` - Anzahl Pferde pro Besitzer
 - `countOepsRegistered(activeOnly)` - Anzahl OEPS-registrierter Pferde ✨ **NEU**
@@ -94,22 +102,26 @@ horses/
 ```
 
 ### Domain Layer
+
 - **1 Domain Model** mit reichhaltiger Geschäftslogik
 - **1 Repository Interface** mit 25+ Geschäftsoperationen
 - **Geschäftsregeln** für Pferderegistrierung und -validierung
 - **Keine Abhängigkeiten** zu anderen Layern
 
 ### Application Layer
+
 - **Use Cases** für CRUD-Operationen
 - **Orchestrierung** von Domain-Services
 - **Anwendungslogik** ohne UI-Abhängigkeiten
 
 ### Infrastructure Layer
+
 - **Datenbankzugriff** mit Exposed ORM
 - **Repository-Implementierung** mit PostgreSQL
 - **Datenbankschema** und Migrationen
 
 ### API Layer
+
 - **REST-Controller** für HTTP-Endpunkte
 
 ## 🚀 Aktuelle Optimierungen (2025-07-25)
@@ -119,12 +131,15 @@ Das Horses-Modul wurde kürzlich analysiert, vervollständigt und optimiert. Fol
 ### ✨ Neue Funktionalitäten
 
 #### Erweiterte Such-Endpunkte
+
 Neue REST-Endpunkte für vollständige Identifikationsnummer-Suche:
+
 - `GET /api/horses/search/passport/{nummer}` - Suche nach Passnummer
 - `GET /api/horses/search/oeps/{nummer}` - Suche nach OEPS-Nummer
 - `GET /api/horses/search/fei/{nummer}` - Suche nach FEI-Nummer
 
 #### Optimierte Statistik-Operationen
+
 - Neue effiziente Zähl-Methoden für OEPS und FEI registrierte Pferde
 - Performance-Verbesserung von O(n) auf O(1) Komplexität für Statistiken
 - Datenbankoptimierte COUNT-Abfragen statt Laden aller Datensätze
@@ -132,11 +147,13 @@ Neue REST-Endpunkte für vollständige Identifikationsnummer-Suche:
 ### ⚡ Performance-Optimierungen
 
 #### Datenbankeffizienz
+
 - **Vorher**: Statistik-Endpunkt lud alle Pferde und verwendete `.size`
 - **Nachher**: Effiziente COUNT-Abfragen direkt in der Datenbank
 - **Auswirkung**: Drastische Reduzierung der Speichernutzung und Antwortzeiten
 
 #### Architektur-Konsistenz
+
 - Alle API-Endpunkte verwenden jetzt konsistent die Use-Case-Schicht
 - Eliminierung direkter Repository-Aufrufe in der API-Schicht
 - Saubere Trennung der Architektur-Schichten
@@ -144,12 +161,14 @@ Neue REST-Endpunkte für vollständige Identifikationsnummer-Suche:
 ### 🏗️ Architektur-Verbesserungen
 
 #### Clean Architecture Compliance
+
 - **Konsistente Schichtung**: Alle Endpunkte folgen dem Use-Case-Pattern
 - **Fehlerbehandlung**: Einheitliche Fehlerantworten über alle Endpunkte
 - **Validierung**: Umfassende Eingabevalidierung mit geteilten Utilities
 - **HTTP-Standards**: Korrekte Status-Codes und REST-Konventionen
 
 #### Code-Qualität
+
 - Verbesserte Lesbarkeit und Wartbarkeit
 - Konsistente Namenskonventionen
 - Umfassende Dokumentation aller neuen Funktionen
@@ -157,12 +176,14 @@ Neue REST-Endpunkte für vollständige Identifikationsnummer-Suche:
 ### 📊 Qualitätsmetriken
 
 #### Vor der Optimierung
+
 - ❌ Fehlende Such-Endpunkte für 3 Identifikationstypen
 - ❌ Ineffiziente Statistik-Abfragen (O(n) Komplexität)
 - ❌ Inkonsistente Architektur (einige Endpunkte umgingen Use Cases)
 - ❌ Performance-Probleme bei großen Datensätzen
 
 #### Nach der Optimierung
+
 - ✅ Vollständige API-Abdeckung für alle Identifikationstypen
 - ✅ Effiziente Statistik-Abfragen (O(1) Komplexität)
 - ✅ Konsistente Clean Architecture durchgehend
@@ -171,16 +192,19 @@ Neue REST-Endpunkte für vollständige Identifikationsnummer-Suche:
 ### 🔮 Zukünftige Empfehlungen
 
 #### Caching-Schicht
+
 - Implementierung einer Caching-Schicht für häufig abgerufene Daten
 - Individuelle Pferde-Lookups mit angemessener TTL
 - Statistiken und Zählungen mit Cache-Invalidierung
 
 #### Async-Operationen
+
 - Asynchrone Verarbeitung für Batch-Operationen
 - Komplexe Such-Abfragen mit Async-Pattern
 - Statistik-Berechnungen im Hintergrund
 
 #### Monitoring und Logging
+
 - Umfassendes Monitoring für API-Antwortzeiten
 - Datenbank-Query-Performance-Überwachung
 - Fehlerrate-Tracking und -Analyse
@@ -188,6 +212,7 @@ Neue REST-Endpunkte für vollständige Identifikationsnummer-Suche:
 - **Validierung** und Fehlerbehandlung
 
 ### Service Layer
+
 - **Spring Boot Anwendung**
 - **Dependency Injection** Konfiguration
 - **Integrationstests**
@@ -254,11 +279,13 @@ data class DomPferd(
 ### Enumerationen
 
 #### PferdeGeschlechtE
+
 - `HENGST` - Hengst (männlich, nicht kastriert)
 - `STUTE` - Stute (weiblich)
 - `WALLACH` - Wallach (männlich, kastriert)
 
 #### DatenQuelleE
+
 - `MANUELL` - Manuelle Eingabe
 - `IMPORT` - Datenimport
 - `SYNCHRONISATION` - Synchronisation mit externen Systemen
@@ -366,6 +393,7 @@ Das Horses-Modul stellt REST-Endpunkte über den HorseController bereit:
 ### Datenbankschema
 
 Das Modul verwendet eine `horses`-Tabelle mit folgenden Spalten:
+
 - `pferd_id` (UUID, Primary Key)
 - `pferde_name` (Required)
 - `geschlecht` (Enum: HENGST, STUTE, WALLACH)

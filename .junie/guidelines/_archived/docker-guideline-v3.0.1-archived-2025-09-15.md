@@ -46,7 +46,7 @@ Das Meldestelle-Projekt implementiert eine **moderne, sicherheitsorientierte Con
 ```mermaid
 graph TB
     subgraph "Infrastructure Services"
-        PG[PostgreSQL]
+        PG[PostgresQL]
         RD[Redis]
         KC[Keycloak]
         KF[Kafka+Zookeeper]
@@ -80,20 +80,20 @@ graph TB
 
 ### Service-Ports Matrix
 
-| Service | Development | Production | Health Check | Debug Port | Version |
-|---------|------------|------------|--------------|------------|---------|
-| PostgreSQL | 5432 | Internal | pg_isready -U meldestelle -d meldestelle | - | 16-alpine |
-| Redis | 6379 | Internal | redis-cli ping | - | 7-alpine |
-| Keycloak | 8180 | 8443 (HTTPS) | /health/ready | - | 26.0.7 |
-| Kafka | 9092 | Internal | kafka-topics --bootstrap-server localhost:9092 --list | - | 7.4.0 |
-| Zookeeper | 2181 | Internal | nc -z localhost 2181 | - | 7.4.0 |
-| Consul | 8500 | Internal | /v1/status/leader | - | 1.15 |
-| Auth Server | 8081 | Internal | /actuator/health/readiness | 5005 | 1.0.0 |
-| Ping Service | 8082 | Internal | /actuator/health/readiness | 5005 | 1.0.0 |
-| Monitoring Server | 8083 | Internal | /actuator/health/readiness | 5005 | 1.0.0 |
-| Prometheus | 9090 | Internal | /-/healthy | - | v2.54.1 |
-| Grafana | 3000 | 3443 (HTTPS) | /api/health | - | 11.3.0 |
-| Nginx | - | 80/443 | /health | - | 1.25-alpine |
+| Service           | Development | Production   | Health Check                                          | Debug Port | Version     |
+|-------------------|-------------|--------------|-------------------------------------------------------|------------|-------------|
+| PostgresQL        | 5432        | Internal     | pg_isready -U meldestelle -d meldestelle              | -          | 16-alpine   |
+| Redis             | 6379        | Internal     | redis-cli ping                                        | -          | 7-alpine    |
+| Keycloak          | 8180        | 8443 (HTTPS) | /health/ready                                         | -          | 26.0.7      |
+| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
+| Zookeeper         | 2181        | Internal     | nc -z localhost 2181                                  | -          | 7.4.0       |
+| Consul            | 8500        | Internal     | /v1/status/leader                                     | -          | 1.15        |
+| Auth Server       | 8081        | Internal     | /actuator/health/readiness                            | 5005       | 1.0.0       |
+| Ping Service      | 8082        | Internal     | /actuator/health/readiness                            | 5005       | 1.0.0       |
+| Monitoring Server | 8083        | Internal     | /actuator/health/readiness                            | 5005       | 1.0.0       |
+| Prometheus        | 9090        | Internal     | /-/healthy                                            | -          | v2.54.1     |
+| Grafana           | 3000        | 3443 (HTTPS) | /api/health                                           | -          | 11.3.0      |
+| Nginx             | -           | 80/443       | /health                                               | -          | 1.25-alpine |
 
 ---
 
@@ -135,7 +135,7 @@ clients = "dev"
 
 ### 🏗️ Architektur der zentralen Konfigurationsverwaltung
 
-```
+```plaintext
 config/
 ├── central.toml                    # 🎯 ABSOLUTE SINGLE SOURCE OF TRUTH
 ├── README.md                       # Dokumentation
@@ -155,7 +155,8 @@ scripts/
 
 ### 📊 Konfigurationsbereiche
 
-#### 1. **Port-Management** - Eliminiert 38+ Redundanzen
+#### 1. **Port-Management** – eliminiert 38+ Redundanzen
+
 ```toml
 [ports]
 # --- Infrastructure Services ---
@@ -178,7 +179,8 @@ prometheus = 9090
 grafana = 3000
 ```
 
-#### 2. **Spring-Profile-Management** - Eliminiert 72+ Duplikate
+#### 2. **Spring-Profile-Management** – eliminiert 72+ Duplikate
+
 ```toml
 [spring-profiles]
 default = "default"
@@ -194,6 +196,7 @@ clients = "dev"
 ```
 
 #### 3. **Service-Discovery** - Standardisiert URLs
+
 ```toml
 [services.ping-service]
 name = "ping-service"
@@ -207,6 +210,7 @@ metrics-endpoint = "/actuator/prometheus"
 ```
 
 #### 4. **Health-Check-Standardisierung**
+
 ```toml
 [health-checks.defaults]
 interval = "15s"
@@ -242,7 +246,7 @@ start-period = "20s"
 ./scripts/config-sync.sh validate
 ```
 
-#### Ports ändern - Ein Befehl, überall aktualisiert
+#### Ports ändern – ein Befehl, überall aktualisiert
 
 ```bash
 # 1. config/central.toml bearbeiten
@@ -261,7 +265,7 @@ ping-service = 8092  # Geändert von 8082
 # ✓ Und 33 weitere Dateien automatisch!
 ```
 
-#### Spring-Profile ändern - Konsistenz garantiert
+#### Spring-Profile ändern – Konsistenz garantiert
 
 ```bash
 # 1. Zentral in config/central.toml ändern
@@ -281,6 +285,7 @@ services = "production"  # Geändert von "docker"
 ### 🔄 Entwickler-Workflow mit zentraler Konfiguration
 
 #### **Neuen Service hinzufügen**
+
 ```bash
 # 1. Port in central.toml definieren
 [ports]
@@ -298,6 +303,7 @@ port = 8090
 ```
 
 #### **Umgebung wechseln**
+
 ```bash
 # Development → Production Profile-Wechsel
 # 1. config/central.toml anpassen
@@ -311,6 +317,7 @@ services = "prod"
 ```
 
 #### **Monitoring hinzufügen**
+
 ```bash
 # Neuer Service automatisch in Prometheus überwacht:
 # 1. Service in central.toml definieren
@@ -320,23 +327,27 @@ services = "prod"
 
 ### 🎉 Vorteile der zentralen Konfigurationsverwaltung
 
-#### **DRY-Prinzip auf Projekt-Ebene** ✅
+#### **DRY-Prinzip auf Projekt-Ebene**
+✅
 - **Vor Version 4.0.0**: Port 8082 in 38 Dateien
 - **Ab Version 4.0.0**: Port einmalig in `config/central.toml`
 
-#### **Wartungsaufwand drastisch reduziert** ✅
+#### **Wartungsaufwand drastisch reduziert**
+✅
 ```bash
 # BEFORE: 38 Dateien manuell editieren für Port-Änderung
 # AFTER: Ein Befehl für alle Dateien
 ./scripts/config-sync.sh sync
 ```
 
-#### **Konsistenz absolut garantiert** ✅
+#### **Konsistenz absolut garantiert** 
+✅
 - Keine Port-Konflikte mehr möglich
 - Keine inkonsistenten Spring-Profile
 - Automatische Validierung bei Synchronisation
 
 #### **Skalierbarkeit für neue Services** ✅
+
 ```bash
 # Neuer Service: Einmal definieren, überall verfügbar
 [ports]
@@ -351,6 +362,7 @@ future-service = 8099
 ```
 
 #### **Fehlerreduktion** ✅
+
 - Keine Tippfehler bei Port-Definitionen
 - Keine vergessenen Aktualisierungen
 - Automatische Backup-Erstellung vor Änderungen
@@ -359,6 +371,7 @@ future-service = 8099
 ### 📚 Best Practices für zentrale Konfigurationsverwaltung
 
 #### **DO: Zentrale Konfiguration verwenden**
+
 ```bash
 # ✅ RICHTIG - Zentrale Konfiguration
 ./scripts/config-sync.sh sync
@@ -371,6 +384,7 @@ future-service = 8099
 ```
 
 #### **DON'T: Manuelle Datei-Bearbeitung**
+
 ```bash
 # ❌ FALSCH - Nie mehr manuelle Port-Änderungen
 vim docker-compose.yml  # Änderungen gehen verloren!
@@ -381,6 +395,7 @@ vim config/central.toml
 ```
 
 #### **Konsistenz-Regeln**
+
 1. **Niemals** Ports direkt in abhängigen Dateien ändern
 2. **Immer** `config/central.toml` als Single Source of Truth verwenden
 3. **Automatisch** mit `config-sync.sh` synchronisieren
@@ -390,6 +405,7 @@ vim config/central.toml
 ### 🔧 Erweiterte Funktionen
 
 #### **Selective Synchronisation**
+
 ```bash
 # Nur bestimmte Bereiche synchronisieren
 ./scripts/config-sync.sh gradle      # Nur gradle.properties
@@ -400,6 +416,7 @@ vim config/central.toml
 ```
 
 #### **Backup und Rollback**
+
 ```bash
 # Alle Backups anzeigen
 ls -la *.bak.*
@@ -409,6 +426,7 @@ cp gradle.properties.bak.20250915_103927 gradle.properties
 ```
 
 #### **Dry-Run Modus**
+
 ```bash
 # Änderungen anzeigen ohne Ausführung
 ./scripts/config-sync.sh sync --dry-run
@@ -417,6 +435,7 @@ cp gradle.properties.bak.20250915_103927 gradle.properties
 ### 🚀 Integration in CI/CD
 
 #### **Automatische Konsistenz-Checks**
+
 ```yaml
 # GitHub Actions Pipeline
 - name: Validate Configuration Consistency
@@ -426,6 +445,7 @@ cp gradle.properties.bak.20250915_103927 gradle.properties
 ```
 
 #### **Pre-Commit Hooks**
+
 ```bash
 # .git/hooks/pre-commit
 #!/bin/bash
@@ -434,7 +454,7 @@ cp gradle.properties.bak.20250915_103927 gradle.properties
 
 ### 🎯 Migration bestehender Projekte
 
-Die zentrale Konfigurationsverwaltung ist **rückwärtskompatibel** und kann schrittweise eingeführt werden:
+Die zentrale Konfigurationsverwaltung ist **rückwärts kompatibel** und kann schrittweise eingeführt werden:
 
 1. **config/central.toml** erstellen
 2. **scripts/config-sync.sh** ausführen
@@ -477,7 +497,7 @@ keycloak = "26.0.7"
 
 ### 🏗️ Architektur der zentralen Versionsverwaltung
 
-```
+```plaintext
 docker/
 ├── versions.toml                    # 🎯 Single Source of Truth
 ├── build-args/                     # Auto-generierte Environment Files
@@ -491,6 +511,7 @@ docker/
 ### 📊 Hierarchische Versionsverwaltung
 
 #### 1. **Globale Versionen** (`docker/build-args/global.env`)
+
 Verwendet von **allen** Dockerfiles:
 ```bash
 # --- Build Tools ---
@@ -618,11 +639,13 @@ api-gateway:
 
 ### 🎉 Vorteile der zentralen Versionsverwaltung
 
-#### **DRY-Prinzip Durchsetzung** ✅
+#### **DRY-Prinzip Durchsetzung** 
+✅
 - **Vor Version 3.0.0**: `GRADLE_VERSION=9.0.0` in 12 Dockerfiles
 - **Ab Version 3.0.0**: `gradle = "9.0.0"` **einmalig** in `docker/versions.toml`
 
 #### **Wartungsaufwand drastisch reduziert** ✅
+
 ```bash
 # BEFORE: 12 Dateien manuell editieren für Gradle-Update
 # AFTER: Ein Befehl für alle Services
@@ -630,11 +653,13 @@ api-gateway:
 ```
 
 #### **Konsistenz garantiert** ✅
+
 - Keine Version-Inkonsistenzen zwischen Services möglich
 - Automatische Synchronisation aller Environment-Dateien
 - Einheitliche Spring-Profile-Behandlung
 
 #### **Skalierbarkeit für neue Services** ✅
+
 ```dockerfile
 # Neue Services verwenden automatisch zentrale Versionen
 ARG GRADLE_VERSION
@@ -644,18 +669,21 @@ ARG JAVA_VERSION
 ### 🔄 Migration bestehender Services
 
 #### Schritt 1: Template-basierte Migration
+
 ```bash
 # Neue Services basieren auf aktualisierten Templates
 cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/new-service/
 ```
 
 #### Schritt 2: Automatisierte Version-Synchronisation
+
 ```bash
 # Bestehende Services automatisch aktualisieren
 ./scripts/docker-versions-update.sh sync
 ```
 
 #### Schritt 3: Build-Integration
+
 ```bash
 # Neue Builds verwenden zentrale Versionen
 ./scripts/docker-build.sh services
@@ -664,6 +692,7 @@ cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/new
 ### 📚 Best Practices für Version 3.0.0
 
 #### **DO: Zentrale Versionskommandos verwenden**
+
 ```bash
 # ✅ RICHTIG - Zentrale Version-Updates
 ./scripts/docker-versions-update.sh update java 22
@@ -673,6 +702,7 @@ cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/new
 ```
 
 #### **DON'T: Manuelle Dockerfile-Bearbeitung**
+
 ```dockerfile
 # ❌ FALSCH - Nie mehr hardcodierte Versionen
 ARG GRADLE_VERSION=9.1.0
@@ -682,6 +712,7 @@ ARG GRADLE_VERSION
 ```
 
 #### **Konsistenz-Regeln**
+
 1. **Niemals** Versionen direkt in Dockerfiles hardcodieren
 2. **Immer** `docker/versions.toml` als Single Source of Truth verwenden
 3. **Automated** Environment-File-Synchronisation via Scripts
@@ -690,6 +721,7 @@ ARG GRADLE_VERSION
 ### 🚀 Entwickler-Workflow mit Version 3.0.0
 
 #### **Neuen Service entwickeln**
+
 ```bash
 # 1. Template kopieren (bereits Version 3.0.0 kompatibel)
 cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/my-service/
@@ -700,6 +732,7 @@ cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/my-
 ```
 
 #### **Versionen projekt-weit upgraden**
+
 ```bash
 # 1. Java-Version upgraden (betrifft ALLE Services)
 ./scripts/docker-versions-update.sh update java 22
@@ -711,6 +744,7 @@ cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/my-
 ```
 
 #### **Version-Status prüfen**
+
 ```bash
 # Aktuelle zentrale Versionen anzeigen
 ./scripts/docker-versions-update.sh show
@@ -782,6 +816,7 @@ ephemeral = "32768-65535"
 ### ⚡ Automatische Port-Integration
 
 #### Docker-Compose Integration
+
 ```yaml
 # Ports werden automatisch aus versions.toml gelesen
 api-gateway:
@@ -798,6 +833,7 @@ ping-service:
 ```
 
 #### Script-basierte Port-Validierung
+
 ```bash
 # scripts/validate-port-conflicts.sh
 #!/bin/bash
@@ -874,6 +910,7 @@ test-containers = true
 ### 🚀 Environment-basierte Deployments
 
 #### Development Environment
+
 ```bash
 # Development mit Hot-Reload und Debug
 export DOCKER_ENVIRONMENT=development
@@ -881,6 +918,7 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 ```
 
 #### Production Environment
+
 ```bash
 # Production mit Security und Resource-Limits
 export DOCKER_ENVIRONMENT=production
@@ -888,6 +926,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 #### Testing Environment
+
 ```bash
 # Testing mit schnellen Health-Checks
 export DOCKER_ENVIRONMENT=testing
@@ -967,6 +1006,7 @@ EOF
 ### 🎯 Service-Kategorien Templates
 
 #### Services Template
+
 ```bash
 generate_services_compose() {
     local services=($(get_services_from_toml))
@@ -981,6 +1021,7 @@ generate_services_compose() {
 ```
 
 #### Infrastructure Template
+
 ```bash
 generate_infrastructure_compose() {
     local infrastructure=($(get_infrastructure_from_toml))
@@ -1281,7 +1322,7 @@ jobs:
 
 Alle Dockerfiles folgen einem standardisierten Template-System:
 
-```
+```plaintext
 dockerfiles/
 ├── templates/
 │   ├── spring-boot-service.Dockerfile      # Backend-Services
@@ -1657,7 +1698,7 @@ RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
 
 Unsere Compose-Dateien sind modular organisiert für verschiedene Einsatzszenarien:
 
-```
+```plaintext
 ├── docker-compose.yml              # ✅ Development (Infrastructure)
 ├── docker-compose.prod.yml         # ✅ Production (gehärtet, SSL/TLS)
 ├── docker-compose.services.yml     # 🆕 Application Services
@@ -1667,7 +1708,7 @@ Unsere Compose-Dateien sind modular organisiert für verschiedene Einsatzszenari
 
 ### Verwendungsszenarien
 
-#### 🏠 Lokale Entwicklung - Vollständiges System
+#### 🏠 Lokale Entwicklung - vollständiges System
 
 ```bash
 # Alle Services einschließlich Clients
@@ -2027,13 +2068,13 @@ labels:
 
 ### Health Check Matrix
 
-| Service | Endpoint | Erwartung | Timeout |
-|---------|----------|-----------|---------|
-| API Gateway | `/actuator/health` | `{"status":"UP"}` | 15s |
-| Ping Service | `/actuator/health/readiness` | HTTP 200 | 3s |
-| PostgreSQL | `pg_isready` | Connection OK | 5s |
-| Redis | `redis-cli ping` | PONG | 5s |
-| Keycloak | `/health/ready` | HTTP 200 | 5s |
+| Service      | Endpoint                     | Erwartung         | Timeout |
+|--------------|------------------------------|-------------------|---------|
+| API Gateway  | `/actuator/health`           | `{"status":"UP"}` | 15s     |
+| Ping Service | `/actuator/health/readiness` | HTTP 200          | 3s      |
+| PostgresQL   | `pg_isready`                 | Connection OK     | 5s      |
+| Redis        | `redis-cli ping`             | PONG              | 5s      |
+| Keycloak     | `/health/ready`              | HTTP 200          | 5s      |
 
 ### Log Aggregation
 
@@ -2362,40 +2403,40 @@ brew install ctop  # Container-Monitoring-Tool
 
 ## 📝 Changelog
 
-| Version | Datum | Änderungen |
-|---------|-------|------------|
-| 3.2.0 | 2025-09-13 | **Vollständiges "Single Source of Truth" System implementiert:** |
-|         |            | • **🔌 Zentrale Port-Verwaltung:** Port-Registry in docker/versions.toml mit automatischer Konflikt-Erkennung |
-|         |            | • **⚙️ Environment-Overrides Vereinheitlichung:** Zentrale Konfiguration für dev/test/prod Umgebungen |
-|         |            | • **📝 Docker-Compose Template-System:** Automatische Generierung von Compose-Files aus TOML-Konfiguration |
+| Version | Datum      | Änderungen                                                                                                                 |
+|---------|------------|----------------------------------------------------------------------------------------------------------------------------|
+| 3.2.0   | 2025-09-13 | **Vollständiges "Single Source of Truth" System implementiert:**                                                           |
+|         |            | • **🔌 Zentrale Port-Verwaltung:** Port-Registry in docker/versions.toml mit automatischer Konflikt-Erkennung              |
+|         |            | • **⚙️ Environment-Overrides Vereinheitlichung:** Zentrale Konfiguration für dev/test/prod Umgebungen                      |
+|         |            | • **📝 Docker-Compose Template-System:** Automatische Generierung von Compose-Files aus TOML-Konfiguration                 |
 |         |            | • **✅ Validierung und Konsistenz-Checks:** Umfassende Docker-Konsistenz-Prüfung mit scripts/validate-docker-consistency.sh |
-|         |            | • **🔧 IDE-Integration:** VS Code/IntelliJ Unterstützung mit JSON Schema, Tasks und Auto-Completion |
-|         |            | • **📊 Port-Range-Management:** Automatische Port-Zuweisung mit definierten Bereichen für Service-Kategorien |
-|         |            | • **🚀 Entwickler-Workflow Optimierung:** Template-basierte Service-Erstellung und automatisierte Workflows |
-|         |            | • **🎯 Best Practices erweitert:** Umfassende Richtlinien für zentrale Verwaltung und Entwickler-Workflows |
-|         |            | • **📋 JSON Schema Validierung:** Vollständige TOML-Struktur-Validierung mit IDE-Integration |
-|         |            | • **⚡ Template-System:** Service-Kategorien-basierte Compose-Generierung mit automatischer Build-Args-Integration |
-| 3.0.1 | 2025-09-13 | **Zentrale Docker-Versionsverwaltung - Vollständige Optimierung:** |
-|         |            | • **Monitoring-Tool-Updates:** Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7 |
-|         |            | • **Erweiterte Script-Funktionalität:** docker-versions-update.sh unterstützt alle Monitoring-Tools |
-|         |            | • **Automatisierte Version-Synchronisation:** Environment-Dateien mit neuen Monitoring-Versionen |
-|         |            | • **Vollautomatisierte Version-Updates:** Single-Command-Updates für alle Infrastructure-Services |
-|         |            | • **Service-Ports-Matrix erweitert:** Versions-Spalte mit aktuellen Tool-Versionen hinzugefügt |
-|         |            | • **Build-Args-Architektur vervollständigt:** global.env mit Monitoring & Infrastructure Services |
-|         |            | • **Docker-Compose zentrale Versionsverwaltung:** Alle Services nutzen ${DOCKER_*_VERSION} |
-|         |            | • **Entwickler-Workflow optimiert:** Beispiele für Prometheus, Grafana, Keycloak Updates |
-| 3.0.0 | 2025-09-13 | **Zentrale Docker-Versionsverwaltung implementiert** |
-| 1.1.0 | 2025-08-16 | **Umfassende Überarbeitung und Optimierung:** |
-|         |            | • Aktualisierung aller Dockerfile-Templates auf aktuelle Implementierung |
-|         |            | • Integration von BuildKit Cache Mounts für optimale Build-Performance |
-|         |            | • Dokumentation moderner Docker-Features (syntax=docker/dockerfile:1.8) |
-|         |            | • Erweiterte Service-Ports-Matrix mit Debug-Ports und korrekten Health-Checks |
-|         |            | • Umfassende docker-compose Konfigurationsbeispiele mit Environment-Variablen |
-|         |            | • Neue Sektion für automatisierte Container-Tests (test-dockerfile.sh) |
-|         |            | • Aktualisierung auf Europe/Vienna Timezone und Java 21 Optimierungen |
-|         |            | • Erweiterte Monitoring- und Observability-Konfigurationen |
-|         |            | • Verbesserte Resource-Management und Performance-Tuning Einstellungen |
-| 1.0.0 | 2025-08-16 | Initiale Docker-Guidelines basierend auf Containerisierungsstrategie |
+|         |            | • **🔧 IDE-Integration:** VS Code/IntelliJ Unterstützung mit JSON Schema, Tasks und Auto-Completion                        |
+|         |            | • **📊 Port-Range-Management:** Automatische Port-Zuweisung mit definierten Bereichen für Service-Kategorien               |
+|         |            | • **🚀 Entwickler-Workflow Optimierung:** Template-basierte Service-Erstellung und automatisierte Workflows                |
+|         |            | • **🎯 Best Practices erweitert:** Umfassende Richtlinien für zentrale Verwaltung und Entwickler-Workflows                 |
+|         |            | • **📋 JSON Schema Validierung:** Vollständige TOML-Struktur-Validierung mit IDE-Integration                               |
+|         |            | • **⚡ Template-System:** Service-Kategorien-basierte Compose-Generierung mit automatischer Build-Args-Integration          |
+| 3.0.1   | 2025-09-13 | **Zentrale Docker-Versionsverwaltung - Vollständige Optimierung:**                                                         |
+|         |            | • **Monitoring-Tool-Updates:** Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7                                         |
+|         |            | • **Erweiterte Script-Funktionalität:** docker-versions-update.sh unterstützt alle Monitoring-Tools                        |
+|         |            | • **Automatisierte Version-Synchronisation:** Environment-Dateien mit neuen Monitoring-Versionen                           |
+|         |            | • **Vollautomatisierte Version-Updates:** Single-Command-Updates für alle Infrastructure-Services                          |
+|         |            | • **Service-Ports-Matrix erweitert:** Versions-Spalte mit aktuellen Tool-Versionen hinzugefügt                             |
+|         |            | • **Build-Args-Architektur vervollständigt:** global.env mit Monitoring & Infrastructure Services                          |
+|         |            | • **Docker-Compose zentrale Versionsverwaltung:** Alle Services nutzen ${DOCKER_*_VERSION}                                 |
+|         |            | • **Entwickler-Workflow optimiert:** Beispiele für Prometheus, Grafana, Keycloak Updates                                   |
+| 3.0.0   | 2025-09-13 | **Zentrale Docker-Versionsverwaltung implementiert**                                                                       |
+| 1.1.0   | 2025-08-16 | **Umfassende Überarbeitung und Optimierung:**                                                                              |
+|         |            | • Aktualisierung aller Dockerfile-Templates auf aktuelle Implementierung                                                   |
+|         |            | • Integration von BuildKit Cache Mounts für optimale Build-Performance                                                     |
+|         |            | • Dokumentation moderner Docker-Features (syntax=docker/dockerfile:1.8)                                                    |
+|         |            | • Erweiterte Service-Ports-Matrix mit Debug-Ports und korrekten Health-Checks                                              |
+|         |            | • Umfassende docker-compose Konfigurationsbeispiele mit Environment-Variablen                                              |
+|         |            | • Neue Sektion für automatisierte Container-Tests (test-dockerfile.sh)                                                     |
+|         |            | • Aktualisierung auf Europe/Vienna Timezone und Java 21 Optimierungen                                                      |
+|         |            | • Erweiterte Monitoring- und Observability-Konfigurationen                                                                 |
+|         |            | • Verbesserte Resource-Management und Performance-Tuning Einstellungen                                                     |
+| 1.0.0   | 2025-08-16 | Initiale Docker-Guidelines basierend auf Containerisierungsstrategie                                                       |
 
 ---
 

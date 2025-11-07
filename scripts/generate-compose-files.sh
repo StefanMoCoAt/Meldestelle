@@ -41,20 +41,36 @@ print_error() {
 # Function to extract version from TOML file
 get_version() {
     local key=$1
-    grep "^$key = " "$VERSIONS_TOML" | sed 's/.*= "\(.*\)"/\1/' || echo ""
+    awk -v k="$key" '
+        /^\[versions\]/ { in_section=1; next }
+        /^\[/ { if (in_section) exit; in_section=0 }
+        in_section && $1 == k && $2 == "=" {
+            val = $3; gsub(/"/, "", val); print val; exit
+        }
+    ' "$VERSIONS_TOML" || echo ""
 }
 
 # Function to extract port from TOML file
 get_port() {
     local service=$1
-    grep "^$service = " "$VERSIONS_TOML" | grep -A 50 "\[service-ports\]" | grep "^$service = " | sed 's/.*= \(.*\)/\1/' || echo ""
+    awk -v key="$service" '
+        /^\[service-ports\]/ { in_section=1; next }
+        /^\[/ { in_section=0 }
+        in_section && $1 == key { print $3; exit }
+    ' "$VERSIONS_TOML" || echo ""
 }
 
 # Function to extract environment config from TOML file
 get_env_config() {
     local env=$1
     local key=$2
-    awk "/\[environments\.$env\]/,/^\[/ {if (/^$key = /) {gsub(/.*= \"?|\"?$/, \"\"); print}}" "$VERSIONS_TOML" || echo ""
+    awk -v env="$env" -v k="$key" '
+        $0 ~ "^\\[environments\."env"\\]" { in_section=1; next }
+        /^\[/ { if (in_section) exit; in_section=0 }
+        in_section && $1 == k && $2 == "=" {
+            val=$3; gsub(/"/, "", val); print val; exit
+        }
+    ' "$VERSIONS_TOML" || echo ""
 }
 
 # Function to generate build args section for a service category
@@ -63,31 +79,31 @@ generate_build_args_section() {
 
     cat << EOF
       args:
-        # Global build arguments (from docker/build-args/global.env)
-        GRADLE_VERSION: \${DOCKER_GRADLE_VERSION:-$(get_version "gradle")}
-        JAVA_VERSION: \${DOCKER_JAVA_VERSION:-$(get_version "java")}
+        # Global build arguments (centralized DOCKER_* variables)
+        GRADLE_VERSION: \${DOCKER_GRADLE_VERSION}
+        JAVA_VERSION: \${DOCKER_JAVA_VERSION}
         BUILD_DATE: \${BUILD_DATE}
-        VERSION: \${DOCKER_APP_VERSION:-$(get_version "app-version")}
+        VERSION: \${DOCKER_APP_VERSION}
 EOF
 
     case $category in
         "services")
             cat << EOF
-        # Service-specific arguments (from docker/build-args/services.env)
-        SPRING_PROFILES_ACTIVE: \${DOCKER_SPRING_PROFILES_DOCKER:-$(get_version "spring-profiles-docker")}
+        # Service-specific arguments (centralized DOCKER_* variables)
+        SPRING_PROFILES_ACTIVE: \${DOCKER_SPRING_PROFILES_DOCKER}
 EOF
             ;;
         "infrastructure")
             cat << EOF
-        # Infrastructure-specific arguments (from docker/build-args/infrastructure.env)
-        SPRING_PROFILES_ACTIVE: \${DOCKER_SPRING_PROFILES_DEFAULT:-$(get_version "spring-profiles-default")}
+        # Infrastructure-specific arguments (centralized DOCKER_* variables)
+        SPRING_PROFILES_ACTIVE: \${DOCKER_SPRING_PROFILES_DEFAULT}
 EOF
             ;;
         "clients")
             cat << EOF
-        # Client-specific arguments (from docker/build-args/clients.env)
-        NODE_VERSION: \${DOCKER_NODE_VERSION:-$(get_version "node")}
-        NGINX_VERSION: \${DOCKER_NGINX_VERSION:-$(get_version "nginx")}
+        # Client-specific arguments (centralized DOCKER_* variables)
+        NODE_VERSION: \${DOCKER_NODE_VERSION}
+        NGINX_VERSION: \${DOCKER_NGINX_VERSION}
 EOF
             ;;
     esac
@@ -103,11 +119,13 @@ generate_environment_vars_for_service() {
     local log_level=$(get_env_config $environment "log-level")
     local debug_port=$(get_env_config $environment "jvm-debug-port")
     local service_port=$(get_port $service)
+    local service_upper=$(echo "$service" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
+    local port_var="${service_upper}_PORT"
 
     cat << EOF
     environment:
       SPRING_PROFILES_ACTIVE: \${SPRING_PROFILES_ACTIVE:-$spring_profiles}
-      SERVER_PORT: \${${service^^}_PORT:-$service_port}
+      SERVER_PORT: \${$port_var:-$service_port}
       DEBUG: \${DEBUG:-$debug_enabled}
       LOGGING_LEVEL_ROOT: \${LOGGING_LEVEL_ROOT:-$log_level}
 EOF
@@ -148,16 +166,25 @@ generate_service_definition() {
     local service_port=$(get_port $service)
     local debug_port=$(get_env_config $environment "jvm-debug-port")
 
+    # Normalize service name to ENV var pattern (e.g., ping-service -> PING_SERVICE)
+    local service_upper=$(echo "$service" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
+
+    # Map to actual Dockerfile path when service directory name differs from service key
+    local dockerfile_service="$service"
+    if [[ "$category" == "infrastructure" && "$service" == "api-gateway" ]]; then
+        dockerfile_service="gateway"
+    fi
+
     cat << EOF
   $service:
     build:
       context: .
-      dockerfile: dockerfiles/$category/$service/Dockerfile
+      dockerfile: dockerfiles/$category/$dockerfile_service/Dockerfile
 $(generate_build_args_section $category)
     container_name: meldestelle-$service
 $(generate_environment_vars_for_service $service $environment)
     ports:
-      - "\${${service^^}_PORT:-$service_port}:$service_port"
+      - "\${${service_upper}_PORT:-$service_port}:$service_port"
 EOF
 
     # Add debug port if enabled
@@ -192,7 +219,7 @@ services:
   # Database
   # ===================================================================
   postgres:
-    image: postgres:16-alpine
+    image: postgres:\${DOCKER_POSTGRES_VERSION:-$(get_version "postgres")}
     container_name: meldestelle-postgres
     environment:
       POSTGRES_USER: \${POSTGRES_USER:-meldestelle}
@@ -217,7 +244,7 @@ services:
   # Cache
   # ===================================================================
   redis:
-    image: redis:7-alpine
+    image: redis:\${DOCKER_REDIS_VERSION:-$(get_version "redis")}
     container_name: meldestelle-redis
     ports:
       - "\${REDIS_PORT:-$(get_port redis)}:$(get_port redis)"

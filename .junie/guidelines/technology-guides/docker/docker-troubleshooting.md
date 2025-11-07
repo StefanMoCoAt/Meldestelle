@@ -1,6 +1,7 @@
 # Docker-Troubleshooting und Best Practices
 
 ---
+
 guideline_type: "technology"
 scope: "docker-troubleshooting"
 audience: ["developers", "devops", "ai-assistants"]
@@ -8,6 +9,7 @@ last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "docker-architecture.md", "docker-development.md"]
 related_files: ["docker-compose.yml", "scripts/validate-docker-consistency.sh", "scripts/docker-versions-update.sh"]
 ai_context: "Fehlerbehebung häufiger Docker-Probleme, Debug-Kommandos und umfassende Best Practices"
+
 ---
 
 ## 🔧 Troubleshooting
@@ -85,29 +87,32 @@ docker-compose logs -f --tail=50 SERVICE_NAME
 
 ### Häufige Befehle
 
-| Problem | Befehl | Beschreibung |
-|---------|---------|--------------|
-| Port belegt | `netstat -tulpn \| grep :<port>` | Port-Nutzung prüfen |
-| Service startet nicht | `docker-compose logs <service>` | Service-Logs anzeigen |
-| Container hängt | `docker stats` | Ressourcenverbrauch |
-| DNS-Probleme | `docker-compose exec <service> nslookup <target>` | DNS-Resolution testen |
-| Disk voll | `docker system prune -a --volumes` | Cleanup durchführen |
+| Problem               | Befehl                                            | Beschreibung          |
+|-----------------------|---------------------------------------------------|-----------------------|
+| Port belegt           | `netstat -tulpn \| grep :<port>`                  | Port-Nutzung prüfen   |
+| Service startet nicht | `docker-compose logs <service>`                   | Service-Logs anzeigen |
+| Container hängt       | `docker stats`                                    | Ressourcenverbrauch   |
+| DNS-Probleme          | `docker-compose exec <service> nslookup <target>` | DNS-Resolution testen |
+| Disk voll             | `docker system prune -a --volumes`                | Cleanup durchführen   |
 
 ### Debug-Workflows
 
 #### Service startet nicht
+
 1. `docker-compose ps` - Status prüfen
 2. `docker-compose logs <service>` - Logs analysieren
 3. `docker-compose exec <service> sh` - Container inspizieren
 4. Health-Check-Endpoint testen
 
 #### Performance-Probleme
+
 1. `docker stats` - Ressourcenverbrauch
 2. `docker-compose top` - Prozess-Übersicht
 3. JVM-Parameter optimieren
 4. Resource-Limits anpassen
 
 #### Netzwerk-Probleme
+
 1. `docker network ls` - Netzwerke auflisten
 2. `docker-compose exec <service> ping <target>` - Connectivity testen
 3. Consul Service-Discovery prüfen
@@ -292,8 +297,8 @@ docker-compose up -d && make test
 ---
 
 **Navigation:**
-- [Docker-Overview](./docker-overview.md) - Grundlagen und Philosophie
-- [Docker-Architecture](./docker-architecture.md) - Container-Services und Struktur
-- [Docker-Development](./docker-development.md) - Entwicklungsworkflow
-- [Docker-Production](./docker-production.md) - Production-Deployment
-- [Docker-Monitoring](./docker-monitoring.md) - Observability
+- [docker-overview](./docker-overview.md) - Grundlagen und Philosophie
+- [docker-architecture](./docker-architecture.md) - Container-Services und Struktur
+- [docker-development](./docker-development.md) - Entwicklungsworkflow
+- [docker-production](./docker-production.md) - Production-Deployment
+- [docker-monitoring](./docker-monitoring.md) - Observability

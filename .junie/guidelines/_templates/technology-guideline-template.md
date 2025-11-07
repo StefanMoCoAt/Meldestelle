@@ -1,6 +1,7 @@
 # [TECHNOLOGIE-NAME] Guidelines
 
 ---
+
 guideline_type: "technology"
 scope: "[spezifischer-bereich-identifier]"
 audience: ["developers", "ai-assistants", "devops"]
@@ -8,6 +9,7 @@ last_updated: "[YYYY-MM-DD]"
 dependencies: ["master-guideline.md", "[weitere-abhängigkeiten]"]
 related_files: ["[relevante-projekt-dateien]", "config/[konfig-dateien]"]
 ai_context: "[Deutsche Kurzbeschreibung für KI-Verständnis]"
+
 ---
 
 ## 🚀 Überblick und Philosophie
@@ -42,8 +44,8 @@ ai_context: "[Deutsche Kurzbeschreibung für KI-Verständnis]"
 
 ### Häufige Aufgaben
 
-| Aufgabe | Befehl | Beschreibung |
-|---------|---------|--------------|
+| Aufgabe  | Befehl      | Beschreibung   |
+|----------|-------------|----------------|
 | [Task 1] | `[command]` | [Beschreibung] |
 | [Task 2] | `[command]` | [Beschreibung] |
 | [Task 3] | `[command]` | [Beschreibung] |
@@ -81,8 +83,8 @@ ai_context: "[Deutsche Kurzbeschreibung für KI-Verständnis]"
 
 ### Metrics
 
-| Metric | Typ | Beschreibung |
-|--------|-----|--------------|
+| Metric          | Typ   | Beschreibung   |
+|-----------------|-------|----------------|
 | `[metric_name]` | [Typ] | [Beschreibung] |
 
 ## 🚨 Troubleshooting
@@ -90,6 +92,7 @@ ai_context: "[Deutsche Kurzbeschreibung für KI-Verständnis]"
 ### Häufige Probleme
 
 #### [Problem 1]
+
 ```bash
 # Diagnose
 [diagnostic-commands]
@@ -99,12 +102,13 @@ ai_context: "[Deutsche Kurzbeschreibung für KI-Verständnis]"
 ```
 
 #### [Problem 2]
+
 [Weitere Problemlösungen]
 
 ---
 
 **Navigation:**
-- [Docker-Overview](./docker/docker-overview.md) - [falls relevant]
+- [Docker-Overview](../technology-guides/docker/docker-overview.md) - [falls relevant]
 - [Master-Guideline](../master-guideline.md) - Projekt-Überblick
 - [Architecture Principles](../project-standards/architecture-principles.md) - Architektur-Grundlagen
 

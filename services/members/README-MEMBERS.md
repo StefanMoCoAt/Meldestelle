@@ -9,6 +9,7 @@ Das Members-Modul ist eine umfassende Lösung zur Verwaltung von Mitgliedern fü
 ### Verwaltete Entität
 
 #### Mitglied (Member)
+
 - **Persönliche Informationen**: Vor- und Nachname, E-Mail, Telefon, Geburtsdatum
 - **Mitgliedschaftsinformationen**: Mitgliedsnummer, Start-/Enddatum, Aktivitätsstatus
 - **Zusätzliche Informationen**: Adresse, Notfallkontakt
@@ -20,11 +21,13 @@ Das Members-Modul ist eine umfassende Lösung zur Verwaltung von Mitgliedern fü
 Das Modul bietet 18+ spezialisierte Repository-Operationen:
 
 #### Basis-CRUD-Operationen
+
 - `findById(id)` - Mitglied nach UUID suchen
 - `save(member)` - Mitglied speichern (erstellen/aktualisieren)
 - `delete(id)` - Mitglied löschen
 
 #### Such-Operationen
+
 - `findByMembershipNumber(number)` - Nach Mitgliedsnummer suchen
 - `findByEmail(email)` - Nach E-Mail-Adresse suchen
 - `findByName(searchTerm, limit)` - Nach Namen suchen (Teilübereinstimmung)
@@ -32,15 +35,18 @@ Das Modul bietet 18+ spezialisierte Repository-Operationen:
 - `findAll(limit, offset)` - Alle Mitglieder (aktiv und inaktiv)
 
 #### Datumsbasierte Abfragen
+
 - `findByMembershipStartDateRange(start, end)` - Mitglieder nach Startdatum-Bereich
 - `findByMembershipEndDateRange(start, end)` - Mitglieder nach Enddatum-Bereich
 - `findMembersWithExpiringMembership(daysAhead)` - Mitglieder mit ablaufender Mitgliedschaft
 
 #### Validierungs-Operationen
+
 - `existsByMembershipNumber(number, excludeId)` - Prüfung auf doppelte Mitgliedsnummer
 - `existsByEmail(email, excludeId)` - Prüfung auf doppelte E-Mail-Adresse
 
 #### Zähl-Operationen
+
 - `countActive()` - Anzahl aktiver Mitglieder
 - `countAll()` - Gesamtanzahl aller Mitglieder
 
@@ -76,28 +82,33 @@ members/
 ```
 
 ### Domain Layer
+
 - **1 Domain Model** mit reichhaltiger Geschäftslogik
 - **1 Repository Interface** mit 18+ Geschäftsoperationen
 - **Domain Events** für Mitgliedschaftsänderungen
 - **Keine Abhängigkeiten** zu anderen Layern
 
 ### Application Layer
+
 - **Use Cases** für komplexe Geschäftsoperationen
 - **Orchestrierung** von Domain-Services
 - **Anwendungslogik** ohne UI-Abhängigkeiten
 
 ### Infrastructure Layer
+
 - **Datenbankzugriff** mit Exposed ORM
 - **Repository-Implementierung** mit PostgreSQL
 - **In-Memory-Repository** für Tests
 - **Datenbankschema** und Migrationen
 
 ### API Layer
+
 - **REST-Controller** für HTTP-Endpunkte
 - **DTO-Mapping** zwischen Domain und API
 - **Validierung** und Fehlerbehandlung
 
 ### Service Layer
+
 - **Spring Boot Anwendung**
 - **Dependency Injection** Konfiguration
 - **Integrationstests**
@@ -204,6 +215,7 @@ Das Members-Modul stellt REST-Endpunkte über den MemberController bereit:
 ### Datenbankschema
 
 Das Modul verwendet eine `members`-Tabelle mit folgenden Spalten:
+
 - `member_id` (UUID, Primary Key)
 - `first_name`, `last_name`, `email` (Required)
 - `phone`, `date_of_birth` (Optional)

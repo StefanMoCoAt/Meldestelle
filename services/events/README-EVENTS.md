@@ -9,6 +9,7 @@ Das Events-Modul ist eine umfassende Lösung zur Verwaltung von Pferdesportveran
 ### Verwaltete Entität
 
 #### Veranstaltung (Event)
+
 - **Grundinformationen**: Name, Beschreibung
 - **Terminverwaltung**: Startdatum, Enddatum, Anmeldeschluss
 - **Ort und Organisation**: Veranstaltungsort, Veranstalter-Verein-ID
@@ -21,21 +22,25 @@ Das Events-Modul ist eine umfassende Lösung zur Verwaltung von Pferdesportveran
 Das Modul bietet 10+ spezialisierte Repository-Operationen:
 
 #### Basis-CRUD-Operationen
+
 - `findById(id)` - Veranstaltung nach UUID suchen
 - `save(veranstaltung)` - Veranstaltung speichern (erstellen/aktualisieren)
 - `delete(id)` - Veranstaltung löschen
 
 #### Such-Operationen
+
 - `findByName(searchTerm, limit)` - Nach Namen suchen (Teilübereinstimmung)
 - `findByVeranstalterVereinId(vereinId, activeOnly)` - Veranstaltungen eines Vereins
 - `findAllActive(limit, offset)` - Alle aktiven Veranstaltungen
 - `findPublicEvents(activeOnly)` - Öffentliche Veranstaltungen
 
 #### Datumsbasierte Abfragen
+
 - `findByDateRange(startDate, endDate, activeOnly)` - Veranstaltungen in Datumsbereich
 - `findByStartDate(date, activeOnly)` - Veranstaltungen nach Startdatum
 
 #### Zähl-Operationen
+
 - `countActive()` - Anzahl aktiver Veranstaltungen
 - `countByVeranstalterVereinId(vereinId, activeOnly)` - Anzahl Veranstaltungen pro Verein
 
@@ -69,27 +74,32 @@ events/
 ```
 
 ### Domain Layer
+
 - **1 Domain Model** mit reichhaltiger Geschäftslogik
 - **1 Repository Interface** mit 10+ Geschäftsoperationen
 - **Domain Service** für komplexe Veranstaltungslogik
 - **Keine Abhängigkeiten** zu anderen Layern
 
 ### Application Layer
+
 - **Use Cases** für CRUD-Operationen
 - **Orchestrierung** von Domain-Services
 - **Anwendungslogik** ohne UI-Abhängigkeiten
 
 ### Infrastructure Layer
+
 - **Datenbankzugriff** mit Exposed ORM
 - **Repository-Implementierung** mit PostgreSQL
 - **Datenbankschema** und Migrationen
 
 ### API Layer
+
 - **REST-Controller** für HTTP-Endpunkte
 - **DTO-Mapping** zwischen Domain und API
 - **Validierung** und Fehlerbehandlung
 
 ### Service Layer
+
 - **Spring Boot Anwendung**
 - **Dependency Injection** Konfiguration
 - **Service-Konfiguration**
@@ -138,6 +148,7 @@ data class Veranstaltung(
 ### Enumerationen
 
 #### SparteE (Sportsparten)
+
 - `DRESSUR` - Dressurreiten
 - `SPRINGEN` - Springreiten
 - `VIELSEITIGKEIT` - Vielseitigkeitsreiten
@@ -257,6 +268,7 @@ Das Events-Modul stellt REST-Endpunkte über den VeranstaltungController bereit:
 ### Datenbankschema
 
 Das Modul verwendet eine `events`-Tabelle mit folgenden Spalten:
+
 - `veranstaltung_id` (UUID, Primary Key)
 - `name` (Required)
 - `beschreibung` (Text, Optional)
@@ -416,11 +428,13 @@ spec:
 ### Externe Systeme
 
 #### OEPS-Integration
+
 - Synchronisation mit OEPS-Veranstaltungskalender
 - Automatische Meldung bei OEPS-relevanten Veranstaltungen
 - Import von OEPS-Veranstaltungsdaten
 
 #### FEI-Integration
+
 - Unterstützung für internationale Veranstaltungen
 - FEI-Regularien und -Standards
 - Automatische Klassifizierung
@@ -428,11 +442,13 @@ spec:
 ### Interne Module
 
 #### Members-Modul
+
 - Teilnehmerverwaltung
 - Anmeldestatus-Tracking
 - Mitgliedschaftsvalidierung
 
 #### Horses-Modul
+
 - Pferdeanmeldungen
 - Eignung für Sparten
 - Registrierungsstatus

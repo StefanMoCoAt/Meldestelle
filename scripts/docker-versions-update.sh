@@ -77,11 +77,14 @@ sync_to_env_files() {
     local spring_default=$(get_version "spring-profiles-default")
     # shellcheck disable=SC2155
     local spring_docker=$(get_version "spring-profiles-docker")
-    # shellcheck disable=SC2155
-    local alpine_version=$(get_version "alpine")
     local prometheus_version=$(get_version "prometheus")
     local grafana_version=$(get_version "grafana")
     local keycloak_version=$(get_version "keycloak")
+    local postgres_version=$(get_version "postgres")
+    local redis_version=$(get_version "redis")
+    local consul_version=$(get_version "consul")
+    local zookeeper_version=$(get_version "zookeeper")
+    local kafka_version=$(get_version "kafka")
 
     # Update global.env
     cat > "$BUILD_ARGS_DIR/global.env" << EOF
@@ -96,18 +99,21 @@ GRADLE_VERSION=$gradle_version
 JAVA_VERSION=$java_version
 
 # --- Build Metadata ---
-BUILD_DATE=\$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 VERSION=$app_version
-
-# --- Common Base Images ---
-ALPINE_VERSION=$alpine_version
-ECLIPSE_TEMURIN_JDK_VERSION=$java_version-jdk-alpine
-ECLIPSE_TEMURIN_JRE_VERSION=$java_version-jre-alpine
 
 # --- Monitoring & Infrastructure Services ---
 DOCKER_PROMETHEUS_VERSION=$prometheus_version
 DOCKER_GRAFANA_VERSION=$grafana_version
 DOCKER_KEYCLOAK_VERSION=$keycloak_version
+
+# --- Datastore Images ---
+DOCKER_POSTGRES_VERSION=$postgres_version
+DOCKER_REDIS_VERSION=$redis_version
+
+# --- Additional Infrastructure Images ---
+DOCKER_CONSUL_VERSION=$consul_version
+DOCKER_ZOOKEEPER_VERSION=$zookeeper_version
+DOCKER_KAFKA_VERSION=$kafka_version
 EOF
     print_success "Updated global.env"
 
@@ -120,7 +126,7 @@ EOF
 # ===================================================================
 
 # --- Include Global Arguments ---
-# Source global.env for GRADLE_VERSION, JAVA_VERSION, BUILD_DATE, VERSION
+# Source global.env for GRADLE_VERSION, JAVA_VERSION, VERSION
 
 # --- Client-Specific Build Tools ---
 NODE_VERSION=$node_version
@@ -133,12 +139,10 @@ CLIENT_NAME=meldestelle-client
 
 # --- Web Application Specific ---
 WEB_APP_PORT=4000
-WEB_APP_BUILD_TARGET=wasmJsBrowserDistribution
 
 # --- Desktop Application Specific ---
 DESKTOP_APP_VNC_PORT=5901
 DESKTOP_APP_NOVNC_PORT=6080
-DESKTOP_APP_BUILD_TARGET=composeDesktop
 
 # --- Client Environment ---
 NODE_ENV=production
@@ -160,7 +164,7 @@ EOF
 # ===================================================================
 
 # --- Include Global Arguments ---
-# Source global.env for GRADLE_VERSION, JAVA_VERSION, BUILD_DATE, VERSION
+# Source global.env for GRADLE_VERSION, JAVA_VERSION, VERSION
 
 # --- Spring Boot Services Configuration ---
 SPRING_PROFILES_ACTIVE=$spring_docker
@@ -191,7 +195,7 @@ EOF
 # ===================================================================
 
 # --- Include Global Arguments ---
-# Source global.env for GRADLE_VERSION, JAVA_VERSION, BUILD_DATE, VERSION
+# Source global.env for GRADLE_VERSION, JAVA_VERSION, VERSION
 
 # --- Infrastructure Services Configuration ---
 SPRING_PROFILES_ACTIVE=$spring_default
@@ -224,6 +228,22 @@ DB_PORT=5432
 DB_NAME=meldestelle
 EOF
     print_success "Updated infrastructure.env"
+
+    # --- Post-generation cleanup to enforce SSoT policies ---
+    # 1) Remove any accidental bare DOCKER_* placeholders from non-global envs
+    sed -i "/^DOCKER_[A-Z0-9_]\+$/d" "$BUILD_ARGS_DIR/services.env" || true
+    sed -i "/^DOCKER_[A-Z0-9_]\+$/d" "$BUILD_ARGS_DIR/infrastructure.env" || true
+    sed -i "/^DOCKER_[A-Z0-9_]\+$/d" "$BUILD_ARGS_DIR/clients.env" || true
+
+    # 2) Remove forbidden DOCKER_APP_VERSION from all build-args envs (it is mapped at runtime)
+    sed -i "/^DOCKER_APP_VERSION\(=.*\)\?$/d" "$BUILD_ARGS_DIR/global.env" || true
+    sed -i "/^DOCKER_APP_VERSION\(=.*\)\?$/d" "$BUILD_ARGS_DIR/clients.env" || true
+    sed -i "/^DOCKER_APP_VERSION\(=.*\)\?$/d" "$BUILD_ARGS_DIR/services.env" || true
+    sed -i "/^DOCKER_APP_VERSION\(=.*\)\?$/d" "$BUILD_ARGS_DIR/infrastructure.env" || true
+
+    # 3) Purge stray numeric service-port assignments that must not live in global.env
+    #    e.g., lines like: prometheus = 9090
+    sed -i -E "/^[a-z_]+ = [0-9]+$/d" "$BUILD_ARGS_DIR/global.env" || true
 
     print_success "All environment files synced successfully!"
 }

@@ -32,7 +32,7 @@ FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS kotlin-builder
 ARG CLIENT_PATH=client/web-app
 ARG CLIENT_MODULE=client:web-app
 ARG CLIENT_NAME=web-app
-ARG NODE_VERSION=20.11.0
+ARG NODE_VERSION
 
 LABEL stage=kotlin-builder
 LABEL maintainer="Meldestelle Development Team"

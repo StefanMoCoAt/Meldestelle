@@ -7,20 +7,29 @@
 
 [versions]
 # --- Build Tools ---
-gradle = "9.0.0"
+gradle = "9.1.0"
 java = "21"
-node = "20.12.0"
+node = "22.21.0"
 
 # --- Base Images ---
-nginx = "1.25-alpine"
-alpine = "3.19"
+nginx = "1.28.0-alpine"
+alpine = "3.22"
 eclipse-temurin-jdk = "21-jdk-alpine"
 eclipse-temurin-jre = "21-jre-alpine"
+
+# --- Datastore Images ---
+postgres = "16-alpine"
+redis = "7-alpine"
+
+# --- Additional Infrastructure Images ---
+consul = "1.15"
+zookeeper = "7.4.0"
+kafka = "7.4.0"
 
 # --- Monitoring & Infrastructure Services ---
 prometheus = "v2.54.1"
 grafana = "11.3.0"
-keycloak = "26.0.7"
+keycloak = "26.4.2"
 
 # --- Spring Configuration ---
 spring-profiles-default = "default"
@@ -126,8 +135,6 @@ services = [
 
 # --- Client Applications Configuration ---
 [categories.clients]
-default-node-version = "20.11.0"
-default-nginx-version = "1.25-alpine"
 clients = [
     "web-app",
     "desktop-app"
@@ -140,9 +147,14 @@ gradle-version = "DOCKER_GRADLE_VERSION"
 java-version = "DOCKER_JAVA_VERSION"
 node-version = "DOCKER_NODE_VERSION"
 nginx-version = "DOCKER_NGINX_VERSION"
+postgres-version = "DOCKER_POSTGRES_VERSION"
+redis-version = "DOCKER_REDIS_VERSION"
 prometheus-version = "DOCKER_PROMETHEUS_VERSION"
 grafana-version = "DOCKER_GRAFANA_VERSION"
 keycloak-version = "DOCKER_KEYCLOAK_VERSION"
+consul-version = "DOCKER_CONSUL_VERSION"
+zookeeper-version = "DOCKER_ZOOKEEPER_VERSION"
+kafka-version = "DOCKER_KAFKA_VERSION"
 spring-profiles-default = "DOCKER_SPRING_PROFILES_DEFAULT"
 spring-profiles-docker = "DOCKER_SPRING_PROFILES_DOCKER"
 app-version = "DOCKER_APP_VERSION"

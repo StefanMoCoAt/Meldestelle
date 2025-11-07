@@ -2,15 +2,14 @@
 # ===================================================================
 # Production-Ready Keycloak Dockerfile
 # ===================================================================
-# Based on: quay.io/keycloak/keycloak:26.4.0
+# Based on: quay.io/keycloak/keycloak:26.4.2
 # Features:
 # - Pre-built optimized image (faster startup)
 # - Security hardening
 # - Custom theme support
 # - Health monitoring
 # ===================================================================
-
-ARG KEYCLOAK_VERSION=26.4.0
+ARG KEYCLOAK_VERSION
 
 FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
 

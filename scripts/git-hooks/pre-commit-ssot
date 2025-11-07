@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# ===================================================================
+# Git pre-commit hook: Enforce Docker SSoT (Single Source of Truth)
+# Runs lightweight sync/generate/validate and drift check before commit
+# Install: make hooks-install  (copies this file into .git/hooks/pre-commit)
+# ===================================================================
+
+set -euo pipefail
+
+ROOT_DIR=$(git rev-parse --show-toplevel)
+cd "$ROOT_DIR"
+
+# Colors
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
+
+info()    { echo -e "${YELLOW}[pre-commit][INFO]${NC} $*"; }
+success() { echo -e "${GREEN}[pre-commit][OK]${NC} $*"; }
+error()   { echo -e "${RED}[pre-commit][ERROR]${NC} $*"; }
+
+MODE="${DOCKER_SSOT_MODE:-compat}"
+
+# Only run if Docker-related files are in the index or if explicitly requested
+if ! git diff --cached --name-only | grep -E '^(docker/|dockerfiles/|docker-compose.*\.yml(\.optimized)?|scripts/(generate-compose-files\.sh|docker-versions-update\.sh|validate-docker-consistency\.sh))' >/dev/null; then
+  info "No Docker-related changes staged; skipping SSoT checks."
+  exit 0
+fi
+
+if [ "$MODE" = "envless" ]; then
+  info "Env-less mode active → skipping env file sync and using versions.toml directly"
+else
+  info "Synchronizing versions to env files..."
+  bash scripts/docker-versions-update.sh sync >/dev/null
+fi
+
+info "Regenerating docker-compose files (development)..."
+bash scripts/generate-compose-files.sh all development >/dev/null
+
+info "Validating Docker SSoT consistency (mode: $MODE)..."
+if ! DOCKER_SSOT_MODE="$MODE" bash scripts/validate-docker-consistency.sh all >/dev/null; then
+  error "SSoT validation failed. See details by running: DOCKER_SSOT_MODE=$MODE bash scripts/validate-docker-consistency.sh all"
+  exit 1
+fi
+
+info "Checking for drift (ignoring timestamps/comments)..."
+CHANGED=$(git diff --name-only || true)
+if [ -n "$CHANGED" ]; then
+  fail=0
+  for f in $CHANGED; do
+    DIFF_FILTERED=$(git diff --unified=0 -- "$f" \
+      | awk 'BEGIN{show=0} { \
+           if ($0 ~ /^\+\+\+|^---|^@@/) { next } \
+           if ($0 ~ /^[+-]# (Generated:|Last updated:)/) { next } \
+           if ($0 ~ /^[+-]#\s*Generated from docker\/versions.toml/) { next } \
+           if ($0 ~ /^[+-]#\s*Environment:/) { next } \
+           if ($0 ~ /^[+-]#\s*Source:/) { next } \
+           if ($0 ~ /^[+-]$/) { next } \
+           if ($0 ~ /^[+-]/) { print $0 } \
+         }')
+    if [ -n "$DIFF_FILTERED" ]; then
+      error "SSoT drift detected in $f (beyond timestamps):"
+      echo "$DIFF_FILTERED"
+      fail=1
+    fi
+  done
+  if [ $fail -ne 0 ]; then
+    if [ "$MODE" = "envless" ]; then
+      error "Generated artifacts differ from repository. Run:\n  DOCKER_SSOT_MODE=envless bash scripts/generate-compose-files.sh all\nThen add and commit the changes."
+    else
+      error "Generated artifacts differ from repository. Run:\n  bash scripts/docker-versions-update.sh sync\n  bash scripts/generate-compose-files.sh all\nThen add and commit the changes."
+    fi
+    exit 1
+  fi
+fi
+
+success "Docker SSoT checks passed."
+exit 0

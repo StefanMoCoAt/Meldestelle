@@ -20,59 +20,57 @@ Das Modul implementiert moderne **Domain-Driven Design (DDD)** Prinzipien mit ex
 
 Das Modul ist in zwei spezialisierte Komponenten aufgeteilt, um Konfiguration von der Client-Logik zu trennen:
 
-
 infrastructure/messaging/
 ├── messaging-config/   # Stellt die zentrale Kafka-Konfiguration bereit
 └── messaging-client/   # Stellt wiederverwendbare, reaktive Clients bereit
-
 
 ### `messaging-config`
 
 Dieses Modul zentralisiert die grundlegende Kafka-Konfiguration für das gesamte Projekt.
 
-* **Zweck:** Definiert Spring-Beans für die `ProducerFactory` (Basis für Producer) und eine `Map` mit Standard-Konfigurationen für Consumer (z.B. `bootstrap-servers`, `group-id`, Serializer).
-* **Vorteil:** Stellt Konsistenz sicher und vereinfacht die Einrichtung neuer Producer oder Consumer in den Services.
+- **Zweck:** Definiert Spring-Beans für die `ProducerFactory` (Basis für Producer) und eine `Map` mit Standard-Konfigurationen für Consumer (z.B. `bootstrap-servers`, `group-id`, Serializer).
+- **Vorteil:** Stellt Konsistenz sicher und vereinfacht die Einrichtung neuer Producer oder Consumer in den Services.
 
 ### `messaging-client`
 
 Dieses Modul baut auf der Konfiguration auf und stellt wiederverwendbare High-Level-Komponenten für die Interaktion mit Kafka bereit.
 
-#### Kern-Komponenten:
+#### Kern-Komponenten
 
-* **`EventPublisher` Interface**: Definiert moderne APIs für das Publizieren von Domain Events
-    * **Moderne APIs**: `publishEvent()` und `publishEvents()` mit Result Pattern
-    * **Legacy APIs**: `publishEventReactive()` und `publishEventsReactive()` (deprecated)
+- **`EventPublisher` Interface**: Definiert moderne APIs für das Publizieren von Domain Events
+  - **Moderne APIs**: `publishEvent()` und `publishEvents()` mit Result Pattern
+  - **Legacy APIs**: `publishEventReactive()` und `publishEventsReactive()` (deprecated)
 
-* **`EventConsumer` Interface**: Definiert APIs für das Empfangen von Domain Events
-    * **Moderne APIs**: `receiveEventsWithResult()` mit Flow<Result<T>> für typsichere Fehlerbehandlung
-    * **Legacy APIs**: `receiveEvents()` mit Flux<T> (deprecated)
+- **`EventConsumer` Interface**: Definiert APIs für das Empfangen von Domain Events
+  - **Moderne APIs**: `receiveEventsWithResult()` mit Flow<Result<T>> für typsichere Fehlerbehandlung
+  - **Legacy APIs**: `receiveEvents()` mit Flux<T> (deprecated)
 
-* **`KafkaEventPublisher`**: Implementierung des EventPublisher mit umfassendem Feature-Set
-    * Reaktive, nicht-blockierende Kafka-Integration mit `ReactiveKafkaProducerTemplate`
-    * Intelligente Retry-Logic mit exponential backoff
-    * Optimierte Batch-Verarbeitung mit kontrollierbarer Parallelität (10 concurrent operations)
-    * Comprehensive Logging und Progress-Tracking
+- **`KafkaEventPublisher`**: Implementierung des EventPublisher mit umfassendem Feature-Set
+  - Reaktive, nicht-blockierende Kafka-Integration mit `ReactiveKafkaProducerTemplate`
+  - Intelligente Retry-Logic mit exponential backoff
+  - Optimierte Batch-Verarbeitung mit kontrollierbarer Parallelität (10 concurrent operations)
+  - Comprehensive Logging und Progress-Tracking
 
-* **`KafkaEventConsumer`**: Implementierung des EventConsumer mit erweiterten Funktionen
-    * Connection-Pooling zur Wiederverwendung von KafkaReceiver-Instanzen
-    * Sichere Deserialisierung mit Trusted-Package-Validierung
-    * Manual Acknowledgment Control für bessere Kontrolle über Commit-Verhalten
-    * Consumer-Cache-Management für Ressourcenoptimierung
+- **`KafkaEventConsumer`**: Implementierung des EventConsumer mit erweiterten Funktionen
+  - Connection-Pooling zur Wiederverwendung von KafkaReceiver-Instanzen
+  - Sichere Deserialisierung mit Trusted-Package-Validierung
+  - Manual Acknowledgment Control für bessere Kontrolle über Commit-Verhalten
+  - Consumer-Cache-Management für Ressourcenoptimierung
 
-* **`MessagingError` Hierarchie**: Domain-spezifische Fehlertypen für strukturierte Fehlerbehandlung
-    * `SerializationError`, `DeserializationError`: Serialization-/Deserialization-Probleme
-    * `ConnectionError`: Netzwerk- und Verbindungsfehler
-    * `TimeoutError`: Zeitüberschreitungen
-    * `AuthenticationError`: Authentifizierungs-/Autorisierungsfehler
-    * `TopicConfigurationError`: Topic-Konfigurationsprobleme
-    * `UnexpectedError`: Allgemeine unerwartete Fehler
+- **`MessagingError` Hierarchie**: Domain-spezifische Fehlertypen für strukturierte Fehlerbehandlung
+  - `SerializationError`, `DeserializationError`: Serialization-/Deserialization-Probleme
+  - `ConnectionError`: Netzwerk- und Verbindungsfehler
+  - `TimeoutError`: Zeitüberschreitungen
+  - `AuthenticationError`: Authentifizierungs-/Autorisierungsfehler
+  - `TopicConfigurationError`: Topic-Konfigurationsprobleme
+  - `UnexpectedError`: Allgemeine unerwartete Fehler
 
-#### Vorteile:
+#### Vorteile
 
-* **Typsichere Fehlerbehandlung**: Result Pattern eliminiert unerwartete Exceptions
-* **Flexible APIs**: Sowohl moderne Coroutine-basierte als auch Legacy reaktive APIs
-* **Production-Ready**: Umfassendes Retry-Management, Observability und Ressourcenoptimierung
-* **Domain-Driven Design**: Explizite Fehlertypen und saubere Abstraktionen
+- **Typsichere Fehlerbehandlung**: Result Pattern eliminiert unerwartete Exceptions
+- **Flexible APIs**: Sowohl moderne Coroutine-basierte als auch Legacy reaktive APIs
+- **Production-Ready**: Umfassendes Retry-Management, Observability und Ressourcenoptimierung
+- **Domain-Driven Design**: Explizite Fehlertypen und saubere Abstraktionen
 
 ## Verwendung
 
@@ -81,6 +79,7 @@ Ein Microservice, der Nachrichten senden oder empfangen möchte, deklariert eine
 ### Moderne API (Result Pattern + Coroutines) - **Empfohlen**
 
 **Beispiel für das Senden einer Nachricht mit typsicherer Fehlerbehandlung:**
+
 ```kotlin
 @Service
 class EventNotificationService(
@@ -113,6 +112,7 @@ class EventNotificationService(
 ```
 
 **Beispiel für das Empfangen von Nachrichten mit typsicherer Fehlerbehandlung:**
+
 ```kotlin
 @Component
 class ModernEventListener(
@@ -175,6 +175,7 @@ class ModernEventListener(
 ```
 
 **Beispiel für Consumer mit Coroutines und strukturierter Parallelität:**
+
 ```kotlin
 @Service
 class BatchEventProcessor(
@@ -215,6 +216,7 @@ class BatchEventProcessor(
 ### Legacy Reactive API - **Wird depreciert**
 
 **Beispiel für das Senden einer Nachricht (reaktiv, nicht-blockierend):**
+
 ```kotlin
 @Service
 class LegacyEventNotificationService(
@@ -235,6 +237,7 @@ class LegacyEventNotificationService(
 ```
 
 **Beispiel für das Empfangen von Nachrichten (reaktiv):**
+
 ```kotlin
 @Component
 class EventListener(
@@ -433,54 +436,54 @@ dependencies {
 Die Zuverlässigkeit des Moduls wird durch eine mehrstufige Teststrategie sichergestellt, die sowohl Unit- als auch Integrationstests umfasst:
 
 ### Integrationstests (Goldstandard)
-* **Testcontainers**: Der `KafkaIntegrationTest` startet einen echten Apache Kafka Docker-Container, um die Funktionalität unter realen Bedingungen zu validieren
-* **Reaktives Testen**: Nutzt Project Reactor's `StepVerifier` für deterministische Tests der reaktiven Streams ohne unzuverlässige Thread.sleep-Aufrufe
-* **Lifecycle Management**: Saubere Ressourcenverwaltung über @BeforeEach und @AfterEach für korrekte Freigabe von Producer-Threads
-* **End-to-End Validierung**: Vollständige Publish-Subscribe-Zyklen mit echtem Kafka-Cluster
+- **Testcontainers**: Der `KafkaIntegrationTest` startet einen echten Apache Kafka Docker-Container, um die Funktionalität unter realen Bedingungen zu validieren
+- **Reaktives Testen**: Nutzt Project Reactor's `StepVerifier` für deterministische Tests der reaktiven Streams ohne unzuverlässige Thread.sleep-Aufrufe
+- **Lifecycle Management**: Saubere Ressourcenverwaltung über @BeforeEach und @AfterEach für korrekte Freigabe von Producer-Threads
+- **End-to-End Validierung**: Vollständige Publish-Subscribe-Zyklen mit echtem Kafka-Cluster
 
 ### Unit Tests
-* **`KafkaEventPublisherErrorTest`**: Fokussierte Tests für Fehlerbehandlung mit MockK für isolierte Testszenarien
-* **Fehlerszenarien**: Systematische Tests für Serialization-, Authentication-, Connection- und Timeout-Fehler
-* **Batch-Verarbeitung**: Validierung von Batch-Operationen und Empty-Batch-Handling
-* **Retry-Logic**: Tests für intelligente Retry-Mechanismen und Retry-Exhaustion
+- **`KafkaEventPublisherErrorTest`**: Fokussierte Tests für Fehlerbehandlung mit MockK für isolierte Testszenarien
+- **Fehlerszenarien**: Systematische Tests für Serialization-, Authentication-, Connection- und Timeout-Fehler
+- **Batch-Verarbeitung**: Validierung von Batch-Operationen und Empty-Batch-Handling
+- **Retry-Logic**: Tests für intelligente Retry-Mechanismen und Retry-Exhaustion
 
 ### Sicherheits- und Konfigurationstests
-* **`KafkaSecurityTest`**: Validierung der Sicherheitskonfigurationen und Trusted-Package-Verwaltung
-* **`KafkaEventConsumerCacheTest`**: Tests für Consumer-Caching und Ressourcenoptimierung
-* **Konfigurationsvalidierung**: Automatische Validierung aller Konfigurationsparameter
+- **`KafkaSecurityTest`**: Validierung der Sicherheitskonfigurationen und Trusted-Package-Verwaltung
+- **`KafkaEventConsumerCacheTest`**: Tests für Consumer-Caching und Ressourcenoptimierung
+- **Konfigurationsvalidierung**: Automatische Validierung aller Konfigurationsparameter
 
 ## Neue Features und Optimierungen (2025)
 
 ### Domain-Driven Design (DDD) Integration
-* **Result Pattern APIs**: Neue suspending Coroutine-basierte APIs mit typsicherer Fehlerbehandlung über das Result Pattern
-* **Domain-spezifische Fehlertypen**: Umfassende `MessagingError` Hierarchie (SerializationError, ConnectionError, TimeoutError, AuthenticationError, etc.)
-* **Explizite Fehlerbehandlung**: Eliminiert unerwartete Exceptions durch strukturierte Fehler-Typen
-* **Backward Compatibility**: Legacy-reactive APIs bleiben verfügbar, sind aber als deprecated markiert
+- **Result Pattern APIs**: Neue suspending Coroutine-basierte APIs mit typsicherer Fehlerbehandlung über das Result Pattern
+- **Domain-spezifische Fehlertypen**: Umfassende `MessagingError` Hierarchie (SerializationError, ConnectionError, TimeoutError, AuthenticationError, etc.)
+- **Explizite Fehlerbehandlung**: Eliminiert unerwartete Exceptions durch strukturierte Fehler-Typen
+- **Backward Compatibility**: Legacy-reactive APIs bleiben verfügbar, sind aber als deprecated markiert
 
 ### Erweiterte Konfigurationsvalidierung
-* **Automatische Validierung**: Alle Konfigurationsparameter werden automatisch bei der Zuweisung validiert
-* **Bootstrap-Server-Format**: Unterstützt sowohl einfache (`host:port`) als auch protokoll-präfixierte Formate (`PLAINTEXT://host:port`)
-* **Sicherheitsfeatures**: Konfigurierbare Sicherheitsfunktionen für Produktionsumgebungen
-* **Connection-Pool-Management**: Konfigurierbare Verbindungspool-Größe für bessere Ressourcenverwaltung
+- **Automatische Validierung**: Alle Konfigurationsparameter werden automatisch bei der Zuweisung validiert
+- **Bootstrap-Server-Format**: Unterstützt sowohl einfache (`host:port`) als auch protokoll-präfixierte Formate (`PLAINTEXT://host:port`)
+- **Sicherheitsfeatures**: Konfigurierbare Sicherheitsfunktionen für Produktionsumgebungen
+- **Connection-Pool-Management**: Konfigurierbare Verbindungspool-Größe für bessere Ressourcenverwaltung
 
 ### Verbesserte Observability
-* **Strukturierte Logs**: Erweiterte Logging-Informationen mit GroupID, Timestamps und Event-Kontext
-* **Fehlerkontext**: Detaillierte Fehlerinformationen mit Retry-Status und Event-Type-Details
-* **Performance-Tracking**: Bessere Nachvollziehbarkeit von Batch-Operationen und Retry-Versuchen
-* **Batch-Progress-Logging**: Automatisches Progress-Logging bei großen Batch-Operationen (alle 100 Events)
+- **Strukturierte Logs**: Erweiterte Logging-Informationen mit GroupID, Timestamps und Event-Kontext
+- **Fehlerkontext**: Detaillierte Fehlerinformationen mit Retry-Status und Event-Type-Details
+- **Performance-Tracking**: Bessere Nachvollziehbarkeit von Batch-Operationen und Retry-Versuchen
+- **Batch-Progress-Logging**: Automatisches Progress-Logging bei großen Batch-Operationen (alle 100 Events)
 
 ### Robustheit-Verbesserungen
-* **Intelligente Retry-Logik**: Differenzierte Retry-Strategien basierend auf Fehlertypen (keine Retries für Serialization/Auth-Fehler)
-* **Exponential Backoff**: Konfigurierbare Retry-Delays mit exponential backoff (1s initial, max 10s backoff)
-* **Controlled Batch Concurrency**: Optimierte Batch-Verarbeitung mit konfigurierbarer Parallelität (Standard: 10 concurrent operations)
-* **Testcontainer-Kompatibilität**: Vollständige Kompatibilität mit Docker-basierten Tests
-* **Enhanced Error Handling**: Verbesserte Fehlerbehandlung mit strukturierten Kontext-Informationen
+- **Intelligente Retry-Logik**: Differenzierte Retry-Strategien basierend auf Fehlertypen (keine Retries für Serialization/Auth-Fehler)
+- **Exponential Backoff**: Konfigurierbare Retry-Delays mit exponential backoff (1s initial, max 10s backoff)
+- **Controlled Batch Concurrency**: Optimierte Batch-Verarbeitung mit konfigurierbarer Parallelität (Standard: 10 concurrent operations)
+- **Testcontainer-Kompatibilität**: Vollständige Kompatibilität mit Docker-basierten Tests
+- **Enhanced Error Handling**: Verbesserte Fehlerbehandlung mit strukturierten Kontext-Informationen
 
 ### Test-Suite Optimierung
-* **Fokussierte Unit Tests**: Bereinigte Test-Suite mit Fokus auf essentielle Funktionalität
-* **MockK Integration**: Moderne Mocking-Frameworks für isolierte Unit Tests
-* **StepVerifier Korrekturen**: Korrigierte reaktive Test-Assertions für `Mono<Unit>` Rückgabetypen
-* **Reduced Test Complexity**: Entfernung unnötiger Performance- und Logging-Tests zugunsten fokussierter Funktionstests
+- **Fokussierte Unit Tests**: Bereinigte Test-Suite mit Fokus auf essentielle Funktionalität
+- **MockK Integration**: Moderne Mocking-Frameworks für isolierte Unit Tests
+- **StepVerifier Korrekturen**: Korrigierte reaktive Test-Assertions für `Mono<Unit>` Rückgabetypen
+- **Reduced Test Complexity**: Entfernung unnötiger Performance- und Logging-Tests zugunsten fokussierter Funktionstests
 
 ## Troubleshooting
 
@@ -493,6 +496,7 @@ Die Zuverlässigkeit des Moduls wird durch eine mehrstufige Teststrategie sicher
 **Mögliche Ursachen und Lösungen**:
 
 1. **Kafka-Cluster-Erreichbarkeit prüfen**:
+
 ```bash
 # Teste Verbindung zu Kafka-Cluster
 telnet kafka-cluster 9092
@@ -502,12 +506,14 @@ nc -zv kafka-cluster 9092
 ```
 
 2. **Bootstrap-Server-Konfiguration validieren**:
+
 ```kotlin
 // Multiple Broker für High Availability
 kafkaConfig.bootstrapServers = "kafka-01:9092,kafka-02:9092,kafka-03:9092"
 ```
 
 3. **Netzwerk-Timeouts erhöhen für langsame Verbindungen**:
+
 ```kotlin
 // Producer-Konfiguration erweitern
 override fun producerConfigs(): Map<String, Any> = super.producerConfigs() + mapOf(
@@ -521,6 +527,7 @@ override fun producerConfigs(): Map<String, Any> = super.producerConfigs() + map
 **Problem**: `MessagingError.DeserializationError` beim Empfangen von Nachrichten
 
 **Lösungsansätze**:
+
 ```kotlin
 // 1. Trusted Packages erweitern
 kafkaConfig.trustedPackages = "at.mocode.*,com.mycompany.*,java.util.*"
@@ -544,6 +551,7 @@ private suspend fun handlePoisonMessage(topic: String, error: MessagingError.Des
 **Problem**: Langsame Message-Verarbeitung oder hohe Latenz
 
 **Optimierungsstrategien**:
+
 ```kotlin
 // 1. Connection Pool vergrößern
 kafkaConfig.connectionPoolSize = 50
@@ -568,6 +576,7 @@ suspend fun processEventsBatch(events: List<EventDetails>) {
 **Problem**: Speicherverbrauch steigt kontinuierlich
 
 **Lösungen**:
+
 ```kotlin
 // 1. Consumer-Cache korrekt verwalten
 @PreDestroy
@@ -696,6 +705,7 @@ A: Die moderne API nutzt das Result Pattern für explizite Fehlerbehandlung und 
 **Q: Wann sollte ich Batch-Verarbeitung verwenden?**
 
 A: Batch-Verarbeitung ist empfohlen bei:
+
 - Mehr als 10 Events pro Sekunde
 - Hoher Netzwerk-Latenz zum Kafka-Cluster
 - Events, die zusammen verarbeitet werden können
@@ -703,6 +713,7 @@ A: Batch-Verarbeitung ist empfohlen bei:
 **Q: Wie handle ich Backpressure bei hohem Event-Durchsatz?**
 
 A: Nutzen Sie die eingebauten Flow-Operatoren:
+
 ```kotlin
 eventConsumer.receiveEventsWithResult(topic, EventType::class.java)
     .asFlow()
@@ -714,8 +725,6 @@ eventConsumer.receiveEventsWithResult(topic, EventType::class.java)
 ---
 
 **Letzte Aktualisierung**: 15. August 2025
-
-
 
 ## Aktualisierungen (September 2025)
 

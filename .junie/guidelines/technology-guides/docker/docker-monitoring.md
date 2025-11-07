@@ -1,6 +1,7 @@
 # Docker-Monitoring und Observability
 
 ---
+
 guideline_type: "technology"
 scope: "docker-monitoring"
 audience: ["developers", "devops", "ai-assistants"]
@@ -8,6 +9,7 @@ last_updated: "2025-09-15"
 dependencies: ["docker-overview.md", "docker-architecture.md"]
 related_files: ["docker-compose.yml", "config/monitoring/*", "config/grafana/*", "config/prometheus/*"]
 ai_context: "Monitoring-Setup, Prometheus-Metriken, Grafana-Dashboards, Health-Checks und Log-Aggregation"
+
 ---
 
 ## 📊 Monitoring und Observability
@@ -44,13 +46,13 @@ labels:
 
 ### Health Check Matrix
 
-| Service | Endpoint | Erwartung | Timeout |
-|---------|----------|-----------|---------|
-| API Gateway | `/actuator/health` | `{"status":"UP"}` | 15s |
-| Ping Service | `/actuator/health/readiness` | HTTP 200 | 3s |
-| PostgreSQL | `pg_isready` | Connection OK | 5s |
-| Redis | `redis-cli ping` | PONG | 5s |
-| Keycloak | `/health/ready` | HTTP 200 | 5s |
+| Service      | Endpoint                     | Erwartung         | Timeout |
+|--------------|------------------------------|-------------------|---------|
+| API Gateway  | `/actuator/health`           | `{"status":"UP"}` | 15s     |
+| Ping Service | `/actuator/health/readiness` | HTTP 200          | 3s      |
+| PostgreSQL   | `pg_isready`                 | Connection OK     | 5s      |
+| Redis        | `redis-cli ping`             | PONG              | 5s      |
+| Keycloak     | `/health/ready`              | HTTP 200          | 5s      |
 
 ### Log Aggregation
 
@@ -65,6 +67,7 @@ docker-compose logs --follow --tail=100 api-gateway | jq -r '.message'
 ## 🎯 AI-Assistenten: Monitoring-Schnellreferenz
 
 ### Monitoring-URLs
+
 - **Grafana Dashboard:** http://localhost:3000 (admin/admin)
 - **Prometheus Targets:** http://localhost:9090/targets
 - **Prometheus Metrics:** http://localhost:9090/metrics
@@ -72,13 +75,13 @@ docker-compose logs --follow --tail=100 api-gateway | jq -r '.message'
 
 ### Wichtige Metrics
 
-| Metric-Typ | Beispiel | Beschreibung |
-|------------|----------|--------------|
-| JVM Memory | `jvm_memory_used_bytes` | Speicherverbrauch Java-Services |
-| HTTP Requests | `http_requests_total` | API-Request-Zähler |
-| Database Connections | `hikaricp_connections` | Pool-Verbindungen |
-| Kafka Lag | `kafka_consumer_lag` | Consumer-Verzögerung |
-| Custom Business | `meldestelle_registrations_total` | Fachliche KPIs |
+| Metric-Typ           | Beispiel                          | Beschreibung                    |
+|----------------------|-----------------------------------|---------------------------------|
+| JVM Memory           | `jvm_memory_used_bytes`           | Speicherverbrauch Java-Services |
+| HTTP Requests        | `http_requests_total`             | API-Request-Zähler              |
+| Database Connections | `hikaricp_connections`            | Pool-Verbindungen               |
+| Kafka Lag            | `kafka_consumer_lag`              | Consumer-Verzögerung            |
+| Custom Business      | `meldestelle_registrations_total` | Fachliche KPIs                  |
 
 ### Health-Check Befehle
 
@@ -115,6 +118,7 @@ docker-compose logs api-gateway | grep -i "took\|duration\|time"
 ### Dashboard-Setup
 
 #### Infrastructure-Dashboard
+
 ```json
 {
   "dashboard": {
@@ -142,6 +146,7 @@ docker-compose logs api-gateway | grep -i "took\|duration\|time"
 ```
 
 #### Application-Dashboard
+
 ```json
 {
   "dashboard": {
@@ -245,8 +250,8 @@ scrape_configs:
 ---
 
 **Navigation:**
-- [Docker-Overview](./docker-overview.md) - Grundlagen und Philosophie
-- [Docker-Architecture](./docker-architecture.md) - Container-Services und Struktur
-- [Docker-Development](./docker-development.md) - Entwicklungsworkflow
-- [Docker-Production](./docker-production.md) - Production-Deployment
-- [Docker-Troubleshooting](./docker-troubleshooting.md) - Problemlösung
+- [docker-overview](./docker-overview.md) - Grundlagen und Philosophie
+- [docker-architecture](./docker-architecture.md) - Container-Services und Struktur
+- [docker-development](./docker-development.md) - Entwicklungsworkflow
+- [docker-production](./docker-production.md) - Production-Deployment
+- [docker-troubleshooting](./docker-troubleshooting.md) - Problemlösung

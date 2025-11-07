@@ -1,0 +1,6 @@
+extends:
+  - spectral:oas
+
+rules:
+  # Keep defaults from spectral:oas; tweak minimal project-specific preferences here if needed
+  info-contact: warn

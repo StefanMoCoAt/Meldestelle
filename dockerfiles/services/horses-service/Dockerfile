@@ -28,7 +28,7 @@ FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 ARG SERVICE_PATH=horses/horses-service
 ARG SERVICE_NAME=horses-service
 ARG SERVICE_PORT=8085
-ARG SPRING_PROFILES_ACTIVE=docker
+ARG SPRING_PROFILES_ACTIVE
 
 LABEL stage=builder
 LABEL maintainer="Meldestelle Development Team"

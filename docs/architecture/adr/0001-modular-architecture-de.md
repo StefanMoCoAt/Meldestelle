@@ -6,18 +6,21 @@ Akzeptiert
 
 ## Kontext
 
-Das Meldestelle-System wurde ursprünglich als monolithische Anwendung entwickelt. Mit zunehmender Komplexität und Größe des Systems traten mehrere Herausforderungen auf:
+Das Meldestelle-System wurde ursprünglich als monolithische Anwendung entwickelt. Mit zunehmender Komplexität und Größe
+des Systems traten mehrere Herausforderungen auf:
 
 1. Der Quellcode wurde schwer zu warten und zu verstehen
-2. Entwicklungsteams mussten eng koordinieren, was die Entwicklung verlangsamte
+2. Entwicklungsteams mussten sich eng koordinieren, was die Entwicklung verlangsamte
 3. Die gesamte Anwendung musste skaliert werden, auch wenn nur bestimmte Teile mehr Ressourcen benötigten
 4. Technologieentscheidungen wurden durch die monolithische Architektur eingeschränkt
 
-Das Team musste entscheiden, ob es mit dem monolithischen Ansatz fortfahren oder zu einer modulareren Architektur migrieren sollte.
+Das Team musste entscheiden, ob es mit dem monolithischen Ansatz fortfahren oder zu einer modularenen Architektur
+migrieren sollte.
 
 ## Entscheidung
 
-Wir haben uns entschieden, von einer monolithischen Struktur zu einer modularen Architektur zu migrieren und das System in die folgenden Module zu organisieren:
+Wir haben uns entschieden, von einer monolithischen Struktur zu einer modularen Architektur zu migrieren und das System
+in die folgenden Module zu organisieren:
 
 - **core**: Gemeinsame Kernkomponenten
 - **masterdata**: Stammdatenverwaltung
@@ -27,7 +30,8 @@ Wir haben uns entschieden, von einer monolithischen Struktur zu einer modularen 
 - **infrastructure**: Gemeinsame Infrastrukturkomponenten
 - **client**: Client-Anwendungen
 
-Jedes Domänenmodul (masterdata, members, horses, events) folgt einem Clean-Architecture-Ansatz mit separaten API-, Anwendungs-, Domänen-, Infrastruktur- und Service-Schichten.
+Jedes Domänenmodul (masterdata, members, horses, events) folgt einem Clean-Architecture-Ansatz mit separaten API-,
+Anwendung-, Domänen-, Infrastruktur- und Service-Schichten.
 
 ## Konsequenzen
 
@@ -55,14 +59,17 @@ Jedes Domänenmodul (masterdata, members, horses, events) folgt einem Clean-Arch
 
 ### Erweiterter Monolith
 
-Wir haben in Betracht gezogen, die interne Struktur des Monolithen mit besseren Modulgrenzen zu verbessern, ihn aber als eine einzige bereitstellbare Einheit zu behalten. Dies wäre einfacher bereitzustellen gewesen, hätte aber die Probleme mit der Skalierung und Technologieflexibilität nicht gelöst.
+Wir haben in Betracht gezogen, die interne Struktur des Monolithen mit besseren Modulgrenzen zu verbessern, ihn aber als
+eine einzige bereitstellbare Einheit zu behalten. Dies wäre einfacher bereitzustellen gewesen, hätte aber die Probleme
+mit der Skalierung und Technologieflexibilität nicht gelöst.
 
 ### Microservices
 
-Wir haben einen feingranulareren Microservices-Ansatz mit vielen kleineren Diensten in Betracht gezogen. Dies hätte maximale Flexibilität geboten, aber für unsere aktuellen Bedürfnisse übermäßige Komplexität und betrieblichen Overhead eingeführt.
+Wir haben einen feingranularen Microservices-Ansatz mit vielen kleineren Diensten in Betracht gezogen. Dies hätte
+maximale Flexibilität geboten, aber für unsere aktuellen Bedürfnisse übermäßige Komplexität und betrieblichen Overhead
+eingeführt.
 
 ## Referenzen
 
-- [Migrationshinweise in README.md](../../../../README.md#aktuelle-migrationshinweise)
-- [Modular Monoliths von Simon Brown](https://simonbrown.je/blog/modularity-and-microservices/)
-- [Clean Architecture von Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Modular Monoliths von Simon Brown](https://meldestelle-pro.youtrack.cloud/api/files/526-8?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTh8QldrSXd1MHoyUlE1T3lZSjBDNVh4Ry1zcGZZM1lWSlE0VXN2M2FQSXNDbw0K&updated=1762338956551)
+- [Clean Architecture von Robert C. Martin](https://meldestelle-pro.youtrack.cloud/api/files/526-10?sign=MTc2MjU2MDAwMDAwMHwyLTF8NTI2LTEwfF9XbVdSakVpSW5HV1VjalY3UjhCMGFub2NIQXdPTUkyM3FFTnNTdGNIRmsNCg&updated=1762339225451)

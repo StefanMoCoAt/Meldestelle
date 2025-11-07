@@ -7,8 +7,9 @@ set -e
 
 # Konfiguration
 KEYCLOAK_URL=${KEYCLOAK_URL:-"http://localhost:8180"}
-ADMIN_USER=${KEYCLOAK_ADMIN:-"admin"}
-ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-"admin"}
+# Support both new KC_BOOTSTRAP_* (Keycloak 26+) and legacy KEYCLOAK_* env vars
+ADMIN_USER=${KC_BOOTSTRAP_ADMIN_USERNAME:-${KEYCLOAK_ADMIN:-"admin"}}
+ADMIN_PASSWORD=${KC_BOOTSTRAP_ADMIN_PASSWORD:-${KEYCLOAK_ADMIN_PASSWORD:-"admin"}}
 REALM_NAME="meldestelle"
 
 echo "🚀 Starting Keycloak setup for Meldestelle..."

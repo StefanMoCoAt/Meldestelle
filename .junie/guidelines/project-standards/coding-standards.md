@@ -19,7 +19,7 @@ ai_context: "Coding conventions, naming standards, type safety, error handling, 
 * **Code-Stil:** Offizielle Kotlin Coding Conventions, durch `Detekt` geprüft.
 
 > **🤖 AI-Assistant Hinweis:**
-> Alle Kotlin-Code muss den offiziellen Kotlin Coding Conventions entsprechen:
+> Alle Kotlin-Code müssen den offiziellen Kotlin Coding Conventions entsprechen:
 > - **Detekt-Validierung:** Automatische Code-Style-Prüfung
 > - **Java 21+ Kompatibilität:** Nutze moderne Java-Features wo sinnvoll
 > - **Multiplatform:** Code sollte plattformübergreifend funktionieren
@@ -69,13 +69,13 @@ logger.info {
 
 ### Namenskonventionen-Übersicht
 
-| Element | Convention | Beispiel |
-|---------|------------|----------|
-| Klassen/Interfaces | PascalCase | `MemberService`, `EventRepository` |
-| Funktionen/Variablen | camelCase | `authenticateUser`, `memberRepository` |
-| Konstanten | SCREAMING_SNAKE_CASE | `MAX_RETRY_ATTEMPTS` |
-| Test-Methoden | Backticks beschreibend | `` `should return Success for valid credentials` `` |
-| Enum-Werte | PascalCase | `MemberStatus.ACTIVE` |
+| Element              | Convention             | Beispiel                                            |
+|----------------------|------------------------|-----------------------------------------------------|
+| Klassen/Interfaces   | PascalCase             | `MemberService`, `EventRepository`                  |
+| Funktionen/Variablen | camelCase              | `authenticateUser`, `memberRepository`              |
+| Konstanten           | SCREAMING_SNAKE_CASE   | `MAX_RETRY_ATTEMPTS`                                |
+| Test-Methoden        | Backticks beschreibend | `` `should return Success for valid credentials` `` |
+| Enum-Werte           | PascalCase             | `MemberStatus.ACTIVE`                               |
 
 ### Code-Qualitäts-Checkliste
 
@@ -88,6 +88,7 @@ logger.info {
 ### Häufige Code-Patterns
 
 #### Typsichere IDs
+
 ```kotlin
 @JvmInline
 value class EntityId(val value: UUID) {
@@ -102,6 +103,7 @@ value class EntityId(val value: UUID) {
 ```
 
 #### Error-Handling mit Result
+
 ```kotlin
 interface EntityRepository {
     suspend fun findById(id: EntityId): Result<Entity?, RepositoryError>
@@ -116,6 +118,7 @@ when (val result = repository.findById(entityId)) {
 ```
 
 #### Structured Logging
+
 ```kotlin
 class EntityService {
     private val logger = LoggerFactory.getLogger(EntityService::class.java)
@@ -149,6 +152,7 @@ class EntityService {
 ```
 
 #### Sealed Class Hierarchie für Fehler
+
 ```kotlin
 sealed interface DomainError {
     val message: String
@@ -210,7 +214,7 @@ potential-bugs:
 ---
 
 **Navigation:**
-- [Master-Guideline](../master-guideline.md) - Übergeordnete Projektrichtlinien
+- [Master-Guideline](../master-guideline.md) - übergeordnete Projektrichtlinien
 - [Testing-Standards](./testing-standards.md) - Test-Qualitätsstandards
 - [Documentation-Standards](./documentation-standards.md) - Dokumentationsrichtlinien
 - [Architecture-Principles](./architecture-principles.md) - Architektur-Grundsätze

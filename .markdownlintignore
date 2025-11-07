@@ -1,0 +1,17 @@
+# Generierte Dateien ignorieren
+docs/api/generated/
+build/
+node_modules/
+kotlin-js-store/
+
+# Externe Dokumentation
+.junie/
+
+# Temporäre/Legacy-Dateien
+.vscode/
+.idea/
+.fleet/
+
+# Spezielle Markdown-Dateien
+CHANGELOG.md
+LICENSE

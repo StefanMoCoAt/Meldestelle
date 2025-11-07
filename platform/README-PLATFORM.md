@@ -10,12 +10,10 @@ Das Modul agiert als eine interne "Single Source of Truth" für alle externen Bi
 
 Das Platform-Modul ist in drei spezialisierte Untermodule aufgeteilt, die jeweils eine klare Aufgabe haben:
 
-
 platform/
 ├── platform-bom/                 # Bill of Materials (BOM) - Erzwingt Versionen
 ├── platform-dependencies/        # Bündelt gemeinsame Laufzeit-Abhängigkeiten
 └── platform-testing/             # Bündelt gemeinsame Test-Abhängigkeiten
-
 
 ### `platform-bom`
 
@@ -31,6 +29,7 @@ Ein einfaches "Sammelmodul", das die am häufigsten benötigten Laufzeit-Abhäng
 
 * **Zweck:** Vereinfacht die `build.gradle.kts`-Dateien der Service-Module. Anstatt 5-6 einzelne `kotlinx`- und Logging-Bibliotheken hinzuzufügen, genügt eine einzige Abhängigkeit zu diesem Modul.
 * **Verwendung:**
+
     ```kotlin
     // In einem Service-Modul
     dependencies {
@@ -44,12 +43,14 @@ Analog zu `platform-dependencies`, aber speziell für Test-Bibliotheken.
 
 * **Zweck:** Stellt ein konsistentes Set an Test-Frameworks (JUnit 5, MockK, AssertJ) und Werkzeugen (Testcontainers) für alle Module bereit.
 * **Verwendung:**
+
     ```kotlin
     // In einem Service-Modul
     dependencies {
         testImplementation(projects.platform.platformTesting)
     }
     ```
+
 * **Optimierung:** Dieses Modul nutzt die in `libs.versions.toml` definierten `[bundles]`, um die Build-Datei extrem kurz und lesbar zu halten.
 
 ---
