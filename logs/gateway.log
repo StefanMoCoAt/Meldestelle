@@ -1,25 +1,25 @@
-2025-10-15 10:31:21.532 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
-2025-10-15 10:31:21.556 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.8 with PID 20139 (/home/stefan/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan in /home/stefan/WsMeldestelle/Meldestelle)
-2025-10-15 10:31:21.556 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.6, Spring v6.2.11
-2025-10-15 10:31:21.556 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 1 profile is active: "dev"
-2025-10-15 10:31:22.587 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=4eb90187-1826-32ce-9dc7-fa80cb000915
-2025-10-15 10:31:24.216 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
-2025-10-15 10:31:24.216 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
-2025-10-15 10:31:24.217 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
-2025-10-15 10:31:24.751 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
-2025-10-15 10:31:25.256 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2025-10-15 10:31:25.331 [catalogWatchTaskScheduler-1] ERROR [] o.s.c.c.discovery.ConsulCatalogWatch - Error watching Consul CatalogServices
+2025-11-06 10:46:06.716 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2025-11-06 10:46:06.759 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.8 with PID 15079 (/home/stefan/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan in /home/stefan/WsMeldestelle/Meldestelle)
+2025-11-06 10:46:06.759 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.6, Spring v6.2.11
+2025-11-06 10:46:06.760 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 1 profile is active: "dev"
+2025-11-06 10:46:08.287 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=4eb90187-1826-32ce-9dc7-fa80cb000915
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
+2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-11-06 10:46:10.778 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
+2025-11-06 10:46:11.345 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2025-11-06 10:46:11.425 [catalogWatchTaskScheduler-1] ERROR [] o.s.c.c.discovery.ConsulCatalogWatch - Error watching Consul CatalogServices
 com.ecwid.consul.transport.TransportException: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Verbindungsaufbau abgelehnt
 	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
 	at com.ecwid.consul.transport.AbstractHttpTransport.makeGetRequest(AbstractHttpTransport.java:36)
@@ -59,9 +59,9 @@ Caused by: java.net.ConnectException: Verbindungsaufbau abgelehnt
 	at org.apache.http.conn.socket.PlainConnectionSocketFactory.connectSocket(PlainConnectionSocketFactory.java:75)
 	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:142)
 	... 24 common frames omitted
-2025-10-15 10:31:25.350 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
-2025-10-15 10:31:25.352 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-b001fd13-0b36-40e4-afae-566661a43ceb', name='meldestelle', tags=[], address='fedora', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://fedora:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
-2025-10-15 10:31:25.361 [main] ERROR [] o.s.c.c.s.ConsulServiceRegistry - Error registering service with consul: NewService{id='meldestelle-8080-b001fd13-0b36-40e4-afae-566661a43ceb', name='meldestelle', tags=[], address='fedora', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://fedora:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
+2025-11-06 10:46:11.441 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
+2025-11-06 10:46:11.444 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-5e7cc71f-5a59-423a-b812-15401589451e', name='meldestelle', tags=[], address='fedora', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://fedora:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
+2025-11-06 10:46:11.452 [main] ERROR [] o.s.c.c.s.ConsulServiceRegistry - Error registering service with consul: NewService{id='meldestelle-8080-5e7cc71f-5a59-423a-b812-15401589451e', name='meldestelle', tags=[], address='fedora', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://fedora:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
 com.ecwid.consul.transport.TransportException: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Verbindungsaufbau abgelehnt
 	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
 	at com.ecwid.consul.transport.AbstractHttpTransport.makePutRequest(AbstractHttpTransport.java:49)
@@ -122,11 +122,11 @@ Caused by: java.net.ConnectException: Verbindungsaufbau abgelehnt
 	at org.apache.http.conn.socket.PlainConnectionSocketFactory.connectSocket(PlainConnectionSocketFactory.java:75)
 	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:142)
 	... 45 common frames omitted
-2025-10-15 10:31:27.376 [main] WARN  [] o.s.b.w.r.c.AnnotationConfigReactiveWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2025-10-15 10:31:27.401 [main] INFO  [] o.s.b.a.l.ConditionEvaluationReportLogger - 
+2025-11-06 10:46:13.466 [main] WARN  [] o.s.b.w.r.c.AnnotationConfigReactiveWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2025-11-06 10:46:13.486 [main] INFO  [] o.s.b.a.l.ConditionEvaluationReportLogger - 
 
 Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-10-15 10:31:27.416 [main] ERROR [] o.s.boot.SpringApplication - Application run failed
+2025-11-06 10:46:13.499 [main] ERROR [] o.s.boot.SpringApplication - Application run failed
 org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
 	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:408)
 	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:394)

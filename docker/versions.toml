@@ -13,7 +13,7 @@ node = "22.21.0"
 
 # --- Base Images ---
 nginx = "1.28.0-alpine"
-alpine = "3.19"
+alpine = "3.22"
 eclipse-temurin-jdk = "21-jdk-alpine"
 eclipse-temurin-jre = "21-jre-alpine"
 
