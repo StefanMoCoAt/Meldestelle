@@ -100,8 +100,8 @@ def get_project_knowledge_base(project_id: str):
   """Liest die Knowledge-Base eines Projekts, inkl. Root-Container-Artikel.
   Versucht zuerst /api/projects/{id}, fällt bei Fehler auf /api/admin/projects/{id} zurück.
   """
-  # 1) Primärer Endpunkt
-  url1 = yt_url(f"/api/projects/{project_id}?fields=knowledgeBase(id,articlesCount,rootArticle(id,title))")
+  # 1) Primärer Endpunkt (minimal fields)
+  url1 = yt_url(f"/api/projects/{project_id}?fields=knowledgeBase(id,rootArticle(id,title))")
   r1 = http("GET", url1)
   if r1.status_code == 200:
     data = r1.json()
@@ -112,8 +112,8 @@ def get_project_knowledge_base(project_id: str):
   else:
     print(f"[YT] Projekt-Details (\"/api/projects/{project_id}\") fehlgeschlagen: HTTP {r1.status_code} {r1.text[:200]}")
 
-  # 2) Fallback: Admin-Endpunkt
-  url2 = yt_url(f"/api/admin/projects/{project_id}?fields=knowledgeBase(id,articlesCount,rootArticle(id,title))")
+  # 2) Fallback: Admin-Endpunkt (minimal fields)
+  url2 = yt_url(f"/api/admin/projects/{project_id}?fields=knowledgeBase(id,rootArticle(id,title))")
   r2 = http("GET", url2)
   if r2.status_code == 200:
     data = r2.json()
@@ -134,7 +134,7 @@ def find_article_in_kb_by_title(title: str, parent_id: str | None = None):
   url = yt_url("/api/articles")
   params = {
     "query": f'title: "{title}"',
-    "fields": "id,title,knowledgeBase(id),parent(id)"
+    "fields": "id,title,knowledgeBase(id),project(id),parent(id)"
   }
   r = http("GET", url, params=params)
   if r.status_code != 200:
@@ -144,9 +144,14 @@ def find_article_in_kb_by_title(title: str, parent_id: str | None = None):
   for art in r.json():
     if art.get("title") != title:
       continue
-    kb = art.get("knowledgeBase") or {}
-    if kb.get("id") != KB_ID:
-      continue
+    if KB_ID:
+      kb = art.get("knowledgeBase") or {}
+      if kb.get("id") != KB_ID:
+        continue
+    else:
+      proj = (art.get("project") or {}).get("id")
+      if proj != PROJECT_ID:
+        continue
     if parent_id:
       parent = art.get("parent") or {}
       if parent.get("id") != parent_id:
@@ -156,13 +161,18 @@ def find_article_in_kb_by_title(title: str, parent_id: str | None = None):
 
 # *** KORRIGIERTE FUNKTION ***
 def create_article(title: str, markdown: str, parent_id: str = None):
-  """Erstellt einen neuen Artikel in der Knowledge Base des Projekts."""
+  """Erstellt einen neuen Artikel in der Knowledge Base des Projekts.
+  Fallback: Wenn keine KB existiert (KB_ID is None), wird der Artikel dem Projekt zugeordnet.
+  """
   url = yt_url("/api/articles?fields=id,title")
   payload = {
     "title": title,
     "content": markdown,
-    "knowledgeBase": {"id": KB_ID}
   }
+  if KB_ID:
+    payload["knowledgeBase"] = {"id": KB_ID}
+  else:
+    payload["project"] = {"id": PROJECT_ID}
   if parent_id:
     payload["parent"] = {"id": parent_id}
 
@@ -235,8 +245,8 @@ def main():
   # Knowledge Base des Projekts abrufen
   kb = get_project_knowledge_base(PROJECT_ID)
   if not kb:
-    print("[YT] Dieses Projekt hat keine Knowledge Base. Bitte in YouTrack aktivieren/anlegen.")
-    sys.exit(1)
+    print("[YT] Hinweis: Dieses Projekt hat (noch) keine Knowledge Base – Synchronisation wird übersprungen.")
+    return 0
   KB_ID = kb.get("id")
   root_article = kb.get("rootArticle") or {}
   KB_ROOT_ARTICLE_ID = root_article.get("id")
