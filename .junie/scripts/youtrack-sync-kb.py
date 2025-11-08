@@ -67,31 +67,64 @@ def http(method: str, url: str, **kw):
 
 # *** KORRIGIERTE FUNKTION ***
 def get_project_by_short_name(name: str):
-  """Sucht die interne ID des Projekts anhand des Kürzels (z.B. 'MP')."""
-  url = yt_url(f"/api/projects?fields=id,shortName")
-  r = http("GET", url)
-  if r.status_code != 200:
-    print(f"[YT] Projektliste fehlgeschlagen: HTTP {r.status_code} {r.text[:400]}")
-    sys.exit(1)
-  for proj in r.json():
-    if proj.get("shortName") == name:
-      return proj
-  return None
+  """Sucht die interne ID des Projekts anhand des Kürzels (z.B. 'MP').
+  Versucht zuerst /api/projects, fällt bei Fehler auf /api/admin/projects zurück.
+  """
+  # 1) Primärer, nicht-admin Endpunkt
+  url1 = yt_url("/api/projects?fields=id,shortName")
+  r1 = http("GET", url1)
+  if r1.status_code == 200:
+    for proj in r1.json():
+      if proj.get("shortName") == name:
+        print("[YT] Projekte via /api/projects gefunden.")
+        return proj
+  else:
+    print(f"[YT] Projektliste (\"/api/projects\") fehlgeschlagen: HTTP {r1.status_code} {r1.text[:200]}")
+
+  # 2) Fallback: Admin-Endpunkt (ältere Versionen/Setups)
+  url2 = yt_url("/api/admin/projects?fields=id,shortName")
+  r2 = http("GET", url2)
+  if r2.status_code == 200:
+    for proj in r2.json():
+      if proj.get("shortName") == name:
+        print("[YT] Projekte via /api/admin/projects gefunden.")
+        return proj
+    return None
+
+  print(f"[YT] Projektliste (\"/api/admin/projects\") fehlgeschlagen: HTTP {r2.status_code} {r2.text[:200]}")
+  sys.exit(1)
 
 # Neues Hilfs-API: Knowledge Base des Projekts abfragen
 
 def get_project_knowledge_base(project_id: str):
-  """Liest die Knowledge-Base eines Projekts, inkl. Root-Container-Artikel."""
-  url = yt_url(f"/api/projects/{project_id}?fields=knowledgeBase(id,articlesCount,rootArticle(id,title))")
-  r = http("GET", url)
-  if r.status_code != 200:
-    print(f"[YT] Projekt-Details fehlgeschlagen: HTTP {r.status_code} {r.text[:400]}")
-    sys.exit(1)
-  data = r.json()
-  kb = data.get("knowledgeBase")
-  if not kb:
+  """Liest die Knowledge-Base eines Projekts, inkl. Root-Container-Artikel.
+  Versucht zuerst /api/projects/{id}, fällt bei Fehler auf /api/admin/projects/{id} zurück.
+  """
+  # 1) Primärer Endpunkt
+  url1 = yt_url(f"/api/projects/{project_id}?fields=knowledgeBase(id,articlesCount,rootArticle(id,title))")
+  r1 = http("GET", url1)
+  if r1.status_code == 200:
+    data = r1.json()
+    kb = data.get("knowledgeBase")
+    if kb:
+      print("[YT] Projekt-Details via /api/projects/{id} geladen.")
+      return kb
+  else:
+    print(f"[YT] Projekt-Details (\"/api/projects/{project_id}\") fehlgeschlagen: HTTP {r1.status_code} {r1.text[:200]}")
+
+  # 2) Fallback: Admin-Endpunkt
+  url2 = yt_url(f"/api/admin/projects/{project_id}?fields=knowledgeBase(id,articlesCount,rootArticle(id,title))")
+  r2 = http("GET", url2)
+  if r2.status_code == 200:
+    data = r2.json()
+    kb = data.get("knowledgeBase")
+    if kb:
+      print("[YT] Projekt-Details via /api/admin/projects/{id} geladen.")
+      return kb
     return None
-  return kb
+
+  print(f"[YT] Projekt-Details (\"/api/admin/projects/{project_id}\") fehlgeschlagen: HTTP {r2.status_code} {r2.text[:200]}")
+  sys.exit(1)
 
 # *** KORRIGIERTE FUNKTION ***
 def find_article_in_kb_by_title(title: str, parent_id: str | None = None):
