@@ -68,7 +68,7 @@ def http(method: str, url: str, **kw):
 # *** KORRIGIERTE FUNKTION ***
 def get_project_by_short_name(name: str):
   """Sucht die interne ID des Projekts anhand des Kürzels (z.B. 'MP').
-  Versucht zuerst /api/projects, fällt bei Fehler auf /api/admin/projects zurück.
+  Versucht zuerst /api/projects, fällt bei Fehlern auf /api/admin/projects zurück.
   """
   # 1) Primärer, nicht-admin Endpunkt
   url1 = yt_url("/api/projects?fields=id,shortName")
@@ -160,7 +160,7 @@ def find_article_in_kb_by_title(title: str, parent_id: str | None = None):
   return None
 
 # *** KORRIGIERTE FUNKTION ***
-def create_article(title: str, markdown: str, parent_id: str = None):
+def create_article(title: str, markdown: str, parent_id: str | None = None):
   """Erstellt einen neuen Artikel in der Knowledge Base des Projekts.
   Fallback: Wenn keine KB existiert (KB_ID is None), wird der Artikel dem Projekt zugeordnet.
   """
