@@ -70,7 +70,7 @@ export KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
 
 ```nginx
 upstream api_backend {
-    server api-gateway:8080;
+    server api-gateway:8081;
     keepalive 32;
 }
 

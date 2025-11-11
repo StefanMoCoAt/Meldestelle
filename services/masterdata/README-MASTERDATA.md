@@ -241,7 +241,7 @@ CREATE TABLE platz (
 #### Land erstellen
 
 ```bash
-curl -X POST http://localhost:8080/api/masterdata/countries \
+curl -X POST http://localhost:8081/api/masterdata/countries \
   -H "Content-Type: application/json" \
   -d '{
     "isoAlpha2Code": "AT",
@@ -257,13 +257,13 @@ curl -X POST http://localhost:8080/api/masterdata/countries \
 #### Altersklassen für 16-jährigen Dressurreiter abrufen
 
 ```bash
-curl "http://localhost:8080/api/masterdata/altersklassen/age/16?sparte=DRESSUR"
+curl "http://localhost:8081/api/masterdata/altersklassen/age/16?sparte=DRESSUR"
 ```
 
 #### Geeignete Dressurplätze finden
 
 ```bash
-curl "http://localhost:8080/api/masterdata/plaetze/suitable?typ=DRESSURPLATZ&dimension=20x60m"
+curl "http://localhost:8081/api/masterdata/plaetze/suitable?typ=DRESSURPLATZ&dimension=20x60m"
 ```
 
 ## Konfiguration

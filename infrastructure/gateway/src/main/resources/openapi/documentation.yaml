@@ -55,7 +55,7 @@ servers:
     description: Production Server
   - url: https://staging-api.meldestelle.at
     description: Staging Server
-  - url: http://localhost:8080
+  - url: http://localhost:8081
     description: Local Development Server
 
 tags:

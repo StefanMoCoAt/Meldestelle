@@ -2,7 +2,7 @@
 # Docker Compose - Infrastructure Services
 # Generated from docker/versions.toml
 # Environment: development
-# Generated: 2025-11-11 12:07:57 UTC
+# Generated: 2025-11-11 16:11:31 UTC
 # ===================================================================
 
 services:
@@ -111,6 +111,9 @@ services:
       start_period: 40s
     restart: unless-stopped
 
+  # ===================================================================
+  # Grafana
+  # ===================================================================
   grafana:
     image: grafana/grafana:${DOCKER_GRAFANA_VERSION:-11.3.0}
     container_name: meldestelle-grafana
@@ -134,6 +137,42 @@ services:
       timeout: 5s
       retries: 3
       start_period: 40s
+    restart: unless-stopped
+
+  # ===================================================================
+  # Zipkin
+  # ===================================================================
+  zipkin:
+    image: openzipkin/zipkin:2
+    ports:
+      - "9411:9411"
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9411/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # ===================================================================
+  # Consul
+  # ===================================================================
+  consul:
+    image: hashicorp/consul:1.15
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     restart: unless-stopped
 
 # ===================================================================

@@ -378,7 +378,7 @@ scrape_configs:
         - 'members-service:8082'
         - 'horses-service:8083'
         - 'events-service:8084'
-        - 'gateway:8080'
+        - 'gateway:8081'
 ```
 
 ### Grafana Dashboards
@@ -430,7 +430,7 @@ spec:
       - name: gateway
         image: meldestelle/api-gateway:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
         env:
         - name: REDIS_HOST
           value: "redis-service"
@@ -535,10 +535,10 @@ kafka-consumer-groups --bootstrap-server localhost:9092 --describe --group melde
 
 ```bash
 # Gateway Health Check
-curl http://localhost:8080/actuator/health
+curl http://localhost:8081/actuator/health
 
 # Route Configuration prüfen
-curl http://localhost:8080/actuator/gateway/routes
+curl http://localhost:8081/actuator/gateway/routes
 ```
 
 ## Best Practices

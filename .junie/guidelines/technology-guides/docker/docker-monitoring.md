@@ -238,7 +238,7 @@ scrape_configs:
   - job_name: 'spring-boot'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['api-gateway:8080', 'ping-service:8082']
+      - targets: ['api-gateway:8081', 'ping-service:8082']
     scrape_interval: 10s
 
   - job_name: 'infrastructure'
