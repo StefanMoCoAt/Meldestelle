@@ -38,6 +38,12 @@ Logs ansehen (z. B. Backend):
 make services-logs
 ```
 
+## Weitere Makefile-Befehle
+
+Für eine vollständige Liste aller verfügbaren Befehle siehe:
+- `make help` (im Terminal)
+- [Docker Development Guide](../../.junie/guidelines/technology-guides/docker/docker-development.md#-vollständige-makefile-referenz)
+
 ## Wichtige URLs
 
 - Web App: <http://localhost:4000>
