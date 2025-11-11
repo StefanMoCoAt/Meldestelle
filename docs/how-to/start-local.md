@@ -41,6 +41,7 @@ make services-logs
 ## Weitere Makefile-Befehle
 
 Für eine vollständige Liste aller verfügbaren Befehle siehe:
+
 - `make help` (im Terminal)
 - [Docker Development Guide](../../.junie/guidelines/technology-guides/docker/docker-development.md#-vollständige-makefile-referenz)
 
@@ -66,8 +67,10 @@ curl -i http://localhost:4000/health || true
 ## Auth (Keycloak)
 
 - Admin-Login (default): <http://localhost:8180>
+
   - Username: KC_BOOTSTRAP_ADMIN_USERNAME (default: admin)
   - Password: KC_BOOTSTRAP_ADMIN_PASSWORD (default: admin)
+
 - Beim ersten Start wird der Realm aus docker/services/keycloak/meldestelle-realm.json importiert.
 
 ## Häufige Probleme
