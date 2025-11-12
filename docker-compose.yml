@@ -56,7 +56,7 @@ services:
   # Service Discovery
   # ===================================================================
   consul:
-    image: hashicorp/consul:${DOCKER_CONSUL_VERSION:-1.15}
+    image: consul:${DOCKER_CONSUL_VERSION:-1.15}
     container_name: meldestelle-consul
     ports:
       - "8500:8500"
@@ -77,7 +77,7 @@ services:
   # Messaging
   # ===================================================================
   zookeeper:
-    image: bitnami/zookeeper:${DOCKER_ZOOKEEPER_VERSION:-3.8}
+    image: zookeeper:${DOCKER_ZOOKEEPER_VERSION:-3.9}
     container_name: meldestelle-zookeeper
     ports:
       - "2181:2181"
@@ -90,7 +90,7 @@ services:
     restart: unless-stopped
 
   kafka:
-    image: bitnami/kafka:${DOCKER_KAFKA_VERSION:-4.1.0}
+    image: apache/kafka:${DOCKER_KAFKA_VERSION:-4.1.0}
     container_name: meldestelle-kafka
     ports:
       - "9092:9092"
@@ -168,7 +168,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:${DOCKER_GRAFANA_VERSION:-12.4.0}
+    image: grafana/grafana:${DOCKER_GRAFANA_VERSION:-main-ubuntu}
     container_name: meldestelle-grafana
     environment:
       GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}

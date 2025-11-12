@@ -22,12 +22,14 @@ redis = "8-alpine"
 
 # --- Additional Infrastructure Images ---
 consul = "1.15"
-zookeeper = "3.8"
+zookeeper = "3.9"
+#docker pull apache/kafka:4.1.0
 kafka = "4.1.0"
 
 # --- Monitoring & Infrastructure Services ---
 prometheus = "v3.7.0"
-grafana = "12.4.0"
+#docker pull grafana/grafana:main-ubuntu
+grafana = "main-ubuntu"
 keycloak = "26.4"
 
 # --- Spring Configuration ---
