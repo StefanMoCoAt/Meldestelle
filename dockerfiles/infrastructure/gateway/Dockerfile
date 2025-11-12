@@ -92,7 +92,6 @@ RUN mkdir -p build/dependency && \
 # Runtime Stage
 # ===================================================================
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
-#eclipse-temurin:21-jre-alpine-3.22
 
 # Build arguments for runtime stage
 ARG BUILD_DATE
