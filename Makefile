@@ -56,7 +56,7 @@ dev-logs: ## Show logs for all development services
 # Layer-specific Commands
 # ===================================================================
 
-infrastructure-up: ## Start only infrastructure services (postgres, redis, keycloak, consul)
+infrastructure-up: ## Start only infrastructure services (postgres, redis, keycloak, consul, zookeeper, kafka)
 	@echo "🏗️ Starting infrastructure services..."
 	$(COMPOSE) -f docker-compose.yml up -d
 	@echo "✅ Infrastructure services started"
@@ -64,6 +64,8 @@ infrastructure-up: ## Start only infrastructure services (postgres, redis, keycl
 	@echo "🔴 Redis:           localhost:6379"
 	@echo "🔐 Keycloak:        http://localhost:8180"
 	@echo "🧭 Consul:          http://localhost:8500"
+	@echo "🦓 Zookeeper:       localhost:2181"
+	@echo "🦒 Kafka:           localhost:9092"
 
 infrastructure-down: ## Stop infrastructure services
 	$(COMPOSE) -f docker-compose.yml down
@@ -128,6 +130,8 @@ full-up: ## Start complete system (infrastructure + services + clients)
 	@echo "   Redis:           localhost:6379"
 	@echo "   Keycloak:        http://localhost:8180"
 	@echo "   Consul:          http://localhost:8500"
+	@echo "   Zookeeper:       localhost:2181"
+	@echo "   Kafka:           localhost:9092"
 	@echo "   Prometheus:      http://localhost:9090"
 	@echo "   Grafana:         http://localhost:3000"
 	@echo ""
@@ -162,7 +166,7 @@ versions-show: ## Show centralized versions (docker/versions.toml)
 versions-update: ## Update one key in versions.toml and sync env files (key=<k> value=<v>)
 	@if [ -z "$(key)" ] || [ -z "$(value)" ]; then \
 		echo "Usage: make versions-update key=<key> value=<version>"; \
-		echo "Keys: gradle java node nginx alpine prometheus grafana keycloak app-version spring-profiles-default spring-profiles-docker"; \
+		echo "Keys: gradle java node nginx postgres redis consul zookeeper kafka prometheus grafana keycloak app-version spring-profiles-default spring-profiles-docker"; \
 		exit 1; \
 	fi
 	@bash scripts/docker-versions-update.sh update $(key) $(value)
@@ -269,6 +273,8 @@ dev-tools-up: ## Info: development tool containers were removed (use local tools
 	@echo "  Redis:      localhost:6379"
 	@echo "  Consul:     http://localhost:8500"
 	@echo "  Keycloak:   http://localhost:8180"
+	@echo "  Zookeeper:  localhost:2181"
+	@echo "  Kafka:      localhost:9092"
 
 dev-tools-down: ## Info: nothing to stop for dev tools in simplified setup
 	@echo "ℹ️ No dev-tool containers to stop in the simplified setup."
@@ -380,6 +386,8 @@ dev-info: ## Show development environment information
 	@echo "🗄️ Infrastructure:"
 	@echo "  PostgresQL:       localhost:5432 (default user: meldestelle)"
 	@echo "  Redis:            localhost:6379"
+	@echo "  Zookeeper:        localhost:2181"
+	@echo "  Kafka:            localhost:9092"
 	@echo ""
 	@echo "ℹ️ Tips: Use 'make health-check' to verify services, and 'make logs SERVICE=postgres' for logs."
 	@echo ""

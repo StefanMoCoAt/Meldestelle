@@ -10,7 +10,7 @@ services:
   # Database
   # ===================================================================
   postgres:
-    image: postgres:${DOCKER_POSTGRES_VERSION:-16-alpine}
+    image: postgres:${DOCKER_POSTGRES_VERSION:-18-alpine}
     container_name: meldestelle-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-meldestelle}
@@ -35,7 +35,7 @@ services:
   # Cache
   # ===================================================================
   redis:
-    image: redis:${DOCKER_REDIS_VERSION:-7-alpine}
+    image: redis:${DOCKER_REDIS_VERSION:-8-alpine}
     container_name: meldestelle-redis
     ports:
       - "${REDIS_PORT:-6379}:6379"
@@ -53,10 +53,66 @@ services:
     restart: unless-stopped
 
   # ===================================================================
+  # Service Discovery
+  # ===================================================================
+  consul:
+    image: hashicorp/consul:${DOCKER_CONSUL_VERSION:-1.15}
+    container_name: meldestelle-consul
+    ports:
+      - "8500:8500"
+    command: agent -dev -client=0.0.0.0 -ui
+    volumes:
+      - consul-data:/consul/data
+    networks:
+      - meldestelle-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8500/v1/status/leader"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # ===================================================================
+  # Messaging
+  # ===================================================================
+  zookeeper:
+    image: bitnami/zookeeper:${DOCKER_ZOOKEEPER_VERSION:-3.8}
+    container_name: meldestelle-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - zookeeper-data:/bitnami/zookeeper
+    networks:
+      - meldestelle-network
+    restart: unless-stopped
+
+  kafka:
+    image: bitnami/kafka:${DOCKER_KAFKA_VERSION:-4.1.0}
+    container_name: meldestelle-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+    depends_on:
+      - zookeeper
+    volumes:
+      - kafka-data:/bitnami/kafka
+    networks:
+      - meldestelle-network
+    restart: unless-stopped
+
+  # ===================================================================
   # Authentication
   # ===================================================================
   keycloak:
-    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.2}
+    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4}
     container_name: meldestelle-keycloak
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
@@ -87,7 +143,7 @@ services:
   # Monitoring
   # ===================================================================
   prometheus:
-    image: prom/prometheus:${DOCKER_PROMETHEUS_VERSION:-v2.54.1}
+    image: prom/prometheus:${DOCKER_PROMETHEUS_VERSION:-v3.7.0}
     container_name: meldestelle-prometheus
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
@@ -112,7 +168,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:${DOCKER_GRAFANA_VERSION:-11.3.0}
+    image: grafana/grafana:${DOCKER_GRAFANA_VERSION:-12.4.0}
     container_name: meldestelle-grafana
     environment:
       GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
@@ -147,6 +203,12 @@ volumes:
   prometheus-data:
     driver: local
   grafana-data:
+    driver: local
+  consul-data:
+    driver: local
+  zookeeper-data:
+    driver: local
+  kafka-data:
     driver: local
 
 # ===================================================================

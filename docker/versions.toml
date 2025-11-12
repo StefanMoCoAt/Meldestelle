@@ -9,27 +9,26 @@
 # --- Build Tools ---
 gradle = "9.1.0"
 java = "21"
-node = "22.21.0"
+node = "24.11.1"
 
 # --- Base Images ---
-nginx = "1.28.0-alpine"
-alpine = "3.22"
+nginx = "1.29-alpine"
 eclipse-temurin-jdk = "21-jdk-alpine"
 eclipse-temurin-jre = "21-jre-alpine"
 
 # --- Datastore Images ---
-postgres = "16-alpine"
-redis = "7-alpine"
+postgres = "18-alpine"
+redis = "8-alpine"
 
 # --- Additional Infrastructure Images ---
 consul = "1.15"
-zookeeper = "7.4.0"
-kafka = "7.4.0"
+zookeeper = "3.8"
+kafka = "4.1.0"
 
 # --- Monitoring & Infrastructure Services ---
-prometheus = "v2.54.1"
-grafana = "11.3.0"
-keycloak = "26.4.2"
+prometheus = "v3.7.0"
+grafana = "12.4.0"
+keycloak = "26.4"
 
 # --- Spring Configuration ---
 spring-profiles-default = "default"
