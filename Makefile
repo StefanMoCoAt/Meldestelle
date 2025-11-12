@@ -3,13 +3,21 @@
 # Optimierte Befehle für containerised Entwicklung-Workflows
 # ===================================================================
 
-.PHONY: help dev-up dev-down dev-restart dev-logs build clean test
+# ===================================================================
+# PHONY Target Declarations
+# ===================================================================
+.PHONY: help
+.PHONY: dev-up dev-down dev-restart dev-logs dev-info dev-tools-up dev-tools-down
+.PHONY: infrastructure-up infrastructure-down infrastructure-logs
 .PHONY: services-up services-down services-restart services-logs
 .PHONY: clients-up clients-down clients-restart clients-logs
-.PHONY: prod-up prod-down prod-restart prod-logs
-.PHONY: infrastructure-up infrastructure-down infrastructure-logs
 .PHONY: full-up full-down full-restart full-logs
-.PHONY: dev-tools-up dev-tools-down status health-check logs shell env-setup env-dev env-prod env-staging env-test dev-info clean-all build-service build-client
+.PHONY: prod-up prod-down prod-restart prod-logs
+.PHONY: env-setup env-dev env-prod env-staging env-test validate env-template
+.PHONY: build build-service build-client clean clean-all
+.PHONY: test test-e2e
+.PHONY: status health-check logs shell
+.PHONY: versions-show versions-update docker-sync docker-validate docker-compose-gen hooks-install
 
 .ONESHELL:
 
@@ -109,11 +117,42 @@ clients-logs: ## Show client application logs
 full-up: ## Start complete system (infrastructure + services + clients)
 	@echo "🚀 Starting complete Meldestelle system..."
 	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml up -d
+	@echo "✅ Complete system started"
+	@echo ""
+	@echo "🌐 Frontend & APIs:"
+	@echo "   Web App:         http://localhost:4000"
+	@echo "   API Gateway:     http://localhost:8081"
+	@echo ""
+	@echo "🔧 Infrastructure:"
+	@echo "   PostgresQL:      localhost:5432"
+	@echo "   Redis:           localhost:6379"
+	@echo "   Keycloak:        http://localhost:8180"
+	@echo "   Consul:          http://localhost:8500"
+	@echo "   Prometheus:      http://localhost:9090"
+	@echo "   Grafana:         http://localhost:3000"
+	@echo ""
+	@echo "⚙️  Microservices:"
+	@echo "   Ping Service:    http://localhost:8082"
+	@echo "   Members Service: http://localhost:8083"
+	@echo "   Horses Service:  http://localhost:8084"
+	@echo "   Events Service:  http://localhost:8085"
+	@echo "   Master Service:  http://localhost:8086"
+	@echo "   Auth Server:     http://localhost:8087"
+	@echo "   Monitoring:      http://localhost:8088"
+
+full-down: ## Stop complete system
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml down
+
+full-restart: ## Restart complete system
+	@$(MAKE) full-down
+	@$(MAKE) full-up
+
+full-logs: ## Show all system logs
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml logs -f
 
 # ===================================================================
 # SSoT Developer UX (optional helpers)
 # ===================================================================
-.PHONY: versions-show versions-update docker-sync docker-validate docker-compose-gen hooks-install
 
 # Show current centralized versions from docker/versions.toml
 versions-show: ## Show centralized versions (docker/versions.toml)
@@ -148,38 +187,6 @@ hooks-install: ## Install pre-commit SSoT guard hook into .git/hooks/pre-commit
 	@cp scripts/git-hooks/pre-commit-ssot .git/hooks/pre-commit
 	@chmod +x .git/hooks/pre-commit
 	@echo "✅ Installed .git/hooks/pre-commit (SSoT guard)"
-	@echo "✅ Complete system started"
-	@echo ""
-	@echo "🌐 Frontend & APIs:"
-	@echo "   Web App:         http://localhost:4000"
-	@echo "   API Gateway:     http://localhost:8081"
-	@echo ""
-	@echo "🔧 Infrastructure:"
-	@echo "   PostgresQL:      localhost:5432"
-	@echo "   Redis:           localhost:6379"
-	@echo "   Keycloak:        http://localhost:8180"
-	@echo "   Consul:          http://localhost:8500"
-	@echo "   Prometheus:      http://localhost:9090"
-	@echo "   Grafana:         http://localhost:3000"
-	@echo ""
-	@echo "⚙️  Microservices:"
-	@echo "   Ping Service:    http://localhost:8082"
-	@echo "   Members Service: http://localhost:8083"
-	@echo "   Horses Service:  http://localhost:8084"
-	@echo "   Events Service:  http://localhost:8085"
-	@echo "   Master Service:  http://localhost:8086"
-	@echo "   Auth Server:     http://localhost:8087"
-	@echo "   Monitoring:      http://localhost:8088"
-
-full-down: ## Stop complete system
-	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml down
-
-full-restart: ## Restart complete system
-	@$(MAKE) full-down
-	@$(MAKE) full-up
-
-full-logs: ## Show all system logs
-	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml logs -f
 
 # ===================================================================
 # Environment Configuration Commands
@@ -247,8 +254,8 @@ prod-restart: ## Restart production environment
 	@$(MAKE) prod-down
 	@$(MAKE) prod-up
 
-prod-logs: ## Show production logs (simplified)
-	$(COMPOSE) -f docker-compose.yml logs -f
+prod-logs: ## Show production logs
+	$(COMPOSE) -f docker-compose.yml -f docker-compose.services.yml logs -f
 
 # ===================================================================
 # Development Tools
@@ -337,19 +344,23 @@ test: ## Run integration tests
 	@echo "🧪 Running integration tests..."
 	@$(MAKE) infrastructure-up
 	@echo "⏳ Waiting for services to be ready..."
-	@sleep 30
+	@sleep 10
+	@$(MAKE) health-check || true
 	@echo "✅ Running test suite..."
-	./gradlew test
+	@./gradlew test || (echo "❌ Tests failed"; $(MAKE) infrastructure-down; exit 1)
 	@$(MAKE) infrastructure-down
+	@echo "✅ Integration tests completed successfully"
 
 test-e2e: ## Run end-to-end tests with full environment
 	@echo "🧪 Running end-to-end tests..."
 	@$(MAKE) dev-up
 	@echo "⏳ Waiting for full environment to be ready..."
-	@sleep 60
+	@sleep 15
+	@$(MAKE) health-check || true
 	@echo "✅ Running e2e test suite..."
-	./gradlew :client:web-app:jsTest
+	@./gradlew :client:web-app:jsTest || (echo "❌ E2E tests failed"; $(MAKE) dev-down; exit 1)
 	@$(MAKE) dev-down
+	@echo "✅ E2E tests completed successfully"
 
 # ===================================================================
 # Information and Help

@@ -9,7 +9,7 @@
 # Build Configuration
 # ===================================================================
 # Docker image versions
-DOCKER_GRADLE_VERSION=9.0.1
+DOCKER_GRADLE_VERSION=9.1.0
 DOCKER_JAVA_VERSION=21
 DOCKER_KEYCLOAK_VERSION=26.4.0
 DOCKER_PROMETHEUS_VERSION=v2.54.1
@@ -21,7 +21,7 @@ APP_VERSION=1.0.0
 APP_NAME=Meldestelle
 
 # Build metadata
-BUILD_DATE=
+BUILD_DATE=2025-11-11
 # BUILD_DATE will be auto-generated if not set
 
 # Spring profiles for services

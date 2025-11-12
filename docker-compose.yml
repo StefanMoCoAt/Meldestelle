@@ -2,7 +2,7 @@
 # Docker Compose - Infrastructure Services
 # Generated from docker/versions.toml
 # Environment: development
-# Generated: 2025-11-11 12:07:57 UTC
+# Generated: 2025-11-11 23:07:01 UTC
 # ===================================================================
 
 services:

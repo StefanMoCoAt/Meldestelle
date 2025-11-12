@@ -38,8 +38,8 @@ readonly SERVICES_CONFIG=(
     "postgres:5432:PostgreSQL:pg_isready -U meldestelle"
     "redis:6379:Redis:redis-cli ping"
     "consul:8500:Consul:http://localhost:8500/v1/status/leader"
-    "api-gateway:8081:API Gateway:http://localhost:8082/actuator/health"
-    "ping-service:8082Ping Service:http://localhost:8082actuator/health"
+    "api-gateway:8081:API Gateway:http://localhost:8082actuator/health"
+    "ping-service:8082ing Service:http://localhost:8082ctuator/health"
 )
 
 # Integration with central Docker version management
@@ -169,11 +169,11 @@ test_application_services() {
 
     # Test API Gateway
     log_info "Testing API Gateway..."
-    wait_for_service_with_retry "API Gateway" "http_health_check http://localhost:8082/actuator/health" || return 1
+    wait_for_service_with_retry "API Gateway" "http_health_check http://localhost:8082actuator/health" || return 1
 
     # Test Ping Service
     log_info "Testing Ping Service..."
-    wait_for_service_with_retry "Ping Service" "http_health_check http://localhost:8082actuator/health" || return 1
+    wait_for_service_with_retry "Ping Service" "http_health_check http://localhost:8082ctuator/health" || return 1
 
     log_success "All application services are healthy!"
 }
@@ -211,7 +211,7 @@ test_network_connectivity() {
     log_info "Testing service-to-service connectivity..."
 
     # Test API Gateway can reach backend services
-    if docker exec meldestelle-api-gateway curl -f -s --max-time 5 http://ping-service:8082actuator/health > /dev/null 2>&1; then
+    if docker exec meldestelle-api-gateway curl -f -s --max-time 5 http://ping-service:8082ctuator/health > /dev/null 2>&1; then
         log_success "API Gateway can reach Ping Service"
     else
         log_error "API Gateway cannot reach Ping Service"

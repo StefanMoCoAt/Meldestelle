@@ -347,10 +347,10 @@ health-endpoint = "/health"
 # ===================================================================
 
 [build]
-gradle-version = "9.0.0"
+gradle-version = "9.1.0"
 java-version = "21"
-node-version = "20.12.0"
-nginx-version = "1.25-alpine"
+node-version = "24.11.0"
+nginx-version = "1.29-alpine"
 docker-version = "1.0.0"
 
 # ===================================================================

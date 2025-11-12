@@ -289,13 +289,33 @@ Dieser Abschnitt beschreibt den lokalen Workflow für die zentrale Docker-Versio
   DOCKER_SSOT_MODE=envless bash scripts/validate-docker-consistency.sh all
   ```
 
-### Makefile-Shortcuts
+### Makefile-Befehle
+
+Das Projekt verwendet ein umfassendes Makefile mit ~50 Befehlen für alle Development-Workflows:
 
 ```bash
- make docker-sync # Kompatibilitätsmodus: Sync 
- make docker-compose-gen # Compose-Files generieren 
- make docker-validate # Validierung
+make help  # Zeigt alle verfügbaren Befehle
 ```
+
+**Wichtigste Befehle:**
+
+```bash
+make full-up         # Startet komplettes System (Infra + Services + Clients)
+make services-up     # Startet Backend (Infra + Microservices)
+make dev-up          # Startet Development-Environment
+make test            # Führt Integration-Tests aus
+make health-check    # Prüft System-Health
+```
+
+**SSoT-Befehle:**
+
+```bash
+make docker-sync         # Synchronisiert versions.toml -> build-args/*.env
+make docker-compose-gen  # Generiert Docker Compose Files
+make docker-validate     # Validiert Docker SSoT Konsistenz
+```
+
+**Vollständige Referenz:** [Docker Development Guide](.junie/guidelines/technology-guides/docker/docker-development.md#-vollständige-makefile-referenz)
 
 ### Was ist die Single Source of Truth?
 

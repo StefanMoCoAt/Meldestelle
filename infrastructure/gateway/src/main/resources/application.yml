@@ -239,7 +239,7 @@ management:
   zipkin:
     tracing:
       endpoint: ${ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
-      # Reduziert Verbindungsfehler wenn Zipkin nicht verfügbar ist
+      # Reduziert Verbindungsfehler, wenn Zipkin nicht verfügbar ist
       connect-timeout: 1s
       read-timeout: 10s
 

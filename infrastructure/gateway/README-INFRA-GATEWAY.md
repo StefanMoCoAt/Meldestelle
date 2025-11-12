@@ -279,7 +279,7 @@ cd /home/stefan/WsMeldestelle/Meldestelle
 
 # Mit Docker
 docker build -t meldestelle/gateway:latest -f infrastructure/gateway/Dockerfile .
-docker run -p 8080:8080 meldestelle/gateway:latest
+docker run -p 8081:8081 meldestelle/gateway:latest
 ```
 
 📖 **Detaillierte Startup-Anleitung:** Siehe `GATEWAY-STARTUP-GUIDE.md` im Projekt-Root für vollständige Befehle und Fehlerbehebung.
@@ -324,7 +324,7 @@ docker build -t meldestelle/gateway:1.0.0 \
 # Container starten
 docker run -d \
   --name gateway \
-  -p 8080:8080 \
+  -p 8081:8081 \
   -e SPRING_PROFILES_ACTIVE=prod \
   -e CONSUL_HOST=consul \
   meldestelle/gateway:1.0.0
@@ -348,11 +348,11 @@ spec:
       - name: gateway
         image: meldestelle/gateway:1.0.0
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
         livenessProbe:
           httpGet:
             path: /actuator/health
-            port: 8080
+            port: 8081
           initialDelaySeconds: 90
           periodSeconds: 30
 ```
@@ -394,10 +394,10 @@ spec:
 docker logs gateway | grep "correlationId"
 
 # Circuit Breaker Status
-curl http://localhost:8080/actuator/circuitbreakers
+curl http://localhost:8081/actuator/circuitbreakers
 
 # Health Details
-curl http://localhost:8080/actuator/health
+curl http://localhost:8081/actuator/health
 ```
 
 ## Zukünftige Erweiterungen
