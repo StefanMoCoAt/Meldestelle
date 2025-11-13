@@ -1,0 +1,21 @@
+# ===================================================================
+# Docker-Profil-Konfiguration für das API-Gateway
+# ===================================================================
+# Zweck:
+#  - Laufzeitwerte für Docker/Compose-Umgebungen (Service-Discovery, Ports,
+#    Hostnamen) bündeln.
+# Hinweise:
+#  - Diese Datei ändert keine Logik; sie liefert nur Standardwerte über
+#    Umgebungsvariablen.
+#  - Interne Docker-Hostnamen (z. B. "consul") entsprechen den Compose-
+#    Servicenamen. Außerhalb von Docker ggf. localhost und passende Ports nutzen.
+# Aktivierung:
+#  - Über SPRING_PROFILES_ACTIVE=docker,keycloak (siehe .env bzw. Compose).
+
+spring:
+  cloud:
+    consul:
+      host: ${CONSUL_HOST:consul}
+      port: ${CONSUL_PORT:8500}
+server:
+  port: ${GATEWAY_PORT:8081}

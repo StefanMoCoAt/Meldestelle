@@ -1,8 +1,13 @@
 # ===================================================================
-# Keycloak Profile Configuration
+# Keycloak-Profilkonfiguration
 # ===================================================================
-# This profile configures OAuth2/JWT authentication with Keycloak.
-# Uses Spring Security's oauth2ResourceServer for secure JWT validation.
+# Zweck:
+#  - Aktiviert OAuth2/JWT-Authentifizierung über Keycloak.
+#  - Nutzt Spring Securitys oauth2ResourceServer zur validierten JWT-Prüfung.
+# Hinweise:
+#  - Innerhalb von Docker verweisen Standardwerte auf den Dienstnamen
+#    "keycloak" (Port 8180). Außerhalb ggf. http://localhost:8180 verwenden.
+#  - Werte können über Umgebungsvariablen überschrieben werden.
 # ===================================================================
 
 spring:
@@ -10,14 +15,16 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # Issuer URI for JWT validation - Docker internal: keycloak:8080, External: localhost:8180
+          # Issuer-URI für die JWT-Validierung
+          #  - Docker-intern: http://keycloak:8180/realms/meldestelle
+          #  - Extern (lokal): http://localhost:8180/realms/meldestelle
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8180/realms/meldestelle}
-          # JWK Set URI for fetching public keys to validate JWT signatures
+          # JWK-Set-URI zum Abruf der öffentlichen Schlüssel für die JWT-Signaturprüfung
           jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8180/realms/meldestelle/protocol/openid-connect/certs}
 
-# Keycloak-spezifische Konfiguration
+# Keycloak-spezifische Konfiguration (optional, zur leichteren Nachvollziehbarkeit)
 keycloak:
-  # Internal Docker service name, external via port 8180
+  # Interner Docker-Servicename; extern über Port 8180 erreichbar
   server-url: ${KEYCLOAK_SERVER_URL:http://keycloak:8180}
   issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8180/realms/meldestelle}
   jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8180/realms/meldestelle/protocol/openid-connect/certs}

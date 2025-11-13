@@ -1,18 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logback-Konfiguration für das API-Gateway
+  Zweck:
+    * Einheitliches Log-Pattern mit Trace-/Span-IDs für verteiltes Tracing.
+    * Reduzierte Log-Lautstärke für gängige Framework-Pakete.
+  Hinweise:
+    * Das Muster kann über die Umgebungsvariable LOG_PATTERN überschrieben werden.
+    * Für detaillierte Fehleranalysen ggf. die Level auf DEBUG oder TRACE erhöhen.
+-->
 <configuration>
+    <!-- Standard-Logformat mit Zeitstempel, Level, Trace/Span und Loggername -->
     <property name="LOG_PATTERN" value="%d{ISO8601} %-5level [%X{traceId:-}:%X{spanId:-}] %logger{36} - %msg%n"/>
 
+    <!-- Konsolenausgabe (Stdout), geeignet für Docker/Container-Logs -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
 
+    <!-- Rahmenwerk-Logs auf INFO begrenzen, um Rauschen zu vermeiden -->
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.web" level="INFO"/>
     <logger name="org.springframework.boot.actuate" level="INFO"/>
     <logger name="reactor.netty" level="WARN"/>
 
+    <!-- Standard-Root-Logger -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
