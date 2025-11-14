@@ -1,633 +1,249 @@
-2025-11-06 10:46:06.716 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
-2025-11-06 10:46:06.759 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.8 with PID 15079 (/home/stefan/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan in /home/stefan/WsMeldestelle/Meldestelle)
-2025-11-06 10:46:06.759 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.6, Spring v6.2.11
-2025-11-06 10:46:06.760 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 1 profile is active: "dev"
-2025-11-06 10:46:08.287 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=4eb90187-1826-32ce-9dc7-fa80cb000915
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
-2025-11-06 10:46:10.119 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
-2025-11-06 10:46:10.778 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
-2025-11-06 10:46:11.345 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2025-11-06 10:46:11.425 [catalogWatchTaskScheduler-1] ERROR [] o.s.c.c.discovery.ConsulCatalogWatch - Error watching Consul CatalogServices
-com.ecwid.consul.transport.TransportException: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Verbindungsaufbau abgelehnt
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
-	at com.ecwid.consul.transport.AbstractHttpTransport.makeGetRequest(AbstractHttpTransport.java:36)
-	at com.ecwid.consul.v1.ConsulRawClient.makeGetRequest(ConsulRawClient.java:139)
-	at com.ecwid.consul.v1.catalog.CatalogConsulClient.getCatalogServices(CatalogConsulClient.java:143)
-	at com.ecwid.consul.v1.ConsulClient.getCatalogServices(ConsulClient.java:400)
-	at org.springframework.cloud.consul.discovery.ConsulCatalogWatch.catalogServicesWatch(ConsulCatalogWatch.java:131)
-	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
-	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
-	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358)
-	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
-	at java.base/java.lang.Thread.run(Thread.java:1583)
-Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Verbindungsaufbau abgelehnt
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:156)
-	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
-	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
-	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
-	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
-	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
-	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
-	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:72)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:221)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:165)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:140)
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:70)
-	... 12 common frames omitted
-Caused by: java.net.ConnectException: Verbindungsaufbau abgelehnt
-	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
-	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
-	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
-	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
-	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
-	at java.base/java.net.Socket.connect(Socket.java:751)
-	at org.apache.http.conn.socket.PlainConnectionSocketFactory.connectSocket(PlainConnectionSocketFactory.java:75)
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:142)
-	... 24 common frames omitted
-2025-11-06 10:46:11.441 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
-2025-11-06 10:46:11.444 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-5e7cc71f-5a59-423a-b812-15401589451e', name='meldestelle', tags=[], address='fedora', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://fedora:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
-2025-11-06 10:46:11.452 [main] ERROR [] o.s.c.c.s.ConsulServiceRegistry - Error registering service with consul: NewService{id='meldestelle-8080-5e7cc71f-5a59-423a-b812-15401589451e', name='meldestelle', tags=[], address='fedora', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://fedora:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
-com.ecwid.consul.transport.TransportException: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Verbindungsaufbau abgelehnt
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
-	at com.ecwid.consul.transport.AbstractHttpTransport.makePutRequest(AbstractHttpTransport.java:49)
-	at com.ecwid.consul.v1.ConsulRawClient.makePutRequest(ConsulRawClient.java:163)
-	at com.ecwid.consul.v1.agent.AgentConsulClient.agentServiceRegister(AgentConsulClient.java:273)
-	at com.ecwid.consul.v1.ConsulClient.agentServiceRegister(ConsulClient.java:310)
-	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:67)
-	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:43)
-	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.register(AbstractAutoServiceRegistration.java:264)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.register(ConsulAutoServiceRegistration.java:80)
-	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.start(AbstractAutoServiceRegistration.java:156)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.start(ConsulAutoServiceRegistration.java:70)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistrationListener.onApplicationEvent(ConsulAutoServiceRegistrationListener.java:60)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:185)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:178)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:156)
-	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:454)
-	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:387)
-	at org.springframework.boot.web.reactive.context.WebServerManager.start(WebServerManager.java:57)
-	at org.springframework.boot.web.reactive.context.WebServerStartStopLifecycle.start(WebServerStartStopLifecycle.java:41)
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:405)
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:394)
-	at org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:586)
-	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
-	at org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:364)
-	at org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:310)
-	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:1006)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:630)
-	at org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext.refresh(ReactiveWebServerApplicationContext.java:66)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
-	at at.mocode.infrastructure.gateway.GatewayApplicationKt.main(GatewayApplication.kt:13)
-Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Verbindungsaufbau abgelehnt
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:156)
-	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
-	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
-	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
-	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
-	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
-	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
-	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:72)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:221)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:165)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:140)
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:70)
-	... 33 common frames omitted
-Caused by: java.net.ConnectException: Verbindungsaufbau abgelehnt
-	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
-	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
-	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
-	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
-	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
-	at java.base/java.net.Socket.connect(Socket.java:751)
-	at org.apache.http.conn.socket.PlainConnectionSocketFactory.connectSocket(PlainConnectionSocketFactory.java:75)
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:142)
-	... 45 common frames omitted
-2025-11-06 10:46:13.466 [main] WARN  [] o.s.b.w.r.c.AnnotationConfigReactiveWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2025-11-06 10:46:13.486 [main] INFO  [] o.s.b.a.l.ConditionEvaluationReportLogger - 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-11-06 10:46:13.499 [main] ERROR [] o.s.boot.SpringApplication - Application run failed
-org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:408)
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:394)
-	at org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:586)
-	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
-	at org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:364)
-	at org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:310)
-	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:1006)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:630)
-	at org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext.refresh(ReactiveWebServerApplicationContext.java:66)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
-	at at.mocode.infrastructure.gateway.GatewayApplicationKt.main(GatewayApplication.kt:13)
-Caused by: com.ecwid.consul.transport.TransportException: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Verbindungsaufbau abgelehnt
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
-	at com.ecwid.consul.transport.AbstractHttpTransport.makePutRequest(AbstractHttpTransport.java:49)
-	at com.ecwid.consul.v1.ConsulRawClient.makePutRequest(ConsulRawClient.java:163)
-	at com.ecwid.consul.v1.agent.AgentConsulClient.agentServiceRegister(AgentConsulClient.java:273)
-	at com.ecwid.consul.v1.ConsulClient.agentServiceRegister(ConsulClient.java:310)
-	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:67)
-	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:43)
-	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.register(AbstractAutoServiceRegistration.java:264)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.register(ConsulAutoServiceRegistration.java:80)
-	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.start(AbstractAutoServiceRegistration.java:156)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.start(ConsulAutoServiceRegistration.java:70)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistrationListener.onApplicationEvent(ConsulAutoServiceRegistrationListener.java:60)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:185)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:178)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:156)
-	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:454)
-	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:387)
-	at org.springframework.boot.web.reactive.context.WebServerManager.start(WebServerManager.java:57)
-	at org.springframework.boot.web.reactive.context.WebServerStartStopLifecycle.start(WebServerStartStopLifecycle.java:41)
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:405)
-	... 14 common frames omitted
-Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Verbindungsaufbau abgelehnt
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:156)
-	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
-	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
-	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
-	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
-	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
-	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
-	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:72)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:221)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:165)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:140)
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:70)
-	... 33 common frames omitted
-Caused by: java.net.ConnectException: Verbindungsaufbau abgelehnt
-	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
-	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
-	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
-	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
-	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
-	at java.base/java.net.Socket.connect(Socket.java:751)
-	at org.apache.http.conn.socket.PlainConnectionSocketFactory.connectSocket(PlainConnectionSocketFactory.java:75)
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:142)
-	... 45 common frames omitted
-2025-11-11 17:24:21.517 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
-2025-11-11 17:24:21.541 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.9 with PID 60081 (/home/stefan-mo/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan-mo in /home/stefan-mo/WsMeldestelle/Meldestelle)
-2025-11-11 17:24:21.542 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.6, Spring v6.2.11
-2025-11-11 17:24:21.542 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 1 profile is active: "dev"
-2025-11-11 17:24:22.681 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=4eb90187-1826-32ce-9dc7-fa80cb000915
-2025-11-11 17:24:24.774 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
-2025-11-11 17:24:24.774 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
-2025-11-11 17:24:24.774 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
-2025-11-11 17:24:24.775 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
-2025-11-11 17:24:25.480 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
-2025-11-11 17:24:26.114 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2025-11-11 17:24:26.202 [catalogWatchTaskScheduler-1] ERROR [] o.s.c.c.discovery.ConsulCatalogWatch - Error watching Consul CatalogServices
-com.ecwid.consul.transport.TransportException: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1] failed: Verbindungsaufbau abgelehnt
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
-	at com.ecwid.consul.transport.AbstractHttpTransport.makeGetRequest(AbstractHttpTransport.java:36)
-	at com.ecwid.consul.v1.ConsulRawClient.makeGetRequest(ConsulRawClient.java:139)
-	at com.ecwid.consul.v1.catalog.CatalogConsulClient.getCatalogServices(CatalogConsulClient.java:143)
-	at com.ecwid.consul.v1.ConsulClient.getCatalogServices(ConsulClient.java:400)
-	at org.springframework.cloud.consul.discovery.ConsulCatalogWatch.catalogServicesWatch(ConsulCatalogWatch.java:131)
-	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
-	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
-	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358)
-	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
-	at java.base/java.lang.Thread.run(Thread.java:1583)
-Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1] failed: Verbindungsaufbau abgelehnt
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:156)
-	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
-	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
-	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
-	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
-	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
-	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
-	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:72)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:221)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:165)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:140)
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:70)
-	... 12 common frames omitted
-Caused by: java.net.ConnectException: Verbindungsaufbau abgelehnt
-	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
-	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
-	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
-	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
-	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
-	at java.base/java.net.Socket.connect(Socket.java:751)
-	at org.apache.http.conn.socket.PlainConnectionSocketFactory.connectSocket(PlainConnectionSocketFactory.java:75)
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:142)
-	... 24 common frames omitted
-2025-11-11 17:24:26.221 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
-2025-11-11 17:24:26.224 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-3272ca20-9767-47d5-907c-f731f4d8125e', name='meldestelle', tags=[], address='10.0.0.18', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://10.0.0.18:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
-2025-11-11 17:24:26.233 [main] ERROR [] o.s.c.c.s.ConsulServiceRegistry - Error registering service with consul: NewService{id='meldestelle-8080-3272ca20-9767-47d5-907c-f731f4d8125e', name='meldestelle', tags=[], address='10.0.0.18', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://10.0.0.18:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
-com.ecwid.consul.transport.TransportException: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1] failed: Verbindungsaufbau abgelehnt
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
-	at com.ecwid.consul.transport.AbstractHttpTransport.makePutRequest(AbstractHttpTransport.java:49)
-	at com.ecwid.consul.v1.ConsulRawClient.makePutRequest(ConsulRawClient.java:163)
-	at com.ecwid.consul.v1.agent.AgentConsulClient.agentServiceRegister(AgentConsulClient.java:273)
-	at com.ecwid.consul.v1.ConsulClient.agentServiceRegister(ConsulClient.java:310)
-	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:67)
-	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:43)
-	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.register(AbstractAutoServiceRegistration.java:264)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.register(ConsulAutoServiceRegistration.java:80)
-	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.start(AbstractAutoServiceRegistration.java:156)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.start(ConsulAutoServiceRegistration.java:70)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistrationListener.onApplicationEvent(ConsulAutoServiceRegistrationListener.java:60)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:185)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:178)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:156)
-	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:454)
-	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:387)
-	at org.springframework.boot.web.reactive.context.WebServerManager.start(WebServerManager.java:57)
-	at org.springframework.boot.web.reactive.context.WebServerStartStopLifecycle.start(WebServerStartStopLifecycle.java:41)
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:405)
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:394)
-	at org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:586)
-	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
-	at org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:364)
-	at org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:310)
-	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:1006)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:630)
-	at org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext.refresh(ReactiveWebServerApplicationContext.java:66)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
-	at at.mocode.infrastructure.gateway.GatewayApplicationKt.main(GatewayApplication.kt:13)
-Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1] failed: Verbindungsaufbau abgelehnt
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:156)
-	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
-	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
-	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
-	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
-	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
-	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
-	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:72)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:221)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:165)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:140)
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:70)
-	... 33 common frames omitted
-Caused by: java.net.ConnectException: Verbindungsaufbau abgelehnt
-	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
-	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
-	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
-	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
-	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
-	at java.base/java.net.Socket.connect(Socket.java:751)
-	at org.apache.http.conn.socket.PlainConnectionSocketFactory.connectSocket(PlainConnectionSocketFactory.java:75)
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:142)
-	... 45 common frames omitted
-2025-11-11 17:24:28.246 [main] WARN  [] o.s.b.w.r.c.AnnotationConfigReactiveWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-2025-11-11 17:24:28.270 [main] INFO  [] o.s.b.a.l.ConditionEvaluationReportLogger - 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-11-11 17:24:28.284 [main] ERROR [] o.s.boot.SpringApplication - Application run failed
-org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:408)
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:394)
-	at org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:586)
-	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
-	at org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:364)
-	at org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:310)
-	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:1006)
-	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:630)
-	at org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext.refresh(ReactiveWebServerApplicationContext.java:66)
-	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
-	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
-	at at.mocode.infrastructure.gateway.GatewayApplicationKt.main(GatewayApplication.kt:13)
-Caused by: com.ecwid.consul.transport.TransportException: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1] failed: Verbindungsaufbau abgelehnt
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
-	at com.ecwid.consul.transport.AbstractHttpTransport.makePutRequest(AbstractHttpTransport.java:49)
-	at com.ecwid.consul.v1.ConsulRawClient.makePutRequest(ConsulRawClient.java:163)
-	at com.ecwid.consul.v1.agent.AgentConsulClient.agentServiceRegister(AgentConsulClient.java:273)
-	at com.ecwid.consul.v1.ConsulClient.agentServiceRegister(ConsulClient.java:310)
-	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:67)
-	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:43)
-	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.register(AbstractAutoServiceRegistration.java:264)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.register(ConsulAutoServiceRegistration.java:80)
-	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.start(AbstractAutoServiceRegistration.java:156)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.start(ConsulAutoServiceRegistration.java:70)
-	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistrationListener.onApplicationEvent(ConsulAutoServiceRegistrationListener.java:60)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:185)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:178)
-	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:156)
-	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:454)
-	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:387)
-	at org.springframework.boot.web.reactive.context.WebServerManager.start(WebServerManager.java:57)
-	at org.springframework.boot.web.reactive.context.WebServerStartStopLifecycle.start(WebServerStartStopLifecycle.java:41)
-	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:405)
-	... 14 common frames omitted
-Caused by: org.apache.http.conn.HttpHostConnectException: Connect to localhost:8500 [localhost/127.0.0.1] failed: Verbindungsaufbau abgelehnt
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:156)
-	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
-	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
-	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
-	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
-	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
-	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
-	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:72)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:221)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:165)
-	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:140)
-	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:70)
-	... 33 common frames omitted
-Caused by: java.net.ConnectException: Verbindungsaufbau abgelehnt
-	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
-	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
-	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
-	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
-	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
-	at java.base/java.net.Socket.connect(Socket.java:751)
-	at org.apache.http.conn.socket.PlainConnectionSocketFactory.connectSocket(PlainConnectionSocketFactory.java:75)
-	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:142)
-	... 45 common frames omitted
-2025-11-11 17:41:20.785 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
-2025-11-11 17:41:20.807 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.9 with PID 66761 (/home/stefan-mo/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan-mo in /home/stefan-mo/WsMeldestelle/Meldestelle)
-2025-11-11 17:41:20.807 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.6, Spring v6.2.11
-2025-11-11 17:41:20.807 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 1 profile is active: "dev"
-2025-11-11 17:41:21.890 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=4eb90187-1826-32ce-9dc7-fa80cb000915
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
-2025-11-11 17:41:23.800 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
-2025-11-11 17:41:23.801 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
-2025-11-11 17:41:24.395 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
-2025-11-11 17:41:25.036 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2025-11-11 17:41:25.145 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
-2025-11-11 17:41:25.148 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-4eca3f58-3081-422e-8d6f-88fd29eca82b', name='meldestelle', tags=[], address='10.0.0.18', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://10.0.0.18:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
-2025-11-11 17:41:25.293 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Started GatewayApplicationKt in 4.771 seconds (process running for 5.315)
-2025-11-11 17:44:40.693 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:13:44.818 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2025-11-13 12:13:44.861 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.8 with PID 67741 (/home/stefan/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan in /home/stefan/WsMeldestelle/Meldestelle)
+2025-11-13 12:13:44.862 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.6, Spring v6.2.11
+2025-11-13 12:13:44.862 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 1 profile is active: "dev"
+2025-11-13 12:13:46.283 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=4eb90187-1826-32ce-9dc7-fa80cb000915
+2025-11-13 12:13:47.941 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
+2025-11-13 12:13:47.942 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-11-13 12:13:48.488 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
+2025-11-13 12:13:48.992 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2025-11-13 12:13:49.083 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
+2025-11-13 12:13:49.085 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-c7469931-1081-4525-b948-a5f4f3ab0586', name='meldestelle', tags=[], address='fedora', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://fedora:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
+2025-11-13 12:13:49.190 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Started GatewayApplicationKt in 4.819 seconds (process running for 5.736)
+2025-11-13 12:14:25.192 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /[0:0:0:0:0:0:0:1]:60764
+RemoteAddress: /[0:0:0:0:0:0:0:1]:46952
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.775 [parallel-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.302 [parallel-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49250
+RemoteAddress: /127.0.0.1:45452
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.781 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.315 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49256
+RemoteAddress: /127.0.0.1:45460
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.786 [parallel-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.327 [parallel-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49272
+RemoteAddress: /127.0.0.1:45476
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.790 [parallel-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.338 [parallel-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49284
+RemoteAddress: /127.0.0.1:45478
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.795 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.349 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49300
+RemoteAddress: /127.0.0.1:45482
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.800 [parallel-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.359 [parallel-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49312
+RemoteAddress: /127.0.0.1:45496
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.804 [parallel-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.369 [parallel-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49316
+RemoteAddress: /127.0.0.1:45502
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.809 [parallel-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.379 [parallel-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49328
+RemoteAddress: /127.0.0.1:45506
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.814 [parallel-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.388 [parallel-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49336
+RemoteAddress: /127.0.0.1:45520
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.818 [parallel-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.398 [parallel-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49340
+RemoteAddress: /127.0.0.1:45536
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.822 [parallel-5] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.409 [parallel-5] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49342
+RemoteAddress: /127.0.0.1:45546
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.827 [parallel-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.416 [parallel-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49352
+RemoteAddress: /127.0.0.1:45552
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.832 [parallel-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.422 [parallel-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49366
+RemoteAddress: /127.0.0.1:45566
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.835 [parallel-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.429 [parallel-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49368
+RemoteAddress: /127.0.0.1:45578
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.839 [parallel-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.435 [parallel-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49370
+RemoteAddress: /127.0.0.1:45586
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.843 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.443 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49372
+RemoteAddress: /127.0.0.1:45588
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.848 [parallel-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.449 [parallel-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49382
+RemoteAddress: /127.0.0.1:45590
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.851 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.454 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49390
+RemoteAddress: /127.0.0.1:45604
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.854 [parallel-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.459 [parallel-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49404
+RemoteAddress: /127.0.0.1:45614
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.857 [parallel-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.463 [parallel-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49408
+RemoteAddress: /127.0.0.1:45616
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.861 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.468 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49412
+RemoteAddress: /127.0.0.1:45632
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.865 [parallel-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.472 [parallel-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49414
+RemoteAddress: /127.0.0.1:45644
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.868 [parallel-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.477 [parallel-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49424
+RemoteAddress: /127.0.0.1:45660
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.871 [parallel-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.481 [parallel-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49434
+RemoteAddress: /127.0.0.1:45676
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.874 [parallel-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.486 [parallel-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49448
+RemoteAddress: /127.0.0.1:45690
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.891 [reactor-http-epoll-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.509 [reactor-http-epoll-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 503 SERVICE_UNAVAILABLE
-ResponseTime: 17ms
-2025-11-11 17:44:40.894 [reactor-http-epoll-16] WARN  [] i.m.p.PrometheusMeterRegistry - The meter (MeterId{name='gateway_errors_total', tags=[tag(application=meldestelle),tag(component=infrastructure),tag(environment=dev),tag(error_type=server_error),tag(gateway=api-gateway),tag(instance=meldestelle-8080-7c278a17-e0ca-4d8a-ac26-1dbd531a9168),tag(method=GET),tag(path=/),tag(service=gateway),tag(status=503),tag(status_series=5xx)]}) registration has failed: Prometheus requires that all meters with the same name have the same set of tag keys. There is already an existing meter named 'gateway_errors' containing tag keys [application, component, environment, gateway, instance, service]. The meter you are attempting to register has keys [application, component, environment, error_type, gateway, instance, method, path, service, status, status_series]. Note that subsequent logs will be logged at debug level.
-2025-11-11 17:44:40.950 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 24ms
+2025-11-13 12:14:25.513 [reactor-http-epoll-16] WARN  [] i.m.p.PrometheusMeterRegistry - The meter (MeterId{name='gateway_errors_total', tags=[tag(application=meldestelle),tag(component=infrastructure),tag(environment=dev),tag(error_type=server_error),tag(gateway=api-gateway),tag(instance=meldestelle-8080-9c545f61-84c8-4af2-a665-9353910088b3),tag(method=GET),tag(path=/),tag(service=gateway),tag(status=503),tag(status_series=5xx)]}) registration has failed: Prometheus requires that all meters with the same name have the same set of tag keys. There is already an existing meter named 'gateway_errors' containing tag keys [application, component, environment, gateway, instance, service]. The meter you are attempting to register has keys [application, component, environment, error_type, gateway, instance, method, path, service, status, status_series]. Note that subsequent logs will be logged at debug level.
+2025-11-13 12:14:25.574 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49464
+RemoteAddress: /127.0.0.1:45692
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:40.952 [reactor-http-epoll-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
-Status: 503 SERVICE_UNAVAILABLE
-ResponseTime: 2ms
-2025-11-11 17:44:41.058 [parallel-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
-Method: GET
-URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49478
-UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.060 [reactor-http-epoll-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.577 [reactor-http-epoll-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 503 SERVICE_UNAVAILABLE
 ResponseTime: 3ms
-2025-11-11 17:44:41.265 [parallel-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.685 [parallel-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:38924
+RemoteAddress: /127.0.0.1:55758
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.267 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.688 [reactor-http-epoll-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 503 SERVICE_UNAVAILABLE
-ResponseTime: 2ms
-2025-11-11 17:44:41.275 [reactor-http-epoll-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 3ms
+2025-11-13 12:14:25.896 [parallel-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
+Method: GET
+URI: http://localhost:8080/
+RemoteAddress: /127.0.0.1:55766
+UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
+2025-11-13 12:14:25.900 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
+Status: 503 SERVICE_UNAVAILABLE
+ResponseTime: 4ms
+2025-11-13 12:14:25.909 [reactor-http-epoll-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 407ms
-2025-11-11 17:44:41.275 [reactor-http-epoll-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 428ms
+2025-11-13 12:14:25.910 [reactor-http-epoll-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 404ms
-2025-11-11 17:44:41.276 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 432ms
+2025-11-13 12:14:25.911 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 411ms
-2025-11-11 17:44:41.277 [reactor-http-epoll-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 439ms
+2025-11-13 12:14:25.912 [reactor-http-epoll-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 416ms
-2025-11-11 17:44:41.278 [reactor-http-epoll-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 444ms
+2025-11-13 12:14:25.914 [reactor-http-epoll-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 421ms
-2025-11-11 17:44:41.279 [reactor-http-epoll-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 451ms
+2025-11-13 12:14:25.915 [reactor-http-epoll-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 425ms
-2025-11-11 17:44:41.280 [reactor-http-epoll-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 456ms
+2025-11-13 12:14:25.917 [reactor-http-epoll-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 429ms
-2025-11-11 17:44:41.282 [reactor-http-epoll-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 463ms
+2025-11-13 12:14:25.918 [reactor-http-epoll-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 434ms
-2025-11-11 17:44:41.283 [reactor-http-epoll-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 469ms
+2025-11-13 12:14:25.919 [reactor-http-epoll-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 440ms
-2025-11-11 17:44:41.284 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 476ms
+2025-11-13 12:14:25.921 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 445ms
-2025-11-11 17:44:41.285 [reactor-http-epoll-5] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 487ms
+2025-11-13 12:14:25.922 [reactor-http-epoll-5] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 450ms
-2025-11-11 17:44:41.287 [reactor-http-epoll-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 493ms
+2025-11-13 12:14:25.924 [reactor-http-epoll-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 455ms
-2025-11-11 17:44:41.288 [reactor-http-epoll-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 502ms
+2025-11-13 12:14:25.925 [reactor-http-epoll-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 461ms
-2025-11-11 17:44:41.289 [reactor-http-epoll-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 509ms
+2025-11-13 12:14:25.927 [reactor-http-epoll-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 467ms
-2025-11-11 17:44:41.291 [reactor-http-epoll-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 518ms
+2025-11-13 12:14:25.928 [reactor-http-epoll-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 473ms
-2025-11-11 17:44:41.292 [reactor-http-epoll-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 530ms
+2025-11-13 12:14:25.930 [reactor-http-epoll-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 478ms
-2025-11-11 17:44:41.294 [reactor-http-epoll-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 542ms
+2025-11-13 12:14:25.933 [reactor-http-epoll-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 485ms
-2025-11-11 17:44:41.295 [reactor-http-epoll-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 554ms
+2025-11-13 12:14:25.934 [reactor-http-epoll-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 491ms
-2025-11-11 17:44:41.297 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 565ms
+2025-11-13 12:14:25.936 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 497ms
-2025-11-11 17:44:41.298 [reactor-http-epoll-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 577ms
+2025-11-13 12:14:25.938 [reactor-http-epoll-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 503ms
-2025-11-11 17:44:41.300 [reactor-http-epoll-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 589ms
+2025-11-13 12:14:25.940 [reactor-http-epoll-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 510ms
-2025-11-11 17:44:41.303 [reactor-http-epoll-10] WARN  [] r.n.http.client.HttpClientConnect - [0533bbdd-1, L:/127.0.0.1:49284 - R:localhost/127.0.0.1:8080] The connection observed an error
+ResponseTime: 602ms
+2025-11-13 12:14:25.943 [reactor-http-epoll-10] WARN  [] r.n.http.client.HttpClientConnect - [2e810019-1, L:/127.0.0.1:45478 - R:localhost/127.0.0.1:8080] The connection observed an error
 io.netty.handler.codec.http.TooLongHttpHeaderException: HTTP header is larger than 8192 bytes.
 	at io.netty.handler.codec.http.HttpObjectDecoder$HeaderParser.newException(HttpObjectDecoder.java:1224)
 	at io.netty.handler.codec.http.HttpObjectDecoder$HeaderParser.parse(HttpObjectDecoder.java:1188)
@@ -655,188 +271,188 @@ io.netty.handler.codec.http.TooLongHttpHeaderException: HTTP header is larger th
 	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
 	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
-2025-11-11 17:44:41.306 [reactor-http-epoll-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:25.949 [reactor-http-epoll-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 503 SERVICE_UNAVAILABLE
-ResponseTime: 521ms
-2025-11-11 17:44:41.361 [parallel-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 622ms
+2025-11-13 12:14:26.007 [parallel-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:38924
+RemoteAddress: /127.0.0.1:55766
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.363 [parallel-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.011 [parallel-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49434
+RemoteAddress: /127.0.0.1:45676
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.366 [parallel-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.016 [parallel-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49424
+RemoteAddress: /127.0.0.1:45660
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.368 [parallel-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.030 [parallel-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49414
+RemoteAddress: /127.0.0.1:45644
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.370 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.036 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49412
+RemoteAddress: /127.0.0.1:45632
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.372 [parallel-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.040 [parallel-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49408
+RemoteAddress: /127.0.0.1:45616
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.375 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.044 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49404
+RemoteAddress: /127.0.0.1:45614
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.378 [parallel-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.055 [parallel-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49390
+RemoteAddress: /127.0.0.1:45604
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.380 [parallel-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.060 [parallel-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49382
+RemoteAddress: /127.0.0.1:45590
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.382 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.065 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49372
+RemoteAddress: /127.0.0.1:45588
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.386 [parallel-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.069 [parallel-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49370
+RemoteAddress: /127.0.0.1:45586
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.388 [parallel-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.072 [parallel-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49368
+RemoteAddress: /127.0.0.1:45578
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.391 [parallel-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.076 [parallel-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49366
+RemoteAddress: /127.0.0.1:45566
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.394 [parallel-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.079 [parallel-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49352
+RemoteAddress: /127.0.0.1:45552
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.396 [parallel-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.083 [parallel-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49342
+RemoteAddress: /127.0.0.1:45546
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.399 [parallel-5] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.086 [parallel-5] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49340
+RemoteAddress: /127.0.0.1:45536
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.401 [parallel-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.089 [parallel-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49336
+RemoteAddress: /127.0.0.1:45520
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.404 [parallel-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.092 [parallel-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49328
+RemoteAddress: /127.0.0.1:45506
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.405 [parallel-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.095 [parallel-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49316
+RemoteAddress: /127.0.0.1:45502
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.408 [parallel-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.098 [parallel-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49312
+RemoteAddress: /127.0.0.1:45496
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.410 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.102 [parallel-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:49300
+RemoteAddress: /127.0.0.1:45482
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.413 [parallel-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.108 [parallel-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:38930
+RemoteAddress: /127.0.0.1:55772
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.416 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.113 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:38936
+RemoteAddress: /127.0.0.1:55788
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.416 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.113 [parallel-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 429 TOO_MANY_REQUESTS
-ResponseTime: 0ms
-2025-11-11 17:44:41.419 [reactor-http-epoll-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 1ms
+2025-11-13 12:14:26.117 [reactor-http-epoll-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 6ms
-2025-11-11 17:44:41.419 [reactor-http-epoll-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 10ms
+2025-11-13 12:14:26.119 [reactor-http-epoll-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 9ms
-2025-11-11 17:44:41.420 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 17ms
+2025-11-13 12:14:26.120 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 12ms
-2025-11-11 17:44:41.421 [reactor-http-epoll-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
-Status: 200 OK
-ResponseTime: 16ms
-2025-11-11 17:44:41.422 [reactor-http-epoll-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
-Status: 200 OK
-ResponseTime: 18ms
-2025-11-11 17:44:41.424 [reactor-http-epoll-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
-Status: 200 OK
-ResponseTime: 23ms
-2025-11-11 17:44:41.425 [reactor-http-epoll-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 22ms
+2025-11-13 12:14:26.122 [reactor-http-epoll-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
 ResponseTime: 26ms
-2025-11-11 17:44:41.426 [reactor-http-epoll-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.123 [reactor-http-epoll-15] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 30ms
-2025-11-11 17:44:41.427 [reactor-http-epoll-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 31ms
+2025-11-13 12:14:26.124 [reactor-http-epoll-16] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 33ms
-2025-11-11 17:44:41.428 [reactor-http-epoll-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 35ms
+2025-11-13 12:14:26.125 [reactor-http-epoll-1] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 37ms
-2025-11-11 17:44:41.429 [reactor-http-epoll-5] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
-Status: 200 OK
-ResponseTime: 41ms
-2025-11-11 17:44:41.430 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 40ms
+2025-11-13 12:14:26.127 [reactor-http-epoll-2] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
 ResponseTime: 44ms
-2025-11-11 17:44:41.432 [reactor-http-epoll-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.129 [reactor-http-epoll-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 50ms
-2025-11-11 17:44:41.433 [reactor-http-epoll-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 51ms
+2025-11-13 12:14:26.130 [reactor-http-epoll-4] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 53ms
-2025-11-11 17:44:41.434 [reactor-http-epoll-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
-Status: 200 OK
-ResponseTime: 56ms
-2025-11-11 17:44:41.435 [reactor-http-epoll-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 54ms
+2025-11-13 12:14:26.132 [reactor-http-epoll-5] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
 ResponseTime: 60ms
-2025-11-11 17:44:41.436 [reactor-http-epoll-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.133 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 64ms
-2025-11-11 17:44:41.438 [reactor-http-epoll-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 65ms
+2025-11-13 12:14:26.135 [reactor-http-epoll-7] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 67ms
-2025-11-11 17:44:41.439 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 70ms
+2025-11-13 12:14:26.137 [reactor-http-epoll-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 71ms
-2025-11-11 17:44:41.441 [reactor-http-epoll-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 77ms
+2025-11-13 12:14:26.139 [reactor-http-epoll-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 75ms
-2025-11-11 17:44:41.441 [reactor-http-epoll-13] WARN  [] r.n.http.client.HttpClientConnect - [5e3549f4-2, L:/127.0.0.1:49424 - R:localhost/127.0.0.1:8080] The connection observed an error
+ResponseTime: 84ms
+2025-11-13 12:14:26.141 [reactor-http-epoll-10] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
+Status: 200 OK
+ResponseTime: 97ms
+2025-11-13 12:14:26.142 [reactor-http-epoll-11] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
+Status: 200 OK
+ResponseTime: 102ms
+2025-11-13 12:14:26.144 [reactor-http-epoll-12] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
+Status: 200 OK
+ResponseTime: 108ms
+2025-11-13 12:14:26.146 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
+Status: 200 OK
+ResponseTime: 116ms
+2025-11-13 12:14:26.147 [reactor-http-epoll-14] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
+Status: 200 OK
+ResponseTime: 131ms
+2025-11-13 12:14:26.148 [reactor-http-epoll-13] WARN  [] r.n.http.client.HttpClientConnect - [caf19f2a-2, L:/127.0.0.1:45660 - R:localhost/127.0.0.1:8080] The connection observed an error
 io.netty.handler.codec.http.TooLongHttpHeaderException: HTTP header is larger than 8192 bytes.
 	at io.netty.handler.codec.http.HttpObjectDecoder$HeaderParser.newException(HttpObjectDecoder.java:1224)
 	at io.netty.handler.codec.http.HttpObjectDecoder$HeaderParser.parse(HttpObjectDecoder.java:1188)
@@ -864,83 +480,209 @@ io.netty.handler.codec.http.TooLongHttpHeaderException: HTTP header is larger th
 	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
 	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
 	at java.base/java.lang.Thread.run(Thread.java:1583)
-2025-11-11 17:44:41.443 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.151 [reactor-http-epoll-13] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 503 SERVICE_UNAVAILABLE
-ResponseTime: 80ms
-2025-11-11 17:44:41.497 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 140ms
+2025-11-13 12:14:26.206 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [REQUEST] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Method: GET
 URI: http://localhost:8080/
-RemoteAddress: /127.0.0.1:38936
+RemoteAddress: /127.0.0.1:55788
 UserAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36
-2025-11-11 17:44:41.497 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.206 [parallel-3] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 429 TOO_MANY_REQUESTS
 ResponseTime: 0ms
-2025-11-11 17:44:41.500 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+2025-11-13 12:14:26.210 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 139ms
-2025-11-11 17:44:41.501 [reactor-http-epoll-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 203ms
+2025-11-13 12:14:26.211 [reactor-http-epoll-9] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 720ms
-2025-11-11 17:44:41.502 [reactor-http-epoll-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 896ms
+2025-11-13 12:14:26.212 [reactor-http-epoll-8] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 727ms
-2025-11-11 17:44:41.502 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [f8c25936-6e27-4bee-9288-a72992217a64]
+ResponseTime: 910ms
+2025-11-13 12:14:26.213 [reactor-http-epoll-6] INFO  [] a.m.i.g.config.EnhancedLoggingFilter - [RESPONSE] [1e19c57b-cd84-4f7a-b93b-69d290955566]
 Status: 200 OK
-ResponseTime: 809ms
-2025-11-11 17:54:36.819 [SpringApplicationShutdownHook] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
-2025-11-11 17:54:36.821 [netty-shutdown] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Graceful shutdown complete
-2025-11-11 17:54:38.831 [SpringApplicationShutdownHook] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Deregistering service with consul: meldestelle-8080-4eca3f58-3081-422e-8d6f-88fd29eca82b
-2025-11-11 17:56:49.328 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
-2025-11-11 17:56:49.354 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.9 with PID 77080 (/home/stefan-mo/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan-mo in /home/stefan-mo/WsMeldestelle/Meldestelle)
-2025-11-11 17:56:49.355 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.6, Spring v6.2.11
-2025-11-11 17:56:49.355 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 1 profile is active: "dev"
-2025-11-11 17:56:50.482 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=4eb90187-1826-32ce-9dc7-fa80cb000915
-2025-11-11 17:56:52.459 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
-2025-11-11 17:56:52.460 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
-2025-11-11 17:56:53.117 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
-2025-11-11 17:56:53.677 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2025-11-11 17:56:53.786 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
-2025-11-11 17:56:53.788 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-53c3b7cb-cff4-4c60-a423-ee7f507acd3b', name='meldestelle', tags=[], address='10.0.0.18', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://10.0.0.18:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
-2025-11-11 17:56:53.925 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Started GatewayApplicationKt in 4.9 seconds (process running for 5.483)
-2025-11-11 17:57:12.800 [SpringApplicationShutdownHook] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
-2025-11-11 17:57:12.802 [netty-shutdown] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Graceful shutdown complete
-2025-11-11 17:57:14.812 [SpringApplicationShutdownHook] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Deregistering service with consul: meldestelle-8080-53c3b7cb-cff4-4c60-a423-ee7f507acd3b
-2025-11-11 18:13:55.110 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
-2025-11-11 18:13:55.137 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.9 with PID 91093 (/home/stefan-mo/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan-mo in /home/stefan-mo/WsMeldestelle/Meldestelle)
-2025-11-11 18:13:55.138 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.6, Spring v6.2.11
-2025-11-11 18:13:55.138 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 1 profile is active: "dev"
-2025-11-11 18:13:56.308 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=4eb90187-1826-32ce-9dc7-fa80cb000915
-2025-11-11 18:13:58.251 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
-2025-11-11 18:13:58.251 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
-2025-11-11 18:13:58.251 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
-2025-11-11 18:13:58.252 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
-2025-11-11 18:13:58.898 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
-2025-11-11 18:13:59.469 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-2025-11-11 18:13:59.562 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
-2025-11-11 18:13:59.564 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-d4055d7b-f605-4fde-a992-8b4f3adb8a86', name='meldestelle', tags=[], address='10.0.0.18', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://10.0.0.18:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
-2025-11-11 18:13:59.707 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Started GatewayApplicationKt in 4.898 seconds (process running for 5.441)
-2025-11-11 18:14:46.705 [SpringApplicationShutdownHook] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
-2025-11-11 18:14:46.706 [netty-shutdown] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Graceful shutdown complete
-2025-11-11 18:14:48.719 [SpringApplicationShutdownHook] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Deregistering service with consul: meldestelle-8080-d4055d7b-f605-4fde-a992-8b4f3adb8a86
+ResponseTime: 1021ms
+2025-11-13 12:52:06.858 [SpringApplicationShutdownHook] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-11-13 12:52:06.859 [netty-shutdown] INFO  [] o.s.b.w.e.netty.GracefulShutdown - Graceful shutdown complete
+2025-11-13 12:52:08.875 [SpringApplicationShutdownHook] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Deregistering service with consul: meldestelle-8080-c7469931-1081-4525-b948-a5f4f3ab0586
+2025-11-13 12:54:10.665 [background-preinit] INFO  [] o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.3.Final
+2025-11-13 12:54:10.690 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - Starting GatewayApplicationKt using Java 21.0.8 with PID 104699 (/home/stefan/WsMeldestelle/Meldestelle/infrastructure/gateway/build/classes/kotlin/main started by stefan in /home/stefan/WsMeldestelle/Meldestelle)
+2025-11-13 12:54:10.690 [main] DEBUG [] a.m.i.gateway.GatewayApplicationKt - Running with Spring Boot v3.5.6, Spring v6.2.11
+2025-11-13 12:54:10.691 [main] INFO  [] a.m.i.gateway.GatewayApplicationKt - The following 2 profiles are active: "docker", "keycloak"
+2025-11-13 12:54:11.745 [main] INFO  [] o.s.cloud.context.scope.GenericScope - BeanFactory id=4eb90187-1826-32ce-9dc7-fa80cb000915
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [After]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Before]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Between]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Cookie]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Header]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Host]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Method]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Path]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Query]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [ReadBody]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [RemoteAddr]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [Weight]
+2025-11-13 12:54:13.620 [main] INFO  [] o.s.c.g.r.RouteDefinitionRouteLocator - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-11-13 12:54:14.299 [main] INFO  [] o.s.b.a.e.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
+2025-11-13 12:54:15.149 [main] WARN  [] o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2025-11-13 12:54:15.238 [main] INFO  [] o.s.b.w.e.netty.NettyWebServer - Netty started on port 8080 (http)
+2025-11-13 12:54:15.241 [main] INFO  [] o.s.c.c.s.ConsulServiceRegistry - Registering service with consul: NewService{id='meldestelle-8080-74ed7a02-ad2c-42e5-bea7-7bc4f3bea8e6', name='meldestelle', tags=[], address='fedora', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://fedora:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
+2025-11-13 12:54:19.171 [main] ERROR [] o.s.c.c.s.ConsulServiceRegistry - Error registering service with consul: NewService{id='meldestelle-8080-74ed7a02-ad2c-42e5-bea7-7bc4f3bea8e6', name='meldestelle', tags=[], address='fedora', meta={secure=false}, port=8080, enableTagOverride=null, check=Check{script='null', dockerContainerID='null', shell='null', interval='10s', ttl='null', http='http://fedora:8080/actuator/health', method='null', header={}, tcp='null', timeout='null', deregisterCriticalServiceAfter='null', tlsSkipVerify=null, status='null', grpc='null', grpcUseTLS=null}, checks=null}
+com.ecwid.consul.transport.TransportException: java.net.UnknownHostException: consul
+	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
+	at com.ecwid.consul.transport.AbstractHttpTransport.makePutRequest(AbstractHttpTransport.java:49)
+	at com.ecwid.consul.v1.ConsulRawClient.makePutRequest(ConsulRawClient.java:163)
+	at com.ecwid.consul.v1.agent.AgentConsulClient.agentServiceRegister(AgentConsulClient.java:273)
+	at com.ecwid.consul.v1.ConsulClient.agentServiceRegister(ConsulClient.java:310)
+	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:67)
+	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:43)
+	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.register(AbstractAutoServiceRegistration.java:264)
+	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.register(ConsulAutoServiceRegistration.java:80)
+	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.start(AbstractAutoServiceRegistration.java:156)
+	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.start(ConsulAutoServiceRegistration.java:70)
+	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistrationListener.onApplicationEvent(ConsulAutoServiceRegistrationListener.java:60)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:185)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:178)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:156)
+	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:454)
+	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:387)
+	at org.springframework.boot.web.reactive.context.WebServerManager.start(WebServerManager.java:57)
+	at org.springframework.boot.web.reactive.context.WebServerStartStopLifecycle.start(WebServerStartStopLifecycle.java:41)
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:405)
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:394)
+	at org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:586)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:364)
+	at org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:310)
+	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:1006)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:630)
+	at org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext.refresh(ReactiveWebServerApplicationContext.java:66)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
+	at at.mocode.infrastructure.gateway.GatewayApplicationKt.main(GatewayApplication.kt:29)
+Caused by: java.net.UnknownHostException: consul
+	at java.base/java.net.InetAddress$CachedLookup.get(InetAddress.java:988)
+	at java.base/java.net.InetAddress$NameServiceAddresses.get(InetAddress.java:1191)
+	at java.base/java.net.InetAddress.getAllByName0(InetAddress.java:1818)
+	at java.base/java.net.InetAddress.getAllByName(InetAddress.java:1688)
+	at org.apache.http.impl.conn.SystemDefaultDnsResolver.resolve(SystemDefaultDnsResolver.java:45)
+	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:112)
+	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
+	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
+	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
+	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
+	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
+	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
+	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:72)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:221)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:165)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:140)
+	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:70)
+	... 33 common frames omitted
+2025-11-13 12:54:19.171 [catalogWatchTaskScheduler-1] ERROR [] o.s.c.c.discovery.ConsulCatalogWatch - Error watching Consul CatalogServices
+com.ecwid.consul.transport.TransportException: java.net.UnknownHostException: consul: Der Name oder der Dienst ist nicht bekannt
+	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
+	at com.ecwid.consul.transport.AbstractHttpTransport.makeGetRequest(AbstractHttpTransport.java:36)
+	at com.ecwid.consul.v1.ConsulRawClient.makeGetRequest(ConsulRawClient.java:139)
+	at com.ecwid.consul.v1.catalog.CatalogConsulClient.getCatalogServices(CatalogConsulClient.java:143)
+	at com.ecwid.consul.v1.ConsulClient.getCatalogServices(ConsulClient.java:400)
+	at org.springframework.cloud.consul.discovery.ConsulCatalogWatch.catalogServicesWatch(ConsulCatalogWatch.java:131)
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358)
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.net.UnknownHostException: consul: Der Name oder der Dienst ist nicht bekannt
+	at java.base/java.net.Inet6AddressImpl.lookupAllHostAddr(Native Method)
+	at java.base/java.net.Inet6AddressImpl.lookupAllHostAddr(Inet6AddressImpl.java:52)
+	at java.base/java.net.InetAddress$PlatformResolver.lookupByName(InetAddress.java:1211)
+	at java.base/java.net.InetAddress.getAddressesFromNameService(InetAddress.java:1828)
+	at java.base/java.net.InetAddress$NameServiceAddresses.get(InetAddress.java:1139)
+	at java.base/java.net.InetAddress.getAllByName0(InetAddress.java:1818)
+	at java.base/java.net.InetAddress.getAllByName(InetAddress.java:1688)
+	at org.apache.http.impl.conn.SystemDefaultDnsResolver.resolve(SystemDefaultDnsResolver.java:45)
+	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:112)
+	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
+	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
+	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
+	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
+	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
+	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
+	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:72)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:221)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:165)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:140)
+	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:70)
+	... 12 common frames omitted
+2025-11-13 12:54:21.191 [main] WARN  [] o.s.b.w.r.c.AnnotationConfigReactiveWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2025-11-13 12:54:21.215 [main] INFO  [] o.s.b.a.l.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-11-13 12:54:21.230 [main] ERROR [] o.s.boot.SpringApplication - Application run failed
+org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:408)
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:394)
+	at org.springframework.context.support.DefaultLifecycleProcessor$LifecycleGroup.start(DefaultLifecycleProcessor.java:586)
+	at java.base/java.lang.Iterable.forEach(Iterable.java:75)
+	at org.springframework.context.support.DefaultLifecycleProcessor.startBeans(DefaultLifecycleProcessor.java:364)
+	at org.springframework.context.support.DefaultLifecycleProcessor.onRefresh(DefaultLifecycleProcessor.java:310)
+	at org.springframework.context.support.AbstractApplicationContext.finishRefresh(AbstractApplicationContext.java:1006)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:630)
+	at org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext.refresh(ReactiveWebServerApplicationContext.java:66)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:752)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
+	at at.mocode.infrastructure.gateway.GatewayApplicationKt.main(GatewayApplication.kt:29)
+Caused by: com.ecwid.consul.transport.TransportException: java.net.UnknownHostException: consul
+	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:83)
+	at com.ecwid.consul.transport.AbstractHttpTransport.makePutRequest(AbstractHttpTransport.java:49)
+	at com.ecwid.consul.v1.ConsulRawClient.makePutRequest(ConsulRawClient.java:163)
+	at com.ecwid.consul.v1.agent.AgentConsulClient.agentServiceRegister(AgentConsulClient.java:273)
+	at com.ecwid.consul.v1.ConsulClient.agentServiceRegister(ConsulClient.java:310)
+	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:67)
+	at org.springframework.cloud.consul.serviceregistry.ConsulServiceRegistry.register(ConsulServiceRegistry.java:43)
+	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.register(AbstractAutoServiceRegistration.java:264)
+	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.register(ConsulAutoServiceRegistration.java:80)
+	at org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration.start(AbstractAutoServiceRegistration.java:156)
+	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistration.start(ConsulAutoServiceRegistration.java:70)
+	at org.springframework.cloud.consul.serviceregistry.ConsulAutoServiceRegistrationListener.onApplicationEvent(ConsulAutoServiceRegistrationListener.java:60)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.doInvokeListener(SimpleApplicationEventMulticaster.java:185)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.invokeListener(SimpleApplicationEventMulticaster.java:178)
+	at org.springframework.context.event.SimpleApplicationEventMulticaster.multicastEvent(SimpleApplicationEventMulticaster.java:156)
+	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:454)
+	at org.springframework.context.support.AbstractApplicationContext.publishEvent(AbstractApplicationContext.java:387)
+	at org.springframework.boot.web.reactive.context.WebServerManager.start(WebServerManager.java:57)
+	at org.springframework.boot.web.reactive.context.WebServerStartStopLifecycle.start(WebServerStartStopLifecycle.java:41)
+	at org.springframework.context.support.DefaultLifecycleProcessor.doStart(DefaultLifecycleProcessor.java:405)
+	... 14 common frames omitted
+Caused by: java.net.UnknownHostException: consul
+	at java.base/java.net.InetAddress$CachedLookup.get(InetAddress.java:988)
+	at java.base/java.net.InetAddress$NameServiceAddresses.get(InetAddress.java:1191)
+	at java.base/java.net.InetAddress.getAllByName0(InetAddress.java:1818)
+	at java.base/java.net.InetAddress.getAllByName(InetAddress.java:1688)
+	at org.apache.http.impl.conn.SystemDefaultDnsResolver.resolve(SystemDefaultDnsResolver.java:45)
+	at org.apache.http.impl.conn.DefaultHttpClientConnectionOperator.connect(DefaultHttpClientConnectionOperator.java:112)
+	at org.apache.http.impl.conn.PoolingHttpClientConnectionManager.connect(PoolingHttpClientConnectionManager.java:376)
+	at org.apache.http.impl.execchain.MainClientExec.establishRoute(MainClientExec.java:393)
+	at org.apache.http.impl.execchain.MainClientExec.execute(MainClientExec.java:236)
+	at org.apache.http.impl.execchain.ProtocolExec.execute(ProtocolExec.java:186)
+	at org.apache.http.impl.execchain.RetryExec.execute(RetryExec.java:89)
+	at org.apache.http.impl.execchain.RedirectExec.execute(RedirectExec.java:110)
+	at org.apache.http.impl.client.InternalHttpClient.doExecute(InternalHttpClient.java:185)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:72)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:221)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:165)
+	at org.apache.http.impl.client.CloseableHttpClient.execute(CloseableHttpClient.java:140)
+	at com.ecwid.consul.transport.AbstractHttpTransport.executeRequest(AbstractHttpTransport.java:70)
+	... 33 common frames omitted

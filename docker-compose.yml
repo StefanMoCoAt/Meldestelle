@@ -13,9 +13,12 @@ services:
     image: postgres:${DOCKER_POSTGRES_VERSION:-18-alpine}
     container_name: meldestelle-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-meldestelle}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       POSTGRES_DB: ${POSTGRES_DB:-meldestelle}
+    secrets:
+      - postgres_user
+      - postgres_password
     ports:
       - "5432:5432"
     volumes:
@@ -115,12 +118,17 @@ services:
     image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4}
     container_name: meldestelle-keycloak
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_BOOTSTRAP_ADMIN_USERNAME_FILE: /run/secrets/kc_bootstrap_admin_username
+      KC_BOOTSTRAP_ADMIN_PASSWORD_FILE: /run/secrets/kc_bootstrap_admin_password
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
-      KC_DB_USERNAME: ${POSTGRES_USER:-meldestelle}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-meldestelle}
+      KC_DB_USERNAME_FILE: /run/secrets/postgres_user
+      KC_DB_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - kc_bootstrap_admin_username
+      - kc_bootstrap_admin_password
+      - postgres_user
+      - postgres_password
     ports:
       - "8180:8080"
     depends_on:
@@ -191,6 +199,19 @@ services:
       retries: 3
       start_period: 40s
     restart: unless-stopped
+
+# ===================================================================
+# Secrets
+# ===================================================================
+secrets:
+  kc_bootstrap_admin_username:
+    file: ./docker/secrets/kc_bootstrap_admin_username.txt
+  kc_bootstrap_admin_password:
+    file: ./docker/secrets/kc_bootstrap_admin_password.txt
+  postgres_user:
+    file: ./docker/secrets/postgres_user.txt
+  postgres_password:
+    file: ./docker/secrets/postgres_password.txt
 
 # ===================================================================
 # Volumes
