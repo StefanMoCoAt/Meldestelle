@@ -97,17 +97,17 @@ Das System ist in unabhängige Domänen aufgeteilt:
 
 ## 🛠️ Tech Stack
 
-| Komponente     | Technologie                   | Version |
-|----------------|-------------------------------|---------|
-| **Backend**    | Kotlin + Spring Boot          | 3.x     |
-| **JVM**        | Java                          | 21      |
-| **Build**      | Gradle                        | 9.1.0   |
-| **Datenbank**  | PostgreSQL                    | 16      |
-| **Cache**      | Redis                         | 7       |
-| **Messaging**  | Apache Kafka                  | 7.4.0   |
-| **Auth**       | Keycloak                      | 26.4.2  |
-| **Monitoring** | Prometheus + Grafana + Zipkin | -       |
-| **Container**  | Docker + Docker Compose       | v2.0+   |
+| Komponente     | Technologie                   | Version   |
+|----------------|-------------------------------|-----------|
+| **Backend**    | Kotlin + Spring Boot          | 3.x       |
+| **JVM**        | Java                          | 21        |
+| **Build**      | Gradle                        | 9.1.0     |
+| **Datenbank**  | PostgreSQL                    | 17-alpine |
+| **Cache**      | Redis                         | 7         |
+| **Messaging**  | Apache Kafka                  | 7.4.0     |
+| **Auth**       | Keycloak                      | 26.4      |
+| **Monitoring** | Prometheus + Grafana + Zipkin | -         |
+| **Container**  | Docker + Docker Compose       | v2.0+     |
 
 ---
 
@@ -392,5 +392,5 @@ PR-Workflow.
 
 ---
 
-**Version**: 2.0.0 (nach Dokumentations-Refactoring)  
-**letzte Aktualisierung**: 31. Oktober 2025
+**Version**: 2.0.0 (nach Documentations-Refactoring)  
+**letzte Aktualisierung**: 17. November 2025
