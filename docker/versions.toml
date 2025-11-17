@@ -17,7 +17,7 @@ eclipse-temurin-jdk = "21-jdk-alpine"
 eclipse-temurin-jre = "21-jre-alpine"
 
 # --- Datastore Images ---
-postgres = "18-alpine"
+postgres = "17-alpine"
 redis = "8-alpine"
 
 # --- Additional Infrastructure Images ---
