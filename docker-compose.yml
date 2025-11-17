@@ -118,12 +118,8 @@ services:
     image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4}
     container_name: meldestelle-keycloak
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME_FILE: /run/secrets/kc_bootstrap_admin_username
-      KC_BOOTSTRAP_ADMIN_PASSWORD_FILE: /run/secrets/kc_bootstrap_admin_password
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
-      KC_DB_USERNAME_FILE: /run/secrets/postgres_user
-      KC_DB_PASSWORD_FILE: /run/secrets/postgres_password
     secrets:
       - kc_bootstrap_admin_username
       - kc_bootstrap_admin_password
@@ -136,7 +132,22 @@ services:
         condition: service_healthy
     volumes:
       - ./docker/services/keycloak:/opt/keycloak/data/import
-    command: start-dev --import-realm
+    # Wrapper: liest Docker Secrets und exportiert sie als Umgebungsvariablen
+    # bevor Keycloak gestartet wird. Wir überschreiben den ENTRYPOINT auf bash,
+    # da das offizielle Image standardmäßig kc.sh als ENTRYPOINT setzt.
+    entrypoint: ["/bin/bash", "-c"]
+    command: >
+
+      # Admin-Credentials aus Secrets setzen
+      export KC_BOOTSTRAP_ADMIN_USERNAME=$(cat /run/secrets/kc_bootstrap_admin_username | tr -d '\n') &&
+      export KC_BOOTSTRAP_ADMIN_PASSWORD=$(cat /run/secrets/kc_bootstrap_admin_password | tr -d '\n') &&
+
+      # DB-Credentials aus Secrets setzen
+      export KC_DB_USERNAME=$(cat /run/secrets/postgres_user | tr -d '\n') &&
+      export KC_DB_PASSWORD=$(cat /run/secrets/postgres_password | tr -d '\n') &&
+
+      # Keycloak starten (dev) und Realm importieren
+      exec /opt/keycloak/bin/kc.sh start-dev --import-realm
     networks:
       - meldestelle-network
     healthcheck:
