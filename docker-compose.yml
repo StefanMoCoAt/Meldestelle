@@ -21,8 +21,16 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       POSTGRES_DB: ${POSTGRES_DB:-meldestelle}
     secrets:
-      - postgres_user
-      - postgres_password
+      - source: postgres_user
+        target: postgres_user
+        uid: "0"
+        gid: "0"
+        mode: 0444
+      - source: postgres_password
+        target: postgres_password
+        uid: "0"
+        gid: "0"
+        mode: 0444
     ports:
       - "5432:5432"
     volumes:
@@ -52,7 +60,11 @@ services:
     command: |
       exec redis-server --appendonly yes --requirepass "$(cat /run/secrets/redis_password | tr -d '\n')"
     secrets:
-      - redis_password
+      - source: redis_password
+        target: redis_password
+        uid: "0"
+        gid: "0"
+        mode: 0444
     networks:
       - meldestelle-network
     healthcheck:
@@ -130,10 +142,26 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
     secrets:
-      - kc_bootstrap_admin_username
-      - kc_bootstrap_admin_password
-      - postgres_user
-      - postgres_password
+      - source: kc_bootstrap_admin_username
+        target: kc_bootstrap_admin_username
+        uid: "0"
+        gid: "0"
+        mode: 0444
+      - source: kc_bootstrap_admin_password
+        target: kc_bootstrap_admin_password
+        uid: "0"
+        gid: "0"
+        mode: 0444
+      - source: postgres_user
+        target: postgres_user
+        uid: "0"
+        gid: "0"
+        mode: 0444
+      - source: postgres_password
+        target: postgres_password
+        uid: "0"
+        gid: "0"
+        mode: 0444
     ports:
       - "8180:8080"
     depends_on:
