@@ -20,19 +20,16 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-meldestelle}
     # Wrapper: Secrets einlesen und als ENV setzen, bevor der offizielle Entrypoint startet
-    entrypoint: ["/bin/sh", "-c"]
-    command: |
-      export POSTGRES_USER="$(tr -d '\n' </run/secrets/postgres_user)" && \
-      export POSTGRES_PASSWORD="$(tr -d '\n' </run/secrets/postgres_password)" && \
-      exec /usr/local/bin/docker-entrypoint.sh postgres
-    secrets:
-      - postgres_user
-      - postgres_password
+    entrypoint: ["/bin/sh", "-ec", "export POSTGRES_USER=\"$(tr -d '\\n' </run/secrets/postgres_user)\"; export POSTGRES_PASSWORD=\"$(tr -d '\\n' </run/secrets/postgres_password)\"; exec /usr/local/bin/docker-entrypoint.sh postgres"]
+    # Wichtiger Fix: Statt Compose-Secrets (die auf manchen Hosts Rootless/UID-Remap zu Permission denied führen)
+    # binden wir die Secret-Dateien explizit read-only ein. So kann der Wrapper sie zuverlässig lesen.
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/services/postgres:/docker-entrypoint-initdb.d
+      - ./docker/secrets/postgres_user.txt:/run/secrets/postgres_user:ro
+      - ./docker/secrets/postgres_password.txt:/run/secrets/postgres_password:ro
     networks:
       - meldestelle-network
     healthcheck:
