@@ -22,9 +22,8 @@ services:
     # Wrapper: Secrets einlesen und als ENV setzen, bevor der offizielle Entrypoint startet
     entrypoint: ["/bin/sh", "-c"]
     command: |
-      set -eu
-      export POSTGRES_USER="$(cat /run/secrets/postgres_user | tr -d '\n')"
-      export POSTGRES_PASSWORD="$(cat /run/secrets/postgres_password | tr -d '\n')"
+      export POSTGRES_USER="$(tr -d '\n' </run/secrets/postgres_user)" && \
+      export POSTGRES_PASSWORD="$(tr -d '\n' </run/secrets/postgres_password)" && \
       exec /usr/local/bin/docker-entrypoint.sh postgres
     secrets:
       - postgres_user
