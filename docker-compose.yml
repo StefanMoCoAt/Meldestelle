@@ -5,13 +5,17 @@
 # Generated: 2025-11-11 23:07:01 UTC
 # ===================================================================
 
+# Extension field for reusable shell command (YAML anchor)
+x-db_is_ready_cmd: &db_is_ready_cmd pg_isready -U "$(cat /run/secrets/postgres_user)" -d "${POSTGRES_DB:-meldestelle}"
+
 services:
   # ===================================================================
   # Database
   # ===================================================================
   postgres:
-    image: postgres:${DOCKER_POSTGRES_VERSION:-18-alpine}
+    image: postgres:${DOCKER_POSTGRES_VERSION:-17-alpine}
     container_name: meldestelle-postgres
+    user: "0:0"
     environment:
       POSTGRES_USER_FILE: /run/secrets/postgres_user
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
@@ -27,7 +31,7 @@ services:
     networks:
       - meldestelle-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U meldestelle -d meldestelle"]
+      test: ["CMD-SHELL", *db_is_ready_cmd]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -44,11 +48,15 @@ services:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis-data:/data
-    command: redis-server --appendonly yes
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      exec redis-server --appendonly yes --requirepass "$(cat /run/secrets/redis_password | tr -d '\n')"
+    secrets:
+      - redis_password
     networks:
       - meldestelle-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$(cat /run/secrets/redis_password)\" redis-cli ping"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -117,6 +125,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4}
     container_name: meldestelle-keycloak
+    user: "0:0"
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
@@ -133,14 +142,14 @@ services:
     volumes:
       - ./docker/services/keycloak:/opt/keycloak/data/import
     # Wrapper: liest Docker Secrets und exportiert sie als Umgebungsvariablen
-    # bevor Keycloak gestartet wird. Wir überschreiben den ENTRYPOINT auf bash,
+    # bevor Keycloak gestartet wird. Wir überschreiben den ENTRYPOINT auf /bin/sh,
     # da das offizielle Image standardmäßig kc.sh als ENTRYPOINT setzt.
-    entrypoint: ["/bin/bash", "-c"]
+    entrypoint: ["/bin/sh", "-c"]
     command: >
 
       # Admin-Credentials aus Secrets setzen
-      export KC_BOOTSTRAP_ADMIN_USERNAME=$(cat /run/secrets/kc_bootstrap_admin_username | tr -d '\n') &&
-      export KC_BOOTSTRAP_ADMIN_PASSWORD=$(cat /run/secrets/kc_bootstrap_admin_password | tr -d '\n') &&
+      export KEYCLOAK_ADMIN="$(cat /run/secrets/kc_bootstrap_admin_username | tr -d '\n')" &&
+      export KEYCLOAK_ADMIN_PASSWORD="$(cat /run/secrets/kc_bootstrap_admin_password | tr -d '\n')" &&
 
       # DB-Credentials aus Secrets setzen
       export KC_DB_USERNAME=$(cat /run/secrets/postgres_user | tr -d '\n') &&
@@ -223,6 +232,8 @@ secrets:
     file: ./docker/secrets/postgres_user.txt
   postgres_password:
     file: ./docker/secrets/postgres_password.txt
+  redis_password:
+    file: ./docker/secrets/redis_password.txt
 
 # ===================================================================
 # Volumes
