@@ -17,20 +17,17 @@ services:
     container_name: meldestelle-postgres
     user: "0:0"
     environment:
-      POSTGRES_USER_FILE: /run/secrets/postgres_user
-      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       POSTGRES_DB: ${POSTGRES_DB:-meldestelle}
+    # Wrapper: Secrets einlesen und als ENV setzen, bevor der offizielle Entrypoint startet
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      set -eu
+      export POSTGRES_USER="$(cat /run/secrets/postgres_user | tr -d '\n')"
+      export POSTGRES_PASSWORD="$(cat /run/secrets/postgres_password | tr -d '\n')"
+      exec /usr/local/bin/docker-entrypoint.sh postgres
     secrets:
-      - source: postgres_user
-        target: postgres_user
-        uid: "0"
-        gid: "0"
-        mode: 0444
-      - source: postgres_password
-        target: postgres_password
-        uid: "0"
-        gid: "0"
-        mode: 0444
+      - postgres_user
+      - postgres_password
     ports:
       - "5432:5432"
     volumes:
@@ -60,11 +57,7 @@ services:
     command: |
       exec redis-server --appendonly yes --requirepass "$(cat /run/secrets/redis_password | tr -d '\n')"
     secrets:
-      - source: redis_password
-        target: redis_password
-        uid: "0"
-        gid: "0"
-        mode: 0444
+      - redis_password
     networks:
       - meldestelle-network
     healthcheck:
@@ -142,26 +135,10 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-meldestelle}
     secrets:
-      - source: kc_bootstrap_admin_username
-        target: kc_bootstrap_admin_username
-        uid: "0"
-        gid: "0"
-        mode: 0444
-      - source: kc_bootstrap_admin_password
-        target: kc_bootstrap_admin_password
-        uid: "0"
-        gid: "0"
-        mode: 0444
-      - source: postgres_user
-        target: postgres_user
-        uid: "0"
-        gid: "0"
-        mode: 0444
-      - source: postgres_password
-        target: postgres_password
-        uid: "0"
-        gid: "0"
-        mode: 0444
+      - kc_bootstrap_admin_username
+      - kc_bootstrap_admin_password
+      - postgres_user
+      - postgres_password
     ports:
       - "8180:8080"
     depends_on:
