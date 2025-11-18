@@ -2,7 +2,7 @@ name: YouTrack Sync (on merge)
 
 permissions:
   contents: read
-  id-token: write # Stellt sicher, dass die Secrets sicher abgerufen werden können
+  id-token: write
 
 concurrency:
   group: youtrack-sync-${{ github.ref }}
@@ -21,9 +21,17 @@ jobs:
 
     steps:
       - name: Comment to YouTrack Issue(s)
-        if: ${{ env.YT_URL && env.YT_TOKEN }}
+        # ENTFERNT: if: ${{ env.YT_URL && env.YT_TOKEN }}
         run: |
           set -euo pipefail
+
+          # HIER IST DIE NEUE PRÜFUNG INNERHALB DER SHELL
+          if [ -z "$YT_URL" ] || [ -z "$YT_TOKEN" ]; then
+            echo "Skipping YouTrack comment because YT_URL or YT_TOKEN is not set."
+            exit 0
+          fi
+          # ENDE DER NEUEN PRÜFUNG
+
           KEYS=$(git log -1 --pretty=%B | grep -o '[A-Z]\+-[0-9]\+' | sort -u || true)
           if [ -z "$KEYS" ]; then
             echo "No issue keys in last commit message. Skipping."
