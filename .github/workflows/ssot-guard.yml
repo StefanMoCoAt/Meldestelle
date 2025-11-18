@@ -54,25 +54,29 @@ jobs:
           echo "[Guard] Prüfe, dass keine Laufzeit-Variablen in Build-Args-Dateien vorkommen..."
           RUNTIME_KEYS_REGEX='^(GATEWAY_HOST|GATEWAY_PORT|WEB_APP_PORT|NODE_ENV|CONSUL_(HOST|PORT|ENABLED)|DB_(HOST|PORT|NAME|USER|USERNAME|PASSWORD)|POSTGRES_DB|REDIS_PORT|KEYCLOAK_PORT|PING_SERVICE_PORT|MEMBERS_SERVICE_PORT|HORSES_SERVICE_PORT|EVENTS_SERVICE_PORT|MASTERDATA_SERVICE_PORT|AUTH_SERVICE_PORT|MONITORING_SERVER_PORT|PROMETHEUS_PORT|GRAFANA_PORT|JWT_ISSUER|JWT_AUDIENCE)$'
           FAIL=0
-          for f in docker/build-args/*.env config/build/*.env 2>/dev/null || true; do
+          shopt -s nullglob
+          for f in docker/build-args/*.env config/build/*.env; do
             [ -f "$f" ] || continue
             BAD=$(grep -E '^[A-Z0-9_]+=' "$f" | cut -d= -f1 | grep -E "$RUNTIME_KEYS_REGEX" || true)
             if [ -n "$BAD" ]; then
               echo "Fehler: Laufzeit-Variablen in Build-Args Datei $f gefunden:"; echo "$BAD"; FAIL=1
             fi
           done
+          shopt -u nullglob
           if [ $FAIL -ne 0 ]; then
             echo "Build vs Runtime Trennung verletzt."; exit 1; fi
 
           echo "[Guard] Prüfe, dass keine Build-/Versions-Variablen in Runtime-Env vorkommen..."
           BUILD_KEYS_REGEX='^(GRADLE_VERSION|JAVA_VERSION|VERSION|APP_VERSION|[A-Z]+_IMAGE_TAG)$'
-          for f in config/env/.env .env.template 2>/dev/null; do
+          shopt -s nullglob
+          for f in config/env/.env .env.template; do
             [ -f "$f" ] || continue
             BAD=$(grep -E '^[A-Z0-9_]+=' "$f" | cut -d= -f1 | grep -E "$BUILD_KEYS_REGEX" || true)
             if [ -n "$BAD" ]; then
               echo "Fehler: Build-/Versions-Variablen in Runtime-Env $f gefunden:"; echo "$BAD"; FAIL=1
             fi
           done
+          shopt -u nullglob
           if [ $FAIL -ne 0 ]; then
             echo "Build-/Runtime-Mischung in Runtime-Env."; exit 1; fi
 
