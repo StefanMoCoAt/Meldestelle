@@ -6,8 +6,8 @@
 # Stage 1: Build Stage - Kotlin/JS kompilieren
 # ===================================================================
 # Build args (build-time only)
-ARG GRADLE_VERSION=9.1.0
-ARG JAVA_VERSION=21
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION} AS builder
 
 # Install Node.js and npm for Kotlin/JS builds (Ubuntu-based image has better Node.js compatibility)
@@ -44,7 +44,7 @@ RUN ./gradlew :clients:app:jsBrowserDistribution --no-configure-on-demand -Pprod
 # Stage 2: Runtime Stage - Nginx für Static Files + API Proxy
 # ===================================================================
 # Build arg controls runtime base image tag (build-time only)
-ARG NGINX_IMAGE_TAG=1.28.0-alpine
+ARG NGINX_IMAGE_TAG
 FROM nginx:${NGINX_IMAGE_TAG}
 
 # Installiere curl für Health-Checks

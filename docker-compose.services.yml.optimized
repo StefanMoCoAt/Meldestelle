@@ -25,10 +25,10 @@ services:
       dockerfile: dockerfiles/services/ping-service/Dockerfile
       args:
         # Global build arguments (build-time only)
-        GRADLE_VERSION: 9.1.0
-        JAVA_VERSION: 21
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: 1.0.0
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
     container_name: meldestelle-ping-service
     env_file:
       - config/env/.env
@@ -102,10 +102,10 @@ services:
       context: .
       dockerfile: dockerfiles/services/members-service/Dockerfile
       args:
-        GRADLE_VERSION: 9.1.0
-        JAVA_VERSION: 21
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: 1.0.0
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
     container_name: meldestelle-members-service
     env_file:
       - config/env/.env
@@ -181,10 +181,10 @@ services:
       context: .
       dockerfile: dockerfiles/services/horses-service/Dockerfile
       args:
-        GRADLE_VERSION: 9.1.0
-        JAVA_VERSION: 21
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: 1.0.0
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
     container_name: meldestelle-horses-service
     env_file:
       - config/env/.env
@@ -260,10 +260,10 @@ services:
       context: .
       dockerfile: dockerfiles/services/events-service/Dockerfile
       args:
-        GRADLE_VERSION: 9.1.0
-        JAVA_VERSION: 21
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: 1.0.0
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
     container_name: meldestelle-events-service
     env_file:
       - config/env/.env
@@ -339,10 +339,10 @@ services:
       context: .
       dockerfile: dockerfiles/services/masterdata-service/Dockerfile
       args:
-        GRADLE_VERSION: 9.1.0
-        JAVA_VERSION: 21
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: 1.0.0
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
     container_name: meldestelle-masterdata-service
     env_file:
       - config/env/.env

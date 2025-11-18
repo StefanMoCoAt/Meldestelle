@@ -10,7 +10,7 @@ services:
   # Database
   # ===================================================================
   postgres:
-    image: postgres:16-alpine
+    image: postgres:${DOCKER_POSTGRES_VERSION:-16-alpine}
     container_name: meldestelle-postgres
     env_file:
       - config/env/.env
@@ -37,7 +37,7 @@ services:
   # Cache
   # ===================================================================
   redis:
-    image: redis:7-alpine
+    image: redis:${DOCKER_REDIS_VERSION:-7-alpine}
     container_name: meldestelle-redis
     env_file:
       - config/env/.env
@@ -60,7 +60,7 @@ services:
   # Authentication
   # ===================================================================
   keycloak:
-    image: quay.io/keycloak/keycloak:26.4.2
+    image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.2}
     container_name: meldestelle-keycloak
     env_file:
       - config/env/.env
@@ -93,7 +93,7 @@ services:
   # Monitoring
   # ===================================================================
   prometheus:
-    image: prom/prometheus:v2.54.1
+    image: prom/prometheus:${DOCKER_PROMETHEUS_VERSION:-v2.54.1}
     container_name: meldestelle-prometheus
     env_file:
       - config/env/.env
@@ -120,7 +120,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:11.3.0
+    image: grafana/grafana:${DOCKER_GRAFANA_VERSION:-11.3.0}
     container_name: meldestelle-grafana
     env_file:
       - config/env/.env
