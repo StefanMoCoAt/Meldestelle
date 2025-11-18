@@ -15,7 +15,7 @@ ARG BUILD_DATE
 ARG VERSION
 
 # Infrastructure-specific arguments (docker/build-args/infrastructure.env)
-ARG SPRING_PROFILES_ACTIVE
+# Note: No runtime profiles as build ARGs
 
 # ===================================================================
 # Build Stage
@@ -23,7 +23,6 @@ ARG SPRING_PROFILES_ACTIVE
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
 # Re-declare build arguments for this stage
-ARG SPRING_PROFILES_ACTIVE
 ARG BUILD_DATE
 ARG VERSION
 
@@ -81,8 +80,7 @@ RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
 # Build the application with optimizations and build cache (removed deprecated flag)
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
-    ./gradlew :infrastructure:gateway:bootJar --info \
-    -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
+    ./gradlew :infrastructure:gateway:bootJar --info
 
 # Extract JAR layers for better caching in runtime stage
 RUN mkdir -p build/dependency && \
@@ -98,7 +96,6 @@ FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
 ARG BUILD_DATE
 ARG VERSION
 ARG JAVA_VERSION
-ARG SPRING_PROFILES_ACTIVE
 
 # Convert build arguments to environment variables
 ENV JAVA_VERSION=${JAVA_VERSION} \
@@ -111,7 +108,6 @@ LABEL service="api-gateway" \
       description="Spring Cloud Gateway for Meldestelle microservices architecture" \
       maintainer="Meldestelle Development Team" \
       java.version="${JAVA_VERSION}" \
-      spring.profiles.active="${SPRING_PROFILES_ACTIVE}" \
       build.date="${BUILD_DATE}" \
       org.opencontainers.image.title="Meldestelle API Gateway" \
       org.opencontainers.image.description="Spring Cloud Gateway with service discovery and monitoring" \

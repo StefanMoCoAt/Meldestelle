@@ -17,10 +17,9 @@ ARG BUILD_DATE
 ARG VERSION
 
 # Service-specific arguments (docker/build-args/services.env or infrastructure.env)
-ARG SPRING_PROFILES_ACTIVE
+# Note: No runtime profiles/ports as build ARGs
 ARG SERVICE_PATH=.
 ARG SERVICE_NAME=spring-boot-service
-ARG SERVICE_PORT=8080
 
 # ===================================================================
 # Build Stage
@@ -30,8 +29,6 @@ FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 # Re-declare build arguments for this stage
 ARG SERVICE_PATH=.
 ARG SERVICE_NAME=spring-boot-service
-ARG SERVICE_PORT=8080
-ARG SPRING_PROFILES_ACTIVE
 
 LABEL stage=builder
 LABEL maintainer="Meldestelle Development Team"
@@ -65,12 +62,12 @@ RUN if [ "${SERVICE_PATH}" = "." ]; then \
         cp /workspace/gradlew /workspace/gradlew.bat .; \
         cp -r /workspace/gradle .; \
         echo "Building standalone application..."; \
-        ./gradlew bootJar --no-daemon --info -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}; \
+        ./gradlew bootJar --no-daemon --info; \
         cp build/libs/*.jar /workspace/app.jar; \
     else \
         echo "Building specific service: ${SERVICE_NAME}"; \
         ./gradlew :${SERVICE_NAME}:dependencies --no-daemon --info; \
-        ./gradlew :${SERVICE_NAME}:bootJar --no-daemon --info -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}; \
+        ./gradlew :${SERVICE_NAME}:bootJar --no-daemon --info; \
         cp ${SERVICE_PATH}/build/libs/*.jar /workspace/app.jar; \
     fi
 
@@ -110,7 +107,6 @@ RUN mkdir -p /app/logs /app/tmp && \
 # Re-declare build arguments for runtime stage
 ARG SERVICE_PATH=.
 ARG SERVICE_NAME=spring-boot-service
-ARG SERVICE_PORT=8080
 
 # Copy JAR (different locations for standalone vs service-specific builds)
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} \
@@ -118,12 +114,12 @@ COPY --from=builder --chown=${APP_USER}:${APP_GROUP} \
 
 USER ${APP_USER}
 
-# Expose ports
-EXPOSE ${SERVICE_PORT} 5005
+# Expose ports (runtime port configured via environment)
+EXPOSE 8080 5005
 
 # Health check
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=3 \
-    CMD curl -fsS --max-time 2 http://localhost:${SERVICE_PORT}/actuator/health/readiness || exit 1
+    CMD curl -fsS --max-time 2 http://localhost:${SERVER_PORT:-8080}/actuator/health/readiness || exit 1
 
 # JVM configuration
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
@@ -137,10 +133,9 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus"
 
 # Spring Boot configuration
-ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
-    SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
-    SERVER_PORT=${SERVICE_PORT} \
-    LOGGING_LEVEL_ROOT=INFO
+ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
+ENV LOGGING_LEVEL_ROOT=INFO
+ENV SERVER_PORT=8080
 
 # Startup command with debug support
 ENTRYPOINT ["sh", "-c", "\
