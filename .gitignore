@@ -26,6 +26,9 @@ logs/
 # Generated diagrams
 build/diagrams/
 
+# Local runtime secrets/overrides
+config/env/.env.local
+
 # Python virtual environment
 .venv/
 venv/
