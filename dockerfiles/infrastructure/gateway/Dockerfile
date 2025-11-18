@@ -173,9 +173,8 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -Dmanagement.endpoint.health.show-details=always \
     -Dmanagement.prometheus.metrics.export.enabled=true"
 
-# Spring Boot configuration (consistent port variable usage)
+# Spring Boot configuration (Profile nur zur Laufzeit setzen, nicht im Build)
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
-    SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
     SERVER_PORT=8081 \
     LOGGING_LEVEL_ROOT=INFO \
     LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY=DEBUG
@@ -184,7 +183,7 @@ ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
 # Fixed memory cgroup path for better compatibility with different container runtimes
 ENTRYPOINT ["tini", "--", "sh", "-c", "\
     echo 'Starting API Gateway with Java ${JAVA_VERSION}...'; \
-    echo 'Active Spring profiles: ${SPRING_PROFILES_ACTIVE}'; \
+    echo 'Active Spring profiles: '${SPRING_PROFILES_ACTIVE:-not-set}; \
     echo 'Gateway port: ${SERVER_PORT}'; \
     MEMORY_LIMIT=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || echo 'unlimited'); \
     echo \"Container memory limit: $MEMORY_LIMIT\"; \

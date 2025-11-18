@@ -365,14 +365,14 @@ services:
       context: .
       dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
       args:
-        # Global build arguments
-        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        # Global build arguments (build-time only)
+        GRADLE_VERSION: 9.1.0
+        JAVA_VERSION: 21
         BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
-        # Infrastructure-specific arguments
-        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DEFAULT:-default}
+        VERSION: 1.0.0
     container_name: meldestelle-api-gateway
+    env_file:
+      - config/env/.env
     volumes:
       # Mount Gradle cache for better build performance
       - api-gateway-gradle-cache:/home/gradle/.gradle
@@ -415,6 +415,8 @@ services:
         condition: service_started
     networks:
       - meldestelle-network
+    # Secrets für lokale Dev optional; mit Profil "prod" aktivieren
+    profiles: ["prod"]
     secrets:
       - keycloak_client_secret
       - postgres_user

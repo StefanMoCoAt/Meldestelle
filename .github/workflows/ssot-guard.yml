@@ -41,6 +41,81 @@ jobs:
       - name: Validate Docker SSoT consistency
         run: bash scripts/validate-docker-consistency.sh all
 
+      - name: Build vs Runtime variable guards
+        run: |
+          set -euo pipefail
+          echo "[Guard] Prüfe, dass keine Laufzeit-Variablen in Build-Args-Dateien vorkommen..."
+          RUNTIME_KEYS_REGEX='^(GATEWAY_HOST|GATEWAY_PORT|WEB_APP_PORT|NODE_ENV|CONSUL_(HOST|PORT|ENABLED)|DB_(HOST|PORT|NAME|USER|USERNAME|PASSWORD)|POSTGRES_DB|REDIS_PORT|KEYCLOAK_PORT|PING_SERVICE_PORT|MEMBERS_SERVICE_PORT|HORSES_SERVICE_PORT|EVENTS_SERVICE_PORT|MASTERDATA_SERVICE_PORT|AUTH_SERVICE_PORT|MONITORING_SERVER_PORT|PROMETHEUS_PORT|GRAFANA_PORT|JWT_ISSUER|JWT_AUDIENCE)$'
+          FAIL=0
+          for f in docker/build-args/*.env config/build/*.env 2>/dev/null || true; do
+            [ -f "$f" ] || continue
+            BAD=$(grep -E '^[A-Z0-9_]+=' "$f" | cut -d= -f1 | grep -E "$RUNTIME_KEYS_REGEX" || true)
+            if [ -n "$BAD" ]; then
+              echo "Fehler: Laufzeit-Variablen in Build-Args Datei $f gefunden:"; echo "$BAD"; FAIL=1
+            fi
+          done
+          if [ $FAIL -ne 0 ]; then
+            echo "Build vs Runtime Trennung verletzt."; exit 1; fi
+
+          echo "[Guard] Prüfe, dass keine Build-/Versions-Variablen in Runtime-Env vorkommen..."
+          BUILD_KEYS_REGEX='^(GRADLE_VERSION|JAVA_VERSION|VERSION|APP_VERSION|[A-Z]+_IMAGE_TAG)$'
+          for f in config/env/.env .env.template 2>/dev/null; do
+            [ -f "$f" ] || continue
+            BAD=$(grep -E '^[A-Z0-9_]+=' "$f" | cut -d= -f1 | grep -E "$BUILD_KEYS_REGEX" || true)
+            if [ -n "$BAD" ]; then
+              echo "Fehler: Build-/Versions-Variablen in Runtime-Env $f gefunden:"; echo "$BAD"; FAIL=1
+            fi
+          done
+          if [ $FAIL -ne 0 ]; then
+            echo "Build-/Runtime-Mischung in Runtime-Env."; exit 1; fi
+
+      - name: Check versions.toml vs global.env consistency
+        run: |
+          set -euo pipefail
+          TOML=docker/versions.toml
+          GLOBAL=docker/build-args/global.env
+          [ -f "$TOML" ] || { echo "Missing $TOML"; exit 1; }
+          [ -f "$GLOBAL" ] || { echo "Missing $GLOBAL"; exit 1; }
+
+          get_toml_ver(){ awk -F'=' -v key="$1" '$1 ~ "^"key"$" {gsub(/[ "\t]/,"",$2); print $2}' "$TOML"; }
+          mapfile -t checks < <(printf "%s\n" \
+            "GRADLE_VERSION:versions.gradle" \
+            "JAVA_VERSION:versions.java" \
+            "VERSION:versions.app-version" \
+            "PROMETHEUS_IMAGE_TAG:versions.prometheus" \
+            "GRAFANA_IMAGE_TAG:versions.grafana" \
+            "KEYCLOAK_IMAGE_TAG:versions.keycloak" \
+            "POSTGRES_IMAGE_TAG:versions.postgres" \
+            "REDIS_IMAGE_TAG:versions.redis" \
+            "CONSUL_IMAGE_TAG:versions.consul" \
+            "ZOOKEEPER_IMAGE_TAG:versions.zookeeper" \
+            "KAFKA_IMAGE_TAG:versions.kafka")
+
+          FAIL=0
+          for entry in "${checks[@]}"; do
+            var=${entry%%:*}; path=${entry##*:}
+            key=${path#*.}
+            case "$var" in
+              GRADLE_VERSION) expected=$(get_toml_ver gradle) ;;
+              JAVA_VERSION) expected=$(get_toml_ver java) ;;
+              VERSION) expected=$(get_toml_ver app-version) ;;
+              PROMETHEUS_IMAGE_TAG) expected=$(get_toml_ver prometheus) ;;
+              GRAFANA_IMAGE_TAG) expected=$(get_toml_ver grafana) ;;
+              KEYCLOAK_IMAGE_TAG) expected=$(get_toml_ver keycloak) ;;
+              POSTGRES_IMAGE_TAG) expected=$(get_toml_ver postgres) ;;
+              REDIS_IMAGE_TAG) expected=$(get_toml_ver redis) ;;
+              CONSUL_IMAGE_TAG) expected=$(get_toml_ver consul) ;;
+              ZOOKEEPER_IMAGE_TAG) expected=$(get_toml_ver zookeeper) ;;
+              KAFKA_IMAGE_TAG) expected=$(get_toml_ver kafka) ;;
+            esac
+            actual=$(grep -E "^${var}=" "$GLOBAL" | head -n1 | cut -d= -f2-)
+            if [ -z "$actual" ] || [ "$actual" != "$expected" ]; then
+              echo "Versions-Drift: $var global.env='$actual' != versions.toml('$expected')"; FAIL=1
+            fi
+          done
+          if [ $FAIL -ne 0 ]; then
+            echo "Versions SSoT-Drift erkannt."; exit 1; fi
+
       - name: Check drift of generated artifacts (ignore timestamps)
         run: |
           set -euo pipefail

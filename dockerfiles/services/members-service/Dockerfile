@@ -14,7 +14,7 @@ ARG BUILD_DATE
 ARG VERSION
 
 # Service-specific arguments (docker/build-args/services.env)
-ARG SPRING_PROFILES_ACTIVE
+# Note: Keine Runtime-Profile/Ports als Build-ARGs
 ARG SERVICE_PATH=members/members-service
 ARG SERVICE_NAME=members-service
 ARG SERVICE_PORT=8083
@@ -24,11 +24,10 @@ ARG SERVICE_PORT=8083
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
-# Re-declare build arguments for this stage
+# Re-declare build arguments for this stage (nur Build-Zeit)
 ARG SERVICE_PATH=members/members-service
 ARG SERVICE_NAME=members-service
 ARG SERVICE_PORT=8084
-ARG SPRING_PROFILES_ACTIVE
 
 LABEL stage=builder
 LABEL maintainer="Meldestelle Development Team"
@@ -60,10 +59,10 @@ COPY members/members-application/ members/members-application/
 COPY members/members-infrastructure/ members/members-infrastructure/
 COPY members/members-service/ members/members-service/
 
-# Build members service
+# Build members service (ohne Runtime-Profile bei Build)
 RUN echo "Building Members Service..." && \
     ./gradlew :members:members-service:dependencies --no-daemon --info && \
-    ./gradlew :members:members-service:bootJar --no-daemon --info -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
+    ./gradlew :members:members-service:bootJar --no-daemon --info
 
 # Extract JAR layers for optimized Docker layer caching
 WORKDIR /builder
@@ -138,9 +137,8 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -Duser.timezone=Europe/Vienna \
     -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus"
 
-# Spring Boot configuration
+# Spring Boot configuration (Profile nur zur Laufzeit via Compose/Env)
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
-    SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
     SERVER_PORT=${SERVICE_PORT} \
     LOGGING_LEVEL_ROOT=INFO \
     LOGGING_LEVEL_AT_MOCODE_MEMBERS=DEBUG
