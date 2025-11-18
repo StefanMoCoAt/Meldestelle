@@ -28,6 +28,8 @@ services:
     container_name: meldestelle-web-app
     env_file:
       - config/env/.env
+      # Optional client-specific overrides (only if file exists)
+      - config/env/clients/web-app.env
     environment:
       NODE_ENV: ${NODE_ENV:-dev}
       API_BASE_URL: http://api-gateway:${GATEWAY_PORT:-8081}

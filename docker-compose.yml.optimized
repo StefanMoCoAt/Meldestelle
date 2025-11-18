@@ -373,6 +373,8 @@ services:
     container_name: meldestelle-api-gateway
     env_file:
       - config/env/.env
+      # Optional infrastructure-specific overrides (only if file exists)
+      - config/env/infrastructure/api-gateway.env
     volumes:
       # Mount Gradle cache for better build performance
       - api-gateway-gradle-cache:/home/gradle/.gradle

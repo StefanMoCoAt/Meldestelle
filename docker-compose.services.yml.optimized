@@ -32,6 +32,8 @@ services:
     container_name: meldestelle-ping-service
     env_file:
       - config/env/.env
+      # Optional service-specific overrides (only if file exists)
+      - config/env/services/ping-service.env
     volumes:
       # Mount Gradle cache for better build performance
       - ping-service-gradle-cache:/home/gradle/.gradle
@@ -107,6 +109,8 @@ services:
     container_name: meldestelle-members-service
     env_file:
       - config/env/.env
+      # Optional service-specific overrides
+      - config/env/services/members-service.env
     volumes:
       - members-service-gradle-cache:/home/gradle/.gradle
     environment:
@@ -184,6 +188,8 @@ services:
     container_name: meldestelle-horses-service
     env_file:
       - config/env/.env
+      # Optional service-specific overrides
+      - config/env/services/horses-service.env
     volumes:
       - horses-service-gradle-cache:/home/gradle/.gradle
     environment:
@@ -261,6 +267,8 @@ services:
     container_name: meldestelle-events-service
     env_file:
       - config/env/.env
+      # Optional service-specific overrides
+      - config/env/services/events-service.env
     volumes:
       - events-service-gradle-cache:/home/gradle/.gradle
     environment:
@@ -338,6 +346,8 @@ services:
     container_name: meldestelle-masterdata-service
     env_file:
       - config/env/.env
+      # Optional service-specific overrides
+      - config/env/services/masterdata-service.env
     volumes:
       - masterdata-service-gradle-cache:/home/gradle/.gradle
     environment:

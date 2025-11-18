@@ -50,6 +50,8 @@ services:
     container_name: meldestelle-web-app
     env_file:
       - config/env/.env
+      # Optional client-specific overrides (only if file exists)
+      - config/env/clients/web-app.env
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       APP_TITLE: ${APP_NAME:-Meldestelle}
