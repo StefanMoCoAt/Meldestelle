@@ -15,9 +15,13 @@ jobs:
   notify:
     runs-on: ubuntu-latest
 
+    env:
+      YT_URL: ${{ secrets.YT_URL }}
+      YT_TOKEN: ${{ secrets.YT_TOKEN }}
+
     steps:
       - name: Comment to YouTrack Issue(s)
-        if: ${{ secrets.YT_URL && secrets.YT_TOKEN }}
+        if: ${{ env.YT_URL && env.YT_TOKEN }}
         run: |
           set -euo pipefail
           KEYS=$(git log -1 --pretty=%B | grep -o '[A-Z]\+-[0-9]\+' | sort -u || true)
@@ -34,6 +38,3 @@ jobs:
               "$YT_URL/api/issues/$ISSUE/comments" \
               -d "{\"text\": \"$MSG\"}"
           done
-        env:
-          YT_URL: ${{ secrets.YT_URL }}
-          YT_TOKEN: ${{ secrets.YT_TOKEN }}
