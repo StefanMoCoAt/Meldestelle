@@ -12,10 +12,10 @@ services:
       dockerfile: dockerfiles/services/ping-service/Dockerfile
       args:
         # Global build arguments (build-time only)
-        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.1.0}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: ${DOCKER_APP_VERSION}
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
     container_name: meldestelle-ping-service
     env_file:
       - config/env/.env
@@ -46,10 +46,10 @@ services:
       dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
       args:
         # Global build arguments (build-time only)
-        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.1.0}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
         BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: ${DOCKER_APP_VERSION}
+        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
     container_name: meldestelle-api-gateway
     env_file:
       - config/env/.env

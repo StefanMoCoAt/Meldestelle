@@ -9,13 +9,13 @@
 # - Custom theme support
 # - Health monitoring
 # ===================================================================
-ARG KEYCLOAK_VERSION
+ARG KEYCLOAK_IMAGE_TAG
 
-FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+FROM quay.io/keycloak/keycloak:${KEYCLOAK_IMAGE_TAG}
 
 LABEL maintainer="Meldestelle Development Team"
 LABEL description="Production-ready Keycloak for Meldestelle authentication"
-LABEL version="${KEYCLOAK_VERSION}"
+LABEL version="${KEYCLOAK_IMAGE_TAG}"
 
 # Set environment variables for build
 ENV KC_HEALTH_ENABLED=true

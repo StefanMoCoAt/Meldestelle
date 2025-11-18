@@ -8,11 +8,14 @@
 # Build args (build-time only)
 ARG GRADLE_VERSION
 ARG JAVA_VERSION
+ARG NODE_VERSION
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION} AS builder
 
-# Install Node.js and npm for Kotlin/JS builds (Ubuntu-based image has better Node.js compatibility)
+# Install Node.js (version aligned with versions.toml)
+# Derive major version from NODE_VERSION (e.g., 22.21.0 -> setup_22.x)
 RUN apt-get update && apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1) && \
+    curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 

@@ -8,6 +8,7 @@
 [WARNING]   ⚠ ARG GRADLE_VERSION should be defined in versions.toml
 [WARNING]   ⚠ ARG JAVA_VERSION should be defined in versions.toml
 [SUCCESS]   ✓ Custom ARG: NGINX_IMAGE_TAG
+[WARNING]   ⚠ ARG NODE_VERSION should be defined in versions.toml
 [WARNING]   ⚠ Dockerfile should use centralized ARGs from versions.toml
 [SUCCESS]   ✓ No default values set for centralized ARGs
 [SUCCESS]   ✓ No hardcoded version literals in ARG defaults
@@ -36,7 +37,7 @@
 [SUCCESS]   ✓ No default values set for centralized ARGs
 [SUCCESS]   ✓ No hardcoded version literals in ARG defaults
 [INFO] Validating Dockerfile: dockerfiles/infrastructure/keycloak/Dockerfile
-[WARNING]   ⚠ ARG KEYCLOAK_VERSION might need to be centralized in versions.toml
+[SUCCESS]   ✓ Custom ARG: KEYCLOAK_IMAGE_TAG
 [WARNING]   ⚠ Dockerfile should use centralized ARGs from versions.toml
 [SUCCESS]   ✓ No default values set for centralized ARGs
 [SUCCESS]   ✓ No hardcoded version literals in ARG defaults
@@ -122,16 +123,17 @@
 [SUCCESS]   ✓ No hardcoded version literals in ARG defaults
 [INFO] Validating Docker Compose file: docker-compose.clients.yml
 [SUCCESS]   ✓ No blank critical build args in compose file
-[WARNING]   ⚠ Version reference ${DOCKER_APP_VERSION} has no mapping in environment-mapping section
-[WARNING]   ⚠ Version reference ${DOCKER_GRADLE_VERSION} has no mapping in environment-mapping section
-[WARNING]   ⚠ Version reference ${DOCKER_JAVA_VERSION} has no mapping in environment-mapping section
+[WARNING]   ⚠ Version reference ${DOCKER_APP_VERSION:-1.0.0} has no mapping in environment-mapping section
+[WARNING]   ⚠ Version reference ${DOCKER_GRADLE_VERSION:-9.1.0} has no mapping in environment-mapping section
+[WARNING]   ⚠ Version reference ${DOCKER_JAVA_VERSION:-21} has no mapping in environment-mapping section
 [WARNING]   ⚠ Version reference ${DOCKER_NGINX_VERSION:-1.28.0-alpine} has no mapping in environment-mapping section
+[WARNING]   ⚠ Version reference ${DOCKER_NODE_VERSION:-22.21.0} has no mapping in environment-mapping section
 [SUCCESS]   ✓ No hardcoded image versions found
 [INFO] Validating Docker Compose file: docker-compose.services.yml
 [SUCCESS]   ✓ No blank critical build args in compose file
-[WARNING]   ⚠ Version reference ${DOCKER_APP_VERSION} has no mapping in environment-mapping section
-[WARNING]   ⚠ Version reference ${DOCKER_GRADLE_VERSION} has no mapping in environment-mapping section
-[WARNING]   ⚠ Version reference ${DOCKER_JAVA_VERSION} has no mapping in environment-mapping section
+[WARNING]   ⚠ Version reference ${DOCKER_APP_VERSION:-1.0.0} has no mapping in environment-mapping section
+[WARNING]   ⚠ Version reference ${DOCKER_GRADLE_VERSION:-9.1.0} has no mapping in environment-mapping section
+[WARNING]   ⚠ Version reference ${DOCKER_JAVA_VERSION:-21} has no mapping in environment-mapping section
 [SUCCESS]   ✓ No hardcoded image versions found
 [INFO] Validating Docker Compose file: docker-compose.yml
 [SUCCESS]   ✓ No blank critical build args in compose file
@@ -185,7 +187,7 @@ Aufruf: grep [OPTION]… MUSTER [DATEI]…
 [SUCCESS]   ✓ Build args file is not empty: global.env
 [SUCCESS]   ✓ Format OK (only key=value/comments) in global.env
 [SUCCESS]   ✓ No bare DOCKER_* placeholders in global.env
-[SUCCESS]   ✓ DOCKER_* variables present only in global.env (8 found)
+[WARNING]   ⚠ Expected some DOCKER_* variables in global.env (prometheus/grafana/keycloak, etc.)
 [SUCCESS]   ✓ GRADLE_VERSION present in global.env
 [SUCCESS]   ✓ JAVA_VERSION present in global.env
 [SUCCESS]   ✓ VERSION present in global.env
@@ -208,32 +210,18 @@ Aufruf: grep [OPTION]… MUSTER [DATEI]…
 [SUCCESS]   ✓ global.env: GRADLE_VERSION matches gradle (9.1.0)
 [SUCCESS]   ✓ global.env: JAVA_VERSION matches java (21)
 [SUCCESS]   ✓ global.env: VERSION matches app-version (1.0.0)
-[SUCCESS]   ✓ global.env: DOCKER_PROMETHEUS_VERSION matches prometheus (v2.54.1)
-[SUCCESS]   ✓ global.env: DOCKER_GRAFANA_VERSION matches grafana (11.3.0)
-[SUCCESS]   ✓ global.env: DOCKER_KEYCLOAK_VERSION matches keycloak (26.4.2)
+[SUCCESS]   ✓ global.env: PROMETHEUS_IMAGE_TAG matches prometheus (v2.54.1)
+[SUCCESS]   ✓ global.env: GRAFANA_IMAGE_TAG matches grafana (11.3.0)
+[SUCCESS]   ✓ global.env: KEYCLOAK_IMAGE_TAG matches keycloak (26.4.2)
 [SUCCESS]   ✓ clients.env: NODE_VERSION matches node (22.21.0)
 [SUCCESS]   ✓ clients.env: NGINX_VERSION matches nginx (1.28.0-alpine)
-[SUCCESS]   ✓ clients.env: APP_VERSION matches app-version (1.0.0)
-[SUCCESS]   ✓ clients.env: WEB_APP_PORT matches web-app (4000)
-[SUCCESS]   ✓ clients.env: DESKTOP_APP_VNC_PORT matches desktop-app-vnc (5901)
-[SUCCESS]   ✓ clients.env: DESKTOP_APP_NOVNC_PORT matches desktop-app-novnc (6080)
-[SUCCESS]   ✓ services.env: SPRING_PROFILES_ACTIVE matches spring-profiles-docker (docker)
-[SUCCESS]   ✓ services.env: PING_SERVICE_PORT matches ping-service (8082)
-[SUCCESS]   ✓ services.env: MEMBERS_SERVICE_PORT matches members-service (8083)
-[SUCCESS]   ✓ services.env: HORSES_SERVICE_PORT matches horses-service (8084)
-[SUCCESS]   ✓ services.env: EVENTS_SERVICE_PORT matches events-service (8085)
-[SUCCESS]   ✓ services.env: MASTERDATA_SERVICE_PORT matches masterdata-service (8086)
-[SUCCESS]   ✓ infrastructure.env: SPRING_PROFILES_ACTIVE matches spring-profiles-default (default)
-[SUCCESS]   ✓ infrastructure.env: GATEWAY_PORT matches api-gateway (8081)
-[SUCCESS]   ✓ infrastructure.env: AUTH_SERVER_PORT matches auth-server (8087)
-[SUCCESS]   ✓ infrastructure.env: MONITORING_SERVER_PORT matches monitoring-server (8088)
 [SUCCESS] Environment files are fully synchronized with versions.toml
 [INFO] Scanning for free-floating version literals outside SSoT-managed files...
 grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/attr/__pycache__/_make.cpython-314.pyc: Übereinstimmungen in Binärdatei
 grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/attr/__pycache__/validators.cpython-314.pyc: Übereinstimmungen in Binärdatei
 [WARNING]   ⚠ Detected occurrences of version literal '9.1.0' outside controlled files:
     3:distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-bin.zip
-    87:  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="$USER_HOME$/.gradle/wrapper/dists/gradle-9.1.0-bin/9agqghryom9wkf8r80qlhnts3/gradle-9.1.0" javaHome="$USER_HOME$/.sdkman/candidates/java/current" gradleVersion="9.1.0">
+    92:  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="$USER_HOME$/.gradle/wrapper/dists/gradle-9.1.0-bin/9agqghryom9wkf8r80qlhnts3/gradle-9.1.0" javaHome="$USER_HOME$/.sdkman/candidates/java/current" gradleVersion="9.1.0">
     10:gradle = "9.1.0"
     588:# Gradle auf 9.1.0 upgraden
     589:./scripts/docker-versions-update.sh update gradle 9.1.0
@@ -255,21 +243,72 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     425:    .. versionadded:: 19.1.0
     12:DOCKER_GRADLE_VERSION=9.1.0
     161:# Update a single version key and sync env files (usage: make versions-update key=gradle value=9.1.0)
+    127:[WARNING]   ⚠ Version reference ${DOCKER_GRADLE_VERSION:-9.1.0} has no mapping in environment-mapping section
+    135:[WARNING]   ⚠ Version reference ${DOCKER_GRADLE_VERSION:-9.1.0} has no mapping in environment-mapping section
+    210:[SUCCESS]   ✓ global.env: GRADLE_VERSION matches gradle (9.1.0)
+    235:[WARNING]   ⚠ Detected occurrences of version literal '9.1.0' outside controlled files:
+    236:    3:distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-bin.zip
+    237:    92:  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="$USER_HOME$/.gradle/wrapper/dists/gradle-9.1.0-bin/9agqghryom9wkf8r80qlhnts3/gradle-9.1.0" javaHome="$USER_HOME$/.sdkman/candidates/java/current" gradleVersion="9.1.0">
+    238:    10:gradle = "9.1.0"
+    239:    588:# Gradle auf 9.1.0 upgraden
+    240:    589:./scripts/docker-versions-update.sh update gradle 9.1.0
+    241:    652:./scripts/docker-versions-update.sh update gradle 9.1.0
+    242:    708:ARG GRADLE_VERSION=9.1.0
+    243:    100:gradle = "9.1.0"
+    244:    129:GRADLE_VERSION=9.1.0
+    245:    199:# Gradle auf 9.1.0 upgraden
+    246:    200:./scripts/docker-versions-update.sh update gradle 9.1.0
+    247:    242:make versions-update key=gradle value=9.1.0  # Aktualisiert eine Version
+    248:    253:make versions-update key=gradle value=9.1.0
+    249:    391:make versions-update key=gradle value=9.1.0
+    250:    350:gradle-version = "9.1.0"
+    251:    7:    // This prevents "plugin loaded multiple times" errors in Gradle 9.1.0+
+    252:    211:    gradleVersion = "9.1.0"
+    253:    1387:    .. versionadded:: 19.1.0 *auto_exc*
+    254:    320:    .. versionadded:: 19.1.0
+    255:    372:    .. versionadded:: 19.1.0
+    256:    425:    .. versionadded:: 19.1.0
+    257:    12:DOCKER_GRADLE_VERSION=9.1.0
+    258:    161:# Update a single version key and sync env files (usage: make versions-update key=gradle value=9.1.0)
+    688:    /home/stefan/WsMeldestelle/Meldestelle/gradle/wrapper/gradle-wrapper.properties:3:distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-bin.zip
 [WARNING]   ⚠ Detected occurrences of version literal '22.21.0' outside controlled files:
     12:node = "22.21.0"
     102:node = "22.21.0"
     159:NODE_VERSION=22.21.0
+    15:# Derive major version from NODE_VERSION (e.g., 22.21.0 -> setup_22.x)
+    130:[WARNING]   ⚠ Version reference ${DOCKER_NODE_VERSION:-22.21.0} has no mapping in environment-mapping section
+    216:[SUCCESS]   ✓ clients.env: NODE_VERSION matches node (22.21.0)
+    259:[WARNING]   ⚠ Detected occurrences of version literal '22.21.0' outside controlled files:
+    260:    12:node = "22.21.0"
+    261:    102:node = "22.21.0"
+    262:    159:NODE_VERSION=22.21.0
+    263:    15:# Derive major version from NODE_VERSION (e.g., 22.21.0 -> setup_22.x)
 [WARNING]   ⚠ Detected occurrences of version literal '1.28.0-alpine' outside controlled files:
     103:nginx = "1.28.0-alpine"
     160:NGINX_VERSION=1.28.0-alpine
+    129:[WARNING]   ⚠ Version reference ${DOCKER_NGINX_VERSION:-1.28.0-alpine} has no mapping in environment-mapping section
+    152:[WARNING]   ⚠ Version reference ${DOCKER_NGINX_VERSION:-1.28.0-alpine} has no mapping in environment-mapping section
+    217:[SUCCESS]   ✓ clients.env: NGINX_VERSION matches nginx (1.28.0-alpine)
+    264:[WARNING]   ⚠ Detected occurrences of version literal '1.28.0-alpine' outside controlled files:
+    265:    103:nginx = "1.28.0-alpine"
+    266:    160:NGINX_VERSION=1.28.0-alpine
 [WARNING]   ⚠ Detected occurrences of version literal '3.22' outside controlled files:
     428:        api("io.projectreactor.kafka:reactor-kafka:1.3.22")
     93:#eclipse-temurin:21-jre-alpine-3.22
+    267:[WARNING]   ⚠ Detected occurrences of version literal '3.22' outside controlled files:
+    268:    428:        api("io.projectreactor.kafka:reactor-kafka:1.3.22")
+    269:    93:#eclipse-temurin:21-jre-alpine-3.22
+    281:    93:#eclipse-temurin:21-jre-alpine-3.22
 [WARNING]   ⚠ Detected occurrences of version literal '21-jdk-alpine' outside controlled files:
     46:          "examples": ["21-jdk-alpine", "17-jdk-alpine"]
     17:eclipse-temurin-jdk = "21-jdk-alpine"
     527:ECLIPSE_TEMURIN_JDK_VERSION=21-jdk-alpine
     138:ECLIPSE_TEMURIN_JDK_VERSION=21-jdk-alpine
+    270:[WARNING]   ⚠ Detected occurrences of version literal '21-jdk-alpine' outside controlled files:
+    271:    46:          "examples": ["21-jdk-alpine", "17-jdk-alpine"]
+    272:    17:eclipse-temurin-jdk = "21-jdk-alpine"
+    273:    527:ECLIPSE_TEMURIN_JDK_VERSION=21-jdk-alpine
+    274:    138:ECLIPSE_TEMURIN_JDK_VERSION=21-jdk-alpine
 [WARNING]   ⚠ Detected occurrences of version literal '21-jre-alpine' outside controlled files:
     52:          "examples": ["21-jre-alpine", "17-jre-alpine"]
     18:eclipse-temurin-jre = "21-jre-alpine"
@@ -277,6 +316,14 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     2357:FROM eclipse-temurin:21-jre-alpine AS runtime
     139:ECLIPSE_TEMURIN_JRE_VERSION=21-jre-alpine
     93:#eclipse-temurin:21-jre-alpine-3.22
+    269:    93:#eclipse-temurin:21-jre-alpine-3.22
+    275:[WARNING]   ⚠ Detected occurrences of version literal '21-jre-alpine' outside controlled files:
+    276:    52:          "examples": ["21-jre-alpine", "17-jre-alpine"]
+    277:    18:eclipse-temurin-jre = "21-jre-alpine"
+    278:    528:ECLIPSE_TEMURIN_JRE_VERSION=21-jre-alpine
+    279:    2357:FROM eclipse-temurin:21-jre-alpine AS runtime
+    280:    139:ECLIPSE_TEMURIN_JRE_VERSION=21-jre-alpine
+    281:    93:#eclipse-temurin:21-jre-alpine-3.22
 [WARNING]   ⚠ Detected occurrences of version literal '16-alpine' outside controlled files:
     28:        image: postgres:16-alpine
     114:              postgres:16-alpine pg_isready -h postgres -p 5432 -U meldestelle -d meldestelle; then
@@ -287,6 +334,18 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     236:    image: postgres:16-alpine
     3:meldestelle-postgres   postgres:16-alpine                 "docker-entrypoint.s…"   postgres   8 seconds ago   Up 7 seconds (healthy)                     0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
     79:postgres: 16-alpine           # ✅ Aktuell (neueste: 16.x)
+    142:[WARNING]   ⚠ Version reference ${DOCKER_POSTGRES_VERSION:-16-alpine} has no mapping in environment-mapping section
+    170:[WARNING]   ⚠ Version reference ${DOCKER_POSTGRES_VERSION:-16-alpine} has no mapping in environment-mapping section
+    282:[WARNING]   ⚠ Detected occurrences of version literal '16-alpine' outside controlled files:
+    283:    28:        image: postgres:16-alpine
+    284:    114:              postgres:16-alpine pg_isready -h postgres -p 5432 -U meldestelle -d meldestelle; then
+    285:    85:| PostgresQL        | 5432        | Internal     | pg_isready -U meldestelle -d meldestelle              | -          | 16-alpine   |
+    286:    90:    private val postgresContainer = PostgreSQLContainer("postgres:16-alpine")
+    287:    225:private val postgresContainer = PostgreSQLContainer("postgres:16-alpine")
+    288:    60:| PostgreSQL        | 5432        | Internal     | pg_isready -U meldestelle -d meldestelle              | -          | 16-alpine   |
+    289:    236:    image: postgres:16-alpine
+    290:    3:meldestelle-postgres   postgres:16-alpine                 "docker-entrypoint.s…"   postgres   8 seconds ago   Up 7 seconds (healthy)                     0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+    291:    79:postgres: 16-alpine           # ✅ Aktuell (neueste: 16.x)
 [WARNING]   ⚠ Detected occurrences of version literal '7-alpine' outside controlled files:
     43:        image: redis:7-alpine
     40:            DockerImageName.parse("redis:7-alpine")
@@ -311,6 +370,32 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     61:| Redis             | 6379        | Internal     | redis-cli ping                                        | -          | 7-alpine    |
     311:    image: redis:7-alpine
     80:redis: 7-alpine               # ✅ Aktuell
+    144:[WARNING]   ⚠ Version reference ${DOCKER_REDIS_VERSION:-7-alpine} has no mapping in environment-mapping section
+    172:[WARNING]   ⚠ Version reference ${DOCKER_REDIS_VERSION:-7-alpine} has no mapping in environment-mapping section
+    292:[WARNING]   ⚠ Detected occurrences of version literal '7-alpine' outside controlled files:
+    293:    43:        image: redis:7-alpine
+    294:    40:            DockerImageName.parse("redis:7-alpine")
+    295:    32:            DockerImageName.parse("redis:7-alpine")
+    296:    39:            DockerImageName.parse("redis:7-alpine")
+    297:    35:            DockerImageName.parse("redis:7-alpine")
+    298:    41:            DockerImageName.parse("redis:7-alpine")
+    299:    34:            DockerImageName.parse("redis:7-alpine")
+    300:    58:            DockerImageName.parse("redis:7-alpine")
+    301:    38:        val redisContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse("redis:7-alpine"))
+    302:    35:        val redisContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse("redis:7-alpine"))
+    303:    32:        val redisContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse("redis:7-alpine"))
+    304:    34:        val redisContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse("redis:7-alpine"))
+    305:    30:        val redisContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse("redis:7-alpine"))
+    306:    31:        val redisContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse("redis:7-alpine"))
+    307:    392:        val redisContainer: GenericContainer<*> = GenericContainer(DockerImageName.parse("redis:7-alpine"))
+    308:    254:    image: redis:7-alpine
+    309:    492:    val redis = GenericContainer<Nothing>("redis:7-alpine")
+    310:    86:| Redis             | 6379        | Internal     | redis-cli ping                                        | -          | 7-alpine    |
+    311:    151:        private val redisContainer = GenericContainer<Nothing>("redis:7-alpine")
+    312:    236:private val redisContainer = GenericContainer<Nothing>("redis:7-alpine")
+    313:    61:| Redis             | 6379        | Internal     | redis-cli ping                                        | -          | 7-alpine    |
+    314:    311:    image: redis:7-alpine
+    315:    80:redis: 7-alpine               # ✅ Aktuell
 grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/rpds/rpds.cpython-314-x86_64-linux-gnu.so: Übereinstimmungen in Binärdatei
 grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/pip/_vendor/distro/__pycache__/distro.cpython-314.pyc: Übereinstimmungen in Binärdatei
 [WARNING]   ⚠ Detected occurrences of version literal '1.15' outside controlled files:
@@ -327,6 +412,25 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     82:consul: 1.15                  # ⚠️ Prüfen (neueste: 1.20+)
     343:- Optional mypyc compilation upgraded to version 1.15 for Python >= 3.8
     296:    (e.g. "CentOS Linux 7.1.1503 (Core)")
+    164:[WARNING]   ⚠ Version reference ${DOCKER_CONSUL_VERSION:-1.15} has no mapping in environment-mapping section
+    318:[WARNING]   ⚠ Detected occurrences of version literal '1.15' outside controlled files:
+    319:    43:micrometer = "1.15.4"
+    320:    288:"@types/serve-static@*", "@types/serve-static@^1.15.5":
+    321:    289:  version "1.15.8"
+    322:    290:  resolved "https://registry.yarnpkg.com/@types/serve-static/-/serve-static-1.15.8.tgz#8180c3fbe4a70e8f00b9f70b9ba7f08f35987877"
+    323:    1263:  version "1.15.11"
+    324:    1264:  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.11.tgz#777d73d72a92f8ec4d2e410eb47352a56b8e8340"
+    325:    2925:    "@types/serve-static" "^1.15.5"
+    326:    90:| Consul            | 8500        | Internal     | /v1/status/leader                                     | -          | 1.15        |
+    327:    65:| Consul            | 8500        | Internal     | /v1/status/leader                                     | -          | 1.15        |
+    328:    82:    image: hashicorp/consul:1.15
+    329:    82:consul: 1.15                  # ⚠️ Prüfen (neueste: 1.20+)
+    330:    343:- Optional mypyc compilation upgraded to version 1.15 for Python >= 3.8
+    331:    296:    (e.g. "CentOS Linux 7.1.1503 (Core)")
+    711:    /home/stefan/WsMeldestelle/Meldestelle/gradle/libs.versions.toml:43:micrometer = "1.15.4"
+    877:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:288:"@types/serve-static@*", "@types/serve-static@^1.15.5":
+    878:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:289:  version "1.15.8"
+    879:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:290:  resolved "https://registry.yarnpkg.com/@types/serve-static/-/serve-static-1.15.8.tgz#8180c3fbe4a70e8f00b9f70b9ba7f08f35987877"
 grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/attr/__pycache__/_make.cpython-314.pyc: Übereinstimmungen in Binärdatei
 [WARNING]   ⚠ Detected occurrences of version literal '7.4.0' outside controlled files:
     88:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
@@ -341,6 +445,34 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     133:- Kafka Version: 7.5.0 → 7.4.0 (Downgrade dokumentieren!)
     143:    .. deprecated:: 17.4.0 *convert*
     144:    .. versionadded:: 17.4.0
+    168:[WARNING]   ⚠ Version reference ${DOCKER_KAFKA_VERSION:-7.4.0} has no mapping in environment-mapping section
+    173:[WARNING]   ⚠ Version reference ${DOCKER_ZOOKEEPER_VERSION:-7.4.0} has no mapping in environment-mapping section
+    333:[WARNING]   ⚠ Detected occurrences of version literal '7.4.0' outside controlled files:
+    334:    88:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
+    335:    89:| Zookeeper         | 2181        | Internal     | nc -z localhost 2181                                  | -          | 7.4.0       |
+    336:    156:        private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"))
+    337:    245:private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"))
+    338:    63:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
+    339:    64:| Zookeeper         | 2181        | Internal     | nc -z localhost 2181                                  | -          | 7.4.0       |
+    340:    155:    image: confluentinc/cp-kafka:7.4.0
+    341:    340:    image: confluentinc/cp-zookeeper:7.4.0
+    342:    83:kafka: 7.4.0                  # ⚠️ Prüfen (neueste: 7.8+)
+    343:    133:- Kafka Version: 7.5.0 → 7.4.0 (Downgrade dokumentieren!)
+    344:    143:    .. deprecated:: 17.4.0 *convert*
+    345:    144:    .. versionadded:: 17.4.0
+    347:[WARNING]   ⚠ Detected occurrences of version literal '7.4.0' outside controlled files:
+    348:    88:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
+    349:    89:| Zookeeper         | 2181        | Internal     | nc -z localhost 2181                                  | -          | 7.4.0       |
+    350:    156:        private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"))
+    351:    245:private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"))
+    352:    63:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
+    353:    64:| Zookeeper         | 2181        | Internal     | nc -z localhost 2181                                  | -          | 7.4.0       |
+    354:    155:    image: confluentinc/cp-kafka:7.4.0
+    355:    340:    image: confluentinc/cp-zookeeper:7.4.0
+    356:    83:kafka: 7.4.0                  # ⚠️ Prüfen (neueste: 7.8+)
+    357:    133:- Kafka Version: 7.5.0 → 7.4.0 (Downgrade dokumentieren!)
+    358:    143:    .. deprecated:: 17.4.0 *convert*
+    359:    144:    .. versionadded:: 17.4.0
 grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/attr/__pycache__/_make.cpython-314.pyc: Übereinstimmungen in Binärdatei
 [WARNING]   ⚠ Detected occurrences of version literal '7.4.0' outside controlled files:
     88:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
@@ -355,6 +487,34 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     133:- Kafka Version: 7.5.0 → 7.4.0 (Downgrade dokumentieren!)
     143:    .. deprecated:: 17.4.0 *convert*
     144:    .. versionadded:: 17.4.0
+    168:[WARNING]   ⚠ Version reference ${DOCKER_KAFKA_VERSION:-7.4.0} has no mapping in environment-mapping section
+    173:[WARNING]   ⚠ Version reference ${DOCKER_ZOOKEEPER_VERSION:-7.4.0} has no mapping in environment-mapping section
+    333:[WARNING]   ⚠ Detected occurrences of version literal '7.4.0' outside controlled files:
+    334:    88:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
+    335:    89:| Zookeeper         | 2181        | Internal     | nc -z localhost 2181                                  | -          | 7.4.0       |
+    336:    156:        private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"))
+    337:    245:private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"))
+    338:    63:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
+    339:    64:| Zookeeper         | 2181        | Internal     | nc -z localhost 2181                                  | -          | 7.4.0       |
+    340:    155:    image: confluentinc/cp-kafka:7.4.0
+    341:    340:    image: confluentinc/cp-zookeeper:7.4.0
+    342:    83:kafka: 7.4.0                  # ⚠️ Prüfen (neueste: 7.8+)
+    343:    133:- Kafka Version: 7.5.0 → 7.4.0 (Downgrade dokumentieren!)
+    344:    143:    .. deprecated:: 17.4.0 *convert*
+    345:    144:    .. versionadded:: 17.4.0
+    347:[WARNING]   ⚠ Detected occurrences of version literal '7.4.0' outside controlled files:
+    348:    88:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
+    349:    89:| Zookeeper         | 2181        | Internal     | nc -z localhost 2181                                  | -          | 7.4.0       |
+    350:    156:        private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"))
+    351:    245:private val kafkaContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.0"))
+    352:    63:| Kafka             | 9092        | Internal     | kafka-topics --bootstrap-server localhost:9092 --list | -          | 7.4.0       |
+    353:    64:| Zookeeper         | 2181        | Internal     | nc -z localhost 2181                                  | -          | 7.4.0       |
+    354:    155:    image: confluentinc/cp-kafka:7.4.0
+    355:    340:    image: confluentinc/cp-zookeeper:7.4.0
+    356:    83:kafka: 7.4.0                  # ⚠️ Prüfen (neueste: 7.8+)
+    357:    133:- Kafka Version: 7.5.0 → 7.4.0 (Downgrade dokumentieren!)
+    358:    143:    .. deprecated:: 17.4.0 *convert*
+    359:    144:    .. versionadded:: 17.4.0
 [WARNING]   ⚠ Detected occurrences of version literal 'v2.54.1' outside controlled files:
     58:          "examples": ["v2.54.1", "v2.47.0"]
     21:prometheus = "v2.54.1"
@@ -372,6 +532,28 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     276:    image: prom/prometheus:v2.54.1
     84:prometheus: v2.54.1           # ⚠️ Prüfen
     15:DOCKER_PROMETHEUS_VERSION=v2.54.1
+    143:[WARNING]   ⚠ Version reference ${DOCKER_PROMETHEUS_VERSION:-v2.54.1} has no mapping in environment-mapping section
+    171:[WARNING]   ⚠ Version reference ${DOCKER_PROMETHEUS_VERSION:-v2.54.1} has no mapping in environment-mapping section
+    213:[ERROR]   ❌ global.env missing DOCKER_PROMETHEUS_VERSION (expected v2.54.1)
+    360:[WARNING]   ⚠ Detected occurrences of version literal 'v2.54.1' outside controlled files:
+    361:    58:          "examples": ["v2.54.1", "v2.47.0"]
+    362:    21:prometheus = "v2.54.1"
+    363:    6:> **Letzte Aktualisierung:** 🎯 ZENTRALE DOCKER-VERSIONSVERWALTUNG vollständig optimiert - Single Source of Truth mit neuesten Monitoring-Versionen (Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7), erweiterte Script-Funktionalität und vollautomatisierte Version-Updates
+    364:    94:| Prometheus        | 9090        | Internal     | /-/healthy                                            | -          | v2.54.1     |
+    365:    493:prometheus = "v2.54.1"
+    366:    531:DOCKER_PROMETHEUS_VERSION=v2.54.1
+    367:    592:./scripts/docker-versions-update.sh update prometheus v2.54.1
+    368:    2420:|         |            | • **Monitoring-Tool-Updates:** Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7                                         |
+    369:    69:| Prometheus        | 9090        | Internal     | /-/healthy                                            | -          | v2.54.1     |
+    370:    104:prometheus = "v2.54.1"
+    371:    142:DOCKER_PROMETHEUS_VERSION=v2.54.1
+    372:    203:./scripts/docker-versions-update.sh update prometheus v2.54.1
+    373:    177:DOCKER_PROMETHEUS_VERSION=v2.54.1
+    374:    276:    image: prom/prometheus:v2.54.1
+    375:    84:prometheus: v2.54.1           # ⚠️ Prüfen
+    376:    15:DOCKER_PROMETHEUS_VERSION=v2.54.1
+    380:    6:> **Letzte Aktualisierung:** 🎯 ZENTRALE DOCKER-VERSIONSVERWALTUNG vollständig optimiert - Single Source of Truth mit neuesten Monitoring-Versionen (Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7), erweiterte Script-Funktionalität und vollautomatisierte Version-Updates
+    385:    2420:|         |            | • **Monitoring-Tool-Updates:** Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7                                         |
 [WARNING]   ⚠ Detected occurrences of version literal '11.3.0' outside controlled files:
     64:          "examples": ["11.3.0", "10.1.0"]
     22:grafana = "11.3.0"
@@ -389,11 +571,33 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     112:    image: grafana/grafana:11.3.0
     85:grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
     16:DOCKER_GRAFANA_VERSION=11.3.0
+    140:[WARNING]   ⚠ Version reference ${DOCKER_GRAFANA_VERSION:-11.3.0} has no mapping in environment-mapping section
+    166:[WARNING]   ⚠ Version reference ${DOCKER_GRAFANA_VERSION:-11.3.0} has no mapping in environment-mapping section
+    214:[ERROR]   ❌ global.env missing DOCKER_GRAFANA_VERSION (expected 11.3.0)
+    363:    6:> **Letzte Aktualisierung:** 🎯 ZENTRALE DOCKER-VERSIONSVERWALTUNG vollständig optimiert - Single Source of Truth mit neuesten Monitoring-Versionen (Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7), erweiterte Script-Funktionalität und vollautomatisierte Version-Updates
+    368:    2420:|         |            | • **Monitoring-Tool-Updates:** Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7                                         |
+    377:[WARNING]   ⚠ Detected occurrences of version literal '11.3.0' outside controlled files:
+    378:    64:          "examples": ["11.3.0", "10.1.0"]
+    379:    22:grafana = "11.3.0"
+    380:    6:> **Letzte Aktualisierung:** 🎯 ZENTRALE DOCKER-VERSIONSVERWALTUNG vollständig optimiert - Single Source of Truth mit neuesten Monitoring-Versionen (Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7), erweiterte Script-Funktionalität und vollautomatisierte Version-Updates
+    381:    95:| Grafana           | 3000        | 3443 (HTTPS) | /api/health                                           | -          | 11.3.0      |
+    382:    494:grafana = "11.3.0"
+    383:    532:DOCKER_GRAFANA_VERSION=11.3.0
+    384:    595:./scripts/docker-versions-update.sh update grafana 11.3.0
+    385:    2420:|         |            | • **Monitoring-Tool-Updates:** Prometheus v2.54.1, Grafana 11.3.0, Keycloak 26.0.7                                         |
+    386:    70:| Grafana           | 3000        | 3443 (HTTPS) | /api/health                                           | -          | 11.3.0      |
+    387:    105:grafana = "11.3.0"
+    388:    143:DOCKER_GRAFANA_VERSION=11.3.0
+    389:    206:./scripts/docker-versions-update.sh update grafana 11.3.0
+    390:    178:DOCKER_GRAFANA_VERSION=11.3.0
+    391:    112:    image: grafana/grafana:11.3.0
+    392:    85:grafana: 11.3.0               # ✅ Wahrscheinlich aktuell
+    393:    16:DOCKER_GRAFANA_VERSION=11.3.0
 [WARNING]   ⚠ Detected occurrences of version literal '26.4.2' outside controlled files:
     24:      KEYCLOAK_VERSION: "26.4.2"
-    815:    <task id="LOCAL-00030" summary="Fix(ci): Stabilize Keycloak startup in integration tests via matrix&#10;&#10;- Add `dev-file` Keycloak variant to matrix for stability fallback.&#10;- Improve wait logic and health checks for Keycloak and Postgres.&#10;- Unify Keycloak version to 26.4.2 across codebase.&#10;- Add log dumps on failure.">
-    1070:    <MESSAGE value="dev(ci): vereinheitliche Keycloak auf 26.4.2; aktiviere Health im CI (MP-8)" />
-    1071:    <MESSAGE value="Fix(ci): Stabilize Keycloak startup in integration tests via matrix&#10;&#10;- Add `dev-file` Keycloak variant to matrix for stability fallback.&#10;- Improve wait logic and health checks for Keycloak and Postgres.&#10;- Unify Keycloak version to 26.4.2 across codebase.&#10;- Add log dumps on failure." />
+    820:    <task id="LOCAL-00030" summary="Fix(ci): Stabilize Keycloak startup in integration tests via matrix&#10;&#10;- Add `dev-file` Keycloak variant to matrix for stability fallback.&#10;- Improve wait logic and health checks for Keycloak and Postgres.&#10;- Unify Keycloak version to 26.4.2 across codebase.&#10;- Add log dumps on failure.">
+    1075:    <MESSAGE value="dev(ci): vereinheitliche Keycloak auf 26.4.2; aktiviere Health im CI (MP-8)" />
+    1076:    <MESSAGE value="Fix(ci): Stabilize Keycloak startup in integration tests via matrix&#10;&#10;- Add `dev-file` Keycloak variant to matrix for stability fallback.&#10;- Improve wait logic and health checks for Keycloak and Postgres.&#10;- Unify Keycloak version to 26.4.2 across codebase.&#10;- Add log dumps on failure." />
     32:        private const val KEYCLOAK_VERSION = "26.4.2"
     238:- **Keycloak 26.4.2** - Identity und Access Management
     266:    image: quay.io/keycloak/keycloak:26.4.2
@@ -403,6 +607,24 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     5:# Based on: quay.io/keycloak/keycloak:26.4.2
     25:Wir haben uns entschieden, Keycloak (Version 26.4.2) als unsere Identitäts- und Zugriffsverwaltungslösung zu verwenden.
     422:  - Keycloak‑Start per `docker run … start-dev` (26.4.2) mit `KC_HEALTH_ENABLED=true`
+    141:[WARNING]   ⚠ Version reference ${DOCKER_KEYCLOAK_VERSION:-26.4.2} has no mapping in environment-mapping section
+    169:[WARNING]   ⚠ Version reference ${DOCKER_KEYCLOAK_VERSION:-26.4.2} has no mapping in environment-mapping section
+    215:[ERROR]   ❌ global.env missing DOCKER_KEYCLOAK_VERSION (expected 26.4.2)
+    394:[WARNING]   ⚠ Detected occurrences of version literal '26.4.2' outside controlled files:
+    395:    24:      KEYCLOAK_VERSION: "26.4.2"
+    396:    820:    <task id="LOCAL-00030" summary="Fix(ci): Stabilize Keycloak startup in integration tests via matrix&#10;&#10;- Add `dev-file` Keycloak variant to matrix for stability fallback.&#10;- Improve wait logic and health checks for Keycloak and Postgres.&#10;- Unify Keycloak version to 26.4.2 across codebase.&#10;- Add log dumps on failure.">
+    397:    1075:    <MESSAGE value="dev(ci): vereinheitliche Keycloak auf 26.4.2; aktiviere Health im CI (MP-8)" />
+    398:    1076:    <MESSAGE value="Fix(ci): Stabilize Keycloak startup in integration tests via matrix&#10;&#10;- Add `dev-file` Keycloak variant to matrix for stability fallback.&#10;- Improve wait logic and health checks for Keycloak and Postgres.&#10;- Unify Keycloak version to 26.4.2 across codebase.&#10;- Add log dumps on failure." />
+    399:    32:        private const val KEYCLOAK_VERSION = "26.4.2"
+    400:    238:- **Keycloak 26.4.2** - Identity und Access Management
+    401:    266:    image: quay.io/keycloak/keycloak:26.4.2
+    402:    106:keycloak = "26.4.2"
+    403:    144:DOCKER_KEYCLOAK_VERSION=26.4.2
+    404:    209:./scripts/docker-versions-update.sh update keycloak 26.4.2
+    405:    5:# Based on: quay.io/keycloak/keycloak:26.4.2
+    406:    25:Wir haben uns entschieden, Keycloak (Version 26.4.2) als unsere Identitäts- und Zugriffsverwaltungslösung zu verwenden.
+    407:    422:  - Keycloak‑Start per `docker run … start-dev` (26.4.2) mit `KC_HEALTH_ENABLED=true`
+    683:    /home/stefan/WsMeldestelle/Meldestelle/.github/workflows/integration-tests.yml:24:      KEYCLOAK_VERSION: "26.4.2"
 grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/requests/__pycache__/sessions.cpython-314.pyc: Übereinstimmungen in Binärdatei
 grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/pip/_vendor/distlib/__pycache__/scripts.cpython-314.pyc: Übereinstimmungen in Binärdatei
 grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/pip/_vendor/packaging/licenses/__pycache__/_spdx.cpython-314.pyc: Übereinstimmungen in Binärdatei
@@ -675,6 +897,291 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
     825:        This method has been deprecated since version 1.0.0 and is only kept for
     19:DOCKER_APP_VERSION=1.0.0
     20:APP_VERSION=1.0.0
+    126:[WARNING]   ⚠ Version reference ${DOCKER_APP_VERSION:-1.0.0} has no mapping in environment-mapping section
+    134:[WARNING]   ⚠ Version reference ${DOCKER_APP_VERSION:-1.0.0} has no mapping in environment-mapping section
+    148:[WARNING]   ⚠ Version reference ${DOCKER_APP_VERSION:-1.0.0} has no mapping in environment-mapping section
+    157:[WARNING]   ⚠ Version reference ${DOCKER_APP_VERSION:-1.0.0} has no mapping in environment-mapping section
+    163:[WARNING]   ⚠ Version reference ${DOCKER_APP_VERSION:-1.0.0} has no mapping in environment-mapping section
+    212:[SUCCESS]   ✓ global.env: VERSION matches app-version (1.0.0)
+    218:[ERROR]   ❌ clients.env missing APP_VERSION (expected 1.0.0)
+    415:[WARNING]   ⚠ Detected occurrences of version literal '1.0.0' outside controlled files:
+    416:    29:composeHotReload = "1.0.0-rc02"
+    417:    78:foojayResolver = "1.0.0"
+    418:    71:"@jsonjoy.com/buffers@^1.0.0":
+    419:    72:  version "1.0.0"
+    420:    73:  resolved "https://registry.yarnpkg.com/@jsonjoy.com/buffers/-/buffers-1.0.0.tgz#ade6895b7d3883d70f87b5743efaa12c71dfef7a"
+    421:    76:"@jsonjoy.com/codegen@^1.0.0":
+    422:    77:  version "1.0.0"
+    423:    78:  resolved "https://registry.yarnpkg.com/@jsonjoy.com/codegen/-/codegen-1.0.0.tgz#5c23f796c47675f166d23b948cdb889184b93207"
+    424:    87:    "@jsonjoy.com/buffers" "^1.0.0"
+    425:    88:    "@jsonjoy.com/codegen" "^1.0.0"
+    426:    99:    "@jsonjoy.com/codegen" "^1.0.0"
+    427:    107:    "@jsonjoy.com/buffers" "^1.0.0"
+    428:    108:    "@jsonjoy.com/codegen" "^1.0.0"
+    429:    496:    json-schema-traverse "^1.0.0"
+    430:    544:balanced-match@^1.0.0:
+    431:    580:    unpipe "1.0.0"
+    432:    595:    balanced-match "^1.0.0"
+    433:    603:    balanced-match "^1.0.0"
+    434:    627:buffer-from@^1.0.0:
+    435:    826:core-util-is@~1.0.0:
+    436:    867:custom-event@~1.0.0:
+    437:    970:    custom-event "~1.0.0"
+    438:    1077:es-object-atoms@^1.0.0, es-object-atoms@^1.1.1:
+    439:    1221:    unpipe "~1.0.0"
+    440:    1234:    unpipe "~1.0.0"
+    441:    1262:follow-redirects@^1.0.0:
+    442:    1299:fs.realpath@^1.0.0:
+    443:    1300:  version "1.0.0"
+    444:    1301:  resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
+    445:    1341:    es-object-atoms "^1.0.0"
+    446:    1369:    package-json-from-dist "^1.0.0"
+    447:    1377:    fs.realpath "^1.0.0"
+    448:    1382:    path-is-absolute "^1.0.0"
+    449:    1434:    obuf "^1.0.0"
+    450:    1486:    follow-redirects "^1.0.0"
+    451:    1487:    requires-port "^1.0.0"
+    452:    1590:is-inside-container@^1.0.0:
+    453:    1591:  version "1.0.0"
+    454:    1592:  resolved "https://registry.yarnpkg.com/is-inside-container/-/is-inside-container-1.0.0.tgz#e81fba699662eb31dbdaf26766a61d4814717ea4"
+    455:    1597:is-network-error@^1.0.0:
+    456:    1644:    is-inside-container "^1.0.0"
+    457:    1646:isarray@~1.0.0:
+    458:    1647:  version "1.0.0"
+    459:    1648:  resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
+    460:    1696:json-schema-traverse@^1.0.0:
+    461:    1697:  version "1.0.0"
+    462:    1698:  resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-1.0.0.tgz#ae7bcb3656ab77a73ba5c49bf654f38e6b6860e2"
+    463:    1915:minimalistic-assert@^1.0.0:
+    464:    2040:obuf@^1.0.0, obuf@^1.1.2:
+    465:    2078:    is-inside-container "^1.0.0"
+    466:    2115:    is-network-error "^1.0.0"
+    467:    2123:package-json-from-dist@^1.0.0:
+    468:    2138:path-is-absolute@^1.0.0:
+    469:    2283:    unpipe "1.0.0"
+    470:    2290:    core-util-is "~1.0.0"
+    471:    2292:    isarray "~1.0.0"
+    472:    2336:requires-port@^1.0.0:
+    473:    2337:  version "1.0.0"
+    474:    2338:  resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
+    475:    2360:    supports-preserve-symlinks-flag "^1.0.0"
+    476:    2519:side-channel-list@^1.0.0:
+    477:    2520:  version "1.0.0"
+    478:    2521:  resolved "https://registry.yarnpkg.com/side-channel-list/-/side-channel-list-1.0.0.tgz#10cb5984263115d3b7a0e336591e290a830af8ad"
+    479:    2555:    side-channel-list "^1.0.0"
+    480:    2620:    buffer-from "^1.0.0"
+    481:    2740:supports-preserve-symlinks-flag@^1.0.0:
+    482:    2741:  version "1.0.0"
+    483:    2742:  resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
+    484:    2831:unpipe@1.0.0, unpipe@~1.0.0:
+    485:    2832:  version "1.0.0"
+    486:    2833:  resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
+    487:    2882:    minimalistic-assert "^1.0.0"
+    488:    2:  <artifact type="jar" name="app-js-1.0.0">
+    489:    4:    <root id="archive" name="app-js-1.0.0.jar">
+    490:    2:  <artifact type="jar" name="app-jvm-1.0.0">
+    491:    4:    <root id="archive" name="app-jvm-1.0.0.jar">
+    492:    2:  <artifact type="jar" name="common-ui-js-1.0.0">
+    493:    4:    <root id="archive" name="common-ui-js-1.0.0.jar">
+    494:    2:  <artifact type="jar" name="common-ui-jvm-1.0.0">
+    495:    4:    <root id="archive" name="common-ui-jvm-1.0.0.jar">
+    496:    2:  <artifact type="jar" name="navigation-js-1.0.0">
+    497:    4:    <root id="archive" name="navigation-js-1.0.0.jar">
+    498:    2:  <artifact type="jar" name="navigation-jvm-1.0.0">
+    499:    4:    <root id="archive" name="navigation-jvm-1.0.0.jar">
+    500:    2:  <artifact type="jar" name="ping-api-js-1.0.0">
+    501:    4:    <root id="archive" name="ping-api-js-1.0.0.jar">
+    502:    2:  <artifact type="jar" name="ping-api-jvm-1.0.0">
+    503:    4:    <root id="archive" name="ping-api-jvm-1.0.0.jar">
+    504:    2:  <artifact type="jar" name="ping-feature-js-1.0.0">
+    505:    4:    <root id="archive" name="ping-feature-js-1.0.0.jar">
+    506:    2:  <artifact type="jar" name="ping-feature-jvm-1.0.0">
+    507:    4:    <root id="archive" name="ping-feature-jvm-1.0.0.jar">
+    508:    2:  <artifact type="jar" name="auth-feature-js-1.0.0">
+    509:    4:    <root id="archive" name="auth-feature-js-1.0.0.jar">
+    510:    2:  <artifact type="jar" name="auth-feature-jvm-1.0.0">
+    511:    4:    <root id="archive" name="auth-feature-jvm-1.0.0.jar">
+    512:    2:  <artifact type="jar" name="app-js-1.0.0-SNAPSHOT">
+    513:    4:    <root id="archive" name="app-js-1.0.0-SNAPSHOT.jar">
+    514:    2:  <artifact type="jar" name="app-jvm-1.0.0-SNAPSHOT">
+    515:    4:    <root id="archive" name="app-jvm-1.0.0-SNAPSHOT.jar">
+    516:    2:  <artifact type="jar" name="common-ui-js-1.0.0-SNAPSHOT">
+    517:    4:    <root id="archive" name="common-ui-js-1.0.0-SNAPSHOT.jar">
+    518:    2:  <artifact type="jar" name="common-ui-jvm-1.0.0-SNAPSHOT">
+    519:    4:    <root id="archive" name="common-ui-jvm-1.0.0-SNAPSHOT.jar">
+    520:    2:  <artifact type="jar" name="common-ui-wasm-js-1.0.0-SNAPSHOT">
+    521:    4:    <root id="archive" name="common-ui-wasm-js-1.0.0-SNAPSHOT.jar">
+    522:    2:  <artifact type="jar" name="core-domain-js-1.0.0-SNAPSHOT">
+    523:    4:    <root id="archive" name="core-domain-js-1.0.0-SNAPSHOT.jar">
+    524:    2:  <artifact type="jar" name="core-domain-jvm-1.0.0-SNAPSHOT">
+    525:    4:    <root id="archive" name="core-domain-jvm-1.0.0-SNAPSHOT.jar">
+    526:    2:  <artifact type="jar" name="core-utils-js-1.0.0-SNAPSHOT">
+    527:    4:    <root id="archive" name="core-utils-js-1.0.0-SNAPSHOT.jar">
+    528:    2:  <artifact type="jar" name="core-utils-jvm-1.0.0-SNAPSHOT">
+    529:    4:    <root id="archive" name="core-utils-jvm-1.0.0-SNAPSHOT.jar">
+    530:    2:  <artifact type="jar" name="shared-js-1.0.0-SNAPSHOT">
+    531:    4:    <root id="archive" name="shared-js-1.0.0-SNAPSHOT.jar">
+    532:    2:  <artifact type="jar" name="shared-jvm-1.0.0-SNAPSHOT">
+    533:    4:    <root id="archive" name="shared-jvm-1.0.0-SNAPSHOT.jar">
+    534:    2:  <artifact type="jar" name="shared-wasm-js-1.0.0-SNAPSHOT">
+    535:    4:    <root id="archive" name="shared-wasm-js-1.0.0-SNAPSHOT.jar" />
+    536:    162:            packageVersion = "1.0.0"
+    537:    59:        "gensync": "^1.0.0-beta.2",
+    538:    705:        "collect-v8-coverage": "^1.0.0",
+    539:    772:        "collect-v8-coverage": "^1.0.0"
+    540:    890:      "version": "1.0.0-next.29",
+    541:    891:      "resolved": "https://registry.npmjs.org/@polka/url/-/url-1.0.0-next.29.tgz",
+    542:    1169:        "@istanbuljs/load-nyc-config": "^1.0.0",
+    543:    1246:        "babel-preset-current-node-syntax": "^1.0.0"
+    544:    1279:        "balanced-match": "^1.0.0",
+    545:    1460:        "iojs": ">= 1.0.0",
+    546:    1792:      "version": "1.0.0",
+    547:    1793:      "resolved": "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz",
+    548:    1810:        "node": "^8.16.0 || ^10.6.0 || >=11.0.0"
+    549:    1824:      "version": "1.0.0-beta.2",
+    550:    1825:      "resolved": "https://registry.npmjs.org/gensync/-/gensync-1.0.0-beta.2.tgz",
+    551:    1874:        "fs.realpath": "^1.0.0",
+    552:    1879:        "path-is-absolute": "^1.0.0"
+    553:    2211:        "dedent": "^1.0.0",
+    554:    2587:        "cjs-module-lexer": "^1.0.0",
+    555:    2588:        "collect-v8-coverage": "^1.0.0",
+    556:    2620:        "babel-preset-current-node-syntax": "^1.0.0",
+    557:    3271:        "supports-preserve-symlinks-flag": "^1.0.0"
+    558:    3362:        "@polka/url": "^1.0.0-next.24",
+    559:    3404:        "buffer-from": "^1.0.0",
+    560:    3517:      "version": "1.0.0",
+    561:    3518:      "resolved": "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz",
+    562:    3674:        "picocolors": "^1.0.0",
+    563:    16:version = "1.0.0"
+    564:    10:version = "1.0.0"
+    565:    16:version = "1.0.0"
+    566:    91:          "examples": ["1.0.0", "2.1.3"]
+    567:    31:app-version = "1.0.0"
+    568:    313:                    <strong>Gateway Version:</strong> 1.0.0<br>
+    569:    45:  version: 1.0.0
+    570:    1305:                  example: 1.0.0
+    571:    5:    "version": "1.0.0",
+    572:    321:docker build -t meldestelle/gateway:1.0.0 \
+    573:    330:  meldestelle/gateway:1.0.0
+    574:    349:        image: meldestelle/gateway:1.0.0
+    575:    7:version = "1.0.0"
+    576:    91:| Auth Server       | 8081        | Internal     | /actuator/health/readiness                            | 5005       | 1.0.0       |
+    577:    92:| Ping Service      | 8082        | Internal     | /actuator/health/readiness                            | 5005       | 1.0.0       |
+    578:    93:| Monitoring Server | 8083        | Internal     | /actuator/health/readiness                            | 5005       | 1.0.0       |
+    579:    523:VERSION=1.0.0
+    580:    636:      VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+    581:    1509:      version="1.0.0" \
+    582:    2439:| 1.0.0   | 2025-08-16 | Initiale Docker-Guidelines basierend auf Containerisierungsstrategie                                                       |
+    583:    4:    "version_schema": "1.0.0",
+    584:    140:  version: 1.0.0
+    585:    66:| Auth Server       | 8081        | Internal     | /actuator/health/readiness                            | 5005       | 1.0.0       |
+    586:    67:| Ping Service      | 8082        | Internal     | /actuator/health/readiness                            | 5005       | 1.0.0       |
+    587:    68:| Monitoring Server | 8083        | Internal     | /actuator/health/readiness                            | 5005       | 1.0.0       |
+    588:    134:VERSION=1.0.0
+    589:    4:# Version: 1.0.0
+    590:    4:# Version: 1.0.0
+    591:    3:**Version:** 1.0.0
+    592:    4:**Version:** 1.0.0
+    593:    11:APP_VERSION=1.0.0
+    594:    173:DOCKER_APP_VERSION=1.0.0
+    595:    12:APP_VERSION=1.0.0
+    596:    11:APP_VERSION=1.0.0
+    597:    18:APP_VERSION=1.0.0
+    598:    11:APP_VERSION=1.0.0
+    599:    5:# Version: 1.0.0
+    600:    15:version = "1.0.0"
+    601:    260:version = "1.0.0"
+    602:    354:docker-version = "1.0.0"
+    603:    67:      version="1.0.0" \
+    604:    77:      version="1.0.0" \
+    605:    77:      version="1.0.0" \
+    606:    77:      version="1.0.0" \
+    607:    77:      version="1.0.0" \
+    608:    103:      version="1.0.0" \
+    609:    57:        echo 'group = "com.example"; version = "1.0.0"; java { sourceCompatibility = JavaVersion.VERSION_21 }' >> build.gradle.kts; \
+    610:    81:      version="1.0.0" \
+    611:    13:        VERSION: 1.0.0
+    612:    24:readonly GATEWAY_JAR="infrastructure/gateway/build/libs/gateway-1.0.0.jar"
+    613:    20:    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    614:    29:    version = "1.0.0-SNAPSHOT"
+    615:    301:The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+    616:    589:- Add `CHANGELOG.md` entries, format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) (PR #141)
+    617:    823:    .. deprecated:: 1.0.0
+    618:    825:        This method has been deprecated since version 1.0.0 and is only kept for
+    619:    1618:                        "version": "1.0.0",
+    620:    25: <assemblyIdentity version="1.0.0.0"
+    621:    297:        >>> Specifier('>=1.0.0')
+    622:    298:        <Specifier('>=1.0.0')>
+    623:    299:        >>> Specifier('>=1.0.0', prereleases=False)
+    624:    300:        <Specifier('>=1.0.0', prereleases=False)>
+    625:    301:        >>> Specifier('>=1.0.0', prereleases=True)
+    626:    302:        <Specifier('>=1.0.0', prereleases=True)>
+    627:    315:        >>> str(Specifier('>=1.0.0'))
+    628:    316:        '>=1.0.0'
+    629:    317:        >>> str(Specifier('>=1.0.0', prereleases=False))
+    630:    318:        '>=1.0.0'
+    631:    512:        >>> "1.0.0" in Specifier(">=1.2.3")
+    632:    536:        >>> Specifier(">=1.2.3").contains("1.0.0")
+    633:    762:        >>> SpecifierSet('>=1.0.0,!=2.0.0')
+    634:    763:        <SpecifierSet('!=2.0.0,>=1.0.0')>
+    635:    764:        >>> SpecifierSet('>=1.0.0,!=2.0.0', prereleases=False)
+    636:    765:        <SpecifierSet('!=2.0.0,>=1.0.0', prereleases=False)>
+    637:    766:        >>> SpecifierSet('>=1.0.0,!=2.0.0', prereleases=True)
+    638:    767:        <SpecifierSet('!=2.0.0,>=1.0.0', prereleases=True)>
+    639:    783:        >>> str(SpecifierSet(">=1.0.0,!=1.0.1"))
+    640:    784:        '!=1.0.1,>=1.0.0'
+    641:    785:        >>> str(SpecifierSet(">=1.0.0,!=1.0.1", prereleases=False))
+    642:    786:        '!=1.0.1,>=1.0.0'
+    643:    798:        >>> SpecifierSet(">=1.0.0,!=1.0.1") & '<=2.0.0,!=2.0.1'
+    644:    799:        <SpecifierSet('!=1.0.1,!=2.0.1,<=2.0.0,>=1.0.0')>
+    645:    800:        >>> SpecifierSet(">=1.0.0,!=1.0.1") & SpecifierSet('<=2.0.0,!=2.0.1')
+    646:    801:        <SpecifierSet('!=1.0.1,!=2.0.1,<=2.0.0,>=1.0.0')>
+    647:    831:        >>> SpecifierSet(">=1.0.0,!=1.0.1") == SpecifierSet(">=1.0.0,!=1.0.1")
+    648:    833:        >>> (SpecifierSet(">=1.0.0,!=1.0.1", prereleases=False) ==
+    649:    834:        ...  SpecifierSet(">=1.0.0,!=1.0.1", prereleases=True))
+    650:    836:        >>> SpecifierSet(">=1.0.0,!=1.0.1") == ">=1.0.0,!=1.0.1"
+    651:    838:        >>> SpecifierSet(">=1.0.0,!=1.0.1") == SpecifierSet(">=1.0.0")
+    652:    840:        >>> SpecifierSet(">=1.0.0,!=1.0.1") == SpecifierSet(">=1.0.0,!=1.0.2")
+    653:    859:        >>> sorted(SpecifierSet(">=1.0.0,!=1.0.1"), key=str)
+    654:    860:        [<Specifier('!=1.0.1')>, <Specifier('>=1.0.0')>]
+    655:    872:        >>> "1.2.3" in SpecifierSet(">=1.0.0,!=1.0.1")
+    656:    874:        >>> Version("1.2.3") in SpecifierSet(">=1.0.0,!=1.0.1")
+    657:    876:        >>> "1.0.1" in SpecifierSet(">=1.0.0,!=1.0.1")
+    658:    878:        >>> "1.3.0a1" in SpecifierSet(">=1.0.0,!=1.0.1")
+    659:    880:        >>> "1.3.0a1" in SpecifierSet(">=1.0.0,!=1.0.1", prereleases=True)
+    660:    901:        >>> SpecifierSet(">=1.0.0,!=1.0.1").contains("1.2.3")
+    661:    903:        >>> SpecifierSet(">=1.0.0,!=1.0.1").contains(Version("1.2.3"))
+    662:    905:        >>> SpecifierSet(">=1.0.0,!=1.0.1").contains("1.0.1")
+    663:    907:        >>> SpecifierSet(">=1.0.0,!=1.0.1").contains("1.3.0a1")
+    664:    909:        >>> SpecifierSet(">=1.0.0,!=1.0.1", prereleases=True).contains("1.3.0a1")
+    665:    911:        >>> SpecifierSet(">=1.0.0,!=1.0.1").contains("1.3.0a1", prereleases=True)
+    666:    71:    >>> canonicalize_version('1.0.0')
+    667:    73:    >>> canonicalize_version('1.0.0', strip_trailing_zero=False)
+    668:    74:    '1.0.0'
+    669:    229:        >>> Version('1.0.0')
+    670:    230:        <Version('1.0.0')>
+    671:    460:        >>> _TrimmedRelease('1.0.0').release
+    672:    76:    'blueoak-1.0.0': {'id': 'BlueOak-1.0.0', 'deprecated': False},
+    673:    553:    'polyform-noncommercial-1.0.0': {'id': 'PolyForm-Noncommercial-1.0.0', 'deprecated': False},
+    674:    554:    'polyform-small-business-1.0.0': {'id': 'PolyForm-Small-Business-1.0.0', 'deprecated': False},
+    675:    80:# Generated from unidata 11.0.0
+    676:    823:    .. deprecated:: 1.0.0
+    677:    825:        This method has been deprecated since version 1.0.0 and is only kept for
+    678:    19:DOCKER_APP_VERSION=1.0.0
+    679:    20:APP_VERSION=1.0.0
+    702:    /home/stefan/WsMeldestelle/Meldestelle/gradle/libs.versions.toml:29:composeHotReload = "1.0.0-rc02"
+    734:    /home/stefan/WsMeldestelle/Meldestelle/gradle/libs.versions.toml:78:foojayResolver = "1.0.0"
+    779:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:71:"@jsonjoy.com/buffers@^1.0.0":
+    780:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:72:  version "1.0.0"
+    781:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:73:  resolved "https://registry.yarnpkg.com/@jsonjoy.com/buffers/-/buffers-1.0.0.tgz#ade6895b7d3883d70f87b5743efaa12c71dfef7a"
+    782:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:76:"@jsonjoy.com/codegen@^1.0.0":
+    783:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:77:  version "1.0.0"
+    784:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:78:  resolved "https://registry.yarnpkg.com/@jsonjoy.com/codegen/-/codegen-1.0.0.tgz#5c23f796c47675f166d23b948cdb889184b93207"
+    789:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:87:    "@jsonjoy.com/buffers" "^1.0.0"
+    790:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:88:    "@jsonjoy.com/codegen" "^1.0.0"
+    798:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:99:    "@jsonjoy.com/codegen" "^1.0.0"
+    803:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:107:    "@jsonjoy.com/buffers" "^1.0.0"
+    804:    /home/stefan/WsMeldestelle/Meldestelle/kotlin-js-store/yarn.lock:108:    "@jsonjoy.com/codegen" "^1.0.0"
 [WARNING]   ⚠ Generic version-like strings found (review for potential drift):
     /home/stefan/WsMeldestelle/Meldestelle/.github/workflows/deploy-proxmox.yml:19:  DOCKER_COMPOSE_VERSION: "v2.20.0"
     /home/stefan/WsMeldestelle/Meldestelle/.github/workflows/deploy-proxmox.yml:70:      uses: webfactory/ssh-agent@v0.8.0
@@ -879,8 +1386,8 @@ grep: /home/stefan/WsMeldestelle/Meldestelle/.venv/lib/python3.14/site-packages/
 ===============================================
 Docker Consistency Validation Summary
 ===============================================
-Checks Passed: 58
-Warnings: 48
+Checks Passed: 43
+Warnings: 50
 Errors: 0
 ===============================================
 [WARNING] Validation completed with warnings. Consider addressing them for optimal consistency.
