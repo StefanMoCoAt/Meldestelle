@@ -13,6 +13,10 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Diese Berechtigung ist notwendig, um auf Secrets zugreifen zu können
+
     steps:
       - name: Comment to YouTrack Issue(s)
         if: ${{ secrets.YT_URL && secrets.YT_TOKEN }}
