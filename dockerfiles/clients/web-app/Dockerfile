@@ -5,11 +5,17 @@
 # ===================================================================
 # Stage 1: Build Stage - Kotlin/JS kompilieren
 # ===================================================================
-FROM gradle:8-jdk21 AS builder
+# Build args (build-time only)
+ARG GRADLE_VERSION
+ARG JAVA_VERSION
+ARG NODE_VERSION
+FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION} AS builder
 
-# Install Node.js and npm for Kotlin/JS builds (Ubuntu-based image has better Node.js compatibility)
+# Install Node.js (version aligned with versions.toml)
+# Derive major version from NODE_VERSION (e.g., 22.21.0 -> setup_22.x)
 RUN apt-get update && apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1) && \
+    curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
@@ -40,7 +46,9 @@ RUN ./gradlew :clients:app:jsBrowserDistribution --no-configure-on-demand -Pprod
 # ===================================================================
 # Stage 2: Runtime Stage - Nginx für Static Files + API Proxy
 # ===================================================================
-FROM nginx:1.25-alpine
+# Build arg controls runtime base image tag (build-time only)
+ARG NGINX_IMAGE_TAG
+FROM nginx:${NGINX_IMAGE_TAG}
 
 # Installiere curl für Health-Checks
 RUN apk add --no-cache curl

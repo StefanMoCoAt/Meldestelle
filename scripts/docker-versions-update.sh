@@ -86,7 +86,7 @@ sync_to_env_files() {
     local zookeeper_version=$(get_version "zookeeper")
     local kafka_version=$(get_version "kafka")
 
-    # Update global.env
+    # Update global.env (strictly build-time versions/tags)
     cat > "$BUILD_ARGS_DIR/global.env" << EOF
 # ===================================================================
 # Global Docker Build Arguments - Used by all categories
@@ -101,23 +101,23 @@ JAVA_VERSION=$java_version
 # --- Build Metadata ---
 VERSION=$app_version
 
-# --- Monitoring & Infrastructure Services ---
-DOCKER_PROMETHEUS_VERSION=$prometheus_version
-DOCKER_GRAFANA_VERSION=$grafana_version
-DOCKER_KEYCLOAK_VERSION=$keycloak_version
+# --- Monitoring & Infrastructure Services (image tags) ---
+PROMETHEUS_IMAGE_TAG=$prometheus_version
+GRAFANA_IMAGE_TAG=$grafana_version
+KEYCLOAK_IMAGE_TAG=$keycloak_version
 
-# --- Datastore Images ---
-DOCKER_POSTGRES_VERSION=$postgres_version
-DOCKER_REDIS_VERSION=$redis_version
+# --- Datastore Images (image tags) ---
+POSTGRES_IMAGE_TAG=$postgres_version
+REDIS_IMAGE_TAG=$redis_version
 
-# --- Additional Infrastructure Images ---
-DOCKER_CONSUL_VERSION=$consul_version
-DOCKER_ZOOKEEPER_VERSION=$zookeeper_version
-DOCKER_KAFKA_VERSION=$kafka_version
+# --- Additional Infrastructure Images (image tags) ---
+CONSUL_IMAGE_TAG=$consul_version
+ZOOKEEPER_IMAGE_TAG=$zookeeper_version
+KAFKA_IMAGE_TAG=$kafka_version
 EOF
     print_success "Updated global.env"
 
-    # Update clients.env
+    # Update clients.env (strictly build-time values; no runtime/dev vars)
     cat > "$BUILD_ARGS_DIR/clients.env" << EOF
 # ===================================================================
 # Clients Docker Build Arguments - dockerfiles/clients/*
@@ -136,26 +136,12 @@ NGINX_VERSION=$nginx_version
 CLIENT_PATH=client
 CLIENT_MODULE=client
 CLIENT_NAME=meldestelle-client
-
-# --- Web Application Specific ---
-WEB_APP_PORT=4000
-
-# --- Desktop Application Specific ---
-DESKTOP_APP_VNC_PORT=5901
-DESKTOP_APP_NOVNC_PORT=6080
-
-# --- Client Environment ---
-NODE_ENV=production
-APP_TITLE=Meldestelle
-APP_VERSION=$app_version
-
-# --- Development Configuration ---
-WEBPACK_DEV_SERVER_HOST=0.0.0.0
-WEBPACK_DEV_SERVER_PORT=4000
+# Note: Runtime/Dev values moved to config/env/.env
+# Keep this file strictly for build-time values only.
 EOF
     print_success "Updated clients.env"
 
-    # Update services.env
+    # Update services.env (strictly build-time values; no runtime vars)
     cat > "$BUILD_ARGS_DIR/services.env" << EOF
 # ===================================================================
 # Services Docker Build Arguments - dockerfiles/services/*
@@ -166,27 +152,14 @@ EOF
 # --- Include Global Arguments ---
 # Source global.env for GRADLE_VERSION, JAVA_VERSION, VERSION
 
-# --- Spring Boot Services Configuration ---
-SPRING_PROFILES_ACTIVE=$spring_docker
-
 # --- Service-Specific Arguments ---
 SERVICE_PATH=.
 SERVICE_NAME=spring-boot-service
-SERVICE_PORT=8080
-
-# --- Service Port Mapping (matches gradle.properties) ---
-PING_SERVICE_PORT=8082
-MEMBERS_SERVICE_PORT=8083
-HORSES_SERVICE_PORT=8084
-EVENTS_SERVICE_PORT=8085
-MASTERDATA_SERVICE_PORT=8086
-
-# --- Services List (for automation scripts) ---
-# ping-service, members-service, horses-service, events-service, masterdata-service
+# Note: Runtime profiles/ports moved to config/env/.env
 EOF
     print_success "Updated services.env"
 
-    # Update infrastructure.env
+    # Update infrastructure.env (strictly build-time values; no runtime vars)
     cat > "$BUILD_ARGS_DIR/infrastructure.env" << EOF
 # ===================================================================
 # Infrastructure Docker Build Arguments - dockerfiles/infrastructure/*
@@ -196,14 +169,6 @@ EOF
 
 # --- Include Global Arguments ---
 # Source global.env for GRADLE_VERSION, JAVA_VERSION, VERSION
-
-# --- Infrastructure Services Configuration ---
-SPRING_PROFILES_ACTIVE=$spring_default
-
-# --- Infrastructure Service Ports (matches gradle.properties) ---
-GATEWAY_PORT=8081
-AUTH_SERVER_PORT=8087
-MONITORING_SERVER_PORT=8088
 
 # --- API Gateway Specific ---
 GATEWAY_SERVICE_PATH=infrastructure/gateway
@@ -217,15 +182,7 @@ AUTH_SERVER_SERVICE_NAME=auth-server
 MONITORING_SERVER_PATH=infrastructure/monitoring/monitoring-server
 MONITORING_SERVER_SERVICE_NAME=monitoring-server
 
-# --- Infrastructure Dependencies ---
-CONSUL_ENABLED=true
-CONSUL_HOST=consul
-CONSUL_PORT=8500
-
-# --- Database Configuration for Infrastructure Services ---
-DB_HOST=postgres
-DB_PORT=5432
-DB_NAME=meldestelle
+# Note: Runtime profiles/ports/dependencies moved to config/env/.env
 EOF
     print_success "Updated infrastructure.env"
 

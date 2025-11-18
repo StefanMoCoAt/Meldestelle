@@ -14,21 +14,18 @@ ARG BUILD_DATE
 ARG VERSION
 
 # Service-specific arguments (docker/build-args/services.env)
-ARG SPRING_PROFILES_ACTIVE
+# Note: Keine Runtime-Profile/Ports als Build-ARGs
 ARG SERVICE_PATH=masterdata/masterdata-service
 ARG SERVICE_NAME=masterdata-service
-ARG SERVICE_PORT=8086
 
 # ===================================================================
 # Build Stage
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
-# Re-declare build arguments for this stage
+# Re-declare build arguments for this stage (nur Build-Zeit)
 ARG SERVICE_PATH=masterdata/masterdata-service
 ARG SERVICE_NAME=masterdata-service
-ARG SERVICE_PORT=8087
-ARG SPRING_PROFILES_ACTIVE
 
 LABEL stage=builder
 LABEL maintainer="Meldestelle Development Team"
@@ -60,10 +57,10 @@ COPY masterdata/masterdata-application/ masterdata/masterdata-application/
 COPY masterdata/masterdata-infrastructure/ masterdata/masterdata-infrastructure/
 COPY masterdata/masterdata-service/ masterdata/masterdata-service/
 
-# Build masterdata service
+# Build masterdata service (ohne Runtime-Profile bei Build)
 RUN echo "Building Masterdata Service..." && \
     ./gradlew :masterdata:masterdata-service:dependencies --no-daemon --info && \
-    ./gradlew :masterdata:masterdata-service:bootJar --no-daemon --info -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
+    ./gradlew :masterdata:masterdata-service:bootJar --no-daemon --info
 
 # Extract JAR layers for optimized Docker layer caching
 WORKDIR /builder
@@ -107,7 +104,6 @@ RUN mkdir -p /app/logs /app/tmp && \
 # Re-declare build arguments for runtime stage
 ARG SERVICE_PATH=masterdata/masterdata-service
 ARG SERVICE_NAME=masterdata-service
-ARG SERVICE_PORT=8087
 
 # Copy Spring Boot layers in optimal order for Docker layer caching
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} /builder/dependencies/ ./
@@ -118,11 +114,11 @@ COPY --from=builder --chown=${APP_USER}:${APP_GROUP} /builder/application/ ./
 USER ${APP_USER}
 
 # Expose application port and debug port
-EXPOSE ${SERVICE_PORT} 5007
+EXPOSE 8086 5007
 
 # Health check
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=3 \
-    CMD curl -fsS --max-time 2 http://localhost:${SERVICE_PORT}/actuator/health/readiness || exit 1
+    CMD curl -fsS --max-time 2 http://localhost:8086/actuator/health/readiness || exit 1
 
 # JVM configuration optimized for masterdata service
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
@@ -138,16 +134,15 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -Duser.timezone=Europe/Vienna \
     -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus"
 
-# Spring Boot configuration
+# Spring Boot configuration (Profile nur zur Laufzeit via Compose/Env)
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
-    SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
-    SERVER_PORT=${SERVICE_PORT} \
+    SERVER_PORT=8086 \
     LOGGING_LEVEL_ROOT=INFO \
     LOGGING_LEVEL_AT_MOCODE_MASTERDATA=DEBUG
 
 # Startup command with debug support
 ENTRYPOINT ["sh", "-c", "\
-    echo 'Starting Masterdata Service on port ${SERVICE_PORT}...'; \
+    echo 'Starting Masterdata Service on port 8086...'; \
     if [ \"${DEBUG:-false}\" = \"true\" ]; then \
         echo 'Debug mode enabled on port 5007'; \
         exec java $JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007 org.springframework.boot.loader.launch.JarLauncher; \

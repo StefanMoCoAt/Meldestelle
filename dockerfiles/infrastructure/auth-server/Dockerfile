@@ -14,16 +14,14 @@ ARG JAVA_VERSION
 ARG BUILD_DATE
 ARG VERSION
 
-# Infrastructure-specific arguments (docker/build-args/infrastructure.env)
-ARG SPRING_PROFILES_ACTIVE
+# Infrastruktur-spezifische Build-Argumente (keine Runtime-Profile/Ports als ARG)
 
 # ===================================================================
 # Build Stage
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
-# Re-declare build arguments for this stage
-ARG SPRING_PROFILES_ACTIVE
+# Re-declare build arguments for this stage (nur Build-Zeit)
 ARG BUILD_DATE
 ARG VERSION
 
@@ -75,8 +73,7 @@ RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
 # Build application with BuildKit cache mount
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
-    ./gradlew :infrastructure:auth:auth-server:bootJar --no-daemon --info \
-    -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
+    ./gradlew :infrastructure:auth:auth-server:bootJar --no-daemon --info
 
 # ===================================================================
 # Runtime Stage
@@ -87,7 +84,6 @@ FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
 ARG BUILD_DATE
 ARG VERSION
 ARG JAVA_VERSION
-ARG SPRING_PROFILES_ACTIVE
 
 # Convert build arguments to environment variables
 ENV JAVA_VERSION=${JAVA_VERSION} \
@@ -100,7 +96,6 @@ LABEL service="auth-server" \
       description="Authentication and Authorization Server for Meldestelle" \
       maintainer="Meldestelle Development Team" \
       java.version="${JAVA_VERSION}" \
-      spring.profiles.active="${SPRING_PROFILES_ACTIVE}" \
       build.date="${BUILD_DATE}" \
       org.opencontainers.image.title="Meldestelle Auth Server" \
       org.opencontainers.image.description="Spring Boot authentication service with Keycloak integration" \
@@ -164,7 +159,6 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
 
 # Auth-server specific Spring Boot configuration
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
-    SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
     SERVER_PORT=8081 \
     MANAGEMENT_SERVER_PORT=8081 \
     LOGGING_LEVEL_ROOT=INFO \
@@ -173,7 +167,7 @@ ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
 # Enhanced entrypoint with tini init system and conditional debug support
 ENTRYPOINT ["tini", "--", "sh", "-c", "\
     echo 'Starting Meldestelle Auth Server with Java ${JAVA_VERSION}...'; \
-    echo 'Active Spring profiles: ${SPRING_PROFILES_ACTIVE}'; \
+    echo 'Active Spring profiles: '${SPRING_PROFILES_ACTIVE:-not-set}; \
     echo 'Auth server port: 8081'; \
     echo 'Container memory: '$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || echo 'unlimited'); \
     if [ \"${DEBUG:-false}\" = \"true\" ]; then \

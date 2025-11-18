@@ -15,13 +15,20 @@
 git clone https://github.com/StefanMoCoAt/meldestelle.git
 cd meldestelle
 
-# 2) (Optional, falls SSoT Compose-Files erst generiert werden müssen)
+# 2) Runtime-Environment vorbereiten (Single Source of Truth)
+#   Kopiere die Vorlage und passe sie bei Bedarf an.
+cp -n .env.template config/env/.env 2>/dev/null || true
+#   Optionale lokale Geheimnisse/Overrides (gitignored):
+#   echo "POSTGRES_PASSWORD=meinlokalespasswort" >> config/env/.env.local
+
+# 3) (Optional) Compose-Files generieren
+#    (nur falls du die Generator-Pipeline nutzt)
 # DOCKER_SSOT_MODE=envless bash scripts/generate-compose-files.sh all development
 
-# 3) Infrastruktur starten
+# 4) Infrastruktur starten
 docker compose -f docker-compose.yml up -d
 
-# 4) Services starten (Beispiel)
+# 5) Services starten (Beispiel)
 ./gradlew :members:members-service:bootRun
 # oder – falls zentral gewollt und unterstützt
 # ./gradlew bootRun
@@ -92,6 +99,47 @@ Das System ist in unabhängige Domänen aufgeteilt:
 - **Container-First**: Docker & Docker Compose
 
 **Details**: [ADR-0002 Domain-Driven Design](docs/architecture/adr/0002-domain-driven-design-de.md)
+
+---
+
+## ⚙️ Konfigurationsstruktur (Build vs. Runtime)
+
+Laufzeit (Runtime) – Single Source of Truth:
+
+- config/env/.env – globale Runtime-Werte (Ports, Hosts, Feature-Flags, Pfade, Profile)
+- config/env/.env.local – lokale, geheime Overrides (gitignored)
+- Optionale DDD-Slice-Overrides (nur wenn nötig):
+  - config/env/services/<service>.env (z. B. ping-service.env)
+  - config/env/infrastructure/<component>.env (z. B. api-gateway.env)
+  - config/env/clients/<client>.env (z. B. web-app.env)
+
+Build-Zeit (nur Versionen/Tags/Pfade):
+
+- docker/versions.toml – zentrale Versionsquelle (SSoT)
+- docker/build-args/global.env – aus versions.toml abgeleitet (kann via scripts/generate-build-env.sh erzeugt werden)
+- docker/build-args/{clients,infrastructure,services}.env – nur Build-relevante Pfade/Namen; keine Runtime-Variablen
+
+Compose-Anbindung:
+
+- Alle docker-compose*.yml laden config/env/.env und optional die per-Slice-Overrides via env_file
+- Laufzeitwerte werden nicht via build.args eingeschleust
+
+Deprecations / Umbenennungen:
+
+- `DOCKER_*_VERSION` → `*_IMAGE_TAG` (nur Build-Zeit)
+- `APP_VERSION` wurde vereinheitlicht als `VERSION`
+
+Schnelltest / Smoke (lokal):
+
+- docker compose -f docker-compose.yml up -d
+- docker compose -f docker-compose.services.yml up -d
+- docker compose -f docker-compose.clients.yml up -d
+- Healthchecks prüfen: <http://localhost:3000> (Grafana), <http://localhost:9090> (Prometheus), <http://localhost:8180> (Keycloak), <http://localhost:8081> (Gateway), <http://localhost:4000> (Web)
+
+Sicherheits-Hinweise:
+
+- Keine echten Secrets im Repo; verwende config/env/.env.local für lokale Entwicklung
+- Die optimierten Compose-Dateien (`*.optimized`) nutzen Docker-Secrets im Profil "prod"
 
 ---
 

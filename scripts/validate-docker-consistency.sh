@@ -546,36 +546,26 @@ validate_env_value_equality() {
         fi
     }
 
-    # global.env mappings
+    # global.env mappings (build-only) — use *_IMAGE_TAG instead of DOCKER_* vars
     _check_env_pair "global.env" "GRADLE_VERSION" "gradle"
     _check_env_pair "global.env" "JAVA_VERSION" "java"
     _check_env_pair "global.env" "VERSION" "app-version"
-    _check_env_pair "global.env" "DOCKER_PROMETHEUS_VERSION" "prometheus"
-    _check_env_pair "global.env" "DOCKER_GRAFANA_VERSION" "grafana"
-    _check_env_pair "global.env" "DOCKER_KEYCLOAK_VERSION" "keycloak"
+    _check_env_pair "global.env" "PROMETHEUS_IMAGE_TAG" "prometheus"
+    _check_env_pair "global.env" "GRAFANA_IMAGE_TAG" "grafana"
+    _check_env_pair "global.env" "KEYCLOAK_IMAGE_TAG" "keycloak"
 
-    # clients.env mappings
+    # clients.env mappings (build-only)
     _check_env_pair "clients.env" "NODE_VERSION" "node"
     _check_env_pair "clients.env" "NGINX_VERSION" "nginx"
-    _check_env_pair "clients.env" "APP_VERSION" "app-version"
-    # Ports for clients (map to [service-ports])
-    _check_env_pair "clients.env" "WEB_APP_PORT" "web-app"
-    _check_env_pair "clients.env" "DESKTOP_APP_VNC_PORT" "desktop-app-vnc"
-    _check_env_pair "clients.env" "DESKTOP_APP_NOVNC_PORT" "desktop-app-novnc"
+    # No APP_VERSION or runtime/dev values here by policy
 
-    # services.env mappings
-    _check_env_pair "services.env" "SPRING_PROFILES_ACTIVE" "spring-profiles-docker"
-    _check_env_pair "services.env" "PING_SERVICE_PORT" "ping-service"
-    _check_env_pair "services.env" "MEMBERS_SERVICE_PORT" "members-service"
-    _check_env_pair "services.env" "HORSES_SERVICE_PORT" "horses-service"
-    _check_env_pair "services.env" "EVENTS_SERVICE_PORT" "events-service"
-    _check_env_pair "services.env" "MASTERDATA_SERVICE_PORT" "masterdata-service"
+    # services.env mappings (build-only)
+    # Only paths/names are expected here; no runtime profiles/ports
+    # Skipping runtime checks by policy
 
-    # infrastructure.env mappings
-    _check_env_pair "infrastructure.env" "SPRING_PROFILES_ACTIVE" "spring-profiles-default"
-    _check_env_pair "infrastructure.env" "GATEWAY_PORT" "api-gateway"
-    _check_env_pair "infrastructure.env" "AUTH_SERVER_PORT" "auth-server"
-    _check_env_pair "infrastructure.env" "MONITORING_SERVER_PORT" "monitoring-server"
+    # infrastructure.env mappings (build-only)
+    # Only paths/names are expected here; no runtime profiles/ports
+    # Skipping runtime checks by policy
 
     if [[ "$has_diff" == false ]]; then
         print_success "Environment files are fully synchronized with versions.toml"

@@ -1,4 +1,12 @@
 name: YouTrack Sync (on merge)
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: youtrack-sync-${{ github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches: [ main ]
@@ -6,17 +14,42 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
+
+    # Secrets als Umgebungsvariablen für den Job verfügbar machen
+    env:
+      YT_URL: ${{ secrets.YT_URL }}
+      YT_TOKEN: ${{ secrets.YT_TOKEN }}
+
     steps:
+      # WICHTIG: Checkout ist notwendig, damit "git log" funktioniert
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Notwendig, um die Commit-Historie für "git log" zu laden
+
       - name: Comment to YouTrack Issue(s)
+        # Wir haben das problematische "if: ${{ secrets... }}" entfernt.
+        # Die Prüfung findet nun sicher im Shell-Skript statt.
         run: |
           set -euo pipefail
+
+          # 1. Prüfen, ob Secrets vorhanden sind (Shell-Ebene)
+          if [ -z "${YT_URL:-}" ] || [ -z "${YT_TOKEN:-}" ]; then
+            echo "Skipping: YT_URL or YT_TOKEN is not set."
+            exit 0
+          fi
+
+          # 2. Commit Message nach Issue-Keys durchsuchen
           KEYS=$(git log -1 --pretty=%B | grep -o '[A-Z]\+-[0-9]\+' | sort -u || true)
           if [ -z "$KEYS" ]; then
             echo "No issue keys in last commit message. Skipping."
             exit 0
           fi
+
+          # 3. Kommentar an YouTrack senden
           for ISSUE in $KEYS; do
             MSG=$(printf 'PR/Commit gemergt: %s\nRepo: %s\nCommit: %s' "${{ github.event.head_commit.url }}" "${{ github.repository }}" "${{ github.sha }}")
+            echo "Posting comment to $ISSUE..."
             curl -sS -X POST \
               -H "Authorization: Bearer $YT_TOKEN" \
               -H "Accept: application/json" \
@@ -24,6 +57,3 @@ jobs:
               "$YT_URL/api/issues/$ISSUE/comments" \
               -d "{\"text\": \"$MSG\"}"
           done
-        env:
-          YT_URL: ${{ secrets.YT_URL }}
-          YT_TOKEN: ${{ secrets.YT_TOKEN }}

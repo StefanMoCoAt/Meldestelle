@@ -24,14 +24,16 @@ services:
       context: .
       dockerfile: dockerfiles/services/ping-service/Dockerfile
       args:
-        # Global build arguments
+        # Global build arguments (build-time only)
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
         VERSION: ${DOCKER_APP_VERSION:-1.0.0}
-        # Service-specific arguments
-        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
     container_name: meldestelle-ping-service
+    env_file:
+      - config/env/.env
+      # Optional service-specific overrides (only if file exists)
+      - config/env/services/ping-service.env
     volumes:
       # Mount Gradle cache for better build performance
       - ping-service-gradle-cache:/home/gradle/.gradle
@@ -67,6 +69,8 @@ services:
         condition: service_healthy
     networks:
       - meldestelle-network
+    # Secrets sind für lokale Entwicklung optional; für Prod Profil aktivieren
+    profiles: ["prod"]
     secrets:
       - postgres_user
       - postgres_password
@@ -99,11 +103,14 @@ services:
       dockerfile: dockerfiles/services/members-service/Dockerfile
       args:
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
         VERSION: ${DOCKER_APP_VERSION:-1.0.0}
-        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
     container_name: meldestelle-members-service
+    env_file:
+      - config/env/.env
+      # Optional service-specific overrides
+      - config/env/services/members-service.env
     volumes:
       - members-service-gradle-cache:/home/gradle/.gradle
     environment:
@@ -175,11 +182,14 @@ services:
       dockerfile: dockerfiles/services/horses-service/Dockerfile
       args:
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
         VERSION: ${DOCKER_APP_VERSION:-1.0.0}
-        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
     container_name: meldestelle-horses-service
+    env_file:
+      - config/env/.env
+      # Optional service-specific overrides
+      - config/env/services/horses-service.env
     volumes:
       - horses-service-gradle-cache:/home/gradle/.gradle
     environment:
@@ -251,11 +261,14 @@ services:
       dockerfile: dockerfiles/services/events-service/Dockerfile
       args:
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
         VERSION: ${DOCKER_APP_VERSION:-1.0.0}
-        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
     container_name: meldestelle-events-service
+    env_file:
+      - config/env/.env
+      # Optional service-specific overrides
+      - config/env/services/events-service.env
     volumes:
       - events-service-gradle-cache:/home/gradle/.gradle
     environment:
@@ -327,11 +340,14 @@ services:
       dockerfile: dockerfiles/services/masterdata-service/Dockerfile
       args:
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
         BUILD_DATE: ${BUILD_DATE:-unknown}
         VERSION: ${DOCKER_APP_VERSION:-1.0.0}
-        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER:-docker}
     container_name: meldestelle-masterdata-service
+    env_file:
+      - config/env/.env
+      # Optional service-specific overrides
+      - config/env/services/masterdata-service.env
     volumes:
       - masterdata-service-gradle-cache:/home/gradle/.gradle
     environment:

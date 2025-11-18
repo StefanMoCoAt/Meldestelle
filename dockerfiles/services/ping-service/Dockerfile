@@ -15,7 +15,7 @@ ARG BUILD_DATE
 ARG VERSION
 
 # Service-specific arguments (docker/build-args/services.env)
-ARG SPRING_PROFILES_ACTIVE
+# Note: No runtime profiles as build ARGs
 
 # Build stage: compile the ping-service JAR inside Docker
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
@@ -81,8 +81,7 @@ RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
 # Build the application with optimizations and build cache
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
-    ./gradlew :services:ping:ping-service:bootJar --no-daemon --info \
-    -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
+    ./gradlew :services:ping:ping-service:bootJar --no-daemon --info
 
 # ===================================================================
 # Runtime stage: optimized JRE image for production
@@ -93,7 +92,6 @@ FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
 ARG BUILD_DATE
 ARG VERSION
 ARG JAVA_VERSION
-ARG SPRING_PROFILES_ACTIVE
 
 # Convert build arguments to environment variables
 ENV JAVA_VERSION=${JAVA_VERSION} \
@@ -106,7 +104,6 @@ LABEL service="ping-service" \
       description="Microservice demonstrating circuit breaker patterns and monitoring" \
       maintainer="Meldestelle Development Team" \
       java.version="${JAVA_VERSION}" \
-      spring.profiles.active="${SPRING_PROFILES_ACTIVE}" \
       build.date="${BUILD_DATE}" \
       org.opencontainers.image.title="Ping Service" \
       org.opencontainers.image.description="Spring Boot microservice with circuit breaker patterns" \
@@ -171,16 +168,14 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
     -Dmanagement.prometheus.metrics.export.enabled=true"
 
 # Spring Boot configuration
-ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
-    SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
-    SERVER_PORT=8082 \
-    LOGGING_LEVEL_ROOT=INFO
+ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
+ENV SERVER_PORT=8082
+ENV LOGGING_LEVEL_ROOT=INFO
 
 # Enhanced entrypoint with tini init system and conditional debug support
 # Fixed memory cgroup path for better compatibility with different container runtimes
 ENTRYPOINT ["tini", "--", "sh", "-c", "\
     echo 'Starting Ping Service with Java ${JAVA_VERSION}...'; \
-    echo 'Active Spring profiles: ${SPRING_PROFILES_ACTIVE}'; \
     echo 'Service port: ${SERVER_PORT}'; \
     MEMORY_LIMIT=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || echo 'unlimited'); \
     echo \"Container memory limit: $MEMORY_LIMIT\"; \

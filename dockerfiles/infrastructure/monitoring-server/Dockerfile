@@ -14,7 +14,7 @@ ARG BUILD_DATE
 ARG VERSION
 
 # Infrastructure-specific arguments (docker/build-args/infrastructure.env)
-ARG SPRING_PROFILES_ACTIVE
+# Note: No runtime profiles as build ARGs
 
 # ===================================================================
 # Build Stage
@@ -55,8 +55,7 @@ COPY infrastructure/monitoring/monitoring-server/src/ infrastructure/monitoring/
 
 # Build application
 RUN ./gradlew :infrastructure:monitoring:monitoring-server:dependencies --no-daemon --info
-RUN ./gradlew :infrastructure:monitoring:monitoring-server:bootJar --no-daemon --info \
-    -Pspring.profiles.active=${SPRING_PROFILES_ACTIVE}
+RUN ./gradlew :infrastructure:monitoring:monitoring-server:bootJar --no-daemon --info
 
 # ===================================================================
 # Runtime Stage
@@ -68,8 +67,7 @@ LABEL service="monitoring-server" \
       version="1.0.0" \
       description="Monitoring and Observability Server for Meldestelle" \
       maintainer="Meldestelle Development Team" \
-      java.version="${JAVA_VERSION}" \
-      spring.profiles.active="${SPRING_PROFILES_ACTIVE}"
+      java.version="${JAVA_VERSION}"
 
 # Build arguments for user configuration
 ARG APP_USER=monitoruser
@@ -122,12 +120,11 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -Dmanagement.endpoints.web.exposure.include=health,info,metrics,prometheus"
 
 # Monitoring-server specific Spring Boot configuration
-ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
-    SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
-    SERVER_PORT=8088 \
-    MANAGEMENT_SERVER_PORT=8088 \
-    LOGGING_LEVEL_ROOT=INFO \
-    LOGGING_LEVEL_AT_MOCODE=DEBUG
+ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
+ENV SERVER_PORT=8088
+ENV MANAGEMENT_SERVER_PORT=8088
+ENV LOGGING_LEVEL_ROOT=INFO
+ENV LOGGING_LEVEL_AT_MOCODE=DEBUG
 
 # Monitoring-focused startup command with debug support
 ENTRYPOINT ["sh", "-c", "\
