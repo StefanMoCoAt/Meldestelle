@@ -88,7 +88,7 @@ jobs:
           [ -f "$TOML" ] || { echo "Missing $TOML"; exit 1; }
           [ -f "$GLOBAL" ] || { echo "Missing $GLOBAL"; exit 1; }
 
-          get_toml_ver(){ awk -F'=' -v key="$1" '$1 ~ "^"key"$" {gsub(/[ "\t]/,"",$2); print $2}' "$TOML"; }
+          get_toml_ver(){ awk -F'=' -v key="$1" '/^\[versions\]/{in_vers=1; next} /^\[/{in_vers=0} in_vers && gsub(/^[ \t]+|[ \t]+$/,"",$1) && $1==key {gsub(/[ "\t]/,"",$2); print $2; exit}' "$TOML"; }
           mapfile -t checks < <(printf "%s\n" \
             "GRADLE_VERSION:versions.gradle" \
             "JAVA_VERSION:versions.java" \
