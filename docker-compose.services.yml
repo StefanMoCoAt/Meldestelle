@@ -2,7 +2,7 @@
 # Docker Compose - Application Services
 # Generated from docker/versions.toml
 # Environment: development
-# Generated: 2025-11-11 23:07:01 UTC
+# Generated: 2025-11-18 19:43:46 UTC
 # ===================================================================
 
 services:
@@ -11,18 +11,16 @@ services:
       context: .
       dockerfile: dockerfiles/services/ping-service/Dockerfile
       args:
-        # Global build arguments (build-time only)
-        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.1.0}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
-        BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+        # Global build arguments (centralized DOCKER_* variables)
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
+        BUILD_DATE: ${BUILD_DATE}
+        VERSION: ${DOCKER_APP_VERSION}
+        # Service-specific arguments (centralized DOCKER_* variables)
+        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DOCKER}
     container_name: meldestelle-ping-service
-    env_file:
-      - config/env/.env
-      # Optional service-specific overrides (only if file exists)
-      - config/env/services/ping-service.env
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       SERVER_PORT: ${PING_SERVICE_PORT:-8082}
       DEBUG: ${DEBUG:-true}
       LOGGING_LEVEL_ROOT: ${LOGGING_LEVEL_ROOT:-DEBUG}
@@ -45,24 +43,22 @@ services:
       context: .
       dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
       args:
-        # Global build arguments (build-time only)
-        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.1.0}
-        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
-        BUILD_DATE: ${BUILD_DATE:-unknown}
-        VERSION: ${DOCKER_APP_VERSION:-1.0.0}
+        # Global build arguments (centralized DOCKER_* variables)
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION}
+        BUILD_DATE: ${BUILD_DATE}
+        VERSION: ${DOCKER_APP_VERSION}
+        # Infrastructure-specific arguments (centralized DOCKER_* variables)
+        SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DEFAULT}
     container_name: meldestelle-api-gateway
-    env_file:
-      - config/env/.env
-      # Optional infrastructure-specific overrides (only if file exists)
-      - config/env/infrastructure/api-gateway.env
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
-      SERVER_PORT: ${GATEWAY_PORT:-8081}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${API_GATEWAY_PORT:-8081}
       DEBUG: ${DEBUG:-true}
       LOGGING_LEVEL_ROOT: ${LOGGING_LEVEL_ROOT:-DEBUG}
       JVM_DEBUG_PORT: 5005
     ports:
-      - "${GATEWAY_PORT:-8081}:8081"
+      - "${API_GATEWAY_PORT:-8081}:8081"
       - "5005:5005"  # Debug-Port
     networks:
       - meldestelle-network
