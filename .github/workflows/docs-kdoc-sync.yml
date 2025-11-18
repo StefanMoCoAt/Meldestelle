@@ -1,5 +1,12 @@
 name: KDoc → YouTrack KB Sync
 
+permissions:
+  contents: read
+
+concurrency:
+  group: kdoc-sync-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
     inputs:

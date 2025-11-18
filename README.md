@@ -105,6 +105,7 @@ Das System ist in unabhängige Domänen aufgeteilt:
 ## ⚙️ Konfigurationsstruktur (Build vs. Runtime)
 
 Laufzeit (Runtime) – Single Source of Truth:
+
 - config/env/.env – globale Runtime-Werte (Ports, Hosts, Feature-Flags, Pfade, Profile)
 - config/env/.env.local – lokale, geheime Overrides (gitignored)
 - Optionale DDD-Slice-Overrides (nur wenn nötig):
@@ -113,27 +114,32 @@ Laufzeit (Runtime) – Single Source of Truth:
   - config/env/clients/<client>.env (z. B. web-app.env)
 
 Build-Zeit (nur Versionen/Tags/Pfade):
+
 - docker/versions.toml – zentrale Versionsquelle (SSoT)
 - docker/build-args/global.env – aus versions.toml abgeleitet (kann via scripts/generate-build-env.sh erzeugt werden)
 - docker/build-args/{clients,infrastructure,services}.env – nur Build-relevante Pfade/Namen; keine Runtime-Variablen
 
 Compose-Anbindung:
+
 - Alle docker-compose*.yml laden config/env/.env und optional die per-Slice-Overrides via env_file
 - Laufzeitwerte werden nicht via build.args eingeschleust
 
 Deprecations / Umbenennungen:
-- DOCKER_*_VERSION → *_IMAGE_TAG (nur Build-Zeit)
-- APP_VERSION wurde vereinheitlicht als VERSION
+
+- `DOCKER_*_VERSION` → `*_IMAGE_TAG` (nur Build-Zeit)
+- `APP_VERSION` wurde vereinheitlicht als `VERSION`
 
 Schnelltest / Smoke (lokal):
+
 - docker compose -f docker-compose.yml up -d
 - docker compose -f docker-compose.services.yml up -d
 - docker compose -f docker-compose.clients.yml up -d
-- Healthchecks prüfen: http://localhost:3000 (Grafana), http://localhost:9090 (Prometheus), http://localhost:8180 (Keycloak), http://localhost:8081 (Gateway), http://localhost:4000 (Web)
+- Healthchecks prüfen: <http://localhost:3000> (Grafana), <http://localhost:9090> (Prometheus), <http://localhost:8180> (Keycloak), <http://localhost:8081> (Gateway), <http://localhost:4000> (Web)
 
 Sicherheits-Hinweise:
+
 - Keine echten Secrets im Repo; verwende config/env/.env.local für lokale Entwicklung
-- Die optimierten Compose-Dateien (*.optimized) nutzen Docker-Secrets im Profil "prod"
+- Die optimierten Compose-Dateien (`*.optimized`) nutzen Docker-Secrets im Profil "prod"
 
 ---
 

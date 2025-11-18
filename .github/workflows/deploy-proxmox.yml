@@ -5,6 +5,13 @@
 
 name: Deploy Proxmox (manual)
 
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-proxmox-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch: # Manueller Trigger
 
@@ -53,7 +60,7 @@ jobs:
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
 
     steps:
     - name: Checkout Code

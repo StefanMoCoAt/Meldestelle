@@ -1,4 +1,11 @@
 name: YouTrack Sync (on merge)
+
+permissions:
+  contents: read
+
+concurrency:
+  group: youtrack-sync-${{ github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches: [ main ]
@@ -8,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Comment to YouTrack Issue(s)
+        if: ${{ secrets.YT_URL != '' && secrets.YT_TOKEN != '' }}
         run: |
           set -euo pipefail
           KEYS=$(git log -1 --pretty=%B | grep -o '[A-Z]\+-[0-9]\+' | sort -u || true)
