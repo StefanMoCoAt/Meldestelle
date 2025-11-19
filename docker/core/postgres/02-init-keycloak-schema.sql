@@ -1,8 +1,8 @@
 -- ===================================================================
 -- Keycloak Schema Init (No-Op)
 -- ===================================================================
--- DEPRECATED: Schema initialization is handled by 01-init-keycloak-schema.sql.
--- This file remains to preserve execution order but performs no actions.
+-- DEPRECATED: Schema-initialization erfolgt über die Datei 01-init-keycloak-schema.sql.
+-- Diese Datei dient lediglich der Sicherstellung der Ausführungsreihenfolge, führt aber keine Aktionen aus.
 -- ===================================================================
 
 DO $$

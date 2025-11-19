@@ -27,7 +27,7 @@ logs/
 build/diagrams/
 
 # Local runtime secrets/overrides
-config/env/.env.local
+_backup_chaos/config/env/.env.local
 
 # Python virtual environment
 .venv/

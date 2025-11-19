@@ -1,0 +1,12 @@
+# Zentrale Einstiegsdatei für Docker Compose
+name: meldestelle-system
+
+include:
+  - path: docker-compose.yml          # Infra (Postgres, Redis, Keycloak...)
+  - path: docker-compose.services.yml # Gateway & Microservices
+  - path: docker-compose.clients.yml  # Web App
+
+# Hier definieren wir das Netzwerk zentral, damit alle includes es nutzen können
+networks:
+  meldestelle-network:
+    driver: bridge

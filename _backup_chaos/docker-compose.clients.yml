@@ -10,9 +10,10 @@ services:
   # Web Application (Compose for Web)
   # ===================================================================
   web-app:
+    profiles: ["ui", "frontend"]
     build:
-      context: .
-      dockerfile: dockerfiles/clients/web-app/Dockerfile
+      context: ..
+      dockerfile: ../dockerfiles/clients/web-app/Dockerfile
       args:
         # Global build arguments (centralized DOCKER_* variables)
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION}

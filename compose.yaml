@@ -1,0 +1,99 @@
+name: meldestelle-hardcoded
+
+services:
+  # --- DATENBANK ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: meldestelle-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pg-user
+      POSTGRES_PASSWORD: pg-password
+      POSTGRES_DB: meldestelle
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Falls du Init-Scripte hast, lassen wir die erstmal weg,
+      # um Fehlerquellen zu reduzieren, oder lassen den Pfad, falls er existiert:
+      - ./docker/core/postgres:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U pg-user -d meldestelle" ]
+      interval: 1s
+      timeout: 5s
+      retries: 3
+    networks:
+      - meldestelle-network
+
+  # --- DATENBANK-MANAGEMENT-TOOL ---
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin4_container
+    restart: unless-stopped
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@domain.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - meldestelle-network
+
+  # --- CACHE ---
+  redis:
+    image: redis:7-alpine
+    container_name: meldestelle-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli" ]
+      interval: 1s
+      timeout: 5s
+      retries: 3
+    networks:
+      - meldestelle-network
+
+  # --- IDENTITY PROVIDER (Wartet auf Postgres) ---
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    container_name: meldestelle-keycloak
+    restart: unless-stopped
+    environment:
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      KC_BOOTSTRAP_ADMIN_USERNAME: kc-admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: kc-password
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/meldestelle
+      KC_DB_USERNAME: pg-user
+      KC_DB_PASSWORD: pg-password
+      KC_HOSTNAME: localhost
+    ports:
+      - "8180:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./docker/core/keycloak:/opt/keycloak/data/import
+    command: start-dev --import-realm
+    healthcheck:
+      test: [ "CMD-SHELL", "kcadm.sh config credentials --server http://localhost:8080 --realm master --user admin --password admin" ] #"kcadm.sh config credentials --server http://localhost:8080 --realm master --user admin --password admin || exit 1"
+      interval: 20s
+      timeout: 10s
+      retries: 3
+    networks:
+      - meldestelle-network
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+  redis-data:
+
+networks:
+  meldestelle-network:
+    driver: bridge

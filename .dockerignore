@@ -171,7 +171,7 @@ backup.sh
 # ===================================================================
 # Security and certificates (never include in builds)
 # ===================================================================
-config/ssl/
+_backup_chaos/config/ssl/
 **/*.key
 **/*.pem
 **/*.p12

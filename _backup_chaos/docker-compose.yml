@@ -10,6 +10,7 @@ services:
   # Database
   # ===================================================================
   postgres:
+    profiles: ["core", "backend"]
     image: postgres:${DOCKER_POSTGRES_VERSION:-16-alpine}
     container_name: meldestelle-postgres
     environment:
@@ -35,6 +36,7 @@ services:
   # Cache
   # ===================================================================
   redis:
+    profiles: ["core", "backend"]
     image: redis:${DOCKER_REDIS_VERSION:-7-alpine}
     container_name: meldestelle-redis
     ports:
@@ -56,6 +58,7 @@ services:
   # Authentication
   # ===================================================================
   keycloak:
+    profiles: ["auth", "security"]
     image: quay.io/keycloak/keycloak:${DOCKER_KEYCLOAK_VERSION:-26.4.2}
     container_name: meldestelle-keycloak
     environment:
@@ -87,6 +90,7 @@ services:
   # Monitoring
   # ===================================================================
   prometheus:
+    profiles: ["monitoring"]
     image: prom/prometheus:${DOCKER_PROMETHEUS_VERSION:-v2.54.1}
     container_name: meldestelle-prometheus
     ports:
@@ -112,6 +116,7 @@ services:
     restart: unless-stopped
 
   grafana:
+    profiles: ["monitoring"]
     image: grafana/grafana:${DOCKER_GRAFANA_VERSION:-11.3.0}
     container_name: meldestelle-grafana
     environment:
