@@ -1,0 +1,153 @@
+name: meldestelle-hardcoded
+
+services:
+  # --- DATENBANK ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: meldestelle-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pg-user
+      POSTGRES_PASSWORD: pg-password
+      POSTGRES_DB: meldestelle
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Falls du Init-Scripte hast, lassen wir die erstmal weg,
+      # um Fehlerquellen zu reduzieren, oder lassen den Pfad, falls er existiert:
+      - ./docker/core/postgres:/docker-entrypoint-initdb.d:Z
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U pg-user -d meldestelle" ]
+      interval: 1s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - meldestelle-network
+
+  # --- DATENBANK-MANAGEMENT-TOOL ---
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin4_container
+    restart: unless-stopped
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@domain.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --spider -q http://localhost:80/ || exit 1" ]
+      interval: 1s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - meldestelle-network
+
+  # --- CACHE ---
+  redis:
+    image: redis:7-alpine
+    container_name: meldestelle-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli" ]
+      interval: 1s
+      timeout: 5s
+      retries: 3
+    networks:
+      - meldestelle-network
+
+  # --- IDENTITY PROVIDER (Wartet auf Postgres) ---
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    container_name: meldestelle-keycloak
+    restart: unless-stopped
+    environment:
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      KC_BOOTSTRAP_ADMIN_USERNAME: kc-admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: kc-password
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/meldestelle
+      KC_DB_USERNAME: pg-user
+      KC_DB_PASSWORD: pg-password
+      KC_HOSTNAME: localhost
+    ports:
+      - "8180:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./docker/core/keycloak:/opt/keycloak/data/import:Z
+    command: start-dev --import-realm
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000" ]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - meldestelle-network
+
+  # --- MONITORING ---
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: meldestelle-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus-data:/prometheus
+      - ./docker/monitoring/prometheus:/etc/prometheus:Z
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - meldestelle-network
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: meldestelle-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: gf-admin
+      GF_SECURITY_ADMIN_PASSWORD: gf-password
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/monitoring/grafana:/etc/grafana/provisioning:Z
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - meldestelle-network
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  meldestelle-network:
+    driver: bridge

@@ -23,11 +23,13 @@ logs/
 # Kotlin/Java
 *.class
 
+.env
+
 # Generated diagrams
 build/diagrams/
 
 # Local runtime secrets/overrides
-_backup_chaos/config/env/.env.local
+config/env/.env.local
 
 # Python virtual environment
 .venv/
