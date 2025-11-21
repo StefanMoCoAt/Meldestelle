@@ -168,13 +168,14 @@ services:
         GRADLE_VERSION: 9.1.0
         JAVA_VERSION: 21
         VERSION: 1.0.0
-        BUILD_DATE: "2025-11-20"
+        BUILD_DATE: "2025-11-21"
     container_name: ${COMPOSE_PROJECT_NAME}-gateway
     restart: no
     ports:
       - "${GATEWAY_PORT}"
       - "${GATEWAY_DEBUG_PORT}" # Für Remote Debugging
     environment:
+      SERVER_PORT: ${GATEWAY_SERVER_PORT}
       SPRING_PROFILES_ACTIVE: docker
       DEBUG: "true"
       # --- VERBINDUNGEN ---
@@ -213,12 +214,12 @@ services:
         GRADLE_VERSION: 9.1.0
         JAVA_VERSION: 21
         VERSION: 1.0.0
-        BUILD_DATE: "2025-11-20"
+        BUILD_DATE: "2025-11-21"
     container_name: ${COMPOSE_PROJECT_NAME}-ping-service
     restart: no # "${RESTART_POLICY:-unless-stopped}"
     ports:
       - "${PING_SERVICE_PORT}"
-      - "5006:5005" # Debug Port
+      - "${PING_DEBUG_PORT}"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       DEBUG: "true"
@@ -241,6 +242,13 @@ services:
       # Wir nutzen den Service-Namen, genau wie bei Postgres
       SPRING_DATA_REDIS_HOST: ${COMPOSE_PROJECT_NAME}-redis
       SPRING_DATA_REDIS_PORT: 6379
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     networks:
       - meldestelle-network
 

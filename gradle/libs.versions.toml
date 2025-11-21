@@ -18,6 +18,7 @@ kotlinx-coroutines = "1.10.2"
 # --- Spring Ecosystem ---
 springBoot = "3.5.6"
 springCloud = "2025.0.0"
+springCloudGateway = "4.3.0"
 springDependencyManagement = "1.1.7"
 springdoc = "2.8.13"
 
