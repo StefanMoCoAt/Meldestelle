@@ -202,6 +202,48 @@ services:
     networks:
       - meldestelle-network
 
+  # ==========================================
+  # MICROSERVICES
+  # ==========================================
+  ping-service:
+    build:
+      context: .
+      dockerfile: dockerfiles/services/ping-service/Dockerfile
+      args:
+        GRADLE_VERSION: 9.1.0
+        JAVA_VERSION: 21
+        VERSION: 1.0.0
+        BUILD_DATE: "2025-11-20"
+    container_name: ${COMPOSE_PROJECT_NAME}-ping-service
+    restart: no # "${RESTART_POLICY:-unless-stopped}"
+    ports:
+      - "${PING_SERVICE_PORT}"
+      - "5006:5005" # Debug Port
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DEBUG: "true"
+      SERVER_PORT: 8082
+
+      # --- CONSUL ---
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: ping-service
+
+      # --- DATENBANK VERBINDUNG (Das hat gefehlt!) ---
+      # Wir nutzen die Container-Namen aus deiner .env Variable
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${COMPOSE_PROJECT_NAME}-postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      # WICHTIG: Wir wollen nur validieren, nichts erstellen.
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+
+      # --- REDIS (DAS HAT GEFEHLT!) ---
+      # Wir nutzen den Service-Namen, genau wie bei Postgres
+      SPRING_DATA_REDIS_HOST: ${COMPOSE_PROJECT_NAME}-redis
+      SPRING_DATA_REDIS_PORT: 6379
+    networks:
+      - meldestelle-network
+
 volumes:
   postgres-data:
   pgadmin-data:

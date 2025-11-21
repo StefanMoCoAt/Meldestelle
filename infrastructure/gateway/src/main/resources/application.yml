@@ -73,6 +73,10 @@ spring:
                 name: Cache-Control
                 value: no-cache, no-store, must-revalidate
           routes:
+
+# ==============================================================
+# --- Gateway-Info-Route (optional) ---
+# ==============================================================
             - id: gateway-info-route
               uri: http://localhost:${server.port}
               predicates:
@@ -81,56 +85,80 @@ spring:
               filters:
                 - SetStatus=200
                 - SetResponseHeader=Content-Type,application/json
-            - id: members-service-route
-              uri: lb://members-service
-              predicates:
-                - Path=/api/members/**
-              filters:
-                - StripPrefix=1
-                - name: CircuitBreaker
-                  args:
-                    name: membersCircuitBreaker
-                    fallbackUri: forward:/fallback/members
-            - id: horses-service-route
-              uri: lb://horses-service
-              predicates:
-                - Path=/api/horses/**
-              filters:
-                - StripPrefix=1
-                - name: CircuitBreaker
-                  args:
-                    name: horsesCircuitBreaker
-                    fallbackUri: forward:/fallback/horses
-            - id: events-service-route
-              uri: lb://events-service
-              predicates:
-                - Path=/api/events/**
-              filters:
-                - StripPrefix=1
-                - name: CircuitBreaker
-                  args:
-                    name: eventsCircuitBreaker
-                    fallbackUri: forward:/fallback/events
-            - id: masterdata-service-route
-              uri: lb://masterdata-service
-              predicates:
-                - Path=/api/masterdata/**
-              filters:
-                - StripPrefix=1
-                - name: CircuitBreaker
-                  args:
-                    name: masterdataCircuitBreaker
-                    fallbackUri: forward:/fallback/masterdata
-            - id: auth-service-route
-              uri: lb://auth-service
-              predicates:
-                - Path=/api/auth/**
-              filters:
-                - StripPrefix=1
-                - name: CircuitBreaker
-                  args:
-                    name: authCircuitBreaker
-                    fallbackUri: forward:/fallback/auth
+
+# ==============================================================
+# --- Members-Service-Integration (optional) ---
+# ==============================================================
+#            - id: members-service-route
+#              uri: lb://members-service
+#              predicates:
+#                - Path=/api/members/**
+#              filters:
+#                - StripPrefix=1
+#                - name: CircuitBreaker
+#                  args:
+#                    name: membersCircuitBreaker
+#                    fallbackUri: forward:/fallback/members
+
+# ==============================================================
+# --- Horses-Service-Integration (optional) ---
+# ==============================================================
+#            - id: horses-service-route
+#              uri: lb://horses-service
+#              predicates:
+#                - Path=/api/horses/**
+#              filters:
+#                - StripPrefix=1
+#                - name: CircuitBreaker
+#                  args:
+#                    name: horsesCircuitBreaker
+#                    fallbackUri: forward:/fallback/horses
+
+# ==============================================================
+# --- Events-Service-Integration (optional) ---
+# ==============================================================
+#            - id: events-service-route
+#              uri: lb://events-service
+#              predicates:
+#                - Path=/api/events/**
+#              filters:
+#                - StripPrefix=1
+#                - name: CircuitBreaker
+#                  args:
+#                    name: eventsCircuitBreaker
+#                    fallbackUri: forward:/fallback/events
+
+# ==============================================================
+# --- Masterdata-Service-Integration (optional) ---
+# ==============================================================
+#            - id: masterdata-service-route
+#              uri: lb://masterdata-service
+#              predicates:
+#                - Path=/api/masterdata/**
+#              filters:
+#                - StripPrefix=1
+#                - name: CircuitBreaker
+#                  args:
+#                    name: masterdataCircuitBreaker
+#                    fallbackUri: forward:/fallback/masterdata
+
+# ==============================================================
+# --- Auth-Service-Integration (optional) ---
+# ==============================================================
+#            - id: auth-service-route
+#              uri: lb://auth-service
+#              predicates:
+#                - Path=/api/auth/**
+#              filters:
+#                - StripPrefix=1
+#                - name: CircuitBreaker
+#                  args:
+#                    name: authCircuitBreaker
+#                    fallbackUri: forward:/fallback/auth
+
+# ==============================================================
+# --- Ping-Service-Integration (optional) ---
+# ==============================================================
             - id: ping-service-route
               uri: lb://ping-service
               predicates:

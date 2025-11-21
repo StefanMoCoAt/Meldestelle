@@ -17,126 +17,126 @@ import java.time.Duration
  */
 @Component
 class GatewayHealthIndicator(
-    private val discoveryClient: DiscoveryClient,
-    private val webClient: WebClient.Builder,
-    private val environment: Environment
+  private val discoveryClient: DiscoveryClient,
+  private val webClient: WebClient.Builder,
+  private val environment: Environment
 ) : HealthIndicator {
 
-    companion object {
-        private val CRITICAL_SERVICES = setOf(
-            "members-service",
-            "horses-service",
-            "events-service",
-            "masterdata-service",
-            "auth-service"
+  companion object {
+    private val CRITICAL_SERVICES = setOf(
+      "ping-service"
+    )
+
+    private val OPTIONAL_SERVICES = setOf(
+      "members-service",
+      "horses-service",
+      "events-service",
+      "masterdata-service",
+      "auth-service"
+    )
+
+    private val HEALTH_CHECK_TIMEOUT = Duration.ofSeconds(5)
+  }
+
+  override fun health(): Health {
+    val builder = Health.up()
+    val details = mutableMapOf<String, Any>()
+
+    try {
+      // Prüfe alle registrierten Services in Consul
+      val allServices = discoveryClient.services
+      val discoveredServices = mutableMapOf<String, Any>()
+
+      allServices.forEach { serviceName ->
+        val instances = discoveryClient.getInstances(serviceName)
+        discoveredServices[serviceName] = mapOf(
+          "instanceCount" to instances.size,
+          "instances" to instances.map { "${it.host}:${it.port}" }
         )
+      }
 
-        private val OPTIONAL_SERVICES = setOf(
-            "ping-service"
-        )
+      details["discoveredServices"] = discoveredServices
+      details["totalServices"] = allServices.size
 
-        private val HEALTH_CHECK_TIMEOUT = Duration.ofSeconds(5)
-    }
+      // Prüfe kritische Services
+      val criticalServiceStatus = mutableMapOf<String, String>()
+      var hasCriticalFailure = false
 
-    override fun health(): Health {
-        val builder = Health.up()
-        val details = mutableMapOf<String, Any>()
-
-        try {
-            // Prüfe alle registrierten Services in Consul
-            val allServices = discoveryClient.services
-            val discoveredServices = mutableMapOf<String, Any>()
-
-            allServices.forEach { serviceName ->
-                val instances = discoveryClient.getInstances(serviceName)
-                discoveredServices[serviceName] = mapOf(
-                    "instanceCount" to instances.size,
-                    "instances" to instances.map { "${it.host}:${it.port}" }
-                )
-            }
-
-            details["discoveredServices"] = discoveredServices
-            details["totalServices"] = allServices.size
-
-            // Prüfe kritische Services
-            val criticalServiceStatus = mutableMapOf<String, String>()
-            var hasCriticalFailure = false
-
-            CRITICAL_SERVICES.forEach { serviceName ->
-                val status = checkServiceHealth(serviceName)
-                criticalServiceStatus[serviceName] = status
-                if (status != "UP") {
-                    hasCriticalFailure = true
-                }
-            }
-
-            // Prüfe optionale Services
-            val optionalServiceStatus = mutableMapOf<String, String>()
-            OPTIONAL_SERVICES.forEach { serviceName ->
-                optionalServiceStatus[serviceName] = checkServiceHealth(serviceName)
-            }
-
-            details["criticalServices"] = criticalServiceStatus
-            details["optionalServices"] = optionalServiceStatus
-
-            // Gateway Status basierend auf kritischen Services
-            val isTestEnvironment = environment.activeProfiles.contains("test")
-            val isDevEnvironment = environment.activeProfiles.contains("dev")
-
-            if (hasCriticalFailure && !isTestEnvironment && !isDevEnvironment) {
-                builder.down()
-                details["status"] = "DOWN"
-                details["reason"] = "Ein oder mehrere kritische Services sind nicht verfügbar"
-            } else {
-                details["status"] = "UP"
-                details["reason"] = when {
-                    isTestEnvironment -> "Gesundheitsprüfung erfolgreich (Testumgebung)"
-                    isDevEnvironment -> "Gesundheitsprüfung erfolgreich (Entwicklungsumgebung - nicht alle Services erforderlich)"
-                    else -> "Alle kritischen Services sind verfügbar"
-                }
-            }
-
-        } catch (exception: Exception) {
-            builder.down()
-                .withException(exception)
-            details["status"] = "DOWN"
-            details["reason"] = "Fehler beim Prüfen der nachgelagerten Services: ${exception.message}"
+      CRITICAL_SERVICES.forEach { serviceName ->
+        val status = checkServiceHealth(serviceName)
+        criticalServiceStatus[serviceName] = status
+        if (status != "UP") {
+          hasCriticalFailure = true
         }
+      }
 
-        return builder.withDetails(details).build()
-    }
+      // Prüfe optionale Services
+      val optionalServiceStatus = mutableMapOf<String, String>()
+      OPTIONAL_SERVICES.forEach { serviceName ->
+        optionalServiceStatus[serviceName] = checkServiceHealth(serviceName)
+      }
 
-    private fun checkServiceHealth(serviceName: String): String {
-        return try {
-            val instances = discoveryClient.getInstances(serviceName)
+      details["criticalServices"] = criticalServiceStatus
+      details["optionalServices"] = optionalServiceStatus
 
-            if (instances.isEmpty()) {
-                "NO_INSTANCES"
-            } else {
-                // Versuche Health-Check für die erste verfügbare Instanz
-                val instance = instances.first()
-                val healthUrl = "http://${instance.host}:${instance.port}/actuator/health"
+      // Gateway Status basierend auf kritischen Services
+      val isTestEnvironment = environment.activeProfiles.contains("test")
+      val isDevEnvironment = environment.activeProfiles.contains("dev")
 
-                val client = webClient.build()
-                val response = client.get()
-                    .uri(healthUrl)
-                    .retrieve()
-                    .bodyToMono(Map::class.java)
-                    .timeout(HEALTH_CHECK_TIMEOUT)
-                    .onErrorReturn(mapOf("status" to "DOWN"))
-                    .block()
-
-                val status = response?.get("status")?.toString() ?: "UNKNOWN"
-                if (status == "UP") "UP" else "DOWN"
-            }
-        } catch (exception: WebClientResponseException) {
-            when (exception.statusCode.value()) {
-                404 -> "NO_HEALTH_ENDPOINT"
-                503 -> "DOWN"
-                else -> "ERROR"
-            }
-        } catch (_: Exception) {
-            "ERROR"
+      if (hasCriticalFailure && !isTestEnvironment && !isDevEnvironment) {
+        builder.down()
+        details["status"] = "DOWN"
+        details["reason"] = "Ein oder mehrere kritische Services sind nicht verfügbar"
+      } else {
+        details["status"] = "UP"
+        details["reason"] = when {
+          isTestEnvironment -> "Gesundheitsprüfung erfolgreich (Testumgebung)"
+          isDevEnvironment -> "Gesundheitsprüfung erfolgreich (Entwicklungsumgebung - nicht alle Services erforderlich)"
+          else -> "Alle kritischen Services sind verfügbar"
         }
+      }
+
+    } catch (exception: Exception) {
+      builder.down()
+        .withException(exception)
+      details["status"] = "DOWN"
+      details["reason"] = "Fehler beim Prüfen der nachgelagerten Services: ${exception.message}"
     }
+
+    return builder.withDetails(details).build()
+  }
+
+  private fun checkServiceHealth(serviceName: String): String {
+    return try {
+      val instances = discoveryClient.getInstances(serviceName)
+
+      if (instances.isEmpty()) {
+        "NO_INSTANCES"
+      } else {
+        // Versuche Health-Check für die erste verfügbare Instanz
+        val instance = instances.first()
+        val healthUrl = "http://${instance.host}:${instance.port}/actuator/health"
+
+        val client = webClient.build()
+        val response = client.get()
+          .uri(healthUrl)
+          .retrieve()
+          .bodyToMono(Map::class.java)
+          .timeout(HEALTH_CHECK_TIMEOUT)
+          .onErrorReturn(mapOf("status" to "DOWN"))
+          .block()
+
+        val status = response?.get("status")?.toString() ?: "UNKNOWN"
+        if (status == "UP") "UP" else "DOWN"
+      }
+    } catch (exception: WebClientResponseException) {
+      when (exception.statusCode.value()) {
+        404 -> "NO_HEALTH_ENDPOINT"
+        503 -> "DOWN"
+        else -> "ERROR"
+      }
+    } catch (_: Exception) {
+      "ERROR"
+    }
+  }
 }
