@@ -77,6 +77,7 @@ kotlin {
             implementation(project(":clients:shared:common-ui"))
             implementation(project(":clients:shared:navigation"))
             implementation(project(":clients:ping-feature"))
+            implementation(project(":clients:members-feature"))
 
             // Compose Multiplatform
             implementation(compose.runtime)

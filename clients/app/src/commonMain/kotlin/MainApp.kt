@@ -3,6 +3,9 @@ import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import at.mocode.clients.membersfeature.ProfileScreen
+import at.mocode.clients.membersfeature.ProfileViewModel
+import at.mocode.clients.shared.navigation.AppScreen
 
 @Composable
 fun MainApp() {
@@ -11,13 +14,20 @@ fun MainApp() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            DevelopmentScreen()
+            var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Home) }
+
+            when (currentScreen) {
+                is AppScreen.Home -> DevelopmentScreen(onOpenProfile = { currentScreen = AppScreen.Profile })
+                is AppScreen.Login -> DevelopmentScreen(onOpenProfile = { currentScreen = AppScreen.Profile })
+                is AppScreen.Ping -> DevelopmentScreen(onOpenProfile = { currentScreen = AppScreen.Profile })
+                is AppScreen.Profile -> ProfileScreen(viewModel = remember { ProfileViewModel() })
+            }
         }
     }
 }
 
 @Composable
-fun DevelopmentScreen() {
+fun DevelopmentScreen(onOpenProfile: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,6 +56,9 @@ fun DevelopmentScreen() {
                     }
                     Button(onClick = { testStatus = "Testing Ping Service..." }) {
                         Text("Test Ping Service")
+                    }
+                    Button(onClick = onOpenProfile) {
+                        Text("Open Profile")
                     }
                 }
 

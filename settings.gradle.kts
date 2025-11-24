@@ -63,39 +63,18 @@ include(":clients:ping-feature")
 include(":clients:auth-feature")
 include(":clients:shared:common-ui")
 include(":clients:shared:navigation")
+include(":clients:members-feature")
 
 // Documentation module
 include(":docs")
 
 /*
 // Business modules (temporarily disabled - require multiplatform configuration updates)
-// Members modules
-include(":members:members-domain")
-include(":members:members-application")
-include(":members:members-infrastructure")
-include(":members:members-api")
-include(":members:members-service")
-
-// Horses modules
-include(":horses:horses-domain")
-include(":horses:horses-application")
-include(":horses:horses-infrastructure")
-include(":horses:horses-api")
-include(":horses:horses-service")
-
-// Events modules
-include(":events:events-domain")
-include(":events:events-application")
-include(":events:events-infrastructure")
-include(":events:events-api")
-include(":events:events-service")
-
-// Masterdata modules
-include(":masterdata:masterdata-domain")
-include(":masterdata:masterdata-application")
-include(":masterdata:masterdata-infrastructure")
-include(":masterdata:masterdata-api")
-include(":masterdata:masterdata-service")
-
-// Note: These modules need multiplatform configuration updates to work with current KMP/WASM setup
+// Note: We enable only the Members modules needed for API contracts to support the Members client feature.
 */
+// Members modules are currently disabled to keep the client build lean.
+// We consume the Members REST API from the client without compiling backend modules here.
+// include(":services:members:members-domain")
+// include(":services:members:members-application")
+// include(":services:members:members-api")
+// other business modules remain disabled

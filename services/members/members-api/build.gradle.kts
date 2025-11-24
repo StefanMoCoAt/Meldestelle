@@ -2,8 +2,8 @@ plugins {
 //    kotlin("jvm")
 //    kotlin("plugin.spring")
 
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
 
     // KORREKTUR: Dieses Plugin ist entscheidend. Es schaltet den `springBoot`-Block
     // und alle Spring-Boot-spezifischen Gradle-Tasks frei.
@@ -16,8 +16,8 @@ plugins {
 dependencies {
     implementation(projects.platform.platformDependencies)
 
-    implementation(projects.members.membersDomain)
-    implementation(projects.members.membersApplication)
+    implementation(projects.services.members.membersDomain)
+    implementation(projects.services.members.membersApplication)
     implementation(projects.core.coreDomain)
     implementation(projects.core.coreUtils)
     implementation(projects.infrastructure.messaging.messagingClient)
