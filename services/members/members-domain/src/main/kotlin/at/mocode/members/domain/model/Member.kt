@@ -1,15 +1,16 @@
-@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+@file:OptIn(kotlin.uuid.ExperimentalUuidApi::class, kotlin.time.ExperimentalTime::class)
 package at.mocode.members.domain.model
 
 import at.mocode.core.domain.serialization.KotlinInstantSerializer
 import at.mocode.core.domain.serialization.KotlinLocalDateSerializer
 import at.mocode.core.domain.serialization.UuidSerializer
 import kotlin.uuid.Uuid
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.toKotlinLocalDate
+import java.time.ZoneId
+import java.time.LocalDate as JLocalDate
 import kotlinx.serialization.Serializable
 
 /**
@@ -81,7 +82,7 @@ data class Member(
     fun isMembershipValid(): Boolean {
         if (!isActive) return false
 
-        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val today = JLocalDate.now(ZoneId.systemDefault()).toKotlinLocalDate()
         return membershipEndDate?.let { endDate ->
             today <= endDate
         } ?: true // If no end date, membership is valid indefinitely

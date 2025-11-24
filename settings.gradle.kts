@@ -72,9 +72,10 @@ include(":docs")
 // Business modules (temporarily disabled - require multiplatform configuration updates)
 // Note: We enable only the Members modules needed for API contracts to support the Members client feature.
 */
-// Members modules are currently disabled to keep the client build lean.
-// We consume the Members REST API from the client without compiling backend modules here.
-// include(":services:members:members-domain")
+// Members modules – enabled to provide the REST API contract used by the client
+include(":services:members:members-domain")
+// keep application out for now (mismatch with core contracts); expose API directly via repository
 // include(":services:members:members-application")
-// include(":services:members:members-api")
+include(":services:members:members-infrastructure")
+include(":services:members:members-api")
 // other business modules remain disabled

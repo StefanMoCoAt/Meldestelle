@@ -31,6 +31,8 @@ object KotlinInstantSerializer : KSerializer<Instant> {
     }
 }
 
+// Note: Serializer for kotlinx.datetime.Instant is defined in a separate file
+
 /**
  * Serializer für UUID Objekte.
  * Konvertiert UUID zu/von String-Repräsentation.
