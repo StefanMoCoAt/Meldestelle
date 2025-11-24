@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.oauth2.jwt.Jwt
 import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse
 
 /**
@@ -55,6 +57,7 @@ class MemberController(
     private val findExpiringMembershipsUseCase = FindExpiringMembershipsUseCase(memberRepository)
     private val findMembersByDateRangeUseCase = FindMembersByDateRangeUseCase(memberRepository)
     private val validateMemberDataUseCase = ValidateMemberDataUseCase(memberRepository)
+    private val ensureMemberProfileExistsUseCase = EnsureMemberProfileExistsUseCase(memberRepository, eventPublisher)
 
     /**
      * Hilfsmethode zur Behandlung gemeinsamer Antwortmuster für Use-Case-Ausführung
@@ -87,6 +90,33 @@ class MemberController(
                 .body(ApiResponse.error<Any>("Internal server error: ${e.message}"))
         }
     }
+
+    // ---------------------------------------------------------------------
+    // Synchronisation nach Login: Stellt sicher, dass Member-Profil existiert
+    // ---------------------------------------------------------------------
+    @Operation(
+        summary = "Synchronisiert das Member-Profil für den eingeloggten Benutzer",
+        description = "Erstellt bei Bedarf ein Mitglied basierend auf den JWT-Claims (mock OEPS fetch)"
+    )
+    @PostMapping("/sync")
+    fun syncMemberProfile(
+        @AuthenticationPrincipal jwt: Jwt
+    ): ResponseEntity<ApiResponse<*>> = handleUseCaseExecution(
+        operation = {
+            val sub = jwt.subject
+            val email = jwt.getClaimAsString("email")
+            val username = jwt.getClaimAsString("preferred_username")
+            val response = ensureMemberProfileExistsUseCase.execute(
+                EnsureMemberProfileExistsUseCase.Request(
+                    userSub = sub,
+                    email = email,
+                    username = username
+                )
+            )
+            ApiResponse.success(response)
+        },
+        successStatus = HttpStatus.OK
+    ) { it }
 
     /**
      * Hilfsmethode zur Behandlung von Repository-Operationen mit gemeinsamer Fehlerbehandlung

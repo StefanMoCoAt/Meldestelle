@@ -2,10 +2,14 @@ package at.mocode.clients.authfeature
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import at.mocode.clients.shared.AppConfig
+import io.ktor.client.call.*
+import io.ktor.client.request.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import at.mocode.clients.authfeature.AuthenticatedHttpClient.addAuthHeader
 
 /**
  * UI state for the login screen
@@ -89,6 +93,18 @@ class LoginViewModel(
                         isAuthenticated = true,
                         errorMessage = null
                     )
+
+                    // Fire-and-forget: Trigger Backend Sync so the user exists in Members
+                    viewModelScope.launch {
+                        try {
+                            val client = AuthenticatedHttpClient.create()
+                            client.post("${AppConfig.GATEWAY_URL}/api/members/sync") {
+                                addAuthHeader()
+                            }
+                        } catch (_: Exception) {
+                            // Non-fatal: Wir zeigen Sync-Fehler im Login nicht an
+                        }
+                    }
                 } else {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,

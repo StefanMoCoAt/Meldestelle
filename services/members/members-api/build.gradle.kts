@@ -24,6 +24,9 @@ dependencies {
 
     implementation("org.springframework:spring-web")
     implementation("org.springdoc:springdoc-openapi-starter-common")
+    // Security/JWT for extracting claims from principal
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.spring.boot.starter.oauth2.resource.server)
 
     testImplementation(projects.platform.platformTesting)
 }
