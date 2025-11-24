@@ -41,6 +41,9 @@ kotlin {
             // UI Kit
             implementation(project(":clients:shared:common-ui"))
 
+            // Shared Konfig & Utilities (AppConfig + BuildConfig)
+            implementation(project(":clients:shared"))
+
             // Compose dependencies
             implementation(compose.runtime)
             implementation(compose.foundation)

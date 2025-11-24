@@ -1,5 +1,6 @@
 package at.mocode.clients.authfeature
 
+import at.mocode.clients.shared.AppConfig
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -18,7 +19,7 @@ object AuthenticatedHttpClient {
     /**
      * Create a basic HTTP client with JSON support
      */
-    fun create(baseUrl: String = "http://localhost:8081"): HttpClient {
+    fun create(baseUrl: String = AppConfig.GATEWAY_URL): HttpClient {
         return HttpClient {
             install(ContentNegotiation) {
                 json(Json {

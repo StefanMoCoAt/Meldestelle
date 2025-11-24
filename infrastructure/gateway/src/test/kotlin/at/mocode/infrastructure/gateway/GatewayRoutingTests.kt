@@ -95,13 +95,11 @@ class GatewayRoutingTests {
     }
 
     @Test
-    fun `should route auth service requests`() {
+    fun `auth route is not configured anymore`() {
         webTestClient.post()
             .uri("/api/auth/login")
             .exchange()
-            .expectStatus().isOk
-            .expectBody(String::class.java)
-            .isEqualTo("auth-service-mock")
+            .expectStatus().isNotFound
     }
 
     @Test
@@ -150,10 +148,7 @@ class GatewayRoutingTests {
                     .filters { f -> f.setPath("/mock/masterdata") }
                     .uri("forward:/")
             }
-            .route("test-auth-login") { r ->
-                r.path("/api/auth/login")
-                    .uri("forward:/mock/auth/login")
-            }
+            // no dedicated auth route anymore – clients should talk to Keycloak directly
             .route("test-ping") { r ->
                 r.path("/api/ping/**")
                     .filters { f -> f.setPath("/mock/ping") }
@@ -192,12 +187,7 @@ class GatewayRoutingTests {
         @PostMapping(value = ["/masterdata", "/masterdata/**"])
         fun masterdataServiceMock(): String = "masterdata-service-mock"
 
-        @GetMapping(value = ["/auth", "/auth/**"])
-        @PostMapping(value = ["/auth", "/auth/**"])
-        fun authServiceMock(): String = "auth-service-mock"
-
-        @PostMapping("/auth/login")
-        fun authLoginPost(): String = "auth-service-mock"
+        // removed auth mock endpoints – not needed anymore
 
         @GetMapping(value = ["/ping", "/ping/**"])
         @PostMapping(value = ["/ping", "/ping/**"])

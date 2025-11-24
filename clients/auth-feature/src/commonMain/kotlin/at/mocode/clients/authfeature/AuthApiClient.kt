@@ -1,8 +1,11 @@
 package at.mocode.clients.authfeature
 
+import at.mocode.clients.shared.AppConfig
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import kotlinx.serialization.Serializable
 
 /**
@@ -27,7 +30,14 @@ data class LoginResponse(
  * HTTP client for authentication API calls
  */
 class AuthApiClient(
-    private val baseUrl: String = "http://localhost:8081"
+    // Keycloak Basis-URL (z. B. http://localhost:8180)
+    private val keycloakBaseUrl: String = AppConfig.KEYCLOAK_URL,
+    // Realm-Name in Keycloak
+    private val realm: String = AppConfig.KEYCLOAK_REALM,
+    // Client-ID (Public Client empfohlen für Frontend-Flows)
+    private val clientId: String = AppConfig.KEYCLOAK_CLIENT_ID,
+    // Optional: Client-Secret (nur bei vertraulichen Clients erforderlich)
+    private val clientSecret: String? = null
 ) {
     private val client = AuthenticatedHttpClient.createUnauthenticated()
 
@@ -35,14 +45,33 @@ class AuthApiClient(
      * Authenticate user with username and password
      */
     suspend fun login(username: String, password: String): LoginResponse {
+        val tokenEndpoint = "$keycloakBaseUrl/realms/$realm/protocol/openid-connect/token"
         return try {
-            val response = client.post("$baseUrl/api/auth/login") {
-                contentType(ContentType.Application.Json)
-                setBody(LoginRequest(username = username, password = password))
+            val response = client.submitForm(
+                url = tokenEndpoint,
+                formParameters = Parameters.build {
+                    append("grant_type", "password")
+                    append("client_id", clientId)
+                    if (!clientSecret.isNullOrBlank()) {
+                        append("client_secret", clientSecret)
+                    }
+                    append("username", username)
+                    append("password", password)
+                }
+            ) {
+                // Explicit: URL-encoded Form
+                contentType(ContentType.Application.FormUrlEncoded)
             }
 
             if (response.status.isSuccess()) {
-                response.body<LoginResponse>()
+                val kc = response.body<KeycloakTokenResponse>()
+                LoginResponse(
+                    success = true,
+                    token = kc.access_token,
+                    message = null,
+                    userId = null,
+                    username = username
+                )
             } else {
                 LoginResponse(
                     success = false,
@@ -60,15 +89,30 @@ class AuthApiClient(
     /**
      * Refresh authentication token
      */
-    suspend fun refreshToken(token: String): LoginResponse {
+    suspend fun refreshToken(refreshToken: String): LoginResponse {
+        val tokenEndpoint = "$keycloakBaseUrl/realms/$realm/protocol/openid-connect/token"
         return try {
-            val response = client.post("$baseUrl/api/auth/refresh") {
-                contentType(ContentType.Application.Json)
-                header(HttpHeaders.Authorization, "Bearer $token")
+            val response = client.submitForm(
+                url = tokenEndpoint,
+                formParameters = Parameters.build {
+                    append("grant_type", "refresh_token")
+                    append("client_id", clientId)
+                    if (!clientSecret.isNullOrBlank()) {
+                        append("client_secret", clientSecret)
+                    }
+                    append("refresh_token", refreshToken)
+                }
+            ) {
+                contentType(ContentType.Application.FormUrlEncoded)
             }
 
             if (response.status.isSuccess()) {
-                response.body<LoginResponse>()
+                val kc = response.body<KeycloakTokenResponse>()
+                LoginResponse(
+                    success = true,
+                    token = kc.access_token,
+                    message = null
+                )
             } else {
                 LoginResponse(
                     success = false,
@@ -87,13 +131,20 @@ class AuthApiClient(
      * Logout and invalidate token
      */
     suspend fun logout(token: String): Boolean {
-        return try {
-            val response = client.post("$baseUrl/api/auth/logout") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
-            response.status.isSuccess()
-        } catch (_: Exception) {
-            false // Logout failed, but we'll clear local token anyway
-        }
+        // Empfehlung: Frontend-seitig Token lokal verwerfen.
+        // Optional könnten hier Keycloak-Endpoints für Token-Revocation aufgerufen werden.
+        return true
     }
+
+    @Serializable
+    private data class KeycloakTokenResponse(
+        val access_token: String,
+        val expires_in: Long? = null,
+        val refresh_expires_in: Long? = null,
+        val refresh_token: String? = null,
+        val token_type: String? = null,
+        val not_before_policy: Long? = null,
+        val session_state: String? = null,
+        val scope: String? = null
+    )
 }

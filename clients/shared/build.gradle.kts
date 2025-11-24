@@ -36,7 +36,7 @@ kotlin {
     // ...
   }
 
-  // WASM, nur wenn explizit aktiviert
+    // WASM, nur wenn explizit aktiviert
   if (enableWasm) {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs { browser() }
@@ -58,6 +58,10 @@ kotlin {
       implementation(libs.ktor.client.logging)
       implementation(libs.ktor.client.auth)
 
+      // Compose für shared UI components (common)
+      implementation(compose.runtime)
+      implementation(compose.foundation)
+      implementation(compose.material3)
     }
 
     commonTest.dependencies {
@@ -67,29 +71,17 @@ kotlin {
 
     jvmMain.dependencies {
       implementation(libs.ktor.client.cio)
-
-      // Compose für shared UI components
-      implementation(compose.runtime)
-      implementation(compose.foundation)
-      implementation(compose.material3)
     }
 
     jsMain.dependencies {
       implementation(libs.ktor.client.js)
-
-      // Compose für shared UI components
-      implementation(compose.runtime)
-      implementation(compose.foundation)
-      implementation(compose.material3)
     }
 
     // WASM SourceSet, nur wenn aktiviert
     if (enableWasm) {
       val wasmJsMain = getByName("wasmJsMain")
       wasmJsMain.dependencies {
-        implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
-
-        // ✅ HINZUFÜGEN: Compose für shared UI components für WASM
+        implementation(libs.ktor.client.js) // WASM verwendet JS-Client
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)

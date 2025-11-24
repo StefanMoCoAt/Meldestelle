@@ -43,7 +43,6 @@ include(":platform:platform-testing")
 
 // Infrastructure modules
 include(":infrastructure:gateway")
-include(":infrastructure:auth:auth-server")
 include(":infrastructure:messaging:messaging-client")
 include(":infrastructure:messaging:messaging-config")
 include(":infrastructure:cache:cache-api")
@@ -58,6 +57,7 @@ include(":services:ping:ping-api")
 include(":services:ping:ping-service")
 
 // Client modules
+include(":clients:shared")
 include(":clients:app")
 include(":clients:ping-feature")
 include(":clients:auth-feature")

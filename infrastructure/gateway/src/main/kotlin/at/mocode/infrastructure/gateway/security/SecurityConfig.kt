@@ -125,8 +125,7 @@ data class GatewaySecurityProperties(
     "/actuator/**",
     "/webjars/**",
     "/v3/api-docs/**",
-    "/api/auth/**", // Alle Auth-Endpunkte
-    "/api/ping/**"
+    "/api/auth/**" // Alle Auth-Endpunkte
   )
 )
 

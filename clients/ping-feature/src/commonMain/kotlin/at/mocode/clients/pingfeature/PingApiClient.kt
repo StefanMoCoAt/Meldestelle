@@ -4,6 +4,7 @@ import at.mocode.ping.api.PingApi
 import at.mocode.ping.api.PingResponse
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
+import at.mocode.clients.shared.AppConfig
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -12,7 +13,7 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
 class PingApiClient(
-    private val baseUrl: String = "http://localhost:8081"
+    private val baseUrl: String = AppConfig.GATEWAY_URL
 ) : PingApi {
 
     private val client = HttpClient {

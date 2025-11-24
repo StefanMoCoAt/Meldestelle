@@ -25,7 +25,6 @@ dependencies {
     implementation(projects.events.eventsApi)
 
     // Infrastruktur-Clients
-    implementation(projects.infrastructure.auth.authClient)
     implementation(projects.infrastructure.cache.redisCache)
     implementation(projects.infrastructure.messaging.messagingClient)
     implementation(projects.infrastructure.monitoring.monitoringClient)
