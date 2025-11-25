@@ -168,7 +168,7 @@ services:
         GRADLE_VERSION: 9.1.0
         JAVA_VERSION: 21
         VERSION: 1.0.0
-        BUILD_DATE: "2025-11-21"
+        BUILD_DATE: "2025-11-25"
     container_name: ${COMPOSE_PROJECT_NAME}-gateway
     restart: no
     ports:
