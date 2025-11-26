@@ -24,7 +24,9 @@ services:
       retries: 5
       start_period: 10s
     networks:
-      - meldestelle-network
+      meldestelle-network:
+        aliases:
+          - postgres
 
   redis:
     image: redis:7-alpine
@@ -41,7 +43,9 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - meldestelle-network
+      meldestelle-network:
+        aliases:
+          - redis
 
   # ==========================================
   # SECURITY
@@ -77,7 +81,9 @@ services:
       retries: 5
       start_period: 60s
     networks:
-      - meldestelle-network
+      meldestelle-network:
+        aliases:
+          - keycloak
 
   # ==========================================
   # MONITORING & TOOLS
@@ -94,7 +100,9 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     networks:
-      - meldestelle-network
+      meldestelle-network:
+        aliases:
+          - pgadmin
 
   prometheus:
     image: prom/prometheus:v2.54.1
@@ -115,7 +123,9 @@ services:
       retries: 3
       start_period: 30s
     networks:
-      - meldestelle-network
+      meldestelle-network:
+        aliases:
+          - prometheus
 
   grafana:
     image: grafana/grafana:11.3.0
@@ -138,7 +148,9 @@ services:
       retries: 3
       start_period: 30s
     networks:
-      - meldestelle-network
+      meldestelle-network:
+        aliases:
+          - grafana
 
   # ==========================================
   # APPLICATION GATEWAY
@@ -157,7 +169,9 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - meldestelle-network
+      meldestelle-network:
+        aliases:
+          - consul
 
   api-gateway:
     build:
@@ -201,7 +215,9 @@ services:
       keycloak:
         condition: service_healthy
     networks:
-      - meldestelle-network
+      meldestelle-network:
+        aliases:
+          - api-gateway
 
   # ==========================================
   # MICROSERVICES
@@ -250,7 +266,9 @@ services:
       keycloak:
         condition: service_healthy
     networks:
-      - meldestelle-network
+      meldestelle-network:
+        aliases:
+          - ping-service
 
 volumes:
   postgres-data:

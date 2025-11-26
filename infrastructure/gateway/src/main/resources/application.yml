@@ -81,13 +81,15 @@ spring:
               uri: http://localhost:${server.port}
               predicates:
                 - Method=GET
+                - Path=/gateway-info
               filters:
-                - name: setStatus
+                - name: SetStatus
                   args:
                     status: 200
-                - name: setResponseHeader
+                - name: SetResponseHeader
                   args:
-                    Content-Type: application/json
+                    name: Content-Type
+                    value: application/json
 
             # ==============================================================
             # --- Ping-Service-Integration (optional) ---
