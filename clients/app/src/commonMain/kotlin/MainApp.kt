@@ -3,8 +3,6 @@ import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import at.mocode.clients.membersfeature.ProfileScreen
-import at.mocode.clients.membersfeature.ProfileViewModel
 import at.mocode.clients.shared.navigation.AppScreen
 
 @Composable
@@ -20,7 +18,7 @@ fun MainApp() {
                 is AppScreen.Home -> DevelopmentScreen(onOpenProfile = { currentScreen = AppScreen.Profile })
                 is AppScreen.Login -> DevelopmentScreen(onOpenProfile = { currentScreen = AppScreen.Profile })
                 is AppScreen.Ping -> DevelopmentScreen(onOpenProfile = { currentScreen = AppScreen.Profile })
-                is AppScreen.Profile -> ProfileScreen(viewModel = remember { ProfileViewModel() })
+              else -> {}
             }
         }
     }

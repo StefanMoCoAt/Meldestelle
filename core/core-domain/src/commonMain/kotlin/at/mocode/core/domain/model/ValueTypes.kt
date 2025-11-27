@@ -1,4 +1,5 @@
 @file:OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+
 package at.mocode.core.domain.model
 
 import at.mocode.core.domain.serialization.UuidSerializer
@@ -19,7 +20,7 @@ import kotlin.uuid.Uuid
 @Serializable
 @JvmInline
 value class EntityId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    companion object
+  companion object
 }
 
 /**
@@ -28,7 +29,7 @@ value class EntityId(@Serializable(with = UuidSerializer::class) val value: Uuid
 @Serializable
 @JvmInline
 value class EventId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    companion object
+  companion object
 }
 
 /**
@@ -37,7 +38,7 @@ value class EventId(@Serializable(with = UuidSerializer::class) val value: Uuid)
 @Serializable
 @JvmInline
 value class AggregateId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    companion object
+  companion object
 }
 
 /**
@@ -46,7 +47,7 @@ value class AggregateId(@Serializable(with = UuidSerializer::class) val value: U
 @Serializable
 @JvmInline
 value class CorrelationId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    companion object
+  companion object
 }
 
 /**
@@ -55,7 +56,7 @@ value class CorrelationId(@Serializable(with = UuidSerializer::class) val value:
 @Serializable
 @JvmInline
 value class CausationId(@Serializable(with = UuidSerializer::class) val value: Uuid) {
-    companion object
+  companion object
 }
 
 // === Domain Value Classes ===
@@ -66,14 +67,14 @@ value class CausationId(@Serializable(with = UuidSerializer::class) val value: U
 @Serializable
 @JvmInline
 value class EventType(val value: String) {
-    init {
-        require(value.isNotBlank()) { "Event type cannot be blank" }
-        require(value.matches(Regex("^[A-Za-z][A-Za-z0-9]*$"))) {
-            "Event type must start with a letter and contain only alphanumeric characters"
-        }
+  init {
+    require(value.isNotBlank()) { "Event type cannot be blank" }
+    require(value.matches(Regex("^[A-Za-z][A-Za-z0-9]*$"))) {
+      "Event type must start with a letter and contain only alphanumeric characters"
     }
+  }
 
-    override fun toString(): String = value
+  override fun toString(): String = value
 }
 
 /**
@@ -82,13 +83,13 @@ value class EventType(val value: String) {
 @Serializable
 @JvmInline
 value class EventVersion(val value: Long) : Comparable<EventVersion> {
-    init {
-        require(value >= 0) { "Event version must be non-negative" }
-    }
+  init {
+    require(value >= 0) { "Event version must be non-negative" }
+  }
 
-    override fun toString(): String = value.toString()
+  override fun toString(): String = value.toString()
 
-    override fun compareTo(other: EventVersion): Int = value.compareTo(other.value)
+  override fun compareTo(other: EventVersion): Int = value.compareTo(other.value)
 }
 
 /**
@@ -97,14 +98,14 @@ value class EventVersion(val value: Long) : Comparable<EventVersion> {
 @Serializable
 @JvmInline
 value class ErrorCode(val value: String) {
-    init {
-        require(value.isNotBlank()) { "Error code cannot be blank" }
-        require(value.matches(Regex("^[A-Z][A-Z0-9_]*$"))) {
-            "Error code must be uppercase and contain only letters, numbers, and underscores"
-        }
+  init {
+    require(value.isNotBlank()) { "Error code cannot be blank" }
+    require(value.matches(Regex("^[A-Z][A-Z0-9_]*$"))) {
+      "Error code must be uppercase and contain only letters, numbers, and underscores"
     }
+  }
 
-    override fun toString(): String = value
+  override fun toString(): String = value
 }
 
 /**
@@ -113,11 +114,11 @@ value class ErrorCode(val value: String) {
 @Serializable
 @JvmInline
 value class PageNumber(val value: Int) {
-    init {
-        require(value >= 0) { "Page number must be non-negative" }
-    }
+  init {
+    require(value >= 0) { "Page number must be non-negative" }
+  }
 
-    override fun toString(): String = value.toString()
+  override fun toString(): String = value.toString()
 }
 
 /**
@@ -126,10 +127,10 @@ value class PageNumber(val value: Int) {
 @Serializable
 @JvmInline
 value class PageSize(val value: Int) {
-    init {
-        require(value > 0) { "Page size must be positive" }
-        require(value <= 1000) { "Page size cannot exceed 1000" }
-    }
+  init {
+    require(value > 0) { "Page size must be positive" }
+    require(value <= 1000) { "Page size cannot exceed 1000" }
+  }
 
-    override fun toString(): String = value.toString()
+  override fun toString(): String = value.toString()
 }

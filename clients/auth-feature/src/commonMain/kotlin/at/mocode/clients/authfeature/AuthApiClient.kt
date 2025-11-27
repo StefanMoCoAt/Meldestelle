@@ -1,6 +1,7 @@
 package at.mocode.clients.authfeature
 
 import at.mocode.clients.shared.AppConfig
+import at.mocode.clients.shared.core.AppConfig
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
@@ -31,13 +32,13 @@ data class LoginResponse(
  */
 class AuthApiClient(
     // Keycloak Basis-URL (z. B. http://localhost:8180)
-    private val keycloakBaseUrl: String = AppConfig.KEYCLOAK_URL,
+  private val keycloakBaseUrl: String = AppConfig.KEYCLOAK_URL,
     // Realm-Name in Keycloak
-    private val realm: String = AppConfig.KEYCLOAK_REALM,
+  private val realm: String = AppConfig.KEYCLOAK_REALM,
     // Client-ID (Public Client empfohlen für Frontend-Flows)
-    private val clientId: String = AppConfig.KEYCLOAK_CLIENT_ID,
+  private val clientId: String = AppConfig.KEYCLOAK_CLIENT_ID,
     // Optional: Client-Secret (nur bei vertraulichen Clients erforderlich)
-    private val clientSecret: String? = null
+  private val clientSecret: String? = null
 ) {
     private val client = AuthenticatedHttpClient.createUnauthenticated()
 

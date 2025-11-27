@@ -58,6 +58,11 @@ kotlin {
       implementation(libs.ktor.client.logging)
       implementation(libs.ktor.client.auth)
 
+      // Dependency Injection (Koin)
+      implementation(libs.koin.core)
+      implementation(libs.koin.compose)
+      implementation(libs.koin.compose.viewmodel)
+
       // Compose für shared UI components (common)
       implementation(compose.runtime)
       implementation(compose.foundation)

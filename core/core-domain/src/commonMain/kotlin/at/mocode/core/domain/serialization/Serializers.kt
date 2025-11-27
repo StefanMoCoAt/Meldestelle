@@ -20,15 +20,15 @@ import kotlin.uuid.Uuid
  */
 @OptIn(ExperimentalTime::class)
 object KotlinInstantSerializer : KSerializer<Instant> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
+  override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: Instant) {
-        encoder.encodeString(value.toString())
-    }
+  override fun serialize(encoder: Encoder, value: Instant) {
+    encoder.encodeString(value.toString())
+  }
 
-    override fun deserialize(decoder: Decoder): Instant {
-        return Instant.parse(decoder.decodeString())
-    }
+  override fun deserialize(decoder: Decoder): Instant {
+    return Instant.parse(decoder.decodeString())
+  }
 }
 
 // Note: Serializer for kotlinx.datetime.Instant is defined in a separate file
@@ -39,15 +39,15 @@ object KotlinInstantSerializer : KSerializer<Instant> {
  */
 @OptIn(ExperimentalUuidApi::class)
 object UuidSerializer : KSerializer<Uuid> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
+  override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: Uuid) {
-        encoder.encodeString(value.toString())
-    }
+  override fun serialize(encoder: Encoder, value: Uuid) {
+    encoder.encodeString(value.toString())
+  }
 
-    override fun deserialize(decoder: Decoder): Uuid {
-        return Uuid.parse(decoder.decodeString())
-    }
+  override fun deserialize(decoder: Decoder): Uuid {
+    return Uuid.parse(decoder.decodeString())
+  }
 }
 
 /**
@@ -55,15 +55,15 @@ object UuidSerializer : KSerializer<Uuid> {
  * Konvertiert LocalDate zu/von ISO-8601 String-Repräsentation.
  */
 object LocalDateSerializer : KSerializer<LocalDate> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDate", PrimitiveKind.STRING)
+  override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDate", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: LocalDate) {
-        encoder.encodeString(value.toString())
-    }
+  override fun serialize(encoder: Encoder, value: LocalDate) {
+    encoder.encodeString(value.toString())
+  }
 
-    override fun deserialize(decoder: Decoder): LocalDate {
-        return LocalDate.parse(decoder.decodeString())
-    }
+  override fun deserialize(decoder: Decoder): LocalDate {
+    return LocalDate.parse(decoder.decodeString())
+  }
 }
 
 /**
@@ -71,15 +71,15 @@ object LocalDateSerializer : KSerializer<LocalDate> {
  * Konvertiert LocalDateTime zu/von ISO-8601 String-Repräsentation.
  */
 object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDateTime", PrimitiveKind.STRING)
+  override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDateTime", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: LocalDateTime) {
-        encoder.encodeString(value.toString())
-    }
+  override fun serialize(encoder: Encoder, value: LocalDateTime) {
+    encoder.encodeString(value.toString())
+  }
 
-    override fun deserialize(decoder: Decoder): LocalDateTime {
-        return LocalDateTime.parse(decoder.decodeString())
-    }
+  override fun deserialize(decoder: Decoder): LocalDateTime {
+    return LocalDateTime.parse(decoder.decodeString())
+  }
 }
 
 /**
@@ -87,13 +87,13 @@ object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
  * Konvertiert LocalTime zu/von ISO-8601 String-Repräsentation.
  */
 object LocalTimeSerializer : KSerializer<LocalTime> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalTime", PrimitiveKind.STRING)
+  override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalTime", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: LocalTime) {
-        encoder.encodeString(value.toString())
-    }
+  override fun serialize(encoder: Encoder, value: LocalTime) {
+    encoder.encodeString(value.toString())
+  }
 
-    override fun deserialize(decoder: Decoder): LocalTime {
-        return LocalTime.parse(decoder.decodeString())
-    }
+  override fun deserialize(decoder: Decoder): LocalTime {
+    return LocalTime.parse(decoder.decodeString())
+  }
 }
