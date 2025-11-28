@@ -141,6 +141,42 @@ services:
     networks:
       - meldestelle-network
 
+  # --- CLIENTS: WEB APP (Kotlin/JS, no WASM) ---
+  web-app:
+    build:
+      context: .
+      dockerfile: dockerfiles/clients/web-app/Dockerfile
+      args:
+        GRADLE_VERSION: 9.1.0
+        JAVA_VERSION: 21
+        NODE_VERSION: 22.21.0
+        NGINX_IMAGE_TAG: 1.28.0-alpine
+    container_name: meldestelle-web-app
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    depends_on:
+      - api-gateway
+    networks:
+      - meldestelle-network
+
+  # --- CLIENTS: DESKTOP APP (VNC + noVNC) ---
+  desktop-app:
+    build:
+      context: .
+      dockerfile: dockerfiles/clients/desktop-app/Dockerfile
+    container_name: meldestelle-desktop-app
+    restart: unless-stopped
+    environment:
+      - API_BASE_URL=http://api-gateway:8081
+    ports:
+      - "5901:5901" # VNC
+      - "6080:6080" # noVNC
+    depends_on:
+      - api-gateway
+    networks:
+      - meldestelle-network
+
 volumes:
   postgres-data:
   pgadmin-data:

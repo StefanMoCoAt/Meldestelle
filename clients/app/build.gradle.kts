@@ -76,6 +76,7 @@ kotlin {
             implementation(project(":clients:shared"))
             implementation(project(":clients:shared:common-ui"))
             implementation(project(":clients:shared:navigation"))
+            implementation(project(":clients:auth-feature"))
             implementation(project(":clients:ping-feature"))
 
             // Compose Multiplatform

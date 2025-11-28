@@ -9,6 +9,7 @@
 ARG GRADLE_VERSION
 ARG JAVA_VERSION
 ARG NODE_VERSION
+ARG NGINX_IMAGE_TAG=1.28.0-alpine
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION} AS builder
 
 # Install Node.js (version aligned with versions.toml)
@@ -29,6 +30,7 @@ COPY gradlew ./
 # Kopiere alle notwendigen Module für Multi-Modul-Projekt
 COPY clients ./clients
 COPY core ./core
+COPY domains ./domains
 COPY platform ./platform
 COPY infrastructure ./infrastructure
 COPY services ./services
@@ -46,8 +48,7 @@ RUN ./gradlew :clients:app:jsBrowserDistribution --no-configure-on-demand -Pprod
 # ===================================================================
 # Stage 2: Runtime Stage - Nginx für Static Files + API Proxy
 # ===================================================================
-# Build arg controls runtime base image tag (build-time only)
-ARG NGINX_IMAGE_TAG
+# Build arg controls runtime base image tag (declared globally to allow usage in FROM)
 FROM nginx:${NGINX_IMAGE_TAG}
 
 # Installiere curl für Health-Checks
@@ -61,6 +62,9 @@ COPY dockerfiles/clients/web-app/nginx.conf /etc/nginx/nginx.conf
 
 # Exponiere Port 4000 (statt Standard 80)
 EXPOSE 4000
+
+# Downloads (Platzhalter) ausliefern lassen
+COPY dockerfiles/clients/web-app/downloads/ /usr/share/nginx/html/downloads/
 
 # Health-Check für Container
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \

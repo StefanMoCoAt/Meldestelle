@@ -1,7 +1,6 @@
 package at.mocode.clients.authfeature
 
 import at.mocode.clients.shared.AppConfig
-import at.mocode.clients.shared.core.AppConfig
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
@@ -83,6 +82,49 @@ class AuthApiClient(
             LoginResponse(
                 success = false,
                 message = "Verbindungsfehler: ${e.message}"
+            )
+        }
+    }
+
+    /**
+     * Exchange an authorization code (PKCE) for tokens
+     */
+    suspend fun exchangeAuthorizationCode(code: String, codeVerifier: String, redirectUri: String): LoginResponse {
+        val tokenEndpoint = "$keycloakBaseUrl/realms/$realm/protocol/openid-connect/token"
+        return try {
+            val response = client.submitForm(
+                url = tokenEndpoint,
+                formParameters = Parameters.build {
+                    append("grant_type", "authorization_code")
+                    append("client_id", clientId)
+                    if (!clientSecret.isNullOrBlank()) {
+                        append("client_secret", clientSecret)
+                    }
+                    append("code", code)
+                    append("code_verifier", codeVerifier)
+                    append("redirect_uri", redirectUri)
+                }
+            ) {
+                contentType(ContentType.Application.FormUrlEncoded)
+            }
+
+            if (response.status.isSuccess()) {
+                val kc = response.body<KeycloakTokenResponse>()
+                LoginResponse(
+                    success = true,
+                    token = kc.access_token,
+                    message = null
+                )
+            } else {
+                LoginResponse(
+                    success = false,
+                    message = "Code-Exchange fehlgeschlagen: HTTP ${'$'}{response.status.value}"
+                )
+            }
+        } catch (e: Exception) {
+            LoginResponse(
+                success = false,
+                message = "Code-Exchange Fehler: ${'$'}{e.message}"
             )
         }
     }

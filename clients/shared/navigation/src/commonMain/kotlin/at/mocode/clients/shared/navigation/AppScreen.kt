@@ -5,4 +5,5 @@ sealed class AppScreen {
     data object Login : AppScreen()
     data object Ping : AppScreen()
     data object Profile : AppScreen()
+    data object AuthCallback : AppScreen()
 }
