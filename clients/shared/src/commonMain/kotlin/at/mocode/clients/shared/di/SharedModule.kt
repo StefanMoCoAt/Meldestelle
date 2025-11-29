@@ -1,16 +1,9 @@
 package at.mocode.clients.shared.di
 
 import at.mocode.clients.shared.core.devConfig
-import at.mocode.clients.shared.data.repository.PingRepositoryImpl
-import at.mocode.clients.shared.domain.repository.PingRepository
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
-
-// Das Modul für unsere Repositories
-val repositoryModule = module {
-  single<PingRepository> { PingRepositoryImpl(get()) }
-}
 
 // Das Modul für die Config
 val configModule = module {
@@ -20,8 +13,7 @@ val configModule = module {
 // Alle Module zusammen
 val sharedModules = listOf(
   configModule,
-  networkModule,
-  repositoryModule
+  networkModule
 )
 
 // Helper zum Starten von Koin (wird von der App aufgerufen)

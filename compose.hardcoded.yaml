@@ -151,6 +151,7 @@ services:
         JAVA_VERSION: 21
         NODE_VERSION: 22.21.0
         NGINX_IMAGE_TAG: 1.28.0-alpine
+        WEB_BUILD_PROFILE: dev
     container_name: meldestelle-web-app
     restart: unless-stopped
     ports:
