@@ -120,7 +120,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
   compilerOptions {
     jvmTarget.set(JvmTarget.JVM_21)
     freeCompilerArgs.addAll(
-      "-opt-in=kotlin.RequiresOptIn"
+      "-opt-in=kotlin.RequiresOptIn",
+      // Suppress beta warning for expect/actual classes as per project decision
+      "-Xexpect-actual-classes"
     )
   }
 }

@@ -16,20 +16,17 @@ if (process.env.ANALYZE_BUNDLE === 'true') {
   }
 }
 
-// Weitere Optimierungen hinzufügen (erweitert bestehende config)
-config.optimization = {
-  ...config.optimization, // Behalte Kotlin/JS Optimierungen
-  splitChunks: {
-    chunks: 'all',
-    cacheGroups: {
-      vendor: {
-        test: /[\\/]node_modules[\\/]/,
-        name: 'vendor',
-        chunks: 'all'
-      }
-    }
-  }
-};
+// Hinweis: Wir liefern eine statische index.html aus src/jsMain/resources aus.
+// Diese Datei enthält nur einen Script-Tag zu "web-app.js" und wird NICHT
+// vom HtmlWebpackPlugin generiert. Zusätzliche Chunks (z. B. vendor/runtime)
+// würden dann nicht automatisch injiziert und führen dazu, dass die App nicht startet
+// (Bildschirm bleibt auf "Loading...").
+//
+// Daher überschreiben wir config.optimization NICHT mehr mit splitChunks.
+// Wenn später Chunking gewünscht ist, muss die index.html durch die generierte
+// HTML ersetzt oder die zusätzlichen Chunks manuell eingebunden werden.
+//
+// (Frühere splitChunks-Konfiguration wurde bewusst entfernt.)
 
 // Development Server Konfiguration erweitern
 if (config.devServer) {

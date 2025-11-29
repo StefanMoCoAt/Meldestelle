@@ -131,7 +131,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         jvmTarget.set(JvmTarget.JVM_21)
         freeCompilerArgs.addAll(
             "-opt-in=kotlin.RequiresOptIn",
-            "-Xskip-metadata-version-check" // Für bleeding-edge Versionen
+            "-Xskip-metadata-version-check", // Für bleeding-edge Versionen
+            // Suppress beta warning for expect/actual declarations used in this module
+            "-Xexpect-actual-classes"
         )
     }
 }
