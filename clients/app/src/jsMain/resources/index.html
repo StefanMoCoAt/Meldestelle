@@ -1,41 +1,27 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Meldestelle - Web Development</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: system-ui, -apple-system, sans-serif;
-            background: #fafafa;
-        }
-        #ComposeTarget {
-            width: 100vw;
-            height: 100vh;
-        }
-        #root {
-            width: 100vw;
-            height: 100vh;
-        }
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-size: 18px;
-            color: #666;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meldestelle - Web</title>
+  <link type="text/css" rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0f172a">
 </head>
 <body>
-    <div id="root">
-        <canvas id="ComposeTarget"></canvas>
-        <div class="loading">🚀 Loading Meldestelle...</div>
-    </div>
-    <!-- Hinweis: Wir erzeugen bewusst ein Single-File-Bundle (keine Chunk-Splitting),
-         daher reicht das App-Bundle allein aus. -->
-    <script src="web-app.js" defer></script>
+<div id="ComposeTarget">
+  <div class="loading">Loading...</div>
+</div>
+<script src="web-app.js"></script>
+<script>
+  // Register Service Worker only in non-localhost environments
+  if ('serviceWorker' in navigator && !['localhost', '127.0.0.1', '::1'].includes(location.hostname)) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').catch(function(err){
+        console.warn('ServiceWorker registration failed:', err);
+      });
+    });
+  }
+</script>
 </body>
 </html>

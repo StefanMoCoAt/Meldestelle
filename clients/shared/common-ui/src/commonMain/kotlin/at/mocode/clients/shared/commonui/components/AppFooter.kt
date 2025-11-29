@@ -12,18 +12,18 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppFooter() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "© 2025 Meldestelle - Built with Kotlin Multiplatform",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-    }
+  Box(
+    modifier = Modifier
+      .fillMaxWidth()
+      .background(MaterialTheme.colorScheme.surfaceVariant)
+      .padding(16.dp),
+    contentAlignment = Alignment.Center
+  ) {
+    Text(
+      text = "© 2025 Meldestelle - Built with Kotlin Multiplatform",
+      style = MaterialTheme.typography.bodySmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+      textAlign = TextAlign.Center
+    )
+  }
 }

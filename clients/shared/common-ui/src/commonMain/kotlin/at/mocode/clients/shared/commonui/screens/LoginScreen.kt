@@ -17,16 +17,16 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun LoginScreenPlaceholder() {
-    Card(modifier = Modifier.fillMaxSize().padding(24.dp)) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "Legacy LoginScreen",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text("Diese Ansicht wurde migriert. Bitte die neue Login-Seite im App-Modul verwenden.")
-        }
+  Card(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+    Column(
+      modifier = Modifier.padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      Text(
+        text = "Legacy LoginScreen",
+        style = MaterialTheme.typography.titleLarge
+      )
+      Text("Diese Ansicht wurde migriert. Bitte die neue Login-Seite im App-Modul verwenden.")
     }
+  }
 }
