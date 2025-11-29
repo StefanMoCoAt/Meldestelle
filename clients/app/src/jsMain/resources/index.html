@@ -34,6 +34,8 @@
         <canvas id="ComposeTarget"></canvas>
         <div class="loading">🚀 Loading Meldestelle...</div>
     </div>
-    <script src="web-app.js"></script>
+    <!-- Hinweis: Wir erzeugen bewusst ein Single-File-Bundle (keine Chunk-Splitting),
+         daher reicht das App-Bundle allein aus. -->
+    <script src="web-app.js" defer></script>
 </body>
 </html>

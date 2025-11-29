@@ -44,7 +44,6 @@ kotlin {
 
             webpackTask {
                 mainOutputFileName = "web-app.js"
-                output.libraryTarget = "commonjs2"
             }
 
             // Development Server konfigurieren
