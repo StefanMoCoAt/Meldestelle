@@ -34,7 +34,7 @@ if (config.devServer) {
     ...config.devServer,
     historyApiFallback: true,
     hot: true,
-    // API Proxy für Backend-Anfragen (Array-Format für moderne Webpack)
+    // API Proxy für Backend-Anfragen (Array-Format für modernen Webpack)
     proxy: [
       {
         context: ['/api'],

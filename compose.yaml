@@ -246,7 +246,7 @@ services:
       SPRING_CLOUD_CONSUL_PORT: 8500
       SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: ping-service
 
-      # --- DATENBANK VERBINDUNG ---
+      # - DATENBANK VERBINDUNG -
       # Wir nutzen die Container-Namen aus deiner .env Variable
       SPRING_DATASOURCE_URL: jdbc:postgresql://${COMPOSE_PROJECT_NAME}-postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
