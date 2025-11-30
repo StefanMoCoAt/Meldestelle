@@ -76,10 +76,14 @@ kotlin {
         commonMain.dependencies {
             // Shared modules
             implementation(project(":clients:shared"))
-            implementation(project(":clients:shared:common-ui"))
-            implementation(project(":clients:shared:navigation"))
+            implementation(project(":frontend:core:design-system"))
+            implementation(project(":frontend:core:navigation"))
+            implementation(project(":frontend:core:network"))
             implementation(project(":clients:auth-feature"))
             implementation(project(":clients:ping-feature"))
+
+            // DI (Koin) needed to call initKoin { modules(...) }
+            implementation(libs.koin.core)
 
             // Compose Multiplatform
             implementation(compose.runtime)
@@ -100,6 +104,7 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.koin.core)
         }
 
         jsMain.dependencies {

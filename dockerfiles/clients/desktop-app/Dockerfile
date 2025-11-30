@@ -15,22 +15,21 @@ COPY gradle ./gradle
 COPY gradlew ./
 
 # Kopiere alle notwendigen Module für Multi-Modul-Projekt
-COPY clients ./clients
+COPY frontend ./frontend
+COPY backend ./backend
 COPY core ./core
 COPY domains ./domains
 COPY platform ./platform
-COPY infrastructure ./infrastructure
-COPY services ./services
 COPY docs ./docs
 
 # Setze Gradle-Wrapper Berechtigung
 RUN chmod +x ./gradlew
 
 # Dependencies downloaden (für besseres Caching)
-RUN ./gradlew :clients:app:dependencies --no-configure-on-demand
+RUN ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-configure-on-demand
 
 # Desktop-App kompilieren (createDistributable für native Distribution)
-RUN ./gradlew :clients:app:createDistributable --no-configure-on-demand
+RUN ./gradlew :frontend:shells:meldestelle-portal:createDistributable --no-configure-on-demand
 
 # ===================================================================
 # Stage 2: Runtime Stage - Ubuntu mit VNC + noVNC
@@ -59,7 +58,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Kopiere kompilierte Desktop-App von Build-Stage
-COPY --from=builder /app/clients/app/build/compose/binaries/main/desktop/ ./desktop-app/
+COPY --from=builder /app/frontend/shells/meldestelle-portal/build/compose/binaries/main/desktop/ ./desktop-app/
 
 # Kopiere Scripts
 COPY dockerfiles/clients/desktop-app/entrypoint.sh /entrypoint.sh

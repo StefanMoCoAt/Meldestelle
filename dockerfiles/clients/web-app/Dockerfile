@@ -30,29 +30,28 @@ COPY gradle ./gradle
 COPY gradlew ./
 
 # Kopiere alle notwendigen Module für Multi-Modul-Projekt
-COPY clients ./clients
+COPY frontend ./frontend
+COPY backend ./backend
 COPY core ./core
 COPY domains ./domains
 COPY platform ./platform
-COPY infrastructure ./infrastructure
-COPY services ./services
 COPY docs ./docs
 
 # Setze Gradle-Wrapper Berechtigung
 RUN chmod +x ./gradlew
 
 # Dependencies downloaden (für besseres Caching)
-RUN ./gradlew :clients:app:dependencies --no-configure-on-demand
+RUN ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-configure-on-demand
 
 # Kotlin/JS Web-App kompilieren (Profil wählbar über WEB_BUILD_PROFILE)
 # - dev  → jsBrowserDevelopmentExecutable (schneller, Source Maps)
 # - prod → jsBrowserDistribution (minifiziert, optimiert)
 RUN if [ "$WEB_BUILD_PROFILE" = "prod" ]; then \
-      ./gradlew :clients:app:jsBrowserDistribution --no-configure-on-demand -Pproduction=true; \
-      mkdir -p /app/web-dist && cp -r clients/app/build/dist/js/productionExecutable/* /app/web-dist/; \
+      ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDistribution --no-configure-on-demand -Pproduction=true; \
+      mkdir -p /app/web-dist && cp -r frontend/shells/meldestelle-portal/build/dist/js/productionExecutable/* /app/web-dist/; \
     else \
-      ./gradlew :clients:app:jsBrowserDevelopmentExecutable --no-configure-on-demand; \
-      mkdir -p /app/web-dist && cp -r clients/app/build/dist/js/developmentExecutable/* /app/web-dist/; \
+      ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDevelopmentExecutable --no-configure-on-demand; \
+      mkdir -p /app/web-dist && cp -r frontend/shells/meldestelle-portal/build/dist/js/developmentExecutable/* /app/web-dist/; \
     fi
 
 # ===================================================================

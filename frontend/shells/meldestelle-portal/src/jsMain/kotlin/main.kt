@@ -2,10 +2,40 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 import org.w3c.dom.HTMLElement
+import at.mocode.clients.shared.di.initKoin
+import at.mocode.frontend.core.network.networkModule
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import org.koin.core.context.GlobalContext
+import org.koin.core.qualifier.named
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
   console.log("[WebApp] main() entered")
+  // Initialize DI (Koin) with shared modules + network module
+  try {
+    initKoin { modules(networkModule) }
+    console.log("[WebApp] Koin initialized with networkModule")
+  } catch (e: dynamic) {
+    console.warn("[WebApp] Koin initialization warning:", e)
+  }
+  // Simple smoke request using DI apiClient
+  try {
+    val client = GlobalContext.get().get<HttpClient>(named("apiClient"))
+    MainScope().launch {
+      try {
+        val resp: String = client.get("/api/ping/health").body()
+        console.log("[WebApp] /api/ping/health → ", resp)
+      } catch (e: dynamic) {
+        console.warn("[WebApp] /api/ping/health failed:", e?.message ?: e)
+      }
+    }
+  } catch (e: dynamic) {
+    console.warn("[WebApp] Unable to resolve apiClient from Koin:", e)
+  }
   fun startApp() {
     try {
       console.log("[WebApp] startApp(): readyState=", document.asDynamic().readyState)

@@ -16,7 +16,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./docker/core/postgres:/docker-entrypoint-initdb.d:Z
+      - ./core/postgres:/docker-entrypoint-initdb.d:Z
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -72,7 +72,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./docker/core/keycloak:/opt/keycloak/data/import:Z
+      - ./core/keycloak:/opt/keycloak/data/import:Z
     command: start-dev --import-realm
     healthcheck:
       test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000" ]
@@ -112,7 +112,7 @@ services:
       - "${PROMETHEUS_PORT}"
     volumes:
       - prometheus-data:/prometheus
-      - ./docker/monitoring/prometheus:/etc/prometheus:Z
+      - ./monitoring/prometheus:/etc/prometheus:Z
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.retention.time=15d
@@ -138,7 +138,7 @@ services:
       - "${GF_PORT}"
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./docker/monitoring/grafana:/etc/grafana/provisioning:Z
+      - ./monitoring/grafana:/etc/grafana/provisioning:Z
     depends_on:
       - prometheus
     healthcheck:
@@ -175,7 +175,7 @@ services:
 
   api-gateway:
     build:
-      context: .
+      context: ..
       dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
       args:
         # Build-Args aus deinen .env Dateien (werden hier statisch benötigt für den Build)
@@ -224,7 +224,7 @@ services:
   # ==========================================
   ping-service:
     build:
-      context: .
+      context: ..
       dockerfile: dockerfiles/services/ping-service/Dockerfile
       args:
         GRADLE_VERSION: 9.1.0
@@ -246,16 +246,13 @@ services:
       SPRING_CLOUD_CONSUL_PORT: 8500
       SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: ping-service
 
-      # --- DATENBANK VERBINDUNG ---
-      # Wir nutzen die Container-Namen aus deiner .env Variable
+      # - DATENBANK VERBINDUNG -
       SPRING_DATASOURCE_URL: jdbc:postgresql://${COMPOSE_PROJECT_NAME}-postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      # WICHTIG: Wir wollen nur validieren, nichts erstellen.
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
 
       # --- REDIS ---
-      # Wir nutzen den Service-Namen, genau wie bei Postgres
       SPRING_DATA_REDIS_HOST: ${COMPOSE_PROJECT_NAME}-redis
       SPRING_DATA_REDIS_PORT: 6379
     depends_on:
@@ -275,7 +272,7 @@ services:
   # ==========================================
   web-app:
     build:
-      context: .
+      context: ..
       dockerfile: dockerfiles/clients/web-app/Dockerfile
       args:
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.1.0}
@@ -297,7 +294,7 @@ services:
 
   desktop-app:
     build:
-      context: .
+      context: ..
       dockerfile: dockerfiles/clients/desktop-app/Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME}-desktop-app
     restart: unless-stopped

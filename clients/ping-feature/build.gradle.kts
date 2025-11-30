@@ -43,10 +43,10 @@ kotlin {
   sourceSets {
     commonMain.dependencies {
       // Contract from backend
-      implementation(projects.services.ping.pingApi)
+      implementation(project(":backend:services:ping:ping-api"))
 
-      // UI Kit
-      implementation(project(":clients:shared:common-ui"))
+      // UI Kit (Design System)
+      implementation(project(":frontend:core:design-system"))
 
       // Shared Konfig & Utilities
       implementation(project(":clients:shared"))
@@ -64,6 +64,9 @@ kotlin {
 
       // Coroutines and serialization
       implementation(libs.bundles.kotlinx.core)
+
+      // DI (Koin) for resolving apiClient from container
+      implementation(libs.koin.core)
 
       // ViewModel lifecycle
       implementation(libs.bundles.compose.common)

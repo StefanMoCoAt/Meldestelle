@@ -42,8 +42,8 @@ kotlin {
 
   sourceSets {
     commonMain.dependencies {
-      // UI Kit
-      implementation(project(":clients:shared:common-ui"))
+      // UI Kit (Design System)
+      implementation(project(":frontend:core:design-system"))
 
       // Shared Konfig & Utilities (AppConfig + BuildConfig)
       implementation(project(":clients:shared"))
