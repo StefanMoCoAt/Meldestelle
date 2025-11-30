@@ -65,6 +65,9 @@ kotlin {
       // Coroutines and serialization
       implementation(libs.bundles.kotlinx.core)
 
+      // DI (Koin) for resolving apiClient from container
+      implementation(libs.koin.core)
+
       // ViewModel lifecycle
       implementation(libs.bundles.compose.common)
 

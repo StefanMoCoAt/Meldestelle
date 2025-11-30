@@ -42,6 +42,23 @@ Richtlinien (Kurzfassung)
 - Kein manueller Authorization-Header – nur der DI-verwaltete apiClient aus frontend/core/network (Koin Named Binding).
 - SQLDelight als Offline-SSoT: Schema/Migrationen zentral versionieren, UI liest stets lokal und synchronisiert im Hintergrund.
 
+DI-Policy & Architecture Guards (MP-23)
+
+- DI-Policy (Frontend)
+  - Http‑Requests erfolgen ausschließlich über den via Koin bereitgestellten `apiClient` (named Binding) aus `:frontend:core:network`.
+  - Manuelles Setzen des `Authorization`‑Headers ist verboten. Token‑Handling wird zentral im `apiClient` konfiguriert (Auth‑Plugin/Interceptor).
+  - Basis‑URL wird plattformspezifisch aufgelöst:
+    - JVM/Desktop: Env `API_BASE_URL` (Fallback `http://localhost:8081`).
+    - Web/JS: `globalThis.API_BASE_URL` (z. B. per `index.html` oder Proxy), sonst `window.location.origin`, Fallback `http://localhost:8081`.
+
+- Architecture Guards (Frontend‑Scope)
+  - Root‑Task `archGuards` bricht den Build ab, wenn verbotene Muster gefunden werden (manuelle `Authorization`‑Header). Tests sind ausgenommen; Backend ist ausgenommen.
+  - Statische Analyse verfügbar über `detekt` und `ktlintCheck`; Aggregator `staticAnalysis` führt alles zusammen.
+
+- Hinweise für Features
+  - Features importieren keine anderen Features (Kommunikation über Navigation + Shared‑Domain‑Modelle). Eine explizite Detekt‑Regel folgt.
+  - Netzwerkzugriffe in Features nutzen Koin über die App‑Shell (DI‑Bootstrap). Für schrittweise Migration kann eine Factory den `apiClient` optional beziehen.
+
 Nächste Schritte (MP-22 Folgetasks)
 
 1. Physisches Verschieben der Frontend-Module gemäß Mapping und Anpassung von settings.gradle.kts.

@@ -63,6 +63,9 @@ kotlin {
       implementation(libs.koin.compose)
       implementation(libs.koin.compose.viewmodel)
 
+      // Network module (provides DI `apiClient`)
+      implementation(project(":frontend:core:network"))
+
       // Compose für shared UI components (common)
       implementation(compose.runtime)
       implementation(compose.foundation)

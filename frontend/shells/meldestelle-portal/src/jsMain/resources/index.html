@@ -12,6 +12,24 @@
 <div id="ComposeTarget">
   <div class="loading">Loading...</div>
 </div>
+<script>
+  // Prefer explicit query param override (?apiBaseUrl=http://host:port),
+  // then fall back to same-origin. This avoids Docker secrets and works with Nginx proxy.
+  (function(){
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const override = params.get('apiBaseUrl');
+      if (override) {
+        globalThis.API_BASE_URL = override.replace(/\/$/, '');
+      } else {
+        globalThis.API_BASE_URL = window.location.origin.replace(/\/$/, '');
+      }
+    } catch (e) {
+      globalThis.API_BASE_URL = 'http://localhost:8081';
+    }
+  })();
+  // KMP bundle will read globalThis.API_BASE_URL in PlatformConfig.js
+ </script>
 <script src="web-app.js"></script>
 <script>
   // Register Service Worker only in non-localhost environments

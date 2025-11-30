@@ -60,25 +60,25 @@ include(":infrastructure:monitoring:monitoring-server")
 // ==========================================================================
 
 // --- EVENTS (Competition Management) ---
-//include(":domains:events:events-api")
-//include(":domains:events:events-common")
-//include(":domains:events:events-domain")
-//include(":domains:events:events-infrastructure")
-//include(":domains:events:events-service")
+// include(":domains:events:events-api")
+// include(":domains:events:events-common")
+// include(":domains:events:events-domain")
+// include(":domains:events:events-infrastructure")
+// include(":domains:events:events-service")
 
 // --- HORSES (Horse Management) ---
-//include(":domains:horses:horses-api")
-//include(":domains:horses:horses-common")
-//include(":domains:horses:horses-domain")
-//include(":domains:horses:horses-infrastructure")
-//include(":domains:horses:horses-service")
+// include(":domains:horses:horses-api")
+// include(":domains:horses:horses-common")
+// include(":domains:horses:horses-domain")
+// include(":domains:horses:horses-infrastructure")
+// include(":domains:horses:horses-service")
 
 // --- MASTERDATA (The Rulebook) ---
-//include(":domains:masterdata:masterdata-api")
-//include(":domains:masterdata:masterdata-common")
-//include(":domains:masterdata:masterdata-domain")
-//include(":domains:masterdata:masterdata-infrastructure")
-//include(":domains:masterdata:masterdata-service")
+// include(":domains:masterdata:masterdata-api")
+// include(":domains:masterdata:masterdata-common")
+// include(":domains:masterdata:masterdata-domain")
+// include(":domains:masterdata:masterdata-infrastructure")
+// include(":domains:masterdata:masterdata-service")
 
 // --- REGISTRY (Single Source of Truth) ---
 // Verwaltet Personen, Pferde & Vereine (ZNS Importe).
@@ -103,6 +103,7 @@ include(":clients:ping-feature")
 include(":clients:shared")
 include(":frontend:core:design-system")
 include(":frontend:core:navigation")
+include(":frontend:core:network")
 
 // ==========================================================================
 // DOCUMENTATION
