@@ -36,21 +36,26 @@ help: ## Show this help message
 # Development Workflow Commands
 # ===================================================================
 
+env-init: ## Create local docker/.env from example if missing
+	@if [ ! -f docker/.env ]; then \
+		cp docker/.env.example docker/.env && echo "✅ Created docker/.env from example"; \
+		else echo "ℹ️ docker/.env already exists"; fi
+
 dev-up: ## Start development environment (single compose)
 	@echo "🚀 Starting development environment..."
-	$(COMPOSE) -f docker/docker-compose.yml up -d
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml up -d
 	@$(MAKE) dev-info
 
 dev-down: ## Stop development environment
 	@echo "🛑 Stopping development environment..."
-	$(COMPOSE) -f docker/docker-compose.yml down
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml down
 
 dev-restart: ## Restart full development environment
 	@$(MAKE) dev-down
 	@$(MAKE) dev-up
 
 dev-logs: ## Show logs for all development services
-	$(COMPOSE) -f docker/docker-compose.yml logs -f
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml logs -f
 
 # ===================================================================
 # Layer-specific Commands
@@ -58,7 +63,7 @@ dev-logs: ## Show logs for all development services
 
 infrastructure-up: ## Start only infrastructure services (postgres, redis, keycloak, consul)
 	@echo "🏗️ Starting infrastructure services..."
-	$(COMPOSE) -f docker/docker-compose.yml up -d
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml up -d
 	@echo "✅ Infrastructure services started"
 	@echo "🗄️ PostgresQL:      localhost:5432"
 	@echo "🔴 Redis:           localhost:6379"
@@ -66,14 +71,14 @@ infrastructure-up: ## Start only infrastructure services (postgres, redis, keycl
 	@echo "🧭 Consul:          http://localhost:8500"
 
 infrastructure-down: ## Stop infrastructure services
-	$(COMPOSE) -f docker/docker-compose.yml down
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml down
 
 infrastructure-logs: ## Show infrastructure logs
-	$(COMPOSE) -f docker/docker-compose.yml logs -f
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml logs -f
 
 services-up: ## Start application services (infrastructure + microservices)
 	@echo "⚙️ Starting application services..."
-	$(COMPOSE) -f docker/docker-compose.yml -f docker/docker-compose.services.yml up -d
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml -f docker/docker-compose.services.yml up -d
 	@echo "✅ Application services started"
 	@echo "🔗 Gateway:         http://localhost:8081"
 	@echo "🏓 Ping Service:    http://localhost:8082"
@@ -83,32 +88,32 @@ services-up: ## Start application services (infrastructure + microservices)
 	@echo "📊 Master Service:  http://localhost:8086"
 
 services-down: ## Stop application services
-	$(COMPOSE) -f docker/docker-compose.yml -f docker/docker-compose.services.yml down
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml -f docker/docker-compose.services.yml down
 
 services-restart: ## Restart application services
 	@$(MAKE) services-down
 	@$(MAKE) services-up
 
 services-logs: ## Show application services logs
-	$(COMPOSE) -f docker/docker-compose.yml -f docker/docker-compose.services.yml logs -f
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml -f docker/docker-compose.services.yml logs -f
 
 clients-up: ## Start client applications (infrastructure + clients)
 	@echo "💻 Starting client applications..."
-	$(COMPOSE) -f docker/docker-compose.yml -f docker/docker-compose.clients.yml up -d
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml -f docker/docker-compose.clients.yml up -d
 	@echo "✅ Client applications started"
 	@echo "🌐 Web App:         http://localhost:4000"
 	@echo "🔐 Auth Server:     http://localhost:8087"
 	@echo "📈 Monitoring:      http://localhost:8088"
 
 clients-down: ## Stop client applications
-	$(COMPOSE) -f docker/docker-compose.yml -f docker/docker-compose.clients.yml down
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml -f docker/docker-compose.clients.yml down
 
 clients-restart: ## Restart client applications
 	@$(MAKE) clients-down
 	@$(MAKE) clients-up
 
 clients-logs: ## Show client application logs
-	$(COMPOSE) -f docker/docker-compose.yml -f docker/docker-compose.clients.yml logs -f
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml -f docker/docker-compose.clients.yml logs -f
 
 # ===================================================================
 # Full System Commands
@@ -116,7 +121,7 @@ clients-logs: ## Show client application logs
 
 full-up: ## Start complete system (infrastructure + services + clients)
 	@echo "🚀 Starting complete Meldestelle system..."
-	$(COMPOSE) -f docker/docker-compose.yml -f docker/docker-compose.services.yml -f docker/docker-compose.clients.yml up -d
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml -f docker/docker-compose.services.yml -f docker/docker-compose.clients.yml up -d
 	@echo "✅ Complete system started"
 	@echo ""
 	@echo "🌐 Frontend & APIs:"
@@ -141,14 +146,14 @@ full-up: ## Start complete system (infrastructure + services + clients)
 	@echo "   Monitoring:      http://localhost:8088"
 
 full-down: ## Stop complete system
-	$(COMPOSE) -f docker/docker-compose.yml -f docker/docker-compose.services.yml -f docker/docker-compose.clients.yml down
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml -f docker/docker-compose.services.yml -f docker/docker-compose.clients.yml down
 
 full-restart: ## Restart complete system
 	@$(MAKE) full-down
 	@$(MAKE) full-up
 
 full-logs: ## Show all system logs
-	$(COMPOSE) -f docker/docker-compose.yml -f docker/docker-compose.services.yml -f docker/docker-compose.clients.yml logs -f
+	$(COMPOSE) --env-file docker/.env -f docker/docker-compose.yml -f docker/docker-compose.services.yml -f docker/docker-compose.clients.yml logs -f
 
 # ===================================================================
 # SSoT Developer UX (optional helpers)
