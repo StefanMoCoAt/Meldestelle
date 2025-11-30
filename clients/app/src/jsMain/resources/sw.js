@@ -58,7 +58,8 @@ self.addEventListener('fetch', (event) => {
         .then((resp) => {
           if (resp && resp.status === 200 && resp.type === 'basic') {
             const copy = resp.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy)).catch(() => {});
+            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy)).catch(() => {
+            });
           }
           return resp;
         })
@@ -83,7 +84,8 @@ self.addEventListener('fetch', (event) => {
         .then((resp) => {
           if (resp && resp.status === 200 && resp.type === 'basic') {
             const copy = resp.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {
+            });
           }
           return resp;
         })

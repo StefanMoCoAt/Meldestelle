@@ -19,118 +19,118 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    authTokenManager: AuthTokenManager,
-    viewModel: LoginViewModel = viewModel { LoginViewModel(authTokenManager) },
-    onLoginSuccess: () -> Unit = {}
+  authTokenManager: AuthTokenManager,
+  viewModel: LoginViewModel = viewModel { LoginViewModel(authTokenManager) },
+  onLoginSuccess: () -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val passwordFocusRequester = remember { FocusRequester() }
+  val uiState by viewModel.uiState.collectAsState()
+  val passwordFocusRequester = remember { FocusRequester() }
 
-    Column(
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(24.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center
+  ) {
+    // Title
+    Text(
+      text = "Anmelden",
+      style = MaterialTheme.typography.headlineMedium,
+      color = MaterialTheme.colorScheme.onSurface,
+      modifier = Modifier.padding(bottom = 32.dp)
+    )
+
+    // Username field
+    OutlinedTextField(
+      value = uiState.username,
+      onValueChange = viewModel::updateUsername,
+      label = { Text("Benutzername") },
+      enabled = !uiState.isLoading,
+      isError = uiState.usernameError != null,
+      supportingText = uiState.usernameError?.let { { Text(it) } },
+      keyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Text,
+        imeAction = ImeAction.Next
+      ),
+      keyboardActions = KeyboardActions(
+        onNext = { passwordFocusRequester.requestFocus() }
+      ),
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(bottom = 16.dp)
+    )
+
+    // Password field
+    OutlinedTextField(
+      value = uiState.password,
+      onValueChange = viewModel::updatePassword,
+      label = { Text("Passwort") },
+      enabled = !uiState.isLoading,
+      isError = uiState.passwordError != null,
+      supportingText = uiState.passwordError?.let { { Text(it) } },
+      visualTransformation = PasswordVisualTransformation(),
+      keyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Password,
+        imeAction = ImeAction.Done
+      ),
+      keyboardActions = KeyboardActions(
+        onDone = {
+          if (uiState.canLogin) {
+            viewModel.login()
+          }
+        }
+      ),
+      modifier = Modifier
+        .fillMaxWidth()
+        .focusRequester(passwordFocusRequester)
+        .padding(bottom = 24.dp)
+    )
+
+    // Error message
+    if (uiState.errorMessage != null) {
+      Card(
+        colors = CardDefaults.cardColors(
+          containerColor = MaterialTheme.colorScheme.errorContainer
+        ),
         modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Title
+          .fillMaxWidth()
+          .padding(bottom = 16.dp)
+      ) {
         Text(
-            text = "Anmelden",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 32.dp)
+          text = uiState.errorMessage!!,
+          color = MaterialTheme.colorScheme.onErrorContainer,
+          style = MaterialTheme.typography.bodyMedium,
+          textAlign = TextAlign.Center,
+          modifier = Modifier.padding(16.dp)
         )
-
-        // Username field
-        OutlinedTextField(
-            value = uiState.username,
-            onValueChange = viewModel::updateUsername,
-            label = { Text("Benutzername") },
-            enabled = !uiState.isLoading,
-            isError = uiState.usernameError != null,
-            supportingText = uiState.usernameError?.let { { Text(it) } },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { passwordFocusRequester.requestFocus() }
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-
-        // Password field
-        OutlinedTextField(
-            value = uiState.password,
-            onValueChange = viewModel::updatePassword,
-            label = { Text("Passwort") },
-            enabled = !uiState.isLoading,
-            isError = uiState.passwordError != null,
-            supportingText = uiState.passwordError?.let { { Text(it) } },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    if (uiState.canLogin) {
-                        viewModel.login()
-                    }
-                }
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(passwordFocusRequester)
-                .padding(bottom = 24.dp)
-        )
-
-        // Error message
-        if (uiState.errorMessage != null) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Text(
-                    text = uiState.errorMessage!!,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-
-        // Login button
-        Button(
-            onClick = { viewModel.login() },
-            enabled = uiState.canLogin && !uiState.isLoading,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Anmelden")
-            }
-        }
+      }
     }
 
-    // Handle login success
-    LaunchedEffect(uiState.isAuthenticated) {
-        if (uiState.isAuthenticated) {
-            onLoginSuccess()
-        }
+    // Login button
+    Button(
+      onClick = { viewModel.login() },
+      enabled = uiState.canLogin && !uiState.isLoading,
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(48.dp)
+    ) {
+      if (uiState.isLoading) {
+        CircularProgressIndicator(
+          modifier = Modifier.size(20.dp),
+          strokeWidth = 2.dp,
+          color = MaterialTheme.colorScheme.onPrimary
+        )
+      } else {
+        Text("Anmelden")
+      }
     }
+  }
+
+  // Handle login success
+  LaunchedEffect(uiState.isAuthenticated) {
+    if (uiState.isAuthenticated) {
+      onLoginSuccess()
+    }
+  }
 }

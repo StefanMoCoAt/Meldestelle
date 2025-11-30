@@ -1,57 +1,59 @@
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinSerialization)
+  alias(libs.plugins.kotlinMultiplatform)
+  alias(libs.plugins.composeMultiplatform)
+  alias(libs.plugins.composeCompiler)
+  alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
-    val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
+  val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
-    jvmToolchain(21)
+  jvmToolchain(21)
 
-    jvm()
-    js(IR) {
-        browser()
-        nodejs()
+  jvm()
+  js(IR) {
+    browser()
+//        nodejs()
+    binaries.executable()
+  }
+
+  // WASM, nur wenn explizit aktiviert
+  if (enableWasm) {
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+      browser()
+      binaries.executable()
+    }
+  }
+
+  sourceSets {
+    commonMain.dependencies {
+      // Shared module dependency
+      implementation(project(":clients:shared"))
+
+      // Compose dependencies
+      implementation(compose.runtime)
+      implementation(compose.foundation)
+      implementation(compose.material3)
+      implementation(compose.ui)
+      implementation(compose.components.resources)
+
+      // Coroutines
+      implementation(libs.kotlinx.coroutines.core)
+
+      // Serialization
+      implementation(libs.kotlinx.serialization.json)
+
+      // DateTime
+      implementation(libs.kotlinx.datetime)
     }
 
-    // WASM, nur wenn explizit aktiviert
-    if (enableWasm) {
-        @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-        wasmJs {
-            browser()
-        }
+    jsMain.dependencies {
+      // JS-specific UI dependencies if needed
     }
 
-    sourceSets {
-        commonMain.dependencies {
-            // Shared module dependency
-            implementation(project(":clients:shared"))
-
-            // Compose dependencies
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-
-            // Coroutines
-            implementation(libs.kotlinx.coroutines.core)
-
-            // Serialization
-            implementation(libs.kotlinx.serialization.json)
-
-            // DateTime
-            implementation(libs.kotlinx.datetime)
-        }
-
-        jsMain.dependencies {
-            // JS-specific UI dependencies if needed
-        }
-
-        jvmMain.dependencies {
-            // JVM-specific UI dependencies if needed
-        }
+    jvmMain.dependencies {
+      // JVM-specific UI dependencies if needed
     }
+  }
 }

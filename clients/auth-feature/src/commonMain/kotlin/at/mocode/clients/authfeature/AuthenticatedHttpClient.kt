@@ -1,6 +1,6 @@
 package at.mocode.clients.authfeature
 
-import at.mocode.clients.shared.AppConfig
+import at.mocode.clients.shared.core.AppConstants
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -14,49 +14,49 @@ import kotlinx.serialization.json.Json
  */
 object AuthenticatedHttpClient {
 
-    private val authTokenManager = AuthTokenManager()
+  private val authTokenManager = AuthTokenManager()
 
-    /**
-     * Create a basic HTTP client with JSON support
-     */
-    fun create(baseUrl: String = AppConfig.GATEWAY_URL): HttpClient {
-        return HttpClient {
-            install(ContentNegotiation) {
-                json(Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
+  /**
+   * Create a basic HTTP client with JSON support
+   */
+  fun create(baseUrl: String = AppConstants.GATEWAY_URL): HttpClient {
+    return HttpClient {
+      install(ContentNegotiation) {
+        json(Json {
+          prettyPrint = true
+          isLenient = true
+          ignoreUnknownKeys = true
+        })
+      }
     }
+  }
 
-    /**
-     * Add an authentication header to an HTTP request builder if a token is available
-     */
-    fun HttpRequestBuilder.addAuthHeader() {
-        authTokenManager.getBearerToken()?.let { bearerToken ->
-            header(HttpHeaders.Authorization, bearerToken)
-        }
+  /**
+   * Add an authentication header to an HTTP request builder if a token is available
+   */
+  fun HttpRequestBuilder.addAuthHeader() {
+    authTokenManager.getBearerToken()?.let { bearerToken ->
+      header(HttpHeaders.Authorization, bearerToken)
     }
+  }
 
-    /**
-     * Get the shared AuthTokenManager instance
-     */
-    fun getAuthTokenManager(): AuthTokenManager = authTokenManager
+  /**
+   * Get the shared AuthTokenManager instance
+   */
+  fun getAuthTokenManager(): AuthTokenManager = authTokenManager
 
-    /**
-     * Create an HTTP client without authentication (for login/public endpoints)
-     */
-    fun createUnauthenticated(): HttpClient {
-        return HttpClient {
-            install(ContentNegotiation) {
-                json(Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                })
-            }
-        }
+  /**
+   * Create an HTTP client without authentication (for login/public endpoints)
+   */
+  fun createUnauthenticated(): HttpClient {
+    return HttpClient {
+      install(ContentNegotiation) {
+        json(Json {
+          prettyPrint = true
+          isLenient = true
+          ignoreUnknownKeys = true
+        })
+      }
     }
+  }
 }

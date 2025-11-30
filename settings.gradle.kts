@@ -2,46 +2,49 @@ rootProject.name = "Meldestelle"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        mavenCentral()
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
-        }
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        maven("https://us-central1-maven.pkg.dev/varabyte-repos/public")
+  repositories {
+    gradlePluginPortal()
+    mavenCentral()
+    google {
+      mavenContent {
+        includeGroupAndSubgroups("androidx")
+        includeGroupAndSubgroups("com.android")
+        includeGroupAndSubgroups("com.google")
+      }
     }
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven("https://us-central1-maven.pkg.dev/varabyte-repos/public")
+  }
 }
 plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+  id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 dependencyResolutionManagement {
 
-    repositories {
-        mavenCentral()
-        google()
-        maven { url = uri("https://jitpack.io") }
-        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
-        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
-        maven { url = uri("https://us-central1-maven.pkg.dev/varabyte-repos/public") }
-    }
+  repositories {
+    mavenCentral()
+    google()
+    maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+    maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
+    maven { url = uri("https://us-central1-maven.pkg.dev/varabyte-repos/public") }
+  }
 }
 
-// Core modules
+// ==========================================================================
+// CORE & PLATFORM
+// ==========================================================================
 include(":core:core-domain")
 include(":core:core-utils")
 
-// Platform modules
 include(":platform:platform-bom")
 include(":platform:platform-dependencies")
 include(":platform:platform-testing")
 
-// Infrastructure modules
+// ==========================================================================
+// INFRASTRUCTURE
+// ==========================================================================
 include(":infrastructure:gateway")
 include(":infrastructure:messaging:messaging-client")
 include(":infrastructure:messaging:messaging-config")
@@ -52,30 +55,56 @@ include(":infrastructure:event-store:redis-event-store")
 include(":infrastructure:monitoring:monitoring-client")
 include(":infrastructure:monitoring:monitoring-server")
 
-// Temporary modules
+// ==========================================================================
+// BUSINESS DOMAINS (Clean Architecture)
+// ==========================================================================
+
+// --- EVENTS (Competition Management) ---
+//include(":domains:events:events-api")
+//include(":domains:events:events-common")
+//include(":domains:events:events-domain")
+//include(":domains:events:events-infrastructure")
+//include(":domains:events:events-service")
+
+// --- HORSES (Horse Management) ---
+//include(":domains:horses:horses-api")
+//include(":domains:horses:horses-common")
+//include(":domains:horses:horses-domain")
+//include(":domains:horses:horses-infrastructure")
+//include(":domains:horses:horses-service")
+
+// --- MASTERDATA (The Rulebook) ---
+//include(":domains:masterdata:masterdata-api")
+//include(":domains:masterdata:masterdata-common")
+//include(":domains:masterdata:masterdata-domain")
+//include(":domains:masterdata:masterdata-infrastructure")
+//include(":domains:masterdata:masterdata-service")
+
+// --- REGISTRY (Single Source of Truth) ---
+// Verwaltet Personen, Pferde & Vereine (ZNS Importe).
+// Ersetzt das alte 'members' und 'horses' Modul.
+include(":domains:registry:oeps-importer") // NEU: Der Gatekeeper für ZNS Daten
+include(":domains:registry:registry-api")
+include(":domains:registry:registry-domain")
+include(":domains:registry:registry-service")
+
+// ==========================================================================
+// TECHNICAL SERVICES
+// ==========================================================================
 include(":services:ping:ping-api")
 include(":services:ping:ping-service")
 
-// Client modules
-include(":clients:shared")
+// ==========================================================================
+// CLIENTS (Frontend)
+// ==========================================================================
 include(":clients:app")
-include(":clients:ping-feature")
 include(":clients:auth-feature")
+include(":clients:ping-feature")
+include(":clients:shared")
 include(":clients:shared:common-ui")
 include(":clients:shared:navigation")
-include(":clients:members-feature")
 
-// Documentation module
+// ==========================================================================
+// DOCUMENTATION
+// ==========================================================================
 include(":docs")
-
-/*
-// Business modules (temporarily disabled - require multiplatform configuration updates)
-// Note: We enable only the Members modules needed for API contracts to support the Members client feature.
-*/
-// Members modules – enabled to provide the REST API contract used by the client
-include(":services:members:members-domain")
-// keep application out for now (mismatch with core contracts); expose API directly via repository
-// include(":services:members:members-application")
-include(":services:members:members-infrastructure")
-include(":services:members:members-api")
-// other business modules remain disabled

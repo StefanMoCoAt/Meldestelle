@@ -44,7 +44,6 @@ kotlin {
 
             webpackTask {
                 mainOutputFileName = "web-app.js"
-                output.libraryTarget = "commonjs2"
             }
 
             // Development Server konfigurieren
@@ -67,7 +66,10 @@ kotlin {
     // WASM, nur wenn explizit aktiviert
     if (enableWasm) {
         @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-        wasmJs { browser() }
+        wasmJs {
+          browser()
+          binaries.executable()
+        }
     }
 
     sourceSets {
@@ -76,8 +78,8 @@ kotlin {
             implementation(project(":clients:shared"))
             implementation(project(":clients:shared:common-ui"))
             implementation(project(":clients:shared:navigation"))
+            implementation(project(":clients:auth-feature"))
             implementation(project(":clients:ping-feature"))
-            implementation(project(":clients:members-feature"))
 
             // Compose Multiplatform
             implementation(compose.runtime)
@@ -129,7 +131,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         jvmTarget.set(JvmTarget.JVM_21)
         freeCompilerArgs.addAll(
             "-opt-in=kotlin.RequiresOptIn",
-            "-Xskip-metadata-version-check" // Für bleeding-edge Versionen
+            "-Xskip-metadata-version-check", // Für bleeding-edge Versionen
+            // Suppress beta warning for expect/actual declarations used in this module
+            "-Xexpect-actual-classes"
         )
     }
 }

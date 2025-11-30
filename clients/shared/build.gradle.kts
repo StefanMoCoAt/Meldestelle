@@ -36,7 +36,7 @@ kotlin {
     // ...
   }
 
-    // WASM, nur wenn explizit aktiviert
+  // WASM, nur wenn explizit aktiviert
   if (enableWasm) {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs { browser() }
@@ -57,6 +57,11 @@ kotlin {
       implementation(libs.ktor.client.serialization.kotlinx.json)
       implementation(libs.ktor.client.logging)
       implementation(libs.ktor.client.auth)
+
+      // Dependency Injection (Koin)
+      implementation(libs.koin.core)
+      implementation(libs.koin.compose)
+      implementation(libs.koin.compose.viewmodel)
 
       // Compose für shared UI components (common)
       implementation(compose.runtime)

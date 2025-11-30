@@ -17,6 +17,7 @@ COPY gradlew ./
 # Kopiere alle notwendigen Module für Multi-Modul-Projekt
 COPY clients ./clients
 COPY core ./core
+COPY domains ./domains
 COPY platform ./platform
 COPY infrastructure ./infrastructure
 COPY services ./services

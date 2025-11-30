@@ -60,6 +60,9 @@ COPY core/ core/
 # Copy infrastructure directories (required by settings.gradle.kts)
 COPY infrastructure/ infrastructure/
 
+# Copy domains directory (required by settings.gradle.kts)
+COPY domains/ domains/
+
 # Copy services directories (required by settings.gradle.kts)
 COPY services/ services/
 

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Meldestelle – Desktop Downloads (Platzhalter)</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif; margin: 2rem; }
+      h1 { margin-bottom: .25rem; }
+      .muted { color: #666; }
+      ul { line-height: 1.8; }
+      .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem 1.25rem; max-width: 720px; }
+    </style>
+  </head>
+  <body>
+    <h1>Desktop Downloads</h1>
+    <p class="muted">Platzhalter-Verzeichnis. Hier können zukünftig Installer/Archive der Desktop-App bereitgestellt werden.</p>
+    <div class="card">
+      <p>Lege deine Dateien in dieses Verzeichnis im Repository:</p>
+      <pre><code>dockerfiles/clients/web-app/downloads/</code></pre>
+      <p>Oder mounte in Docker Compose ein Host-Verzeichnis auf <code>/usr/share/nginx/html/downloads</code>.</p>
+      <p>Beispiele (geplant):</p>
+      <ul>
+        <li>Meldestelle-Setup-1.0.0.msi (Windows)</li>
+        <li>Meldestelle-1.0.0.dmg (macOS)</li>
+        <li>Meldestelle-1.0.0.deb (Linux)</li>
+      </ul>
+    </div>
+  </body>
+  </html>

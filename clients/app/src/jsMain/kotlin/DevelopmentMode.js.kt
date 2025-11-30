@@ -1,2 +1,2 @@
 actual fun isDevelopmentMode(): Boolean =
-    kotlinx.browser.window.location.hostname == "localhost"
+  kotlinx.browser.window.location.hostname == "localhost"

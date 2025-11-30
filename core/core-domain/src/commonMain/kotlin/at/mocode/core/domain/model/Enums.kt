@@ -12,10 +12,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 enum class DatenQuelleE {
-    MANUELL,
-    IMPORT_ZNS,
-    SYSTEM_GENERATED,
-    IMPORT_API
+  MANUELL,
+  IMPORT_ZNS,
+  SYSTEM_GENERATED,
+  IMPORT_API
 }
 
 /**
@@ -23,11 +23,11 @@ enum class DatenQuelleE {
  */
 @Serializable
 enum class StatusE {
-    AKTIV,
-    INAKTIV,
-    ENTWURF,
-    ARCHIVIERT,
-    GELOESCHT
+  AKTIV,
+  INAKTIV,
+  ENTWURF,
+  ARCHIVIERT,
+  GELOESCHT
 }
 
 /**
@@ -35,10 +35,10 @@ enum class StatusE {
  */
 @Serializable
 enum class PrioritaetE {
-    NIEDRIG,
-    NORMAL,
-    HOCH,
-    KRITISCH
+  NIEDRIG,
+  NORMAL,
+  HOCH,
+  KRITISCH
 }
 
 /**
@@ -46,11 +46,11 @@ enum class PrioritaetE {
  */
 @Serializable
 enum class BenutzerRolleE {
-    ADMIN,
-    BENUTZER,
-    MODERATOR,
-    GAST,
-    SYSTEM
+  ADMIN,
+  BENUTZER,
+  MODERATOR,
+  GAST,
+  SYSTEM
 }
 
 /**
@@ -58,11 +58,11 @@ enum class BenutzerRolleE {
  */
 @Serializable
 enum class VerifikationsStatusE {
-    NICHT_VERIFIZIERT,
-    IN_PRUEFUNG,
-    VERIFIZIERT,
-    ABGELEHNT,
-    KORREKTUR_ERFORDERLICH
+  NICHT_VERIFIZIERT,
+  IN_PRUEFUNG,
+  VERIFIZIERT,
+  ABGELEHNT,
+  KORREKTUR_ERFORDERLICH
 }
 
 /**
@@ -70,10 +70,10 @@ enum class VerifikationsStatusE {
  */
 @Serializable
 enum class BearbeitungsStatusE {
-    OFFEN,
-    IN_BEARBEITUNG,
-    WARTEND,
-    ABGESCHLOSSEN,
-    ABGEBROCHEN,
-    FEHLER
+  OFFEN,
+  IN_BEARBEITUNG,
+  WARTEND,
+  ABGESCHLOSSEN,
+  ABGEBROCHEN,
+  FEHLER
 }
