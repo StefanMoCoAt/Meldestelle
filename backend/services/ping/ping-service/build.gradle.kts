@@ -19,7 +19,7 @@ dependencies {
 
   // Platform und Core Dependencies
   implementation(projects.platform.platformDependencies)
-  implementation(projects.services.ping.pingApi)
+  implementation(project(":backend:services:ping:ping-api"))
   implementation(projects.infrastructure.monitoring.monitoringClient)
 
   // Spring Boot Service Complete Bundle

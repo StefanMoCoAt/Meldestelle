@@ -76,8 +76,8 @@ kotlin {
         commonMain.dependencies {
             // Shared modules
             implementation(project(":clients:shared"))
-            implementation(project(":clients:shared:common-ui"))
-            implementation(project(":clients:shared:navigation"))
+            implementation(project(":frontend:core:design-system"))
+            implementation(project(":frontend:core:navigation"))
             implementation(project(":clients:auth-feature"))
             implementation(project(":clients:ping-feature"))
 

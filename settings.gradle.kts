@@ -45,7 +45,7 @@ include(":platform:platform-testing")
 // ==========================================================================
 // INFRASTRUCTURE
 // ==========================================================================
-include(":infrastructure:gateway")
+include(":backend:gateway")
 include(":infrastructure:messaging:messaging-client")
 include(":infrastructure:messaging:messaging-config")
 include(":infrastructure:cache:cache-api")
@@ -91,18 +91,18 @@ include(":domains:registry:registry-service")
 // ==========================================================================
 // TECHNICAL SERVICES
 // ==========================================================================
-include(":services:ping:ping-api")
-include(":services:ping:ping-service")
+include(":backend:services:ping:ping-api")
+include(":backend:services:ping:ping-service")
 
 // ==========================================================================
 // CLIENTS (Frontend)
 // ==========================================================================
-include(":clients:app")
+include(":frontend:shells:meldestelle-portal")
 include(":clients:auth-feature")
 include(":clients:ping-feature")
 include(":clients:shared")
-include(":clients:shared:common-ui")
-include(":clients:shared:navigation")
+include(":frontend:core:design-system")
+include(":frontend:core:navigation")
 
 // ==========================================================================
 // DOCUMENTATION
