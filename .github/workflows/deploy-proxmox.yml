@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Set up JDK 21
       uses: actions/setup-java@v5
@@ -48,11 +48,14 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build Client (Test Compilation)
-      run: ./gradlew :client:compileCommonMainKotlinMetadata --no-daemon
+    - name: Static Analysis
+      run: ./gradlew staticAnalysis --no-daemon || true
 
-    - name: Run Client Tests
-      run: ./gradlew :client:test --no-daemon || true  # Allow failure for now
+    - name: Build (all)
+      run: ./gradlew build -x test --no-daemon
+
+    - name: Test (all)
+      run: ./gradlew test --no-daemon || true  # Allow failure for now
 
   # ===================================================================
   # Deploy to Proxmox (nur bei main branch)
@@ -64,7 +67,7 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
 
     - name: Setup SSH Key
       uses: webfactory/ssh-agent@v0.8.0
@@ -98,7 +101,7 @@ jobs:
 
           # Stop existing services
           echo "🛑 Stopping existing services..."
-          docker compose -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml down || true
+          docker compose --env-file docker/.env -f docker/docker-compose.yaml down || true
 
           # Clean up old images (optional)
           echo "🧹 Cleaning up old images..."
@@ -106,13 +109,11 @@ jobs:
 
           # Build new images
           echo "🏗️ Building new images..."
-          docker compose -f docker-compose.yml build
-          docker compose -f docker-compose.services.yml build
-          docker compose -f docker-compose.clients.yml build
+          docker compose --env-file docker/.env -f docker/docker-compose.yaml build
 
           # Start infrastructure first
           echo "🚀 Starting infrastructure..."
-          docker compose -f docker-compose.yml up -d
+          docker compose --env-file docker/.env -f docker/docker-compose.yaml up -d
 
           # Wait for infrastructure to be ready
           echo "⏳ Waiting for infrastructure..."
@@ -120,7 +121,8 @@ jobs:
 
           # Start services
           echo "🚀 Starting services..."
-          docker compose -f docker-compose.yml -f docker-compose.services.yml up -d
+          # Start services (already included in main compose file)
+          docker compose --env-file docker/.env -f docker/docker-compose.yaml up -d
 
           # Wait for services to be ready
           echo "⏳ Waiting for services..."
@@ -128,7 +130,8 @@ jobs:
 
           # Start clients
           echo "🚀 Starting clients..."
-          docker compose -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml up -d
+          # Start clients (already included in main compose file)
+          docker compose --env-file docker/.env -f docker/docker-compose.yaml up -d
 
           # Health check
           echo "🏥 Running health checks..."
@@ -136,11 +139,11 @@ jobs:
 
           # Check service status
           echo "📊 Service Status:"
-          docker compose -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml ps
+          docker compose --env-file docker/.env -f docker/docker-compose.yaml ps
 
           # Check logs for errors
           echo "📋 Recent logs:"
-          docker compose -f docker-compose.yml -f docker-compose.services.yml -f docker-compose.clients.yml logs --tail=50
+          docker compose --env-file docker/.env -f docker/docker-compose.yaml logs --tail=50
 
           echo "✅ Deployment completed successfully!"
         ENDSSH
