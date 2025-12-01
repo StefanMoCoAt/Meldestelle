@@ -1,4 +1,4 @@
--- Testcontainers init script for Keycloak schema
+-- Testcontainers an init script for Keycloak schema
 -- Creates the schema and basic privileges for the test DB user
 
 CREATE SCHEMA IF NOT EXISTS keycloak;
