@@ -113,7 +113,6 @@ include(":frontend:features:auth-feature")
 include(":frontend:features:members-feature")
 include(":frontend:features:ping-feature")
 
-
 include(":frontend:shells:meldestelle-portal")
 
 // ==========================================================================
