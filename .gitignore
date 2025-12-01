@@ -23,7 +23,7 @@ logs/
 # Kotlin/Java
 *.class
 
-.env
+config/.env
 
 # Generated diagrams
 build/diagrams/

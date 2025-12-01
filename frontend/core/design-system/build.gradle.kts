@@ -29,7 +29,7 @@ kotlin {
   sourceSets {
     commonMain.dependencies {
       // Shared module dependency
-      implementation(project(":clients:shared"))
+      implementation(project(":frontend:shared"))
 
       // Compose dependencies
       implementation(compose.runtime)

@@ -1,0 +1,52 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+processors:
+  active: true
+
+console-reports:
+  active: true
+  exclude:
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'NotificationReport'
+
+comments:
+  active: true
+  AbsentOrWrongFileLicense:
+    active: false
+
+style:
+  active: true
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: false
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+  UnusedImports:
+    active: true
+
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    threshold: 80
+  TooManyFunctions:
+    active: true
+    thresholdInClasses: 30
+
+performance:
+  active: true
+
+potential-bugs:
+  active: true
+
+exceptions:
+  active: true

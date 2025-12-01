@@ -146,7 +146,7 @@ Das Docker-Setup ist spezifisch für die Web-Entwicklung konfiguriert (wie in `R
 
 ```shell script
 # Startet die Web-App mit Hot-Reload
-docker-compose -f docker-compose.yml \
+docker-compose -f docker-compose.yaml \
 -f docker-compose.clients.yml up -d web-app
 ```
 

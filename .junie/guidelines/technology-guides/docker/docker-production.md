@@ -186,7 +186,7 @@ source .env.production
 certbot certificates
 
 # 3. Services mit Production-Konfiguration starten
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.yaml -f docker-compose.prod.yml up -d
 
 # 4. Health-Checks durchführen
 curl -f https://api.meldestelle.at/actuator/health

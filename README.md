@@ -26,7 +26,7 @@ cp -n .env.template config/env/.env 2>/dev/null || true
 # DOCKER_SSOT_MODE=envless bash scripts/generate-compose-files.sh all development
 
 # 4) Infrastruktur starten
-docker compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yaml up -d
 
 # 5) Services starten (Beispiel)
 ./gradlew :members:members-service:bootRun
@@ -259,8 +259,8 @@ bash scripts/generate-compose-files.sh all development && \
 
 ```bash
 # Nur Infrastruktur
-# Wenn eine handgeschriebene docker-compose.yml existiert:
-docker compose -f docker-compose.yml up -d
+# Wenn eine handgeschriebene docker-compose.yaml existiert:
+docker compose -f docker-compose.yaml up -d
 # Falls Compose-Files generiert werden:
 docker compose -f docker-compose.services.yml up -d
 
@@ -304,7 +304,7 @@ b) Falls unterstützt: alle (oder Aggregator)
 #### Nur Infrastruktur (Postgres, Redis, Kafka, Keycloak)
 
 ```bash
- docker compose -f docker-compose.yml up -d
+ docker compose -f docker-compose.yaml up -d
 ```
 
 #### Services über Gradle

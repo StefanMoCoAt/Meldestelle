@@ -75,12 +75,12 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // Shared modules
-            implementation(project(":clients:shared"))
+            implementation(project(":frontend:shared"))
             implementation(project(":frontend:core:design-system"))
             implementation(project(":frontend:core:navigation"))
             implementation(project(":frontend:core:network"))
-            implementation(project(":clients:auth-feature"))
-            implementation(project(":clients:ping-feature"))
+            implementation(project(":frontend:features:auth-feature"))
+            implementation(project(":frontend:features:ping-feature"))
 
             // DI (Koin) needed to call initKoin { modules(...) }
             implementation(libs.koin.core)

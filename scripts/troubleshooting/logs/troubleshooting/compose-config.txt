@@ -1,2 +1,0 @@
-# docker compose config output
-open /home/stefan-mo/WsMeldestelle/Meldestelle/scripts/troubleshooting/docker-compose.yml: no such file or directory

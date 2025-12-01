@@ -19,8 +19,8 @@ dependencies {
 
   // Platform und Core Dependencies
   implementation(projects.platform.platformDependencies)
-  implementation(project(":backend:services:ping:ping-api"))
-  implementation(projects.infrastructure.monitoring.monitoringClient)
+  implementation(projects.backend.services.ping.pingApi)
+  implementation(projects.backend.infrastructure.monitoring.monitoringClient)
 
   // Spring Boot Service Complete Bundle
   // Provides: web, validation, actuator, security, oauth2-client, oauth2-resource-server,
