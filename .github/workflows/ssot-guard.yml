@@ -16,11 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # FIX: Wir erstellen eine temporäre .env aus dem Example,
-      # damit Docker Compose zufrieden ist.
+      # FIX: .env aus Example erstellen, damit Variablen da sind
       - name: Create .env context
         run: cp docker/.env.example docker/.env
 
+      # FIX: .yaml Extension nutzen (SSoT)
       - name: Validate Docker Compose Config
-        # Wir nutzen explizit die soeben erstellte .env
-        run: docker compose --env-file docker/.env -f docker/docker-compose.yml config
+        run: docker compose --env-file docker/.env -f docker/docker-compose.yaml config
