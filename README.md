@@ -1,5 +1,6 @@
 # Meldestelle
 
+
 > Modulares System für Pferdesportveranstaltungen mit Domain-Driven Design
 
 [![CI Pipeline](https://github.com/StefanMoCoAt/meldestelle/workflows/CI%20-%20Main%20Pipeline/badge.svg)](https://github.com/StefanMoCoAt/meldestelle/actions)
