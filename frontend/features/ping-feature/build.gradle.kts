@@ -28,7 +28,6 @@ kotlin {
         enabled = false
       }
     }
-    binaries.executable()
   }
 
   // WASM, nur wenn explizit aktiviert
@@ -36,20 +35,19 @@ kotlin {
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
       browser()
-      binaries.executable()
     }
   }
 
   sourceSets {
     commonMain.dependencies {
       // Contract from backend
-      implementation(project(":backend:services:ping:ping-api"))
+      implementation(projects.backend.services.ping.pingApi)
 
       // UI Kit (Design System)
-      implementation(project(":frontend:core:design-system"))
+      implementation(projects.frontend.core.designSystem)
 
       // Shared Konfig & Utilities
-      implementation(project(":frontend:shared"))
+      implementation(projects.frontend.shared)
 
       // Compose dependencies
       implementation(compose.runtime)

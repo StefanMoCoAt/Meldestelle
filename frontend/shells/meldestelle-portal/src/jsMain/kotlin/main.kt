@@ -2,8 +2,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
 import org.w3c.dom.HTMLElement
-import at.mocode.clients.shared.di.initKoin
+import at.mocode.shared.di.initKoin
 import at.mocode.frontend.core.network.networkModule
+import at.mocode.frontend.core.localdb.localDbModule
+import at.mocode.frontend.core.localdb.DatabaseProvider
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.core.context.GlobalContext
@@ -15,10 +17,10 @@ import io.ktor.client.request.get
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
   console.log("[WebApp] main() entered")
-  // Initialize DI (Koin) with shared modules + network module
+  // Initialize DI (Koin) with shared modules + network + local DB modules
   try {
-    initKoin { modules(networkModule) }
-    console.log("[WebApp] Koin initialized with networkModule")
+    initKoin { modules(networkModule, localDbModule) }
+    console.log("[WebApp] Koin initialized with networkModule + localDbModule")
   } catch (e: dynamic) {
     console.warn("[WebApp] Koin initialization warning:", e)
   }
@@ -35,6 +37,21 @@ fun main() {
     }
   } catch (e: dynamic) {
     console.warn("[WebApp] Unable to resolve apiClient from Koin:", e)
+  }
+
+  // Simple local DB smoke: create DB instance (avoid query calls to keep smoke minimal)
+  try {
+    val provider = GlobalContext.get().get<DatabaseProvider>()
+    MainScope().launch {
+      try {
+        val db = provider.createDatabase()
+        console.log("[WebApp] Local DB created:", jsTypeOf(db))
+      } catch (e: dynamic) {
+        console.warn("[WebApp] Local DB smoke failed:", e?.message ?: e)
+      }
+    }
+  } catch (e: dynamic) {
+    console.warn("[WebApp] Unable to resolve DatabaseProvider from Koin:", e)
   }
   fun startApp() {
     try {

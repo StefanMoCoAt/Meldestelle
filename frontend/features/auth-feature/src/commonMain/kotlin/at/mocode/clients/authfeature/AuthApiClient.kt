@@ -1,6 +1,6 @@
 package at.mocode.clients.authfeature
 
-import at.mocode.clients.shared.core.AppConstants
+import at.mocode.shared.core.AppConstants
 import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*

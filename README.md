@@ -263,7 +263,7 @@ bash scripts/generate-compose-files.sh all development && \
 # Wenn eine handgeschriebene docker-compose.yaml existiert:
 docker compose -f docker-compose.yaml up -d
 # Falls Compose-Files generiert werden:
-docker compose -f docker-compose.services.yml up -d
+docker compose -f docker-compose.services.yaml up -d
 
 # Services via Gradle
 a) Einzeldienst

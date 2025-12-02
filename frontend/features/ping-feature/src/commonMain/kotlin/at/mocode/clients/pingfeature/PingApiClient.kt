@@ -4,7 +4,7 @@ import at.mocode.ping.api.PingApi
 import at.mocode.ping.api.PingResponse
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
-import at.mocode.clients.shared.core.AppConstants
+import at.mocode.shared.core.AppConstants
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*

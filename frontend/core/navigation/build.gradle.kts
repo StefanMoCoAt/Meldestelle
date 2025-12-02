@@ -18,14 +18,12 @@ kotlin {
 
   js {
     browser()
-    binaries.executable()
   }
 
   if (enableWasm) {
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
       browser()
-      binaries.executable()
     }
   }
 

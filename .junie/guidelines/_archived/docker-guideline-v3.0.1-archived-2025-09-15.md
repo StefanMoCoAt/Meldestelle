@@ -108,7 +108,7 @@ graph TB
 ```bash
 # Massive Redundanz über 100+ Dateien verteilt:
 gradle.properties:              services.port.ping=8082
-docker-compose.services.yml:    SERVER_PORT: ${PING_SERVICE_PORT:-8082}
+docker-compose.services.yaml:    SERVER_PORT: ${PING_SERVICE_PORT:-8082}
 dockerfiles/services/ping:     EXPOSE 8082
 scripts/test/integration:       ping-service:8082
 config/monitoring/prometheus:   - targets: ['ping-service:8082']
@@ -258,7 +258,7 @@ ping-service = 8092  # Geändert von 8082
 
 # Ergebnis: 38+ Dateien automatisch aktualisiert:
 # ✓ gradle.properties: services.port.ping=8092
-# ✓ docker-compose.services.yml: SERVER_PORT: ${PING_SERVICE_PORT:-8092}
+# ✓ docker-compose.services.yaml: SERVER_PORT: ${PING_SERVICE_PORT:-8092}
 # ✓ dockerfiles/services/ping-service/Dockerfile: EXPOSE 8092
 # ✓ scripts/test/integration-test.sh: ping-service:8092
 # ✓ config/monitoring/prometheus.dev.yml: - targets: ['ping-service:8092']
@@ -1163,8 +1163,8 @@ jobs:
     "docker.composeCommand": "docker-compose",
     "docker.composeFiles": [
         "docker-compose.yaml",
-        "docker-compose.services.yml",
-        "docker-compose.clients.yml"
+        "docker-compose.services.yaml",
+        "docker-compose.clients.yaml"
     ]
 }
 ```
@@ -1714,8 +1714,8 @@ Unsere Compose-Dateien sind modular organisiert für verschiedene Einsatzszenari
 # Alle Services einschließlich Clients
 docker-compose \
   -f docker-compose.yaml \
-  -f docker-compose.services.yml \
-  -f docker-compose.clients.yml \
+  -f docker-compose.services.yaml \
+  -f docker-compose.clients.yaml \
   up -d
 
 # Nur Infrastructure für Backend-Entwicklung
@@ -1723,7 +1723,7 @@ docker-compose -f docker-compose.yaml up -d postgres redis kafka consul zipkin
 
 # Mit Debug-Unterstützung für Service-Entwicklung
 DEBUG=true SPRING_PROFILES_ACTIVE=docker \
-docker-compose -f docker-compose.yaml -f docker-compose.services.yml up -d
+docker-compose -f docker-compose.yaml -f docker-compose.services.yaml up -d
 
 # Mit Live-Reload für Frontend-Entwicklung
 docker-compose -f docker-compose.yaml -f docker-compose.override.yml up -d
@@ -1734,7 +1734,7 @@ docker-compose -f docker-compose.yaml -f docker-compose.override.yml up -d
 **Beispiel für Auth-Server Konfiguration:**
 
 ```yaml
-# Erweiterte Environment-Variablen aus docker-compose.services.yml
+# Erweiterte Environment-Variablen aus docker-compose.services.yaml
 auth-server:
   environment:
     # Spring Boot Configuration
@@ -1788,7 +1788,7 @@ auth-server:
 # Production - Optimiert und sicher
 docker-compose \
   -f docker-compose.prod.yml \
-  -f docker-compose.services.yml \
+  -f docker-compose.services.yaml \
   up -d
 
 # Mit spezifischen Environment-Variablen
@@ -1805,7 +1805,7 @@ docker-compose -f docker-compose.yaml up -d postgres redis
 ./gradlew test
 
 # End-to-End Tests
-docker-compose -f docker-compose.yaml -f docker-compose.services.yml up -d
+docker-compose -f docker-compose.yaml -f docker-compose.services.yaml up -d
 ./gradlew :client:web-app:jsTest
 ```
 

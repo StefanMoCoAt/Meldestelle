@@ -32,7 +32,6 @@ kotlin {
         enabled = false
       }
     }
-    binaries.executable()
     // ...
   }
 
@@ -64,7 +63,7 @@ kotlin {
       implementation(libs.koin.compose.viewmodel)
 
       // Network module (provides DI `apiClient`)
-      implementation(project(":frontend:core:network"))
+      implementation(projects.frontend.core.network)
 
       // Compose für shared UI components (common)
       implementation(compose.runtime)

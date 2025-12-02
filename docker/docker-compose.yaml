@@ -16,15 +16,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-<<<<<<<< HEAD:docker/docker-compose.yaml
-      - ./postgres/init:/docker-entrypoint-initdb.d:Z
+      - ./core/postgres:/docker-entrypoint-initdb.d:Z
       # Central postgres.conf from config (optional)
       - ../config/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:Z
     # Use central postgresql.conf if present
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
-========
-      - ./core/postgres:/docker-entrypoint-initdb.d:Z
->>>>>>>> origin/main:docker/docker-compose.yml
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -83,11 +79,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-<<<<<<<< HEAD:docker/docker-compose.yaml
-      - ./keycloak/realm:/opt/keycloak/data/import:Z
-========
       - ./core/keycloak:/opt/keycloak/data/import:Z
->>>>>>>> origin/main:docker/docker-compose.yml
     command: start-dev --import-realm
     healthcheck:
       test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000" ]
@@ -127,12 +119,8 @@ services:
       - "${PROMETHEUS_PORT}"
     volumes:
       - prometheus-data:/prometheus
-<<<<<<<< HEAD:docker/docker-compose.yaml
       # Use central config as single source of truth
       - ../config/monitoring/prometheus:/etc/prometheus:Z
-========
-      - ./monitoring/prometheus:/etc/prometheus:Z
->>>>>>>> origin/main:docker/docker-compose.yml
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.retention.time=15d
@@ -158,14 +146,10 @@ services:
       - "${GF_PORT}"
     volumes:
       - grafana-data:/var/lib/grafana
-<<<<<<<< HEAD:docker/docker-compose.yaml
       # Provisioning (datasources/dashboards) from central config
       - ../config/monitoring/grafana/provisioning:/etc/grafana/provisioning:Z
       # Dashboards directory (referenced by provisioning file path: /var/lib/grafana/dashboards)
       - ../config/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:Z
-========
-      - ./monitoring/grafana:/etc/grafana/provisioning:Z
->>>>>>>> origin/main:docker/docker-compose.yml
     depends_on:
       - prometheus
     healthcheck:
@@ -203,11 +187,7 @@ services:
   api-gateway:
     build:
       context: ..
-<<<<<<<< HEAD:docker/docker-compose.yaml
-      dockerfile: ../backend/gateway/Dockerfile
-========
-      dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
->>>>>>>> origin/main:docker/docker-compose.yml
+      dockerfile: backend/infrastructure/gateway/Dockerfile
       args:
         # Build-Args aus deinen .env Dateien (werden hier statisch benötigt für den Build)
         GRADLE_VERSION: 9.1.0
@@ -226,13 +206,13 @@ services:
       # --- VERBINDUNGEN ---
       # Keycloak URL (INTERN im Docker Netzwerk!)
       # Beachte: http://container-name:8080 (nicht localhost, nicht 8180)
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://${COMPOSE_PROJECT_NAME}-keycloak:8080/realms/meldestelle
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/meldestelle
       SPRING_CLOUD_CONSUL_HOST: consul
       SPRING_CLOUD_CONSUL_PORT: 8500
       # WICHTIG: Das Gateway muss wissen, wie es von anderen Containern erreicht wird (nicht localhost!)
       SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: api-gateway
       # Postgres Verbindung (für Routes/Session, falls nötig)
-      SPRING_DATASOURCE_URL: jdbc:postgresql://${COMPOSE_PROJECT_NAME}-postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       # Logging
@@ -256,11 +236,7 @@ services:
   ping-service:
     build:
       context: ..
-<<<<<<<< HEAD:docker/docker-compose.yaml
-      dockerfile: ../backend/services/ping/Dockerfile
-========
-      dockerfile: dockerfiles/services/ping-service/Dockerfile
->>>>>>>> origin/main:docker/docker-compose.yml
+      dockerfile: backend/services/ping/Dockerfile
       args:
         GRADLE_VERSION: 9.1.0
         JAVA_VERSION: 21
@@ -282,13 +258,13 @@ services:
       SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: ping-service
 
       # - DATENBANK VERBINDUNG -
-      SPRING_DATASOURCE_URL: jdbc:postgresql://${COMPOSE_PROJECT_NAME}-postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
 
       # --- REDIS ---
-      SPRING_DATA_REDIS_HOST: ${COMPOSE_PROJECT_NAME}-redis
+      SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
     depends_on:
       consul:
@@ -308,11 +284,7 @@ services:
   web-app:
     build:
       context: ..
-<<<<<<<< HEAD:docker/docker-compose.yaml
-      dockerfile: clients/web-app/Dockerfile
-========
-      dockerfile: dockerfiles/clients/web-app/Dockerfile
->>>>>>>> origin/main:docker/docker-compose.yml
+      dockerfile: docker/frontends/web-app/Dockerfile
       args:
         GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.1.0}
         JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
@@ -337,11 +309,7 @@ services:
   desktop-app:
     build:
       context: ..
-<<<<<<<< HEAD:docker/docker-compose.yaml
-      dockerfile: clients/desktop-app/Dockerfile
-========
-      dockerfile: dockerfiles/clients/desktop-app/Dockerfile
->>>>>>>> origin/main:docker/docker-compose.yml
+      dockerfile: docker/frontends/desktop-app/Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME}-desktop-app
     restart: unless-stopped
     environment:

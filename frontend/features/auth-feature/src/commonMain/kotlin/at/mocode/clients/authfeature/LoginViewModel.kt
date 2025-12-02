@@ -3,7 +3,7 @@ package at.mocode.clients.authfeature
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.mocode.clients.authfeature.AuthenticatedHttpClient.addAuthHeader
-import at.mocode.clients.shared.core.AppConstants
+import at.mocode.shared.core.AppConstants
 import io.ktor.client.request.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

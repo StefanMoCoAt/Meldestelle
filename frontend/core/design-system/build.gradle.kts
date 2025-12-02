@@ -14,7 +14,6 @@ kotlin {
   js(IR) {
     browser()
 //        nodejs()
-    binaries.executable()
   }
 
   // WASM, nur wenn explizit aktiviert
@@ -22,14 +21,13 @@ kotlin {
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
       browser()
-      binaries.executable()
     }
   }
 
   sourceSets {
     commonMain.dependencies {
       // Shared module dependency
-      implementation(project(":frontend:shared"))
+      implementation(projects.frontend.shared)
 
       // Compose dependencies
       implementation(compose.runtime)

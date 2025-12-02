@@ -10,7 +10,7 @@ import at.mocode.clients.authfeature.AuthenticatedHttpClient
 import at.mocode.clients.authfeature.AuthTokenManager
 import at.mocode.clients.pingfeature.PingScreen
 import at.mocode.clients.pingfeature.PingViewModel
-import at.mocode.clients.shared.core.AppConstants
+import at.mocode.shared.core.AppConstants
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import kotlinx.coroutines.launch

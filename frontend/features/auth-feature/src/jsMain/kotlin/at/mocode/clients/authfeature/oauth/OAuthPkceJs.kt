@@ -1,6 +1,6 @@
 package at.mocode.clients.authfeature.oauth
 
-import at.mocode.clients.shared.core.AppConstants
+import at.mocode.shared.core.AppConstants
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import org.khronos.webgl.ArrayBuffer

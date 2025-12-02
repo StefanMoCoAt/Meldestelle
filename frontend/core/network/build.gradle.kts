@@ -18,7 +18,6 @@ kotlin {
     browser {
       testTask { enabled = false }
     }
-    binaries.executable()
   }
 
   if (enableWasm) {
@@ -28,7 +27,7 @@ kotlin {
 
   sourceSets {
     commonMain.dependencies {
-      // Ktor Client core + JSON + Auth + Logging + Timeouts + Retry
+      // Ktor Client core + JSON and Auth + Logging + Timeouts + Retry
       api(libs.ktor.client.core)
       implementation(libs.ktor.client.contentNegotiation)
       implementation(libs.ktor.client.serialization.kotlinx.json)
@@ -41,6 +40,9 @@ kotlin {
 
       // DI (Koin)
       api(libs.koin.core)
+
+      // Project modules via typesafe accessors
+      // (none here; kept for consistency)
     }
 
     jvmMain.dependencies {

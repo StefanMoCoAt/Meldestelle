@@ -1,6 +1,6 @@
 package at.mocode.clients.authfeature.oauth
 
-import at.mocode.clients.shared.core.AppConstants
+import at.mocode.shared.core.AppConstants
 
 data class PkceState(
   val state: String,

@@ -1,6 +1,6 @@
 package at.mocode.clients.authfeature.oauth
 
-import at.mocode.clients.shared.core.AppConstants
+import at.mocode.shared.core.AppConstants
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.util.Base64
