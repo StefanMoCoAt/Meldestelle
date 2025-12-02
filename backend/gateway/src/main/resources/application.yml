@@ -1,0 +1,299 @@
+# Port, auf dem das Gateway läuft
+server:
+  port: ${SERVER_PORT:8081}
+  # Optimierte Netty-Konfiguration für reaktive Anwendungen
+  netty:
+    connection-timeout: 5s
+    idle-timeout: 15s
+
+# Der Name, unter dem sich das Gateway in Consul registriert
+spring:
+  application:
+    name: api-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  security:
+    user:
+      name: ${GATEWAY_ADMIN_USER:admin}
+      password: ${GATEWAY_ADMIN_PASSWORD:admin}
+  cloud:
+    consul:
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      enabled: ${CONSUL_ENABLED:true}
+      discovery:
+        enabled: ${CONSUL_ENABLED:true}
+        register: ${CONSUL_ENABLED:true}
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        instance-id: ${spring.application.name}-${server.port}-${random.uuid}
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 5000
+            response-timeout: 30s
+            pool:
+              max-idle-time: 15s
+              max-life-time: 60s
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            - name: CircuitBreaker
+              args:
+                name: defaultCircuitBreaker
+                fallbackUri: forward:/fallback
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+                methods: GET,POST,PUT,DELETE
+                backoff:
+                  firstBackoff: 50ms
+                  maxBackoff: 500ms
+                  factor: 2
+                  basedOnPreviousValue: false
+            - name: AddResponseHeader
+              args:
+                name: X-Content-Type-Options
+                value: nosniff
+            - name: AddResponseHeader
+              args:
+                name: X-Frame-Options
+                value: DENY
+            - name: AddResponseHeader
+              args:
+                name: X-XSS-Protection
+                value: 1; mode=block
+            - name: AddResponseHeader
+              args:
+                name: Referrer-Policy
+                value: strict-origin-when-cross-origin
+            - name: AddResponseHeader
+              args:
+                name: Cache-Control
+                value: no-cache, no-store, must-revalidate
+          routes:
+
+            # ==============================================================
+            # --- Gateway-Info-Route (optional) ---
+            # ==============================================================
+            - id: gateway-info-route
+              uri: http://localhost:${server.port}
+              predicates:
+                - Method=GET
+                - Path=/gateway-info
+              filters:
+                - name: SetStatus
+                  args:
+                    status: 200
+                - name: SetResponseHeader
+                  args:
+                    name: Content-Type
+                    value: application/json
+
+            # ==============================================================
+            # --- Ping-Service-Integration (optional) ---
+            # ==============================================================
+            - id: ping-service-route
+              uri: lb://ping-service
+              predicates:
+                - Path=/api/ping/**
+              filters:
+                - StripPrefix=1
+
+  # ==============================================================
+  # --- Members-Service-Integration (optional) ---
+  # ==============================================================
+  #            - id: members-service-route
+  #              uri: lb://members-service
+  #              predicates:
+  #                - Path=/api/members/**
+  #              filters:
+  #                - StripPrefix=1
+  #                - name: CircuitBreaker
+  #                  args:
+  #                    name: membersCircuitBreaker
+  #                    fallbackUri: forward:/fallback/members
+
+  # ==============================================================
+  # --- Horses-Service-Integration (optional) ---
+  # ==============================================================
+  #            - id: horses-service-route
+  #              uri: lb://horses-service
+  #              predicates:
+  #                - Path=/api/horses/**
+  #              filters:
+  #                - StripPrefix=1
+  #                - name: CircuitBreaker
+  #                  args:
+  #                    name: horsesCircuitBreaker
+  #                    fallbackUri: forward:/fallback/horses
+
+  # ==============================================================
+  # --- Events-Service-Integration (optional) ---
+  # ==============================================================
+  #            - id: events-service-route
+  #              uri: lb://events-service
+  #              predicates:
+  #                - Path=/api/events/**
+  #              filters:
+  #                - StripPrefix=1
+  #                - name: CircuitBreaker
+  #                  args:
+  #                    name: eventsCircuitBreaker
+  #                    fallbackUri: forward:/fallback/events
+
+  # ==============================================================
+  # --- Masterdata-Service-Integration (optional) ---
+  # ==============================================================
+  #            - id: masterdata-service-route
+  #              uri: lb://masterdata-service
+  #              predicates:
+  #                - Path=/api/masterdata/**
+  #              filters:
+  #                - StripPrefix=1
+  #                - name: CircuitBreaker
+  #                  args:
+  #                    name: masterdataCircuitBreaker
+  #                    fallbackUri: forward:/fallback/masterdata
+
+  # ==============================================================
+  # --- Auth-Service-Integration (optional) ---
+  # ==============================================================
+  #            - id: auth-service-route
+  #              uri: lb://auth-service
+  #              predicates:
+  #                - Path=/api/auth/**
+  #              filters:
+  #                - StripPrefix=1
+  #                - name: CircuitBreaker
+  #                  args:
+  #                    name: authCircuitBreaker
+  #                    fallbackUri: forward:/fallback/auth
+# Circuit Breaker Konfiguration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 100
+        minimumNumberOfCalls: 20
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+    instances:
+      defaultCircuitBreaker:
+        baseConfig: default
+      membersCircuitBreaker:
+        baseConfig: default
+        slidingWindowSize: 50
+      horsesCircuitBreaker:
+        baseConfig: default
+        slidingWindowSize: 50
+      eventsCircuitBreaker:
+        baseConfig: default
+        slidingWindowSize: 75
+      masterdataCircuitBreaker:
+        baseConfig: default
+        slidingWindowSize: 30
+      authCircuitBreaker:
+        baseConfig: default
+        slidingWindowSize: 20
+        failureRateThreshold: 30
+
+# Management und Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway,circuitbreakers
+      base-path: /actuator
+      cors:
+        allowed-origins:
+          - "https://*.meldestelle.at"
+          - "http://localhost:*"
+        allowed-methods: GET,POST
+        allowed-headers: "*"
+        allow-credentials: true
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+    metrics:
+      access: unrestricted
+    info:
+      access: unrestricted
+    prometheus:
+      access: unrestricted
+    gateway:
+      access: unrestricted
+    circuitbreakers:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.90,0.95,0.99
+      minimum-expected-value:
+        http.server.requests: 1ms
+      maximum-expected-value:
+        http.server.requests: 30s
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.profiles.active}
+      instance: ${spring.cloud.consul.discovery.instance-id}
+      service: gateway
+      component: infrastructure
+      gateway: api-gateway
+  info:
+    env:
+      enabled: true
+    git:
+      mode: full
+    build:
+      enabled: true
+    java:
+      enabled: true
+  # Tracing-Konfiguration - Aktiviert (Micrometer Tracing + Zipkin)
+  tracing:
+    enabled: ${TRACING_ENABLED:false}
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
+      # Reduziert Verbindungsfehler, wenn Zipkin nicht verfügbar ist
+      connect-timeout: 1s
+      read-timeout: 10s
+
+# Erweiterte Logging-Konfiguration
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.cloud.loadbalancer: DEBUG
+    org.springframework.cloud.consul: INFO
+    at.mocode.infrastructure.gateway: DEBUG
+    io.github.resilience4j: INFO
+    reactor.netty.http.client: INFO
+    org.springframework.security: WARN
+    org.springframework.web: INFO
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr([%X{correlationId:-}]){yellow} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
+  file:
+    name: infrastructure/gateway/logs/gateway.log
+  logback:
+    rolling policy:
+      clean-history-on-start: true
+      max-file-size: 100MB
+      total-size-cap: 1GB
+      max-history: 30

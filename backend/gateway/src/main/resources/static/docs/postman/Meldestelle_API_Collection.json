@@ -1,0 +1,576 @@
+{
+  "info": {
+    "name": "Meldestelle Self-Contained Systems API",
+    "description": "Comprehensive API collection for the Austrian Equestrian Federation Meldestelle system. This collection covers all bounded contexts including Authentication, Master Data, and Horse Registry.",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "System Information",
+      "item": [
+        {
+          "name": "API Gateway Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "API Documentation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api",
+              "host": ["{{baseUrl}}"],
+              "path": ["api"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/swagger",
+              "host": ["{{baseUrl}}"],
+              "path": ["swagger"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication Context",
+      "item": [
+        {
+          "name": "User Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"phoneNumber\": \"+43123456789\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "User Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data && response.data.token) {",
+                  "        pm.collectionVariables.set('authToken', response.data.token);",
+                  "        console.log('Auth token saved:', response.data.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\",\n  \"phoneNumber\": \"+43987654321\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"SecurePassword123!\",\n  \"newPassword\": \"NewSecurePassword456!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "change-password"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Master Data Context",
+      "item": [
+        {
+          "name": "Countries",
+          "item": [
+            {
+              "name": "Get All Countries",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/masterdata/countries",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "masterdata", "countries"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Active Countries",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/masterdata/countries/active",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "masterdata", "countries", "active"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Country by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/masterdata/countries/{{countryId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "masterdata", "countries", "{{countryId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get Country by ISO Code",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/masterdata/countries/iso/AT",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "masterdata", "countries", "iso", "AT"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Country",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isoAlpha2Code\": \"TS\",\n  \"isoAlpha3Code\": \"TST\",\n  \"isoNumerischerCode\": \"999\",\n  \"nameDeutsch\": \"Testland\",\n  \"nameEnglisch\": \"Testland\",\n  \"istEuMitglied\": false,\n  \"istEwrMitglied\": false,\n  \"istAktiv\": true,\n  \"sortierReihenfolge\": 999\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/masterdata/countries",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "masterdata", "countries"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update Country",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"isoAlpha2Code\": \"TS\",\n  \"isoAlpha3Code\": \"TST\",\n  \"isoNumerischerCode\": \"999\",\n  \"nameDeutsch\": \"Updated Testland\",\n  \"nameEnglisch\": \"Updated Testland\",\n  \"istEuMitglied\": false,\n  \"istEwrMitglied\": false,\n  \"istAktiv\": true,\n  \"sortierReihenfolge\": 999\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/masterdata/countries/{{countryId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "masterdata", "countries", "{{countryId}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Country",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/masterdata/countries/{{countryId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "masterdata", "countries", "{{countryId}}"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Horse Registry Context",
+      "item": [
+        {
+          "name": "Get All Horses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/horses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Horses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/horses/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses", "active"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Horse by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/horses/{{horseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses", "{{horseId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Horses by Name",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/horses/search?name=Test&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses", "search"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Test"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Horses by Owner",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/horses/owner/{{ownerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses", "owner", "{{ownerId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Horse",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pferdeName\": \"Test Horse\",\n  \"geschlecht\": \"WALLACH\",\n  \"geburtsdatum\": \"2020-05-15\",\n  \"rasse\": \"Warmblut\",\n  \"farbe\": \"Braun\",\n  \"zuechterName\": \"Test Breeder\",\n  \"stockmass\": 165,\n  \"istAktiv\": true,\n  \"bemerkungen\": \"Test horse for API demonstration\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/horses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Horse",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pferdeName\": \"Updated Test Horse\",\n  \"geschlecht\": \"WALLACH\",\n  \"geburtsdatum\": \"2020-05-15\",\n  \"rasse\": \"Warmblut\",\n  \"farbe\": \"Dunkelbraun\",\n  \"zuechterName\": \"Updated Test Breeder\",\n  \"stockmass\": 167,\n  \"istAktiv\": true,\n  \"bemerkungen\": \"Updated test horse for API demonstration\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/horses/{{horseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses", "{{horseId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Horse",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/horses/{{horseId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses", "{{horseId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Batch Delete Horses",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"horseIds\": [\"{{horseId1}}\", \"{{horseId2}}\"],\n  \"forceDelete\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/horses/batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses", "batch"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Horse Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/horses/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "horses", "stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

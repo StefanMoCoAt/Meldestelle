@@ -1,0 +1,83 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: api-gateway-keycloak-integration-test
+  main:
+    web-application-type: reactive
+  # Exclude OAuth2 ResourceServer auto-configuration to prevent early issuer-uri validation
+  # The OAuth2 configuration will be set dynamically after Testcontainers start
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration
+  # OAuth2 configuration will be set by @DynamicPropertySource after containers start
+  # Do not set static issuer-uri here as it will fail validation before containers are ready
+  cloud:
+    discovery:
+      enabled: false
+    consul:
+      enabled: false
+      config:
+        enabled: false
+      discovery:
+        register: false
+    loadbalancer:
+      enabled: false
+    gateway:
+      # IMPORTANT: Do not load production lb:// routes in tests
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+          httpclient:
+            connect-timeout: 1000
+            response-timeout: 5s
+          routes:
+            [ ]
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns:
+                  - "http://localhost:*"
+                  - "https://*.meldestelle.at"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - PATCH
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                allowCredentials: true
+                maxAge: 3600
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuit breakers:
+      enabled: false
+  security:
+    enabled: false
+
+# Enable JWT authentication through OAuth2 Resource Server for integration testing
+gateway:
+  security:
+    jwt:
+      enabled: false # Disable custom JWT filter
+    keycloak:
+      enabled: true # Enable Keycloak integration
+
+logging:
+  level:
+    org.springframework.cloud.gateway: WARN
+    org.springframework.security: DEBUG
+    at.mocode.infrastructure.gateway: DEBUG

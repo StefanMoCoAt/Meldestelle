@@ -41,7 +41,22 @@ include(":backend:infrastructure:cache:redis-cache")
 include(":backend:infrastructure:event-store:event-store-api")
 include(":backend:infrastructure:event-store:redis-event-store")
 
+<<<<<<< HEAD
 include(":backend:infrastructure:gateway")
+=======
+// ==========================================================================
+// INFRASTRUCTURE
+// ==========================================================================
+include(":backend:gateway")
+include(":infrastructure:messaging:messaging-client")
+include(":infrastructure:messaging:messaging-config")
+include(":infrastructure:cache:cache-api")
+include(":infrastructure:cache:redis-cache")
+include(":infrastructure:event-store:event-store-api")
+include(":infrastructure:event-store:redis-event-store")
+include(":infrastructure:monitoring:monitoring-client")
+include(":infrastructure:monitoring:monitoring-server")
+>>>>>>> origin/main
 
 include(":backend:infrastructure:messaging:messaging-client")
 
@@ -52,6 +67,7 @@ include(":backend:infrastructure:monitoring:monitoring-client")
 include(":backend:infrastructure:monitoring:monitoring-server")
 
 // --- EVENTS (Competition Management) ---
+<<<<<<< HEAD
 // include(":backend:services:events:events-api")
 // include(":backend:services:events:events-common")
 // include(":backend:services:events:events-domain")
@@ -81,6 +97,27 @@ include(":backend:infrastructure:monitoring:monitoring-server")
 
 include(":backend:services:ping:ping-api")
 include(":backend:services:ping:ping-service")
+=======
+// include(":domains:events:events-api")
+// include(":domains:events:events-common")
+// include(":domains:events:events-domain")
+// include(":domains:events:events-infrastructure")
+// include(":domains:events:events-service")
+
+// --- HORSES (Horse Management) ---
+// include(":domains:horses:horses-api")
+// include(":domains:horses:horses-common")
+// include(":domains:horses:horses-domain")
+// include(":domains:horses:horses-infrastructure")
+// include(":domains:horses:horses-service")
+
+// --- MASTERDATA (The Rulebook) ---
+// include(":domains:masterdata:masterdata-api")
+// include(":domains:masterdata:masterdata-common")
+// include(":domains:masterdata:masterdata-domain")
+// include(":domains:masterdata:masterdata-infrastructure")
+// include(":domains:masterdata:masterdata-service")
+>>>>>>> origin/main
 
 // --- REGISTRY (Single Source of Truth) ---
 // Verwaltet Personen, Pferde & Vereine (ZNS Importe).
@@ -93,8 +130,24 @@ include(":backend:services:registry:registry-service")
 // ==========================================================================
 // CORE
 // ==========================================================================
+<<<<<<< HEAD
 include(":core:core-domain")
 include(":core:core-utils")
+=======
+include(":backend:services:ping:ping-api")
+include(":backend:services:ping:ping-service")
+
+// ==========================================================================
+// CLIENTS (Frontend)
+// ==========================================================================
+include(":frontend:shells:meldestelle-portal")
+include(":clients:auth-feature")
+include(":clients:ping-feature")
+include(":clients:shared")
+include(":frontend:core:design-system")
+include(":frontend:core:navigation")
+include(":frontend:core:network")
+>>>>>>> origin/main
 
 // ==========================================================================
 // DOCUMENTATION
