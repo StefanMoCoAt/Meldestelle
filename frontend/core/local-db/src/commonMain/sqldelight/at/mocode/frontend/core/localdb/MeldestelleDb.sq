@@ -1,0 +1,10 @@
+CREATE TABLE LocalSettings (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+insertOrReplace:
+INSERT OR REPLACE INTO LocalSettings(key, value) VALUES (?, ?);
+
+selectAll:
+SELECT * FROM LocalSettings;

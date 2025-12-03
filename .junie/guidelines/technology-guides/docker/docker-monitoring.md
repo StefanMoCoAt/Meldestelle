@@ -58,7 +58,7 @@ labels:
 
 ```bash
 # Centralized logging mit ELK Stack (optional)
-docker-compose -f docker-compose.yml -f docker-compose.logging.yml up -d
+docker-compose -f docker-compose.yaml -f docker-compose.logging.yml up -d
 
 # Log-Parsing für strukturierte Logs
 docker-compose logs --follow --tail=100 api-gateway | jq -r '.message'

@@ -2,7 +2,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.unit.dp
-import at.mocode.clients.shared.di.initKoin
+import at.mocode.shared.di.initKoin
 import at.mocode.frontend.core.network.networkModule
 
 fun main() = application {

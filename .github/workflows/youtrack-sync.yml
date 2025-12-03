@@ -23,7 +23,7 @@ jobs:
     steps:
       # WICHTIG: Checkout ist notwendig, damit "git log" funktioniert
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Notwendig, um die Commit-Historie für "git log" zu laden
 

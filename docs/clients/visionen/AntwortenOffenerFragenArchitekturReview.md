@@ -9,7 +9,7 @@
 
 **Eintrag im Guide:**
 
-```kotlin
+```text
 // GUIDELINE: Dependency Injection
 // Wir nutzen Koin. Module werden im `di` Package des Features definiert.
 
@@ -25,7 +25,8 @@ val inventoryModule = module {
 // 2. Nutzung des ApiClients (Best Practice)
 // Wir injizieren IMMER den "apiClient" (mit Auth-Header), niemals den Default Client.
 val networkModule = module {
-    single(named("apiClient")) { ... } // Konfiguriert in :core:network
+    // Hinweis: Platzhalter (kein ausführbarer Code im Dokument)
+    single(named("apiClient")) { /* bereitgestellt in :core:network */ }
 }
 
 val myFeatureModule = module {
@@ -133,14 +134,14 @@ suspend fun updateStock(item: Item) {
 
 **Eintrag im Guide:**
 
-```kotlin
+```text
 // GUIDELINE: Feature Isolation
 // 1. Features importieren NIEMALS andere Features im `build.gradle.kts`.
 // 2. Kommunikation nur über Navigation (Router).
 // 3. Gemeinsam genutzte Datenobjekte (z.B. UserID, ShopID) liegen in :core:domain.
 
 // FALSCH:
-import com.project.features.billing.Invoice // Abhängigkeit zu anderem Feature!
+// import com.project.features.billing.Invoice // Abhängigkeit zu anderem Feature! (nur zu Illustrationszwecken)
 
 // RICHTIG:
 // Feature A navigiert zu Feature B via Route

@@ -1,0 +1,29 @@
+package at.mocode.clients.pingfeature
+
+import at.mocode.ping.api.EnhancedPingResponse
+import at.mocode.ping.api.HealthResponse
+import at.mocode.ping.api.PingApi
+import at.mocode.ping.api.PingResponse
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+
+/**
+ * PingApi implementation that uses a provided HttpClient (e.g., DI-provided "apiClient").
+ */
+class PingApiKoinClient(private val client: HttpClient) : PingApi {
+
+  override suspend fun simplePing(): PingResponse {
+    return client.get("/api/ping/simple").body()
+  }
+
+  override suspend fun enhancedPing(simulate: Boolean): EnhancedPingResponse {
+    return client.get("/api/ping/enhanced") {
+      url.parameters.append("simulate", simulate.toString())
+    }.body()
+  }
+
+  override suspend fun healthCheck(): HealthResponse {
+    return client.get("/api/ping/health").body()
+  }
+}

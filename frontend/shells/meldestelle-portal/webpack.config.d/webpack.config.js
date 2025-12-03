@@ -1,7 +1,7 @@
 // HTML template will be handled by Kotlin/JS build system
 // No need for custom HtmlWebpackPlugin configuration
 
-// Bundle-Analyse für Development (optional, only if package is available)
+// Bundle-Analyze für Development (optional, only if package is available)
 if (process.env.ANALYZE_BUNDLE === 'true') {
   try {
     const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
@@ -17,13 +17,13 @@ if (process.env.ANALYZE_BUNDLE === 'true') {
 }
 
 // Hinweis: Wir liefern eine statische index.html aus src/jsMain/resources aus.
-// Diese Datei enthält nur einen Script-Tag zu "web-app.js" und wird NICHT
+// Diese Datei enthält nur ein Script-Tag zu "web-app.js" und wird NICHT
 // vom HtmlWebpackPlugin generiert. Zusätzliche Chunks (z. B. vendor/runtime)
 // würden dann nicht automatisch injiziert und führen dazu, dass die App nicht startet
-// (Bildschirm bleibt auf "Loading...").
+// (Bildschirm bleibt auf "Loading ...").
 //
 // Daher überschreiben wir config.optimization NICHT mehr mit splitChunks.
-// Wenn später Chunking gewünscht ist, muss die index.html durch die generierte
+// Wenn später Chunking gewünscht ist, muss die index.html durch das generierte
 // HTML ersetzt oder die zusätzlichen Chunks manuell eingebunden werden.
 //
 // (Frühere splitChunks-Konfiguration wurde bewusst entfernt.)
