@@ -1164,7 +1164,7 @@ jobs:
     "docker.composeFiles": [
         "docker-compose.yaml",
         "docker-compose.services.yaml",
-        "docker-compose.clients.yaml"
+        "docker-compose.frontend.yaml"
     ]
 }
 ```
@@ -1715,7 +1715,7 @@ Unsere Compose-Dateien sind modular organisiert für verschiedene Einsatzszenari
 docker-compose \
   -f docker-compose.yaml \
   -f docker-compose.services.yaml \
-  -f docker-compose.clients.yaml \
+  -f docker-compose.frontend.yaml \
   up -d
 
 # Nur Infrastructure für Backend-Entwicklung

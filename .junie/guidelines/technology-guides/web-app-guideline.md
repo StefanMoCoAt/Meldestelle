@@ -147,7 +147,7 @@ Das Docker-Setup ist spezifisch für die Web-Entwicklung konfiguriert (wie in `R
 ```shell script
 # Startet die Web-App mit Hot-Reload
 docker-compose -f docker-compose.yaml \
--f docker-compose.clients.yaml up -d web-app
+-f docker-compose.frontend.yaml up -d web-app
 ```
 
 Der Dienst ist dann unter dem in der `docker-compose.clients.yml` konfigurierten Port (z.B. Port `3000`) erreichbar.

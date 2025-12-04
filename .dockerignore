@@ -73,8 +73,7 @@ Thumbs.db
 config/.env
 .env.local
 .env.*.local
-config/.env
-config/.env.example
+.env.example
 
 # ===================================================================
 # Docker and Container files

@@ -640,10 +640,10 @@ docker compose -f docker-compose.yaml up -d
 docker compose -f docker-compose.yaml -f docker-compose.services.yaml up -d
 
 # Infrastruktur + Clients
-docker compose -f docker-compose.yaml -f docker-compose.clients.yaml up -d
+docker compose -f docker-compose.yaml -f docker-compose.frontend.yaml up -d
 
 # Alles
-docker compose -f docker-compose.yaml -f docker-compose.services.yaml -f docker-compose.clients.yaml up -d
+docker compose -f docker-compose.yaml -f docker-compose.services.yaml -f docker-compose.frontend.yaml up -d
 
 # ⚠️ Tipp: Verwende stattdessen die Makefile-Befehle!
 ```

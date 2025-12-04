@@ -59,7 +59,7 @@ services:
     container_name: "${PROJECT_NAME}-keycloak"
     restart: "${RESTART_POLICY}"
     build:
-      context: "../config/backend/infrastructure/keycloak"
+      context: "config/backend/infrastructure/keycloak"
       args:
         KEYCLOAK_IMAGE_TAG: "26.4"
     environment:
