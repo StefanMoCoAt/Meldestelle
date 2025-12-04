@@ -4,6 +4,9 @@ out/
 .gradle/
 **/build/
 
+# Enviroments
+#.env
+
 # Kotlin
 .kotlin/
 
@@ -25,8 +28,6 @@ logs/
 
 # Kotlin/Java
 *.class
-
-config/.env
 
 # Generated diagrams
 build/diagrams/

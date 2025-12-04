@@ -19,7 +19,7 @@ eclipse-temurin-jre = "21-jre-alpine"
 
 # --- Datastore Images ---
 postgres = "16-alpine"
-redis = "7-alpine"
+redis = "7.4-alpine"
 
 # --- Additional Infrastructure Images ---
 consul = "1.15"
