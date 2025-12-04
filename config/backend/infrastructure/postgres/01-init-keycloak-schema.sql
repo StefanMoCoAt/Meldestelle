@@ -11,8 +11,14 @@
 -- Erstellt das Keycloak-Schema, falls es noch nicht existiert.
 CREATE SCHEMA IF NOT EXISTS keycloak;
 
+-- Da der "POSTGRES_USER" (Superuser) das Skript ausführt,
+-- gehört ihm das Schema automatisch oder er hat Zugriff.
+-- Explizite GRANTS auf "pg-user" entfernen, um .env-Unabhängigkeit zu wahren.
+
+-- Falls du es explizit willst, nutze current_user (der ausführende User):
+GRANT ALL PRIVILEGES ON SCHEMA keycloak TO current_user;
 -- Gewährt dem Benutzer „meldestelle“ alle Berechtigungen für das Schema.
-GRANT ALL PRIVILEGES ON SCHEMA keycloak TO "pg-user";
+-- GRANT ALL PRIVILEGES ON SCHEMA keycloak TO "pg-user";
 
 -- Gewährt die Nutzung des Schemas
 GRANT USAGE ON SCHEMA keycloak TO "pg-user";

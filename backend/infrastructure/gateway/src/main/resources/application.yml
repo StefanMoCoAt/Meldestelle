@@ -1,6 +1,6 @@
 # Port, auf dem das Gateway läuft
 server:
-  port: ${SERVER_PORT:8081}
+  port: ${GATEWAY_SERVER_PORT:8081}
   # Optimierte Netty-Konfiguration für reaktive Anwendungen
   netty:
     connection-timeout: 5s

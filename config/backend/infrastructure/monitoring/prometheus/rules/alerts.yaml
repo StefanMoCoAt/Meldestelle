@@ -1,0 +1,73 @@
+groups:
+  - name: meldestelle_alerts
+    rules:
+      # 1. Memory: Passt soweit, ist okay.
+      - alert: HighMemoryUsage
+        expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage ({{ $value | humanize }}%)"
+          description: "JVM Heap usage is above 85%.\n  Instance: {{ $labels.instance }}"
+
+      # 2. CPU: Passt auch.
+      - alert: HighCpuUsage
+        expr: process_cpu_usage * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage ({{ $value | humanize }}%)"
+          description: "CPU usage is above 85%.\n  Instance: {{ $labels.instance }}"
+
+      # 3. Error Rate: FIX - Division durch null abfangen & Rate nutzen
+      - alert: HighErrorRate
+        # Wir prüfen nur, wenn überhaupt Requests > 0 da sind, um DivByZero zu vermeiden
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count[5m]))
+          ) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate ({{ $value | humanize }}%)"
+          description: "More than 5% of requests resulted in 5xx errors.\n  Instance: {{ $labels.instance }}"
+
+      # 4. Service Down: FIX - Job Name Regex
+      - alert: ServiceDown
+        # Prüft alle Jobs, die du in prometheus.yml definiert hast (api-gateway, consul etc.),
+        # 'up == 0' bedeutet: Target ist konfiguriert, aber nicht erreichbar.
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service instance {{ $labels.instance }} of job {{ $labels.job }} is not reachable."
+
+      # 5. Slow Response: FIX - 'rate' benutzen!
+      - alert: SlowResponseTime
+        # Berechnet die durchschnittliche Dauer pro request im 5-Minuten-Fenster
+        expr: rate(http_server_requests_seconds_sum[5m]) / rate(http_server_requests_seconds_count[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow response time ({{ $value | humanizeDuration }})"
+          description: "Average response time is > 1s for the last 5 minutes.\n  Instance: {{ $labels.instance }}\n  Path: {{ $labels.uri }}"
+
+      # 6. GC Pause: FIX - 'rate' benutzen!
+      - alert: HighGcPauseTime
+        # Zeigt an, wie viel Zeit PRO SEKUNDE für GC draufgeht (nicht pro GC Event, das ist oft aussagekräftiger)
+        # Oder "Durchschnittliche Dauer pro GC Event im Zeitfenster":
+        expr: rate(jvm_gc_pause_seconds_sum[5m]) / rate(jvm_gc_pause_seconds_count[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High GC pause time ({{ $value | humanizeDuration }})"
+          description: "Average GC pause is > 0.5s.\n  Instance: {{ $labels.instance }}"

@@ -73,8 +73,8 @@ Thumbs.db
 config/.env
 .env.local
 .env.*.local
-**/.env
-**/.env.*
+config/.env
+config/.env.example
 
 # ===================================================================
 # Docker and Container files
@@ -171,7 +171,7 @@ backup.sh
 # ===================================================================
 # Security and certificates (never include in builds)
 # ===================================================================
-config/ssl/
+config/backend/infrastructure/ssl/
 **/*.key
 **/*.pem
 **/*.p12

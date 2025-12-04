@@ -1,0 +1,368 @@
+name: "${PROJECT_NAME:-meldestelle}"
+
+services:
+  # ==========================================
+  # CORE INFRASTRUCTURE
+  # ==========================================
+
+  # --- DATABASE: PostgreSQL ---
+  postgres:
+    image: "postgres:16-alpine"
+    container_name: "${PROJECT_NAME}-postgres"
+    restart: "${RESTART_POLICY}"
+    ports:
+      - "${POSTGRES_PORT}"
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+    volumes:
+      - "postgres-data:/var/lib/postgresql/data"
+      - "../config/backend/infrastructure/postgres:/docker-entrypoint-initdb.d:Z"
+      - "../config/backend/infrastructure/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:Z"
+    command: [ "postgres", "-c", "config_file=/etc/postgresql/postgresql.conf" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: "5s"
+      timeout: "5s"
+      retries: "5"
+      start_period: "10s"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "postgres"
+
+  # --- CACHE: Redis ---
+  redis:
+    image: "redis:8.4-alpine"
+    container_name: "${PROJECT_NAME}-redis"
+    restart: "${RESTART_POLICY}"
+    ports:
+      - "${REDIS_PORT}"
+    volumes:
+      - "redis-data:/data"
+      - "../config/backend/infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
+    command: [ "sh", "-lc", "exec redis-server /usr/local/etc/redis/redis.conf ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a \"$REDIS_PASSWORD\" ping | grep PONG" ]
+      interval: "5s"
+      timeout: "5s"
+      retries: "3"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "redis"
+
+  # --- IAM: Keycloak ---
+  keycloak:
+    image: "meldestelle-keycloak:latest"
+    container_name: "${PROJECT_NAME}-keycloak"
+    restart: "${RESTART_POLICY}"
+    build:
+      context: "../config/backend/infrastructure/keycloak"
+      args:
+        KEYCLOAK_IMAGE_TAG: "26.4"
+    environment:
+      # Admin Credentials aus .env
+      KC_BOOTSTRAP_ADMIN_USERNAME: "${KC_ADMIN_USER}"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "${KC_ADMIN_PASSWORD}"
+
+      # DB Verbindung (Nutzt interne Docker-Namen, daher fest 'postgres')
+      KC_DB: "postgres"
+      KC_DB_URL: "jdbc:postgresql://postgres:5432/pg-${PROJECT_NAME}-db"
+      KC_DB_USERNAME: "${POSTGRES_USER}"
+      KC_DB_PASSWORD: "${POSTGRES_PASSWORD}"
+
+      # Hostname & Proxy (Wichtig für Dev!)
+      KC_HOSTNAME: "localhost"
+      # Erlaubte Backend-Calls via http://keycloak:8080 im Docker Netzwerk
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: "xforwarded"
+
+      # Health & Metrics sind schon im Image gebaut, aber env schadet nicht
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+    ports:
+      - "${KC_PORT}"
+      - "9000:9000"
+    depends_on:
+      postgres:
+        condition: "service_healthy"
+    volumes:
+      # Import Realm
+      - "../config/backend/infrastructure/keycloak:/opt/keycloak/data/import:Z"
+    command: "start --optimized --import-realm"
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000" ]
+      interval: "10s"
+      timeout: "5s"
+      retries: "5"
+      start_period: "60s"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "keycloak"
+
+  # --- DATENBANK-MANAGEMENT-TOOL: pgAdmin4 ---
+  pgadmin:
+    image: "dpage/pgadmin4:8"
+    container_name: "${PROJECT_NAME}-pgadmin"
+    restart: "${RESTART_POLICY}"
+    ports:
+      - "${PGADMIN_PORT:-8888:80}"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASSWORD}"
+    volumes:
+      - "pgadmin-data:/var/lib/pgadmin"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "pgadmin"
+
+  # --- MONITORING: Prometheus ---
+  prometheus:
+    image: "prom/prometheus:v3.7.3"
+    container_name: "${PROJECT_NAME}-prometheus"
+    restart: "${RESTART_POLICY}"
+    ports:
+      - "${PROMETHEUS_PORT}"
+    volumes:
+      - "prometheus-data:/prometheus"
+      - "../config/backend/infrastructure/monitoring/prometheus:/etc/prometheus:Z"
+    command:
+      - --web.enable-lifecycle
+      - --config.file=/etc/prometheus/prometheus.yaml
+      - --storage.tsdb.retention.time=15d
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy" ]
+      interval: "30s"
+      timeout: "10s"
+      retries: "3"
+      start_period: "30s"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "prometheus"
+
+  # --- MONITORING: Grafana ---
+  grafana:
+    image: grafana/grafana:12.3
+    container_name: ${PROJECT_NAME}-grafana
+    restart: "${RESTART_POLICY}"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_ADMIN_PASSWORD}
+    ports:
+      - "${GF_PORT}"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      # Provisioning (datasources/dashboards) from central config
+      - ../config/backend/infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning:Z
+      # Dashboards directory (referenced by provisioning file path: /var/lib/grafana/dashboards)
+      - ../config/backend/infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:Z
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      meldestelle-network:
+        aliases:
+          - grafana
+
+  # --- CONSUL ---
+  consul:
+    image: "hashicorp/consul:1.22.1"
+    container_name: "${PROJECT_NAME}-consul"
+    restart: "${RESTART_POLICY}"
+    ports:
+      - "${CONSUL_PORT}"
+      - "${CONSUL_UDP_PORT}"
+    command: "agent -server -bootstrap-expect=1 -ui -client=0.0.0.0"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: "30s"
+      timeout: "10s"
+      retries: "3"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "consul"
+
+  # --- API-GATEWAY: Spring Cloud Gateway ---
+  api-gateway:
+    build:
+      context: ..
+      dockerfile: backend/infrastructure/gateway/Dockerfile
+      args:
+        # Build-Args aus deinen .env Dateien (werden hier statisch benötigt für den Build)
+        GRADLE_VERSION: "9.1.0"
+        JAVA_VERSION: "21"
+        VERSION: "1.0.0-SNAPSHOT"
+        BUILD_DATE: "2025-12-04"
+    container_name: "${PROJECT_NAME}-gateway"
+    restart: "${RESTART_POLICY}"
+    ports:
+      - "${GATEWAY_SERVER_PORT}"
+      - "${GATEWAY_DEBUG_PORT}"
+    environment:
+      # server.port must be an integer. Do not pass host:container mapping here.
+      SERVER_PORT: "8081"
+      SPRING_PROFILES_ACTIVE: "docker"
+      DEBUG: "true"
+
+      # --- KEYCLOAK ---
+      # Container-zu-Container Kommunikation (intern)
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://keycloak:8080/realms/meldestelle"
+      # JWK Set Uri erzwingen, damit er nicht über den Issuer (localhost vs keycloak) stolpert
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs"
+
+      # --- CONSUL ---
+      SPRING_CLOUD_CONSUL_HOST: "consul"
+      # Consul port must be an integer (container internal port)
+      SPRING_CLOUD_CONSUL_PORT: "8500"
+      # WICHTIG: Das Gateway muss wissen, wie es von anderen Containern erreicht wird (nicht localhost!)
+      SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: "api-gateway"
+      # Wichtig für Docker: Wir wollen IP-Adressen registrieren, keine Hostnames, die DNS brauchen
+      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "true"
+
+      # --- POSTGRES ---
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/${POSTGRES_DB}"
+      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER}"
+      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD}"
+
+      # --- LOGGING ---
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY: "DEBUG"
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "DEBUG"
+
+    depends_on:
+      consul:
+        condition: "service_healthy"
+      postgres:
+        condition: "service_healthy"
+      keycloak:
+        condition: "service_healthy"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "api-gateway"
+
+  # ==========================================
+  # MICROSERVICES
+  # ==========================================
+  ping-service:
+    build:
+      context: ..
+      dockerfile: backend/services/ping/Dockerfile
+      args:
+        GRADLE_VERSION: 9.1.0
+        JAVA_VERSION: 21
+        VERSION: 1.0.0
+        BUILD_DATE: "2025-11-29"
+    container_name: ${PROJECT_NAME}-ping-service
+    restart: "${RESTART_POLICY}"
+    ports:
+      - "${PING_PORT}"
+      - "${PING_DEBUG_PORT}"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DEBUG: "true"
+      SERVER_PORT: 8082
+
+      # --- CONSUL ---
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: 8500
+      SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: ping-service
+
+      # - DATENBANK VERBINDUNG -
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+
+      # --- REDIS ---
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      # Optional: if REDIS_PASSWORD is set in .env, forward it to Spring
+      SPRING_DATA_REDIS_PASSWORD: "${REDIS_PASSWORD}"
+      # Make initial connection a bit more tolerant on startup races
+      SPRING_DATA_REDIS_CONNECT_TIMEOUT: 5s
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      meldestelle-network:
+        aliases:
+          - ping-service
+
+  # ==========================================
+  # FRONTEND
+  # ==========================================
+
+  # --- WEB-APP ---
+  web-app:
+    build:
+      context: ..
+      dockerfile: ../config/frontends/web-app/Dockerfile
+      args:
+        GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.1.0}
+        JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+        NODE_VERSION: ${DOCKER_NODE_VERSION:-22.21.0}
+        NGINX_IMAGE_TAG: ${DOCKER_NGINX_VERSION:-1.28.0-alpine}
+        WEB_BUILD_PROFILE: ${WEB_BUILD_PROFILE:-dev}
+    container_name: ${PROJECT_NAME}-web-app
+    restart: "${RESTART_POLICY}"
+    ports:
+      - "${WEB_APP_PORT}"
+    volumes:
+      # Mount production nginx config (can be adjusted per env)
+      - ../config/nginx/nginx.prod.conf:/etc/nginx/nginx.conf:Z,ro
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      meldestelle-network:
+        aliases:
+          - web-app
+
+  desktop-app:
+    build:
+      context: ..
+      dockerfile: ../config/frontends/desktop-app/Dockerfile
+    container_name: ${PROJECT_NAME}-desktop-app
+    restart: "${RESTART_POLICY}"
+    environment:
+      API_BASE_URL: http://api-gateway:8081
+    ports:
+      - "${DESKTOP_APP_VNC_PORT}"
+      - "${DESKTOP_APP_NOVNC_PORT}"
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      meldestelle-network:
+        aliases:
+          - desktop-app
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  meldestelle-network:
+    driver: bridge

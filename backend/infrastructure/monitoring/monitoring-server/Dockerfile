@@ -46,16 +46,16 @@ COPY core/ core/
 COPY build.gradle.kts ./
 
 # Copy monitoring dependencies
-COPY infrastructure/monitoring/monitoring-client/ infrastructure/monitoring/monitoring-client/
-COPY infrastructure/cache/ infrastructure/cache/
+COPY backend/infrastructure/monitoring/monitoring-client/ backend/infrastructure/monitoring/monitoring-client/
+COPY backend/infrastructure/cache/ backend/infrastructure/cache/
 
 # Copy monitoring-server specific files
-COPY infrastructure/monitoring/monitoring-server/build.gradle.kts infrastructure/monitoring/monitoring-server/
-COPY infrastructure/monitoring/monitoring-server/src/ infrastructure/monitoring/monitoring-server/src/
+COPY backend/infrastructure/monitoring/monitoring-server/ backend/infrastructure/monitoring/monitoring-server/
+COPY backend/infrastructure/monitoring/monitoring-server/src/ backend/infrastructure/monitoring/monitoring-server/src/
 
 # Build application
-RUN ./gradlew :infrastructure:monitoring:monitoring-server:dependencies --no-daemon --info
-RUN ./gradlew :infrastructure:monitoring:monitoring-server:bootJar --no-daemon --info
+RUN ./gradlew :backend:infrastructure:monitoring:monitoring-server:dependencies --no-daemon --info
+RUN ./gradlew :backend:infrastructure:monitoring:monitoring-server:bootJar --no-daemon --info
 
 # ===================================================================
 # Runtime Stage
@@ -93,7 +93,7 @@ RUN mkdir -p /app/logs /app/tmp /app/config /app/metrics && \
 
 # Copy the built JAR from builder stage
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} \
-     /workspace/infrastructure/monitoring/monitoring-server/build/libs/*.jar app.jar
+     /workspace/backend/infrastructure/monitoring/monitoring-server/build/libs/*.jar app.jar
 
 # Switch to non-root user
 USER ${APP_USER}
@@ -142,7 +142,7 @@ ENTRYPOINT ["sh", "-c", "\
 # Build and Usage Instructions
 # ===================================================================
 # Build:
-#   docker build -t meldestelle/monitoring-server:latest -f infrastructure/monitoring/monitoring-server/Dockerfile .
+#   docker build -t meldestelle/monitoring-server:latest -f backend/infrastructure/monitoring/monitoring-server/Dockerfile .
 #
 # Run standalone:
 #   docker run -p 8083:8083 --name monitoring-server meldestelle/monitoring-server:latest

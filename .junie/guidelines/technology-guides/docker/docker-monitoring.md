@@ -176,7 +176,7 @@ docker-compose logs api-gateway | grep -i "took\|duration\|time"
 ### Alerting-Regeln
 
 ```yaml
-# prometheus/alerts.yml
+# prometheus/alerts.yaml
 groups:
   - name: meldestelle.rules
     rules:
@@ -226,13 +226,13 @@ docker-compose exec grafana find /var/log -name "*.log" -exec truncate -s 0 {} \
 ### Performance-Tuning
 
 ```yaml
-# prometheus.yml - Optimierte Konfiguration
+# prometheus.yaml - Optimierte Konfiguration
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
 rule_files:
-  - "/etc/prometheus/alerts.yml"
+  - "/etc/prometheus/alerts.yaml"
 
 scrape_configs:
   - job_name: 'spring-boot'
