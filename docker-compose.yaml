@@ -347,9 +347,9 @@ services:
       # außer man nutzt envsubst im Entrypoint (für dynamische API URLs).
       # Hier nutzen wir den Docker-DNS Namen 'api-gateway', der ist fest in nginx.conf.
       dummy_var: "prevent_empty_block"
-#    volumes:
-#      # Hot-Reloading der Nginx Config (Optional)
-#      - ./config/frontends/web-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    #    volumes:
+    #      # Hot-Reloading der Nginx Config (Optional)
+    #      - ./config/frontends/web-app/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       api-gateway:
         condition: "service_started"
@@ -358,6 +358,7 @@ services:
         aliases:
           - "web-app"
 
+  # --- DESKTOP-APP ---
   desktop-app:
     build:
       context: .
@@ -371,7 +372,7 @@ services:
     environment:
       API_BASE_URL: "http://api-gateway:8081"
     ports:
-      - "${DESKTOP_APP_VNC_PORT:-5900:5900}"
+      - "${DESKTOP_APP_VNC_PORT:-5901:5901}"
       - "${DESKTOP_APP_NOVNC_PORT:-6080:6080}"
     depends_on:
       api-gateway:

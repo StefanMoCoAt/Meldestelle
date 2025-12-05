@@ -2,44 +2,44 @@
 # Multi-Stage Dockerfile für Meldestelle Desktop-App (VNC)
 # ===================================================================
 
-# ===================================================================
-# Stage 1: Build Stage - Kotlin Desktop-App kompilieren
-# ===================================================================
-FROM gradle:8-jdk21-alpine AS builder
+# 1. Build Stage (Debian-basiert für Stabilität bei Desktop-Builds)
+FROM gradle:8-jdk21 AS builder
 
 WORKDIR /app
 
-# Kopiere Gradle-Konfiguration und Wrapper
+# Copy Configs
 COPY build.gradle.kts settings.gradle.kts gradle.properties ./
-COPY gradle ./gradle
+COPY gradle/ gradle/
 COPY gradlew ./
 
-# Kopiere alle notwendigen Module für Multi-Modul-Projekt
-COPY frontend ./frontend
-COPY backend ./backend
-COPY core ./core
-COPY domains ./domains
-COPY platform ./platform
-COPY docs ./docs
+# Fix Permissions
+RUN chmod +x gradlew
 
-# Setze Gradle-Wrapper Berechtigung
-RUN chmod +x ./gradlew
+# Copy Sources (Struktur wie im Web-App Fix)
+COPY platform/ platform/
+COPY core/ core/
+COPY backend/ backend/
+COPY frontend/ frontend/
+COPY docs/ docs/
+# Falls du 'domains' oder andere Ordner hast, die in settings.gradle.kts stehen:
+# COPY domains/ domains/
 
-# Dependencies downloaden (für besseres Caching)
-RUN ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-configure-on-demand
+# Dependencies laden
+RUN ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-daemon
 
-# Desktop-App kompilieren (createDistributable für native Distribution)
-RUN ./gradlew :frontend:shells:meldestelle-portal:createDistributable --no-configure-on-demand
+# Desktop-App Distribution erstellen
+# Wir nutzen 'packageDistributionForCurrentOS' oder 'createDistributable'
+RUN ./gradlew :frontend:shells:meldestelle-portal:createDistributable --no-daemon
 
 # ===================================================================
-# Stage 2: Runtime Stage - Ubuntu mit VNC + noVNC
+# 2. Runtime Stage - Ubuntu (Notwendig für GUI/X11 Libraries)
 # ===================================================================
 FROM ubuntu:22.04
 
-# Verhindere interaktive Installationen
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Installiere System-Dependencies
+# Installiere X11, VNC, Window Manager und Libraries für Compose Multiplatform
+# Compose braucht oft libgl1-mesa-glx, libgtk-3-0, libasound2 etc.
 RUN apt-get update && apt-get install -y \
     openjdk-21-jdk \
     xvfb \
@@ -52,43 +52,43 @@ RUN apt-get update && apt-get install -y \
     wget \
     unzip \
     supervisor \
+    net-tools \
+    libgl1-mesa-glx \
+    libgtk-3-0 \
+    libasound2 \
     && rm -rf /var/lib/apt/lists/*
 
-# Arbeitsverzeichnis
 WORKDIR /app
 
-# Kopiere kompilierte Desktop-App von Build-Stage
-COPY --from=builder /app/frontend/shells/meldestelle-portal/build/compose/binaries/main/desktop/ ./desktop-app/
+# Kopiere Build-Ergebnis
+# HINWEIS: Der Pfad muss exakt stimmen. Compose Gradle Plugin Output ist oft verschachtelt.
+# Wir kopieren den Inhalt nach /app/desktop-app
+COPY --from=builder /app/frontend/shells/meldestelle-portal/build/compose/binaries/main/app/ /app/desktop-app/
 
-# Kopiere Scripts
-COPY dockerfiles/clients/desktop-app/entrypoint.sh /entrypoint.sh
-COPY dockerfiles/clients/desktop-app/health-check.sh /opt/health-check.sh
-COPY dockerfiles/clients/desktop-app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Scripts (Achte darauf, dass die Pfade im Host stimmen!)
+COPY config/frontends/desktop-app/entrypoint.sh /entrypoint.sh
+COPY config/frontends/desktop-app/health-check.sh /opt/health-check.sh
+# Wir nutzen vorerst dein Entrypoint-Script, Supervisor Config ist optional wenn Script alles macht
+# COPY config/frontends/desktop-app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Setze Permissions
 RUN chmod +x /entrypoint.sh /opt/health-check.sh
 
-# Erstelle VNC-User
+# User Setup
 RUN useradd -m -s /bin/bash vncuser && \
     mkdir -p /home/vncuser/.vnc && \
     chown -R vncuser:vncuser /home/vncuser && \
     chown -R vncuser:vncuser /app
 
-# VNC und noVNC Ports
 EXPOSE 5901 6080
 
-# Environment Variables
-ENV DISPLAY=:99
-ENV VNC_PORT=5901
-ENV NOVNC_PORT=6080
-ENV API_BASE_URL=http://api-gateway:8081
+ENV DISPLAY=:99 \
+    VNC_PORT=5901 \
+    NOVNC_PORT=6080 \
+    API_BASE_URL="http://api-gateway:8081"
 
-# Health-Check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD /opt/health-check.sh
 
-# User wechseln
 USER vncuser
 
-# Entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
