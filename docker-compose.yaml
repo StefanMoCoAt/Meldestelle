@@ -324,24 +324,32 @@ services:
   # --- WEB-APP ---
   web-app:
     build:
-      context: ..
-      dockerfile: ../config/frontends/web-app/Dockerfile
+      context: . # Wichtig: Root Context für Monorepo Zugriff
+      dockerfile: config/frontends/web-app/Dockerfile
       args:
         GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.1.0}"
         JAVA_VERSION: "${DOCKER_JAVA_VERSION:-21}"
+        # Frontend spezifisch:
         NODE_VERSION: "${DOCKER_NODE_VERSION:-22.21.0}"
         NGINX_IMAGE_TAG: "${DOCKER_NGINX_VERSION:-1.28.0-alpine}"
-        WEB_BUILD_PROFILE: "${WEB_BUILD_PROFILE:-dev}"
+        WEB_BUILD_PROFILE: "${WEB_BUILD_PROFILE:-dev}" # dev oder prod
+        # Metadaten:
+        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
         BUILD_DATE: "${DOCKER_BUILD_DATE}"
     labels:
       - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
     container_name: "${PROJECT_NAME:-meldestelle}-web-app"
     restart: "${RESTART_POLICY:-no}"
     ports:
-      - "${WEB_APP_PORT:-4000:80}"
-    volumes:
-      # Mount production nginx config (can be adjusted per env)
-      - ../config/frontends/web-app/nginx.conf:/etc/nginx/nginx.conf:Z,ro
+      - "${WEB_APP_PORT:-4000:4000}"
+    environment:
+      # Nginx braucht eigentlich keine Env-Vars zur Laufzeit für die Config,
+      # außer man nutzt envsubst im Entrypoint (für dynamische API URLs).
+      # Hier nutzen wir den Docker-DNS Namen 'api-gateway', der ist fest in nginx.conf.
+      dummy_var: "prevent_empty_block"
+#    volumes:
+#      # Hot-Reloading der Nginx Config (Optional)
+#      - ./config/frontends/web-app/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       api-gateway:
         condition: "service_started"
@@ -352,8 +360,8 @@ services:
 
   desktop-app:
     build:
-      context: ..
-      dockerfile: ../config/frontends/desktop-app/Dockerfile
+      context: .
+      dockerfile: config/frontends/desktop-app/Dockerfile
       args:
         BUILD_DATE: "${DOCKER_BUILD_DATE}"
     labels:

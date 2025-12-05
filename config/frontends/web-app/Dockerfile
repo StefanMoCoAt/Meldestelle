@@ -1,83 +1,116 @@
+# syntax=docker/dockerfile:1.8
 # ===================================================================
-# Multi-Stage Dockerfile für Meldestelle Web-App (Kotlin/JS)
+# Multi-Stage Dockerfile for Meldestelle Web-App (Kotlin/JS)
+# Version: 2.1.0 - Fix: Use Debian for Build (Glibc), Alpine for Run
 # ===================================================================
 
-# ===================================================================
-# Stage 1: Build Stage - Kotlin/JS kompilieren
-# ===================================================================
-# Build args (build-time only)
+# === GLOBAL ARGS ===
 ARG GRADLE_VERSION
 ARG JAVA_VERSION
 ARG NODE_VERSION
-ARG NGINX_IMAGE_TAG=1.28.0-alpine
-# Toggle build profile: dev (default) or prod
-ARG WEB_BUILD_PROFILE=dev
+ARG NGINX_IMAGE_TAG
+ARG WEB_BUILD_PROFILE
+ARG VERSION
+ARG BUILD_DATE
+
+# ===================================================================
+# Stage 1: Build Stage (Debian-based for Node.js compatibility)
+# ===================================================================
+# WICHTIG: Wir nutzen hier NICHT Alpine, damit die Node-Binaries funktionieren!
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION} AS builder
 
-# Install Node.js (version aligned with versions.toml)
-# Derive major version from NODE_VERSION (e.g., 22.21.0 -> setup_22.x)
-RUN apt-get update && apt-get install -y curl && \
-    NODE_MAJOR=$(echo "$NODE_VERSION" | cut -d. -f1) && \
-    curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
+ARG WEB_BUILD_PROFILE
+ARG VERSION
+ARG BUILD_DATE
 
-WORKDIR /app
+LABEL stage=builder
+WORKDIR /workspace
 
-# Kopiere Gradle-Konfiguration und Wrapper
-COPY build.gradle.kts settings.gradle.kts gradle.properties ./
-COPY gradle ./gradle
-COPY gradlew ./
+# 1. Gradle Optimizations
+# Hinweis: Wir lassen Node/Yarn Download Flags weg, da Gradle auf Debian
+# die Standard-Binaries problemlos laden und ausführen kann.
+ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
+                 -Dorg.gradle.daemon=false \
+                 -Dorg.gradle.parallel=true \
+                 -Dorg.gradle.workers.max=2 \
+                 -Dorg.gradle.jvmargs=-Xmx2g \
+                 -XX:+UseParallelGC \
+                 -XX:MaxMetaspaceSize=512m"
+ENV GRADLE_USER_HOME=/home/gradle/.gradle
 
-# Kopiere alle notwendigen Module für Multi-Modul-Projekt
-COPY frontend ./frontend
-COPY backend ./backend
-COPY core ./core
-COPY domains ./domains
-COPY platform ./platform
-COPY docs ./docs
+# 2. Copy Build Configs
+COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
+COPY gradle/ gradle/
+COPY build.gradle.kts ./
 
-# Setze Gradle-Wrapper Berechtigung
-RUN chmod +x ./gradlew
+RUN chmod +x gradlew
 
-# Dependencies downloaden (für besseres Caching)
-RUN ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-configure-on-demand
+# 3. Copy Sources (Monorepo Structure)
+COPY platform/ platform/
+COPY core/ core/
+COPY backend/ backend/
+COPY frontend/ frontend/
+# FIX: Docs Ordner ist notwendig für die Gradle-Konfigurationsphase
+COPY docs/ docs/
 
-# Kotlin/JS Web-App kompilieren (Profil wählbar über WEB_BUILD_PROFILE)
-# - dev  → jsBrowserDevelopmentExecutable (schneller, Source Maps)
-# - prod → jsBrowserDistribution (minifiziert, optimiert)
-RUN if [ "$WEB_BUILD_PROFILE" = "prod" ]; then \
-      ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDistribution --no-configure-on-demand -Pproduction=true; \
-      mkdir -p /app/web-dist && cp -r frontend/shells/meldestelle-portal/build/dist/js/productionExecutable/* /app/web-dist/; \
+# 4. Resolve Dependencies
+# Wir lassen Gradle Node.js selbst herunterladen (funktioniert jetzt, da wir auf Debian sind)
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-daemon
+
+# 5. Build Web App
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    if [ "$WEB_BUILD_PROFILE" = "prod" ]; then \
+        echo "Building for PRODUCTION..."; \
+        ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDistribution -Pproduction=true --no-daemon; \
+        mkdir -p /app/dist && \
+        cp -r frontend/shells/meldestelle-portal/build/dist/js/productionExecutable/* /app/dist/; \
     else \
-      ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDevelopmentExecutable --no-configure-on-demand; \
-      mkdir -p /app/web-dist && cp -r frontend/shells/meldestelle-portal/build/dist/js/developmentExecutable/* /app/web-dist/; \
+        echo "Building for DEVELOPMENT..."; \
+        ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDevelopmentExecutable --no-daemon; \
+        mkdir -p /app/dist && \
+        cp -r frontend/shells/meldestelle-portal/build/dist/js/developmentExecutable/* /app/dist/; \
     fi
 
 # ===================================================================
-# Stage 2: Runtime Stage - Nginx für Static Files + API Proxy
+# Stage 2: Runtime Stage (Alpine Nginx)
 # ===================================================================
-# Build arg controls runtime base image tag (declared globally to allow usage in FROM)
 FROM nginx:${NGINX_IMAGE_TAG}
 
-# Installiere curl für Health-Checks
-RUN apk add --no-cache curl
+ARG VERSION
+ARG BUILD_DATE
+ARG JAVA_VERSION
 
-# Kopiere kompilierte Web-App von Build-Stage (vereinheitlichtes Ausgabeverzeichnis)
-COPY --from=builder /app/web-dist/ /usr/share/nginx/html/
+# Metadata
+LABEL service="web-app" \
+      version="${VERSION}" \
+      maintainer="Meldestelle Development Team" \
+      build.date="${BUILD_DATE}" \
+      org.opencontainers.image.title="Meldestelle Web-App"
 
-# Kopiere Nginx-Konfiguration
-COPY dockerfiles/clients/web-app/nginx.conf /etc/nginx/nginx.conf
+# Tools & User Setup
+RUN apk add --no-cache curl && \
+    rm /etc/nginx/conf.d/default.conf && \
+    mkdir -p /usr/share/nginx/html/downloads
 
-# Exponiere Port 4000 (statt Standard 80)
+# Copy Artifacts
+COPY config/frontends/web-app/nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /app/dist/ /usr/share/nginx/html/
+COPY config/frontends/web-app/downloads/ /usr/share/nginx/html/downloads/
+
+# Permissions
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid
+
+USER nginx
 EXPOSE 4000
 
-# Downloads (Platzhalter) ausliefern lassen
-COPY dockerfiles/clients/web-app/downloads/ /usr/share/nginx/html/downloads/
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:4000/health || exit 1
 
-# Health-Check für Container
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD curl -f http://localhost:4000/ || exit 1
-
-# Starte Nginx
 CMD ["nginx", "-g", "daemon off;"]
