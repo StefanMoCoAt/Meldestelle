@@ -61,6 +61,12 @@ kotlin {
       implementation(libs.ktor.client.logging)
       implementation(libs.ktor.client.auth)
 
+      // DI
+      implementation(libs.koin.core)
+
+      // Network core (provides apiClient + TokenProvider)
+      implementation(projects.frontend.core.network)
+
       // Coroutines and serialization
       implementation(libs.kotlinx.coroutines.core)
       implementation(libs.kotlinx.serialization.json)

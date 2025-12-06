@@ -6,8 +6,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import at.mocode.clients.shared.navigation.AppScreen
-import at.mocode.clients.authfeature.AuthenticatedHttpClient
 import at.mocode.clients.authfeature.AuthTokenManager
+import org.koin.core.context.GlobalContext
 import at.mocode.clients.pingfeature.PingScreen
 import at.mocode.clients.pingfeature.PingViewModel
 import at.mocode.shared.core.AppConstants
@@ -29,7 +29,8 @@ fun MainApp() {
     ) {
       var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Home) }
 
-      val authTokenManager = remember { AuthenticatedHttpClient.getAuthTokenManager() }
+      // Resolve AuthTokenManager from Koin
+      val authTokenManager = remember { GlobalContext.get().koin.get<AuthTokenManager>() }
       val pingViewModel = remember { PingViewModel() }
       val scope = rememberCoroutineScope()
 

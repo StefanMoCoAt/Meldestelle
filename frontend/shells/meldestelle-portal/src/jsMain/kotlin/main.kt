@@ -4,6 +4,7 @@ import kotlinx.browser.document
 import org.w3c.dom.HTMLElement
 import at.mocode.shared.di.initKoin
 import at.mocode.frontend.core.network.networkModule
+import at.mocode.clients.authfeature.di.authFeatureModule
 import at.mocode.frontend.core.localdb.localDbModule
 import at.mocode.frontend.core.localdb.DatabaseProvider
 import kotlinx.coroutines.MainScope
@@ -19,8 +20,8 @@ fun main() {
   console.log("[WebApp] main() entered")
   // Initialize DI (Koin) with shared modules + network + local DB modules
   try {
-    initKoin { modules(networkModule, localDbModule) }
-    console.log("[WebApp] Koin initialized with networkModule + localDbModule")
+    initKoin { modules(networkModule, localDbModule, authFeatureModule) }
+    console.log("[WebApp] Koin initialized with networkModule + localDbModule + authFeatureModule")
   } catch (e: dynamic) {
     console.warn("[WebApp] Koin initialization warning:", e)
   }

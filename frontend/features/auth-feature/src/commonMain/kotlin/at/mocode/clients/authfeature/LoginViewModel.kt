@@ -2,9 +2,10 @@ package at.mocode.clients.authfeature
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import at.mocode.clients.authfeature.AuthenticatedHttpClient.addAuthHeader
-import at.mocode.shared.core.AppConstants
-import io.ktor.client.request.*
+import io.ktor.client.request.post
+import org.koin.core.context.GlobalContext
+import org.koin.core.qualifier.named
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,6 +38,7 @@ class LoginViewModel(
   val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
   private val authApiClient = AuthApiClient()
+  private val apiClient: HttpClient by lazy { GlobalContext.get().koin.get<HttpClient>(named("apiClient")) }
 
   fun updateUsername(username: String) {
     _uiState.value = _uiState.value.copy(
@@ -96,10 +98,8 @@ class LoginViewModel(
           // Fire-and-forget: Trigger Backend Sync so the user exists in Members
           viewModelScope.launch {
             try {
-              val client = AuthenticatedHttpClient.create()
-              client.post("${AppConstants.GATEWAY_URL}/api/members/sync") {
-                addAuthHeader()
-              }
+              // Fire-and-forget sync call; Bearer token added by Ktor Auth plugin
+              apiClient.post("/api/members/sync")
             } catch (_: Exception) {
               // Non-fatal: Wir zeigen Sync-Fehler im Login nicht an
             }

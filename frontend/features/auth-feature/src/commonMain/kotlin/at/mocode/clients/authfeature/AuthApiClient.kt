@@ -5,6 +5,9 @@ import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
+import io.ktor.client.HttpClient
+import org.koin.core.context.GlobalContext
+import org.koin.core.qualifier.named
 
 /**
  * Data classes for authentication API communication
@@ -37,7 +40,7 @@ class AuthApiClient(
   // Optional: Client-Secret (nur bei vertraulichen Clients erforderlich)
   private val clientSecret: String? = null
 ) {
-  private val client = AuthenticatedHttpClient.createUnauthenticated()
+  private val client: HttpClient by lazy { GlobalContext.get().koin.get<HttpClient>(named("apiClient")) }
 
   /**
    * Authenticate user with username and password

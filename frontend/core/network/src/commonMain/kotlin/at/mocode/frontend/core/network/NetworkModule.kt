@@ -4,6 +4,8 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
@@ -16,11 +18,19 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /**
+ * Simple token provider interface so core network module does not depend on auth-feature.
+ */
+interface TokenProvider {
+  fun getAccessToken(): String?
+}
+
+/**
  * Koin module that provides a preconfigured Ktor HttpClient under the named qualifier "apiClient".
  * The client uses the environment-aware base URL from NetworkConfig.
  */
 val networkModule = module {
   single(named("apiClient")) {
+    val tokenProvider: TokenProvider? = try { get<TokenProvider>() } catch (_: Throwable) { null }
     HttpClient {
       // JSON (kotlinx) configuration
       install(ContentNegotiation) {
@@ -50,9 +60,20 @@ val networkModule = module {
         exponentialDelay()
       }
 
-      // Authentication plugin (Bearer refresh can be wired later)
+      // Authentication plugin (Bearer)
       install(Auth) {
-        // TODO: Wire token provider/refresh when auth is implemented
+        bearer {
+          loadTokens {
+            val token = tokenProvider?.getAccessToken()
+            token?.let { BearerTokens(it, refreshToken = "") }
+          }
+          // Only send token to our API base URL
+          sendWithoutRequest { request ->
+            val base = NetworkConfig.baseUrl.trimEnd('/')
+            val url = request.url.toString()
+            url.startsWith(base)
+          }
+        }
       }
 
       // Logging for development
