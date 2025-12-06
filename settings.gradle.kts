@@ -112,6 +112,7 @@ include(":docs")
 // FRONTEND
 // ==========================================================================
 // --- CORE ---
+include(":frontend:core:domain")
 include(":frontend:core:design-system")
 include(":frontend:core:navigation")
 include(":frontend:core:network")

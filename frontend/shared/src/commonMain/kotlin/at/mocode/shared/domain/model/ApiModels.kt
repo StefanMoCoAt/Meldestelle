@@ -39,21 +39,3 @@ data class PingData(
   val service: String
 )
 
-/**
- * Minimale User- und Auth-Models für Shared-Kernel (Quick-Fix für Build).
- * Hinweis: Für MP-25 können diese in :frontend:core:domain verschoben/ausgebaut werden.
- */
-@Serializable
-data class AuthToken(
-  val accessToken: String,
-  val tokenType: String = "Bearer",
-  val expiresAtEpochMillis: Long? = null
-)
-
-@Serializable
-data class User(
-  val id: String,
-  val username: String,
-  val displayName: String? = null,
-  val roles: List<String> = emptyList()
-)

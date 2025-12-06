@@ -1,12 +1,11 @@
 package at.mocode.clients.authfeature
 
 import at.mocode.shared.core.AppConstants
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
-import io.ktor.client.HttpClient
-import org.koin.core.qualifier.named
 
 /**
  * Data classes for authentication API communication

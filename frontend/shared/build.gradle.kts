@@ -46,6 +46,7 @@ kotlin {
 
       api(projects.core.coreUtils)
       api(projects.core.coreDomain)
+      api(project(":frontend:core:domain"))
 
       // Kotlinx core dependencies (coroutines, serialization, datetime)
       implementation(libs.bundles.kotlinx.core)

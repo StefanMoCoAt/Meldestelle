@@ -1,8 +1,8 @@
 package at.mocode.shared.presentation.actions
 
 import at.mocode.shared.presentation.state.Notification
-import at.mocode.shared.domain.model.User
-import at.mocode.shared.domain.model.AuthToken
+import at.mocode.frontend.core.domain.models.User
+import at.mocode.frontend.core.domain.models.AuthToken
 
 sealed class AppAction {
   // Auth Actions

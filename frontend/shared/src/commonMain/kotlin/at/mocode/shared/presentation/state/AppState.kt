@@ -1,8 +1,8 @@
 package at.mocode.shared.presentation.state
 
 import kotlinx.serialization.Serializable
-import at.mocode.shared.domain.model.User
-import at.mocode.shared.domain.model.AuthToken
+import at.mocode.frontend.core.domain.models.User
+import at.mocode.frontend.core.domain.models.AuthToken
 
 @Serializable
 data class AppState(
