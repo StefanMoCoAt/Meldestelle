@@ -64,6 +64,15 @@ include(":backend:infrastructure:monitoring:monitoring-server")
 // include(":backend:services:events:events-infrastructure")
 // include(":backend:services:events:events-service")
 
+// --- ENTRIES (Nennungen) ---
+include(":backend:services:entries:entries-service")
+
+// --- RESULTS (Ergebnisse) ---
+include(":backend:services:results:results-service")
+
+// --- SCHEDULING (Zeitplan/Abteilungen) ---
+include(":backend:services:scheduling:scheduling-service")
+
 // --- HORSES (Horse Management) ---
 // include(":backend:services:horses:horses-api")
 // include(":backend:services:horses:horses-common")
