@@ -6,7 +6,6 @@ import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import io.ktor.client.HttpClient
-import org.koin.core.context.GlobalContext
 import org.koin.core.qualifier.named
 
 /**
@@ -31,6 +30,7 @@ data class LoginResponse(
  * HTTP client for authentication API calls
  */
 class AuthApiClient(
+  private val httpClient: HttpClient,
   // Keycloak Basis-URL (z. B. http://localhost:8180)
   private val keycloakBaseUrl: String = AppConstants.KEYCLOAK_URL,
   // Realm-Name in Keycloak
@@ -40,7 +40,6 @@ class AuthApiClient(
   // Optional: Client-Secret (nur bei vertraulichen Clients erforderlich)
   private val clientSecret: String? = null
 ) {
-  private val client: HttpClient by lazy { GlobalContext.get().koin.get<HttpClient>(named("apiClient")) }
 
   /**
    * Authenticate user with username and password
@@ -48,7 +47,7 @@ class AuthApiClient(
   suspend fun login(username: String, password: String): LoginResponse {
     val tokenEndpoint = "$keycloakBaseUrl/realms/$realm/protocol/openid-connect/token"
     return try {
-      val response = client.submitForm(
+      val response = httpClient.submitForm(
         url = tokenEndpoint,
         formParameters = Parameters.build {
           append("grant_type", "password")
@@ -93,7 +92,7 @@ class AuthApiClient(
   suspend fun exchangeAuthorizationCode(code: String, codeVerifier: String, redirectUri: String): LoginResponse {
     val tokenEndpoint = "$keycloakBaseUrl/realms/$realm/protocol/openid-connect/token"
     return try {
-      val response = client.submitForm(
+      val response = httpClient.submitForm(
         url = tokenEndpoint,
         formParameters = Parameters.build {
           append("grant_type", "authorization_code")
@@ -136,7 +135,7 @@ class AuthApiClient(
   suspend fun refreshToken(refreshToken: String): LoginResponse {
     val tokenEndpoint = "$keycloakBaseUrl/realms/$realm/protocol/openid-connect/token"
     return try {
-      val response = client.submitForm(
+      val response = httpClient.submitForm(
         url = tokenEndpoint,
         formParameters = Parameters.build {
           append("grant_type", "refresh_token")

@@ -164,6 +164,8 @@ tasks.register("archGuardForbiddenAuthorizationHeader") {
         "setHeader(\"Authorization\"",
         "headers[\"Authorization\"]",
         "headers[\'Authorization\']",
+        ".header(HttpHeaders.Authorization",
+        "header(HttpHeaders.Authorization",
       )
     // Scope: Frontend-only enforcement. Backend/Test code is excluded.
     val srcDirs = listOf("clients", "frontend")

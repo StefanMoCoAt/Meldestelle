@@ -3,8 +3,6 @@ package at.mocode.clients.authfeature
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.ktor.client.request.post
-import org.koin.core.context.GlobalContext
-import org.koin.core.qualifier.named
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,14 +29,13 @@ data class LoginUiState(
  * ViewModel for handling login authentication logic
  */
 class LoginViewModel(
-  private val authTokenManager: AuthTokenManager
+  private val authTokenManager: AuthTokenManager,
+  private val authApiClient: AuthApiClient,
+  private val apiClient: HttpClient
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(LoginUiState())
   val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
-
-  private val authApiClient = AuthApiClient()
-  private val apiClient: HttpClient by lazy { GlobalContext.get().koin.get<HttpClient>(named("apiClient")) }
 
   fun updateUsername(username: String) {
     _uiState.value = _uiState.value.copy(

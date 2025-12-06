@@ -7,7 +7,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import at.mocode.clients.shared.navigation.AppScreen
 import at.mocode.clients.authfeature.AuthTokenManager
-import org.koin.core.context.GlobalContext
 import at.mocode.clients.pingfeature.PingScreen
 import at.mocode.clients.pingfeature.PingViewModel
 import at.mocode.shared.core.AppConstants
@@ -16,9 +15,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import at.mocode.clients.authfeature.AuthApiClient
+import at.mocode.clients.authfeature.LoginViewModel
 import at.mocode.clients.authfeature.oauth.OAuthPkceService
 import at.mocode.clients.authfeature.oauth.AuthCallbackParams
 import at.mocode.clients.authfeature.oauth.CallbackParams
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MainApp() {
@@ -30,7 +32,8 @@ fun MainApp() {
       var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Home) }
 
       // Resolve AuthTokenManager from Koin
-      val authTokenManager = remember { GlobalContext.get().koin.get<AuthTokenManager>() }
+      val authTokenManager = koinInject<AuthTokenManager>()
+      val authApiClient = koinInject<AuthApiClient>()
       val pingViewModel = remember { PingViewModel() }
       val scope = rememberCoroutineScope()
 
@@ -42,8 +45,7 @@ fun MainApp() {
           val state = callback.state
           val pkce = OAuthPkceService.current()
           if (pkce != null && pkce.state == state) {
-            val api = AuthApiClient()
-            val res = api.exchangeAuthorizationCode(code, pkce.codeVerifier, AppConstants.webRedirectUri())
+            val res = authApiClient.exchangeAuthorizationCode(code, pkce.codeVerifier, AppConstants.webRedirectUri())
             val token = res.token
             if (res.success && token != null) {
               authTokenManager.setToken(token)
@@ -66,7 +68,6 @@ fun MainApp() {
         )
 
         is AppScreen.Login -> LoginScreen(
-          authTokenManager = authTokenManager,
           onLoginSuccess = { currentScreen = AppScreen.Profile }
         )
 
@@ -194,15 +195,16 @@ private fun AuthStatusScreen(
 
 @Composable
 private fun LoginScreen(
-  authTokenManager: AuthTokenManager,
   onLoginSuccess: () -> Unit
 ) {
-  var username by remember { mutableStateOf("") }
-  var password by remember { mutableStateOf("") }
-  var error by remember { mutableStateOf<String?>(null) }
-  var isLoading by remember { mutableStateOf(false) }
-  val scope = rememberCoroutineScope()
-  val api = remember { AuthApiClient() }
+  val viewModel = koinViewModel<LoginViewModel>()
+  val uiState by viewModel.uiState.collectAsState()
+
+  LaunchedEffect(uiState.isAuthenticated) {
+    if (uiState.isAuthenticated) {
+      onLoginSuccess()
+    }
+  }
 
   Column(
     modifier = Modifier
@@ -213,48 +215,41 @@ private fun LoginScreen(
     Text("Anmeldung", style = MaterialTheme.typography.headlineMedium)
 
     OutlinedTextField(
-      value = username,
-      onValueChange = { username = it },
+      value = uiState.username,
+      onValueChange = { viewModel.updateUsername(it) },
       label = { Text("Benutzername") },
       singleLine = true,
-      enabled = !isLoading,
+      enabled = !uiState.isLoading,
+      isError = uiState.usernameError != null,
       modifier = Modifier.fillMaxWidth()
     )
+    if (uiState.usernameError != null) {
+      Text(uiState.usernameError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+    }
 
     OutlinedTextField(
-      value = password,
-      onValueChange = { password = it },
+      value = uiState.password,
+      onValueChange = { viewModel.updatePassword(it) },
       label = { Text("Passwort") },
       singleLine = true,
-      enabled = !isLoading,
+      enabled = !uiState.isLoading,
       visualTransformation = PasswordVisualTransformation(),
+      isError = uiState.passwordError != null,
       modifier = Modifier.fillMaxWidth()
     )
+    if (uiState.passwordError != null) {
+      Text(uiState.passwordError!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+    }
 
-    error?.let {
-      Text(it, color = MaterialTheme.colorScheme.error)
+    if (uiState.errorMessage != null) {
+      Text(uiState.errorMessage!!, color = MaterialTheme.colorScheme.error)
     }
 
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
       Button(
-        onClick = {
-          error = null
-          isLoading = true
-          scope.launch {
-            val res = api.login(username.trim(), password)
-            val token = res.token
-            if (res.success && token != null) {
-              authTokenManager.setToken(token)
-              isLoading = false
-              onLoginSuccess()
-            } else {
-              isLoading = false
-              error = res.message ?: "Login fehlgeschlagen"
-            }
-          }
-        },
-        enabled = !isLoading && username.isNotBlank() && password.isNotBlank()
-      ) { Text(if (isLoading) "Bitte warten…" else "Login") }
+        onClick = { viewModel.login() },
+        enabled = uiState.canLogin
+      ) { Text(if (uiState.isLoading) "Bitte warten…" else "Login") }
     }
   }
 }

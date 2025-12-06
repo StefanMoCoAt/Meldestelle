@@ -14,13 +14,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-  authTokenManager: AuthTokenManager,
-  viewModel: LoginViewModel = viewModel { LoginViewModel(authTokenManager) },
+  viewModel: LoginViewModel,
   onLoginSuccess: () -> Unit = {}
 ) {
   val uiState by viewModel.uiState.collectAsState()

@@ -85,6 +85,8 @@ kotlin {
 
             // DI (Koin) needed to call initKoin { modules(...) }
             implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
 
             // Compose Multiplatform
             implementation(compose.runtime)
