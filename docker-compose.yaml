@@ -358,7 +358,7 @@ services:
         aliases:
           - "web-app"
 
-  # --- DESKTOP-APP ---
+  # --- DESKTOP-APP (optional) ---
   desktop-app:
     build:
       context: .

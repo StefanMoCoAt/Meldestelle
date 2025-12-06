@@ -32,20 +32,19 @@ RUN ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-daemon
 RUN ./gradlew :frontend:shells:meldestelle-portal:createDistributable --no-daemon
 
 # ===================================================================
-# 2. Runtime Stage - Ubuntu (Notwendig für GUI/X11 Libraries)
+# Stage 2: Runtime Stage - Ubuntu mit VNC + noVNC
 # ===================================================================
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Installiere X11, VNC, Window Manager und Libraries für Compose Multiplatform
-# Compose braucht oft libgl1-mesa-glx, libgtk-3-0, libasound2 etc.
+# Installiere System-Dependencies
 RUN apt-get update && apt-get install -y \
     openjdk-21-jdk \
     xvfb \
     x11vnc \
-    novnc \
-    websockify \
+    python3 \
+    python3-numpy \
     xfce4 \
     xfce4-goodies \
     curl \
@@ -53,10 +52,26 @@ RUN apt-get update && apt-get install -y \
     unzip \
     supervisor \
     net-tools \
+    git \
+    # WICHTIG: GUI Libraries für Java/Compose
     libgl1-mesa-glx \
+    libgl1-mesa-dri \
     libgtk-3-0 \
     libasound2 \
+    libxcursor1 \
+    libxi6 \
+    libxtst6 \
+    libxrandr2 \
+    && apt-get remove -y xfce4-power-manager \
+    && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
+
+# Manuelle Installation von noVNC und Websockify
+# Wir klonen Websockify an den Ort, wo noVNC es erwartet
+RUN mkdir -p /usr/share/novnc \
+    && git clone --depth 1 https://github.com/novnc/noVNC.git /usr/share/novnc \
+    && git clone --depth 1 https://github.com/novnc/websockify /usr/share/novnc/utils/websockify \
+    && ln -s /usr/share/novnc/vnc.html /usr/share/novnc/index.html
 
 WORKDIR /app
 
