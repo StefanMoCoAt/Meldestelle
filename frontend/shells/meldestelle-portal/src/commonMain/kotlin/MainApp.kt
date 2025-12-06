@@ -59,7 +59,7 @@ fun MainApp() {
       when (currentScreen) {
         is AppScreen.Home -> WelcomeScreen(
           authTokenManager = authTokenManager,
-          onOpenPing = { AppScreen.Ping },
+          onOpenPing = { currentScreen = AppScreen.Ping },
           onOpenLogin = {
             // Fallback to the local LoginScreen (Password Grant) if PKCE cannot be started
             currentScreen = AppScreen.Login
