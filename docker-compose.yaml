@@ -117,6 +117,40 @@ services:
         aliases:
           - "pgadmin"
 
+  # --- MONITORING: Postgres Exporter ---
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    container_name: "${PROJECT_NAME:-meldestelle}-postgres-exporter"
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://pg-user:pg-password@postgres:5432/pg-meldestelle-db?sslmode=disable"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      meldestelle-network:
+        aliases:
+          - postgres-exporter
+
+  # --- MONITORING: Alertmanager ---
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: "${PROJECT_NAME:-meldestelle}-alertmanager"
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      # Wir müssen hier envsubst nutzen ODER die Config ohne Variablen schreiben.
+      # Einfachste Lösung: Ein Entrypoint-Script, das envsubst macht (ähnlich wie bei Nginx).
+      # ODER: Wir hardcoden es für Dev erst mal.
+      - ./config/backend/infrastructure/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+    networks:
+      meldestelle-network:
+        aliases:
+          - alertmanager
+
   # --- MONITORING: Prometheus ---
   prometheus:
     image: "${PROMETHEUS_IMAGE:-prom/prometheus:v3.7.3}"

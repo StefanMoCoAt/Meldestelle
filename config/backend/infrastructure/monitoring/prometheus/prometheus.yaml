@@ -1,5 +1,7 @@
-# Prometheus configuration for Meldestelle project
-# Basic configuration to enable service monitoring
+# ===================================================================
+# Prometheus Configuration for Meldestelle
+# Features: Consul Service Discovery, Spring Boot Actuator support
+# ===================================================================
 
 global:
   scrape_interval: 15s
@@ -9,33 +11,21 @@ global:
 alerting:
   alertmanagers:
     - static_configs:
-        - targets:
-            - "alertmanager:9093"
+      - targets:
+          # Da wir Alertmanager noch nicht im Docker Compose haben (kommt noch!),
+          # lassen wir das vorerst auskommentiert oder fügen den Container hinzu.
+          - "alertmanager:9093"
 
 rule_files:
   - "/etc/prometheus/rules/alerts.yaml"
 
 scrape_configs:
-  # Job 1: Prometheus überwacht sich selbst
+  # 1. Prometheus Self-Monitoring
   - job_name: 'prometheus'
     static_configs:
       - targets: [ 'localhost:9090' ]
 
-  # Job 2: API Gateway (Spring Boot Actuator)
-  - job_name: 'api-gateway'
-    metrics_path: '/actuator/prometheus'
-    scrape_interval: "30s"
-    static_configs:
-      - targets: [ 'api-gateway:8081' ]
-
-  # Job 3: Postgres (ACHTUNG)
-  # Postgres direkt auf 5432 zu scrapen geht nicht.
-  # Entweder auskommentieren oder 'postgres-exporter' Container hinzufügen.
-  # - job_name: 'postgres-exporter'
-  #   static_configs:
-  #     - targets: ['postgres-exporter:9187']
-
-  # Add consul for service discovery monitoring
+  # 2. Consul Self-Monitoring
   - job_name: 'consul'
     metrics_path: '/v1/agent/metrics'
     params:
@@ -43,4 +33,31 @@ scrape_configs:
     static_configs:
       - targets: [ 'consul:8500' ]
 
+  # 3. Spring Boot Services via Consul Discovery.
+  # Das ist die Magie: Prometheus fragt Consul nach allen Services.
+  # Wenn ein Service das Tag 'metrics' oder 'spring-boot' hat (oder einfach alle), wird er scraped.
+  - job_name: 'consul-services'
+    consul_sd_configs:
+      - server: 'consul:8500'
+        services: [ ] # Leere Liste = Alle Services
 
+    relabel_configs:
+      # Nur Services scrapen, die NICHT consul selbst sind (das haben wir oben schon)
+      - source_labels: [ __meta_consul_service ]
+        regex: consul
+        action: drop
+
+      # Setze den Pfad auf /actuator/prometheus für Spring Boot Apps
+      # Optional: Man kann das auch über Consul Tags steuern
+      - source_labels: [ __meta_consul_service ]
+        target_label: __metrics_path__
+        replacement: /actuator/prometheus
+
+      # Übernehme den Service-Namen als 'application' Label
+      - source_labels: [ __meta_consul_service ]
+        target_label: application
+
+      # Behalte die Instanz (IP: Port)
+      - source_labels: [ __meta_consul_address, __meta_consul_service_port ]
+        separator: ':'
+        target_label: instance
