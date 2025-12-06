@@ -53,7 +53,7 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     net-tools \
     git \
-    # WICHTIG: GUI Libraries für Java/Compose
+    # WICHTIG: GUI Libraries für Java/Compose \
     libgl1-mesa-glx \
     libgl1-mesa-dri \
     libgtk-3-0 \
