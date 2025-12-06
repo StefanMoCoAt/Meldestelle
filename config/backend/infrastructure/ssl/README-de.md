@@ -267,4 +267,3 @@ Implementieren Sie Überwachung für:
 
 **Letzte Aktualisierung**: 25. Juli 2025
 
-Für weitere Informationen zur Produktionsumgebung siehe [README-PRODUCTION.md](../../Tagebuch/README-PRODUCTION.md).

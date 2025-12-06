@@ -11,10 +11,10 @@ global:
 alerting:
   alertmanagers:
     - static_configs:
-      - targets:
-          # Da wir Alertmanager noch nicht im Docker Compose haben (kommt noch!),
-          # lassen wir das vorerst auskommentiert oder fügen den Container hinzu.
-          - "alertmanager:9093"
+        - targets:
+            # Da wir Alertmanager noch nicht im Docker Compose haben (kommt noch!),
+            # lassen wir das vorerst auskommentiert oder fügen den Container hinzu.
+            - "alertmanager:9093"
 
 rule_files:
   - "/etc/prometheus/rules/alerts.yaml"
@@ -61,3 +61,8 @@ scrape_configs:
       - source_labels: [ __meta_consul_address, __meta_consul_service_port ]
         separator: ':'
         target_label: instance
+
+  # Job 4: Postgres Exporter (Statisch, da kein Consul-Client im Image)
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: [ 'postgres-exporter:9187' ]

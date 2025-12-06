@@ -1,0 +1,26 @@
+global:
+  resolve_timeout: 5m
+  # FIX: Hier müssen echte Werte stehen, keine Variablen!
+  # Wenn du noch keinen SMTP hast, trag Dummy-Werte ein, damit der Container startet.
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alertmanager@meldestelle.at'
+  smtp_auth_username: 'deine-email@gmail.com'
+  smtp_auth_password: 'dein-passwort'
+  smtp_require_tls: true
+
+route:
+  receiver: 'email-notifications'
+  # ... (Rest bleibt gleich)
+
+receivers:
+  - name: 'email-notifications'
+    email_configs:
+      - to: 'admin@meldestelle.at'
+        send_resolved: true
+
+  - name: 'slack-critical'
+    slack_configs:
+      # FIX: Auch hier die echte Webhook URL eintragen oder den Block entfernen, wenn nicht genutzt
+      - api_url: 'https://hooks.slack.com/services/example'
+        channel: '#alerts-critical'
+        # ...

@@ -119,37 +119,37 @@ services:
 
   # --- MONITORING: Postgres Exporter ---
   postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter
+    image: "${POSTGRES_EXPORTER_IMAGE:-prometheuscommunity/postgres-exporter:v0.18.0}"
     container_name: "${PROJECT_NAME:-meldestelle}-postgres-exporter"
-    restart: unless-stopped
+    restart: "${RESTART_POLICY:-no}"
     environment:
-      DATA_SOURCE_NAME: "postgresql://pg-user:pg-password@postgres:5432/pg-meldestelle-db?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-pg-user}:${POSTGRES_PASSWORD:-pg-password}@postgres:5432/${POSTGRES_DB:-pg-meldestelle-db}?sslmode=disable"
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: "service_healthy"
     networks:
       meldestelle-network:
         aliases:
-          - postgres-exporter
+          - "postgres-exporter"
 
   # --- MONITORING: Alertmanager ---
   alertmanager:
-    image: prom/alertmanager:v0.26.0
+    image: "${ALERTMANAGER_IMAGE:-prom/alertmanager:v0.29.0}"
     container_name: "${PROJECT_NAME:-meldestelle}-alertmanager"
-    restart: unless-stopped
+    restart: "${RESTART_POLICY:-no}"
     ports:
-      - "9093:9093"
+      - "${ALERTMANAGER_PORT:-9093:9093}"
     volumes:
       # Wir müssen hier envsubst nutzen ODER die Config ohne Variablen schreiben.
       # Einfachste Lösung: Ein Entrypoint-Script, das envsubst macht (ähnlich wie bei Nginx).
       # ODER: Wir hardcoden es für Dev erst mal.
-      - ./config/backend/infrastructure/monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./config/backend/infrastructure/monitoring/alertmanager/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml
     command:
-      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --config.file=/etc/alertmanager/alertmanager.yaml
     networks:
       meldestelle-network:
         aliases:
-          - alertmanager
+          - "alertmanager"
 
   # --- MONITORING: Prometheus ---
   prometheus:
@@ -161,6 +161,7 @@ services:
     volumes:
       - "prometheus-data:/prometheus"
       - "./config/backend/infrastructure/monitoring/prometheus:/etc/prometheus:Z"
+      - "./config/backend/infrastructure/monitoring/prometheus/rules:/etc/prometheus/rules:Z"
     command:
       - --web.enable-lifecycle
       - --config.file=/etc/prometheus/prometheus.yaml
@@ -189,9 +190,9 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       # Provisioning (datasources/dashboards) from central config
-      - ../config/backend/infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning:Z
+      - ./config/backend/infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning:Z
       # Dashboards directory (referenced by a provisioning file path: /var/lib/grafana/dashboards)
-      - ../config/backend/infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:Z
+      - ./config/backend/infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:Z
     depends_on:
       prometheus:
         condition: "service_healthy"

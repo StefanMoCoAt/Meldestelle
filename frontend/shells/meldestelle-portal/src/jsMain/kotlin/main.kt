@@ -57,7 +57,7 @@ fun main() {
     try {
       console.log("[WebApp] startApp(): readyState=", document.asDynamic().readyState)
       val root = document.getElementById("ComposeTarget") as HTMLElement
-      console.log("[WebApp] ComposeTarget exists? ", (root != null))
+      console.log("[WebApp] ComposeTarget exists? ", (true))
       ComposeViewport(root) {
         MainApp()
       }
