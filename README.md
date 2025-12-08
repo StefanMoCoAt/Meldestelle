@@ -29,7 +29,7 @@ cp -n .env.template config/env/.env 2>/dev/null || true
 docker compose -f docker-compose.yaml up -d
 
 # 5) Services starten (Beispiel)
-./gradlew :members:members-service:bootRun
+./gradlew :backend:services:results:results-service:bootRun
 # oder – falls zentral gewollt und unterstützt
 # ./gradlew bootRun
 ```
@@ -163,33 +163,42 @@ Sicherheits-Hinweise:
 
 ```plaintext
 Meldestelle/
-├── 🗂️ client/                 # Client-Anwendungen
-│   ├── desktop-app/
-│   └── web-app/
-├── 🗂️ core/                   # Gemeinsame Kern-Komponenten
+├── backend/                          # Backend: Gateway, Infrastruktur, Services
+│   ├── infrastructure/
+│   │   ├── cache/
+│   │   ├── event-store/
+│   │   ├── gateway/
+│   │   ├── messaging/
+│   │   └── monitoring/
+│   └── services/
+│       ├── entries/
+│       ├── results/
+│       ├── scheduling/
+│       ├── ping/
+│       └── registry/
+├── frontend/                         # Kotlin Multiplatform Frontend (Web/JVM)
+│   ├── core/                         # Shared Foundation
+│   │   ├── design-system/
+│   │   ├── domain/
+│   │   ├── network/
+│   │   ├── local-db/
+│   │   └── navigation/
+│   ├── features/                     # Vertikale Slices
+│   │   ├── auth-feature/
+│   │   └── ping-feature/
+│   ├── shared/
+│   └── shells/
+│       └── meldestelle-portal/
+├── core/                             # Gemeinsame Core-Module (JVM/KMP-unabhängig)
 │   ├── core-domain/
 │   └── core-utils/
-├── 🗂️ docs/                   # Minimale Entwickler-Dokumentation
-│   ├── architecture/
-│   └── how-to/
-├── 🗂️ events/                 # Bounded Context: Veranstaltungsverwaltung
-│   └── (analog zu members)
-├── 🗂️ horses/                 # Bounded Context: Pferderegistrierung
-│   └── (analog zu members)
-├── 🗂️ infrastructure/         # Technische Infrastruktur
-│   ├── auth/                  # Authentifizierung
-│   ├── cache/                 # Caching (Redis)
-│   ├── gateway/               # API Gateway (Spring Cloud Gateway)
-│   ├── messaging/             # Kafka-Integration
-│   └── monitoring/            # Observability
-├── 🗂️ masterdata/             # Bounded Context: Stammdaten
-│   └── (analog zu members)
-└── 🗂️ members/                # Bounded Context: Mitgliederverwaltung
-    ├── members-api/
-    ├── members-application/
-    ├── members-domain/
-    ├── members-infrastructure/
-    └── members-service/
+├── docs/                             # Repository-Dokumentation
+│   ├── adr/                          # Architecture Decision Records (flach)
+│   ├── c4/                           # C4-Diagramme (PlantUML)
+│   ├── how-to/
+│   └── reference/
+├── platform/                         # Versionen, BOM und Abhängigkeitsbündel
+└── config/                           # Runtime-/Tooling-Konfiguration
 ```
 
 ---
@@ -266,7 +275,7 @@ docker compose -f docker-compose.services.yaml up -d
 
 # Services via Gradle
 a) Einzeldienst
-./gradlew :members:members-service:bootRun
+./gradlew :backend:services:results:results-service:bootRun
 b) Falls unterstützt: alle (oder Aggregator)
 ./gradlew bootRun
 ```
@@ -292,7 +301,7 @@ b) Falls unterstützt: alle (oder Aggregator)
 ### Spezifisches Modul testen
 
 ```bash
- ./gradlew :members:members-service:test
+ ./gradlew :backend:services:results:results-service:test
 ```
 
 ---

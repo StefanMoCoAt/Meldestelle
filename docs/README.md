@@ -93,5 +93,5 @@ Das Projekt nutzt automatisierte Workflows für Konsistenz:
 
 ---
 
-**Hinweis**: Diese README wurde am 30. Oktober 2025 aktualisiert im Rahmen der Documentations-Migration nach YouTrack (
-siehe ADR-0009 - folgt).
+**Hinweis**: Diese README wurde am 8. Dezember 2025 aktualisiert im Rahmen der Dokumentations-Migration nach YouTrack
+(siehe [ADR-0009](adr/0009-final-kmp-architecture.md)).
