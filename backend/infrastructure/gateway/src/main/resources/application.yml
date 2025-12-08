@@ -101,6 +101,31 @@ spring:
               filters:
                 - StripPrefix=1
 
+            # ==============================================================
+            # --- Entries-Service-Integration (MP-27) ---
+            # ==============================================================
+            - id: entries-service-route
+              uri: lb://entries-service
+              predicates:
+                - Path=/api/entries/**
+              filters:
+                - StripPrefix=1
+
+            # Mappe das Root "/api/entries" explizit auf die Service-Root "/"
+            - id: entries-service-root
+              uri: lb://entries-service
+              predicates:
+                - Path=/api/entries
+              filters:
+                - SetPath=/
+
+            - id: entries-service-root-slash
+              uri: lb://entries-service
+              predicates:
+                - Path=/api/entries/
+              filters:
+                - SetPath=/
+
   # ==============================================================
   # --- Members-Service-Integration (optional) ---
   # ==============================================================
