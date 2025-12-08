@@ -109,6 +109,9 @@ jobs:
       - name: Build
         run: ./gradlew staticAnalysis build -x test
 
+      - name: Check Bundle Budgets
+        run: ./gradlew checkBundleBudget
+
       - name: Test
         run: ./gradlew test
 
