@@ -12,8 +12,15 @@ frontend/  KMP Frontend
   shells    Ausführbare Apps (Assembler)
   features  Vertical Slices (kein Feature→Feature)
   core      Shared Foundation (Design-System, Network, Local-DB, Auth, Domain)
+    design-system
+    domain
+    network
+    local-db
+    navigation
 docker/    Docker Compose, .env.example, Monitoring-/Core-Konfiguration
 docs/      Architektur, ADRs, C4-Modelle, Guides
+  adr      Architecture Decision Records (ADRs)
+  c4       C4-Diagramme (PlantUML Quellen)
 
 Ist → Soll Mapping (erste Tranche)
 
@@ -65,3 +72,5 @@ Nächste Schritte (MP-22 Folgetasks)
 2. Physisches Verschieben der Backend-Komponenten in backend/* inkl. evtl. Package-Pfade, sofern notwendig.
 3. Ergänzung von docker-compose.services.yml und docker-compose.clients.yml mit echten Overlays.
 4. Erstellen der ersten ADRs unter docs/adr (Koin, SQLDelight, Optimistic Locking, Freshness UI, Core Domain).
+
+Hinweis: ADRs liegen ab sofort zentral unter `docs/adr/` (nicht mehr unter `docs/architecture/adr/`). C4-Diagramme wurden nach `docs/c4/` verschoben.

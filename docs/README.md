@@ -23,23 +23,24 @@ Die Hauptdokumentation befindet sich in der **YouTrack Wissensdatenbank**:
 
 Architekturentscheidungen sind Teil der Code-Historie und werden im Repository versioniert:
 
-- [ADR Übersicht](architecture/adr)
-- [ADR-0001: Modulare Architektur](architecture/adr/0001-modular-architecture-de.md)
-- [ADR-0002: Domain-Driven Design](architecture/adr/0002-domain-driven-design-de.md)
-- [ADR-0003: Microservices](architecture/adr/0003-microservices-architecture-de.md)
-- [ADR-0004: Event-Driven Communication](architecture/adr/0004-event-driven-communication-de.md)
-- [ADR-0005: Polyglot Persistence](architecture/adr/0005-polyglot-persistence-de.md)
-- [ADR-0006: Authentication & Authorization (Keycloak)](architecture/adr/0006-authentication-authorization-keycloak-de.md)
-- [ADR-0007: API Gateway Pattern](architecture/adr/0007-api-gateway-pattern-de.md)
-- [ADR-0008: Multiplatform Client Applications](architecture/adr/0008-multiplatform-client-applications-de.md)
+- [ADR Übersicht](adr)
+- [ADR-0001: Modulare Architektur](adr/0001-modular-architecture-de.md)
+- [ADR-0002: Domain-Driven Design](adr/0002-domain-driven-design-de.md)
+- [ADR-0003: Microservices](adr/0003-microservices-architecture-de.md)
+- [ADR-0004: Event-Driven Communication](adr/0004-event-driven-communication-de.md)
+- [ADR-0005: Polyglot Persistence](adr/0005-polyglot-persistence-de.md)
+- [ADR-0006: Authentication & Authorization (Keycloak)](adr/0006-authentication-authorization-keycloak-de.md)
+- [ADR-0007: API Gateway Pattern](adr/0007-api-gateway-pattern-de.md)
+- [ADR-0008: Multiplatform Client Applications](adr/0008-multiplatform-client-applications-de.md)
+- [ADR-0009: Final KMP Architecture](adr/0009-final-kmp-architecture.md)
 
 ### 2. C4-Diagramme (PlantUML-Quellen)
 
 Versionierte Diagramm-Quellen für Architekturdokumentation:
 
-- [C4 Context](architecture/c4/01-context-de.puml)
-- [C4 Container](architecture/c4/02-container-de.puml)
-- [C4 Component - Events Service](architecture/c4/03-component-events-service-de.puml)
+- [C4 Context](c4/01-context-de.puml)
+- [C4 Container](c4/02-container-de.puml)
+- [C4 Component - Events Service](c4/03-component-events-service-de.puml)
 
 ### 3. Developer Guides
 
@@ -72,7 +73,7 @@ Das Projekt nutzt automatisierte Workflows für Konsistenz:
 
 ### Für Architektur-Entscheidungen
 
-1. ADR in `docs/architecture/adr/` erstellen
+1. ADR in `docs/adr/` erstellen
 2. PR mit ADR-Review
 3. Nach Merge → Zusammenfassung in YouTrack verlinken
 
