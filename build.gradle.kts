@@ -222,14 +222,15 @@ tasks.register("archGuardNoFeatureToFeatureDeps") {
           .forEach { cfg ->
             cfg.dependencies.withType(org.gradle.api.artifacts.ProjectDependency::class.java).forEach { dep ->
               // Use reflection to avoid compile-time issues with dependencyProject property
-              val proj = try {
-                dep.javaClass.getMethod("getDependencyProject").invoke(dep) as org.gradle.api.Project
-              } catch (e: Throwable) {
-                null
-              }
+              val proj =
+                try {
+                  dep.javaClass.getMethod("getDependencyProject").invoke(dep) as org.gradle.api.Project
+                } catch (e: Throwable) {
+                  null
+                }
               val target = proj?.path ?: ""
               if (target.startsWith(featurePrefix) && target != p.path) {
-                violations += "${p.path} -> ${target} (configuration: ${cfg.name})"
+                violations += "${p.path} -> $target (configuration: ${cfg.name})"
               }
             }
           }
@@ -237,12 +238,13 @@ tasks.register("archGuardNoFeatureToFeatureDeps") {
     }
 
     if (violations.isNotEmpty()) {
-      val msg = buildString {
-        appendLine("Feature isolation violation(s) detected:")
-        violations.forEach { appendLine(" - $it") }
-        appendLine()
-        appendLine("Policy: frontend features must not depend on other features. Use navigation/shared domain in :frontend:core instead.")
-      }
+      val msg =
+        buildString {
+          appendLine("Feature isolation violation(s) detected:")
+          violations.forEach { appendLine(" - $it") }
+          appendLine()
+          appendLine("Policy: frontend features must not depend on other features. Use navigation/shared domain in :frontend:core instead.")
+        }
       throw GradleException(msg)
     }
   }
@@ -251,12 +253,13 @@ tasks.register("archGuardNoFeatureToFeatureDeps") {
 // ------------------------------------------------------------------
 // Bundle Size Budgets for Frontend Shells (Kotlin/JS)
 // ------------------------------------------------------------------
+// ✅ FIX: Klasse auf Top-Level verschieben
+data class Budget(val rawBytes: Long, val gzipBytes: Long)
+
 tasks.register("checkBundleBudget") {
   group = "verification"
   description = "Checks JS bundle sizes of frontend shells against configured budgets"
   doLast {
-    data class Budget(val rawBytes: Long, val gzipBytes: Long)
-
     val budgetsFile = file("config/bundles/budgets.json")
     if (!budgetsFile.exists()) {
       throw GradleException("Budgets file not found: ${budgetsFile.path}")
@@ -264,14 +267,16 @@ tasks.register("checkBundleBudget") {
 
     // Load budgets JSON as simple Map<String, Budget>
     val text = budgetsFile.readText()
+
     @Suppress("UNCHECKED_CAST")
     val parsed =
       groovy.json.JsonSlurper().parseText(text) as Map<String, Map<String, Any?>>
-    val budgets = parsed.mapValues { (_, v) ->
-      val raw = (v["rawBytes"] as Number).toLong()
-      val gz = (v["gzipBytes"] as Number).toLong()
-      Budget(raw, gz)
-    }
+    val budgets =
+      parsed.mapValues { (_, v) ->
+        val raw = (v["rawBytes"] as Number).toLong()
+        val gz = (v["gzipBytes"] as Number).toLong()
+        Budget(raw, gz)
+      }
 
     fun gzipSize(bytes: ByteArray): Long {
       val baos = java.io.ByteArrayOutputStream()
@@ -293,12 +298,14 @@ tasks.register("checkBundleBudget") {
     shells.forEach { shell ->
       val key = shell.path.trimStart(':').replace(':', '/') // or use colon form for budgets keys below
       val colonKey = shell.path.trimStart(':').replace('/', ':').trim() // ensure ":a:b:c"
-      // Budgets are keyed by Gradle path with colons but without leading colon in config for readability
-      val budgetKeyCandidates = listOf(
-        shell.path.removePrefix(":"), // e.g., frontend:shells:meldestelle-portal
-        colonKey.removePrefix(":"),
-        shell.name,
-      )
+      // Budgets are keyed by a Gradle path with colons but without leading colon in config for readability
+      val budgetKeyCandidates =
+        listOf(
+          // e.g., frontend:shells:meldestelle-portal
+          shell.path.removePrefix(":"),
+          colonKey.removePrefix(":"),
+          shell.name,
+        )
 
       val budgetEntry = budgetKeyCandidates.asSequence().mapNotNull { budgets[it] }.firstOrNull()
       if (budgetEntry == null) {
@@ -334,13 +341,13 @@ tasks.register("checkBundleBudget") {
       val top = topFiles.sortedByDescending { it.second }.take(5)
 
       report.appendLine("- ${shell.path}:")
-      report.appendLine("    raw:  ${totalRaw} bytes (budget ${budgetEntry.rawBytes})")
-      report.appendLine("    gzip: ${totalGzip} bytes (budget ${budgetEntry.gzipBytes})")
+      report.appendLine("    raw:  $totalRaw bytes (budget ${budgetEntry.rawBytes})")
+      report.appendLine("    gzip: $totalGzip bytes (budget ${budgetEntry.gzipBytes})")
       report.appendLine("    top files:")
-      top.forEach { (n, s) -> report.appendLine("      - $n: ${s} bytes") }
+      top.forEach { (n, s) -> report.appendLine("      - $n: $s bytes") }
 
       if (totalRaw > budgetEntry.rawBytes || totalGzip > budgetEntry.gzipBytes) {
-        errors += "${shell.path}: raw=${totalRaw}/${budgetEntry.rawBytes}, gzip=${totalGzip}/${budgetEntry.gzipBytes}"
+        errors += "${shell.path}: raw=$totalRaw/${budgetEntry.rawBytes}, gzip=$totalGzip/${budgetEntry.gzipBytes}"
       }
     }
 
@@ -349,12 +356,13 @@ tasks.register("checkBundleBudget") {
     file(outDir.resolve("bundle-budgets.txt")).writeText(report.toString())
 
     if (errors.isNotEmpty()) {
-      val msg = buildString {
-        appendLine("Bundle budget violations:")
-        errors.forEach { appendLine(" - $it") }
-        appendLine()
-        appendLine("See report: ${outDir.resolve("bundle-budgets.txt").path}")
-      }
+      val msg =
+        buildString {
+          appendLine("Bundle budget violations:")
+          errors.forEach { appendLine(" - $it") }
+          appendLine()
+          appendLine("See report: ${outDir.resolve("bundle-budgets.txt").path}")
+        }
       throw GradleException(msg)
     } else {
       println(report.toString())
