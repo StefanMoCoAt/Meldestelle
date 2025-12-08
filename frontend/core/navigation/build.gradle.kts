@@ -29,7 +29,8 @@ kotlin {
 
   sourceSets {
     commonMain.dependencies {
-      // No specific dependencies needed for navigation routes
+      // Depend on core domain for User/Role types used by navigation API
+      implementation(project(":frontend:core:domain"))
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
