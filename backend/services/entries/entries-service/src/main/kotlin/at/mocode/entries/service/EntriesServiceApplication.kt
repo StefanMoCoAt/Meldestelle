@@ -2,26 +2,34 @@ package at.mocode.entries.service
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
-
-@SpringBootApplication
-class EntriesServiceApplication
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.EnableAspectJAutoProxy
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 fun main(args: Array<String>) {
     runApplication<EntriesServiceApplication>(*args)
 }
 
-@RestController
-class EntriesController {
-    @GetMapping("/")
-    fun health(): String = "Entries Service is running"
+@SpringBootApplication
+@EnableAspectJAutoProxy
+class EntriesServiceApplication {
 
-    @PostMapping("/entries/conflict-demo")
-    fun conflictDemo(): ResponseEntity<String> {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict detected (Demo)")
+  @Bean
+  fun corsConfigurer(): WebMvcConfigurer {
+    return object : WebMvcConfigurer {
+      override fun addCorsMappings(registry: CorsRegistry) {
+        registry.addMapping("/**")
+          .allowedOriginPatterns("http://localhost:*")
+          .allowedOrigins("http://localhost:8080",
+            "http://localhost:8083",
+            "http://localhost:4000"
+          )
+          .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+          .allowedHeaders("*")
+          .allowCredentials(true)
+          .maxAge(3600)
+      }
     }
+  }
 }

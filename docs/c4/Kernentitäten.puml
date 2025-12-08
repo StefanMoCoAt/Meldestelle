@@ -1,0 +1,80 @@
+@startuml
+!define table(x) entity x << (T, white) >>
+!define primary_key(x) <b><color:#b8861b><&key></color> x</b>
+!define foreign_key(x) <color:#aaaaaa><&key></color> x
+
+skinparam linetype ortho
+
+table(Turnier) {
+  primary_key(turnier_id)
+  --
+  name: varchar
+  start_datum: date
+  end_datum: date
+  ort: varchar
+  kategorie_oeto: varchar
+}
+
+table(Bewerb) {
+  primary_key(bewerb_id)
+  --
+  foreign_key(turnier_id)
+  nummer: varchar
+  disziplin: varchar
+  klasse: varchar
+  nenngeld: decimal
+}
+
+table(Person) {
+  primary_key(person_id)
+  --
+  vorname: varchar
+  nachname: varchar
+  lizenznummer: varchar
+}
+
+table(Pferd) {
+  primary_key(pferd_id)
+  --
+  foreign_key(besitzer_person_id)
+  name: varchar
+  lebensnummer: varchar
+}
+
+table(Nennung) {
+  primary_key(nennung_id)
+  --
+  foreign_key(bewerb_id)
+  foreign_key(person_id)
+  foreign_key(pferd_id)
+  status: varchar
+  nennungs_datum: timestamp
+}
+
+table(Startplatz) {
+  primary_key(startplatz_id)
+  --
+  foreign_key(nennung_id)
+  startnummer: int
+  startzeit: time
+  status: varchar
+}
+
+table(Ergebnis) {
+  primary_key(ergebnis_id)
+  --
+  foreign_key(startplatz_id)
+  wertnote: decimal
+  fehler: int
+  zeit: time
+  platzierung: int
+}
+
+Turnier ||--o{ Bewerb
+Bewerb }o--o{ Nennung
+Person }o--o{ Nennung
+Pferd }o--o{ Nennung
+Person }o..o{ Pferd
+Nennung ||--|{ Startplatz
+Startplatz ||--|{ Ergebnis
+@enduml

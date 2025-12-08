@@ -355,7 +355,7 @@ services:
   entries-service:
     build:
       context: .
-      dockerfile: backend/services/entries/entries-service/Dockerfile
+      dockerfile: backend/services/entries/Dockerfile
       args:
         GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.1.0}"
         JAVA_VERSION: "${DOCKER_JAVA_VERSION:-21}"

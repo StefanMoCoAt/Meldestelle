@@ -13,6 +13,7 @@ springBoot {
 dependencies {
   implementation(platform(projects.platform.platformBom))
   implementation(projects.platform.platformDependencies)
+  implementation(projects.backend.services.entries.entriesApi)
   implementation(projects.backend.infrastructure.monitoring.monitoringClient)
 
   implementation(libs.bundles.spring.boot.service.complete)

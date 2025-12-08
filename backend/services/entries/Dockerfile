@@ -38,9 +38,10 @@ COPY frontend/ frontend/
 COPY core/ core/
 COPY backend/ backend/
 COPY docs/ docs/
-COPY build.gradle.kts ./
+COPY entries-service/build.gradle.kts ./
 
 # Copy entries modules
+COPY backend/services/entries/entries-api/ backend/services/entries/entries-api/
 COPY backend/services/entries/entries-service/ backend/services/entries/entries-service/
 
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
@@ -127,5 +128,6 @@ ENTRYPOINT ["tini", "--", "sh", "-c", "\
         echo 'DEBUG mode enabled'; \
         exec java ${JAVA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar app.jar; \
     else \
+        echo 'Starting Entries Service in production mode'; \
         exec java ${JAVA_OPTS} -jar app.jar; \
     fi"]

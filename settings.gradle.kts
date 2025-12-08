@@ -65,6 +65,7 @@ include(":backend:infrastructure:monitoring:monitoring-server")
 // include(":backend:services:events:events-service")
 
 // --- ENTRIES (Nennungen) ---
+include(":backend:services:entries:entries-api")
 include(":backend:services:entries:entries-service")
 
 // --- RESULTS (Ergebnisse) ---
