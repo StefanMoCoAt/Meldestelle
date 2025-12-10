@@ -14,18 +14,21 @@ ARG JAVA_VERSION
 ARG BUILD_DATE
 ARG VERSION
 
-# Service-specific arguments (docker/build-args/services.env)
 # Note: No runtime profiles as build ARGs
 
 # Build stage: compile the ping-service JAR inside Docker
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
+# Re-declare build arguments for this stage
+ARG VERSION
+ARG BUILD_DATE
+
 # Add metadata labels
-LABEL stage=builder \
-      service=ping-service \
-      maintainer="Meldestelle Development Team" \
-      version="${VERSION}" \
-      build.date="${BUILD_DATE}"
+LABEL stage=builder
+LABEL service=ping-service
+LABEL maintainer="Meldestelle Development Team"
+LABEL version="${VERSION}"
+LABEL build.date="${BUILD_DATE}"
 
 WORKDIR /workspace
 

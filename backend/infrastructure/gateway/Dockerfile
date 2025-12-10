@@ -14,7 +14,6 @@ ARG JAVA_VERSION
 ARG BUILD_DATE
 ARG VERSION
 
-# Infrastructure-specific arguments (docker/build-args/infrastructure.env)
 # Note: No runtime profiles as build ARGs
 
 # ===================================================================

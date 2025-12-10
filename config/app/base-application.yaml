@@ -1,0 +1,89 @@
+spring:
+  application:
+    name: meldestelle
+
+  # --- ZENTRALE DATENBANK KONFIGURATION ---
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pg-meldestelle-db}
+    username: ${SPRING_DATASOURCE_USERNAME:pg-user}
+    password: ${SPRING_DATASOURCE_PASSWORD:pg-password}
+    driver-class-name: org.postgresql.Driver
+
+  # --- JPA / HIBERNATE DEFAULTS ---
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  # --- REDIS KONFIGURATION (NEU) ---
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:redis-password} # Leer lassen als Default
+      # Optional: Timeouts für Stabilität
+      connect-timeout: 5s
+      timeout: 2s
+
+  cloud:
+    consul:
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      enabled: ${CONSUL_ENABLED:true}
+      discovery:
+        enabled: ${CONSUL_ENABLED:true}
+        register: ${CONSUL_ENABLED:true}
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        instance-id: ${spring.application.name}-${server.port}-${random.uuid}
+
+#  # Redis configuration for cache
+#  redis:
+#    host: ${SPRING_DATA_REDIS_HOST:localhost}
+#    port: ${SPRING_DATA_REDIS_PORT:6379}
+#    password: ${SPRING_DATA_REDIS_PASSWORD:redis-password}
+#    database: 0
+#    connection-timeout: 5s
+#    read-timeout: 2s
+#    use-pooling: true
+#    max-pool-size: 8
+#    min-pool-size: 2
+#    connection-check-interval: 10000 # 10 seconds
+#    local-cache-cleanup-interval: 60000 # 1 minute
+#    sync-interval: 300000 # 5 minutes
+#
+#  # Redis configuration for event store
+#  event-store:
+#    host: ${SPRING_DATA_REDIS_HOST:localhost}
+#    port: ${SPRING_DATA_REDIS_PORT:6379}
+#    password: ${SPRING_DATA_REDIS_PASSWORD:redis-password}
+#    database: 1 # Use a different database for event store
+#    connection-timeout: 5s
+#    read-timeout: 2s
+#    use-pooling: true
+#    max-pool-size: 8
+#    min-pool-size: 2
+#    consumer-group: event-processors
+#    consumer-name:
+#      "${spring.application.name}-${random.uuid}"
+#    stream-prefix:
+#      "event-stream:"
+#    all-events-stream:
+#      "all-events"
+#    claim-idle-timeout: 60000 # 1 minute
+#    poll-timeout: 100 # 100 milliseconds
+#    poll-interval: 100 # 100 milliseconds
+#    max-batch-size: 100
+#    create-consumer-group-if-not-exists: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    at.mocode: DEBUG
+    org.springframework.data.redis: INFO
+
+## Server configuration
+#server:
+#  port: 8080

@@ -18,8 +18,9 @@ services:
       POSTGRES_DB: "${POSTGRES_DB:-pg-meldestelle-db}"
     volumes:
       - "postgres-data:/var/lib/postgresql/data"
-      - "./config/backend/infrastructure/postgres:/docker-entrypoint-initdb.d:Z"
-      - "./config/backend/infrastructure/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:Z"
+      - "./config/docker/postgres:/docker-entrypoint-initdb.d:Z"
+      - "./config/docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:Z"
+    profiles: [ "infra", "all" ]
     command: [ "postgres", "-c", "config_file=/etc/postgresql/postgresql.conf" ]
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
@@ -41,7 +42,8 @@ services:
       - "${REDIS_PORT:-6379:6379}"
     volumes:
       - "redis-data:/data"
-      - "./config/backend/infrastructure/redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
+      - "./config/docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
+    profiles: [ "infra", "all" ]
     command: [ "sh", "-lc", "exec redis-server /usr/local/etc/redis/redis.conf --protected-mode no ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}" ]
     healthcheck:
       test: [ "CMD-SHELL", "[ -z \"$REDIS_PASSWORD\" ] && redis-cli ping | grep PONG || redis-cli -a \"$REDIS_PASSWORD\" ping | grep PONG" ]
@@ -59,7 +61,7 @@ services:
     container_name: "${PROJECT_NAME:-meldestelle}-keycloak"
     restart: "${RESTART_POLICY:-no}"
     build:
-      context: "./config/backend/infrastructure/keycloak"
+      context: "./config/docker/keycloak"
       args:
         KEYCLOAK_IMAGE_TAG: "${KEYCLOAK_IMAGE_TAG:-26.4}"
         BUILD_DATE: "${DOCKER_BUILD_DATE}"
@@ -87,7 +89,8 @@ services:
       redis:
         condition: "service_healthy"
     volumes:
-      - "./config/backend/infrastructure/keycloak:/opt/keycloak/data/import:Z"
+      - "./config/docker/keycloak:/opt/keycloak/data/import:Z"
+    profiles: [ "infra", "all" ]
     command: "start --optimized --import-realm"
     healthcheck:
       test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000" ]
@@ -112,6 +115,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASSWORD:-pgadmin}"
     volumes:
       - "pgadmin-data:/var/lib/pgadmin"
+    profiles: [ "tools", "all" ]
     networks:
       meldestelle-network:
         aliases:
@@ -131,6 +135,7 @@ services:
       meldestelle-network:
         aliases:
           - "postgres-exporter"
+    profiles: [ "ops", "all" ]
 
   # --- MONITORING: Alertmanager ---
   alertmanager:
@@ -143,9 +148,10 @@ services:
       # Wir müssen hier envsubst nutzen ODER die Config ohne Variablen schreiben.
       # Einfachste Lösung: Ein Entrypoint-Script, das envsubst macht (ähnlich wie bei Nginx).
       # ODER: Wir hardcoden es für Dev erst mal.
-      - ./config/backend/infrastructure/monitoring/alertmanager/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml
+      - ./config/docker/monitoring/alertmanager/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml
     command:
       - --config.file=/etc/alertmanager/alertmanager.yaml
+    profiles: [ "ops", "all" ]
     networks:
       meldestelle-network:
         aliases:
@@ -160,8 +166,8 @@ services:
       - "${PROMETHEUS_PORT:-9090:9090}"
     volumes:
       - "prometheus-data:/prometheus"
-      - "./config/backend/infrastructure/monitoring/prometheus:/etc/prometheus:Z"
-      - "./config/backend/infrastructure/monitoring/prometheus/rules:/etc/prometheus/rules:Z"
+      - "./config/docker/monitoring/prometheus:/etc/prometheus:Z"
+      - "./config/docker/monitoring/prometheus/rules:/etc/prometheus/rules:Z"
     command:
       - --web.enable-lifecycle
       - --config.file=/etc/prometheus/prometheus.yaml
@@ -176,6 +182,7 @@ services:
       meldestelle-network:
         aliases:
           - "prometheus"
+    profiles: [ "ops", "all" ]
 
   # --- MONITORING: Grafana ---
   grafana:
@@ -190,9 +197,9 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       # Provisioning (datasources/dashboards) from central config
-      - ./config/backend/infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning:Z
+      - ./config/docker/monitoring/grafana/provisioning:/etc/grafana/provisioning:Z
       # Dashboards directory (referenced by a provisioning file path: /var/lib/grafana/dashboards)
-      - ./config/backend/infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:Z
+      - ./config/docker/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:Z
     depends_on:
       prometheus:
         condition: "service_healthy"
@@ -206,6 +213,7 @@ services:
       meldestelle-network:
         aliases:
           - "grafana"
+    profiles: [ "ops", "all" ]
 
   # --- CONSUL ---
   consul:
@@ -225,6 +233,7 @@ services:
       meldestelle-network:
         aliases:
           - "consul"
+    profiles: [ "infra", "all" ]
 
   # --- API-GATEWAY: Spring Cloud Gateway ---
   api-gateway:
@@ -294,6 +303,9 @@ services:
       meldestelle-network:
         aliases:
           - "api-gateway"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
 
   # ==========================================
   # MICROSERVICES
@@ -351,6 +363,9 @@ services:
       meldestelle-network:
         aliases:
           - "ping-service"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
 
   entries-service:
     build:
@@ -386,6 +401,9 @@ services:
       meldestelle-network:
         aliases:
           - "entries-service"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
 
   results-service:
     build:
@@ -421,6 +439,9 @@ services:
       meldestelle-network:
         aliases:
           - "results-service"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
 
   scheduling-service:
     build:
@@ -456,6 +477,9 @@ services:
       meldestelle-network:
         aliases:
           - "scheduling-service"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
 
   # ==========================================
   # FRONTEND
@@ -465,7 +489,7 @@ services:
   web-app:
     build:
       context: . # Wichtig: Root Context für Monorepo Zugriff
-      dockerfile: config/frontends/web-app/Dockerfile
+      dockerfile: config/docker/nginx/web-app/Dockerfile
       args:
         GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.1.0}"
         JAVA_VERSION: "${DOCKER_JAVA_VERSION:-21}"
@@ -489,7 +513,7 @@ services:
       dummy_var: "prevent_empty_block"
     #    volumes:
     #      # Hot-Reloading der Nginx Config (Optional)
-    #      - ./config/frontends/web-app/nginx.conf:/etc/nginx/nginx.conf:ro
+    #      - ./config/docker/nginx/web-app/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       api-gateway:
         condition: "service_started"
@@ -497,12 +521,13 @@ services:
       meldestelle-network:
         aliases:
           - "web-app"
+    profiles: [ "gui", "all" ]
 
   # --- DESKTOP-APP (optional) ---
   desktop-app:
     build:
       context: .
-      dockerfile: config/frontends/desktop-app/Dockerfile
+      dockerfile: config/docker/nginx/desktop-app/Dockerfile
       args:
         BUILD_DATE: "${DOCKER_BUILD_DATE}"
     labels:
@@ -521,6 +546,7 @@ services:
       meldestelle-network:
         aliases:
           - "desktop-app"
+    profiles: [ "gui", "all" ]
 
 volumes:
   postgres-data:
