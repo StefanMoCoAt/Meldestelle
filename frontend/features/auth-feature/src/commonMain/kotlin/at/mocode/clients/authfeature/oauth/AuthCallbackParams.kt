@@ -2,6 +2,7 @@ package at.mocode.clients.authfeature.oauth
 
 data class CallbackParams(val code: String, val state: String?)
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect object AuthCallbackParams {
   /**
    * Parse OAuth callback parameters from the current environment.

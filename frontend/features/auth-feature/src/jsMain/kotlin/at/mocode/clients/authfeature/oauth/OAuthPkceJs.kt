@@ -43,6 +43,7 @@ private fun sha256(input: String): Promise<ArrayBuffer> {
   return subtle.digest("SHA-256", data) as Promise<ArrayBuffer>
 }
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual object OAuthPkceService {
   actual suspend fun startAuth(): PkceState {
     val codeVerifier = randomUrlSafe(64)

@@ -2,7 +2,7 @@ package at.mocode.frontend.core.network
 
 import kotlinx.browser.window
 
-@Suppress("UnsafeCastFromDynamic")
+@Suppress("UnsafeCastFromDynamic", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual object PlatformConfig {
   actual fun resolveApiBaseUrl(): String {
     // 1) Prefer a global JS variable (can be injected by index.html or nginx)

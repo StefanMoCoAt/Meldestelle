@@ -1,5 +1,6 @@
 package at.mocode.frontend.core.network
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual object PlatformConfig {
   actual fun resolveApiBaseUrl(): String {
     // Prefer environment variable

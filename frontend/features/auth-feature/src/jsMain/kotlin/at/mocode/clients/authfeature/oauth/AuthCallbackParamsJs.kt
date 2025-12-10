@@ -2,6 +2,7 @@ package at.mocode.clients.authfeature.oauth
 
 import kotlinx.browser.window
 
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual object AuthCallbackParams {
   actual fun parse(): CallbackParams? {
     val search = window.location.search

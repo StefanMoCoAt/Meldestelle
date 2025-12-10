@@ -23,7 +23,10 @@ val authFeatureModule = module {
   // Bridge to core network TokenProvider without adding a hard dependency there
   single<TokenProvider> {
     object : TokenProvider {
-      override fun getAccessToken(): String? = get<AuthTokenManager>().getToken()
+      override fun getAccessToken(): String? {
+        val token = get<AuthTokenManager>().getToken()
+        return token
+      }
     }
   }
 }

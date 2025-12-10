@@ -19,6 +19,7 @@ object OAuthParams {
  * For the desktop (JVM) target we currently do not start a browser flow,
  * but we provide hashing to keep API parity.
  */
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect object OAuthPkceService {
   /** Starts a PKCE auth attempt and stores transient state in memory. */
   suspend fun startAuth(): PkceState
