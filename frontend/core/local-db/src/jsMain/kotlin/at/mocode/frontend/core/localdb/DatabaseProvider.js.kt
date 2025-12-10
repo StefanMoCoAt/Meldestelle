@@ -4,7 +4,6 @@ package at.mocode.frontend.core.localdb
 
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
-import kotlinx.coroutines.await
 import org.w3c.dom.Worker
 
 actual class DatabaseDriverFactory {

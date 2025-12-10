@@ -31,7 +31,7 @@ private fun base64UrlFromArrayBuffer(buf: ArrayBuffer): String {
 }
 
 private fun randomUrlSafe(length: Int): String {
-  val bytes = Random.Default.nextBytes(length)
+  val bytes = Random.nextBytes(length)
   // Use base64url for entropy; ensure URL-safe by replacing padding removed already
   return base64UrlFromBytes(bytes)
 }
