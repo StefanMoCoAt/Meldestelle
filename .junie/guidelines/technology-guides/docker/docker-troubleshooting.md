@@ -234,7 +234,7 @@ vim dockerfiles/services/ping-service/Dockerfile  # Version hardcoden
    ARG JAVA_VERSION
 
    # ❌ FALSCH - Hardcodierte Versionen
-   ARG GRADLE_VERSION=9.0.0
+   ARG GRADLE_VERSION=9.2.1
    ```
 
 #### IDE-Integration Best Practices

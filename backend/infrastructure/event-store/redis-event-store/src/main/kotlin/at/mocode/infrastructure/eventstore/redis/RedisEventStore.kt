@@ -126,7 +126,7 @@ class RedisEventStore(
         try {
             redisTemplate.execute(object : SessionCallback<List<Any>> {
                 @Throws(DataAccessException::class)
-                override fun <K : Any?, V : Any?> execute(operations: org.springframework.data.redis.core.RedisOperations<K, V>): List<Any> {
+                override fun <K : Any, V : Any> execute(operations: org.springframework.data.redis.core.RedisOperations<K, V>): List<Any> {
                     val streamOps = (operations as StringRedisTemplate).opsForStream<String, String>()
 
                     operations.multi()
@@ -169,7 +169,7 @@ class RedisEventStore(
         try {
             redisTemplate.execute(object : SessionCallback<List<Any>> {
                 @Throws(DataAccessException::class)
-                override fun <K : Any?, V : Any?> execute(operations: org.springframework.data.redis.core.RedisOperations<K, V>): List<Any> {
+                override fun <K : Any, V : Any> execute(operations: org.springframework.data.redis.core.RedisOperations<K, V>): List<Any> {
                     val streamOps = (operations as StringRedisTemplate).opsForStream<String, String>()
 
                     operations.multi()

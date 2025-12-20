@@ -21,10 +21,12 @@ plugins {
 }
 
 dependencyResolutionManagement {
-
+  repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
   repositories {
     mavenCentral()
     google()
+    maven { url = uri("https://repo.spring.io/milestone") }
+    maven { url = uri("https://repo.spring.io/snapshot") }
     maven { url = uri("https://jitpack.io") }
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
@@ -47,6 +49,12 @@ include(":backend:infrastructure:event-store:redis-event-store")
 
 // --- GATEWAY ---
 include(":backend:infrastructure:gateway")
+
+// --- COMMON INFRA ---
+include(":backend:infrastructure:common-infra")
+
+// --- SECURITY ---
+include(":backend:infrastructure:security-module")
 
 // --- MESSAGING ---
 include(":backend:infrastructure:messaging:messaging-client")

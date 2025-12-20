@@ -7,33 +7,32 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
-import reactor.core.publisher.Mono
-import reactor.kafka.sender.SenderResult
+import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.support.SendResult
+import java.util.concurrent.CompletableFuture
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KafkaEventPublisherErrorTest {
 
-    private lateinit var mockTemplate: ReactiveKafkaProducerTemplate<String, Any>
+    private lateinit var mockTemplate: KafkaTemplate<String, Any>
     private lateinit var publisher: KafkaEventPublisher
 
     @BeforeEach
     fun setUp() {
-        mockTemplate = mockk<ReactiveKafkaProducerTemplate<String, Any>>()
+        mockTemplate = mockk<KafkaTemplate<String, Any>>()
         publisher = KafkaEventPublisher(mockTemplate)
     }
 
     @Test
     fun `should publish single event successfully`() = runTest {
         val testEvent = TestEvent("data")
-        val mockResult = mockk<SenderResult<Void>>()
+        val mockResult = mockk<SendResult<String, Any>>()
         val mockRecordMetadata = mockk<org.apache.kafka.clients.producer.RecordMetadata>()
         every { mockRecordMetadata.topic() } returns "test-topic"
         every { mockRecordMetadata.partition() } returns 0
         every { mockRecordMetadata.offset() } returns 0L
-        every { mockResult.recordMetadata() } returns mockRecordMetadata
-
-        every { mockTemplate.send("test-topic", "key", testEvent) } returns Mono.just(mockResult)
+        every { mockResult.recordMetadata } returns mockRecordMetadata
+        every { mockTemplate.send("test-topic", "key", testEvent) } returns CompletableFuture.completedFuture(mockResult)
 
         val result = publisher.publishEvent("test-topic", "key", testEvent)
 
@@ -45,8 +44,9 @@ class KafkaEventPublisherErrorTest {
     fun `should handle serialization errors without retry`() = runTest {
         val testEvent = TestEvent("data")
 
-        every { mockTemplate.send("test-topic", "key", testEvent) } returns
-            Mono.error(RuntimeException("Serialization failed"))
+        val failedFuture = CompletableFuture<SendResult<String, Any>>()
+        failedFuture.completeExceptionally(RuntimeException("Serialization failed"))
+        every { mockTemplate.send("test-topic", "key", testEvent) } returns failedFuture
 
         val result = publisher.publishEvent("test-topic", "key", testEvent)
 
@@ -60,8 +60,9 @@ class KafkaEventPublisherErrorTest {
     fun `should handle authentication errors without retry`() = runTest {
         val testEvent = TestEvent("data")
 
-        every { mockTemplate.send("test-topic", "key", testEvent) } returns
-            Mono.error(RuntimeException("Authentication failed"))
+        val authFailed = CompletableFuture<SendResult<String, Any>>()
+        authFailed.completeExceptionally(RuntimeException("Authentication failed"))
+        every { mockTemplate.send("test-topic", "key", testEvent) } returns authFailed
 
         val result = publisher.publishEvent("test-topic", "key", testEvent)
 
@@ -89,15 +90,14 @@ class KafkaEventPublisherErrorTest {
             "key2" to TestEvent("message2")
         )
 
-        val mockResult = mockk<SenderResult<Void>>()
+        val mockResult = mockk<SendResult<String, Any>>()
         val mockRecordMetadata = mockk<org.apache.kafka.clients.producer.RecordMetadata>()
         every { mockRecordMetadata.topic() } returns "test-topic"
         every { mockRecordMetadata.partition() } returns 0
         every { mockRecordMetadata.offset() } returns 0L
-        every { mockResult.recordMetadata() } returns mockRecordMetadata
-
-        every { mockTemplate.send("test-topic", "key1", any()) } returns Mono.just(mockResult)
-        every { mockTemplate.send("test-topic", "key2", any()) } returns Mono.just(mockResult)
+        every { mockResult.recordMetadata } returns mockRecordMetadata
+        every { mockTemplate.send("test-topic", "key1", any()) } returns CompletableFuture.completedFuture(mockResult)
+        every { mockTemplate.send("test-topic", "key2", any()) } returns CompletableFuture.completedFuture(mockResult)
 
         val result = publisher.publishEvents("test-topic", events)
 

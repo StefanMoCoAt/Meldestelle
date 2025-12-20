@@ -4,8 +4,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
+@org.springframework.boot.context.properties.ConfigurationPropertiesScan(basePackages = ["at.mocode.infrastructure.gateway"])
 class GatewayApplication
 
 fun main(args: Array<String>) {
-    runApplication<GatewayApplication>(*args)
+  // Der Web-Anwendungstyp wird über application.yml gesteuert (spring.main.web-application-type=reactive)
+  runApplication<GatewayApplication>(*args)
 }

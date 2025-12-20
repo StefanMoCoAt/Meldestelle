@@ -24,7 +24,7 @@ val authFeatureModule = module {
   single<TokenProvider> {
     object : TokenProvider {
       override fun getAccessToken(): String? {
-        val token = get<AuthTokenManager>().getToken()
+        val token = this@single.get<AuthTokenManager>().getToken()
         return token
       }
     }

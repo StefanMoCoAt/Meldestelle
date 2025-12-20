@@ -1,8 +1,8 @@
 # ===================================================================
 # Keycloak Profile Configuration
 # ===================================================================
-# This profile configures OAuth2/JWT authentication with Keycloak.
-# Uses Spring Security's oauth2ResourceServer for secure JWT validation.
+# Dieses Profil konfiguriert die OAuth2/JWT-Authentifizierung mit Keycloak.
+# Verwendet Spring Security's oauth2ResourceServer zur JWT-Validierung.
 # ===================================================================
 
 spring:
@@ -10,19 +10,16 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # Issuer URI for JWT validation - Docker internal: keycloak:8080, External: localhost:8180
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8180/realms/meldestelle}
-          # JWK Set URI for fetching public keys to validate JWT signatures
-          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8180/realms/meldestelle/protocol/openid-connect/certs}
+          # Issuer-URI für die JWT-Validierung
+          # Docker intern: http://keycloak:8080/realms/meldestelle
+          # Extern: http://localhost:8180/realms/meldestelle
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/meldestelle}
+          # JWK-Set-URI zum Abrufen öffentlicher Schlüssel
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/meldestelle/protocol/openid-connect/certs}
 
-# Keycloak-spezifische Konfiguration
-keycloak:
-  # Internal Docker service name, external via port 8180
-  server-url: ${KEYCLOAK_SERVER_URL:http://keycloak:8180}
-  issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8180/realms/meldestelle}
-  jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://keycloak:8180/realms/meldestelle/protocol/openid-connect/certs}
-  realm: ${KEYCLOAK_REALM:meldestelle}
-  resource: ${KEYCLOAK_CLIENT_ID:api-gateway}
-  client-id: ${KEYCLOAK_CLIENT_ID:api-gateway}
-  public-client: false
-  bearer-only: true
+# Custom Keycloak-Konfiguration (für eigene Services falls benötigt)
+app:
+  keycloak:
+    server-url: ${KEYCLOAK_SERVER_URL:http://localhost:8180}
+    realm: ${KEYCLOAK_REALM:meldestelle}
+    client-id: ${KEYCLOAK_CLIENT_ID:api-gateway}

@@ -86,9 +86,9 @@ graph TB
 
 ```dockerfile
 # BEFORE: Redundante Hardcodierung in 12+ Dockerfiles
-ARG GRADLE_VERSION=9.0.0
-ARG GRADLE_VERSION=9.0.0
-ARG GRADLE_VERSION=9.0.0
+ARG GRADLE_VERSION=9.2.1
+ARG GRADLE_VERSION=9.2.1
+ARG GRADLE_VERSION=9.2.1
 # ... 9 weitere Male identisch wiederholt!
 ```
 
@@ -97,7 +97,7 @@ ARG GRADLE_VERSION=9.0.0
 ```toml
 # docker/versions.toml - SINGLE SOURCE OF TRUTH
 [versions]
-gradle = "9.1.0"
+gradle = "9.2.1"
 java = "21"
 node = "22.21.0"
 nginx = "1.28.0-alpine"
@@ -126,7 +126,7 @@ docker/
 Verwendet von **allen** Dockerfiles:
 ```bash
 # --- Build Tools ---
-GRADLE_VERSION=9.1.0
+GRADLE_VERSION=9.2.1
 JAVA_VERSION=21
 
 # --- Build Metadata ---
@@ -196,8 +196,8 @@ AUTH_SERVER_PORT=8087
 # Java auf Version 22 upgraden
 ./scripts/docker-versions-update.sh update java 22
 
-# Gradle auf 9.1.0 upgraden
-./scripts/docker-versions-update.sh update gradle 9.1.0
+# Gradle auf 9.2.1 upgraden
+./scripts/docker-versions-update.sh update gradle 9.2.1
 
 # Prometheus auf neueste Version upgraden
 ./scripts/docker-versions-update.sh update prometheus v2.54.1

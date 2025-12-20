@@ -40,7 +40,10 @@ spring:
         register: ${CONSUL_ENABLED:true}
         health-check-path: /actuator/health
         health-check-interval: 10s
-        instance-id: ${spring.application.name}-${server.port}-${random.uuid}
+        health-check-critical-timeout: 30s
+        instance-id: ${spring.application.name}:${server.port}:${random.value}
+        prefer-ip-address: true
+        tags: [ "ping-service", "backend" ]
 
 management:
   endpoints:

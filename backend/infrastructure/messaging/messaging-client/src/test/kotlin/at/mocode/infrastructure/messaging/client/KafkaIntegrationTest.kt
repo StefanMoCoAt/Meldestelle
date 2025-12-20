@@ -23,7 +23,7 @@ class KafkaIntegrationTest {
     companion object {
         @Container
         private val kafkaContainer = KafkaContainer(
-            DockerImageName.parse("apache/kafka:3.8.1")
+            DockerImageName.parse("apache/kafka:4.1.1")
         )
     }
 

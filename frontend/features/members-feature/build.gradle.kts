@@ -18,7 +18,7 @@ version = "1.0.0"
 kotlin {
   val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
-  jvmToolchain(21)
+  jvmToolchain(25)
 
   jvm()
 
@@ -118,7 +118,7 @@ kotlin {
 // KMP Compile-Optionen
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
   compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_21)
+    jvmTarget.set(JvmTarget.JVM_25)
     freeCompilerArgs.addAll(
       "-opt-in=kotlin.RequiresOptIn",
       // Suppress beta warning for expect/actual classes as per project decision

@@ -19,6 +19,8 @@ dependencies {
 
   // Platform und Core Dependencies
   implementation(projects.platform.platformDependencies)
+  implementation(project(":backend:infrastructure:common-infra"))
+  implementation(project(":backend:infrastructure:security-module"))
   implementation(projects.backend.services.ping.pingApi)
   implementation(projects.backend.infrastructure.monitoring.monitoringClient)
 

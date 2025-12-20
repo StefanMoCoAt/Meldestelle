@@ -1,0 +1,29 @@
+# ===================================================================
+# Docker Profile Configuration
+# ===================================================================
+# Dieses Profil wird aktiviert, wenn die Anwendung in einem Docker-Container läuft.
+# Es überschreibt Standardwerte für die Kommunikation zwischen Containern.
+# ===================================================================
+
+spring:
+  cloud:
+    consul:
+      host: ${CONSUL_HOST:consul}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${random.value}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SSEC_ISSUER_URI:http://keycloak:8080/realms/meldestelle}
+          jwk-set-uri: ${SSEC_JWK_SET_URI:http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs}
+
+# Logging-Optimierung für Container-Umgebungen
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID:- } --- [%t] %-40.40logger{39} : %m%n"
+  file:
+    name: /app/logs/gateway.log

@@ -72,12 +72,12 @@ COPY build.gradle.kts ./
 # Download and cache dependencies with BuildKit cache mount (removed deprecated flag)
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
-    ./gradlew :backend:infrastructure:gateway:dependencies --info
+    ./gradlew :backend:infrastructure:gateway:dependencies --stacktrace
 
 # Build the application with optimizations and build cache (removed deprecated flag)
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
-    ./gradlew :backend:infrastructure:gateway:bootJar --info
+    ./gradlew :backend:infrastructure:gateway:bootJar -x test --stacktrace
 
 # Extract JAR layers for better caching in runtime stage
 RUN mkdir -p build/dependency && \

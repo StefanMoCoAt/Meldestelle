@@ -3,7 +3,7 @@ plugins {
   id("com.github.ben-manes.versions") version "0.51.0"
 
   // Kotlin plugins declared here with 'apply false' to centralize version management
-  // This prevents "plugin loaded multiple times" errors in Gradle 9.1.0+
+  // This prevents "plugin loaded multiple times" errors in Gradle 9.2.1+
   // Subprojects apply these plugins via version catalog: alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.kotlinJvm) apply false
   alias(libs.plugins.kotlinMultiplatform) apply false
@@ -35,6 +35,8 @@ allprojects {
   repositories {
     mavenCentral()
     google()
+    maven { url = uri("https://repo.spring.io/milestone") }
+    maven { url = uri("https://repo.spring.io/snapshot") }
     maven { url = uri("https://jitpack.io") }
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
@@ -57,23 +59,15 @@ subprojects {
     maxHeapSize = "2g"
     // Parallel test execution for better performance
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
-    // Removed byte-buddy-agent configuration to fix Gradle 9.0.0 deprecation warning
+    // Removed byte-buddy-agent configuration to fix Gradle 9.2.1 deprecation warning
     // The agent configuration was causing Task.project access at execution time
-  }
-
-  // Erzwinge eine stabile Version von kotlinx-serialization-json für alle Konfigurationen,
-  // um Auflösungsfehler (z.B. 1.10.2, nicht verfügbar auf Maven Central) zu vermeiden
-  configurations.configureEach {
-    resolutionStrategy {
-      force("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    }
   }
 
   // Dedicated performance test task per JVM subproject
   plugins.withId("java") {
     val javaExt = extensions.getByType<JavaPluginExtension>()
     // Ensure a full JDK toolchain with compiler is available (Gradle will auto-download if missing)
-    javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 
     tasks.register<Test>("perfTest") {
       description = "Runs tests tagged with 'perf'"
@@ -125,7 +119,7 @@ subprojects {
       basePath = rootDir.absolutePath
     }
     tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-      jvmTarget = "21"
+      jvmTarget = "25"
       reports {
         xml.required.set(false)
         txt.required.set(false)
@@ -498,6 +492,6 @@ tasks.withType<Exec>().configureEach {
 }
 
 tasks.wrapper {
-  gradleVersion = "9.1.0"
+  gradleVersion = "9.2.1"
   distributionType = Wrapper.DistributionType.BIN
 }

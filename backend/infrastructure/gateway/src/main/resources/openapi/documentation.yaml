@@ -51,12 +51,12 @@ info:
     name: Internal Use Only
 
 servers:
-  - url: https://api.meldestelle.at
-    description: Production Server
-  - url: https://staging-api.meldestelle.at
-    description: Staging Server
   - url: http://localhost:8081
     description: Local Development Server
+  - url: http://localhost:8180
+    description: Local Keycloak Server
+  - url: http://localhost:8500
+    description: Local Consul Server
 
 tags:
   - name: System

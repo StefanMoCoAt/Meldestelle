@@ -8,7 +8,7 @@ plugins {
 kotlin {
   val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
-  jvmToolchain(21)
+  jvmToolchain(25)
 
   jvm()
   js(IR) {

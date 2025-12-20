@@ -220,12 +220,14 @@ class KafkaSecurityTest {
         // Both configurations should be valid
         assertDoesNotThrow {
             KafkaEventConsumer(devConfig)
-            KafkaEventPublisher(ReactiveKafkaConfig(devConfig).reactiveKafkaProducerTemplate())
+            val template = ReactiveKafkaConfig(devConfig).kafkaTemplate()
+            KafkaEventPublisher(template)
         }
 
         assertDoesNotThrow {
             KafkaEventConsumer(prodConfig)
-            KafkaEventPublisher(ReactiveKafkaConfig(prodConfig).reactiveKafkaProducerTemplate())
+            val template = ReactiveKafkaConfig(prodConfig).kafkaTemplate()
+            KafkaEventPublisher(template)
         }
     }
 

@@ -1,5 +1,6 @@
 package at.mocode.infrastructure.gateway.security
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -24,6 +25,8 @@ class SecurityConfig(
   private val securityProperties: GatewaySecurityProperties
 ) {
 
+  private val logger = LoggerFactory.getLogger(SecurityConfig::class.java)
+
   /**
    * Konfiguriert die zentrale Security-Filter-Kette für das Gateway.
    *
@@ -32,25 +35,16 @@ class SecurityConfig(
    */
   @Bean
   fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-    return http { // Start der modernen Kotlin-DSL
-      // 1. CORS-Konfiguration anwenden
+    return http {
       cors { }
-
-      // 2. CSRF deaktivieren (für zustandslose APIs)
       csrf { disable() }
-
-      // 3. Routen-Berechtigungen definieren
       authorizeExchange {
-        // Öffentlich zugängliche Pfade aus der .yml-Datei laden
         authorize(
           pathMatchers(*securityProperties.publicPaths.toTypedArray()),
           permitAll
         )
-        // Alle anderen Pfade erfordern eine Authentifizierung
         authorize(anyExchange, authenticated)
       }
-
-      // 4. JWT-Validierung via Keycloak aktivieren
       oauth2ResourceServer {
         jwt { }
       }
@@ -66,19 +60,19 @@ class SecurityConfig(
    */
   @Bean
   fun reactiveJwtDecoder(
-    @Value($$"${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}") jwkSetUri: String
+    @Value("\${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}") jwkSetUri: String
   ): ReactiveJwtDecoder {
     return if (jwkSetUri.isNotBlank()) {
       try {
         NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build()
       } catch (e: Exception) {
         // Log warning and return a no-op decoder to allow startup
-        println("WARN: Failed to configure JWT decoder with JWK Set URI: $jwkSetUri - ${e.message}")
-        println("WARN: JWT authentication will not work until Keycloak is available")
+        logger.warn("Failed to configure JWT decoder with JWK Set URI: {} - {}", jwkSetUri, e.message)
+        logger.warn("JWT authentication will not work until Keycloak is available")
         createNoOpJwtDecoder()
       }
     } else {
-      println("INFO: No JWK Set URI configured, using no-op JWT decoder")
+      logger.info("No JWK Set URI configured, using no-op JWT decoder")
       createNoOpJwtDecoder()
     }
   }
@@ -116,6 +110,9 @@ class SecurityConfig(
 /**
  * Configurations-Properties für alle sicherheitsrelevanten Einstellungen des Gateways.
  */
+@Configuration
+class SecurityPropertiesConfig
+
 @ConfigurationProperties(prefix = "gateway.security")
 data class GatewaySecurityProperties(
   val cors: CorsProperties = CorsProperties(),

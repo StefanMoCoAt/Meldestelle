@@ -2,7 +2,8 @@ package at.mocode.infrastructure.messaging.client
 
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
-import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate
+import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.support.SendResult
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -18,7 +19,7 @@ import java.time.Duration
  */
 @Component
 class KafkaEventPublisher(
-    private val reactiveKafkaTemplate: ReactiveKafkaProducerTemplate<String, Any>
+    private val kafkaTemplate: KafkaTemplate<String, Any>
 ) : EventPublisher {
 
     private val logger = LoggerFactory.getLogger(KafkaEventPublisher::class.java)
@@ -45,9 +46,9 @@ class KafkaEventPublisher(
             logger.debug("Publishing event to topic '{}' with key '{}', event type: '{}'",
                 topic, key, event::class.simpleName)
 
-            reactiveKafkaTemplate.send(topic, key ?: "", event)
+            sendMono(topic, key ?: "", event)
                 .doOnSuccess { result ->
-                    val record = result.recordMetadata()
+                    val record = result!!.recordMetadata
                     logger.debug(
                         "Successfully published event to topic-partition {}-{} with offset {} (key: '{}')",
                         record.topic(), record.partition(), record.offset(), key
@@ -84,9 +85,9 @@ class KafkaEventPublisher(
                     val index = indexedEventPair.t1
                     val eventPair = indexedEventPair.t2
                     val (key, event) = eventPair
-                    reactiveKafkaTemplate.send(topic, key ?: "", event)
+                    sendMono(topic, key ?: "", event)
                         .doOnSuccess { result ->
-                            val record = result.recordMetadata()
+                            val record = result!!.recordMetadata
                             logger.debug("Successfully published event to topic-partition {}-{} with offset {} (key: '{}')",
                                 record.topic(), record.partition(), record.offset(), key)
                             if ((index + 1) % BATCH_PROGRESS_LOG_INTERVAL == 0L || index == events.size.toLong() - 1) {
@@ -100,10 +101,6 @@ class KafkaEventPublisher(
                         }
                         .retryWhen(createRetrySpec(topic, key))
                         .map { } // Convert to Mono<Unit> that emits one Unit per successful send
-                        .onErrorContinue { error, _ ->
-                            logger.error("Error publishing event {} in batch to topic '{}': {}",
-                                index + 1, topic, error.message)
-                        }
                 }, BATCH_CONCURRENCY_LEVEL) // Controlled concurrency for better resource management
                 .doOnComplete {
                     logger.info("Completed publishing batch of {} events to topic '{}'", events.size, topic)
@@ -125,9 +122,9 @@ class KafkaEventPublisher(
         logger.debug("Publishing event to topic '{}' with key '{}', event type: '{}'",
             topic, key, event::class.simpleName)
 
-        return reactiveKafkaTemplate.send(topic, key ?: "", event)
+        return sendMono(topic, key ?: "", event)
             .doOnSuccess { result ->
-                val record = result.recordMetadata()
+                val record = result!!.recordMetadata
                 logger.debug(
                     "Successfully published event to topic-partition {}-{} with offset {} (key: '{}')",
                     record.topic(), record.partition(), record.offset(), key
@@ -160,9 +157,9 @@ class KafkaEventPublisher(
                 val index = indexedEventPair.t1
                 val eventPair = indexedEventPair.t2
                 val (key, event) = eventPair
-                reactiveKafkaTemplate.send(topic, key ?: "", event)
+                sendMono(topic, key ?: "", event)
                     .doOnSuccess { result ->
-                        val record = result.recordMetadata()
+                        val record = result!!.recordMetadata
                         logger.debug("Successfully published event to topic-partition {}-{} with offset {} (key: '{}')",
                             record.topic(), record.partition(), record.offset(), key)
                         if ((index + 1) % BATCH_PROGRESS_LOG_INTERVAL == 0L || index == events.size.toLong() - 1) {
@@ -176,10 +173,6 @@ class KafkaEventPublisher(
                     }
                     .retryWhen(createRetrySpec(topic, key))
                     .map { } // Convert to Mono<Unit> that emits one Unit per successful send
-                    .onErrorContinue { error, _ ->
-                        logger.error("Error publishing event {} in batch to topic '{}': {}",
-                            index + 1, topic, error.message)
-                    }
             }, BATCH_CONCURRENCY_LEVEL) // Controlled concurrency for better resource management
             .doOnComplete {
                 logger.info("Completed publishing batch of {} events to topic '{}'", events.size, topic)
@@ -188,6 +181,10 @@ class KafkaEventPublisher(
                 logger.error("Batch publishing to topic '{}' failed with error: {}", topic, error.message)
             }
     }
+
+    // Pragmatic wrapper: bridge blocking future to Mono. For full non-blocking, migrate to Reactor Kafka.
+    private fun sendMono(topic: String, key: String, value: Any): Mono<SendResult<String, Any>> =
+        Mono.fromCallable { kafkaTemplate.send(topic, key, value).get() }
 
     /**
      * Creates a retry specification with exponential backoff for robust error handling.

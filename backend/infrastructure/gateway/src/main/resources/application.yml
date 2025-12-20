@@ -5,13 +5,18 @@ server:
   netty:
     connection-timeout: 5s
     idle-timeout: 15s
+  shutdown: graceful
 
 # Der Name, unter dem sich das Gateway in Consul registriert
 spring:
-  application:
-    name: api-gateway
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+    group:
+      dev: "keycloak"
+      docker: "keycloak"
+  main:
+    web-application-type: reactive
+    allow-bean-definition-overriding: true
   security:
     user:
       name: ${GATEWAY_ADMIN_USER:admin}
@@ -26,73 +31,57 @@ spring:
         register: ${CONSUL_ENABLED:true}
         health-check-path: /actuator/health
         health-check-interval: 10s
-        instance-id: ${spring.application.name}-${server.port}-${random.uuid}
+        health-check-critical-timeout: 30s
+        instance-id: ${spring.application.name}:${server.port}:${random.value}
+        prefer-ip-address: true
+        tags: [ "gateway", "infrastructure" ]
     gateway:
-      server:
-        webflux:
-          httpclient:
-            connect-timeout: 5000
-            response-timeout: 30s
-            pool:
-              max-idle-time: 15s
-              max-life-time: 60s
-          default-filters:
-            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-            - name: CircuitBreaker
-              args:
-                name: defaultCircuitBreaker
-                fallbackUri: forward:/fallback
-            - name: Retry
-              args:
-                retries: 3
-                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
-                methods: GET,POST,PUT,DELETE
-                backoff:
-                  firstBackoff: 50ms
-                  maxBackoff: 500ms
-                  factor: 2
-                  basedOnPreviousValue: false
-            - name: AddResponseHeader
-              args:
-                name: X-Content-Type-Options
-                value: nosniff
-            - name: AddResponseHeader
-              args:
-                name: X-Frame-Options
-                value: DENY
-            - name: AddResponseHeader
-              args:
-                name: X-XSS-Protection
-                value: 1; mode=block
-            - name: AddResponseHeader
-              args:
-                name: Referrer-Policy
-                value: strict-origin-when-cross-origin
-            - name: AddResponseHeader
-              args:
-                name: Cache-Control
-                value: no-cache, no-store, must-revalidate
-          routes:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 30s
+        pool:
+          max-idle-time: 15s
+          max-life-time: 60s
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - name: CircuitBreaker
+          args:
+            name: defaultCircuitBreaker
+            fallbackUri: forward:/fallback
+        - name: Retry
+          args:
+            retries: 3
+            statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+            methods: GET,POST,PUT,DELETE
+            backoff:
+              firstBackoff: 50ms
+              maxBackoff: 500ms
+              factor: 2
+              basedOnPreviousValue: false
+        - name: AddResponseHeader
+          args:
+            name: X-Content-Type-Options
+            value: nosniff
+        - name: AddResponseHeader
+          args:
+            name: X-Frame-Options
+            value: DENY
+        - name: AddResponseHeader
+          args:
+            name: X-XSS-Protection
+            value: 1; mode=block
+        - name: AddResponseHeader
+          args:
+            name: Referrer-Policy
+            value: strict-origin-when-cross-origin
+        - name: AddResponseHeader
+          args:
+            name: Cache-Control
+            value: no-cache, no-store, must-revalidate
+      routes:
 
             # ==============================================================
-            # --- Gateway-Info-Route (optional) ---
-            # ==============================================================
-            - id: gateway-info-route
-              uri: http://localhost:${server.port}
-              predicates:
-                - Method=GET
-                - Path=/gateway-info
-              filters:
-                - name: SetStatus
-                  args:
-                    status: 200
-                - name: SetResponseHeader
-                  args:
-                    name: Content-Type
-                    value: application/json
-
-            # ==============================================================
-            # --- Ping-Service-Integration (optional) ---
+            # --- Ping-Service-Integration ---
             # ==============================================================
             - id: ping-service-route
               uri: lb://ping-service
@@ -100,9 +89,13 @@ spring:
                 - Path=/api/ping/**
               filters:
                 - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: defaultCircuitBreaker
+                    fallbackUri: forward:/fallback
 
             # ==============================================================
-            # --- Entries-Service-Integration (MP-27) ---
+            # --- Entries-Service-Integration ---
             # ==============================================================
             - id: entries-service-route
               uri: lb://entries-service
@@ -110,91 +103,80 @@ spring:
                 - Path=/api/entries/**
               filters:
                 - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: defaultCircuitBreaker
+                    fallbackUri: forward:/fallback
 
-            # Mappe das Root "/api/entries" explizit auf die Service-Root "/"
-            - id: entries-service-root
-              uri: lb://entries-service
+            # ==============================================================
+            # --- Members-Service-Integration ---
+            # ==============================================================
+            - id: members-service-route
+              uri: lb://members-service
               predicates:
-                - Path=/api/entries
+                - Path=/api/members/**
               filters:
-                - SetPath=/
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: membersCircuitBreaker
+                    fallbackUri: forward:/fallback/members
 
-            - id: entries-service-root-slash
-              uri: lb://entries-service
+            # ==============================================================
+            # --- Horses-Service-Integration ---
+            # ==============================================================
+            - id: horses-service-route
+              uri: lb://horses-service
               predicates:
-                - Path=/api/entries/
+                - Path=/api/horses/**
               filters:
-                - SetPath=/
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: horsesCircuitBreaker
+                    fallbackUri: forward:/fallback/horses
 
-  # ==============================================================
-  # --- Members-Service-Integration (optional) ---
-  # ==============================================================
-  #            - id: members-service-route
-  #              uri: lb://members-service
-  #              predicates:
-  #                - Path=/api/members/**
-  #              filters:
-  #                - StripPrefix=1
-  #                - name: CircuitBreaker
-  #                  args:
-  #                    name: membersCircuitBreaker
-  #                    fallbackUri: forward:/fallback/members
+            # ==============================================================
+            # --- Events-Service-Integration ---
+            # ==============================================================
+            - id: events-service-route
+              uri: lb://events-service
+              predicates:
+                - Path=/api/events/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: eventsCircuitBreaker
+                    fallbackUri: forward:/fallback/events
 
-  # ==============================================================
-  # --- Horses-Service-Integration (optional) ---
-  # ==============================================================
-  #            - id: horses-service-route
-  #              uri: lb://horses-service
-  #              predicates:
-  #                - Path=/api/horses/**
-  #              filters:
-  #                - StripPrefix=1
-  #                - name: CircuitBreaker
-  #                  args:
-  #                    name: horsesCircuitBreaker
-  #                    fallbackUri: forward:/fallback/horses
+            # ==============================================================
+            # --- Masterdata-Service-Integration ---
+            # ==============================================================
+            - id: masterdata-service-route
+              uri: lb://masterdata-service
+              predicates:
+                - Path=/api/masterdata/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: masterdataCircuitBreaker
+                    fallbackUri: forward:/fallback/masterdata
 
-  # ==============================================================
-  # --- Events-Service-Integration (optional) ---
-  # ==============================================================
-  #            - id: events-service-route
-  #              uri: lb://events-service
-  #              predicates:
-  #                - Path=/api/events/**
-  #              filters:
-  #                - StripPrefix=1
-  #                - name: CircuitBreaker
-  #                  args:
-  #                    name: eventsCircuitBreaker
-  #                    fallbackUri: forward:/fallback/events
-
-  # ==============================================================
-  # --- Masterdata-Service-Integration (optional) ---
-  # ==============================================================
-  #            - id: masterdata-service-route
-  #              uri: lb://masterdata-service
-  #              predicates:
-  #                - Path=/api/masterdata/**
-  #              filters:
-  #                - StripPrefix=1
-  #                - name: CircuitBreaker
-  #                  args:
-  #                    name: masterdataCircuitBreaker
-  #                    fallbackUri: forward:/fallback/masterdata
-
-  # ==============================================================
-  # --- Auth-Service-Integration (optional) ---
-  # ==============================================================
-  #            - id: auth-service-route
-  #              uri: lb://auth-service
-  #              predicates:
-  #                - Path=/api/auth/**
-  #              filters:
-  #                - StripPrefix=1
-  #                - name: CircuitBreaker
-  #                  args:
-  #                    name: authCircuitBreaker
-  #                    fallbackUri: forward:/fallback/auth
+            # ==============================================================
+            # --- Auth-Service-Integration (Keycloak Proxy) ---
+            # ==============================================================
+            - id: auth-service-route
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: authCircuitBreaker
+                    fallbackUri: forward:/fallback/auth
 # Circuit Breaker Konfiguration
 resilience4j:
   circuitbreaker:
@@ -315,7 +297,7 @@ logging:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr([%X{correlationId:-}]){yellow} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
   file:
-    name: infrastructure/gateway/logs/gateway.log
+    name: logs/gateway.log
   logback:
     rolling policy:
       clean-history-on-start: true

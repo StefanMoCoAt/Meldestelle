@@ -36,7 +36,9 @@ dependencies {
         api(libs.logback.classic)
         // --- Spring & SpringDoc ---
         api(libs.springdoc.openapi.starter.common)
+        api(libs.springdoc.openapi.starter.webflux.ui)
         api(libs.springdoc.openapi.starter.webmvc.ui)
+        api(libs.spring.kafka)
         // --- Database & Persistence ---
         api(libs.bundles.exposed)
         api(libs.bundles.flyway)

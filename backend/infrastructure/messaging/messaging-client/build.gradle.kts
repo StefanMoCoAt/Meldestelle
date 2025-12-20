@@ -26,6 +26,7 @@ dependencies {
     implementation(projects.backend.infrastructure.messaging.messagingConfig)
     // Fügt die reaktive Kafka-Implementierung hinzu (Project Reactor).
     implementation(libs.reactor.kafka)
+    implementation(libs.spring.kafka)
     // Stellt alle Test-Abhängigkeiten gebündelt bereit.
     testImplementation(projects.platform.platformTesting)
 }

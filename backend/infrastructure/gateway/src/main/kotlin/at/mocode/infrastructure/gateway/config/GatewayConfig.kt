@@ -9,6 +9,7 @@ import org.springframework.core.Ordered
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.http.server.reactive.ServerHttpResponse
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
@@ -163,37 +164,49 @@ class RateLimitingFilter : GlobalFilter, Ordered {
     )
 
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
-        val request = exchange.request
-        val response = exchange.response
-        val clientIp = getClientIp(request)
-        val path = request.path.value()
+        return exchange.getPrincipal<java.security.Principal>()
+            .map { principal ->
+                if (principal is JwtAuthenticationToken) {
+                    java.util.Optional.of(principal)
+                } else {
+                    java.util.Optional.empty<JwtAuthenticationToken>()
+                }
+            }
+            .defaultIfEmpty(java.util.Optional.empty<JwtAuthenticationToken>())
+            .flatMap { authOptional ->
+                val auth: JwtAuthenticationToken? = if (authOptional.isPresent) authOptional.get() else null
+                val request = exchange.request
+                val response = exchange.response
+                val clientIp = getClientIp(request)
+                val path = request.path.value()
 
-        // Periodische Bereinigung des Caches zur Vermeidung von memory Leaks
-        performPeriodicCleanup()
+                // Periodische Bereinigung des Caches zur Vermeidung von memory Leaks
+                performPeriodicCleanup()
 
-        val limit = determineRateLimit(request, path)
-        val counter = requestCounts.computeIfAbsent(clientIp) { RequestCounter() }
+                val limit = determineRateLimit(auth, path)
+                val counter = requestCounts.computeIfAbsent(clientIp) { RequestCounter() }
 
-        // Zähler zurücksetzen, wenn mehr als eine Minute vergangen ist
-        val now = System.currentTimeMillis()
-        if (now - counter.lastReset > 60_000) {
-            counter.count = 0
-            counter.lastReset = now
-        }
+                // Zähler zurücksetzen, wenn mehr als eine Minute vergangen ist
+                val now = System.currentTimeMillis()
+                if (now - counter.lastReset > 60_000) {
+                    counter.count = 0
+                    counter.lastReset = now
+                }
 
-        counter.count++
+                counter.count++
 
-        // Rate-Limit-Header hinzufügen
-        response.headers.add(RATE_LIMIT_ENABLED_HEADER, "true")
-        response.headers.add(RATE_LIMIT_LIMIT_HEADER, limit.toString())
-        response.headers.add(RATE_LIMIT_REMAINING_HEADER, maxOf(0, limit - counter.count).toString())
+                // Rate-Limit-Header hinzufügen
+                response.headers.add(RATE_LIMIT_ENABLED_HEADER, "true")
+                response.headers.add(RATE_LIMIT_LIMIT_HEADER, limit.toString())
+                response.headers.add(RATE_LIMIT_REMAINING_HEADER, maxOf(0, limit - counter.count).toString())
 
-        return if (counter.count > limit) {
-            response.statusCode = HttpStatus.TOO_MANY_REQUESTS
-            response.setComplete()
-        } else {
-            chain.filter(exchange)
-        }
+                if (counter.count > limit) {
+                    response.statusCode = HttpStatus.TOO_MANY_REQUESTS
+                    response.setComplete()
+                } else {
+                    chain.filter(exchange)
+                }
+            }
     }
 
     private fun getClientIp(request: ServerHttpRequest): String {
@@ -203,28 +216,19 @@ class RateLimitingFilter : GlobalFilter, Ordered {
             ?: "unknown"
     }
 
-    private fun determineRateLimit(request: ServerHttpRequest, path: String): Int {
+    private fun determineRateLimit(auth: JwtAuthenticationToken?, path: String): Int {
         return when {
             path.startsWith("/api/auth") -> AUTH_ENDPOINT_LIMIT
-            isAdminUser(request) -> ADMIN_LIMIT
-            isAuthenticatedUser(request) -> AUTHENTICATED_LIMIT
+            isAdminUser(auth) -> ADMIN_LIMIT
+            auth != null -> AUTHENTICATED_LIMIT
             else -> ANONYMOUS_LIMIT
         }
     }
 
-    private fun isAuthenticatedUser(request: ServerHttpRequest): Boolean {
-        return request.headers.getFirst("Authorization") != null
-    }
-
-    private fun isAdminUser(request: ServerHttpRequest): Boolean {
-        // Sichere Rollenvalidierung basierend auf JWT-Authentifizierung
-        // die X-User-Role wird vom JwtAuthenticationFilter nach erfolgreicher JWT-Validierung gesetzt
-        val userRole = request.headers.getFirst("X-User-Role")
-        val userId = request.headers.getFirst("X-User-ID")
-
-        // Zusätzliche Sicherheitsprüfung: Beide Header müssen vorhanden sein.
-        // Dies reduziert die Wahrscheinlichkeit von Header-Spoofing
-        return userRole == "ADMIN" && userId != null
+    private fun isAdminUser(auth: JwtAuthenticationToken?): Boolean {
+        if (auth == null) return false
+        val roles = auth.authorities.map { it.authority }
+        return roles.contains("ROLE_ADMIN") || roles.contains("ADMIN")
     }
 
     /**
