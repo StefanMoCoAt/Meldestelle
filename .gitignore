@@ -23,7 +23,7 @@ node_modules/
 Thumbs.db
 
 # Logs
-logs/
+_backup/logs/
 **/*.log
 
 # Kotlin/Java

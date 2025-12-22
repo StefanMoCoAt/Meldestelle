@@ -8,7 +8,7 @@ import org.springframework.test.context.ActiveProfiles
 
 /**
  * Basis-Test zur Überprüfung, dass der Gateway-Anwendungskontext erfolgreich lädt.
- * Verwendet Test-Profil um Produktions-Filter und externe Abhängigkeiten zu deaktivieren.
+ * Verwendet ein Test-Profil, um Produktions-Filter und externe Abhängigkeiten zu deaktivieren.
  */
 @SpringBootTest(
     classes = [GatewayApplication::class],

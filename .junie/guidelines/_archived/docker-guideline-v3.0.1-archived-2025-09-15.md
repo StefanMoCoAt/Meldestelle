@@ -475,9 +475,7 @@ Das System integriert sich nahtlos in die bestehende Docker-Versionsverwaltung u
 
 ```dockerfile
 # BEFORE: Redundante Hardcodierung in 12+ Dockerfiles
-ARG GRADLE_VERSION=9.0.0
-ARG GRADLE_VERSION=9.0.0
-ARG GRADLE_VERSION=9.0.0
+ARG GRADLE_VERSION=9.2.1
 # ... 9 weitere Male identisch wiederholt!
 ```
 
@@ -486,9 +484,9 @@ ARG GRADLE_VERSION=9.0.0
 ```toml
 # docker/versions.toml - SINGLE SOURCE OF TRUTH
 [versions]
-gradle = "9.0.0"
-java = "21"
-node = "20.12.0"
+gradle = "9.2.1"
+java = "25"
+node = "24.12.0"
 nginx = "1.25-alpine"
 prometheus = "v2.54.1"
 grafana = "11.3.0"
@@ -515,8 +513,8 @@ docker/
 Verwendet von **allen** Dockerfiles:
 ```bash
 # --- Build Tools ---
-GRADLE_VERSION=9.0.0
-JAVA_VERSION=21
+GRADLE_VERSION=9.2.1
+JAVA_VERSION=25
 
 # --- Build Metadata ---
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
@@ -545,7 +543,7 @@ MEMBERS_SERVICE_PORT=8083
 
 **Clients** (`docker/build-args/clients.env`):
 ```bash
-NODE_VERSION=20.11.0
+NODE_VERSION=24.12.0
 NGINX_VERSION=1.25-alpine
 WEB_APP_PORT=4000
 DESKTOP_APP_VNC_PORT=5901
@@ -583,10 +581,10 @@ AUTH_SERVER_PORT=8087
 ./scripts/docker-versions-update.sh show
 
 # Java auf Version 22 upgraden
-./scripts/docker-versions-update.sh update java 22
+./scripts/docker-versions-update.sh update java 25
 
 # Gradle auf 9.1.0 upgraden
-./scripts/docker-versions-update.sh update gradle 9.1.0
+./scripts/docker-versions-update.sh update gradle 9.2.1
 
 # Prometheus auf neueste Version upgraden
 ./scripts/docker-versions-update.sh update prometheus v2.54.1
@@ -630,8 +628,8 @@ api-gateway:
     dockerfile: dockerfiles/infrastructure/gateway/Dockerfile
     args:
       # Zentrale Versionen via Environment-Variablen
-      GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.0.0}
-      JAVA_VERSION: ${DOCKER_JAVA_VERSION:-21}
+      GRADLE_VERSION: ${DOCKER_GRADLE_VERSION:-9.2.1}
+      JAVA_VERSION: ${DOCKER_JAVA_VERSION:-25}
       BUILD_DATE: ${BUILD_DATE}
       VERSION: ${DOCKER_APP_VERSION:-1.0.0}
       SPRING_PROFILES_ACTIVE: ${DOCKER_SPRING_PROFILES_DEFAULT:-default}
@@ -641,15 +639,15 @@ api-gateway:
 
 #### **DRY-Prinzip Durchsetzung** 
 ✅
-- **Vor Version 3.0.0**: `GRADLE_VERSION=9.0.0` in 12 Dockerfiles
-- **Ab Version 3.0.0**: `gradle = "9.0.0"` **einmalig** in `docker/versions.toml`
+- **Vor Version 3.0.0**: `GRADLE_VERSION=9.2.1` in 12 Dockerfiles
+- **Ab Version 3.0.0**: `gradle = "9.2.1"` **einmalig** in `docker/versions.toml`
 
 #### **Wartungsaufwand drastisch reduziert** ✅
 
 ```bash
 # BEFORE: 12 Dateien manuell editieren für Gradle-Update
 # AFTER: Ein Befehl für alle Services
-./scripts/docker-versions-update.sh update gradle 9.1.0
+./scripts/docker-versions-update.sh update gradle 9.2.1
 ```
 
 #### **Konsistenz garantiert** ✅

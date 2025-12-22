@@ -4,11 +4,11 @@
 
 [versions]
 # --- Android Ecosystem ---
-agp = "8.1.4"
+# agp = "8.1.4"
 
 # --- Kotlin Ecosystem ---
-kotlin = "2.2.20"
-kotlin-logging = "7.0.3"
+kotlin = "2.3.0"
+kotlin-logging = "7.0.13"
 kotlinx = "1.10.2"
 kotlinx-serialization-json = "1.9.0"
 kotlinx-datetime = "0.7.1"
@@ -16,44 +16,37 @@ kotlinx-coroutines = "1.10.2"
 
 
 # --- Spring Ecosystem ---
-springBoot = "3.5.6"
-springCloud = "2025.0.0"
-springCloudGateway = "4.3.0"
+springBoot = "3.5.9"
+springCloud = "2025.1.0"
+# springCloudGateway = "4.3.0"
 springDependencyManagement = "1.1.7"
-springdoc = "2.8.13"
+springdoc = "3.0.0"
 
 # --- Ktor (API Layer & Client) ---
 ktor = "3.3.3"
 
 # --- DI ---
-koin = "4.1.0"
-koinCompose = "4.0.0"
+koin = "4.1.1"
+koinCompose = "4.1.1"
 
 # --- Compose UI ---
-androidx-lifecycle = "2.9.4"
-composeHotReload = "1.0.0-rc02"
-composeMultiplatform = "1.9.0"
-
-# coroutinesVersion = "1.10.2"
-# dateTimeVersion = "0.7.1"
-# koin = "4.1.0"
-# ktor = "3.3.3"
-# sqlDelight = "2.1.0"
-# material3 = "1.3.2"
+androidx-lifecycle = "2.9.6"
+composeHotReload = "1.0.0"
+composeMultiplatform = "1.9.3"
 
 # --- Database & Persistence ---
 exposed = "0.61.0"
 postgresql = "42.7.8"
 hikari = "7.0.2"
-h2 = "2.3.232"
-flyway = "11.7.2"
-redisson = "3.52.0"
-lettuce = "6.6.0.RELEASE"
-sqldelight = "2.1.0"
+h2 = "2.4.240"
+flyway = "11.19.1"
+redisson = "4.0.0"
+lettuce = "7.2.1.RELEASE"
+sqldelight = "2.2.1"
 
 # --- Service Discovery & Monitoring ---
-micrometer = "1.15.4"
-micrometerTracing = "1.5.4"
+micrometer = "1.16.1"
+micrometerTracing = "1.6.1"
 zipkin = "3.5.1"
 zipkinReporter = "3.5.1"
 
@@ -62,26 +55,29 @@ auth0Jwt = "4.5.0"
 keycloakAdminClient = "26.0.7"
 
 # --- Testing ---
-junitJupiter = "5.12.2"
-junitPlatform = "1.12.2"
-mockk = "1.14.6"
-assertj = "3.27.4"
-testcontainers = "1.21.3"
-testcontainersKeycloak = "3.9.0"
+junitJupiter = "6.0.1"
+junitPlatform = "6.0.1"
+mockk = "1.14.7"
+assertj = "3.27.6"
+testcontainers = "2.0.3"
+testcontainersKeycloak = "4.0.1"
+testcontainersJunitJupiter = "1.21.4"
+testcontainersPostgresql = "1.21.4"
+testcontainersKafka = "1.21.4"
 
 # --- Resilience4j ---
 resilience4j = "2.3.0"
 
 # --- Utilities ---
-#uuid = "0.9.0"
+# uuid = "0.9.0"
 bignum = "0.3.10"
-logback = "1.5.19"
-caffeine = "3.2.2"
-reactorKafka = "1.3.23"
-jackson = "2.19.2"
+logback = "1.5.22"
+caffeine = "3.2.3"
+# reactorKafka = "1.3.23"
+jackson = "3.0.3"
 jakartaAnnotation = "3.0.0"
-roomCommonJvm = "2.8.2"
-uiDesktop = "1.9.3"
+roomCommonJvm = "2.8.4"
+uiDesktop = "1.7.0"
 
 # --- Logging ---
 slf4j = "2.0.17"
@@ -235,9 +231,9 @@ reactor-test = { module = "io.projectreactor:reactor-test" } # Version wird von 
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
-testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
-testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
-testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainersJunitJupiter" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainersPostgresql" }
+testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainersKafka" }
 testcontainers-keycloak = { module = "com.github.dasniko:testcontainers-keycloak", version.ref = "testcontainersKeycloak" }
 room-common-jvm = { module = "androidx.room:room-common-jvm", version.ref = "roomCommonJvm" }
 ui-desktop = { module = "androidx.compose.ui:ui-desktop", version.ref = "uiDesktop" }
@@ -500,8 +496,8 @@ monitoring-complete = [
 
 
 [plugins]
-androidApplication = { id = "com.android.application", version.ref = "agp" }
-androidLibrary = { id = "com.android.library", version.ref = "agp" }
+# androidApplication = { id = "com.android.application", version.ref = "agp" }
+# androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -524,4 +520,4 @@ foojayResolver = { id = "org.gradle.toolchains.foojay-resolver-convention", vers
 # See: https://github.com/Kotlin/dokka
 # Note: dokka 2.0.0+ matches Kotlin 2.0+; verify compatibility if bumping Kotlin
 # Using latest stable known compatible as of 2025-10
-dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
+dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }

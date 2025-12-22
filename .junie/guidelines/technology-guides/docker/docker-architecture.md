@@ -126,8 +126,8 @@ docker/
 Verwendet von **allen** Dockerfiles:
 ```bash
 # --- Build Tools ---
-GRADLE_VERSION=9.1.0
-JAVA_VERSION=21
+GRADLE_VERSION=9.2.1
+JAVA_VERSION=25
 
 # --- Build Metadata ---
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
@@ -135,8 +135,8 @@ VERSION=1.0.0
 
 # --- Common Base Images ---
 ALPINE_VERSION=3.19
-ECLIPSE_TEMURIN_JDK_VERSION=21-jdk-alpine
-ECLIPSE_TEMURIN_JRE_VERSION=21-jre-alpine
+ECLIPSE_TEMURIN_JDK_VERSION=25-jdk-alpine
+ECLIPSE_TEMURIN_JRE_VERSION=25-jre-alpine
 
 # --- Monitoring & Infrastructure Services ---
 DOCKER_PROMETHEUS_VERSION=v2.54.1

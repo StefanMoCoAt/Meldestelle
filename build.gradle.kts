@@ -1,3 +1,12 @@
+import groovy.json.JsonSlurper
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+import java.io.ByteArrayOutputStream
+import java.util.zip.GZIPOutputStream
+
 plugins {
   // Version management plugin for dependency updates
   id("com.github.ben-manes.versions") version "0.51.0"
@@ -101,13 +110,13 @@ subprojects {
     environment("NODE_OPTIONS", merged)
     // Also set the legacy switch to silence warnings entirely
     environment("NODE_NO_WARNINGS", "1")
-    // Set Chrome binary path to avoid snap permission issues
+    // Set a Chrome binary path to avoid snap permission issues
     environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
     environment("CHROMIUM_BIN", "/usr/bin/chromium")
     environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/chromium")
   }
 
-  tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+  tasks.withType<KotlinCompile> {
     compilerOptions {
       freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
@@ -117,14 +126,14 @@ subprojects {
   // Detekt & Ktlint default setup
   // ------------------------------
   plugins.withId("io.gitlab.arturbosch.detekt") {
-    extensions.configure(io.gitlab.arturbosch.detekt.extensions.DetektExtension::class.java) {
+    extensions.configure(DetektExtension::class.java) {
       buildUponDefaultConfig = true
       allRules = false
       autoCorrect = false
       config.setFrom(files(rootProject.file("config/detekt/detekt.yml")))
       basePath = rootDir.absolutePath
     }
-    tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    tasks.withType<Detekt>().configureEach {
       jvmTarget = "21"
       reports {
         xml.required.set(false)
@@ -136,13 +145,13 @@ subprojects {
   }
 
   plugins.withId("org.jlleitschuh.gradle.ktlint") {
-    extensions.configure(org.jlleitschuh.gradle.ktlint.KtlintExtension::class.java) {
+    extensions.configure(KtlintExtension::class.java) {
       android.set(false)
       outputToConsole.set(true)
       ignoreFailures.set(false)
       reporters {
-        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
-        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.PLAIN)
+        reporter(ReporterType.CHECKSTYLE)
+        reporter(ReporterType.PLAIN)
       }
     }
   }
@@ -220,11 +229,11 @@ tasks.register("archGuardNoFeatureToFeatureDeps") {
             !n.contains("test") && !n.contains("debug") // ignore test/debug configs
           }
           .forEach { cfg ->
-            cfg.dependencies.withType(org.gradle.api.artifacts.ProjectDependency::class.java).forEach { dep ->
+            cfg.dependencies.withType(ProjectDependency::class.java).forEach { dep ->
               // Use reflection to avoid compile-time issues with dependencyProject property
               val proj =
                 try {
-                  dep.javaClass.getMethod("getDependencyProject").invoke(dep) as org.gradle.api.Project
+                  dep.javaClass.getMethod("getDependencyProject").invoke(dep) as Project
                 } catch (e: Throwable) {
                   null
                 }
@@ -270,7 +279,7 @@ tasks.register("checkBundleBudget") {
 
     @Suppress("UNCHECKED_CAST")
     val parsed =
-      groovy.json.JsonSlurper().parseText(text) as Map<String, Map<String, Any?>>
+      JsonSlurper().parseText(text) as Map<String, Map<String, Any?>>
     val budgets =
       parsed.mapValues { (_, v) ->
         val raw = (v["rawBytes"] as Number).toLong()
@@ -279,8 +288,8 @@ tasks.register("checkBundleBudget") {
       }
 
     fun gzipSize(bytes: ByteArray): Long {
-      val baos = java.io.ByteArrayOutputStream()
-      java.util.zip.GZIPOutputStream(baos).use { it.write(bytes) }
+      val baos = ByteArrayOutputStream()
+      GZIPOutputStream(baos).use { it.write(bytes) }
       return baos.toByteArray().size.toLong()
     }
 
@@ -296,7 +305,7 @@ tasks.register("checkBundleBudget") {
     }
 
     shells.forEach { shell ->
-      val key = shell.path.trimStart(':').replace(':', '/') // or use colon form for budgets keys below
+      val key = shell.path.trimStart(':').replace(':', '/') // or use a colon form for budgets keys below
       val colonKey = shell.path.trimStart(':').replace('/', ':').trim() // ensure ":a:b:c"
       // Budgets are keyed by a Gradle path with colons but without leading colon in config for readability
       val budgetKeyCandidates =
@@ -307,7 +316,7 @@ tasks.register("checkBundleBudget") {
           shell.name,
         )
 
-      val budgetEntry = budgetKeyCandidates.asSequence().mapNotNull { budgets[it] }.firstOrNull()
+      val budgetEntry = budgetKeyCandidates.firstNotNullOfOrNull { budgets[it] }
       if (budgetEntry == null) {
         report.appendLine("- ${shell.path}: No budget configured (skipping)")
         return@forEach
@@ -383,7 +392,7 @@ tasks.register("archGuards") {
 tasks.register("staticAnalysis") {
   group = "verification"
   description = "Run static analysis (detekt, ktlint) and architecture guards"
-  // These tasks are provided by plugins; only depend if tasks exist
+  // Plugins provide these tasks; only 'depend on' if tasks exist
   dependsOn(
     tasks.matching { it.name == "detekt" },
     tasks.matching { it.name == "ktlintCheck" },
@@ -395,80 +404,36 @@ tasks.register("staticAnalysis") {
 // ###                     DOKKA (Multi-Module)                   ###
 // ##################################################################
 
-// Apply Dokka automatically to Kotlin subprojects to enable per-module docs
+// Apply Dokka (V2) automatically to Kotlin subprojects
 subprojects {
-  plugins.withId("org.jetbrains.kotlin.jvm") {
-    apply(plugin = "org.jetbrains.dokka")
-  }
-  plugins.withId("org.jetbrains.kotlin.multiplatform") {
-    apply(plugin = "org.jetbrains.dokka")
-  }
-
-  // Minimal sourceLink configuration when running in GitHub Actions
-  tasks.withType(org.jetbrains.dokka.gradle.DokkaTask::class.java).configureEach {
-    dokkaSourceSets.configureEach {
-      val repo = System.getenv("GITHUB_REPOSITORY")
-      if (!repo.isNullOrBlank()) {
-        sourceLink {
-          localDirectory.set(project.file("src"))
-          remoteUrl.set(
-            java.net.URI.create(
-              "https://github.com/$repo/blob/main/" + project.path.trimStart(':').replace(':', '/') + "/src",
-            ).toURL(),
-          )
-        }
-      }
-      // Keep module names short and stable
-      moduleName.set(project.path.trimStart(':'))
-    }
-  }
+  plugins.withId("org.jetbrains.kotlin.jvm") { apply(plugin = "org.jetbrains.dokka") }
+  plugins.withId("org.jetbrains.kotlin.multiplatform") { apply(plugin = "org.jetbrains.dokka") }
 }
 
 // Aggregate tasks to build multi-module docs in Markdown (GFM) and HTML
-val dokkaGfmAll =
-  tasks.register("dokkaGfmAll") {
+// Unified V2 aggregator: builds docs via `dokkaGenerate` in subprojects and aggregates outputs
+val dokkaAll =
+  tasks.register("dokkaAll") {
     group = "documentation"
-    description = "Builds Dokka GFM for all modules and aggregates outputs under build/dokka/gfm"
-    // Depend on all dokkaGfm tasks that exist in subprojects
+    description = "Builds Dokka (V2) for all modules and aggregates outputs under build/dokka/all"
+    // Trigger Dokka generation in all subprojects that have the Dokka plugin
     dependsOn(
       subprojects
         .filter { it.plugins.hasPlugin("org.jetbrains.dokka") }
-        .map { "${it.path}:dokkaGfm" },
+        .map { "${it.path}:dokkaGenerate" },
     )
     doLast {
-      val dest = layout.buildDirectory.dir("dokka/gfm").get().asFile
+      val dest = layout.buildDirectory.dir("dokka/all").get().asFile
       if (dest.exists()) dest.deleteRecursively()
       dest.mkdirs()
       subprojects.filter { it.plugins.hasPlugin("org.jetbrains.dokka") }.forEach { p ->
-        val out = p.layout.buildDirectory.dir("dokka/gfm").get().asFile
+        // Dokka V2 writes into build/dokka; copy everything to keep format/plugins agnostic
+        val out = p.layout.buildDirectory.dir("dokka").get().asFile
         if (out.exists()) {
           out.copyRecursively(File(dest, p.path.trimStart(':').replace(':', '/')), overwrite = true)
         }
       }
-      println("[DOKKA] Aggregated GFM into ${dest.absolutePath}")
-    }
-  }
-
-val dokkaHtmlAll =
-  tasks.register("dokkaHtmlAll") {
-    group = "documentation"
-    description = "Builds Dokka HTML for all modules and aggregates outputs under build/dokka/html"
-    dependsOn(
-      subprojects
-        .filter { it.plugins.hasPlugin("org.jetbrains.dokka") }
-        .map { "${it.path}:dokkaHtml" },
-    )
-    doLast {
-      val dest = layout.buildDirectory.dir("dokka/html").get().asFile
-      if (dest.exists()) dest.deleteRecursively()
-      dest.mkdirs()
-      subprojects.filter { it.plugins.hasPlugin("org.jetbrains.dokka") }.forEach { p ->
-        val out = p.layout.buildDirectory.dir("dokka/html").get().asFile
-        if (out.exists()) {
-          out.copyRecursively(File(dest, p.path.trimStart(':').replace(':', '/')), overwrite = true)
-        }
-      }
-      println("[DOKKA] Aggregated HTML into ${dest.absolutePath}")
+      println("[DOKKA] Aggregated Dokka V2 outputs into ${dest.absolutePath}")
     }
   }
 
@@ -491,7 +456,7 @@ tasks.withType<Exec>().configureEach {
   val merged = if (current.isNullOrBlank()) "--no-deprecation" else "$current --no-deprecation"
   environment("NODE_OPTIONS", merged)
   environment("NODE_NO_WARNINGS", "1")
-  // Set Chrome binary path to avoid snap permission issues
+  // Set a Chrome binary path to avoid snap permission issues
   environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
   environment("CHROMIUM_BIN", "/usr/bin/chromium")
   environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/chromium")
