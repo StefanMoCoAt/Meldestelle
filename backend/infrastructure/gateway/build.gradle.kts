@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 // Dieses Modul ist das API-Gateway und der einzige öffentliche Einstiegspunkt
 // für alle externen Anfragen an das Meldestelle-System.
 plugins {
@@ -22,16 +24,15 @@ dependencies {
   implementation(projects.backend.infrastructure.monitoring.monitoringClient)
 
   // === GATEWAY-SPEZIFISCHE ABHÄNGIGKEITEN ===
-  implementation(libs.bundles.spring.cloud.gateway)
-  implementation(libs.bundles.spring.boot.security)
-  implementation(libs.bundles.resilience)
-  implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
-  implementation(libs.spring.boot.starter.actuator) // Wichtig für Health & Metrics
-  implementation(libs.bundles.logging)
-  implementation(libs.bundles.jackson.kotlin)
+  // Kern-Gateway inkl. Security, Actuator, CircuitBreaker, Discovery
+  implementation(libs.bundles.gateway.core)
+  // Ergänzende Observability (Logging, Jackson)
+  implementation(libs.bundles.gateway.observability)
+  // Redis-Unterstützung für verteiltes Rate Limiting (RequestRateLimiter)
+  // Umgestellt auf das spezifische Gateway-Redis-Bundle (einfach, leicht zu konfigurieren)
+  implementation(libs.bundles.gateway.redis)
 
-  // WICHTIG: PostgreSQL Treiber hinzufügen!
-  implementation(libs.postgresql.driver)
+  // Hinweis: Der Gateway benötigt keinen Datenbanktreiber → entfernt
 
   // === Test Dependencies ===
   testImplementation(projects.platform.platformTesting)
@@ -50,7 +51,7 @@ sourceSets {
   }
 }
 
-val integrationTestImplementation by configurations.getting {
+val integrationTestImplementation: Configuration? by configurations.getting {
   extendsFrom(configurations.testImplementation.get())
 }
 
@@ -71,6 +72,6 @@ tasks.register<Test>("integrationTest") {
     showExceptions = true
     showCauses = true
     showStackTraces = true
-    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    exceptionFormat = TestExceptionFormat.FULL
   }
 }

@@ -20,6 +20,11 @@ class FallbackController {
         return createFallbackResponse("members-service", "Member operations are temporarily unavailable")
     }
 
+    @RequestMapping(value = ["/ping"], method = [RequestMethod.GET, RequestMethod.POST])
+    fun pingFallback(): ResponseEntity<ErrorResponse> {
+        return createFallbackResponse("ping-service", "Ping service is temporarily unavailable")
+    }
+
     @RequestMapping(value = ["/horses"], method = [RequestMethod.GET, RequestMethod.POST])
     fun horsesFallback(): ResponseEntity<ErrorResponse> {
         return createFallbackResponse("horses-service", "Horse registry operations are temporarily unavailable")

@@ -27,10 +27,8 @@ import org.springframework.test.context.ActiveProfiles
         "gateway.security.jwt.enabled=false",
         // Reaktiven Web-Anwendungstyp verwenden
         "spring.main.web-application-type=reactive",
-        // Gateway Discovery deaktivieren
-        "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false",
-        // Actuator Security deaktivieren
-        "management.security.enabled=false",
+        // Gateway Discovery deaktivieren (korrekte Property)
+        "spring.cloud.gateway.discovery.locator.enabled=false",
         // Zufälligen Port setzen
         "server.port=0"
     ]

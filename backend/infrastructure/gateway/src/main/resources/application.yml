@@ -16,6 +16,11 @@ spring:
     user:
       name: ${GATEWAY_ADMIN_USER:admin}
       password: ${GATEWAY_ADMIN_PASSWORD:admin}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 3s
   cloud:
     consul:
       host: ${CONSUL_HOST:localhost}
@@ -38,18 +43,14 @@ spring:
               max-life-time: 60s
           default-filters:
             - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-            - name: CircuitBreaker
-              args:
-                name: defaultCircuitBreaker
-                fallbackUri: forward:/fallback
             - name: Retry
               args:
-                retries: 3
+                retries: 2
                 statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
-                methods: GET,POST,PUT,DELETE
+                methods: GET
                 backoff:
-                  firstBackoff: 50ms
-                  maxBackoff: 500ms
+                  firstBackoff: 100ms
+                  maxBackoff: 1000ms
                   factor: 2
                   basedOnPreviousValue: false
             - name: AddResponseHeader
@@ -60,10 +61,6 @@ spring:
               args:
                 name: X-Frame-Options
                 value: DENY
-            - name: AddResponseHeader
-              args:
-                name: X-XSS-Protection
-                value: 1; mode=block
             - name: AddResponseHeader
               args:
                 name: Referrer-Policy
@@ -100,6 +97,15 @@ spring:
                 - Path=/api/ping/**
               filters:
                 - StripPrefix=1
+                - name: CircuitBreaker
+                  args:
+                    name: pingCircuitBreaker
+                    fallbackUri: forward:/fallback/ping
+                - name: RequestRateLimiter
+                  args:
+                    key-resolver: "#{@principalNameKeyResolver}"
+                    redis-rate-limiter.replenishRate: ${PING_RATE_LIMIT_REPLENISH_RATE:50}
+                    redis-rate-limiter.burstCapacity: ${PING_RATE_LIMIT_BURST:100}
 
             # ==============================================================
             # --- Entries-Service-Integration (MP-27) ---
@@ -215,6 +221,8 @@ resilience4j:
     instances:
       defaultCircuitBreaker:
         baseConfig: default
+      pingCircuitBreaker:
+        baseConfig: default
       membersCircuitBreaker:
         baseConfig: default
         slidingWindowSize: 50
@@ -248,8 +256,8 @@ management:
         allow-credentials: true
   endpoint:
     health:
-      show-details: always
-      show-components: always
+      show-details: when_authorized
+      show-components: when_authorized
       probes:
         enabled: true
     metrics:
@@ -304,21 +312,10 @@ management:
 logging:
   level:
     org.springframework.cloud.gateway: INFO
-    org.springframework.cloud.loadbalancer: DEBUG
+    org.springframework.cloud.loadbalancer: INFO
     org.springframework.cloud.consul: INFO
-    at.mocode.infrastructure.gateway: DEBUG
+    at.mocode.infrastructure.gateway: INFO
     io.github.resilience4j: INFO
     reactor.netty.http.client: INFO
-    org.springframework.security: WARN
-    org.springframework.web: INFO
-  pattern:
-    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr([%X{correlationId:-}]){yellow} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{correlationId:-}] %logger{36} - %msg%n"
-  file:
-    name: infrastructure/gateway/logs/gateway.log
-  logback:
-    rolling policy:
-      clean-history-on-start: true
-      max-file-size: 100MB
-      total-size-cap: 1GB
-      max-history: 30
+
+# (Redis-Konfiguration wurde in den bestehenden spring.data.redis-Block oben integriert)
