@@ -97,8 +97,8 @@ ARG GRADLE_VERSION=9.0.0
 ```toml
 # docker/versions.toml - SINGLE SOURCE OF TRUTH
 [versions]
-gradle = "9.1.0"
-java = "21"
+gradle = "9.2.1"
+java = "25"
 node = "22.21.0"
 nginx = "1.28.0-alpine"
 prometheus = "v2.54.1"
@@ -196,8 +196,8 @@ AUTH_SERVER_PORT=8087
 # Java auf Version 22 upgraden
 ./scripts/docker-versions-update.sh update java 22
 
-# Gradle auf 9.1.0 upgraden
-./scripts/docker-versions-update.sh update gradle 9.1.0
+# Gradle auf 9.2.1 upgraden
+./scripts/docker-versions-update.sh update gradle 9.2.1
 
 # Prometheus auf neueste Version upgraden
 ./scripts/docker-versions-update.sh update prometheus v2.54.1

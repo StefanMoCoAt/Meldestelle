@@ -12,7 +12,7 @@ version = "1.0.0"
 kotlin {
   val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
-  jvmToolchain(21)
+  jvmToolchain(25)
 
   jvm()
 

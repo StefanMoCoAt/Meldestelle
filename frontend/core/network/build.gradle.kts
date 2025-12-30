@@ -11,7 +11,7 @@ plugins {
 kotlin {
   val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
-  jvmToolchain(21)
+  jvmToolchain(25)
 
   jvm()
   js {
@@ -64,7 +64,7 @@ kotlin {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
   compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_21)
+    jvmTarget.set(JvmTarget.JVM_25)
     freeCompilerArgs.addAll("-opt-in=kotlin.RequiresOptIn")
   }
 }

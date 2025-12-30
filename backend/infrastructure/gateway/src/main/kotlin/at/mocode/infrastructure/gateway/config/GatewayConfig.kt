@@ -1,5 +1,6 @@
 package at.mocode.infrastructure.gateway.config
 
+import org.slf4j.LoggerFactory
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
 import org.springframework.cloud.gateway.filter.GlobalFilter
 import org.springframework.core.Ordered
@@ -17,6 +18,8 @@ import java.util.*
  */
 @Component
 class CorrelationIdFilter : GlobalFilter, Ordered {
+
+    private val logger = LoggerFactory.getLogger(CorrelationIdFilter::class.java)
 
     companion object {
         const val CORRELATION_ID_HEADER = "X-Correlation-ID"
@@ -39,6 +42,9 @@ class CorrelationIdFilter : GlobalFilter, Ordered {
         mutatedExchange.response.headers.add(CORRELATION_ID_HEADER, correlationId)
 
         return chain.filter(mutatedExchange)
+            .doOnError { ex ->
+                logger.error("Error in CorrelationIdFilter for request {}: {}", request.uri, ex.message)
+            }
     }
 
     override fun getOrder(): Int = Ordered.HIGHEST_PRECEDENCE

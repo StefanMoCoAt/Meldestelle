@@ -239,7 +239,7 @@ Befehle für Docker-Versionsverwaltung:
 
 ```bash
 make versions-show                      # Zeigt zentrale Versionen (docker/versions.toml)
-make versions-update key=gradle value=9.1.0  # Aktualisiert eine Version
+make versions-update key=gradle value=9.2.1  # Aktualisiert eine Version
 make docker-sync                        # Synchronisiert versions.toml -> build-args/*.env
 make docker-compose-gen ENV=development # Generiert Docker Compose Files
 make docker-validate                    # Validiert Docker SSoT Konsistenz
@@ -250,7 +250,7 @@ make hooks-install                      # Installiert Pre-Commit SSoT Guard Hook
 
 ```bash
 # 1. Version in versions.toml aktualisieren
-make versions-update key=gradle value=9.1.0
+make versions-update key=gradle value=9.2.1
 
 # 2. Build-Args synchronisieren
 make docker-sync
@@ -388,7 +388,7 @@ curl -s http://localhost:8082/actuator/health | jq
 
 ```bash
 # Gradle-Version ändern
-make versions-update key=gradle value=9.1.0
+make versions-update key=gradle value=9.2.1
 
 # Änderungen synchronisieren
 make docker-sync

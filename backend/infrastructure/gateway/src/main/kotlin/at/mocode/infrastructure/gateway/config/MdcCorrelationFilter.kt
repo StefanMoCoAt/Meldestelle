@@ -1,6 +1,7 @@
 package at.mocode.infrastructure.gateway.config
 
 import at.mocode.infrastructure.gateway.config.CorrelationIdFilter.Companion.CORRELATION_ID_HEADER
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
 import org.springframework.cloud.gateway.filter.GlobalFilter
@@ -19,6 +20,8 @@ import reactor.core.publisher.Mono
 @Component
 class MdcCorrelationFilter : GlobalFilter, Ordered {
 
+    private val logger = LoggerFactory.getLogger(MdcCorrelationFilter::class.java)
+
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
         val correlationId = exchange.request.headers.getFirst(CORRELATION_ID_HEADER)
         if (correlationId != null) {
@@ -26,6 +29,9 @@ class MdcCorrelationFilter : GlobalFilter, Ordered {
         }
 
         return chain.filter(exchange)
+            .doOnError { ex ->
+                logger.error("Error in MdcCorrelationFilter: {}", ex.message)
+            }
             // Bei Abschluss säubern, um Leaks über Thread-Grenzen zu vermeiden
             .doFinally { MDC.remove(CORRELATION_ID_HEADER) }
     }

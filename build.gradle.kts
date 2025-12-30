@@ -12,7 +12,7 @@ plugins {
   id("com.github.ben-manes.versions") version "0.51.0"
 
   // Kotlin plugins declared here with 'apply false' to centralize version management
-  // This prevents "plugin loaded multiple times" errors in Gradle 9.1.0+
+  // This prevents "plugin loaded multiple times" errors in Gradle 9.2.1+
   // Subprojects apply these plugins via version catalog: alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.kotlinJvm) apply false
   alias(libs.plugins.kotlinMultiplatform) apply false
@@ -82,7 +82,7 @@ subprojects {
   plugins.withId("java") {
     val javaExt = extensions.getByType<JavaPluginExtension>()
     // Ensure a full JDK toolchain with compiler is available (Gradle will auto-download if missing)
-    javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 
     tasks.register<Test>("perfTest") {
       description = "Runs tests tagged with 'perf'"
@@ -134,7 +134,7 @@ subprojects {
       basePath = rootDir.absolutePath
     }
     tasks.withType<Detekt>().configureEach {
-      jvmTarget = "21"
+      jvmTarget = "25"
       reports {
         xml.required.set(false)
         txt.required.set(false)
@@ -463,6 +463,6 @@ tasks.withType<Exec>().configureEach {
 }
 
 tasks.wrapper {
-  gradleVersion = "9.1.0"
+  gradleVersion = "9.2.1"
   distributionType = Wrapper.DistributionType.BIN
 }

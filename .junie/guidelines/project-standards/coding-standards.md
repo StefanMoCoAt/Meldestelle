@@ -15,13 +15,13 @@ ai_context: "Coding conventions, naming standards, type safety, error handling, 
 ### Sprach- und Stilstandards
 
 * **Primärsprache:** Kotlin (JVM/Multiplatform)
-* **Java-Kompatibilität:** Ziel ist Java 21+
+* **Java-Kompatibilität:** Ziel ist Java 25+
 * **Code-Stil:** Offizielle Kotlin Coding Conventions, durch `Detekt` geprüft.
 
 > **🤖 AI-Assistant Hinweis:**
 > Alle Kotlin-Code müssen den offiziellen Kotlin Coding Conventions entsprechen:
 > - **Detekt-Validierung:** Automatische Code-Style-Prüfung
-> - **Java 21+ Kompatibilität:** Nutze moderne Java-Features wo sinnvoll
+> - **Java 25+ Kompatibilität:** Nutze moderne Java-Features wo sinnvoll
 > - **Multiplatform:** Code sollte plattformübergreifend funktionieren
 
 ### Namenskonventionen

@@ -26,7 +26,7 @@ Detaillierte Coding-Standards und Qualitätsrichtlinien finden Sie in:
 **→ [Coding Standards](./project-standards/coding-standards.md)**
 
 Kernpunkte:
-- **Primärsprache:** Kotlin (JVM/Multiplatform) mit Java 21+ Kompatibilität
+- **Primärsprache:** Kotlin (JVM/Multiplatform) mit Java 25+ Kompatibilität
 - **Namenskonventionen:** PascalCase für Klassen, camelCase für Funktionen
 - **Value Classes:** Typsichere Wrapper für primitive Typen
 - **Result-Pattern:** Für erwartbare Geschäftsfehler

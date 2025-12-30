@@ -3,7 +3,7 @@
 # ===================================================================
 
 # 1. Build Stage (Debian-basiert für Stabilität bei Desktop-Builds)
-FROM gradle:8-jdk21 AS builder
+FROM gradle:8-jdk25 AS builder
 
 WORKDIR /app
 
@@ -40,7 +40,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Installiere System-Dependencies
 RUN apt-get update && apt-get install -y \
-    openjdk-21-jdk \
+    openjdk-25-jdk \
     xvfb \
     x11vnc \
     python3 \

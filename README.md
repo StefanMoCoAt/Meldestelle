@@ -148,8 +148,8 @@ Sicherheits-Hinweise:
 | Komponente     | Technologie                   | Version |
 |----------------|-------------------------------|---------|
 | **Backend**    | Kotlin + Spring Boot          | 3.x     |
-| **JVM**        | Java                          | 21      |
-| **Build**      | Gradle                        | 9.1.0   |
+| **JVM**        | Java                          | 25      |
+| **Build**      | Gradle                        | 9.2.1   |
 | **Datenbank**  | PostgreSQL                    | 16      |
 | **Cache**      | Redis                         | 7       |
 | **Messaging**  | Apache Kafka                  | 7.4.0   |
@@ -384,7 +384,7 @@ make docker-validate     # Validiert Docker SSoT Konsistenz
 ### Versionen ändern
 
 ```bash
- bash scripts/docker-versions-update.sh update gradle 9.1.0 
+ bash scripts/docker-versions-update.sh update gradle 9.2.1
  bash scripts/docker-versions-update.sh update node 22.21.0 
  bash scripts/docker-versions-update.sh update postgres 16-alpine
 ```

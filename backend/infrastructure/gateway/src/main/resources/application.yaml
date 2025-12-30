@@ -4,6 +4,7 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration
+      - org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration
   cloud:
     gateway:
       httpclient:

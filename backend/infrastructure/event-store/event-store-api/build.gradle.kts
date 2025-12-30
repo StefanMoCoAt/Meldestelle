@@ -12,7 +12,7 @@ kotlin {
         // Optimierungen für API-Module
         freeCompilerArgs.addAll(
             "-opt-in=kotlin.time.ExperimentalTime",
-            "-Xjvm-default=all"
+            "-jvm-default=all"
         )
     }
 }

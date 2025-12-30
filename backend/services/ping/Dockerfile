@@ -147,7 +147,7 @@ EXPOSE 8082 5005
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=3 \
     CMD curl -fsS --max-time 2 http://localhost:8082/actuator/health/readiness || exit 1
 
-# Optimized JVM settings for Spring Boot microservice with Java 21
+# Optimized JVM settings for Spring Boot microservice with Java 25
 # Removed deprecated UseTransparentHugePages flag for better compatibility
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
     -XX:+UseG1GC \

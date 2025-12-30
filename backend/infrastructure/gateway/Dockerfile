@@ -87,7 +87,7 @@ RUN mkdir -p build/dependency && \
 # Runtime Stage
 # ===================================================================
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
-#eclipse-temurin:21-jre-alpine-3.22
+#eclipse-temurin:25-jre-alpine-3.22
 
 # Build arguments for runtime stage
 ARG BUILD_DATE
@@ -150,7 +150,7 @@ EXPOSE 8081 5005
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=3 \
     CMD curl -fsS --max-time 2 http://localhost:8081/actuator/health/readiness || exit 1
 
-# Optimized JVM settings for Spring Cloud Gateway with Java 21
+# Optimized JVM settings for Spring Cloud Gateway with Java 25
 # Removed deprecated UseTransparentHugePages flag for better compatibility
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -XX:+UseG1GC \

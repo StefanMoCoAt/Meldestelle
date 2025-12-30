@@ -4,7 +4,7 @@
 
  ## Voraussetzungen
  - Docker und Docker Compose (v2)
- - Java 21 (JDK)
+ - Java 25 (JDK)
  - Git
 
  ## Schnellstart

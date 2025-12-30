@@ -583,7 +583,7 @@ AUTH_SERVER_PORT=8087
 # Java auf Version 22 upgraden
 ./scripts/docker-versions-update.sh update java 25
 
-# Gradle auf 9.1.0 upgraden
+# Gradle auf 9.2.1 upgraden
 ./scripts/docker-versions-update.sh update gradle 9.2.1
 
 # Prometheus auf neueste Version upgraden
@@ -703,7 +703,7 @@ cp dockerfiles/templates/spring-boot-service.Dockerfile dockerfiles/services/new
 
 ```dockerfile
 # ❌ FALSCH - Nie mehr hardcodierte Versionen
-ARG GRADLE_VERSION=9.1.0
+ARG GRADLE_VERSION=9.2.1
 
 # ✅ RICHTIG - Zentrale Referenz
 ARG GRADLE_VERSION
@@ -1545,7 +1545,7 @@ EXPOSE ${SERVICE_PORT} 5005
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=3 \
     CMD curl -fsS --max-time 2 http://localhost:${SERVICE_PORT}/actuator/health/readiness || exit 1
 
-# Optimized JVM settings for Spring Boot 3.x with Java 21 and monitoring support
+# Optimized JVM settings for Spring Boot 3.x with Java 25 and monitoring support
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -XX:+UseG1GC \
     -XX:+UseStringDeduplication \
@@ -2431,7 +2431,7 @@ brew install ctop  # Container-Monitoring-Tool
 |         |            | • Erweiterte Service-Ports-Matrix mit Debug-Ports und korrekten Health-Checks                                              |
 |         |            | • Umfassende docker-compose Konfigurationsbeispiele mit Environment-Variablen                                              |
 |         |            | • Neue Sektion für automatisierte Container-Tests (test-dockerfile.sh)                                                     |
-|         |            | • Aktualisierung auf Europe/Vienna Timezone und Java 21 Optimierungen                                                      |
+|         |            | • Aktualisierung auf Europe/Vienna Timezone und Java 25 Optimierungen                                                      |
 |         |            | • Erweiterte Monitoring- und Observability-Konfigurationen                                                                 |
 |         |            | • Verbesserte Resource-Management und Performance-Tuning Einstellungen                                                     |
 | 1.0.0   | 2025-08-16 | Initiale Docker-Guidelines basierend auf Containerisierungsstrategie                                                       |

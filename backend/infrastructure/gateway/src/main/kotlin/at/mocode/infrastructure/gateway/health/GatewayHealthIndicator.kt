@@ -20,9 +20,11 @@ import java.time.Duration
 @Component
 class GatewayHealthIndicator(
   private val discoveryClient: DiscoveryClient,
-  private val webClient: WebClient.Builder,
+  webClientBuilder: WebClient.Builder,
   private val environment: Environment
 ) : ReactiveHealthIndicator {
+
+  private val webClient = webClientBuilder.build()
 
   companion object {
     private val CRITICAL_SERVICES = setOf(
@@ -120,8 +122,7 @@ class GatewayHealthIndicator(
         } else {
           val instance = instances.first()
           val healthUrl = "http://${instance.host}:${instance.port}/actuator/health"
-          val client = webClient.build()
-          client.get()
+          webClient.get()
             .uri(healthUrl)
             .retrieve()
             .bodyToMono(Map::class.java)

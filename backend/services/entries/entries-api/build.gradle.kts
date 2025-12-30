@@ -10,8 +10,8 @@ kotlin {
 
   val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
-  // Align the toolchain with a project (see composeApp uses 21)
-  jvmToolchain(21)
+  // Align the toolchain with a project (see composeApp uses 25)
+  jvmToolchain(25)
 
   // JVM target for backend usage
   jvm()

@@ -1,6 +1,7 @@
 package at.mocode.infrastructure.gateway.error
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.slf4j.LoggerFactory
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -15,12 +16,16 @@ import reactor.core.publisher.Mono
 @Component
 class ProblemDetailsExceptionHandler : ErrorWebExceptionHandler {
 
+  private val logger = LoggerFactory.getLogger(ProblemDetailsExceptionHandler::class.java)
   private val mapper = ObjectMapper()
 
   override fun handle(exchange: ServerWebExchange, ex: Throwable): Mono<Void> {
     // Versuche, Status aus Attributen zu lesen, ansonsten 500
     val status = exchange.response.statusCode?.value() ?: HttpStatus.INTERNAL_SERVER_ERROR.value()
     val traceId = exchange.request.headers.getFirst("X-Correlation-ID")
+
+    logger.error("Gateway error [{}]: {} (TraceId: {})", status, ex.message, traceId, ex)
+
     val body = mapOf(
       "type" to "about:blank",
       "title" to (ex.message ?: "Unexpected error"),

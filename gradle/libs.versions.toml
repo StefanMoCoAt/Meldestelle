@@ -84,6 +84,8 @@ uiDesktop = "1.7.0"
 # --- Logging ---
 slf4j = "2.0.17"
 
+java = "25"
+
 # --- Gradle Plugins ---
 foojayResolver = "1.0.0"
 

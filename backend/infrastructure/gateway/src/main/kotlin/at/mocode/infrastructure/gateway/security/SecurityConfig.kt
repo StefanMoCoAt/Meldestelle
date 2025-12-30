@@ -1,5 +1,6 @@
 package at.mocode.infrastructure.gateway.security
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -23,6 +24,8 @@ import java.time.Duration
 class SecurityConfig(
   private val securityProperties: GatewaySecurityProperties
 ) {
+
+  private val logger = LoggerFactory.getLogger(SecurityConfig::class.java)
 
   /**
    * Konfiguriert die zentrale Security-Filter-Kette für das Gateway.
@@ -78,12 +81,12 @@ class SecurityConfig(
         NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build()
       } catch (e: Exception) {
         // Log warning and return a no-op decoder to allow startup
-        println("WARN: Failed to configure JWT decoder with JWK Set URI: $jwkSetUri - ${e.message}")
-        println("WARN: JWT authentication will not work until Keycloak is available")
+        logger.warn("Failed to configure JWT decoder with JWK Set URI: {} - {}", jwkSetUri, e.message)
+        logger.warn("JWT authentication will not work until Keycloak is available")
         createNoOpJwtDecoder()
       }
     } else {
-      println("INFO: No JWK Set URI configured, using no-op JWT decoder")
+      logger.info("No JWK Set URI configured, using no-op JWT decoder")
       createNoOpJwtDecoder()
     }
   }
@@ -106,10 +109,11 @@ class SecurityConfig(
   fun realmRolesJwtAuthenticationConverter(): org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter {
     val converter = org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter()
     converter.setJwtGrantedAuthoritiesConverter { jwt ->
-      val roles = (jwt.claims["realm_access"] as? Map<*, *>)?.get("roles") as? Collection<*> ?: emptyList<Any>()
+      val realmAccess = jwt.claims["realm_access"] as? Map<*, *>
+      val roles = realmAccess?.get("roles") as? Collection<*> ?: emptyList<Any>()
       roles
         .filterIsInstance<String>()
-        .map { role -> org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role.lowercase()) }
+        .map { role -> org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_${role.uppercase()}") }
     }
     return org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter(converter)
   }

@@ -5,7 +5,7 @@
   "files.associations": {
     "docker/versions.toml": "toml",
     "*.toml": "toml",
-    "docker-compose*.yml": "dockercompose",
+    "docker-compose*.yaml": "dockercompose",
     "Dockerfile*": "dockerfile"
   },
   "toml.schema.enabled": true,
@@ -119,8 +119,8 @@
     "docker-validate": "scripts/validate-docker-consistency.sh",
     "docker-generate-compose": "scripts/generate-compose-files.sh all development",
     "docker-build-all": "scripts/docker-build.sh all",
-    "docker-up-dev": "docker-compose -f docker-compose.yml -f docker-compose.services.yml up -d",
-    "docker-down": "docker-compose -f docker-compose.yml -f docker-compose.services.yml down",
-    "docker-logs": "docker-compose -f docker-compose.yml -f docker-compose.services.yml logs -f"
+    "docker-up-dev": "docker-compose -f docker-compose.yaml -f docker-compose.services.yaml up -d",
+    "docker-down": "docker-compose -f docker-compose.yaml -f docker-compose.services.yaml down",
+    "docker-logs": "docker-compose -f docker-compose.yaml -f docker-compose.services.yaml logs -f"
   }
 }
