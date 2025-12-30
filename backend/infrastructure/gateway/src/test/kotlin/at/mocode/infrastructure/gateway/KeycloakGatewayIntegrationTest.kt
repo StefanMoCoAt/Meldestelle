@@ -2,7 +2,7 @@ package at.mocode.infrastructure.gateway
 
 import at.mocode.infrastructure.gateway.config.TestSecurityConfig
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import at.mocode.infrastructure.gateway.support.GatewayTestContext
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
@@ -13,7 +13,7 @@ import org.springframework.test.context.TestPropertySource
  * without requiring actual Testcontainers, focusing on resolving the OAuth2 ResourceServer
  * autoconfiguration timing issue.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@GatewayTestContext
 @ActiveProfiles("keycloak-integration-test")
 @TestPropertySource(
     properties = [

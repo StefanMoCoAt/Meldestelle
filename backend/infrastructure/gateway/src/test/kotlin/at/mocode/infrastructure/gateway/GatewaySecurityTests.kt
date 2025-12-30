@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
-import org.springframework.boot.test.context.SpringBootTest
+import at.mocode.infrastructure.gateway.support.GatewayTestContext
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.cloud.gateway.route.RouteLocator
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
@@ -20,32 +20,8 @@ import org.springframework.web.bind.annotation.*
  * Tests for Gateway security configuration including CORS settings.
  * Tests the overall security setup and cross-origin request handling.
  */
-@SpringBootTest(
-    classes = [GatewayApplication::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = [
-        // Disable external dependencies
-        "spring.cloud.discovery.enabled=false",
-        "spring.cloud.consul.enabled=false",
-        "spring.cloud.consul.config.enabled=false",
-        "spring.cloud.consul.discovery.register=false",
-        "spring.cloud.loadbalancer.enabled=false",
-        // Disable circuit breaker for security tests
-        "resilience4j.circuitbreaker.configs.default.registerHealthIndicator=false",
-        "management.health.circuitbreakers.enabled=false",
-        // Disable JWT for CORS testing
-        "gateway.security.jwt.enabled=false",
-        // Use reactive web application type
-        "spring.main.web-application-type=reactive",
-        // Disable gateway discovery - use explicit routes
-        "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false",
-        // Disable actuator security
-        "management.security.enabled=false",
-        // Set random port
-        "server.port=0"
-    ]
-)
-@ActiveProfiles("test") // Use test profile to disable unrelated global filters; CORS config is present in application-test.yml
+@GatewayTestContext
+@ActiveProfiles("test") // Behalte test-Profil explizit für Klarheit
 @AutoConfigureWebTestClient
 @Import(TestSecurityConfig::class, GatewaySecurityTests.TestSecurityConfig::class)
 class GatewaySecurityTests {

@@ -1,6 +1,7 @@
 package at.mocode.infrastructure.gateway.config
 
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import reactor.core.publisher.Mono
@@ -14,6 +15,7 @@ class RateLimiterConfig {
    * Funktioniert out-of-the-box mit Keycloak (Resource Server), sofern Security aktiv ist.
    */
   @Bean
+  @ConditionalOnProperty(prefix = "gateway.ratelimit.principal-key-resolver", name = ["enabled"], havingValue = "true", matchIfMissing = false)
   fun principalNameKeyResolver(): KeyResolver = KeyResolver { exchange ->
     exchange.getPrincipal<Principal>()
       .map { it.name }

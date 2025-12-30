@@ -1,0 +1,28 @@
+spring:
+  autoconfigure:
+    exclude: [ ]
+  main:
+    web-application-type: reactive
+  cloud:
+    refresh:
+      enabled: false
+    config:
+      enabled: false
+    bootstrap:
+      enabled: false
+
+spring.cloud:
+  gateway:
+    enabled: true
+
+# Keine weiteren Gateway-spezifischen AutoConfigs ausschließen, da nicht zwingend vorhanden
+
+management:
+  health:
+    circuitbreakers:
+      enabled: false
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: false

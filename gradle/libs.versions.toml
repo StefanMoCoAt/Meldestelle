@@ -17,6 +17,7 @@ kotlinx-coroutines = "1.10.2"
 
 # --- Spring Ecosystem ---
 springBoot = "3.5.9"
+# Spring Cloud Version kompatibel zu Spring Boot 3.5.x
 springCloud = "2025.1.0"
 # springCloudGateway = "4.3.0"
 springDependencyManagement = "1.1.7"
@@ -55,8 +56,9 @@ auth0Jwt = "4.5.0"
 keycloakAdminClient = "26.0.7"
 
 # --- Testing ---
-junitJupiter = "6.0.1"
-junitPlatform = "6.0.1"
+# JUnit 5 (Jupiter) & JUnit Platform versions aligned with Gradle 9.x
+junitJupiter = "5.11.3"
+junitPlatform = "1.11.3"
 mockk = "1.14.7"
 assertj = "3.27.6"
 testcontainers = "2.0.3"

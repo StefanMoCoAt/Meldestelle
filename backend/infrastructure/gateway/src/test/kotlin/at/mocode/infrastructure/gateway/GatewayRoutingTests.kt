@@ -1,16 +1,15 @@
 package at.mocode.infrastructure.gateway
 
 import at.mocode.infrastructure.gateway.config.TestSecurityConfig
+import at.mocode.infrastructure.gateway.support.GatewayTestContext
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cloud.gateway.route.RouteLocator
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,32 +20,7 @@ import org.springframework.web.bind.annotation.RestController
  * Tests for Gateway routing functionality.
  * Uses mock backend services to test route forwarding.
  */
-@SpringBootTest(
-    classes = [GatewayApplication::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = [
-        // Disable external dependencies
-        "spring.cloud.discovery.enabled=false",
-        "spring.cloud.consul.enabled=false",
-        "spring.cloud.consul.config.enabled=false",
-        "spring.cloud.consul.discovery.register=false",
-        "spring.cloud.loadbalancer.enabled=false",
-        // Disable circuit breaker for routing tests
-        "resilience4j.circuitbreaker.configs.default.registerHealthIndicator=false",
-        "management.health.circuitbreakers.enabled=false",
-        // Disable custom filters for pure routing tests
-        "gateway.security.jwt.enabled=false",
-        // Use reactive web application type
-        "spring.main.web-application-type=reactive",
-        // Disable gateway discovery - use explicit routes
-        "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false",
-        // Disable actuator security
-        "management.security.enabled=false",
-        // Set random port
-        "server.port=0"
-    ]
-)
-@ActiveProfiles("test")
+@GatewayTestContext
 @AutoConfigureWebTestClient
 @Import(TestSecurityConfig::class, GatewayRoutingTests.TestRoutesConfig::class)
 class GatewayRoutingTests {

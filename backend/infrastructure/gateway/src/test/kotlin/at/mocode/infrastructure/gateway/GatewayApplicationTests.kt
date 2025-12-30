@@ -2,6 +2,10 @@ package at.mocode.infrastructure.gateway
 
 import at.mocode.infrastructure.gateway.config.TestSecurityConfig
 import org.junit.jupiter.api.Test
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.http.client.autoconfigure.HttpClientAutoConfiguration
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
+import org.springframework.cloud.gateway.config.GatewayAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
@@ -11,8 +15,8 @@ import org.springframework.test.context.ActiveProfiles
  * Verwendet ein Test-Profil, um Produktions-Filter und externe Abhängigkeiten zu deaktivieren.
  */
 @SpringBootTest(
-    classes = [GatewayApplication::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = [MinimalTestApp::class],
+    webEnvironment = SpringBootTest.WebEnvironment.NONE,
     properties = [
         // Alle externen Abhängigkeiten für Context-Loading-Test deaktivieren
         "spring.cloud.discovery.enabled=false",
@@ -25,8 +29,8 @@ import org.springframework.test.context.ActiveProfiles
         "management.health.circuitbreakers.enabled=false",
         // Custom Security und Filter deaktivieren
         "gateway.security.jwt.enabled=false",
-        // Reaktiven Web-Anwendungstyp verwenden
-        "spring.main.web-application-type=reactive",
+        // Für diesen Kontext-Load-Test keinen Web-Stack initialisieren
+        "spring.main.web-application-type=none",
         // Gateway Discovery deaktivieren (korrekte Property)
         "spring.cloud.gateway.discovery.locator.enabled=false",
         // Zufälligen Port setzen
@@ -34,7 +38,8 @@ import org.springframework.test.context.ActiveProfiles
     ]
 )
 @ActiveProfiles("test")
-@Import(TestSecurityConfig::class)
+@EnableAutoConfiguration
+@Import(TestSecurityConfig::class, TestSupportConfig::class)
 class GatewayApplicationTests {
 
     @Test

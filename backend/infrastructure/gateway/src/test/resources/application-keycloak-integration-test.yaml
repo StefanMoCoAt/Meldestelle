@@ -1,11 +1,15 @@
+# migrated from application-keycloak-integration-test.yml (standardized to .yaml)
 server:
   port: 0
 
 spring:
   application:
-    name: api-gateway-dev-test
+    name: api-gateway-keycloak-integration-test
   main:
     web-application-type: reactive
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration
   cloud:
     discovery:
       enabled: false
@@ -20,14 +24,13 @@ spring:
     gateway:
       server:
         webflux:
-          httpclient:
-            connect-timeout: 1000
-            response-timeout: 5s
           discovery:
             locator:
               enabled: false
-          routes:
-            [ ]
+          httpclient:
+            connect-timeout: 1000
+            response-timeout: 5s
+          routes: [ ]
           globalcors:
             cors-configurations:
               '[/**]':
@@ -45,7 +48,6 @@ spring:
                   - "*"
                 allowCredentials: true
                 maxAge: 3600
-      # Override production routes: keep empty in tests running with dev profile
 
 management:
   endpoints:
@@ -56,15 +58,20 @@ management:
     health:
       show-details: always
   health:
-    circuitbreakers:
+    circuit breakers:
       enabled: false
-
-logging:
-  level:
-    org.springframework.cloud.gateway: WARN
-    at.mocode.infrastructure.gateway: DEBUG
+  security:
+    enabled: false
 
 gateway:
   security:
     jwt:
       enabled: false
+    keycloak:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: WARN
+    org.springframework.security: DEBUG
+    at.mocode.infrastructure.gateway: DEBUG

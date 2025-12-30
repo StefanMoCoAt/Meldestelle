@@ -3,7 +3,7 @@ package at.mocode.infrastructure.gateway
 import at.mocode.infrastructure.gateway.config.TestSecurityConfig
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
+import at.mocode.infrastructure.gateway.support.GatewayTestContext
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
@@ -13,31 +13,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
  * Tests für den Fallback Controller, der Circuit Breaker Szenarien behandelt.
  * Testet alle Fallback-Endpunkte für verschiedene Services.
  */
-@SpringBootTest(
-    classes = [GatewayApplication::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = [
-        // Externe Abhängigkeiten für Fallback-Tests deaktivieren
-        "spring.cloud.discovery.enabled=false",
-        "spring.cloud.consul.enabled=false",
-        "spring.cloud.consul.config.enabled=false",
-        "spring.cloud.consul.discovery.register=false",
-        "spring.cloud.loadbalancer.enabled=false",
-        // Circuit Breaker Health Indicator deaktivieren um Interferenzen zu vermeiden
-        "resilience4j.circuitbreaker.configs.default.registerHealthIndicator=false",
-        "management.health.circuitbreakers.enabled=false",
-        // Custom Filter für reine Fallback-Tests deaktivieren
-        "gateway.security.jwt.enabled=false",
-        // Reaktiven Web-Anwendungstyp verwenden
-        "spring.main.web-application-type=reactive",
-        // Gateway Discovery deaktivieren
-        "spring.cloud.gateway.server.webflux.discovery.locator.enabled=false",
-        // Actuator Security deaktivieren
-        "management.security.enabled=false",
-        // Zufälligen Port setzen
-        "server.port=0"
-    ]
-)
+@GatewayTestContext
 @ActiveProfiles("test")
 @Import(TestSecurityConfig::class)
 class FallbackControllerTests {

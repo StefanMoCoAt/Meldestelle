@@ -46,13 +46,18 @@ class SecurityConfig(
           pathMatchers(*securityProperties.publicPaths.toTypedArray()),
           permitAll
         )
+        // Ping-API erfordert Admin-Rolle (Realm-Rolle "admin")
+        authorize(pathMatchers("/api/ping/**"), hasRole("admin"))
         // Alle anderen Pfade erfordern eine Authentifizierung
         authorize(anyExchange, authenticated)
       }
 
       // 4. JWT-Validierung via Keycloak aktivieren
       oauth2ResourceServer {
-        jwt { }
+        jwt {
+          // Realm-Rollen (Keycloak) -> ROLE_* Authorities
+          jwtAuthenticationConverter = realmRolesJwtAuthenticationConverter()
+        }
       }
     }
   }
@@ -94,6 +99,22 @@ class SecurityConfig(
   }
 
   /**
+   * Konvertiert Keycloak Realm-Rollen (realm_access.roles) in Spring Authorities (ROLE_*),
+   * sodass hasRole("admin") funktioniert.
+   */
+  @Bean
+  fun realmRolesJwtAuthenticationConverter(): org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter {
+    val converter = org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter()
+    converter.setJwtGrantedAuthoritiesConverter { jwt ->
+      val roles = (jwt.claims["realm_access"] as? Map<*, *>)?.get("roles") as? Collection<*> ?: emptyList<Any>()
+      roles
+        .filterIsInstance<String>()
+        .map { role -> org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + role.lowercase()) }
+    }
+    return org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter(converter)
+  }
+
+  /**
    * Definiert die zentrale und einzige CORS-Konfiguration für das Gateway.
    */
   @Bean
@@ -125,8 +146,7 @@ data class GatewaySecurityProperties(
     "/actuator/**",
     "/webjars/**",
     "/v3/api-docs/**",
-    "/api/auth/**", // Alle Auth-Endpunkte
-    "/api/ping/**"
+    "/api/auth/**" // Alle Auth-Endpunkte
   )
 )
 
