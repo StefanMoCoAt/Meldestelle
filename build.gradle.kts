@@ -40,15 +40,10 @@ allprojects {
   group = "at.mocode"
   version = "1.0.0-SNAPSHOT"
 
-  // Apply common repository configuration
-  repositories {
-    mavenCentral()
-    google()
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
-    maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
-    maven { url = uri("https://us-central1-maven.pkg.dev/varabyte-repos/public") }
-  }
+  // The 'repositories' block was removed from here.
+  // Repository configuration is now centralized in 'settings.gradle.kts'
+  // as per modern Gradle best practices. This resolves dependency resolution
+  // conflicts with platforms and Spring Boot 4+.
 }
 
 subprojects {

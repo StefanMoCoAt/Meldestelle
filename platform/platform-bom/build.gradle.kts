@@ -22,22 +22,9 @@ dependencies {
     // `constraints` erzwingt spezifische Versionen für einzelne Bibliotheken.
     // Alle Versionen werden sicher aus `libs.versions.toml` bezogen.
     constraints {
-        // --- Spring Boot Core Constraints (hart pinnen, um Leaks von M-Releases zu verhindern) ---
-        api("org.springframework.boot:spring-boot:${libs.versions.springBoot.get()}")
-        api("org.springframework.boot:spring-boot-autoconfigure:${libs.versions.springBoot.get()}")
-        api("org.springframework.boot:spring-boot-actuator-autoconfigure:${libs.versions.springBoot.get()}")
-        api("org.springframework.boot:spring-boot-actuator:${libs.versions.springBoot.get()}")
-        api("org.springframework.boot:spring-boot-starter:${libs.versions.springBoot.get()}")
-        api("org.springframework.boot:spring-boot-test:${libs.versions.springBoot.get()}")
-        api("org.springframework.boot:spring-boot-test-autoconfigure:${libs.versions.springBoot.get()}")
-        // Zusätzliche Boot-Module, die in neueren Versionen als eigenständige Artefakte vorliegen
-        // und in AutoConfigurations referenziert werden. Hart pinnen, um Versions-Skew in Tests zu vermeiden.
-        // HttpClient AutoConfig und Settings
-        api("org.springframework.boot:spring-boot-http:${libs.versions.springBoot.get()}")
-        api("org.springframework.boot:spring-boot-autoconfigure-processor:${libs.versions.springBoot.get()}")
-        api("org.springframework.boot:spring-boot-http-converter:${libs.versions.springBoot.get()}")
-        // Kontext- und Properties-Unterstützung, auf die PropertyMapper intern zugreifen kann
-        api("org.springframework.boot:spring-boot-configuration-processor:${libs.versions.springBoot.get()}")
+        // --- Spring Boot Core Constraints wurden entfernt. ---
+        // Die Versionen werden jetzt vollständig durch das importierte Spring Boot BOM verwaltet.
+        // Das ist der saubere und empfohlene Weg.
 
         // --- Utilities & Other ---
         api(libs.caffeine)

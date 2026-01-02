@@ -5,9 +5,8 @@ plugins {
 group = "at.mocode"
 version = "1.0.0-SNAPSHOT"
 
-repositories {
-  mavenCentral()
-}
+// The 'repositories' block was removed from here.
+// Repository configuration is now centralized in 'settings.gradle.kts'.
 
 dependencies {
   testImplementation(platform("org.junit:junit-bom:5.10.0"))

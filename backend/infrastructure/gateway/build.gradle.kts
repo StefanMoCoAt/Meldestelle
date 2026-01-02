@@ -24,6 +24,10 @@ dependencies {
   implementation(projects.backend.infrastructure.monitoring.monitoringClient)
 
   // === GATEWAY-SPEZIFISCHE ABHÄNGIGKEITEN ===
+  // KORREKTUR: Explizite Deklaration von WebFlux, da es in Spring Boot 4.x
+  // anscheinend nicht mehr vollständig transitiv vom Gateway-Starter eingebunden wird.
+  implementation(libs.spring.boot.starter.webflux)
+
   // Kern-Gateway inkl. Security, Actuator, CircuitBreaker, Discovery
   implementation(libs.bundles.gateway.core)
   // Ergänzende Observability (Logging, Jackson)
