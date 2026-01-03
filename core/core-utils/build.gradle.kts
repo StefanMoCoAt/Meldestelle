@@ -6,7 +6,7 @@ plugins {
 }
 
 kotlin {
-  jvmToolchain(25)
+    // Toolchain is now handled centrally in the root build.gradle.kts
 
   // Target platforms
   jvm {

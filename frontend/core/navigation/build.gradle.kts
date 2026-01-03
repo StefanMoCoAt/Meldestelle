@@ -10,9 +10,8 @@ group = "at.mocode.clients.shared"
 version = "1.0.0"
 
 kotlin {
+  // Toolchain is now handled centrally in the root build.gradle.kts
   val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
-
-  jvmToolchain(25)
 
   jvm()
 

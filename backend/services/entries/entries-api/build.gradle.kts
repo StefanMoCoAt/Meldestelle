@@ -7,11 +7,9 @@ group = "at.mocode"
 version = "1.0.0"
 
 kotlin {
+  // Toolchain is now handled centrally in the root build.gradle.kts
 
   val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
-
-  // Align the toolchain with a project (see composeApp uses 25)
-  jvmToolchain(25)
 
   // JVM target for backend usage
   jvm()

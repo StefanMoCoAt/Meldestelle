@@ -18,9 +18,8 @@ plugins {
 }
 
 kotlin {
+  // Toolchain is now handled centrally in the root build.gradle.kts
   val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
-
-  jvmToolchain(25)
 
   // JVM Target für Desktop
   jvm()
