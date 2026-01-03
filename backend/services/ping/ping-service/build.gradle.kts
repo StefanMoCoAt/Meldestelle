@@ -5,7 +5,8 @@ plugins {
   alias(libs.plugins.kotlinSpring)
   alias(libs.plugins.kotlinJpa)
   alias(libs.plugins.spring.boot)
-  alias(libs.plugins.spring.dependencyManagement)
+  // FINALE BEREINIGUNG: Das `dependencyManagement`-Plugin wird entfernt.
+  // alias(libs.plugins.spring.dependencyManagement)
 }
 
 // Configure the main class for the executable JAR
@@ -14,10 +15,8 @@ springBoot {
 }
 
 dependencies {
-  // ULTIMATIVER TEST: Wir umgehen unser lokales BOM und importieren das offizielle Spring Boot BOM direkt.
-  // Wenn dies funktioniert, liegt der Fehler im Aufbau von `:platform:platform-bom`.
-  implementation(platform(libs.spring.boot.dependencies))
-  // implementation(platform(projects.platform.platformBom))
+  // Die `platform`-Deklaration ist der einzig korrekte Weg.
+  implementation(platform(projects.platform.platformBom))
 
   // Platform und Core Dependencies
   implementation(projects.platform.platformDependencies)

@@ -7,7 +7,6 @@ plugins {
   alias(libs.plugins.kotlinSpring)
   alias(libs.plugins.kotlinJpa)
   alias(libs.plugins.spring.boot)
-  alias(libs.plugins.spring.dependencyManagement)
 }
 
 // Konfiguriert die Hauptklasse für das ausführbare JAR
@@ -16,6 +15,7 @@ springBoot {
 }
 
 dependencies {
+  // Wiederherstellung des Standardzustands: Das Gateway verwendet das reparierte lokale BOM.
   implementation(platform(projects.platform.platformBom))
 
   // === Core Dependencies ===
@@ -24,19 +24,15 @@ dependencies {
   implementation(projects.backend.infrastructure.monitoring.monitoringClient)
 
   // === GATEWAY-SPEZIFISCHE ABHÄNGIGKEITEN ===
-  // KORREKTUR: Explizite Deklaration von WebFlux, da es in Spring Boot 4.x
-  // anscheinend nicht mehr vollständig transitiv vom Gateway-Starter eingebunden wird.
-  implementation(libs.spring.boot.starter.webflux)
+  // Die WebFlux-Abhängigkeit wird jetzt korrekt durch das BOM bereitgestellt.
+  // implementation(libs.spring.boot.starter.webflux)
 
   // Kern-Gateway inkl. Security, Actuator, CircuitBreaker, Discovery
   implementation(libs.bundles.gateway.core)
   // Ergänzende Observability (Logging, Jackson)
   implementation(libs.bundles.gateway.observability)
   // Redis-Unterstützung für verteiltes Rate Limiting (RequestRateLimiter)
-  // Umgestellt auf das spezifische Gateway-Redis-Bundle (einfach, leicht zu konfigurieren)
   implementation(libs.bundles.gateway.redis)
-
-  // Hinweis: Der Gateway benötigt keinen Datenbanktreiber → entfernt
 
   // === Test Dependencies ===
   testImplementation(projects.platform.platformTesting)

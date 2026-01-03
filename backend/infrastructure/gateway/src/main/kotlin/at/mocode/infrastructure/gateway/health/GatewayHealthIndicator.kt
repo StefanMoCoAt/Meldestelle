@@ -42,6 +42,8 @@ class GatewayHealthIndicator(
     private val HEALTH_CHECK_TIMEOUT = Duration.ofSeconds(5)
   }
 
+  // KORREKTUR für Spring Boot 4: Die `health()`-Methode und ihr Rückgabetyp `Mono<Health>`
+  // erlauben keine Null-Werte mehr. Die Fragezeichen (?) wurden entfernt.
   override fun health(): Mono<Health> {
     val builder = Health.up()
     val details = mutableMapOf<String, Any>()

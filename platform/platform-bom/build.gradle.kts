@@ -40,9 +40,11 @@ dependencies {
         api(libs.logback.classic)
         // --- Spring & SpringDoc ---
         api(libs.springdoc.openapi.starter.common)
-        api(libs.springdoc.openapi.starter.webmvc.ui)
+        // KORREKTUR: `webmvc`-Starter durch `webflux`-Starter ersetzt, um Konflikt zu beheben.
+        api(libs.springdoc.openapi.starter.webflux.ui)
         // --- Database & Persistence ---
-        api(libs.bundles.exposed)
+        // CHIRURGISCHER EINGRIFF: `exposed`-Bundle entfernt, um Kotlin-Versionskonflikt zu beheben.
+        // api(libs.bundles.exposed)
         api(libs.bundles.flyway)
         api(libs.postgresql.driver)
         api(libs.hikari.cp)
