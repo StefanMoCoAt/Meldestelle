@@ -48,8 +48,22 @@ allprojects {
 }
 
 subprojects {
-  // Note: Individual modules handle Kotlin compiler configuration
-  // a Root project doesn't apply Kotlin plugins, so we can't configure KotlinCompile tasks here
+  // FINALE KORREKTUR: Konsistente JVM-Target-Konfiguration für Java und Kotlin
+  // basierend auf der Tech-Stack-Referenz.
+  plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinBasePluginWrapper> {
+    extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension> {
+      jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+      }
+    }
+  }
+
+  tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+      jvmTarget.set(JvmTarget.JVM_25)
+      freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+  }
 
   tasks.withType<Test>().configureEach {
     useJUnitPlatform {
@@ -70,19 +84,7 @@ subprojects {
   plugins.withId("java") {
     val javaExt = extensions.getByType<JavaPluginExtension>()
     // Ensure a full JDK toolchain with compiler is available (Gradle will auto-download if missing)
-    javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(24))
-
-    // Set Kotlin Toolchain for projects using Kotlin
-    plugins.withId("org.jetbrains.kotlin.jvm") {
-      extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
-        jvmToolchain(24)
-      }
-    }
-    plugins.withId("org.jetbrains.kotlin.multiplatform") {
-      extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
-        jvmToolchain(24)
-      }
-    }
+    javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 
     tasks.register<Test>("perfTest") {
       description = "Runs tests tagged with 'perf'"
@@ -114,23 +116,6 @@ subprojects {
     environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
     environment("CHROMIUM_BIN", "/usr/bin/chromium")
     environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/chromium")
-  }
-
-  // Suche diesen Block am Ende von subprojects und ersetze ihn:
-  tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions {
-      // Dein bestehender Argument-Eintrag
-      freeCompilerArgs.add("-Xannotation-default-target=param-property")
-
-      // WICHTIG: Parameter-Namen für Spring Boot & Reflection erhalten
-      javaParameters.set(true)
-
-      // OPTIONAL: Ermöglicht die Nutzung von Context Receivers (hilfreich in modernen Architekturen)
-      freeCompilerArgs.add("-Xcontext-receivers")
-
-      // Explizite Setzung des JVM Targets auf 25 (überschreibt IDE-Fehleinstellungen)
-      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
-    }
   }
 
   // ------------------------------
