@@ -171,7 +171,7 @@ tasks.register("archGuardForbiddenAuthorizationHeader") {
         ".header(\"Authorization\"",
         "setHeader(\"Authorization\"",
         "headers[\"Authorization\"]",
-        "headers['Authorization']",
+        "headers[\'Authorization\']",
         ".header(HttpHeaders.Authorization",
         "header(HttpHeaders.Authorization",
       )
