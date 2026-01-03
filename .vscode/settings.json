@@ -1,16 +1,16 @@
 {
   "yaml.schemas": {
-    "./docker/schemas/versions-schema.json": "docker/versions.toml"
+    "./config/docker/schemas/versions-schema.json": "config/docker/versions.toml"
   },
   "files.associations": {
-    "docker/versions.toml": "toml",
+    "config/docker/versions.toml": "toml",
     "*.toml": "toml",
     "docker-compose*.yaml": "dockercompose",
     "Dockerfile*": "dockerfile"
   },
   "toml.schema.enabled": true,
   "toml.schema.associations": {
-    "docker/versions.toml": "./docker/schemas/versions-schema.json"
+    "config/docker/versions.toml": "./config/docker/schemas/versions-schema.json"
   },
   "editor.quickSuggestions": {
     "other": "on",
@@ -83,21 +83,13 @@
   "terminal.integrated.env.windows": {
     "DOCKER_BUILDKIT": "1"
   },
-  "extensions.recommendations": [
-    "tamasfe.even-better-toml",
-    "ms-azuretools.vscode-docker",
-    "redhat.vscode-yaml",
-    "ms-vscode.vscode-json",
-    "ms-kubernetes-tools.vscode-kubernetes-tools",
-    "formulahendry.docker-explorer"
-  ],
   "json.validate.enable": true,
   "json.schemas": [
     {
       "fileMatch": [
-        "docker/versions.toml"
+        "config/docker/versions.toml"
       ],
-      "url": "./docker/schemas/versions-schema.json"
+      "url": "./config/docker/schemas/versions-schema.json"
     }
   ],
   "git.ignoreLimitWarning": true,
@@ -113,12 +105,20 @@
   "breadcrumbs.showModules": true,
   "problems.decorations.enabled": true,
   "security.workspace.trust.untrustedFiles": "open",
+  "kotlin.compiler.jvmTarget": "25",
+  "kotlin.languageServer.enabled": true,
+  "kotlin.completion.snippets.enabled": true,
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-25",
+      "path": "/usr/lib/jvm/openjdk-25",
+      "default": true
+    }
+  ],
   "command-runner.commands": {
-    "docker-versions-show": "scripts/docker-versions-update.sh show",
-    "docker-versions-sync": "scripts/docker-versions-update.sh sync",
-    "docker-validate": "scripts/validate-docker-consistency.sh",
-    "docker-generate-compose": "scripts/generate-compose-files.sh all development",
-    "docker-build-all": "scripts/docker-build.sh all",
+    "ktlint-format": "./gradlew ktlintFormat",
+    "detekt": "./gradlew detekt",
+    "test-all": "./gradlew test",
     "docker-up-dev": "docker-compose -f docker-compose.yaml -f docker-compose.services.yaml up -d",
     "docker-down": "docker-compose -f docker-compose.yaml -f docker-compose.services.yaml down",
     "docker-logs": "docker-compose -f docker-compose.yaml -f docker-compose.services.yaml logs -f"
