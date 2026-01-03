@@ -1,42 +1,72 @@
-# General build artifacts
-build/
-out/
+# --- General ---
 .gradle/
 **/build/
-
-# Enviroments
-#.env
-
-# Kotlin
+**/out/
 .kotlin/
+kotlin-js-store/
 
-# IDE
+# --- Environments ---
+#.env
+config/env/.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# --- IDEs ---
+# IntelliJ
 .idea/
 *.iml
+*.ipr
+*.iws
 
-# Node
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/snippets
+
+# Fleet
+.fleet/
+!.fleet/receipt.json
+
+# --- Dependencies & Build ---
 node_modules/
 **/node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
-# OS files
+# --- OS Files ---
 .DS_Store
 Thumbs.db
+*.swp
+*~
+.nfs*
 
-# Logs
+# --- Logs ---
 _backup/logs/
 **/*.log
+*.log.gz
 
-# Kotlin/Java
+# --- Languages & Runtimes ---
+# Java/Kotlin
 *.class
+.attach_pid*
 
-# Generated diagrams
-build/diagrams/
-
-# Local runtime secrets/overrides
-config/env/.env.local
-
-# Python virtual environment
+# Python
 .venv/
 venv/
+ENV/
 *.pyc
 __pycache__/
+
+# --- Quality & Documentation ---
+build/diagrams/
+.eslintcache
+.stylelintcache
+.phpunit.result.cache
+.dataSources/
+dataSources.local.xml

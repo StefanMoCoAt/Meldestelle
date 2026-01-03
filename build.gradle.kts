@@ -79,6 +79,18 @@ subprojects {
     // Ensure a full JDK toolchain with compiler is available (Gradle will auto-download if missing)
     javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 
+    // Set Kotlin Toolchain for projects using Kotlin
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+      extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
+        jvmToolchain(25)
+      }
+    }
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+      extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
+        jvmToolchain(25)
+      }
+    }
+
     tasks.register<Test>("perfTest") {
       description = "Runs tests tagged with 'perf'"
       group = "verification"
@@ -111,9 +123,20 @@ subprojects {
     environment("PUPPETEER_EXECUTABLE_PATH", "/usr/bin/chromium")
   }
 
-  tasks.withType<KotlinCompile> {
+  // Suche diesen Block am Ende von subprojects und ersetze ihn:
+  tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
+      // Dein bestehender Argument-Eintrag
       freeCompilerArgs.add("-Xannotation-default-target=param-property")
+
+      // WICHTIG: Parameter-Namen für Spring Boot & Reflection erhalten
+      javaParameters.set(true)
+
+      // OPTIONAL: Ermöglicht die Nutzung von Context Receivers (hilfreich in modernen Architekturen)
+      freeCompilerArgs.add("-Xcontext-receivers")
+
+      // Explizite Setzung des JVM Targets auf 25 (überschreibt IDE-Fehleinstellungen)
+      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
     }
   }
 
@@ -325,7 +348,8 @@ tasks.register("checkBundleBudget") {
       }
 
       // Collect JS files under distributions (avoid .map and .txt)
-      val jsFiles = distDir.walkTopDown().filter { it.isFile && it.extension == "js" && !it.name.endsWith(".map") }.toList()
+      val jsFiles =
+        distDir.walkTopDown().filter { it.isFile && it.extension == "js" && !it.name.endsWith(".map") }.toList()
       if (jsFiles.isEmpty()) {
         report.appendLine("- ${shell.path}: no JS artifacts found in ${distDir.path}")
         return@forEach
