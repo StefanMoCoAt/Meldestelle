@@ -233,7 +233,7 @@ tasks.register("archGuardNoFeatureToFeatureDeps") {
               val proj =
                 try {
                   dep.javaClass.getMethod("getDependencyProject").invoke(dep) as Project
-                } catch (_: Throwable) {
+                } catch (e: Throwable) {
                   null
                 }
               val target = proj?.path ?: ""
