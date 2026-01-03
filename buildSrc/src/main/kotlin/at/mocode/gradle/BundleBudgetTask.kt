@@ -5,9 +5,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.util.zip.GZIPOutputStream
 
+// ✅ FIX: Klasse auf Top-Level verschieben
 data class Budget(val rawBytes: Long, val gzipBytes: Long)
 
 abstract class BundleBudgetTask : DefaultTask() {
