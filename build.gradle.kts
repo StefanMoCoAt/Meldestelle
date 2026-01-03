@@ -10,7 +10,7 @@ plugins {
   id("com.github.ben-manes.versions") version "0.51.0"
 
   // Custom convention plugins
-  id("at.mocode.bundle-budget") apply false // Apply to root, but task runs on subprojects
+  id("at.mocode.bundle-budget") apply false // Apply to root, but a task runs on subprojects
 
   // Kotlin plugins declared here with 'apply false' to centralize version management
   // This prevents "plugin loaded multiple times" errors in Gradle 9.2.1+
@@ -34,7 +34,7 @@ plugins {
 }
 
 // ##################################################################
-// ###                  ALLPROJECTS CONFIGURATION                 ###
+// ###                  ALL-PROJECTS CONFIGURATION                 ###
 // ##################################################################
 
 allprojects {
@@ -48,7 +48,7 @@ allprojects {
 }
 
 subprojects {
-  // Note: Kotlin compiler configuration is handled by individual modules
+  // Note: Individual modules handle Kotlin compiler configuration
   // a Root project doesn't apply Kotlin plugins, so we can't configure KotlinCompile tasks here
 
   tasks.withType<Test>().configureEach {
@@ -70,17 +70,17 @@ subprojects {
   plugins.withId("java") {
     val javaExt = extensions.getByType<JavaPluginExtension>()
     // Ensure a full JDK toolchain with compiler is available (Gradle will auto-download if missing)
-    javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(25))
+    javaExt.toolchain.languageVersion.set(JavaLanguageVersion.of(24))
 
     // Set Kotlin Toolchain for projects using Kotlin
     plugins.withId("org.jetbrains.kotlin.jvm") {
       extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
-        jvmToolchain(25)
+        jvmToolchain(24)
       }
     }
     plugins.withId("org.jetbrains.kotlin.multiplatform") {
       extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
-        jvmToolchain(25)
+        jvmToolchain(24)
       }
     }
 
@@ -245,7 +245,7 @@ tasks.register("archGuardNoFeatureToFeatureDeps") {
               val proj =
                 try {
                   dep.javaClass.getMethod("getDependencyProject").invoke(dep) as Project
-                } catch (e: Throwable) {
+                } catch (_: Throwable) {
                   null
                 }
               val target = proj?.path ?: ""
