@@ -66,14 +66,6 @@ subprojects {
     // The agent configuration was causing Task.project access at execution time
   }
 
-  // Erzwinge eine stabile Version von kotlinx-serialization-json für alle Konfigurationen,
-  // um Auflösungsfehler (z.B. 1.10.2, nicht verfügbar auf Maven Central) zu vermeiden
-  configurations.configureEach {
-    resolutionStrategy {
-      force("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    }
-  }
-
   // Dedicated performance test task per JVM subproject
   plugins.withId("java") {
     val javaExt = extensions.getByType<JavaPluginExtension>()
