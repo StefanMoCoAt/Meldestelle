@@ -12,9 +12,6 @@ plugins {
   // Version management plugin for dependency updates
   id("com.github.ben-manes.versions") version "0.51.0"
 
-  // Custom convention plugins
-  id("at.mocode.bundle-budget") apply false // Apply to root, but a task runs on subprojects
-
   // Kotlin plugins declared here with 'apply false' to centralize version management
   // This prevents "plugin loaded multiple times" errors in Gradle 9.2.1+
   // Subprojects apply these plugins via version catalog: alias(libs.plugins.kotlinJvm)
@@ -37,7 +34,7 @@ plugins {
 }
 
 // ##################################################################
-// ###                  ALL-PROJECTS CONFIGURATION                 ###
+// ###                  ALLPROJECTS CONFIGURATION                 ###
 // ##################################################################
 
 allprojects {
@@ -81,6 +78,14 @@ subprojects {
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
     // Removed byte-buddy-agent configuration to fix Gradle 9.0.0 deprecation warning
     // The agent configuration was causing Task.project access at execution time
+  }
+
+  // Erzwinge eine stabile Version von kotlinx-serialization-json für alle Konfigurationen,
+  // um Auflösungsfehler (z.B. 1.10.2, nicht verfügbar auf Maven Central) zu vermeiden
+  configurations.configureEach {
+    resolutionStrategy {
+      force("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    }
   }
 
   // Dedicated performance test task per JVM subproject
