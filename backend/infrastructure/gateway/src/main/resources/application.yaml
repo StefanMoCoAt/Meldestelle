@@ -27,6 +27,11 @@ management:
     web:
       exposure:
         include: health,info,prometheus
+  tracing:
+    sampling:
+      probability: 1.0 # 100% der Requests tracen (für Dev/Test sinnvoll, in Prod reduzieren)
+    propagation:
+      type: w3c # Standard W3C Trace Context (kompatibel mit OpenTelemetry)
 
 # Gateway-spezifische Einstellungen
 gateway:

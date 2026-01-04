@@ -16,6 +16,7 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
+import reactor.core.publisher.Mono
 import java.time.Duration
 
 @Configuration
@@ -69,35 +70,53 @@ class SecurityConfig(
    * Erstellt einen ReactiveJwtDecoder für die JWT-Validierung.
    *
    * Verwendet die JWK Set URI aus der Konfiguration, um die öffentlichen Schlüssel
-   * von Keycloak zu laden. Falls die URI nicht konfiguriert ist oder Keycloak
-   * nicht erreichbar ist, wird trotzdem ein Bean erstellt, um Startfehler zu vermeiden.
+   * von Keycloak zu laden.
+   *
+   * Resilience-Optimierung:
+   * Anstatt beim Start zu failen oder einen statischen NoOp-Decoder zu nutzen,
+   * verwenden wir einen delegierenden Decoder. Dieser versucht bei jedem Request,
+   * den echten Decoder (lazy) zu initialisieren, falls er noch nicht bereit ist.
+   * So kann Keycloak auch NACH dem Gateway starten.
    */
   @Bean
   fun reactiveJwtDecoder(
     @Value($$"${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}") jwkSetUri: String
   ): ReactiveJwtDecoder {
-    return if (jwkSetUri.isNotBlank()) {
-      try {
-        NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build()
-      } catch (e: Exception) {
-        // Log warning and return a no-op decoder to allow startup
-        logger.warn("Failed to configure JWT decoder with JWK Set URI: {} - {}", jwkSetUri, e.message)
-        logger.warn("JWT authentication will not work until Keycloak is available")
-        createNoOpJwtDecoder()
-      }
-    } else {
-      logger.info("No JWK Set URI configured, using no-op JWT decoder")
-      createNoOpJwtDecoder()
-    }
+    return ResilienceReactiveJwtDecoder(jwkSetUri)
   }
 
   /**
-   * Erstellt einen No-Op JWT Decoder für Fälle, in denen Keycloak nicht verfügbar ist.
-   * Dieser Decoder lehnt alle Token ab, erlaubt aber den Anwendungsstart.
+   * Ein Wrapper um den NimbusReactiveJwtDecoder, der Initialisierungsfehler abfängt
+   * und erst zur Laufzeit (lazy) versucht, die JWKs zu laden.
    */
-  private fun createNoOpJwtDecoder(): ReactiveJwtDecoder {
-    return ReactiveJwtDecoder { token ->
-      throw IllegalStateException("JWT validation is not available - Keycloak may not be running")
+  class ResilienceReactiveJwtDecoder(private val jwkSetUri: String) : ReactiveJwtDecoder {
+    private val logger = LoggerFactory.getLogger(ResilienceReactiveJwtDecoder::class.java)
+    private var delegate: ReactiveJwtDecoder? = null
+
+    override fun decode(token: String): Mono<org.springframework.security.oauth2.jwt.Jwt> {
+      if (delegate == null) {
+        synchronized(this) {
+          if (delegate == null) {
+            try {
+              if (jwkSetUri.isBlank()) {
+                throw IllegalArgumentException("JWK Set URI is missing")
+              }
+              logger.info("Attempting to initialize JWT Decoder with URI: {}", jwkSetUri)
+              delegate = NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build()
+              logger.info("JWT Decoder successfully initialized.")
+            } catch (e: Exception) {
+              logger.warn("Could not initialize JWT Decoder (Keycloak might be down): {}", e.message)
+              return Mono.error(IllegalStateException("Identity Provider currently unavailable. Please try again later."))
+            }
+          }
+        }
+      }
+      return delegate!!.decode(token)
+        .onErrorResume { e ->
+            // Falls der Decoder zwar da ist, aber z.B. Netzwerkfehler auftreten, loggen wir das
+            logger.debug("JWT decoding failed: {}", e.message)
+            Mono.error(e)
+        }
     }
   }
 

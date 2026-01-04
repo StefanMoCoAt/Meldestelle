@@ -16,8 +16,9 @@ kotlinx-coroutines = "1.10.2"
 
 
 # --- Spring Ecosystem ---
-springBoot = "4.0.1"
-# Spring Cloud Version kompatibel zu Spring Boot 4.0.1
+# KORREKTUR: Version auf Benutzerwunsch angepasst (war 4.0.1)
+springBoot = "3.5.9"
+# Spring Cloud Version kompatibel zu Spring Boot
 springCloud = "2025.1.0"
 # springCloudGateway = "4.3.0"
 springDependencyManagement = "1.1.7"
@@ -153,8 +154,8 @@ spring-boot-starter-oauth2-resource-server = { module = "org.springframework.boo
 spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
 spring-boot-starter-json = { module = "org.springframework.boot:spring-boot-starter-json" }
-# KORREKTUR: Fehlende Definition für spring-boot-starter-aop hinzugefügt.
-spring-boot-starter-aop = { module = "org.springframework.boot:spring-boot-starter-aop" }
+# KORREKTUR: Explizite Versionierung über BOM-Referenz
+spring-boot-starter-aop = { module = "org.springframework.boot:spring-boot-starter-aop", version.ref = "springBoot" }
 spring-kafka = { module = "org.springframework.kafka:spring-kafka" }
 spring-security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
 spring-web = { module = "org.springframework:spring-web" }

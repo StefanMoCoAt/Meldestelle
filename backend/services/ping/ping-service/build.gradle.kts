@@ -1,61 +1,38 @@
-// Optimized Spring Boot ping service for testing microservice architecture
-// This service demonstrates circuit breaker patterns, service discovery, and monitoring
 plugins {
-  alias(libs.plugins.kotlinJvm)
-  alias(libs.plugins.kotlinSpring)
-  alias(libs.plugins.kotlinJpa)
-  alias(libs.plugins.spring.boot)
-  // FINALE BEREINIGUNG: Das `dependencyManagement`-Plugin wird entfernt.
-  // alias(libs.plugins.spring.dependencyManagement)
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSpring)
+    alias(libs.plugins.kotlinJpa)
+    alias(libs.plugins.spring.boot)
 }
 
-// Configure the main class for the executable JAR
-springBoot {
-  mainClass.set("at.mocode.ping.service.PingServiceApplicationKt")
+kotlin {
+    compilerOptions {
+        // Aktiviert die experimentelle UUID API von Kotlin 2.3.0
+        freeCompilerArgs.add("-opt-in=kotlin.uuid.ExperimentalUuidApi")
+    }
 }
 
 dependencies {
-  // Die `platform`-Deklaration ist der einzig korrekte Weg.
-  implementation(platform(projects.platform.platformBom))
+    // === Project Dependencies ===
+    implementation(projects.backend.services.ping.pingApi)
+    implementation(projects.platform.platformDependencies)
 
-  // Platform und Core Dependencies
-  implementation(projects.platform.platformDependencies)
-  implementation(projects.backend.services.ping.pingApi)
-  implementation(projects.backend.infrastructure.monitoring.monitoringClient)
+    // === Spring Boot & Cloud ===
+    implementation(libs.bundles.spring.boot.service.complete)
+    // WICHTIG: Da wir JPA (blockierend) nutzen, brauchen wir Spring MVC (nicht WebFlux)
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.bundles.spring.cloud.gateway) // Für Discovery Client
 
-  // Spring Boot Service Complete Bundle
-  // Provides: web, validation, actuator, security, oauth2-client, oauth2-resource-server,
-  //           data-jpa, data-redis, micrometer-prometheus, tracing, zipkin
-  implementation(libs.bundles.spring.boot.service.complete)
+    // === Database & Persistence ===
+    implementation(libs.bundles.database.complete)
 
-  // Datenbank (PostgresQL) Driver
-  implementation(libs.postgresql.driver)
+    // === Resilience ===
+    implementation(libs.bundles.resilience)
 
-  // Web-Server (Tomcat) explizit hinzufügen!
-  implementation(libs.spring.boot.starter.web)
+    // === Testing ===
+    testImplementation(libs.bundles.testing.jvm)
+}
 
-  // Jackson Kotlin Support Bundle
-  implementation(libs.bundles.jackson.kotlin)
-
-  // Kotlin Reflection (now from version catalog)
-  implementation(libs.kotlin.reflect)
-
-  // Service Discovery
-  implementation(libs.spring.cloud.starter.consul.discovery)
-
-  // Caching (Caffeine for Spring Cloud LoadBalancer)
-  implementation(libs.caffeine)
-  implementation(libs.spring.web) // Provides spring-context-support
-
-  // Resilience4j Bundle (Circuit Breaker, Reactor, AOP)
-  implementation(libs.bundles.resilience)
-
-  // OpenAPI Documentation
-  implementation(libs.springdoc.openapi.starter.webmvc.ui)
-
-  // Test Dependencies
-  testImplementation(projects.platform.platformTesting)
-  testImplementation(libs.bundles.testing.jvm)
-  testImplementation(libs.spring.boot.starter.test)
-  testImplementation(libs.spring.boot.starter.web)
+tasks.test {
+    useJUnitPlatform()
 }

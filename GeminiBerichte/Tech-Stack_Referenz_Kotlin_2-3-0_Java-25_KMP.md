@@ -3,11 +3,11 @@
 
 ### 1. Kern-Spezifikationen
 
-| Komponente | Version | Status |
-| --- | --- | --- |
-| **Kotlin** | `2.3.0` | Stabil (K2 Compiler standardmäßig aktiv) |
-| **Java (JDK)** | `25` | LTS (Long-Term Support) |
-| **Gradle** | `9.2+` | Erforderlich für JDK 25 Support |
+| Komponente | Version  | Status |
+| --- |----------| --- |
+| **Kotlin** | `2.3.0`  | Stabil (K2 Compiler standardmäßig aktiv) |
+| **Java (JDK)** | `25`     | LTS (Long-Term Support) |
+| **Gradle** | `9.2.1`  | Erforderlich für JDK 25 Support |
 | **Android Plugin (AGP)** | `8.8.0+` | Empfohlen für Gradle 9.x Kompatibilität |
 
 ---
@@ -52,7 +52,7 @@ Damit das Projekt Java 25 erkennt, muss der Wrapper auf dem neuesten Stand sein:
 **Terminal-Befehl:**
 
 ```bash
-./gradlew wrapper --gradle-version 9.2 --distribution-type all
+./gradlew wrapper --gradle-version 9.2.1 --distribution-type all
 
 ```
 

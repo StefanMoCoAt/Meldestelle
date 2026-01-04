@@ -1,5 +1,6 @@
 package at.mocode.infrastructure.gateway.config
 
+import io.micrometer.tracing.Tracer
 import org.slf4j.LoggerFactory
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
 import org.springframework.cloud.gateway.filter.GlobalFilter
@@ -7,17 +8,21 @@ import org.springframework.core.Ordered
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import java.util.*
 
 /**
  * Gateway-Konfiguration für erweiterte Funktionalitäten wie Logging, Rate Limiting und Security.
  */
 
 /**
- * Global Filter für Correlations-IDs zur Request-Verfolgung.
+ * Globaler Filter, der sicherstellt, dass die Trace-ID (von Micrometer Tracing)
+ * auch als "X-Correlation-ID" im Response-Header zurückgegeben wird.
+ *
+ * Hinweis: Micrometer Tracing kümmert sich bereits automatisch um die Propagation
+ * der Trace-ID (b3 oder w3c) an nachgelagerte Services. Dieser Filter dient nur
+ * der Bequemlichkeit für Clients (z. B. Frontend), um die ID einfach auslesen zu können.
  */
 @Component
-class CorrelationIdFilter : GlobalFilter, Ordered {
+class CorrelationIdFilter(private val tracer: Tracer) : GlobalFilter, Ordered {
 
     private val logger = LoggerFactory.getLogger(CorrelationIdFilter::class.java)
 
@@ -26,26 +31,21 @@ class CorrelationIdFilter : GlobalFilter, Ordered {
     }
 
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
-        val request = exchange.request
-        val correlationId = request.headers.getFirst(CORRELATION_ID_HEADER)
-            ?: UUID.randomUUID().toString()
+        // Die aktuelle Trace-ID aus dem Micrometer Tracer holen
+        val currentSpan = tracer.currentSpan()
+        val traceId = currentSpan?.context()?.traceId()
 
-        val mutatedRequest = request.mutate()
-            .header(CORRELATION_ID_HEADER, correlationId)
-            .build()
+        if (traceId != null) {
+            // Trace-ID als Response-Header hinzufügen
+            exchange.response.headers.add(CORRELATION_ID_HEADER, traceId)
+        }
 
-        val mutatedExchange = exchange.mutate()
-            .request(mutatedRequest)
-            .build()
-
-        // Response-Header nach der Verarbeitung hinzufügen
-        mutatedExchange.response.headers.add(CORRELATION_ID_HEADER, correlationId)
-
-        return chain.filter(mutatedExchange)
+        return chain.filter(exchange)
             .doOnError { ex ->
-                logger.error("Error in CorrelationIdFilter for request {}: {}", request.uri, ex.message)
+                logger.error("Error processing request {}: {}", exchange.request.uri, ex.message)
             }
     }
 
-    override fun getOrder(): Int = Ordered.HIGHEST_PRECEDENCE
+    // Niedrige Priorität, damit Tracing-Kontext bereits initialisiert ist
+    override fun getOrder(): Int = Ordered.LOWEST_PRECEDENCE
 }

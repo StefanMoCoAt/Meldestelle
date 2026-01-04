@@ -25,7 +25,7 @@ dependencies {
 
   // === GATEWAY-SPEZIFISCHE ABHÄNGIGKEITEN ===
   // Die WebFlux-Abhängigkeit wird jetzt korrekt durch das BOM bereitgestellt.
-  // implementation(libs.spring.boot.starter.webflux)
+  implementation(libs.spring.boot.starter.webflux)
 
   // Kern-Gateway inkl. Security, Actuator, CircuitBreaker, Discovery
   implementation(libs.bundles.gateway.core)
@@ -33,6 +33,12 @@ dependencies {
   implementation(libs.bundles.gateway.observability)
   // Redis-Unterstützung für verteiltes Rate Limiting (RequestRateLimiter)
   implementation(libs.bundles.gateway.redis)
+
+  // === Tracing Dependencies (Micrometer Tracing) ===
+  // Ermöglicht verteiltes Tracing über Thread-Grenzen hinweg (ersetzt manuellen MDC-Filter)
+  implementation(libs.micrometer.tracing.bridge.brave)
+  // Optional: Zipkin Reporter, falls du Traces an Zipkin senden willst (bereits im monitoringClient enthalten, aber hier explizit schadet nicht)
+  // implementation(libs.zipkin.reporter.brave)
 
   // === Test Dependencies ===
   testImplementation(projects.platform.platformTesting)
