@@ -4,7 +4,7 @@
 
 [versions]
 # --- Android Ecosystem ---
-# agp = "8.1.4"
+# agp = "8.13"
 
 # --- Kotlin Ecosystem ---
 kotlin = "2.3.0"
@@ -16,16 +16,17 @@ kotlinx-coroutines = "1.10.2"
 
 
 # --- Spring Ecosystem ---
-# KORREKTUR: Version auf Benutzerwunsch angepasst (war 4.0.1)
+# Spring Boot 3.5.x Linie (kompatibel zu Spring Framework 6.2)
 springBoot = "3.5.9"
-# Spring Cloud Version kompatibel zu Spring Boot
-springCloud = "2025.1.0"
+# Spring Cloud Release Train kompatibel zu Spring Boot 3.5.x → Northfields (2025.0.x)
+springCloud = "2025.0.1"
 # springCloudGateway = "4.3.0"
 springDependencyManagement = "1.1.7"
 springdoc = "3.0.0"
 
 # --- Ktor (API Layer & Client) ---
-ktor = "3.3.3"
+# Kotlin 2.3.0 Alignment + iOS SSE Fix
+ktor = "3.4.0"
 
 # --- DI ---
 koin = "4.1.1"
@@ -34,10 +35,12 @@ koinCompose = "4.1.1"
 # --- Compose UI ---
 androidx-lifecycle = "2.9.6"
 composeHotReload = "1.0.0"
-composeMultiplatform = "1.9.3"
+# Für Kotlin 2.3.0 erforderlich (R8/StackTrace Fixes, Wasm Reife)
+composeMultiplatform = "1.10.0"
 
 # --- Database & Persistence ---
-exposed = "0.61.0"
+# Stabil für Kotlin 2.3.0 (anstelle von 0.61.0)
+exposed = "0.62.0"
 postgresql = "42.7.8"
 hikari = "7.0.2"
 h2 = "2.4.240"
