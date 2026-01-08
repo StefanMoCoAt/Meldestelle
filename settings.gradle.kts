@@ -5,15 +5,10 @@ pluginManagement {
   repositories {
     gradlePluginPortal()
     mavenCentral()
-    google {
-      mavenContent {
-        includeGroupAndSubgroups("androidx")
-        includeGroupAndSubgroups("com.android")
-        includeGroupAndSubgroups("com.google")
-      }
-    }
+    google() // Removed content filtering to ensure all artifacts are found
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     maven("https://us-central1-maven.pkg.dev/varabyte-repos/public")
+    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") } // Added snapshots for plugins
   }
 }
 plugins {

@@ -48,8 +48,16 @@ kotlin {
       // JVM-specific dependencies - access to central catalog
       api(projects.platform.platformDependencies)
       // Database Management (JVM-specific)
-      api(libs.bundles.exposed)
-      api(libs.bundles.flyway)
+      // api(libs.bundles.exposed)
+      api(libs.exposed.core)
+      api(libs.exposed.dao)
+      api(libs.exposed.jdbc)
+      api(libs.exposed.kotlin.datetime)
+
+      // api(libs.bundles.flyway)
+      api(libs.flyway.core)
+      api(libs.flyway.postgresql)
+
       api(libs.hikari.cp)
       // Service Discovery (JVM-specific)
       api(libs.spring.cloud.starter.consul.discovery)
@@ -64,7 +72,15 @@ kotlin {
     jvmTest.dependencies {
       // Testing (JVM-specific)
       implementation(projects.platform.platformTesting)
-      implementation(libs.bundles.testing.jvm)
+      // implementation(libs.bundles.testing.jvm)
+      implementation(libs.junit.jupiter.api)
+      implementation(libs.junit.jupiter.engine)
+      implementation(libs.junit.jupiter.params)
+      implementation(libs.junit.platform.launcher)
+      implementation(libs.mockk)
+      implementation(libs.assertj.core)
+      implementation(libs.kotlinx.coroutines.test)
+
       runtimeOnly(libs.postgresql.driver)
     }
   }

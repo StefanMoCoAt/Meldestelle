@@ -28,11 +28,26 @@ dependencies {
   implementation(libs.spring.boot.starter.webflux)
 
   // Kern-Gateway inkl. Security, Actuator, CircuitBreaker, Discovery
-  implementation(libs.bundles.gateway.core)
+  // implementation(libs.bundles.gateway.core)
+  implementation(libs.spring.cloud.starter.gateway.server.webflux)
+  implementation(libs.spring.cloud.starter.consul.discovery)
+  implementation(libs.spring.boot.starter.actuator)
+  implementation(libs.spring.boot.starter.security)
+  implementation(libs.spring.boot.starter.oauth2.resource.server)
+  implementation(libs.spring.security.oauth2.jose)
+  implementation(libs.spring.cloud.starter.circuitbreaker.resilience4j)
+
   // Ergänzende Observability (Logging, Jackson)
-  implementation(libs.bundles.gateway.observability)
+  // implementation(libs.bundles.gateway.observability)
+  implementation(libs.kotlin.logging.jvm)
+  implementation(libs.logback.classic)
+  implementation(libs.logback.core)
+  implementation(libs.jackson.module.kotlin)
+  implementation(libs.jackson.datatype.jsr310)
+
   // Redis-Unterstützung für verteiltes Rate Limiting (RequestRateLimiter)
-  implementation(libs.bundles.gateway.redis)
+  // implementation(libs.bundles.gateway.redis)
+  implementation(libs.spring.boot.starter.data.redis)
 
   // === Tracing Dependencies (Micrometer Tracing) ===
   // Ermöglicht verteiltes Tracing über Thread-Grenzen hinweg (ersetzt manuellen MDC-Filter)
@@ -42,7 +57,14 @@ dependencies {
 
   // === Test Dependencies ===
   testImplementation(projects.platform.platformTesting)
-  testImplementation(libs.bundles.testing.jvm)
+  // testImplementation(libs.bundles.testing.jvm)
+  testImplementation(libs.junit.jupiter.api)
+  testImplementation(libs.junit.jupiter.engine)
+  testImplementation(libs.junit.jupiter.params)
+  testImplementation(libs.junit.platform.launcher)
+  testImplementation(libs.mockk)
+  testImplementation(libs.assertj.core)
+  testImplementation(libs.kotlinx.coroutines.test)
 }
 
 tasks.test {

@@ -62,7 +62,14 @@ kotlin {
       implementation(libs.junit.jupiter.api)
       implementation(libs.mockk)
       implementation(projects.platform.platformTesting)
-      implementation(libs.bundles.testing.jvm)
+      // implementation(libs.bundles.testing.jvm) // Temporarily disabled due to resolution issues
+      implementation(libs.junit.jupiter.api)
+      implementation(libs.junit.jupiter.engine)
+      implementation(libs.junit.jupiter.params)
+      implementation(libs.junit.platform.launcher)
+      implementation(libs.mockk)
+      implementation(libs.assertj.core)
+      implementation(libs.kotlinx.coroutines.test)
     }
 
   }

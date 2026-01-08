@@ -5,8 +5,8 @@
 [versions]
 # --- Kotlin & Core ---
 kotlin = "2.3.0"
-# KSP version must match Kotlin version. Assuming 2.3.0-1.0.0 for Kotlin 2.3.0
-ksp = "2.3.0-1.0.0"
+# KSP version aligned with Kotlin 2.3.0 (Modern Scheme)
+ksp = "2.3.4"
 kotlinx = "1.10.2"
 kotlinx-serialization-json = "1.9.0"
 kotlinx-datetime = "0.7.1"
@@ -227,128 +227,69 @@ testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "tes
 testcontainers-keycloak = { module = "com.github.dasniko:testcontainers-keycloak", version.ref = "testcontainersKeycloak" }
 room-common-jvm = { module = "androidx.room:room-common-jvm", version.ref = "room" }
 
+# --- Added Bundles ---
+# jackson-kotlin = [
+#     "jackson-module-kotlin",
+#     "jackson-datatype-jsr310"
+# ]
+
+# resilience = [
+#     "resilience4j-spring-boot3",
+#     "resilience4j-reactor"
+# ]
+
 [bundles]
-
-# --- Server Bundles ---
-ktor-server-essentials = [
-    "ktor-server-core",
-    "ktor-server-netty",
-    "ktor-server-contentNegotiation",
-    "ktor-server-serialization-kotlinx-json",
-    "ktor-server-statusPages",
-    "ktor-server-callLogging"
+testing-jvm = [
+    "junit-jupiter-api",
+    "junit-jupiter-engine",
+    "junit-jupiter-params",
+    "junit-platform-launcher",
+    "mockk",
+    "assertj-core"
 ]
-
-ktor-server-complete = [
-    "ktor-server-core",
-    "ktor-server-netty",
-    "ktor-server-contentNegotiation",
-    "ktor-server-serialization-kotlinx-json",
-    "ktor-server-statusPages",
-    "ktor-server-cors",
-    "ktor-server-defaultHeaders",
-    "ktor-server-auth",
-    "ktor-server-authJwt",
-    "ktor-server-callLogging",
-    "ktor-server-metrics-micrometer",
-    "ktor-server-openapi",
-    "ktor-server-swagger",
-    "ktor-server-rateLimit"
-]
-
-spring-boot-essentials = [
-    "spring-boot-starter-validation",
-    "spring-boot-starter-actuator"
-]
-
 spring-boot-service-complete = [
+    "spring-boot-starter-web",
     "spring-boot-starter-validation",
     "spring-boot-starter-actuator",
-    "spring-boot-starter-security",
-    "spring-boot-starter-oauth2-client",
-    "spring-boot-starter-oauth2-resource-server",
-    "spring-security-oauth2-jose",
-    "spring-boot-starter-data-jpa",
-    "spring-boot-starter-data-redis",
+    "spring-boot-starter-json",
+    "spring-boot-starter-aop",
+    "jackson-module-kotlin",
+    "jackson-datatype-jsr310",
     "micrometer-prometheus",
     "micrometer-tracing-bridge-brave",
-    "zipkin-reporter-brave"
+    "zipkin-reporter-brave",
+    "zipkin-sender-okhttp3"
 ]
-
-gateway-core = [
-    "spring-cloud-starter-gateway-server-webflux",
-    "spring-cloud-starter-consul-discovery",
-    "spring-boot-starter-actuator",
-    "spring-boot-starter-security",
-    "spring-boot-starter-oauth2-resource-server",
-    "spring-security-oauth2-jose",
-    "spring-cloud-starter-circuitbreaker-resilience4j"
-]
-
-gateway-observability = [
-    "kotlin-logging-jvm",
-    "logback-classic",
-    "logback-core",
-    "jackson-module-kotlin",
-    "jackson-datatype-jsr310"
-]
-
-gateway-redis = [
-    "spring-boot-starter-data-redis"
-]
-
-# --- Client Bundles ---
-ktor-client-essentials = [
-    "ktor-client-core",
-    "ktor-client-cio",
-    "ktor-client-contentNegotiation",
-    "ktor-client-serialization-kotlinx-json"
-]
-
-compose-common = [
-    "androidx-lifecycle-viewmodelCompose",
-    "androidx-lifecycle-runtimeCompose"
-]
-
-# --- Persistence Bundles ---
-exposed = [
-    "exposed-core",
-    "exposed-dao",
-    "exposed-jdbc",
-    "exposed-kotlin-datetime"
-]
-
 database-complete = [
-    "exposed-core",
-    "exposed-dao",
-    "exposed-jdbc",
-    "exposed-kotlin-datetime",
+    "spring-boot-starter-data-jpa",
     "postgresql-driver",
     "hikari-cp",
     "flyway-core",
     "flyway-postgresql"
 ]
-
-flyway = [
-    "flyway-core",
-    "flyway-postgresql"
+compose-common = [
+    "androidx-lifecycle-viewmodelCompose",
+    "androidx-lifecycle-runtimeCompose"
 ]
-
 redis-cache = [
     "spring-boot-starter-data-redis",
     "lettuce-core",
     "jackson-module-kotlin",
     "jackson-datatype-jsr310"
 ]
-
-# --- Infrastructure Bundles ---
+testcontainers = [
+    "testcontainers-core",
+    "testcontainers-junit-jupiter",
+    "testcontainers-postgresql",
+    "testcontainers-kafka",
+    "testcontainers-keycloak"
+]
 kafka-config = [
     "spring-kafka",
-    "spring-boot-starter-json",
+    "reactor-kafka",
     "jackson-module-kotlin",
     "jackson-datatype-jsr310"
 ]
-
 monitoring-client = [
     "spring-boot-starter-actuator",
     "micrometer-prometheus",
@@ -356,45 +297,13 @@ monitoring-client = [
     "zipkin-reporter-brave",
     "zipkin-sender-okhttp3"
 ]
-
-monitoring-complete = [
-    "spring-boot-starter-actuator",
-    "micrometer-prometheus",
-    "micrometer-tracing-bridge-brave",
-    "zipkin-reporter-brave",
-    "zipkin-sender-okhttp3",
-    "kotlin-logging-jvm",
-    "logback-classic",
-    "slf4j-api"
+jackson-kotlin = [
+    "jackson-module-kotlin",
+    "jackson-datatype-jsr310"
 ]
-
-# --- Testing Bundles ---
-testing-jvm = [
-    "junit-jupiter-api",
-    "junit-jupiter-engine",
-    "junit-jupiter-params",
-    "junit-platform-launcher",
-    "mockk",
-    "assertj-core",
-    "kotlinx-coroutines-test"
-]
-
-testing-kmp = [
-    "kotlin-test",
-    "junit-jupiter-api",
-    "junit-jupiter-engine",
-    "junit-jupiter-params",
-    "junit-platform-launcher",
-    "mockk",
-    "assertj-core",
-    "kotlinx-coroutines-test"
-]
-
-testcontainers = [
-    "testcontainers-core",
-    "testcontainers-junit-jupiter",
-    "testcontainers-postgresql",
-    "testcontainers-keycloak"
+resilience = [
+    "resilience4j-spring-boot3",
+    "resilience4j-reactor"
 ]
 
 [plugins]

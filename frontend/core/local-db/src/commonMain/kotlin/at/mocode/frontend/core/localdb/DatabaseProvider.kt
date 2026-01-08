@@ -2,22 +2,33 @@
 
 package at.mocode.frontend.core.localdb
 
-import app.cash.sqldelight.db.SqlDriver
+import androidx.room.RoomDatabase
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import org.koin.dsl.module
 
-// Generated database class name from SQLDelight configuration
-expect class DatabaseDriverFactory() {
-  suspend fun createDriver(): SqlDriver
+// Abstract Room Database class definition
+// @Database(entities = [MyEntity::class], version = 1) // Entities need to be defined
+abstract class MeldestelleDb : RoomDatabase() {
+    // abstract fun myDao(): MyDao
 }
 
-// Convenience to create the typed database from a driver
-expect class DatabaseProvider() {
-  suspend fun createDatabase(): MeldestelleDb
+// Factory to create the database builder platform-specifically
+expect class DatabaseBuilderFactory() {
+    fun create(): RoomDatabase.Builder<MeldestelleDb>
 }
 
-// Koin module that exposes the database as a singleton
+class DatabaseProvider(private val factory: DatabaseBuilderFactory) {
+    fun createDatabase(): MeldestelleDb {
+        return factory.create()
+            .setDriver(BundledSQLiteDriver())
+            .setQueryCoroutineContext(Dispatchers.IO)
+            .build()
+    }
+}
+
 val localDbModule = module {
-  single { DatabaseDriverFactory() }
-  // Provide only the suspend-capable provider; consumers create the DB in a coroutine
-  single { DatabaseProvider() }
+    single { DatabaseBuilderFactory() }
+    single { DatabaseProvider(get()).createDatabase() }
 }
