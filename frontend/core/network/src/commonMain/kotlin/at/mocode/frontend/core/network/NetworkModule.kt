@@ -54,7 +54,7 @@ val networkModule = module {
       install(HttpRequestRetry) {
         maxRetries = 3
         retryIf { _, response ->
-          val s = response?.status?.value ?: 0
+          val s = response.status.value
           s == 0 || s >= 500
         }
         exponentialDelay()

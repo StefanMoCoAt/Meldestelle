@@ -11,8 +11,7 @@ kotlin {
     compilerOptions {
         // Optimierungen für API-Module
         freeCompilerArgs.addAll(
-            "-opt-in=kotlin.time.ExperimentalTime",
-            "-jvm-default=all"
+            "-opt-in=kotlin.time.ExperimentalTime"
         )
     }
 }

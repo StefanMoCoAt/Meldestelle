@@ -1,7 +1,7 @@
 package at.mocode.infrastructure.gateway.health
 
-import org.springframework.boot.health.contributor.Health
-import org.springframework.boot.health.contributor.ReactiveHealthIndicator
+import org.springframework.boot.actuate.health.Health
+import org.springframework.boot.actuate.health.ReactiveHealthIndicator
 import org.springframework.cloud.client.ServiceInstance
 import org.springframework.cloud.client.discovery.DiscoveryClient
 import org.springframework.core.env.Environment
@@ -68,6 +68,7 @@ class GatewayHealthIndicator(
             val checkMono: Mono<String> = when {
               CRITICAL_SERVICES.contains(serviceName) || OPTIONAL_SERVICES.contains(serviceName) ->
                 checkServiceHealthReactive(serviceName, instances)
+
               else -> Mono.just("SKIPPED")
             }
             checkMono.map { status -> Triple(serviceName, status, instanceDetails) }
@@ -143,6 +144,7 @@ class GatewayHealthIndicator(
             503 -> Mono.just("DOWN")
             else -> Mono.just("ERROR")
           }
+
           is TimeoutException -> Mono.just("TIMEOUT")
           else -> Mono.just("ERROR")
         }

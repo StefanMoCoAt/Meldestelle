@@ -39,7 +39,7 @@ class ResultTest {
     val b = Result.success("x")
     val zipped = a.zip(b)
     assertTrue(zipped is Result.Success)
-    assertEquals(Pair(1, "x"), (zipped as Result.Success).value)
+    assertEquals(Pair(1, "x"), zipped.value)
 
     val f1: Result<Int> = Result.failure(ErrorDto(ErrorCode("E1"), ""))
     val f2: Result<String> = Result.failure(ErrorDto(ErrorCode("E2"), ""))
@@ -48,12 +48,12 @@ class ResultTest {
 
     val combined = Result.combine(listOf(Result.success(1), Result.success(2)))
     assertTrue(combined is Result.Success)
-    assertEquals(listOf(1, 2), (combined as Result.Success).value)
+    assertEquals(listOf(1, 2), combined.value)
 
     val combinedFail =
-      Result.combine(listOf(f1 as Result<Int>, Result.success(3), Result.failure(ErrorDto(ErrorCode("E3"), ""))))
+      Result.combine(listOf(f1, Result.success(3), Result.failure(ErrorDto(ErrorCode("E3"), ""))))
     assertTrue(combinedFail is Result.Failure)
-    assertEquals(2, (combinedFail as Result.Failure).errors.size)
+    assertEquals(2, combinedFail.errors.size)
   }
 
   @Test
@@ -63,7 +63,7 @@ class ResultTest {
 
     val iae = Result.runCatching<String> { throw IllegalArgumentException("bad") }
     assertTrue(iae is Result.Failure)
-    assertEquals("INVALID_ARGUMENT", (iae as Result.Failure).errors.first().code.value)
+    assertEquals("INVALID_ARGUMENT", iae.errors.first().code.value)
 
     val generic = Result.runCatching<String> { throw Exception("x") }
     assertTrue(generic is Result.Failure)
@@ -71,7 +71,7 @@ class ResultTest {
     val verrs = listOf(ValidationError.required("name"), ValidationError.invalidFormat("email"))
     val fromVal: Result<Unit> = Result.failure(verrs)
     assertTrue(fromVal is Result.Failure)
-    assertEquals("REQUIRED", (fromVal as Result.Failure).errors.first().code.value)
+    assertEquals("REQUIRED", fromVal.errors.first().code.value)
 
     val rec = Result.failure<String>(ErrorDto(ErrorCode("E"), "")).recover { _ -> "fallback" }
     assertTrue(rec is Result.Success)
@@ -79,7 +79,7 @@ class ResultTest {
     val recFail =
       Result.failure<String>(ErrorDto(ErrorCode("E"), "")).recoverCatching { _ -> throw IllegalStateException("boom") }
     assertTrue(recFail is Result.Failure)
-    assertEquals("RECOVERY_FAILED", (recFail as Result.Failure).errors.first().code.value)
+    assertEquals("RECOVERY_FAILED", recFail.errors.first().code.value)
   }
 
   @Test
