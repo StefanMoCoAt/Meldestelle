@@ -48,7 +48,13 @@ kotlin {
       api(project(":frontend:core:domain"))
 
       // Kotlinx core dependencies (coroutines, serialization, datetime)
-      implementation(libs.bundles.kotlinx.core)
+      // KORREKTUR: Zugriff auf Bundle korrigiert.
+      // In libs.versions.toml: [bundles] kotlinx-core = [...]
+      // Gradle Accessor: libs.bundles.kotlinx.core
+      // Falls das fehlschlägt, listen wir die Libs einzeln auf, um den Build zu fixen.
+      implementation(libs.kotlinx.coroutines.core)
+      implementation(libs.kotlinx.serialization.json)
+      implementation(libs.kotlinx.datetime)
 
       // HTTP Client
       implementation(libs.ktor.client.core)
@@ -66,9 +72,10 @@ kotlin {
       implementation(projects.frontend.core.network)
 
       // Compose für shared UI components (common)
-      implementation(compose.runtime)
-      implementation(compose.foundation)
-      implementation(compose.material3)
+      // KORREKTUR: Verwendung der korrekten Compose-Dependencies ohne Deprecation-Warnung
+      implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
+      implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc02")
+      implementation("org.jetbrains.compose.material3:material3:1.9.0-beta03")
     }
 
     commonTest.dependencies {
@@ -88,10 +95,11 @@ kotlin {
     if (enableWasm) {
       val wasmJsMain = getByName("wasmJsMain")
       wasmJsMain.dependencies {
-        implementation(libs.ktor.client.js) // WASM verwendet JS-Client
+        implementation(libs.ktor.client.js) // WASM verwendet JS-Clients
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
+
       }
     }
   }

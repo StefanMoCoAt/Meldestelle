@@ -35,7 +35,7 @@ kotlin {
       // ktor-client-resources optional; disabled until version is added to catalog
 
       // Kotlinx core bundles
-      implementation(libs.bundles.kotlinx.core)
+      implementation(libs.kotlinx.coroutines.core)
 
       // DI (Koin)
       api(libs.koin.core)

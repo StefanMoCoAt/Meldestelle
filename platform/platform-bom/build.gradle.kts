@@ -43,9 +43,16 @@ dependencies {
         // KORREKTUR: `webmvc`-Starter durch `webflux`-Starter ersetzt, um Konflikt zu beheben.
         api(libs.springdoc.openapi.starter.webflux.ui)
         // --- Database & Persistence ---
-        // CHIRURGISCHER EINGRIFF: `exposed`-Bundle entfernt, um Kotlin-Versionskonflikt zu beheben.
-        // api(libs.bundles.exposed)
-        api(libs.bundles.flyway)
+        // Exposed Bundle wieder aktiviert, da Version jetzt kompatibel ist
+        api(libs.exposed.core)
+        api(libs.exposed.dao)
+        api(libs.exposed.jdbc)
+        api(libs.exposed.kotlin.datetime)
+
+        // Flyway Bundle kann nicht direkt in constraints verwendet werden, müssen einzeln gelistet werden
+        api(libs.flyway.core)
+        api(libs.flyway.postgresql)
+
         api(libs.postgresql.driver)
         api(libs.hikari.cp)
         api(libs.h2.driver)
@@ -57,7 +64,11 @@ dependencies {
         api(libs.jackson.module.kotlin)
         api(libs.jackson.datatype.jsr310)
         // --- Testcontainers ---
-        api(libs.bundles.testcontainers)
+        // Testcontainers Bundle kann nicht direkt in constraints verwendet werden
+        api(libs.testcontainers.core)
+        api(libs.testcontainers.junit.jupiter)
+        api(libs.testcontainers.postgresql)
+        api(libs.testcontainers.keycloak)
     }
 }
 

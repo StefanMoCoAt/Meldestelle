@@ -29,11 +29,11 @@ kotlin {
       implementation(projects.frontend.shared)
 
       // Compose dependencies
-      implementation(compose.runtime)
-      implementation(compose.foundation)
-      implementation(compose.material3)
-      implementation(compose.ui)
-      implementation(compose.components.resources)
+      implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
+      implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc02")
+      implementation("org.jetbrains.compose.material3:material3:1.9.0-beta03")
+      implementation("org.jetbrains.compose.ui:ui:1.10.0-rc02")
+      implementation("org.jetbrains.compose.components:components-resources:1.10.0-rc02")
 
       // Coroutines
       implementation(libs.kotlinx.coroutines.core)

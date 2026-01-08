@@ -9,7 +9,7 @@ services:
   postgres:
     image: "${POSTGRES_IMAGE:-postgres:16-alpine}"
     container_name: "${PROJECT_NAME:-meldestelle}-postgres"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "${POSTGRES_PORT:-5432:5432}"
     environment:
@@ -37,7 +37,7 @@ services:
   redis:
     image: "${REDIS_IMAGE:-redis:7.4-alpine}"
     container_name: "${PROJECT_NAME:-meldestelle}-redis"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "${REDIS_PORT:-6379:6379}"
     volumes:
@@ -59,7 +59,7 @@ services:
   keycloak:
     image: "meldestelle-keycloak:latest"
     container_name: "${PROJECT_NAME:-meldestelle}-keycloak"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     build:
       context: "./config/docker/keycloak"
       args:
@@ -107,7 +107,7 @@ services:
   pgadmin:
     image: "${PGADMIN_IMAGE:-dpage/pgadmin4:8}"
     container_name: "${PROJECT_NAME:-meldestelle}-pgadmin"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "${PGADMIN_PORT:-8888:80}"
     environment:
@@ -125,7 +125,7 @@ services:
   postgres-exporter:
     image: "${POSTGRES_EXPORTER_IMAGE:-prometheuscommunity/postgres-exporter:v0.18.0}"
     container_name: "${PROJECT_NAME:-meldestelle}-postgres-exporter"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     environment:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-pg-user}:${POSTGRES_PASSWORD:-pg-password}@postgres:5432/${POSTGRES_DB:-pg-meldestelle-db}?sslmode=disable"
     depends_on:
@@ -141,7 +141,7 @@ services:
   alertmanager:
     image: "${ALERTMANAGER_IMAGE:-prom/alertmanager:v0.29.0}"
     container_name: "${PROJECT_NAME:-meldestelle}-alertmanager"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "${ALERTMANAGER_PORT:-9093:9093}"
     volumes:
@@ -161,7 +161,7 @@ services:
   prometheus:
     image: "${PROMETHEUS_IMAGE:-prom/prometheus:v3.7.3}"
     container_name: "${PROJECT_NAME:-meldestelle}-prometheus"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "${PROMETHEUS_PORT:-9090:9090}"
     volumes:
@@ -188,7 +188,7 @@ services:
   grafana:
     image: "${GF_IMAGE:-grafana/grafana:12.3}"
     container_name: "${PROJECT_NAME:-meldestelle}-grafana"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     environment:
       GF_SECURITY_ADMIN_USER: "${GF_ADMIN_USER:-gf-admin}"
       GF_SECURITY_ADMIN_PASSWORD: "${GF_ADMIN_PASSWORD:-gf-password}"
@@ -219,7 +219,7 @@ services:
   consul:
     image: "${CONSUL_IMAGE:-hashicorp/consul:1.22.1}"
     container_name: "${PROJECT_NAME:-meldestelle}-consul"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "${CONSUL_PORT:-8500:8500}"
       - "${CONSUL_UDP_PORT:-8600:8600/udp}"
@@ -249,7 +249,7 @@ services:
     labels:
       - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
     container_name: "${PROJECT_NAME:-meldestelle}-gateway"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "${GATEWAY_PORT:-8081:8081}"
       - "${GATEWAY_DEBUG_PORT:-5005:5005}"
@@ -323,7 +323,7 @@ services:
     labels:
       - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
     container_name: "${PROJECT_NAME:-meldestelle}-ping-service"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "${PING_PORT:-8082:8082}"
       - "${PING_DEBUG_PORT:-5006:5006}"
@@ -379,7 +379,7 @@ services:
     labels:
       - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
     container_name: "${PROJECT_NAME:-meldestelle}-entries-service"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "8083:8083"
     environment:
@@ -417,7 +417,7 @@ services:
     labels:
       - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
     container_name: "${PROJECT_NAME:-meldestelle}-results-service"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "8084:8084"
     environment:
@@ -455,7 +455,7 @@ services:
     labels:
       - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
     container_name: "${PROJECT_NAME:-meldestelle}-scheduling-service"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "8085:8085"
     environment:
@@ -503,7 +503,7 @@ services:
     labels:
       - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
     container_name: "${PROJECT_NAME:-meldestelle}-web-app"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     ports:
       - "${WEB_APP_PORT:-4000:4000}"
     environment:
@@ -533,7 +533,7 @@ services:
     labels:
       - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
     container_name: "${PROJECT_NAME:-meldestelle}-desktop-app"
-    restart: "${RESTART_POLICY:-no}"
+    restart: no
     environment:
       API_BASE_URL: "http://api-gateway:8081"
     ports:

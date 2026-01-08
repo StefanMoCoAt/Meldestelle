@@ -19,12 +19,21 @@ dependencies {
   implementation(libs.bundles.spring.boot.service.complete)
   implementation(libs.postgresql.driver)
   implementation(libs.spring.boot.starter.web)
-  implementation(libs.bundles.jackson.kotlin)
+
+  // KORREKTUR: Jackson Bundle aufgelöst, da Accessor fehlschlägt
+  implementation(libs.jackson.module.kotlin)
+  implementation(libs.jackson.datatype.jsr310)
+
   implementation(libs.kotlin.reflect)
   implementation(libs.spring.cloud.starter.consul.discovery)
   implementation(libs.caffeine)
   implementation(libs.spring.web)
-  implementation(libs.bundles.resilience)
+
+  // Resilience Dependencies (manuell aufgelöst)
+  implementation(libs.resilience4j.spring.boot3)
+  implementation(libs.resilience4j.reactor)
+  implementation(libs.spring.boot.starter.aop)
+
   implementation(libs.springdoc.openapi.starter.webmvc.ui)
 
   testImplementation(projects.platform.platformTesting)

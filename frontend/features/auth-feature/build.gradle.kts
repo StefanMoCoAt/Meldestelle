@@ -46,12 +46,13 @@ kotlin {
       implementation(projects.frontend.shared)
 
       // Compose dependencies
-      implementation(compose.runtime)
-      implementation(compose.foundation)
-      implementation(compose.material3)
-      implementation(compose.ui)
-      implementation(compose.components.resources)
-      implementation(compose.materialIconsExtended)
+      //implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
+      implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
+      implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc02")
+      implementation("org.jetbrains.compose.material3:material3:1.9.0-beta03")
+      implementation("org.jetbrains.compose.ui:ui:1.10.0-rc02")
+      implementation("org.jetbrains.compose.components:components-resources:1.10.0-rc02")
+      implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
 
       // Ktor client for HTTP calls
       implementation(libs.ktor.client.core)
@@ -110,9 +111,11 @@ kotlin {
         implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
 
         // ✅ HINZUFÜGEN: Compose für shared UI components für WASM
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
+        implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
+        implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc02")
+        implementation("org.jetbrains.compose.material3:material3:1.9.0-beta03")
+
+
       }
     }
   }
