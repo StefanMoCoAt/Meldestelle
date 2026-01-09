@@ -72,10 +72,9 @@ kotlin {
       implementation(projects.frontend.core.network)
 
       // Compose für shared UI components (common)
-      // KORREKTUR: Verwendung der korrekten Compose-Dependencies ohne Deprecation-Warnung
-      implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
-      implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc02")
-      implementation("org.jetbrains.compose.material3:material3:1.9.0-beta03")
+      implementation(compose.runtime)
+      implementation(compose.foundation)
+      implementation(compose.material3)
     }
 
     commonTest.dependencies {

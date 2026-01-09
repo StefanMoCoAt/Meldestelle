@@ -55,30 +55,16 @@ kotlin {
       implementation(compose.components.resources)
       implementation(compose.materialIconsExtended)
 
-      // Ktor client for HTTP calls
-      implementation(libs.ktor.client.core)
-      implementation(libs.ktor.client.contentNegotiation)
-      implementation(libs.ktor.client.serialization.kotlinx.json)
-      implementation(libs.ktor.client.logging)
-      implementation(libs.ktor.client.auth)
-
-      // Coroutines and serialization
-      implementation(libs.kotlinx.coroutines.core)
-      implementation(libs.kotlinx.serialization.json)
-
-      // DateTime for multiplatform time handling
-      implementation(libs.kotlinx.datetime)
-
-      // ViewModel lifecycle
-      implementation(libs.androidx.lifecycle.viewmodelCompose)
-      implementation(libs.androidx.lifecycle.runtimeCompose)
-
+      // Bundles (Cleaned up dependencies)
+      implementation(libs.bundles.kmp.common)        // Coroutines, Serialization, DateTime
+      implementation(libs.bundles.ktor.client.common) // Ktor Client (Core, Auth, JSON, Logging)
+      implementation(libs.bundles.compose.common)     // ViewModel & Lifecycle
     }
 
     commonTest.dependencies {
       implementation(libs.kotlin.test)
       implementation(libs.kotlinx.coroutines.test)
-      implementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
+      implementation(libs.ktor.client.mock)
     }
 
     jvmTest.dependencies {
@@ -93,10 +79,6 @@ kotlin {
 
     jsMain.dependencies {
       implementation(libs.ktor.client.js)
-      implementation(libs.ktor.client.auth)
-      implementation(libs.kotlinx.coroutines.core)
-      implementation(libs.kotlinx.serialization.json)
-      implementation(libs.kotlinx.datetime)
     }
 
     // WASM SourceSet, nur wenn aktiviert
@@ -105,7 +87,7 @@ kotlin {
       wasmJsMain.dependencies {
         implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
 
-        // ✅ HINZUFÜGEN: Compose für shared UI components für WASM
+        // Compose für shared UI components für WASM
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)

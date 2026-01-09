@@ -49,32 +49,26 @@ kotlin {
       implementation(projects.frontend.shared)
 
       // Compose dependencies
-      implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc02")
-      implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
-      implementation("org.jetbrains.compose.material3:material3:1.9.0-beta03")
-      implementation("org.jetbrains.compose.ui:ui:1.10.0-rc02")
-      implementation("org.jetbrains.compose.components:components-resources:1.10.0-rc02")
-      implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+      implementation(compose.foundation)
+      implementation(compose.runtime)
+      implementation(compose.material3)
+      implementation(compose.ui)
+      implementation(compose.components.resources)
+      implementation(compose.materialIconsExtended)
 
-      // Ktor client for HTTP calls
-      implementation(libs.ktor.client.core)
-
-      // Coroutines and serialization
-      implementation(libs.kotlinx.coroutines.core)
+      // Bundles (Cleaned up dependencies)
+      implementation(libs.bundles.kmp.common)        // Coroutines, Serialization, DateTime
+      implementation(libs.bundles.ktor.client.common) // Ktor Client (Core, Auth, JSON, Logging)
+      implementation(libs.bundles.compose.common)     // ViewModel & Lifecycle
 
       // DI (Koin) for resolving apiClient from container
       implementation(libs.koin.core)
-
-      // ViewModel lifecycle
-      implementation(libs.bundles.compose.common)
-
     }
 
     commonTest.dependencies {
       implementation(libs.kotlin.test)
       implementation(libs.kotlinx.coroutines.test)
       implementation(libs.ktor.client.mock)
-
     }
 
     jvmTest.dependencies {
@@ -85,13 +79,10 @@ kotlin {
 
     jvmMain.dependencies {
       implementation(libs.ktor.client.cio)
-      // Auth-Models Zugriff (nur für JVM)
-      //implementation(project(":infrastructure:auth:auth-client"))
     }
 
     jsMain.dependencies {
       implementation(libs.ktor.client.js)
-
     }
 
     // WASM SourceSet, nur wenn aktiviert
@@ -100,11 +91,10 @@ kotlin {
       wasmJsMain.dependencies {
         implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
 
-        // ✅ HINZUFÜGEN: Compose für shared UI components für WASM
-        implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
-        implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc02")
-        implementation("org.jetbrains.compose.material3:material3:1.9.0-beta03")
-
+        // Compose für shared UI components für WASM
+        implementation(compose.runtime)
+        implementation(compose.foundation)
+        implementation(compose.material3)
       }
     }
   }

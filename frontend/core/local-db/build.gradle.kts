@@ -5,12 +5,12 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.kotlinSerialization)
-  alias(libs.plugins.androidx.room)
-  alias(libs.plugins.ksp)
+  alias(libs.plugins.sqldelight)
 }
 
 kotlin {
   // Toolchain is now handled centrally in the root build.gradle.kts
+  val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
   jvm()
   js {
@@ -19,18 +19,34 @@ kotlin {
     }
   }
 
+  if (enableWasm) {
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+      browser()
+    }
+  }
+
   sourceSets {
     commonMain.dependencies {
       implementation(libs.koin.core)
-      implementation(libs.kotlinx.coroutines.core)
-      implementation(libs.androidx.room.runtime)
-      implementation(libs.androidx.sqlite.bundled)
+      implementation(libs.bundles.kmp.common) // Coroutines, Serialization, DateTime
+      implementation(libs.sqldelight.runtime)
+      implementation(libs.sqldelight.coroutines)
     }
 
     jvmMain.dependencies {
+      implementation(libs.sqldelight.driver.sqlite)
     }
 
     jsMain.dependencies {
+      implementation(libs.sqldelight.driver.web)
+    }
+
+    if (enableWasm) {
+      val wasmJsMain = getByName("wasmJsMain")
+      wasmJsMain.dependencies {
+        implementation(libs.sqldelight.driver.web)
+      }
     }
 
     commonTest.dependencies {
@@ -39,12 +55,11 @@ kotlin {
   }
 }
 
-room {
-  schemaDirectory("$projectDir/schemas")
-}
-
-dependencies {
-  add("kspCommonMainMetadata", libs.androidx.room.compiler)
-  add("kspJvm", libs.androidx.room.compiler)
-  // add("kspJs", libs.androidx.room.compiler) // Room compiler support for JS might vary, check specific version support
+sqldelight {
+  databases {
+    create("AppDatabase") {
+      packageName.set("at.mocode.frontend.core.localdb")
+      generateAsync.set(true) // WICHTIG: Async-First für JS/Wasm Support
+    }
+  }
 }

@@ -1,27 +1,25 @@
 package at.mocode.core.utils
 
-import at.mocode.core.domain.model.ErrorCodes
-import at.mocode.core.domain.model.ErrorDto
-import at.mocode.core.domain.model.PagedResponse
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.statements.BatchInsertStatement
-import org.jetbrains.exposed.sql.transactions.transaction
-import java.sql.SQLException
-import java.sql.SQLTimeoutException
+// import at.mocode.core.domain.model.ErrorCodes
+// import at.mocode.core.domain.model.ErrorDto
+// import at.mocode.core.domain.model.PagedResponse
+// import org.jetbrains.exposed.sql.*
+// import org.jetbrains.exposed.sql.statements.BatchInsertStatement
+// import org.jetbrains.exposed.sql.transactions.transaction
+// import java.sql.SQLException
+// import java.sql.SQLTimeoutException
 
 /**
  * JVM-specific database utilities for the Core module.
  * Provides common database operations and configurations.
+ *
+ * DEPRECATED / DISABLED:
+ * This file contains Exposed-specific code which is not compatible with the KMP frontend.
+ * It has been commented out to allow the frontend build to succeed.
+ * If backend services need this, it should be moved to a backend-specific module (e.g. :backend:common).
  */
 
-/**
- * Executes a database operation in a transaction and returns a Result.
- * Provides specific error handling for different database-related exceptions.
- *
- * @param database Optional database to use (uses default if null)
- * @param block The transaction block to execute
- * @return A Result containing either the operation result or error information
- */
+/*
 inline fun <T> transactionResult(
   database: Database? = null,
   crossinline block: Transaction.() -> T
@@ -64,25 +62,16 @@ inline fun <T> transactionResult(
   }
 }
 
-/**
- * Executes a write database operation.
- */
 inline fun <T> writeTransaction(
   database: Database? = null,
   crossinline block: Transaction.() -> T
 ): Result<T> = transactionResult(database, block)
 
-/**
- * Executes a read database operation.
- */
 inline fun <T> readTransaction(
   database: Database? = null,
   crossinline block: Transaction.() -> T
 ): Result<T> = transactionResult(database, block)
 
-/**
- * Extension function for Query-Builder to add pagination.
- */
 fun Query.paginate(page: Int, size: Int): Query {
   require(page >= 0) { "Page number must be non-negative" }
   require(size > 0) { "Page size must be positive" }
@@ -90,15 +79,6 @@ fun Query.paginate(page: Int, size: Int): Query {
   return limit(size).offset(start = (page * size).toLong())
 }
 
-/**
- * Creates a PagedResponse from a Query.
- * Handles pagination efficiently and manages edge cases properly.
- *
- * @param page The requested page number (0-based)
- * @param size The requested page size
- * @param transform Function to transform each ResultRow to the target type
- * @return A PagedResponse containing the paginated and transformed data
- */
 fun <T> Query.toPagedResponse(
   page: Int,
   size: Int,
@@ -144,15 +124,8 @@ fun <T> Query.toPagedResponse(
   )
 }
 
-/**
- * Utility class for common database operations.
- */
 object DatabaseUtils {
 
-  /**
-   * Checks if a table exists.
-   * Uses a safe query approach to verify table existence.
-   */
   fun tableExists(tableName: String, database: Database? = null): Boolean {
     return try {
       transaction(database) {
@@ -168,9 +141,6 @@ object DatabaseUtils {
     }
   }
 
-  /**
-   * Creates an index if it doesn't exist.
-   */
   @JvmName("createIndexIfNotExistsArray")
   fun createIndexIfNotExists(
     tableName: String,
@@ -205,26 +175,17 @@ object DatabaseUtils {
     }
   }
 
-  /**
-   * Führt ein beliebiges SQL-Statement aus (DDL/DML). Liefert keinen Update-Count zurück.
-   */
   fun executeRawSql(sql: String, database: Database? = null): Result<Unit> = transactionResult(database) {
     exec(sql)
     Unit
   }
 
-  /**
-   * Executes a raw SQL update statement and returns affected rows.
-   */
   fun executeUpdate(sql: String, database: Database? = null): Result<Int> = transactionResult(database) {
     // Nutzt Exposed PreparedStatementApi, kein AutoCloseable
     val ps = this.connection.prepareStatement(sql, false)
     ps.executeUpdate()
   }
 
-  /**
-   * Helper function for batch inserts.
-   */
   inline fun <T> batchInsert(
     table: Table,
     data: Iterable<T>,
@@ -238,13 +199,6 @@ object DatabaseUtils {
   }
 }
 
-/**
- * Extension functions for ResultRow.
- */
-
-/**
- * Safely gets a value from a ResultRow.
- */
 fun <T> ResultRow.getOrNull(column: Column<T>): T? {
   return try {
     this[column]
@@ -253,10 +207,6 @@ fun <T> ResultRow.getOrNull(column: Column<T>): T? {
   }
 }
 
-/**
- * Converts a ResultRow to a Map.
- * Safely handles any exceptions during the conversion process.
- */
 fun ResultRow.toMap(): Map<String, Any?> {
   val result = mutableMapOf<String, Any?>()
   this.fieldIndex.forEach { (expression, _) ->
@@ -272,3 +222,4 @@ fun ResultRow.toMap(): Map<String, Any?> {
   }
   return result
 }
+*/

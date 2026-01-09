@@ -88,7 +88,6 @@ kotlin {
       implementation(libs.koin.compose.viewmodel)
 
       // Compose Multiplatform
-      // KORREKTUR: Verwendung der Plugin-Extension 'compose' statt hardcodierter Strings oder libs
       implementation(compose.runtime)
       implementation(compose.foundation)
       implementation(compose.material3)
@@ -96,25 +95,18 @@ kotlin {
       implementation(compose.components.resources)
       implementation(compose.materialIconsExtended)
 
-      // ViewModel lifecycle
-      implementation(libs.bundles.compose.common)
-
-      // Coroutines, Serialization, DateTime
-      // KORREKTUR: Explizite Auflistung statt Bundle, um Accessor-Probleme zu vermeiden
-      implementation(libs.kotlinx.coroutines.core)
-      implementation(libs.kotlinx.serialization.json)
-      implementation(libs.kotlinx.datetime)
+      // Bundles (Cleaned up dependencies)
+      implementation(libs.bundles.kmp.common)        // Coroutines, Serialization, DateTime
+      implementation(libs.bundles.compose.common)     // ViewModel & Lifecycle
     }
 
     jvmMain.dependencies {
       implementation(compose.desktop.currentOs)
       implementation(libs.kotlinx.coroutines.swing)
-      implementation(libs.kotlinx.coroutines.core)
       implementation(libs.koin.core)
     }
 
     jsMain.dependencies {
-      // KORREKTUR: compose.html.core statt libs.compose.html.core
       implementation(compose.html.core)
     }
 
@@ -124,12 +116,10 @@ kotlin {
       wasmJsMain.dependencies {
         implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
 
-        // ✅ HINZUFÜGEN: Compose für shared UI components für WASM
-        // KORREKTUR: Verwendung der Plugin-Extension
+        // Compose für shared UI components für WASM
         implementation(compose.runtime)
         implementation(compose.foundation)
         implementation(compose.material3)
-
       }
     }
 

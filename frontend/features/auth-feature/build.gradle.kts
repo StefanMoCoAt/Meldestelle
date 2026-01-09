@@ -45,45 +45,30 @@ kotlin {
       // Shared Konfig & Utilities (AppConfig + BuildConfig)
       implementation(projects.frontend.shared)
 
-      // Compose dependencies
-      //implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
-      implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
-      implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc02")
-      implementation("org.jetbrains.compose.material3:material3:1.9.0-beta03")
-      implementation("org.jetbrains.compose.ui:ui:1.10.0-rc02")
-      implementation("org.jetbrains.compose.components:components-resources:1.10.0-rc02")
-      implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
-
-      // Ktor client for HTTP calls
-      implementation(libs.ktor.client.core)
-      implementation(libs.ktor.client.contentNegotiation)
-      implementation(libs.ktor.client.serialization.kotlinx.json)
-      implementation(libs.ktor.client.logging)
-      implementation(libs.ktor.client.auth)
-
-      // DI
-      implementation(libs.koin.core)
-
       // Network core (provides apiClient + TokenProvider)
       implementation(projects.frontend.core.network)
 
-      // Coroutines and serialization
-      implementation(libs.kotlinx.coroutines.core)
-      implementation(libs.kotlinx.serialization.json)
+      // Compose dependencies (Core UI)
+      implementation(compose.runtime)
+      implementation(compose.foundation)
+      implementation(compose.material3)
+      implementation(compose.ui)
+      implementation(compose.components.resources)
+      implementation(compose.materialIconsExtended)
 
-      // DateTime for multiplatform time handling
-      implementation(libs.kotlinx.datetime)
+      // Bundles (Cleaned up dependencies)
+      implementation(libs.bundles.kmp.common)        // Coroutines, Serialization, DateTime
+      implementation(libs.bundles.ktor.client.common) // Ktor Client (Core, Auth, JSON, Logging)
+      implementation(libs.bundles.compose.common)     // ViewModel & Lifecycle
 
-      // ViewModel lifecycle
-      implementation(libs.androidx.lifecycle.viewmodelCompose)
-      implementation(libs.androidx.lifecycle.runtimeCompose)
-
+      // DI
+      implementation(libs.koin.core)
     }
 
     commonTest.dependencies {
       implementation(libs.kotlin.test)
       implementation(libs.kotlinx.coroutines.test)
-      implementation("io.ktor:ktor-client-mock:${libs.versions.ktor.get()}")
+      implementation(libs.ktor.client.mock)
     }
 
     jvmTest.dependencies {
@@ -98,10 +83,6 @@ kotlin {
 
     jsMain.dependencies {
       implementation(libs.ktor.client.js)
-      implementation(libs.ktor.client.auth)
-      implementation(libs.kotlinx.coroutines.core)
-      implementation(libs.kotlinx.serialization.json)
-      implementation(libs.kotlinx.datetime)
     }
 
     // WASM SourceSet, nur wenn aktiviert
@@ -110,12 +91,10 @@ kotlin {
       wasmJsMain.dependencies {
         implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
 
-        // ✅ HINZUFÜGEN: Compose für shared UI components für WASM
-        implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc02")
-        implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc02")
-        implementation("org.jetbrains.compose.material3:material3:1.9.0-beta03")
-
-
+        // Compose für shared UI components für WASM
+        implementation(compose.runtime)
+        implementation(compose.foundation)
+        implementation(compose.material3)
       }
     }
   }

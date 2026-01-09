@@ -1,42 +1,50 @@
 # This file is the SINGLE SOURCE OF TRUTH for all project dependencies.
-# It allows for centralized version management and ensures consistency.
+# Organized by Domain: Frontend (KMP) vs. Backend (Spring/JVM)
 # Last updated: 2026-01-08
 
 [versions]
-# --- Kotlin & Core ---
+# ==============================================================================
+# === FRONTEND & KMP CORE ===
+# ==============================================================================
+# Kotlin & Tooling
 kotlin = "2.3.0"
-# KSP version aligned with Kotlin 2.3.0 (Modern Scheme)
 ksp = "2.3.4"
-kotlinx = "1.10.2"
+
+# KotlinX (Core Libraries)
+kotlinx-coroutines = "1.10.2"
 kotlinx-serialization-json = "1.9.0"
 kotlinx-datetime = "0.7.1"
-kotlinx-coroutines = "1.10.2"
 
-# --- Spring Ecosystem ---
-# Spring Boot 3.5.x Linie (kompatibel zu Spring Framework 6.2)
-springBoot = "3.5.9"
-# Spring Cloud Release Train kompatibel zu Spring Boot 3.5.x → Northfields (2025.0.x)
-springCloud = "2025.0.1"
-springDependencyManagement = "1.1.7"
-springdoc = "3.0.0"
-
-# --- KMP & UI ---
-# Für Kotlin 2.3.0 erforderlich (R8/StackTrace Fixes, Wasm Reife)
+# UI: Compose Multiplatform
+# Aligned with Kotlin 2.3.0
 composeMultiplatform = "1.10.0-rc02"
 composeHotReload = "1.0.0"
 androidx-lifecycle = "2.9.6"
 uiDesktop = "1.7.0"
 
-# --- Ktor (API Layer & Client) ---
+# Network: Ktor (Client & Server)
 # Kotlin 2.3.0 Alignment + iOS SSE Fix
 ktor = "3.3.3"
 
-# --- DI ---
+# Dependency Injection
 koin = "4.1.1"
 koinCompose = "4.1.1"
 
-# --- Data & Persistence ---
-# Stabil für Kotlin 2.3.0
+# Local Persistence (Frontend)
+# Room removed in favor of SQLDelight for JS/Wasm support
+sqldelight = "2.2.1"
+sqlite = "2.6.2"
+
+# ==============================================================================
+# === BACKEND & INFRASTRUCTURE ===
+# ==============================================================================
+# Spring Ecosystem
+springBoot = "3.5.9"
+springCloud = "2025.0.1"
+springDependencyManagement = "1.1.7"
+springdoc = "3.0.0"
+
+# Server Persistence
 exposed = "1.0.0-rc-4"
 postgresql = "42.7.8"
 hikari = "7.0.2"
@@ -45,21 +53,28 @@ flyway = "11.19.1"
 redisson = "4.0.0"
 lettuce = "7.2.1.RELEASE"
 
-# Room & SQLite (KMP)
-room = "2.8.4"
-sqlite = "2.6.2"
-
-# --- Infrastructure & Observability ---
+# Observability
 micrometer = "1.16.1"
 micrometerTracing = "1.6.1"
 zipkin = "3.5.1"
 zipkinReporter = "3.5.1"
 resilience4j = "2.3.0"
+
+# Auth & Security
 auth0Jwt = "4.5.0"
 keycloakAdminClient = "26.0.7"
 
-# --- Testing ---
-# JUnit 5 (Jupiter) & JUnit Platform versions aligned with Gradle 9.x
+# Utilities
+bignum = "0.3.10"
+logback = "1.5.22"
+caffeine = "3.2.3"
+reactorKafka = "1.3.23"
+jackson = "3.0.3"
+jakartaAnnotation = "3.0.0"
+slf4j = "2.0.17"
+kotlin-logging = "7.0.13"
+
+# Testing
 junitJupiter = "5.11.3"
 junitPlatform = "1.11.3"
 mockk = "1.14.7"
@@ -70,38 +85,69 @@ testcontainersJunitJupiter = "1.21.4"
 testcontainersPostgresql = "1.21.4"
 testcontainersKafka = "1.21.4"
 
-# --- Utilities ---
-bignum = "0.3.10"
-logback = "1.5.22"
-caffeine = "3.2.3"
-reactorKafka = "1.3.23"
-jackson = "3.0.3"
-jakartaAnnotation = "3.0.0"
-slf4j = "2.0.17"
-kotlin-logging = "7.0.13"
-
-# --- Gradle Plugins ---
+# Gradle Plugins
 foojayResolver = "1.0.0"
 
 [libraries]
-# === BOMs (Bill of Materials) ===
-kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
-kotlinx-coroutines-bom = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "kotlinx" }
-spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
-spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "springCloud" }
-
-# === Kotlin Core ===
+# ==============================================================================
+# === FRONTEND: KOTLIN MULTIPLATFORM CORE ===
+# ==============================================================================
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing",version.ref = "kotlinx-coroutines"  } # Version from BOM
-kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor",version.ref = "kotlinx-coroutines"  } # Version from BOM
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+# ==============================================================================
+# === FRONTEND: COMPOSE UI ===
+# ==============================================================================
+# Note: Core Compose libraries (runtime, foundation, material3) are usually added via the
+# 'compose' Gradle plugin extension (e.g. implementation(compose.runtime)).
+# These entries are for specific additional artifacts.
 
-# === Spring Boot & Cloud ===
+androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
+androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+ui-desktop = { module = "androidx.compose.ui:ui-desktop", version.ref = "uiDesktop" }
+
+# ==============================================================================
+# === FRONTEND: NETWORK (KTOR CLIENT) ===
+# ==============================================================================
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+
+# Engines
+ktor-client-cio = { module = "io.ktor:ktor-client-cio-jvm", version.ref = "ktor" } # JVM/Desktop
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }       # JS/Wasm
+
+# ==============================================================================
+# === FRONTEND: DEPENDENCY INJECTION (KOIN) ===
+# ==============================================================================
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinCompose" }
+
+# ==============================================================================
+# === FRONTEND: LOCAL PERSISTENCE (SQLDelight) ===
+# ==============================================================================
+sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
+sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
+sqldelight-driver-sqlite = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" } # JVM
+sqldelight-driver-web = { module = "app.cash.sqldelight:web-worker-driver", version.ref = "sqldelight" } # JS/Wasm
+
+# ==============================================================================
+# === BACKEND: SPRING BOOT & CLOUD ===
+# ==============================================================================
+spring-boot-dependencies = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
+spring-cloud-dependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "springCloud" }
+
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
@@ -127,7 +173,9 @@ spring-cloud-starter-gateway-server-webflux = { module = "org.springframework.cl
 spring-cloud-starter-consul-discovery = { module = "org.springframework.cloud:spring-cloud-starter-consul-discovery" }
 spring-cloud-starter-circuitbreaker-resilience4j = { module = "org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j" }
 
-# === Ktor Server ===
+# ==============================================================================
+# === BACKEND: KTOR SERVER ===
+# ==============================================================================
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
 ktor-server-contentNegotiation = { module = "io.ktor:ktor-server-content-negotiation-jvm", version.ref = "ktor" }
@@ -145,27 +193,9 @@ ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "k
 ktor-server-tests = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor" }
 ktor-server-testHost = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
 
-# === Ktor Client ===
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
-ktor-client-cio = { module = "io.ktor:ktor-client-cio-jvm", version.ref = "ktor" }
-ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
-ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
-ktor-client-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
-ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
-ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
-ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
-
-# === Koin (DI) ===
-koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
-koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinCompose" }
-koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinCompose" }
-
-# === Compose UI ===
-androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
-androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
-ui-desktop = { module = "androidx.compose.ui:ui-desktop", version.ref = "uiDesktop" }
-
-# === Persistence (DB & Cache) ===
+# ==============================================================================
+# === BACKEND: PERSISTENCE & INFRA ===
+# ==============================================================================
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
@@ -180,13 +210,6 @@ flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql", versio
 redisson = { module = "org.redisson:redisson", version.ref = "redisson" }
 lettuce-core = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
 
-# --- Room & SQLite (KMP) ---
-androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-androidx-room-sqlite-wrapper = { module = "androidx.room:room-sqlite-wrapper", version.ref = "room" }
-
-# === Observability & Resilience ===
 micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 micrometer-tracing-bridge-brave = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometerTracing" }
 zipkin-reporter-brave = { module = "io.zipkin.reporter2:zipkin-reporter-brave", version.ref = "zipkinReporter" }
@@ -196,11 +219,12 @@ zipkin-server = { module = "io.zipkin:zipkin-server", version.ref = "zipkin" }
 resilience4j-spring-boot3 = { module = "io.github.resilience4j:resilience4j-spring-boot3", version.ref = "resilience4j" }
 resilience4j-reactor = { module = "io.github.resilience4j:resilience4j-reactor", version.ref = "resilience4j" }
 
-# === Authentication ===
 auth0-java-jwt = { module = "com.auth0:java-jwt", version.ref = "auth0Jwt" }
 keycloak-admin-client = { module = "org.keycloak:keycloak-admin-client", version.ref = "keycloakAdminClient" }
 
-# === Utilities ===
+# ==============================================================================
+# === SHARED UTILITIES & TESTING ===
+# ==============================================================================
 bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "bignum" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
@@ -212,7 +236,6 @@ jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-
 jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakartaAnnotation" }
 
-# === Testing ===
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junitJupiter" }
@@ -225,20 +248,35 @@ testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", ve
 testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainersPostgresql" }
 testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainersKafka" }
 testcontainers-keycloak = { module = "com.github.dasniko:testcontainers-keycloak", version.ref = "testcontainersKeycloak" }
-room-common-jvm = { module = "androidx.room:room-common-jvm", version.ref = "room" }
 
-# --- Added Bundles ---
-# jackson-kotlin = [
-#     "jackson-module-kotlin",
-#     "jackson-datatype-jsr310"
-# ]
-
-# resilience = [
-#     "resilience4j-spring-boot3",
-#     "resilience4j-reactor"
-# ]
+# BOMs
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlinx-coroutines-bom = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-bom", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "kotlinx-coroutines" }
 
 [bundles]
+# === FRONTEND BUNDLES ===
+# Use these in commonMain to reduce boilerplate
+kmp-common = [
+    "kotlinx-coroutines-core",
+    "kotlinx-serialization-json",
+    "kotlinx-datetime"
+]
+
+ktor-client-common = [
+    "ktor-client-core",
+    "ktor-client-contentNegotiation",
+    "ktor-client-serialization-kotlinx-json",
+    "ktor-client-auth",
+    "ktor-client-logging"
+]
+
+compose-common = [
+    "androidx-lifecycle-viewmodelCompose",
+    "androidx-lifecycle-runtimeCompose"
+]
+
+# === BACKEND BUNDLES ===
 testing-jvm = [
     "junit-jupiter-api",
     "junit-jupiter-engine",
@@ -266,10 +304,6 @@ database-complete = [
     "hikari-cp",
     "flyway-core",
     "flyway-postgresql"
-]
-compose-common = [
-    "androidx-lifecycle-viewmodelCompose",
-    "androidx-lifecycle-runtimeCompose"
 ]
 redis-cache = [
     "spring-boot-starter-data-redis",
@@ -328,7 +362,7 @@ spring-dependencyManagement = { id = "io.spring.dependency-management", version.
 ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
 
 # --- Persistence ---
-androidx-room = { id = "androidx.room", version.ref = "room" }
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 
 # --- Tools ---
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "foojayResolver" }

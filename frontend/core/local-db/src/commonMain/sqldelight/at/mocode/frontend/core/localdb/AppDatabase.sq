@@ -1,0 +1,17 @@
+CREATE TABLE Task (
+  id TEXT NOT NULL PRIMARY KEY,
+  content TEXT NOT NULL,
+  is_completed INTEGER NOT NULL DEFAULT 0
+);
+
+selectAll:
+SELECT *
+FROM Task;
+
+insert:
+INSERT INTO Task(id, content, is_completed)
+VALUES ?;
+
+delete:
+DELETE FROM Task
+WHERE id = ?;
