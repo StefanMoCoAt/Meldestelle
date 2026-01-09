@@ -7,7 +7,6 @@ plugins {
 
 kotlin {
   // Toolchain is now handled centrally in the root build.gradle.kts
-  val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
   jvm()
   js(IR) {
@@ -15,12 +14,10 @@ kotlin {
 //        nodejs()
   }
 
-  // WASM, nur wenn explizit aktiviert
-  if (enableWasm) {
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs {
-      browser()
-    }
+  // WASM enabled by default
+  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+  wasmJs {
+    browser()
   }
 
   sourceSets {

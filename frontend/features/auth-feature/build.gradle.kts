@@ -17,7 +17,6 @@ version = "1.0.0"
 
 kotlin {
   // Toolchain is now handled centrally in the root build.gradle.kts
-  val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
   jvm()
 
@@ -29,12 +28,10 @@ kotlin {
     }
   }
 
-  // WASM, nur wenn explizit aktiviert
-  if (enableWasm) {
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs {
-      browser()
-    }
+  // Wasm enabled by default
+  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+  wasmJs {
+    browser()
   }
 
   sourceSets {
@@ -85,17 +82,14 @@ kotlin {
       implementation(libs.ktor.client.js)
     }
 
-    // WASM SourceSet, nur wenn aktiviert
-    if (enableWasm) {
-      val wasmJsMain = getByName("wasmJsMain")
-      wasmJsMain.dependencies {
-        implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
+    val wasmJsMain = getByName("wasmJsMain")
+    wasmJsMain.dependencies {
+      implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
 
-        // Compose für shared UI components für WASM
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
-      }
+      // Compose für shared UI components für WASM
+      implementation(compose.runtime)
+      implementation(compose.foundation)
+      implementation(compose.material3)
     }
   }
 }

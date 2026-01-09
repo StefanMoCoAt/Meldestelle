@@ -20,6 +20,12 @@ kotlin {
     }
   }
 
+  // Wasm support enabled?
+  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+  wasmJs {
+      browser()
+  }
+
   sourceSets {
     // Opt-in to experimental Kotlin UUID API across all source sets
     all {

@@ -52,12 +52,14 @@ Technologien & Standards:
 - Architektur: Domain-Driven Design (DDD). Halte Domänenlogik rein und getrennt von Infrastruktur.
 - Testing: JUnit 5, MockK, Testcontainers (Postgres, Keycloak).
 - API: REST, OpenAPI (SpringDoc).
+- **Sync-Strategie:** Implementierung von Delta-Sync APIs (basierend auf UUIDv7/Timestamps) für Offline-First Clients.
 
 Regeln:
 1. Nutze `val` und Immutability wo immer möglich.
 2. Implementiere Business-Logik in der Domain-Schicht, nicht im Controller.
 3. Nutze Testcontainers für Integrationstests.
 4. Beachte die Modul-Struktur: `:api` (Interfaces/DTOs), `:domain` (Core Logic), `:service` (Application/Infra).
+5. **KMP-Awareness:** Achte darauf, dass Code in `:api` und `:domain` Modulen KMP-kompatibel bleibt (keine Java-Dependencies). Nutze für JVM-spezifische Logik (z.B. Exposed) dedizierte Infrastruktur-Module.
 ```
 
 ---

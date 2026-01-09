@@ -10,7 +10,6 @@ plugins {
 
 kotlin {
   // Toolchain is now handled centrally in the root build.gradle.kts
-  val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
   jvm()
   js {
@@ -19,10 +18,9 @@ kotlin {
     }
   }
 
-  if (enableWasm) {
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-  }
+  // Wasm enabled by default
+  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+  wasmJs { browser() }
 
   sourceSets {
     commonMain.dependencies {
@@ -52,11 +50,9 @@ kotlin {
       implementation(libs.ktor.client.js)
     }
 
-    if (enableWasm) {
-      val wasmJsMain = getByName("wasmJsMain")
-      wasmJsMain.dependencies {
-        implementation(libs.ktor.client.js)
-      }
+    val wasmJsMain = getByName("wasmJsMain")
+    wasmJsMain.dependencies {
+      implementation(libs.ktor.client.js)
     }
   }
 }

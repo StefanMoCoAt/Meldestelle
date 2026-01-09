@@ -18,7 +18,6 @@ plugins {
 
 kotlin {
   // Toolchain is now handled centrally in the root build.gradle.kts
-  val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
 
   // JVM Target für Desktop
   jvm {
@@ -62,13 +61,11 @@ kotlin {
     binaries.executable()
   }
 
-  // WASM, nur wenn explizit aktiviert
-  if (enableWasm) {
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs {
-      browser()
-      binaries.executable()
-    }
+  // Wasm enabled by default
+  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+  wasmJs {
+    browser()
+    binaries.executable()
   }
 
   sourceSets {
@@ -110,17 +107,14 @@ kotlin {
       implementation(compose.html.core)
     }
 
-    // WASM SourceSet, nur wenn aktiviert
-    if (enableWasm) {
-      val wasmJsMain = getByName("wasmJsMain")
-      wasmJsMain.dependencies {
-        implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
+    val wasmJsMain = getByName("wasmJsMain")
+    wasmJsMain.dependencies {
+      implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
 
-        // Compose für shared UI components für WASM
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
-      }
+      // Compose für shared UI components für WASM
+      implementation(compose.runtime)
+      implementation(compose.foundation)
+      implementation(compose.material3)
     }
 
     commonTest.dependencies {

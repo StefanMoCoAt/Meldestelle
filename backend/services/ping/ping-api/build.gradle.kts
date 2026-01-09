@@ -9,8 +9,6 @@ version = "1.0.0"
 kotlin {
     // Toolchain is now handled centrally in the root build.gradle.kts
 
-    val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
-
     // JVM target for backend usage
     jvm()
 
@@ -20,12 +18,10 @@ kotlin {
         // no need for binaries.executable() in a library
     }
 
-    // Optional Wasm target for browser clients
-    if (enableWasm) {
-        @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-        wasmJs {
-            browser()
-        }
+    // Wasm enabled by default
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
     }
 
     sourceSets {

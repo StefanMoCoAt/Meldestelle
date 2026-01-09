@@ -1,121 +1,79 @@
-@file:OptIn(ExperimentalKotlinGradlePluginApi::class, ExperimentalWasmDsl::class)
-
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinJsCompile
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-/**
- * Shared Module: Gemeinsame Libraries und Utilities für alle Client-Features
- * KEINE EXECUTABLE - ist eine Library für andere Module
- */
 plugins {
-  alias(libs.plugins.kotlinMultiplatform)
-  alias(libs.plugins.kotlinSerialization)
-  alias(libs.plugins.composeMultiplatform)
-  alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
-  // Toolchain is now handled centrally in the root build.gradle.kts
-  val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
+    jvm("desktop")
 
-  // JVM Target für Desktop
-  jvm()
-
-  // JavaScript Target für Web
-  js {
-    browser {
-      testTask {
-        enabled = false
-      }
-    }
-    // ...
-  }
-
-  // WASM, nur wenn explizit aktiviert
-  if (enableWasm) {
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs { browser() }
-  }
-
-  sourceSets {
-    commonMain.dependencies {
-
-      api(projects.core.coreUtils)
-      api(projects.core.coreDomain)
-      api(project(":frontend:core:domain"))
-
-      // Kotlinx core dependencies (coroutines, serialization, datetime)
-      // KORREKTUR: Zugriff auf Bundle korrigiert.
-      // In libs.versions.toml: [bundles] kotlinx-core = [...]
-      // Gradle Accessor: libs.bundles.kotlinx.core
-      // Falls das fehlschlägt, listen wir die Libs einzeln auf, um den Build zu fixen.
-      implementation(libs.kotlinx.coroutines.core)
-      implementation(libs.kotlinx.serialization.json)
-      implementation(libs.kotlinx.datetime)
-
-      // HTTP Client
-      implementation(libs.ktor.client.core)
-      implementation(libs.ktor.client.contentNegotiation)
-      implementation(libs.ktor.client.serialization.kotlinx.json)
-      implementation(libs.ktor.client.logging)
-      implementation(libs.ktor.client.auth)
-
-      // Dependency Injection (Koin)
-      implementation(libs.koin.core)
-      implementation(libs.koin.compose)
-      implementation(libs.koin.compose.viewmodel)
-
-      // Network module (provides DI `apiClient`)
-      implementation(projects.frontend.core.network)
-
-      // Compose für shared UI components (common)
-      implementation(compose.runtime)
-      implementation(compose.foundation)
-      implementation(compose.material3)
+    js(IR) {
+        browser()
+        binaries.executable()
     }
 
-    commonTest.dependencies {
-      implementation(libs.kotlin.test)
-      implementation(libs.kotlinx.coroutines.test)
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+        binaries.executable()
     }
 
-    jvmMain.dependencies {
-      implementation(libs.ktor.client.cio)
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(projects.frontend.core.domain)
+                // implementation(projects.frontend.core.designSystem) // REMOVED: Circular dependency
+                implementation(projects.frontend.core.navigation)
+                implementation(projects.frontend.core.network)
+                implementation(projects.frontend.core.localDb)
+
+                // Features - REMOVED: Circular dependency. Shared should NOT depend on features.
+                // implementation(projects.frontend.features.authFeature)
+                // implementation(projects.frontend.features.pingFeature)
+
+                // KMP Bundles
+                implementation(libs.bundles.kmp.common)
+                implementation(libs.bundles.compose.common)
+
+                // Compose
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.components.resources)
+                implementation(compose.components.uiToolingPreview)
+
+                // Koin
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose)
+                implementation(libs.koin.compose.viewmodel)
+            }
+        }
+
+        commonTest {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
+
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotlinx.coroutines.swing)
+            }
+        }
+
+        val jsMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
+        }
+
+        val wasmJsMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
+        }
     }
-
-    jsMain.dependencies {
-      implementation(libs.ktor.client.js)
-    }
-
-    // WASM SourceSet, nur wenn aktiviert
-    if (enableWasm) {
-      val wasmJsMain = getByName("wasmJsMain")
-      wasmJsMain.dependencies {
-        implementation(libs.ktor.client.js) // WASM verwendet JS-Clients
-        implementation(compose.runtime)
-        implementation(compose.foundation)
-        implementation(compose.material3)
-
-      }
-    }
-  }
-}
-
-// KMP Compile-Optionen
-tasks.withType<KotlinCompile> {
-  compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_25)
-    freeCompilerArgs.addAll(
-      "-opt-in=kotlin.RequiresOptIn"
-    )
-  }
-}
-
-tasks.withType<KotlinJsCompile>().configureEach {
-  compilerOptions {
-    target = "es2015"
-  }
 }

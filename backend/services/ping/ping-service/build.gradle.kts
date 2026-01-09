@@ -16,22 +16,21 @@ dependencies {
     // === Project Dependencies ===
     implementation(projects.backend.services.ping.pingApi)
     implementation(projects.platform.platformDependencies)
+    // NEU: Zugriff auf die verschobenen DatabaseUtils
+    implementation(projects.backend.infrastructure.persistence)
 
     // === Spring Boot & Cloud ===
     implementation(libs.bundles.spring.boot.service.complete)
     // WICHTIG: Da wir JPA (blockierend) nutzen, brauchen wir Spring MVC (nicht WebFlux)
     implementation(libs.spring.boot.starter.web)
 
-    // KORREKTUR: Bundle aufgelöst, da Accessor fehlschlägt
-    // libs.bundles.spring.cloud.gateway -> spring-cloud-gateway
-    implementation(libs.spring.cloud.starter.gateway.server.webflux)
+    // Service Discovery
     implementation(libs.spring.cloud.starter.consul.discovery)
 
     // === Database & Persistence ===
     implementation(libs.bundles.database.complete)
 
     // === Resilience ===
-    // KORREKTUR: Bundle aufgelöst
     implementation(libs.resilience4j.spring.boot3)
     implementation(libs.resilience4j.reactor)
     implementation(libs.spring.boot.starter.aop)

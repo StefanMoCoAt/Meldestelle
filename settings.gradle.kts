@@ -52,6 +52,9 @@ include(":backend:infrastructure:messaging:messaging-config")
 include(":backend:infrastructure:monitoring:monitoring-client")
 include(":backend:infrastructure:monitoring:monitoring-server")
 
+// --- PERSISTENCE ---
+include(":backend:infrastructure:persistence")
+
 // === BACKEND - SERVICES ===
 // --- ENTRIES (Nennungen) ---
 include(":backend:services:entries:entries-api")
