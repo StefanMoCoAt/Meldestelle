@@ -13,11 +13,14 @@ kotlin {
         binaries.executable()
     }
 
+    // Wasm vorerst deaktiviert
+    /*
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
         browser()
         binaries.executable()
     }
+    */
 
     sourceSets {
         commonMain {
@@ -70,10 +73,12 @@ kotlin {
             }
         }
 
+        /*
         val wasmJsMain by getting {
             dependencies {
                 implementation(libs.ktor.client.js)
             }
         }
+        */
     }
 }

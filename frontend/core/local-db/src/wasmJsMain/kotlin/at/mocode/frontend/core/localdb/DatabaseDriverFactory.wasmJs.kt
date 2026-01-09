@@ -1,5 +1,6 @@
 package at.mocode.frontend.core.localdb
 
+/*
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import org.w3c.dom.Worker
@@ -25,3 +26,4 @@ actual class DatabaseDriverFactory {
 // We must return a type that Wasm understands as an external JS reference.
 // 'Worker' from org.w3c.dom is correct, but we need to ensure the stdlib is available.
 private fun createWorker(): Worker = js("new Worker(new URL('sqlite.worker.js', import.meta.url))")
+*/

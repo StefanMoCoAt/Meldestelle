@@ -21,9 +21,11 @@ kotlin {
     }
   }
 
-  // Always enable Wasm to match the rest of the KMP stack
+  // Wasm vorerst deaktiviert
+  /*
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
   wasmJs { browser() }
+  */
 
   sourceSets {
     commonMain.dependencies {

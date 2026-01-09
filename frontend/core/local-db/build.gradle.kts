@@ -16,13 +16,16 @@ kotlin {
     browser {
       testTask { enabled = false }
     }
+    binaries.executable()
   }
 
-  // Wasm enabled by default
+  // Wasm vorerst deaktiviert, um Stabilität mit JS zu gewährleisten
+  /*
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
   wasmJs {
     browser()
   }
+  */
 
   sourceSets {
     commonMain.dependencies {
@@ -40,10 +43,12 @@ kotlin {
       implementation(libs.sqldelight.driver.web)
     }
 
+    /*
     val wasmJsMain = getByName("wasmJsMain")
     wasmJsMain.dependencies {
       implementation(libs.sqldelight.driver.web)
     }
+    */
 
     commonTest.dependencies {
       implementation(libs.kotlin.test)
@@ -55,7 +60,7 @@ sqldelight {
   databases {
     create("AppDatabase") {
       packageName.set("at.mocode.frontend.core.localdb")
-      generateAsync.set(true) // WICHTIG: Async-First für JS/Wasm Support
+      generateAsync.set(true) // WICHTIG: Async-First für JS Support
     }
   }
 }

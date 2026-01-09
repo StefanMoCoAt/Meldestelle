@@ -14,11 +14,13 @@ kotlin {
 //        nodejs()
   }
 
-  // WASM enabled by default
+  // Wasm vorerst deaktiviert
+  /*
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
   wasmJs {
     browser()
   }
+  */
 
   sourceSets {
     commonMain.dependencies {

@@ -61,12 +61,14 @@ kotlin {
     binaries.executable()
   }
 
-  // Wasm enabled by default
+  // Wasm vorerst deaktiviert
+  /*
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
   wasmJs {
     browser()
     binaries.executable()
   }
+  */
 
   sourceSets {
     commonMain.dependencies {
@@ -107,6 +109,7 @@ kotlin {
       implementation(compose.html.core)
     }
 
+    /*
     val wasmJsMain = getByName("wasmJsMain")
     wasmJsMain.dependencies {
       implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
@@ -116,6 +119,7 @@ kotlin {
       implementation(compose.foundation)
       implementation(compose.material3)
     }
+    */
 
     commonTest.dependencies {
       implementation(libs.kotlin.test)
