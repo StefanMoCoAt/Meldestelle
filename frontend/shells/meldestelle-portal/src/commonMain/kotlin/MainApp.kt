@@ -8,7 +8,7 @@ import androidx.compose.runtime.collectAsState
 import at.mocode.clients.shared.navigation.AppScreen
 import at.mocode.clients.authfeature.AuthTokenManager
 import at.mocode.clients.pingfeature.PingScreen
-import at.mocode.clients.pingfeature.PingViewModel
+import at.mocode.ping.feature.presentation.PingViewModel
 import at.mocode.shared.core.AppConstants
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -34,7 +34,8 @@ fun MainApp() {
       // Resolve AuthTokenManager from Koin
       val authTokenManager = koinInject<AuthTokenManager>()
       val authApiClient = koinInject<AuthApiClient>()
-      val pingViewModel = remember { PingViewModel() }
+      // Delta-Sync blueprint: resolve the Ping feature view model via Koin.
+      val pingViewModel: PingViewModel = koinViewModel()
       val scope = rememberCoroutineScope()
 
       // Handle PKCE callback on an app load (web)

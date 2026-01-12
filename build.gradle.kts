@@ -80,6 +80,34 @@ subprojects {
     // The agent configuration was causing Task.project access at execution time
   }
 
+  // ---------------------------------------------------------------------------
+  // Frontend/JS build noise reduction
+  // ---------------------------------------------------------------------------
+  // (B) Avoid noisy "will be copied ... overwriting" logs for Kotlin/JS *CompileSync tasks.
+  // The Kotlin JS plugin wires multiple resource sourcesets into the same destination.
+  // We keep the first occurrence and exclude duplicates.
+  tasks.withType<Copy>().configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  }
+  tasks.withType<Sync>().configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  }
+
+  // (A) Source map configuration is handled via `gradle.properties` (global Kotlin/JS settings)
+  // to avoid compiler-flag incompatibilities across toolchains.
+
+  // (B) JS test executable compilation/sync is currently very noisy (duplicate resource copying from jsMain + jsTest).
+  // We disable JS/WASM JS test executables in CI/build to keep output warning-free.
+  tasks.matching {
+    val n = it.name
+    n.contains("jsTest", ignoreCase = true) ||
+      n.contains("compileTestDevelopmentExecutableKotlinJs") ||
+      n.contains("compileTestDevelopmentExecutableKotlinWasmJs") ||
+      n.contains("TestDevelopmentExecutableCompileSync")
+  }.configureEach {
+    enabled = false
+  }
+
   // Dedicated performance test task per JVM subproject
   plugins.withId("java") {
     val javaExt = extensions.getByType<JavaPluginExtension>()

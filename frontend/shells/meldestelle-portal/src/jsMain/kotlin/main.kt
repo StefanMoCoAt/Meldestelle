@@ -7,11 +7,20 @@ import at.mocode.frontend.core.network.networkModule
 import at.mocode.clients.authfeature.di.authFeatureModule
 import at.mocode.frontend.core.localdb.localDbModule
 import at.mocode.frontend.core.localdb.DatabaseProvider
+import at.mocode.frontend.core.localdb.AppDatabase
+import at.mocode.frontend.core.sync.di.syncModule
+import at.mocode.ping.feature.di.pingFeatureModule
 import navigation.navigationModule
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.core.context.GlobalContext
+import org.koin.core.context.GlobalContext.get
 import org.koin.core.qualifier.named
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.Koin
+import org.koin.core.context.loadKoinModules
+import org.koin.dsl.module
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -21,7 +30,7 @@ fun main() {
   console.log("[WebApp] main() entered")
   // Initialize DI (Koin) with shared modules + network + local DB modules
   try {
-    initKoin { modules(networkModule, localDbModule, authFeatureModule, navigationModule) }
+    initKoin { modules(networkModule, localDbModule, syncModule, pingFeatureModule, authFeatureModule, navigationModule) }
     console.log("[WebApp] Koin initialized with networkModule + localDbModule + authFeatureModule + navigationModule")
   } catch (e: dynamic) {
     console.warn("[WebApp] Koin initialization warning:", e)
@@ -47,6 +56,15 @@ fun main() {
     MainScope().launch {
       try {
         val db = provider.createDatabase()
+        // Register the created DB instance into Koin so feature repositories can use it.
+        // This is the central place where we bridge the async DB creation into the DI graph.
+        // Inject the created DB instance into Koin.
+        // We register a one-off module that provides this concrete instance.
+        loadKoinModules(
+          module {
+            single<AppDatabase> { db }
+          }
+        )
         console.log("[WebApp] Local DB created:", jsTypeOf(db))
       } catch (e: dynamic) {
         console.warn("[WebApp] Local DB smoke failed:", e?.message ?: e)

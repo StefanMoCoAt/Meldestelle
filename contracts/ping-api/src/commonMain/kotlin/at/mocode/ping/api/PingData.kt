@@ -1,5 +1,6 @@
 package at.mocode.ping.api
 
+import at.mocode.core.sync.Syncable
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,3 +22,15 @@ data class HealthResponse(
     val service: String,
     val healthy: Boolean
 )
+
+/**
+ * Sync-Contract: Ping Event für Delta-Sync.
+ */
+@Serializable
+data class PingEvent(
+  // Using a String for the ID to be compatible with UUIDs from the backend.
+  override val id: String,
+  val message: String,
+  // Using a Long for the timestamp, which can be derived from a UUIDv7.
+  override val lastModified: Long
+) : Syncable

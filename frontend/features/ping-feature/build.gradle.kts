@@ -47,6 +47,15 @@ kotlin {
       // Shared Konfig & Utilities
       implementation(projects.frontend.shared)
 
+      // Generic Delta-Sync core
+      implementation(projects.frontend.core.sync)
+
+      // Local DB (SQLDelight)
+      implementation(projects.frontend.core.localDb)
+
+      // Shared sync contract base (Syncable)
+      implementation(projects.core.coreDomain)
+
       // Compose dependencies
       implementation(compose.foundation)
       implementation(compose.runtime)

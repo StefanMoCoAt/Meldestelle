@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+@file:Suppress("DEPRECATION")
 
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
@@ -78,6 +79,7 @@ kotlin {
       implementation(projects.frontend.core.designSystem)
       implementation(projects.frontend.core.navigation)
       implementation(projects.frontend.core.network)
+      implementation(projects.frontend.core.sync)
       implementation(project(":frontend:core:local-db"))
       implementation(projects.frontend.features.authFeature)
       implementation(projects.frontend.features.pingFeature)
@@ -143,10 +145,12 @@ val copySqliteWorkerJs by tasks.registering(Copy::class) {
   from(localDb.layout.buildDirectory.file("processedResources/js/main/sqlite.worker.js"))
 
   // Root build directory where Kotlin JS packages are assembled.
-  into(rootProject.layout.buildDirectory.dir("js/packages/${rootProject.name}-frontend-shells-meldestelle-portal/kotlin"))
+  // Use a concrete path (instead of a Provider) so the Copy task always materializes the directory.
+  into(rootProject.layout.buildDirectory.asFile.get().resolve("js/packages/${rootProject.name}-frontend-shells-meldestelle-portal/kotlin"))
 }
 
-tasks.matching { it.name == "jsBrowserProductionWebpack" }.configureEach {
+// Ensure the worker is present for the production bundle.
+tasks.named("jsBrowserProductionWebpack") {
   dependsOn(copySqliteWorkerJs)
 }
 
@@ -162,6 +166,14 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     )
   }
 }
+
+// ---------------------------------------------------------------------------
+// Kotlin/JS source maps
+// ---------------------------------------------------------------------------
+// Production source maps must remain enabled for browser debugging.
+// The remaining Kotlin/Gradle message
+// `Cannot rewrite paths in JavaScript source maps: Too many sources or format is not supported`
+// is treated as an external Kotlin/JS toolchain limitation and is documented separately.
 
 // Configure a duplicate handling strategy for distribution tasks
 tasks.withType<Tar> {

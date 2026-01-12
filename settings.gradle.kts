@@ -131,6 +131,7 @@ include(":frontend:core:design-system")
 include(":frontend:core:navigation")
 include(":frontend:core:network")
 include(":frontend:core:local-db")
+include(":frontend:core:sync")
 
 // --- FEATURES ---
 include(":frontend:features:auth-feature")

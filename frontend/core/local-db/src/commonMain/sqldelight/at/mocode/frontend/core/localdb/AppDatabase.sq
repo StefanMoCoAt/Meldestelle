@@ -4,6 +4,14 @@ CREATE TABLE Task (
   is_completed INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE TABLE PingEvent (
+  -- UUIDv7 as String (cursor-friendly and backend-compatible)
+  id TEXT NOT NULL PRIMARY KEY,
+  message TEXT NOT NULL,
+  -- Derived from UUIDv7 timestamp (epoch millis) for sorting/display
+  last_modified INTEGER NOT NULL
+);
+
 selectAll:
 SELECT *
 FROM Task;
@@ -15,3 +23,26 @@ VALUES ?;
 delete:
 DELETE FROM Task
 WHERE id = ?;
+
+selectPingEventsSince:
+SELECT *
+FROM PingEvent
+WHERE id > ?
+ORDER BY id;
+
+selectLatestPingEventId:
+SELECT id
+FROM PingEvent
+ORDER BY id DESC
+LIMIT 1;
+
+upsertPingEvents:
+-- SQLite dialect configured for this project is 3.18 (no UPSERT support).
+-- Use INSERT OR REPLACE as pragmatic upsert.
+INSERT OR REPLACE INTO PingEvent(id, message, last_modified)
+VALUES ?;
+
+upsertPingEvent:
+-- Single-row convenience upsert (used by repositories).
+INSERT OR REPLACE INTO PingEvent(id, message, last_modified)
+VALUES (?, ?, ?);
