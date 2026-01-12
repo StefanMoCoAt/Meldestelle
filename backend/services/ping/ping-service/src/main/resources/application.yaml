@@ -42,17 +42,6 @@ spring:
         health-check-interval: 10s
         instance-id: ${spring.application.name}-${server.port}-${random.uuid}
 
-# CORS-Konfiguration ausgelagert aus dem Code
-web:
-  cors:
-    mappings:
-      "/**":
-        allowed-origin-patterns: "http://localhost:*,http://127.0.0.1:*"
-        allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
-        allowed-headers: "*"
-        allow-credentials: true
-        max-age: 3600
-
 management:
   endpoints:
     web:

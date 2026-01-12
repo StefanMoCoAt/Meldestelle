@@ -7,6 +7,19 @@ spring:
       - org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origin-patterns: "http://localhost:*,http://127.0.0.1:*"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
       httpclient:
         connect-timeout: 3000
         response-timeout: 5s

@@ -17,11 +17,11 @@ wiederverwendbare Vorlage zu schaffen.
 
 1. Modulstruktur anlegen
 
-Bitte lege die folgende Modulstruktur unter backend/services/ping an. Beachte die neue, klarere Benennung des
+Bitte lege die folgende Modulstruktur an. Beachte die neue, klarere Benennung des
 Implementierungsmoduls:
 
-- `:backend:services:ping:ping-api`: Enthält die KMP-kompatiblen DTOs.
-- `:backend:services:ping:ping-infrastructure`: Enthält die Spring Boot Anwendung, Controller und Konfiguration.
+- `:contracts:ping-api`: Enthält die KMP-kompatiblen DTOs.
+- `:backend:services:ping:ping-service`: Enthält die Spring Boot Anwendung, Controller und Konfiguration.
 
 Stelle sicher, dass die Module in der `settings.gradle.kts` registriert sind.
 
@@ -29,9 +29,9 @@ Stelle sicher, dass die Module in der `settings.gradle.kts` registriert sind.
   include(
   ":platform:platform-bom",
   ":platform:platform-testing",
-  ":backend:services:ping:ping-api",
-  ":backend:services:ping:ping-infrastructure",
-  ":backend:gateway",
+  ":contracts:ping-api",
+  ":backend:services:ping:ping-service",
+  ":backend:infrastructure:gateway",
   // ":backend:services:registry:registry-api",
   // ":backend:services:registry:registry-domain",
   ```
@@ -56,7 +56,7 @@ JVM-spezifischen Abhängigkeiten** enthalten, um die KMP-Kompatibilität für da
   )
   ```
 
-3. Service-Implementierung in :ping-infrastructure
+3. Service-Implementierung in :ping-service
    
 Implementiere die Spring Boot Anwendung.
 
@@ -67,7 +67,7 @@ Implementiere die Spring Boot Anwendung.
 Hier ist ein Implementierungsvorschlag für den Controller:
 
   ```kotlin
-  // in backend/services/ping/ping-infrastructure/src/main/kotlin/.../PingController.kt
+  // in backend/services/ping/ping-service/src/main/kotlin/.../PingController.kt
   
   @RestController
   @RequestMapping("/api/ping")
@@ -96,7 +96,7 @@ Erstelle die `application.yml` für den Service. Sie muss die Anwendung für uns
 - **Observability:** Actuator-Endpunkte (`health`, `info`, `prometheus`) freigeben und Tracing aktivieren.
 
   ```yaml
-  # in backend/services/ping/ping-infrastructure/src/main/resources/application.yml
+  # in backend/services/ping/ping-service/src/main/resources/application.yml
   
   server:
     port: 8081 # Eindeutiger Port für den Service
@@ -159,7 +159,7 @@ Achte auf die korrekte und saubere Definition der Abhängigkeiten.
     }
   ```
   
-- `ping-infrastructure/build.gradle.kts`
+- `ping-service/build.gradle.kts`
   ```kotlin
       plugins {
         alias(libs.plugins.spring.boot)
@@ -169,7 +169,7 @@ Achte auf die korrekte und saubere Definition der Abhängigkeiten.
 
     dependencies {
         // API-Modul einbinden
-        implementation(project(":backend:services:ping:ping-api"))
+        implementation(project(":contracts:ping-api"))
 
         // Unsere zentrale BOM für konsistente Versionen
         implementation(platform(project(":platform:platform-bom")))
