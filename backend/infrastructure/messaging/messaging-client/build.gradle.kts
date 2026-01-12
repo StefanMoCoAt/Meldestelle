@@ -22,6 +22,18 @@ dependencies {
     implementation(platform(projects.platform.platformBom))
     // Stellt gemeinsame Abhängigkeiten bereit.
     implementation(projects.platform.platformDependencies)
+
+    // Spring Boot / Spring Framework APIs used directly in this module
+    // (e.g. ConditionalOnMissingBean)
+    implementation("org.springframework.boot:spring-boot-autoconfigure")
+    implementation("org.springframework.boot:spring-boot")
+
+    // Spring Kafka (ReactiveKafkaProducerTemplate, etc.)
+    implementation(libs.spring.kafka)
+
+    // Jakarta annotations used by Spring / configuration classes
+    implementation(libs.jakarta.annotation.api)
+
     // Baut auf der zentralen Kafka-Konfiguration auf und erbt deren Abhängigkeiten.
     implementation(projects.backend.infrastructure.messaging.messagingConfig)
     // Fügt die reaktive Kafka-Implementierung hinzu (Project Reactor).

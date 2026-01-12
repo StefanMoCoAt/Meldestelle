@@ -1,20 +1,28 @@
 package at.mocode.ping.service
 
-import at.mocode.ping.api.EnhancedPingResponse
-import at.mocode.ping.api.HealthResponse
+import at.mocode.ping.domain.Ping
+import at.mocode.ping.infrastructure.web.PingController
+import at.mocode.ping.application.PingUseCase
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MvcResult
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.Instant
 
 /**
  * Unit tests for PingController
@@ -28,109 +36,102 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
     ]
 )
 @Import(PingControllerTest.TestConfig::class)
+@AutoConfigureMockMvc
 class PingControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var pingService: PingServiceCircuitBreaker
+    private lateinit var pingUseCase: PingUseCase
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @TestConfiguration
     class TestConfig {
         @Bean
-        fun pingServiceCircuitBreaker(): PingServiceCircuitBreaker = mockk(relaxed = true)
+        fun pingUseCase(): PingUseCase = mockk(relaxed = true)
     }
 
     @BeforeEach
     fun setUp() {
         // Reset mocks before each test
-        io.mockk.clearMocks(pingService)
+        io.mockk.clearMocks(pingUseCase)
     }
 
     @Test
     fun `should return simple ping response`() {
+        // Given
+        every { pingUseCase.executePing(any()) } returns Ping(
+            message = "Simple Ping",
+            timestamp = Instant.parse("2023-10-01T10:00:00Z")
+        )
+
         // When & Then
-        mockMvc.perform(get("/ping/simple"))
+        val mvcResult: MvcResult = mockMvc.perform(get("/ping/simple"))
+            .andExpect(request().asyncStarted())
+            .andReturn()
+
+        val result = mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk)
+            .andReturn()
+
+        // In some environments the JSONPath matcher fails to parse the response body.
+        // We still validate the serialized output contains the expected fields.
+        val body = result.response.contentAsString
+        System.out.println("[DEBUG_LOG] /ping/simple response status=${result.response.status} contentType=${result.response.contentType} body=$body")
+        val json = objectMapper.readTree(body)
+        assertThat(json.has("status")).isTrue
+        assertThat(json["status"].asText()).isEqualTo("pong")
+        assertThat(json["service"].asText()).isEqualTo("ping-service")
+
+        verify { pingUseCase.executePing("Simple Ping") }
     }
 
     @Test
-    fun `should return enhanced ping response without simulation`() {
+    fun `should return enhanced ping response`() {
         // Given
-        val expectedResponse = EnhancedPingResponse(
-            status = "pong",
-            timestamp = "2023-10-01T10:00:00Z",
-            service = "ping-service",
-            circuitBreakerState = "CLOSED",
-            responseTime = 10L
+        every { pingUseCase.executePing(any()) } returns Ping(
+            message = "Enhanced Ping",
+            timestamp = Instant.parse("2023-10-01T10:00:00Z")
         )
-        every { pingService.ping(false) } returns expectedResponse
 
         // When & Then
-        mockMvc.perform(get("/ping/enhanced"))
+        val mvcResult: MvcResult = mockMvc.perform(get("/ping/enhanced"))
+            .andExpect(request().asyncStarted())
+            .andReturn()
+
+        val result = mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk)
+            .andReturn()
 
-        // Verify
-        verify { pingService.ping(false) }
-    }
+        val body = result.response.contentAsString
+        System.out.println("[DEBUG_LOG] /ping/enhanced response status=${result.response.status} contentType=${result.response.contentType} body=$body")
+        val json = objectMapper.readTree(body)
+        assertThat(json.has("status")).isTrue
+        assertThat(json["status"].asText()).isEqualTo("pong")
+        assertThat(json["service"].asText()).isEqualTo("ping-service")
 
-    @Test
-    fun `should return enhanced ping response with simulation enabled`() {
-        // Given
-        val expectedResponse = EnhancedPingResponse(
-            status = "fallback",
-            timestamp = "2023-10-01T10:00:00Z",
-            service = "ping-service-fallback",
-            circuitBreakerState = "OPEN",
-            responseTime = 5L
-        )
-        every { pingService.ping(true) } returns expectedResponse
-
-        // When & Then
-        mockMvc.perform(get("/ping/enhanced?simulate=true"))
-            .andExpect(status().isOk)
-
-        // Verify
-        verify { pingService.ping(true) }
+        verify { pingUseCase.executePing("Enhanced Ping") }
     }
 
     @Test
     fun `should return health check response`() {
-        // Given
-        val expectedResponse = HealthResponse(
-            status = "pong",
-            timestamp = "2023-10-01T10:00:00Z",
-            service = "ping-service",
-            healthy = true
-        )
-        every { pingService.healthCheck() } returns expectedResponse
-
         // When & Then
-        mockMvc.perform(get("/ping/health"))
+        val mvcResult: MvcResult = mockMvc.perform(get("/ping/health"))
+            .andExpect(request().asyncStarted())
+            .andReturn()
+
+        val result = mockMvc.perform(asyncDispatch(mvcResult))
             .andExpect(status().isOk)
+            .andReturn()
 
-        // Verify
-        verify { pingService.healthCheck() }
-    }
-
-    @Test
-    fun `should handle missing simulate parameter with default false`() {
-        // Given
-        val expectedResponse = EnhancedPingResponse(
-            status = "pong",
-            timestamp = "2023-10-01T10:00:00Z",
-            service = "ping-service",
-            circuitBreakerState = "CLOSED",
-            responseTime = 8L
-        )
-        every { pingService.ping(false) } returns expectedResponse
-
-        // When & Then
-        mockMvc.perform(get("/ping/enhanced"))
-            .andExpect(status().isOk)
-
-        // Verify default parameter is used
-        verify { pingService.ping(false) }
+        val body = result.response.contentAsString
+        System.out.println("[DEBUG_LOG] /ping/health response status=${result.response.status} contentType=${result.response.contentType} body=$body")
+        val json = objectMapper.readTree(body)
+        assertThat(json.has("status")).isTrue
+        assertThat(json["status"].asText()).isEqualTo("up")
+        assertThat(json["service"].asText()).isEqualTo("ping-service")
     }
 }

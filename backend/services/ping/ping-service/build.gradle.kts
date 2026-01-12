@@ -15,17 +15,19 @@ kotlin {
 dependencies {
     // === Project Dependencies ===
     implementation(projects.contracts.pingApi)
+
+    // Our central BOM for consistent versions
+    implementation(platform(projects.platform.platformBom))
     implementation(projects.platform.platformDependencies)
     // NEU: Zugriff auf die verschobenen DatabaseUtils
     implementation(projects.backend.infrastructure.persistence)
 
     // === Spring Boot & Cloud ===
-    implementation(libs.bundles.spring.boot.service.complete)
-    // WICHTIG: Da wir JPA (blockierend) nutzen, brauchen wir Spring MVC (nicht WebFlux)
-    implementation(libs.spring.boot.starter.web)
-
-    // Service Discovery
-    implementation(libs.spring.cloud.starter.consul.discovery)
+    // Standard dependencies for a secure microservice
+    implementation(libs.bundles.spring.boot.secure.service)
+    // Common service extras
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.json)
 
     // === Database & Persistence ===
     implementation(libs.bundles.database.complete)
@@ -37,8 +39,13 @@ dependencies {
 
     // === Testing ===
     testImplementation(libs.bundles.testing.jvm)
+    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.security.test)
 }
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+    }
 }

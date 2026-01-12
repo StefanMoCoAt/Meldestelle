@@ -41,6 +41,11 @@ kotlin {
 
     jsMain.dependencies {
       implementation(libs.sqldelight.driver.web)
+
+      // NPM deps used by `sqlite.worker.js` (OPFS-backed SQLite WASM worker)
+      implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
+      // Use a published build tag from the official package.
+      implementation(npm("@sqlite.org/sqlite-wasm", "3.51.1-build2"))
     }
 
     /*

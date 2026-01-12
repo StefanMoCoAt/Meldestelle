@@ -39,6 +39,15 @@ kotlin {
                 implementation(libs.bundles.kmp.common)
                 implementation(libs.bundles.compose.common)
 
+                // Ktor (used directly in shared/di and shared/network)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.contentNegotiation)
+                implementation(libs.ktor.client.logging)
+                implementation(libs.ktor.client.serialization.kotlinx.json)
+
+                // Serialization
+                implementation(libs.kotlinx.serialization.json)
+
                 // Compose
                 implementation(compose.runtime)
                 implementation(compose.foundation)

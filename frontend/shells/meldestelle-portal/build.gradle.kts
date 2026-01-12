@@ -74,6 +74,7 @@ kotlin {
     commonMain.dependencies {
       // Shared modules
       implementation(projects.frontend.shared)
+      implementation(projects.frontend.core.domain)
       implementation(projects.frontend.core.designSystem)
       implementation(projects.frontend.core.navigation)
       implementation(projects.frontend.core.network)
@@ -125,6 +126,28 @@ kotlin {
       implementation(libs.kotlin.test)
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// SQLDelight WebWorker (OPFS) resource
+// ---------------------------------------------------------------------------
+// `:frontend:core:local-db` ships `sqlite.worker.js` as a JS resource.
+// When bundling the final JS app, webpack resolves `new URL("sqlite.worker.js", import.meta.url)`
+// relative to the Kotlin JS package folder (root build dir). We therefore copy the worker into
+// that folder before webpack runs.
+
+val copySqliteWorkerJs by tasks.registering(Copy::class) {
+  val localDb = project(":frontend:core:local-db")
+  dependsOn(localDb.tasks.named("jsProcessResources"))
+
+  from(localDb.layout.buildDirectory.file("processedResources/js/main/sqlite.worker.js"))
+
+  // Root build directory where Kotlin JS packages are assembled.
+  into(rootProject.layout.buildDirectory.dir("js/packages/${rootProject.name}-frontend-shells-meldestelle-portal/kotlin"))
+}
+
+tasks.matching { it.name == "jsBrowserProductionWebpack" }.configureEach {
+  dependsOn(copySqliteWorkerJs)
 }
 
 // KMP Compile-Optionen

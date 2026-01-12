@@ -17,7 +17,8 @@ import kotlin.random.Random
  * Nutzt den Application Port (PingUseCase).
  */
 @RestController
-@CrossOrigin(allowedHeaders = ["*"], allowCredentials = "true")
+// Spring requires using `originPatterns` (not wildcard `origins`) when credentials are enabled.
+@CrossOrigin(allowedHeaders = ["*"], allowCredentials = "true", originPatterns = ["*"])
 class PingController(
     private val pingUseCase: PingUseCase
 ) : PingApi {

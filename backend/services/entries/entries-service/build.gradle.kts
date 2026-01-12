@@ -16,16 +16,18 @@ dependencies {
   implementation(projects.backend.services.entries.entriesApi)
   implementation(projects.backend.infrastructure.monitoring.monitoringClient)
 
-  implementation(libs.bundles.spring.boot.service.complete)
+  // Standard dependencies for a secure microservice (centralized bundle)
+  implementation(libs.bundles.spring.boot.secure.service)
+  // Common service extras
+  implementation(libs.spring.boot.starter.validation)
+  implementation(libs.spring.boot.starter.json)
   implementation(libs.postgresql.driver)
-  implementation(libs.spring.boot.starter.web)
 
   // KORREKTUR: Jackson Bundle aufgelöst, da Accessor fehlschlägt
   implementation(libs.jackson.module.kotlin)
   implementation(libs.jackson.datatype.jsr310)
 
   implementation(libs.kotlin.reflect)
-  implementation(libs.spring.cloud.starter.consul.discovery)
   implementation(libs.caffeine)
   implementation(libs.spring.web)
 
@@ -39,5 +41,4 @@ dependencies {
   testImplementation(projects.platform.platformTesting)
   testImplementation(libs.bundles.testing.jvm)
   testImplementation(libs.spring.boot.starter.test)
-  testImplementation(libs.spring.boot.starter.web)
 }

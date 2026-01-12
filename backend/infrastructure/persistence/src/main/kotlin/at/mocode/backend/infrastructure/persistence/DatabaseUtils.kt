@@ -3,9 +3,16 @@ package at.mocode.backend.infrastructure.persistence
 import at.mocode.core.domain.model.ErrorCodes
 import at.mocode.core.domain.model.ErrorDto
 import at.mocode.core.domain.model.PagedResponse
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.statements.BatchInsertStatement
-import org.jetbrains.exposed.sql.transactions.transaction
+import at.mocode.core.utils.Result
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.Column
+import org.jetbrains.exposed.v1.core.statements.BatchInsertStatement
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
+import org.jetbrains.exposed.v1.jdbc.Query
+import org.jetbrains.exposed.v1.jdbc.batchInsert
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.sql.SQLException
 import java.sql.SQLTimeoutException
 
@@ -18,7 +25,7 @@ import java.sql.SQLTimeoutException
 
 inline fun <T> transactionResult(
   database: Database? = null,
-  crossinline block: Transaction.() -> T
+  crossinline block: JdbcTransaction.() -> T
 ): Result<T> {
   return try {
     val result = transaction(database) { block() }
@@ -60,12 +67,12 @@ inline fun <T> transactionResult(
 
 inline fun <T> writeTransaction(
   database: Database? = null,
-  crossinline block: Transaction.() -> T
+  crossinline block: JdbcTransaction.() -> T
 ): Result<T> = transactionResult(database, block)
 
 inline fun <T> readTransaction(
   database: Database? = null,
-  crossinline block: Transaction.() -> T
+  crossinline block: JdbcTransaction.() -> T
 ): Result<T> = transactionResult(database, block)
 
 fun Query.paginate(page: Int, size: Int): Query {
@@ -123,18 +130,17 @@ fun <T> Query.toPagedResponse(
 object DatabaseUtils {
 
   fun tableExists(tableName: String, database: Database? = null): Boolean {
-    return try {
-      transaction(database) {
-        // Postgres-spezifischer, robuster Ansatz über to_regclass
-        val valid = tableName.trim()
-        if (!valid.matches(Regex("^[A-Za-z_][A-Za-z0-9_]*$"))) return@transaction false
-        exec("SELECT to_regclass('$valid')") { rs ->
-          if (rs.next()) rs.getString(1) else null
-        } != null
-      }
-    } catch (e: Exception) {
-      false
-    }
+    return transactionResult(database) {
+      // Postgres-spezifischer, robuster Ansatz über to_regclass
+      val valid = tableName.trim()
+      if (!valid.matches(Regex("^[A-Za-z_][A-Za-z0-9_]*$"))) return@transactionResult false
+      exec("SELECT to_regclass('$valid')") { rs ->
+        if (rs.next()) rs.getString(1) else null
+      } != null
+    }.fold(
+      onSuccess = { it },
+      onFailure = { false }
+    )
   }
 
   @JvmName("createIndexIfNotExistsArray")
