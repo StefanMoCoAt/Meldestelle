@@ -29,6 +29,11 @@ dependencyResolutionManagement {
 }
 
 // ==========================================================================
+// CONTRACTS
+// ==========================================================================
+include(":contracts:ping-api")
+
+// ==========================================================================
 // Backend
 // ==========================================================================
 
@@ -89,7 +94,6 @@ include(":backend:services:entries:entries-service")
 // include(":backend:services:members:members-service")
 
 // --- PING (Ping Service) ---
-include(":backend:services:ping:ping-api")
 include(":backend:services:ping:ping-service")
 
 // --- REGISTRY (Single Source of Truth) ---

@@ -88,6 +88,10 @@ testcontainersKafka = "1.21.4"
 
 # Gradle Plugins
 foojayResolver = "1.0.0"
+benManesVersions = "0.51.0"
+detekt = "1.23.6"
+ktlint = "12.1.1"
+dokka = "2.1.0"
 
 [libraries]
 # ==============================================================================
@@ -370,4 +374,7 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 
 # --- Tools ---
 foojayResolver = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "foojayResolver" }
-dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+benManesVersions = { id = "com.github.ben-manes.versions", version.ref = "benManesVersions" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }

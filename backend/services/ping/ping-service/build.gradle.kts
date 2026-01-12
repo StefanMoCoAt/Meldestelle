@@ -14,7 +14,7 @@ kotlin {
 
 dependencies {
     // === Project Dependencies ===
-    implementation(projects.backend.services.ping.pingApi)
+    implementation(projects.contracts.pingApi)
     implementation(projects.platform.platformDependencies)
     // NEU: Zugriff auf die verschobenen DatabaseUtils
     implementation(projects.backend.infrastructure.persistence)

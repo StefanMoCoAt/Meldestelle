@@ -10,7 +10,7 @@ import java.util.zip.GZIPOutputStream
 
 plugins {
   // Version management plugin for dependency updates
-  id("com.github.ben-manes.versions") version "0.51.0"
+  alias(libs.plugins.benManesVersions)
 
   // Kotlin plugins declared here with 'apply false' to centralize version management
   // This prevents "plugin loaded multiple times" errors in Gradle 9.2.1+
@@ -29,8 +29,8 @@ plugins {
   alias(libs.plugins.dokka)
 
   // Static analysis (enabled at root and inherited by subprojects)
-  id("io.gitlab.arturbosch.detekt") version "1.23.6"
-  id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
+  alias(libs.plugins.detekt)
+  alias(libs.plugins.ktlint)
 }
 
 // ##################################################################
@@ -78,14 +78,6 @@ subprojects {
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
     // Removed byte-buddy-agent configuration to fix Gradle 9.0.0 deprecation warning
     // The agent configuration was causing Task.project access at execution time
-  }
-
-  // Erzwinge eine stabile Version von kotlinx-serialization-json für alle Konfigurationen,
-  // um Auflösungsfehler (z.B. 1.10.2, nicht verfügbar auf Maven Central) zu vermeiden
-  configurations.configureEach {
-    resolutionStrategy {
-      force("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    }
   }
 
   // Dedicated performance test task per JVM subproject

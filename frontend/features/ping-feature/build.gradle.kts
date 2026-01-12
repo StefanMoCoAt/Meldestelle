@@ -39,7 +39,7 @@ kotlin {
   sourceSets {
     commonMain.dependencies {
       // Contract from backend
-      implementation(projects.backend.services.ping.pingApi)
+      implementation(projects.contracts.pingApi)
 
       // UI Kit (Design System)
       implementation(projects.frontend.core.designSystem)
