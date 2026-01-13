@@ -96,9 +96,9 @@ RUN apk add --no-cache curl && \
     mkdir -p /usr/share/nginx/html/downloads
 
 # Copy Artifacts
-COPY config/frontends/web-app/nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/dist/ /usr/share/nginx/html/
-COPY config/frontends/web-app/downloads/ /usr/share/nginx/html/downloads/
+COPY downloads/ /usr/share/nginx/html/downloads/
 
 # Permissions
 RUN chown -R nginx:nginx /usr/share/nginx/html && \

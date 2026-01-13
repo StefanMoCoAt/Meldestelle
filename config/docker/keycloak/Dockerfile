@@ -6,7 +6,6 @@
 # Features:
 # - Pre-built optimized image (faster startup)
 # - Security hardening
-# - Custom theme support
 # - Health monitoring
 # ===================================================================
 ARG KEYCLOAK_IMAGE_TAG
@@ -25,7 +24,7 @@ ENV KC_DB=postgres
 WORKDIR /opt/keycloak
 
 # Pre-build Keycloak for faster startup
-RUN /opt/keycloak/bin/kc.sh build \
+RUN /opt/keykeycloak/bin/kc.sh build \
     --db=postgres \
     --health-enabled=true \
     --metrics-enabled=true
