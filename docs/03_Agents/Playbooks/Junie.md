@@ -14,7 +14,7 @@ Junie wird genutzt für **Repo-nahe Arbeit**: Code lesen, reale Pfade/Module fin
 * Änderungen so klein wie möglich halten und den passenden Doku-Output erzeugen.
 
 ## Don’t
-* Keine „zweite Wahrheit“ in `.junie/guidelines/*` etablieren.
+* Keine „zweite Wahrheit“ in `.junie/*` etablieren (Tooling bleibt Tooling).
 * Keine Entscheidungen „im Chat verlieren“ – am Ende muss ein Artefakt in `docs/` stehen.
 
 ## Abschluss (Pflicht)

@@ -60,8 +60,8 @@
  - Environment-Variablen: in `config/env/.env` und optional `config/env/.env.local`.
 
  ## Weiterführende Hinweise
- - Architektur: `docs/ARCHITECTURE.md`
- - ADRs: `docs/adr/`
- - C4-Diagramme: `docs/c4/`
+ - Architektur: `docs/01_Architecture/ARCHITECTURE.md`
+ - ADRs: `docs/01_Architecture/adr/`
+ - C4-Diagramme: `docs/01_Architecture/c4/`
 
  Stand: Dezember 2025

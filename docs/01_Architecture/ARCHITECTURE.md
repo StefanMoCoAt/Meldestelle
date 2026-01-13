@@ -5,7 +5,7 @@ Dieses Dokument beschreibt die Zielstruktur und das Mapping vom bisherigen Stand
 Zielstruktur (Top-Level)
 
 backend/   Gateway, Discovery (optional), Services
-  gateway
+  gateway   Spring Cloud Gateway
   discovery
   services
 frontend/  KMP Frontend
@@ -71,6 +71,6 @@ Nächste Schritte (MP-22 Folgetasks)
 1. Physisches Verschieben der Frontend-Module gemäß Mapping und Anpassung von settings.gradle.kts.
 2. Physisches Verschieben der Backend-Komponenten in backend/* inkl. evtl. Package-Pfade, sofern notwendig.
 3. Ergänzung von docker-compose.services.yml und docker-compose.clients.yml mit echten Overlays.
-4. Erstellen der ersten ADRs unter docs/adr (Koin, SQLDelight, Optimistic Locking, Freshness UI, Core Domain).
+4. Erstellen der ersten ADRs unter `docs/01_Architecture/adr/` (Koin, SQLDelight, Optimistic Locking, Freshness UI, Core Domain).
 
-Hinweis: ADRs liegen ab sofort zentral unter `docs/adr/` (nicht mehr unter `docs/architecture/adr/`). C4-Diagramme wurden nach `docs/c4/` verschoben.
+Hinweis: ADRs liegen ab sofort zentral unter `docs/01_Architecture/adr/`. C4-Diagramme liegen unter `docs/01_Architecture/c4/`.

@@ -3,12 +3,15 @@ owner: project-maintainers
 status: active
 review_cycle: 180d
 last_reviewed: 2025-10-31
-summary: "Übersicht der wichtigsten lokalen URLs und Ports. Quelle: docker/versions.toml"
+summary: "Übersicht der wichtigsten lokalen URLs und Ports. Quelle: docker-compose.yaml + config/env"
 ---
 
 # Referenz: Wichtige URLs und Ports (lokal)
 
-Quelle der Wahrheit für Ports: [docker/versions.toml](../../docker/versions.toml) → [service-ports]
+Quelle der Wahrheit für Ports/URLs (Repo-aktuell):
+
+* `docker-compose.yaml`
+* `config/env/.env` (und optional `config/env/.env.local`)
 
 ## Infrastruktur
 
@@ -39,7 +42,5 @@ Quelle der Wahrheit für Ports: [docker/versions.toml](../../docker/versions.tom
 
 ## Hinweise
 
-- Die oben genannten Ports sind in `docker/versions.toml` unter `[service-ports]` zentral gepflegt und werden für Docker
-  Compose-Generierung und Validierung verwendet.
-- Bei Port-Konflikten können die Werte in `docker/versions.toml` angepasst und anschließend die Compose-Dateien mit
-  `bash scripts/generate-compose-files.sh all development` neu generiert werden.
+- Die oben genannten Ports sind aus dem aktuellen Compose-/Env-Setup abgeleitet.
+- Bei Port-Konflikten passe die Werte in `config/env/.env` an (oder nutze lokale Overrides in `config/env/.env.local`).
