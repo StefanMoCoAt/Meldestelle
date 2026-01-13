@@ -24,7 +24,7 @@ ENV KC_DB=postgres
 WORKDIR /opt/keycloak
 
 # Pre-build Keycloak for faster startup
-RUN /opt/keykeycloak/bin/kc.sh build \
+RUN /opt/keycloak/bin/kc.sh build \
     --db=postgres \
     --health-enabled=true \
     --metrics-enabled=true

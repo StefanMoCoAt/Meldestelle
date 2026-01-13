@@ -57,8 +57,9 @@ COPY platform/ platform/
 COPY core/ core/
 
 # Copy backend/infrastructure directories (required by settings.gradle.kts)
-COPY backend/infrastructure backend/infrastructure
-COPY backend/services backend/services
+COPY backend/infrastructure/ backend/infrastructure/
+COPY backend/services/ backend/services/
+COPY contracts/ contracts/
 
 # Copy client directories (required by settings.gradle.kts)
 COPY frontend/ frontend/
@@ -70,13 +71,13 @@ COPY docs/ docs/
 COPY build.gradle.kts ./
 
 # Download and cache dependencies with BuildKit cache mount (removed deprecated flag)
-RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
-    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+RUN --mount=type=cache,id=gradle-cache-gateway,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,id=gradle-wrapper-gateway,target=/home/gradle/.gradle/wrapper \
     ./gradlew :backend:infrastructure:gateway:dependencies --info
 
 # Build the application with optimizations and build cache (removed deprecated flag)
-RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
-    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+RUN --mount=type=cache,id=gradle-cache-gateway,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,id=gradle-wrapper-gateway,target=/home/gradle/.gradle/wrapper \
     ./gradlew :backend:infrastructure:gateway:bootJar --info
 
 # Extract JAR layers for better caching in runtime stage

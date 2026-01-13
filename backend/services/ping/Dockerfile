@@ -63,24 +63,23 @@ COPY core/ core/
 # Copy backend (includes services and infrastructure in new structure)
 COPY backend/ backend/
 
+# Copy contracts directory
+COPY contracts/ contracts/
+
 # Copy docs directory (required by settings.gradle.kts)
 COPY docs/ docs/
 
 # Copy root build configuration
 COPY build.gradle.kts ./
 
-# Copy ping modules (changes most frequently) for both legacy and new structure
-COPY backend/services/ping/ping-api/ backend/services/ping/ping-api/
-COPY backend/services/ping/ping-service/ backend/services/ping/ping-service/
-
 # Download and cache dependencies in a separate layer with build cache
-RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
-    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+RUN --mount=type=cache,id=gradle-cache-ping,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,id=gradle-wrapper-ping,target=/home/gradle/.gradle/wrapper \
     ./gradlew :backend:services:ping:ping-service:dependencies --no-daemon --info
 
 # Build the application with optimizations and build cache
-RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
-    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+RUN --mount=type=cache,id=gradle-cache-ping,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,id=gradle-wrapper-ping,target=/home/gradle/.gradle/wrapper \
     ./gradlew :backend:services:ping:ping-service:bootJar --no-daemon --info
 
 # ===================================================================
