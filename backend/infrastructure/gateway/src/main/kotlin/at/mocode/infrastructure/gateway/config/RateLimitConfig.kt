@@ -13,7 +13,7 @@ class RateLimitConfig {
 
     /**
      * Standard KeyResolver: IP-basiert.
-     * Nutzt X-Forwarded-For (für Proxies/LoadBalancer), wenn vorhanden, sonst die Remote-Adresse.
+     * Nutzt X-Forwarded-For (für Proxys/LoadBalancer), wenn vorhanden, sonst die Remote-Adresse.
      * Wird verwendet, wenn kein anderer KeyResolver explizit angefordert wird oder aktiv ist.
      */
     @Bean

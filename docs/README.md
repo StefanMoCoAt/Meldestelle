@@ -1,97 +1,26 @@
-# Meldestelle - Dokumentation
+# Projektdokumentation "Meldestelle"
 
-## 📚 Single Source of Truth: YouTrack
+Willkommen zur zentralen Projektdokumentation. Dieses Verzeichnis ist die "Single Source of Truth" für alle architektonischen Entscheidungen, Anleitungen und Implementierungsdetails.
 
-Die Hauptdokumentation befindet sich in der **YouTrack Wissensdatenbank**:
+Die Dokumentation wird nach dem **"Docs-as-Code"**-Prinzip gepflegt: Sie liegt neben dem Code, wird mit Git versioniert und von allen Teammitgliedern (Mensch und KI) aktuell gehalten.
 
-👉 **[Meldestelle Command Center](https://meldestelle-pro.youtrack.cloud/articles/MP-A-24)**
+## Struktur der Dokumentation
 
-### Was du in YouTrack findest
+*   **/01_Architecture**: Enthält **Architecture Decision Records (ADRs)**. Jede wichtige Architekturentscheidung (z.B. "Warum nutzen wir ein API-Gateway?") wird hier in einer eigenen Datei festgehalten.
+*   **/02_Onboarding**: Anleitungen für den schnellen Einstieg in das Projekt. Enthält `Getting_Started.md` für das lokale Setup.
+*   **/03_Agents**: Definitionen und spezifische Anleitungen für die im Projekt eingesetzten KI-Agenten.
+    *   `AGENTS.md`: Definiert die Rollen, Verantwortlichkeiten und Regeln für jeden Agenten.
+    *   `Gemini/`, `Junie/`: Ablageorte für finalisierte Berichte und Analysen der jeweiligen KI-Assistenten.
+*   **/04_Backend**: Dokumentation, die sich speziell auf die Backend-Services bezieht.
+*   **/05_Frontend**: Dokumentation für das KMP-Frontend ("Meldestelle Portal").
+*   **/06_Infrastructure**: Anleitungen und Konfigurationsdetails zur Infrastruktur (Docker, Keycloak, Consul, etc.).
 
-- 🏗️ **Bounded Context Dokumentation** (Members, Horses, Events, Masterdata)
-- 📡 **API-Referenz** (automatisch aus KDoc generiert)
-- 🚀 **Deployment-Guides** (Proxmox, Cloudflare, Nginx)
-- 🔐 **Sicherheit-Konfigurationen** (Keycloak, GitHub Secrets)
-- 💡 **Roadmap & Visionen**
-- 📊 **Architektur-Diagramme** (interaktiv)
+## Wie man diese Dokumentation pflegt
 
----
+Jeder Entwickler und jeder KI-Agent ist dafür verantwortlich, die Dokumentation, die seinen Arbeitsbereich betrifft, zu aktualisieren.
 
-## 📂 Was im Repository bleibt
+*   **Bei neuen Features:** Erstelle oder aktualisiere die entsprechende Implementierungs-Doku.
+*   **Bei Architektur-Änderungen:** Erstelle ein neues ADR oder aktualisiere ein bestehendes.
+*   **Bei Änderungen am Setup:** Passe die Anleitungen im `Onboarding`- oder `Infrastructure`-Verzeichnis an.
 
-### 1. Architecture Decision Records (ADRs)
-
-Architekturentscheidungen sind Teil der Code-Historie und werden im Repository versioniert:
-
-- [ADR Übersicht](adr)
-- [ADR-0001: Modulare Architektur](adr/0001-modular-architecture-de.md)
-- [ADR-0002: Domain-Driven Design](adr/0002-domain-driven-design-de.md)
-- [ADR-0003: Microservices](adr/0003-microservices-architecture-de.md)
-- [ADR-0004: Event-Driven Communication](adr/0004-event-driven-communication-de.md)
-- [ADR-0005: Polyglot Persistence](adr/0005-polyglot-persistence-de.md)
-- [ADR-0006: Authentication & Authorization (Keycloak)](adr/0006-authentication-authorization-keycloak-de.md)
-- [ADR-0007: API Gateway Pattern](adr/0007-api-gateway-pattern-de.md)
-- [ADR-0008: Multiplatform Client Applications](adr/0008-multiplatform-client-applications-de.md)
-- [ADR-0009: Final KMP Architecture](adr/0009-final-kmp-architecture.md)
-
-### 2. C4-Diagramme (PlantUML-Quellen)
-
-Versionierte Diagramm-Quellen für Architekturdokumentation:
-
-- [C4 Context](c4/01-context-de.puml)
-- [C4 Container](c4/02-container-de.puml)
-- [C4 Component - Events Service](c4/03-component-events-service-de.puml)
-
-### 3. Developer Guides
-
-Minimale Anleitungen für lokale Entwicklung:
-
-- **[Lokales Setup](how-to/start-local.md)** – Projekt in 5 Minuten starten
-- **[KDoc Style Guide](how-to/kdoc-style.md)** – Documentations-Konventionen im Code
-- **[Branch-Schutz & PR-Workflow](how-to/branchschutz-und-pr-workflow.md)** – Git-Workflow
-
----
-
-## 🔄 Automatische Synchronisation
-
-Das Projekt nutzt automatisierte Workflows für Konsistenz:
-
-- **KDoc → YouTrack**: [docs-kdoc-sync.yml](../.github/workflows/docs-kdoc-sync.yml) – Synchronisiert API-Dokumentation
-  aus Code-Kommentaren nach YouTrack
-- **Docker SSoT**: [ssot-guard.yml](../.github/workflows/ssot-guard.yml) – Validiert Docker-Versionskonsistenz
-- **CI Pipeline**: [ci-main.yml](../.github/workflows/ci-main.yml) – Hauptpipeline für Build, Tests, Validierung
-
----
-
-## 📋 Documentations-Workflow
-
-### Für Code-Änderungen
-
-1. KDoc im Code schreiben
-2. PR erstellen → CI validiert
-3. Nach Merge → KDoc-Sync pusht automatisch nach YouTrack
-
-### Für Architektur-Entscheidungen
-
-1. ADR in `docs/adr/` erstellen
-2. PR mit ADR-Review
-3. Nach Merge → Zusammenfassung in YouTrack verlinken
-
-### Für Infrastruktur/Konfiguration
-
-1. Dokumentation direkt in YouTrack erstellen
-2. Bei Code-relevanten Änderungen → im Commit-Message auf YouTrack-Artikel verweisen
-
----
-
-## ❓ Fragen & Support
-
-- **Technische Fragen**: [GitHub Discussions](https://github.com/StefanMoCoAt/meldestelle/discussions)
-- **Bugs**: [GitHub Issues](https://github.com/StefanMoCoAt/meldestelle/issues)
-- **Architektur-Diskussionen**: [YouTrack](https://meldestelle-pro.youtrack.cloud)
-- **Projekt-Dokumentation**: [YouTrack Wissensdatenbank](https://meldestelle-pro.youtrack.cloud/knowledge-bases)
-
----
-
-**Hinweis**: Diese README wurde am 8. Dezember 2025 aktualisiert im Rahmen der Dokumentations-Migration nach YouTrack
-(siehe [ADR-0009](adr/0009-final-kmp-architecture.md)).
+Änderungen an der Dokumentation sollten Teil derselben Pull Request/Commit sein wie die zugehörigen Code-Änderungen.
