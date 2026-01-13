@@ -34,7 +34,7 @@ docker compose -f docker-compose.yaml up -d
 # ./gradlew bootRun
 ```
 
-**Vollständige Anleitung**: [docs/how-to/start-local.md](docs/how-to/start-local.md)
+**Vollständige Anleitung**: [docs/02_Onboarding/Development/start-local.md](docs/02_Onboarding/Development/start-local.md)
 
 ---
 
@@ -57,26 +57,11 @@ Die Hauptdokumentation befindet sich in der **YouTrack Wissensdatenbank**:
 #### Im Repository
 
 - [📖 docs/README.md](docs/README.md) - Übersicht aller Repository-Dokumentation
-- [🏛️ Architecture Decision Records](docs/adr)
-- [📐 C4-Diagramme](docs/c4)
-- [🛠️ Developer Guides](docs/how-to)
-- [📑 Projekt-Guidelines (Master)](.junie/guidelines/master-guideline.md)
-
-Zusätzliche zentrale Guidelines:
-
-- [Coding Standards](.junie/guidelines/project-standards/coding-standards.md)
-- [Testing Standards](.junie/guidelines/project-standards/testing-standards.md)
-- [Documentation Standards](.junie/guidelines/project-standards/documentation-standards.md)
-- [Architecture Principles](.junie/guidelines/project-standards/architecture-principles.md)
-- [Web App Guideline](.junie/guidelines/technology-guides/web-app-guideline.md)
-- Docker Guides:
-  - [Docker Overview](.junie/guidelines/technology-guides/docker/docker-overview.md)
-  - [Docker Architecture](.junie/guidelines/technology-guides/docker/docker-architecture.md)
-  - [Docker Development](.junie/guidelines/technology-guides/docker/docker-development.md)
-  - [Docker Production](.junie/guidelines/technology-guides/docker/docker-production.md)
-  - [Docker Monitoring](.junie/guidelines/technology-guides/docker/docker-monitoring.md)
-  - [Docker Troubleshooting](.junie/guidelines/technology-guides/docker/docker-troubleshooting.md)
-- Process Guide: [Trace Bullet](.junie/guidelines/process-guides/trace-bullet-guideline.md)
+- [🏛️ Architecture Decision Records](docs/01_Architecture/adr/)
+- [📐 C4-Diagramme](docs/01_Architecture/c4/)
+- [🛠️ Developer Guides](docs/02_Onboarding/Development/)
+- [🤖 KI Operating Model](docs/03_Agents/)
+- [🧰 Tooling/Guardrails](.junie/README.md)
 
 ---
 
@@ -98,7 +83,7 @@ Das System ist in unabhängige Domänen aufgeteilt:
 - **Polyglot Persistence**: PostgreSQL + Redis
 - **Container-First**: Docker & Docker Compose
 
-**Details**: [ADR-0002 Domain-Driven Design](docs/adr/0002-domain-driven-design-de.md)
+**Details**: [ADR-0002 Domain-Driven Design](docs/01_Architecture/adr/0002-domain-driven-design-de.md)
 
 ---
 
@@ -372,7 +357,7 @@ make docker-compose-gen  # Generiert Docker Compose Files
 make docker-validate     # Validiert Docker SSoT Konsistenz
 ```
 
-**Vollständige Referenz:** [Docker Development Guide](.junie/guidelines/technology-guides/docker/docker-development.md#-vollständige-makefile-referenz)
+**Vollständige Referenz:** Siehe `Makefile` (`make help`) und `docs/02_Onboarding/Development/start-local.md`.
 
 ### Was ist die Single Source of Truth?
 
@@ -436,7 +421,7 @@ DOCKER_SSOT_MODE=envless bash scripts/generate-compose-files.sh all development 
 
 ## 🤝 Contributing
 
-Bitte lies [docs/how-to/branchschutz-und-pr-workflow.md](docs/how-to/branchschutz-und-pr-workflow.md) für den
+Bitte lies [docs/02_Onboarding/Development/branchschutz-und-pr-workflow.md](docs/02_Onboarding/Development/branchschutz-und-pr-workflow.md) für den
 PR-Workflow.
 
 ---
