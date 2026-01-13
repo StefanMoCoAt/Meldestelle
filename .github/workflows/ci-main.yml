@@ -78,14 +78,14 @@ jobs:
           globs: |
             README.md
             docs/README.md
-            docs/adr/**/*.md
-            docs/how-to/start-local.md
+            docs/01_Architecture/adr/**/*.md
+            docs/02_Onboarding/Development/start-local.md
 
       - name: Check Links in ADRs
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
           config-file: '.github/markdown-link-check.json'
-          folder-path: 'docs/adr/'
+          folder-path: 'docs/01_Architecture/adr/'
           use-quiet-mode: 'yes'
 
   # ========================================
