@@ -38,5 +38,5 @@ Wir werden **Koin** als Dependency-Injection-Framework für das KMP-Frontend ver
 
 ## Referenzen
 
-*   [Koin Dokumentation](https.koin.io)
-*   [Repository-Architektur (MP-22)](docs/01_Architecture/ARCHITECTURE.md) (veraltet, aber erwähnt die DI-Policy)
+*   [Koin Dokumentation](https://insert-koin.io/)
+*   [Repository-Architektur (MP-22)](../ARCHITECTURE.md) (veraltet, aber erwähnt die DI-Policy)

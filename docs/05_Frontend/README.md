@@ -12,7 +12,7 @@ Die Architektur ist auf **Offline-Fähigkeit** und eine reaktive UI ausgelegt.
 
 ## Kerntechnologien
 
-*   **UI:** [Compose Multiplatform](https.jetbrains.com/lp/compose-multiplatform/) für eine deklarative, plattformübergreifende UI.
+*   **UI:** [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/) für eine deklarative, plattformübergreifende UI.
 *   **Persistenz (Offline-First):** [SQLDelight](https://cashapp.github.io/sqldelight/) für die lokale Speicherung von Daten.
 *   **State Management:** Kotlin Coroutines und Flow in Kombination mit ViewModels.
 *   **Dependency Injection:** [Koin](https://insert-koin.io/) für die lose Kopplung von Komponenten.
@@ -26,7 +26,7 @@ Die Architektur ist auf **Offline-Fähigkeit** und eine reaktive UI ausgelegt.
 
 ## Wichtige Dokumente
 
-*   **[ADR-0010: SQLDelight für Cross-Platform-Persistenz](docs/01_Architecture/adr/0010-sqldelight-for-cross-platform-persistence.md):** Beschreibt die Entscheidung für SQLDelight.
-*   **[ADR-0011: Koin für Dependency Injection](docs/01_Architecture/adr/0011-koin-for-dependency-injection.md):** Beschreibt die Entscheidung für Koin.
-*   **[Offline-First-Architektur](docs/05_Frontend/offline-first-architecture.md):** Detaillierte Beschreibung der Offline-First-Strategie.
-*   **[Web-Setup (Webpack & Worker)](docs/05_Frontend/web-setup.md):** Details zur Konfiguration des Web-Targets.
+*   **[ADR-0010: SQLDelight für Cross-Platform-Persistenz](../01_Architecture/adr/0010-sqldelight-for-cross-platform-persistence.md):** Beschreibt die Entscheidung für SQLDelight.
+*   **[ADR-0011: Koin für Dependency Injection](../01_Architecture/adr/0011-koin-for-dependency-injection.md):** Beschreibt die Entscheidung für Koin.
+*   **[Offline-First-Architektur](offline-first-architecture.md):** Detaillierte Beschreibung der Offline-First-Strategie.
+*   **[Web-Setup (Webpack & Worker)](web-setup.md):** Details zur Konfiguration des Web-Targets.

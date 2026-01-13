@@ -39,5 +39,5 @@ Wir werden **SQLDelight** als primäre Persistenz-Bibliothek für das KMP-Fronte
 
 ## Referenzen
 
-*   [Frontend Status Report 01-2026](docs/90_Reports/Frontend_Status_Report_01-2026.md)
+*   [Frontend Status Report 01-2026](../../../90_Reports/Frontend_Status_Report_01-2026.md)
 *   [SQLDelight Dokumentation](https://cashapp.github.io/sqldelight/)
