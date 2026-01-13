@@ -1,67 +1,63 @@
- # Start Local (Lokales Setup)
+# Start Local (Lokales Setup)
 
- Kurzanleitung, um das Projekt lokal in wenigen Minuten zu starten.
+Kurzanleitung, um das Projekt lokal in wenigen Minuten zu starten.
 
- ## Voraussetzungen
- - Docker und Docker Compose (v2)
- - Java 25 (JDK)
- - Git
+**Wichtiger Hinweis (Januar 2026):** Der Build ist derzeit aufgrund eines Kotlin/Wasm-Compiler-Problems blockiert. Die Infrastruktur und die Backend-Services können jedoch unabhängig davon gestartet werden.
 
- ## Schnellstart
+## Voraussetzungen
+- Docker und Docker Compose (v2)
+- Java 25 (JDK)
+- Git
 
- ```bash
- # 1) Repository klonen
- git clone https://github.com/StefanMoCoAt/meldestelle.git
- cd meldestelle
+## Schnellstart
 
- # 2) Runtime-Environment vorbereiten (Single Source of Truth)
- #   Kopiere die Vorlage und passe sie bei Bedarf an.
- cp -n .env.template config/env/.env 2>/dev/null || true
- #   Optionale lokale Geheimnisse/Overrides (gitignored):
- #   echo "POSTGRES_PASSWORD=meinlokalespasswort" >> config/env/.env.local
+```bash
+# 1) Repository klonen
+git clone https://github.com/StefanMoCoAt/meldestelle.git
+cd meldestelle
 
- # 3) (Optional) Compose-Files generieren
- #    (nur falls du die Generator-Pipeline nutzt)
- # DOCKER_SSOT_MODE=envless bash scripts/generate-compose-files.sh all development
+# 2) Runtime-Environment vorbereiten
+#    Kopiere die Vorlage.
+cp .env.example .env
 
- # 4) Infrastruktur starten (Postgres, Redis, Kafka, Keycloak, Monitoring, Gateway)
- docker compose -f docker-compose.yaml up -d
+# 3) Infrastruktur starten (Postgres, Redis, Keycloak, Monitoring, Gateway)
+docker compose -f docker-compose.yaml up -d
 
- # 5) Backend-Service starten (Beispiel: Results Service)
- ./gradlew :backend:services:results:results-service:bootRun
- # oder – falls zentral gewollt und unterstützt:
- # ./gradlew bootRun
- ```
+# 4) Backend-Service starten (Beispiel: Results Service)
+./gradlew :backend:services:results:results-service:bootRun
+```
 
- Sobald die Infrastruktur läuft, erreichst du unter anderem:
- - Gateway: http://localhost:8081
- - Keycloak: http://localhost:8180
- - Grafana: http://localhost:3000
- - Prometheus: http://localhost:9090
+Sobald die Infrastruktur läuft, erreichst du unter anderem:
+- Gateway: http://localhost:8081
+- Keycloak: http://localhost:8180
+- Grafana: http://localhost:3000
+- Prometheus: http://localhost:9090
 
- ## Tests ausführen
- ```bash
- ./gradlew test
- # Spezifisches Modul
- ./gradlew :backend:services:results:results-service:test
- ```
+## Tests ausführen
+```bash
+# Führt alle Tests aus (Frontend-Tests könnten fehlschlagen)
+./gradlew test
 
- ## Troubleshooting
- - Dienste starten nicht? Ports belegt oder Logs prüfen:
-   ```bash
-   docker ps
-   docker logs <container-name>
-   ```
- - Infrastruktur neu starten:
-   ```bash
-   docker compose -f docker-compose.yaml down -v
-   docker compose -f docker-compose.yaml up -d
-   ```
- - Environment-Variablen: in `config/env/.env` und optional `config/env/.env.local`.
+# Spezifisches Backend-Modul testen
+./gradlew :backend:services:results:results-service:test
+```
 
- ## Weiterführende Hinweise
- - Architektur: `docs/01_Architecture/ARCHITECTURE.md`
- - ADRs: `docs/01_Architecture/adr/`
- - C4-Diagramme: `docs/01_Architecture/c4/`
+## Troubleshooting
+- Dienste starten nicht? Ports belegt oder Logs prüfen:
+  ```bash
+  docker ps
+  docker logs <container-name>
+  ```
+- Infrastruktur neu starten:
+  ```bash
+  docker compose -f docker-compose.yaml down -v
+  docker compose -f docker-compose.yaml up -d
+  ```
+- Environment-Variablen: werden aus der `.env`-Datei im Root-Verzeichnis geladen.
 
- Stand: Dezember 2025
+## Weiterführende Hinweise
+- Architektur: `docs/01_Architecture/ARCHITECTURE.md` (veraltet, siehe Reports)
+- ADRs: `docs/01_Architecture/adr/`
+- Aktuelle Reports: `docs/90_Reports/`
+
+Stand: Januar 2026 (teilweise aktualisiert)

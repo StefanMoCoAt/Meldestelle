@@ -1,8 +1,26 @@
-Repository-Architektur (MP-22)
+# Repository-Architektur (MP-22)
 
-Dieses Dokument beschreibt die Zielstruktur und das Mapping vom bisherigen Stand (Ist) zur neuen Struktur (Soll). Es begleitet Epic 2 (MP-22).
+**WARNUNG (Januar 2026): Dieses Dokument ist veraltet.** Die hier beschriebene "Soll"-Struktur wurde teilweise umgesetzt, aber wichtige strategische Änderungen sind in den Statusberichten vom Januar 2026 dokumentiert. Dieses Dokument dient nur noch als historischer Referenzpunkt.
 
-Zielstruktur (Top-Level)
+**Aktuelle Informationen finden Sie in:**
+*   `docs/90_Reports/Backend_Status_Report_01-2026.md`
+*   `docs/90_Reports/Frontend_Status_Report_01-2026.md`
+*   Den ADRs in `docs/01_Architecture/adr/`
+
+---
+
+## Zusammenfassung der wichtigsten Änderungen (Januar 2026)
+
+*   **Backend:** Ein Konflikt zwischen Spring Boot und Spring Cloud wurde durch einen Downgrade von Spring Cloud gelöst.
+*   **Frontend:** Die Persistenz-Strategie wurde von Room auf **SQLDelight** umgestellt, um echte Cross-Platform-Fähigkeit (insbesondere für Web/Wasm) zu ermöglichen.
+*   **Modul-Struktur:** Das `core:core-utils`-Modul wurde bereinigt, um eine strikte Trennung zwischen KMP-kompatiblem Code und JVM-spezifischem Code zu gewährleisten. JVM-spezifischer Code wurde in das neue Modul `:backend:infrastructure:persistence` verschoben.
+*   **Build-System:** Die `libs.versions.toml` wurde stark refaktoriert und nutzt nun Bundles zur Vereinfachung der Gradle-Dateien.
+
+---
+
+## Ursprünglicher Inhalt (Veraltet)
+
+### Zielstruktur (Top-Level)
 
 backend/   Gateway, Discovery (optional), Services
   gateway   Spring Cloud Gateway
@@ -22,7 +40,7 @@ docs/      Architektur, ADRs, C4-Modelle, Guides
   adr      Architecture Decision Records (ADRs)
   c4       C4-Diagramme (PlantUML Quellen)
 
-Ist → Soll Mapping (erste Tranche)
+### Ist → Soll Mapping (erste Tranche)
 
 - Frontend
   - clients/app → frontend/shells/meldestelle-portal (verschieben in Folge-Commit)
@@ -38,18 +56,18 @@ Ist → Soll Mapping (erste Tranche)
   - compose.yaml → docker/docker-compose.yml (neu angelegt, Makefile angepasst)
   - .env Handling → docker/.env.example (neu, als Template)
 
-Build/Gradle
+### Build/Gradle
 
 - settings.gradle.kts bleibt vorerst unverändert. Modul-Verschiebungen folgen in einem separaten Schritt mit angepassten include-Pfaden.
 - Version Catalog (gradle/libs.versions.toml) bleibt die einzige Quelle der Versionswahrheit.
 
-Richtlinien (Kurzfassung)
+### Richtlinien (Kurzfassung)
 
 - Features kommunizieren ausschließlich über Routen (Navigation) und Shared-Modelle in frontend/core/domain.
 - Kein manueller Authorization-Header – nur der DI-verwaltete apiClient aus frontend/core/network (Koin Named Binding).
 - SQLDelight als Offline-SSoT: Schema/Migrationen zentral versionieren, UI liest stets lokal und synchronisiert im Hintergrund.
 
-DI-Policy & Architecture Guards (MP-23)
+### DI-Policy & Architecture Guards (MP-23)
 
 - DI-Policy (Frontend)
   - Http‑Requests erfolgen ausschließlich über den via Koin bereitgestellten `apiClient` (named Binding) aus `:frontend:core:network`.
@@ -66,7 +84,7 @@ DI-Policy & Architecture Guards (MP-23)
   - Features importieren keine anderen Features (Kommunikation über Navigation + Shared‑Domain‑Modelle). Eine explizite Detekt‑Regel folgt.
   - Netzwerkzugriffe in Features nutzen Koin über die App‑Shell (DI‑Bootstrap). Für schrittweise Migration kann eine Factory den `apiClient` optional beziehen.
 
-Nächste Schritte (MP-22 Folgetasks)
+### Nächste Schritte (MP-22 Folgetasks)
 
 1. Physisches Verschieben der Frontend-Module gemäß Mapping und Anpassung von settings.gradle.kts.
 2. Physisches Verschieben der Backend-Komponenten in backend/* inkl. evtl. Package-Pfade, sofern notwendig.
