@@ -1,4 +1,4 @@
-# What's new in Kotlin 2.3.0 | Kotlin Documentation
+# What's new in Kotlin 2.3.0
 
 **Quelle:** [Original Kotlin Documentation](https://kotlinlang.org/docs/whatsnew23.html)
 **Datum des Dokuments:** 16. Dezember 2025
@@ -31,7 +31,7 @@ The following features have now graduated to Stable:
 *   Support for `return` statements in expression bodies with explicit return types is now enabled by default.
 
 ### Experimental: Unused return value checker
-Kotlin 2.3.0 introduces the unused return value checker to help prevent ignored results. It warns you whenever an expression returns a value other than `Unit` or `Nothing` and isn't used.
+Kotlin 2.3.0 introduces the unused return value checker to help prevent ignored results.
 
 ### Experimental: Explicit backing fields
 A new syntax for explicitly declaring the underlying field that holds a property's value, simplifying the common backing properties pattern.
@@ -53,13 +53,9 @@ Starting with Kotlin 2.3.0, the compiler can generate classes containing Java 25
 *   **Experimental Suspend Function Export:** Export suspend functions directly to JavaScript using `@JsExport`.
 *   **`BigInt64Array` for `LongArray`:** Simplifies interop with JavaScript APIs that use typed arrays.
 *   **Unified Companion Object Access:** Consistent access to companion objects in interfaces across all JS module systems.
-*   **`@JsStatic` in Interfaces:** Now supported in interfaces with companion objects.
-*   **`@JsQualifier` on individual declarations:** Can now be applied to individual functions and classes.
-*   **`@JsExport.Default`:** New annotation for generating JavaScript default exports.
 
 ## Gradle
 *   Fully compatible with Gradle 7.6.3 through 9.0.0.
-*   Minimum supported Android Gradle plugin version is now 8.2.2.
 *   New experimental API for registering generated sources.
 
 ## Standard library
@@ -68,5 +64,3 @@ Starting with Kotlin 2.3.0, the compiler can generate classes containing Java 25
 
 ## Compose compiler
 *   **Stack Traces for Minified Android Apps:** The compiler now outputs ProGuard mappings for Compose stack traces when applications are minified by R8.
-
-*(Dies ist eine gekürzte Zusammenfassung. Das Originaldokument enthält detailliertere Informationen und Code-Beispiele.)*

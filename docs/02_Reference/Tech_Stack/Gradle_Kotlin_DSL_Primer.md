@@ -52,7 +52,7 @@ The Kotlin DSL supports lazy property assignment using the `=` operator for type
 
 ```kotlin
 // Instead of:
-javaVersion.set(JavaLanguageVersion.of(17))
+// javaVersion.set(JavaLanguageVersion.of(17))
 
 // Use:
 javaVersion = JavaLanguageVersion.of(17)
@@ -106,5 +106,3 @@ repositories {
     mavenCentral()
 }
 ```
-
-*(Dies ist eine gekürzte Zusammenfassung. Das Originaldokument enthält detailliertere Informationen.)*
