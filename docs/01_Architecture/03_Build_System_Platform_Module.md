@@ -1,4 +1,4 @@
-# Platform Module
+# Architektur: Das Platform-Modul
 
 ## Überblick
 
@@ -10,10 +10,12 @@ Das Modul agiert als eine interne "Single Source of Truth" für alle externen Bi
 
 Das Platform-Modul ist in drei spezialisierte Untermodule aufgeteilt, die jeweils eine klare Aufgabe haben:
 
+```text
 platform/
 ├── platform-bom/                 # Bill of Materials (BOM) - Erzwingt Versionen
 ├── platform-dependencies/        # Bündelt gemeinsame Laufzeit-Abhängigkeiten
 └── platform-testing/             # Bündelt gemeinsame Test-Abhängigkeiten
+```
 
 ### `platform-bom`
 
@@ -52,6 +54,3 @@ Analog zu `platform-dependencies`, aber speziell für Test-Bibliotheken.
     ```
 
 * **Optimierung:** Dieses Modul nutzt die in `libs.versions.toml` definierten `[bundles]`, um die Build-Datei extrem kurz und lesbar zu halten.
-
----
-**Letzte Aktualisierung**: 31. Juli 2025

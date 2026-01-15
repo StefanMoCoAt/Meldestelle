@@ -2254,7 +2254,7 @@ sprüchen zur Verfügung zu stehen.
 4. Die Zusage der Richtertätigkeit ist dem Veranstalter unter Anga-
 be allfälliger Einschränkungen schriftlich zu bestätigen.
 5. Aufgaben des/der Stewards bzw. Richters am Abreiteplatz.
-Aufsicht am Abreiteplatz: Aufsicht des Trainings und des Abrei-
+Aufsicht am Abreitplatz: Aufsicht des Trainings und des Abrei-
 tens, Überprüfung der Ausrüstung von Reiter und Pferd, der
 Hilfsmittel und insbesondere der Sicherheitsausrüstung.
 Erhalten eines geordneten Abreitens für alle Teilnehmer mit

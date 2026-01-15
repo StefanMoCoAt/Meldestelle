@@ -1,7 +1,6 @@
-# Frontend
+# Frontend Module
 
-Kotlin Multiplatform Frontend layer.
+Dieses Modul enthält den gesamten Code für das Kotlin Multiplatform (KMP) Frontend "Meldestelle Portal".
 
-- shells: ausführbare Anwendungen (Assembler)
-- features: Vertical Slices (kein Feature→Feature Import)
-- core: gemeinsame Basis (Design-System, Network, Local-DB, Auth, Domain)
+**Die vollständige Dokumentation befindet sich hier:**
+[**-> docs/06_Frontend/README.md**](../docs/06_Frontend/README.md)

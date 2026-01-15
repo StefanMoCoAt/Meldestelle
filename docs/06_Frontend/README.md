@@ -10,6 +10,19 @@ Das Frontend ist eine **Kotlin Multiplatform (KMP)**-Anwendung, die für die fol
 
 Die Architektur ist auf **Offline-Fähigkeit** und eine reaktive UI ausgelegt.
 
+## Modul-Struktur
+
+Das `frontend`-Verzeichnis ist wie folgt strukturiert, um eine klare Trennung der Verantwortlichkeiten zu gewährleisten:
+
+*   `shells/`: Die ausführbaren Anwendungen (Assembler-Module), die die App für eine bestimmte Plattform (Desktop, Web) zusammenbauen.
+*   `features/`: Vertikale Slices der Anwendung. Jedes Feature-Modul kapselt eine bestimmte Funktionalität (z.B. `auth-feature`, `ping-feature`). Wichtig: Ein Feature-Modul darf niemals von einem anderen Feature-Modul abhängen.
+*   `core/`: Gemeinsame Basis-Module, die von allen Features genutzt werden. Dazu gehören:
+    *   `design-system/`: Compose-Komponenten, Themes, Farben.
+    *   `domain/`: Fachliche Kernlogik und Datenmodelle des Frontends.
+    *   `local-db/`: SQLDelight-Datenbank-Setup und Queries.
+    *   `navigation/`: Navigations-Logik und Routen-Definitionen.
+    *   `network/`: Ktor-Client und API-Definitionen.
+
 ## Kerntechnologien
 
 *   **UI:** [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/) für eine deklarative, plattformübergreifende UI.
@@ -17,12 +30,6 @@ Die Architektur ist auf **Offline-Fähigkeit** und eine reaktive UI ausgelegt.
 *   **State Management:** Kotlin Coroutines und Flow in Kombination mit ViewModels.
 *   **Dependency Injection:** [Koin](https://insert-koin.io/) für die lose Kopplung von Komponenten.
 *   **Netzwerk:** [Ktor Client](https://ktor.io/docs/client-introduction.html) für die Kommunikation mit dem Backend.
-
-## Architektur-Prinzipien
-
-*   **Clean Architecture / DDD:** Die Codebasis ist in Schichten unterteilt (UI, Application, Domain, Infrastructure), um eine klare Trennung der Verantwortlichkeiten zu gewährleisten.
-*   **Async-First Data Layer:** Alle Datenbank- und Netzwerk-Interaktionen sind asynchron (`suspend`-Funktionen), um die UI nicht zu blockieren.
-*   **Feature-basierte Modularisierung:** Die Anwendung ist in unabhängige "Feature"-Module unterteilt, die jeweils eine bestimmte Funktionalität kapseln.
 
 ## Wichtige Dokumente
 

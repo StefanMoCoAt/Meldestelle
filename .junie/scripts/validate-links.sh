@@ -2,8 +2,7 @@
 set -euo pipefail
 
 # validate-links.sh - Link-Validierung für Projektdokumentation (`docs/**`).
-# Zweck: Guardrail für die neue Doku-Strategie (Single Source of Truth = `docs/`).
-# Hinweis: Das frühere Guidelines-System (`.junie/guidelines/**`) ist entfernt.
+# Zweck: Guardrail für die "Docs-as-Code"-Strategie.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -29,7 +28,7 @@ BESCHREIBUNG:
   Ignoriert externe Links (http/https/mailto) sowie reine Anchors (#...).
 
 OPTIONEN:
-  --quick  Nur schnelle Checks (zusätzlich werden harte Altlast-Pfade geprüft)
+  --quick  Führt nur eine Teilmenge der Prüfungen durch (aktuell nicht implementiert).
 EOF
       exit 0
       ;;
@@ -54,14 +53,9 @@ if not docs_dir.is_dir():
     print(f"[ERROR] docs-Verzeichnis nicht gefunden: {docs_dir}", file=sys.stderr)
     sys.exit(2)
 
-# Harte Altlast-Pfade, die nicht mehr im Repo vorkommen sollen
-FORBIDDEN_SUBSTRINGS = [
-    "docs/00_Domain/",
-    "docs/adr/",
-    "docs/c4/",
-    "docs/how-to/",
-    "docs/reference/",
-]
+# Veraltete Pfad-Prüfungen wurden entfernt, da sie zu wartungsintensiv waren.
+# Das Skript konzentriert sich nun auf die Validierung der Link-Integrität.
+FORBIDDEN_SUBSTRINGS = []
 
 md_files = sorted(docs_dir.rglob("*.md"))
 

@@ -4,7 +4,7 @@ LanguageMultiplatform
 
 *   [Home](home.html)
 *   [Get started](getting-started.html)
-*   [Take Kotlin tour](kotlin-tour-welcome.html)
+*   [Take a Kotlin tour](kotlin-tour-welcome.html)
 *   What's new in Kotlin
     
 *   [Kotlin 2.3.0](whatsnew23.html)
