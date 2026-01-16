@@ -9,7 +9,7 @@ context: Operation Tracer Bullet (Phase 1)
 
 # Arbeitsanweisung: Infrastructure Hardening & Security Implementation
 
-**Ziel:** Finalisierung der Backend-Infrastruktur-Module und Härtung des `ping-service` gemäß [ADR 001](../../01_Architecture/adr/001-backend-infrastructure-decisions.md).
+**Ziel:** Finalisierung der Backend-Infrastruktur-Module und Härtung des `ping-service` gemäß [ADR 001](../01_Architecture/adr/001-backend-infrastructure-decisions.md).
 
 ---
 
@@ -75,5 +75,5 @@ Mache den Service "Production Ready".
 ---
 
 **Referenzen:**
-*   [ADR 001: Backend Infrastructure Decisions](../../01_Architecture/adr/001-backend-infrastructure-decisions.md)
-*   [Master Roadmap Q1 2026](../../01_Architecture/MASTER_ROADMAP_2026_Q1.md)
+*   [ADR 001: Backend Infrastructure Decisions](../01_Architecture/adr/001-backend-infrastructure-decisions.md)
+*   [Master Roadmap Q1 2026](../01_Architecture/MASTER_ROADMAP_2026_Q1.md)
