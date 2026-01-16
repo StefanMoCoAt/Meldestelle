@@ -1,6 +1,8 @@
 # 01 - Core Domain Entities
 
-Dieses Dokument definiert die zentralen fachlichen Entitäten (Kern-Entitäten) des "Meldestelle"-Projekts. Diese Entitäten bilden das Fundament des Datenmodells und der gesamten Anwendungslogik. Sie sind das Ergebnis der Analyse der OEPS/ÖTO- und FEI-Regelwerke sowie der grundlegenden Anforderungen an das System.
+Dieses Dokument definiert die zentralen fachlichen Entitäten (Kern-Entitäten) des "Meldestelle"-Projekts. Diese Entitäten bilden das Fundament des Datenmodells und der gesamten Anwendungslogik.
+
+> **Hinweis:** Dieses Modell wurde basierend auf der Analyse des OEPS-Pflichtenhefts 2021 V2.4 verfeinert.
 
 ## Die 6 Kern-Entitäten
 
@@ -20,7 +22,7 @@ Dieses Dokument definiert die zentralen fachlichen Entitäten (Kern-Entitäten) 
 **Beispiele:** "Apropos Pferd 2026", "Vereinsturnier Reitclub XY".
 
 **Attribute:**
-*   `Event-ID` (PK): Eindeutiger technischer Schlüssel.
+*   `Event-ID` (PK): Eindeutiger technischer Schlüssel (UUID).
 *   `Name`: Offizieller Name des Events.
 *   `Veranstaltungsort`: Adresse und Name der Anlage.
 *   `Datum_Von`: Startdatum des Events.
@@ -37,8 +39,9 @@ Dieses Dokument definiert die zentralen fachlichen Entitäten (Kern-Entitäten) 
 **Beispiele:** "CSN-A im Rahmen der Apropos Pferd", "CSI2* im Rahmen der Apropos Pferd".
 
 **Attribute:**
-*   `Turnier-ID` (PK): Eindeutiger technischer Schlüssel.
+*   `Turnier-ID` (PK): Eindeutiger technischer Schlüssel (UUID).
 *   `Event_ID` (FK): Verweis auf das übergeordnete `Event`.
+*   `Turniernummer_OEPS`: 5-stellige Nummer (z.B. `21001`) für den Datenaustausch.
 *   `Regelwerk`: Entscheidende Weiche für die Anwendungslogik (Enum: `OETO`, `FEI`).
 *   `Kategorie`: Offizielle Turnierkategorie (z.B. "CSN-A", "CSI2*", "CDI-W").
 *   `Disziplinen`: Liste der angebotenen Sportarten (z.B. `Springen`, `Dressur`).
@@ -55,11 +58,13 @@ Dieses Dokument definiert die zentralen fachlichen Entitäten (Kern-Entitäten) 
 **Beispiele:** "Standardspringprüfung Kl. L", "Dressurprüfung Kl. M - Aufgabe M5".
 
 **Attribute:**
-*   `Bewerb-ID` (PK): Eindeutiger technischer Schlüssel.
+*   `Bewerb-ID` (PK): Eindeutiger technischer Schlüssel (UUID).
 *   `Turnier_ID` (FK): Verweis auf das zugehörige `Turnier`.
-*   `Nummer`: Die offizielle Nummer des Bewerbs laut Ausschreibung (z.B. "05").
+*   `Nummer_Intern`: 2-stellige Nummer (z.B. `05`).
+*   `Nummer_Offiziell`: 3-stellige Nummer (z.B. `005`) für Turniere > 99 Bewerbe.
+*   `Abteilung`: Kennzeichen für Unterteilungen (z.B. `1`, `2`). Default `0`.
 *   `Titel`: Der offizielle Titel des Bewerbs.
-*   `Startgeld`: Das für diesen Bewerb zu entrichtende Startgeld.
+*   `Startgeld`: Das für diesen Bewerb zu entrichtende Startgeld (in EUR).
 *   `Startberechtigung_Text`: Textuelle Beschreibung der Teilnahmevoraussetzungen.
 *   `Besondere_Bestimmungen`: Spezielle Regeln nur für diesen Bewerb.
 
@@ -72,7 +77,7 @@ Dieses Dokument definiert die zentralen fachlichen Entitäten (Kern-Entitäten) 
 **Beispiele:** "Casino Grand Prix 2026", "OÖ Landesmeisterschaft Dressur Allgemeine Klasse".
 
 **Attribute:**
-*   `Serie-ID` (PK): Eindeutiger technischer Schlüssel.
+*   `Serie-ID` (PK): Eindeutiger technischer Schlüssel (UUID).
 *   `Name`: Offizieller Name der Serie.
 *   `Saison`: Das Jahr, in dem die Serie stattfindet.
 *   `Reglement_Text`: Die spezifischen Regeln für die Wertung (Punktesystem, etc.).
@@ -83,37 +88,43 @@ Dieses Dokument definiert die zentralen fachlichen Entitäten (Kern-Entitäten) 
 
 ### 5. Entität: `Akteur`
 
-**Zweck:** Zentrale, widerspruchsfreie Verwaltung aller beteiligten Personen und Organisationen, unabhängig von ihrer Rolle.
+**Zweck:** Zentrale, widerspruchsfreie Verwaltung aller beteiligten Personen und Organisationen.
 
 **Beispiele:** Ein Reiter, ein Pferdebesitzer, ein Züchter, ein Richter, ein Reitverein.
 
 **Attribute:**
-*   `Akteur-ID` (PK): Eindeutiger technischer Schlüssel.
+*   `Akteur-ID` (PK): Eindeutiger technischer Schlüssel (UUID).
 *   `Typ`: `PERSON` oder `ORGANISATION`.
 *   `Name`: Vollständiger Name der Person oder Organisation.
 *   `Kontakt`: Adress- und Kontaktdaten.
-*   `Rollen`: Eine Liste der Rollen, die dieser Akteur einnimmt (z.B. `REITER`, `PFERDEBESITZER`, `ZÜCHTER`, `FUNKTIONÄR`, `VERANSTALTER`).
-*   `Identifikatoren`: Ein flexibler Speicher (z.B. JSON oder eigene Tabelle) für alle offiziellen Nummern:
-  *   `OEPS-Lizenznummer`
-  *   `FEI-ID`
-  *   `Mitgliedsnummer_Zuchtverband`
+*   `Rollen`: Liste der Rollen (z.B. `REITER`, `RICHTER`).
+*   **OEPS-Daten (für Personen):**
+    *   `Satznummer`: 6-stellig, numerisch (Primärschlüssel OEPS).
+    *   `Lizenz`: Aktueller Lizenzcode (z.B. "R1").
+    *   `Startkarte`: Boolean/Status (Jahresgebühr bezahlt?).
+    *   `Verein_ID`: Verweis auf den Stammverein.
+*   **Identifikatoren (Sonstige):**
+    *   `FEI-ID`
+    *   `Mitgliedsnummer_Zuchtverband`
 
 ---
 
 ### 6. Entität: `Pferd`
 
-**Zweck:** Zentrale Verwaltung aller Pferde, egal ob im Sport oder in der Zucht, mit all ihren unterschiedlichen Identitäten.
+**Zweck:** Zentrale Verwaltung aller Pferde, egal ob im Sport oder in der Zucht.
 
-**Beispiele:** Ein international erfolgreiches Sportpferd, eine Zuchtstute, ein junges Pferd in Ausbildung.
+**Beispiele:** Ein international erfolgreiches Sportpferd, eine Zuchtstute.
 
 **Attribute:**
-*   `Pferd-ID` (PK): Eindeutiger technischer Schlüssel.
+*   `Pferd-ID` (PK): Eindeutiger technischer Schlüssel (UUID).
 *   `Name`: Offizieller Name des Pferdes.
 *   `Abstammung_Vater_ID` (FK): Verweis auf ein anderes `Pferd` (Vater).
 *   `Abstammung_Mutter_ID` (FK): Verweis auf ein anderes `Pferd` (Mutter).
 *   `Besitzer_ID` (FK): Verweis auf den `Akteur`, dem das Pferd gehört.
-*   `Identifikatoren`: Ein flexibler Speicher für alle offiziellen Nummern:
-  *   `Lebensnummer` (aus der Zucht)
-  *   `OEPS-Registrierungsnummer`
-  *   `FEI-ID`
-  *   `Chip-Nummer`
+*   **OEPS-Daten:**
+    *   `Satznummer`: 10-stellig, numerisch (Primärschlüssel OEPS).
+    *   `Kopfnummer`: 4-stellig, alphanumerisch (Permanente ID).
+    *   `Lebensnummer`: 9-stellig (Zuchtnummer).
+*   **FEI-Daten:**
+    *   `FEI-ID`: Eindeutige FEI-Nummer.
+    *   `FEI-Pass`: Passnummer (kann abweichen).
