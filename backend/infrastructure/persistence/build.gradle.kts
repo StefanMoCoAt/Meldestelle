@@ -16,6 +16,7 @@ tasks.jar {
 }
 
 dependencies {
+    implementation(platform(projects.platform.platformBom))
     implementation(projects.core.coreUtils)
     implementation(projects.core.coreDomain)
     implementation(projects.platform.platformDependencies)
@@ -33,4 +34,12 @@ dependencies {
 
     // Logging
     implementation(libs.slf4j.api)
+
+    // Testing
+    testImplementation(projects.platform.platformTesting)
+    testImplementation(libs.bundles.testing.jvm)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

@@ -22,6 +22,7 @@ dependencies {
   implementation(projects.core.coreUtils)
   implementation(projects.platform.platformDependencies)
   implementation(projects.backend.infrastructure.monitoring.monitoringClient)
+  implementation(projects.backend.infrastructure.security) // NEU: Security Module
 
   // === GATEWAY-SPEZIFISCHE ABHÄNGIGKEITEN ===
   // Die WebFlux-Abhängigkeit wird jetzt korrekt durch das BOM bereitgestellt.
@@ -32,9 +33,17 @@ dependencies {
   implementation(libs.spring.cloud.starter.gateway.server.webflux)
   implementation(libs.spring.cloud.starter.consul.discovery)
   implementation(libs.spring.boot.starter.actuator)
-  implementation(libs.spring.boot.starter.security)
-  implementation(libs.spring.boot.starter.oauth2.resource.server)
-  implementation(libs.spring.security.oauth2.jose)
+  // Security dependencies are now transitively provided by infrastructure.security,
+  // but Gateway is WebFlux, so we might need specific WebFlux security if the shared module is WebMVC only.
+  // However, starter-security works for both. Resource server might need check.
+  // For now, we keep explicit dependencies if they differ from the shared module or just rely on shared.
+  // Shared module has: starter-security, starter-oauth2-resource-server, jose, web.
+  // Gateway needs: starter-security, starter-oauth2-resource-server, jose.
+  // "web" (MVC) vs "webflux" (Reactive) conflict might occur if shared module pulls in MVC.
+  // CHECK: Shared module uses `implementation(libs.spring.web)`. This pulls in spring-webmvc usually?
+  // No, `spring-web` is common. `spring-boot-starter-web` pulls in MVC.
+  // The shared module build.gradle.kts uses `libs.spring.web`.
+
   implementation(libs.spring.cloud.starter.circuitbreaker.resilience4j)
 
   // Ergänzende Observability (Logging, Jackson)

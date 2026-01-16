@@ -61,6 +61,9 @@ include(":backend:infrastructure:monitoring:monitoring-server")
 // --- PERSISTENCE ---
 include(":backend:infrastructure:persistence")
 
+// --- SECURITY ---
+include(":backend:infrastructure:security")
+
 // === BACKEND - SERVICES ===
 // --- ENTRIES (Nennungen) ---
 include(":backend:services:entries:entries-api")

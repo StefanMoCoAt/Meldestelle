@@ -19,8 +19,10 @@ dependencies {
     // Our central BOM for consistent versions
     implementation(platform(projects.platform.platformBom))
     implementation(projects.platform.platformDependencies)
-    // NEU: Zugriff auf die verschobenen DatabaseUtils
+
+    // Infrastructure Modules
     implementation(projects.backend.infrastructure.persistence)
+    implementation(projects.backend.infrastructure.security) // NEU: Security Module
 
     // === Spring Boot & Cloud ===
     // Standard dependencies for a secure microservice
