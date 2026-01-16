@@ -1,8 +1,9 @@
 ---
 type: Task
-status: OPEN
+status: DONE
 owner: Senior Backend Developer
 created: 2026-01-15
+completed: 2026-01-16
 priority: HIGH
 context: Operation Tracer Bullet (Phase 1)
 ---
@@ -29,18 +30,18 @@ Die Architektur wurde wie folgt geschärft (siehe ADR 001):
 ### A. Security Module (`backend/infrastructure/security`)
 Dieses Modul wurde neu angelegt. Fülle es mit Leben.
 
-*   [ ] **Security Configuration:**
+*   [x] **Security Configuration:**
     *   Erstelle eine `SecurityConfig`-Klasse, die `SecurityFilterChain` konfiguriert.
     *   Implementiere OAuth2 Resource Server Support (JWT Validierung).
     *   Definiere globale CORS-Regeln (Frontend darf zugreifen).
-*   [ ] **Role Converter:**
+*   [x] **Role Converter:**
     *   Implementiere einen `KeycloakRoleConverter`, der die Rollen aus dem JWT (Realm/Resource Access) in Spring Security `GrantedAuthority` mapping.
 *   **Wichtig:** Achte auf Kompatibilität. Das Gateway nutzt WebFlux (Reactive), die Services nutzen WebMVC (Servlet). Falls nötig, trenne die Konfigurationen oder nutze `ConditionalOnWebApplication`.
 
 ### B. Persistence Layer (`backend/infrastructure/persistence`)
 Das Modul ist bereits konfiguriert.
 
-*   [ ] **Verwendung im Service:**
+*   [x] **Verwendung im Service:**
     *   Stelle sicher, dass der `ping-service` dieses Modul nutzt.
     *   Implementiere `PingEntity` als JPA Entity.
     *   Nutze `JpaRepository` für Standard-CRUD-Operationen.
@@ -48,17 +49,17 @@ Das Modul ist bereits konfiguriert.
 ### C. Ping Service Hardening (`backend/services/ping/ping-service`)
 Mache den Service "Production Ready."
 
-*   [ ] **Flyway:**
+*   [x] **Flyway:**
     *   Erstelle `src/main/resources/db/migration/V1__init_ping.sql`.
     *   Definiere das Schema für die `ping` Tabelle.
-*   [ ] **API Implementation:**
+*   [x] **API Implementation:**
     *   Implementiere `/ping/public` (offen) und `/ping/secure` (benötigt Auth).
     *   Nutze `@PreAuthorize("hasRole('MELD_USER')")` o.ä. zum Testen der Rollen.
-*   [ ] **Resilience:**
+*   [x] **Resilience:**
     *   Konfiguriere Resilience4j (CircuitBreaker) für die DB-Verbindung (via `application.yml`).
 
 ### D. Gateway Integration (`backend/infrastructure/gateway`)
-*   [ ] **Routing:**
+*   [x] **Routing:**
     *   Prüfe die `application.yml` im Gateway.
     *   Stelle sicher, dass Routen zum `ping-service` korrekt konfiguriert sind (via Service Discovery "ping-service").
 
