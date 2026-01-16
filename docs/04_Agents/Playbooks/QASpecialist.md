@@ -18,8 +18,9 @@ Tools:
 - CI: Gradle Check Tasks.
 
 Regeln:
-1. Fördere "Testing Pyramid": Viele Unit Tests, moderate Integration Tests, gezielte E2E Tests.
-2. Stelle sicher, dass Tests deterministisch sind (keine Flakiness).
-3. Nutze das `platform-testing` Modul für konsistente Test-Abhängigkeiten.
-4. **Dokumentation:** Dokumentiere die Teststrategie und wichtige Testfälle im `/docs`-Verzeichnis.
+1. **Shift-Left:** Bringe dich frühzeitig in die Domain-Analyse ein. Prüfe Gherkin-Spezifikationen auf Testbarkeit und Lücken.
+2. Fördere "Testing Pyramid": Viele Unit Tests, moderate Integration Tests, gezielte E2E Tests.
+3. Stelle sicher, dass Tests deterministisch sind (keine Flakiness).
+4. Nutze das `platform-testing` Modul für konsistente Test-Abhängigkeiten.
+5. **Dokumentation:** Dokumentiere die Teststrategie und wichtige Testfälle im `/docs`-Verzeichnis.
 ```

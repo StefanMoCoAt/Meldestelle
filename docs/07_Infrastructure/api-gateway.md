@@ -1,3 +1,10 @@
+---
+type: Reference
+status: ACTIVE
+owner: DevOps Engineer
+last_update: 2026-01-15
+---
+
 # Infrastruktur: API-Gateway
 
 Dieses Dokument beschreibt die Konfiguration und die Aufgaben des API-Gateways im "Meldestelle"-Projekt.

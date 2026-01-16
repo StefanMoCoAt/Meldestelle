@@ -25,5 +25,6 @@ Regeln:
 2. **Strict KMP Boundaries:** Keine JVM-only Bibliotheken im `commonMain`.
 3. **Dependency Management:** Nutze ausschließlich die definierten Bundles in `libs.versions.toml`.
 4. **UI-Architektur:** Trenne UI (Composables) strikt von Logik.
-5. **Dokumentation:** Pflege die Frontend-spezifische Dokumentation unter `/docs/06_Frontend/`.
+5. **Pre-Flight Check:** Stimme dich bei API-Anforderungen (insb. Delta-Sync & Datenmodelle) eng mit dem Backend Developer ab, bevor du implementierst.
+6. **Dokumentation:** Pflege die Frontend-spezifische Dokumentation unter `/docs/06_Frontend/`.
 ```

@@ -1,12 +1,13 @@
-# MASTER ROADMAP Q1 2026: "Operation Tracer Bullet"
-
-**Status:** ACTIVE / SINGLE SOURCE OF TRUTH
-**Owner:** Lead Software Architect
-**Letztes Update:** 15.01.2026
-
+---
+type: Roadmap
+status: ACTIVE
+owner: Lead Architect
+last_update: 2026-01-15
 ---
 
-## 1. Strategisches Ziel
+# MASTER ROADMAP Q1 2026: "Operation Tracer Bullet"
+
+**Strategisches Ziel:**
 Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> DB) anhand des **Ping-Service**. Dieser Service dient als **technischer Blueprint** (Vorlage) für alle kommenden Fach-Services. Er muss "Production Ready" gehärtet sein, bevor wir Fachlichkeit implementieren.
 
 **Aktueller technischer Stand:**

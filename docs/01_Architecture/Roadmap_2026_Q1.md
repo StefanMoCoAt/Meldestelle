@@ -1,64 +1,11 @@
+---
+type: Roadmap
+status: ARCHIVED
+owner: Lead Architect
+last_update: 2026-01-15
+---
+
 # Roadmap Q1 2026: "Operation Tracer Bullet"
 
-**Status:** Draft
-**Owner:** Lead Software Architect
-**Ziel:** Stabilisierung der Architektur und Durchstich ("Tracer Bullet") mit dem `ping-service`.
-
----
-
-## Phase 1: Fundament & Stabilisierung (Woche 1-2)
-
-Das Ziel dieser Phase ist es, die Entwicklungsumgebung (Build, Docker, Dependencies) so zu stabilisieren, dass alle Entwickler (und Agenten) reibungslos arbeiten können.
-
-### 1.1 Build-System & Dependencies (Architect)
-- [ ] **Spring Cloud Fix:** Downgrade von `2025.1.0` (Oakwood) auf `2025.0.1` (Northfields) in `libs.versions.toml` und `platform-bom`.
-- [ ] **Wasm Build Fix:** Analyse und Behebung der `Worker` / `Unresolved reference` Fehler im Frontend-Build. Ggf. explizite Dependency für `kotlinx-browser` prüfen.
-- [ ] **Dependency Cleanup:** Entfernen von redundanten Datenbank-Libs (Entscheidung: SQLDelight für KMP Client, Room entfernen wenn nicht genutzt; Exposed im Backend auf `1.0.0-rc-4` heben).
-- [ ] **Micrometer Upgrade:** Explizites Setzen von Micrometer `1.16.1` für besseren Java 25 Support.
-
-### 1.2 Infrastruktur & Docker (DevOps)
-- [ ] **Gateway CircuitBreaker:** Behebung des `ClassNotFoundException` / `NoSuchMethodError` im Gateway (vermutlich Folge des Spring Cloud Konflikts).
-- [ ] **Docker Stabilität:** Sicherstellen, dass `docker compose up` zuverlässig alle Services (Consul, Keycloak, Postgres) startet und vernetzt.
-- [ ] **Keycloak Config:** Validierung der Realm-Konfiguration (`meldestelle`) und der Client-Scopes für den `ping-service`.
-
----
-
-## Phase 2: Backend Implementation "Ping" (Woche 2-3)
-
-Implementierung des ersten vertikalen Durchstichs.
-
-### 2.1 Modul-Struktur & API (Backend Dev)
-- [ ] **Refactoring `core-utils`:** Verschieben von JVM-spezifischem Code (`DatabaseUtils`) nach `:backend:infrastructure:persistence`. `core-utils` muss "pure KMP" sein.
-- [ ] **API Definition:** Erstellung von `:contracts:ping-api` mit KMP-kompatiblen DTOs (`PingResponse`).
-
-### 2.2 Service Implementation (Backend Dev)
-- [ ] **Ping Service:** Implementierung von `:backend:services:ping:ping-service` mit Spring Boot 3.5.9.
-- [ ] **Security:** Integration von OAuth2 Resource Server (Keycloak) und Absicherung des `/secure` Endpoints.
-- [ ] **Discovery:** Registrierung bei Consul.
-- [ ] **Observability:** Tracing mit Zipkin und Metrics mit Prometheus aktivieren.
-
----
-
-## Phase 3: Frontend Integration (Woche 3-4)
-
-Anbindung des Frontends an den neuen Service.
-
-### 3.1 HTTP Client & Sync (Frontend Expert)
-- [ ] **Ktor Client:** Konfiguration des HTTP-Clients für die Kommunikation mit dem Gateway (`http://localhost:8080`).
-- [ ] **Auth:** Implementierung des OIDC-Flows im Frontend (Login via Keycloak), Speichern des Tokens.
-- [ ] **Integration:** Aufruf von `/api/ping` und `/api/ping/secure` und Anzeige im UI.
-
-### 3.2 Offline-Sync Basis (Frontend Expert)
-- [ ] **Sync-Logik:** Erste Implementierung eines Sync-Mechanismus (z.B. Queue für Offline-Requests) basierend auf SQLDelight.
-
----
-
-## Phase 4: Review & Hardening (Woche 4)
-
-### 4.1 Quality Assurance (QA Specialist)
-- [ ] **Integrationstests:** Automatisierte Tests, die den gesamten Flow (Frontend -> Gateway -> Service) prüfen.
-- [ ] **Lasttests:** Einfache Lasttests auf den `ping-service` zur Validierung der Virtual Threads.
-
-### 4.2 Documentation (Curator)
-- [ ] **Update Docs:** Aktualisierung der Architektur-Dokumentation basierend auf den Erkenntnissen.
-- [ ] **Onboarding:** Sicherstellen, dass neue Entwickler das Projekt mit einem Befehl starten können.
+**MOVED:** This file has been archived to `_archive/2026-01-15_Roadmap_2026_Q1.md`.
+Please use `MASTER_ROADMAP_2026_Q1.md` as the Single Source of Truth.

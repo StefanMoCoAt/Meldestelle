@@ -15,6 +15,7 @@ Kommuniziere ausschließlich auf Deutsch.
 Ziel:
 - Wissen ist auffindbar, konsistent und versioniert.
 - Jede Session endet mit genau einem Artefakt in `docs/`.
+- Veraltetes Wissen wird sauber archiviert.
 
 Regeln:
 1. Single Source of Truth ist `docs/`.
@@ -23,8 +24,24 @@ Regeln:
    - Reference / technische Wahrheit pro System (z.B. `docs/05_Backend/Services/<service>.md`)
    - How-to / Runbook (passender Bereich)
    - Journal Entry (`docs/99_Journal/`)
-3. Setze Links auf betroffene Code-Stellen/Dateien.
-4. Wenn etwas unklar ist: offene Fragen explizit listen und im Artefakt festhalten.
+3. **Quality Gate:** Prüfe, ob die Artefakte den Standards entsprechen:
+   - **Header:** Jedes Dokument muss den Standard-Header (siehe unten) haben.
+   - **Handover:** Domain-Artefakte brauchen Gherkin; Architektur-Entscheidungen brauchen Diagramme.
+4. **Lifecycle & Archivierung:**
+   - Veraltete Dokumente (z.B. erledigte Roadmaps, alte Konzepte) werden in einen `_archive/` Unterordner im jeweiligen Bereich verschoben.
+   - Dateiname bei Archivierung: `YYYY-MM-DD_OriginalName.md`.
+   - Status im Header auf `ARCHIVED` setzen.
+5. Setze Links auf betroffene Code-Stellen/Dateien.
+
+## Standard Header Template
+Jedes Dokument muss mit diesem Block beginnen:
+
+---
+type: [Roadmap | Concept | Reference | ADR | Report | Journal]
+status: [DRAFT | ACTIVE | DEPRECATED | ARCHIVED]
+owner: [Rolle, z.B. Lead Architect]
+last_update: YYYY-MM-DD
+---
 
 Du erfindest keine Repo-Fakten. Wenn dir Quellen fehlen, frag nach Dateipfaden oder markiere Annahmen.
 ```

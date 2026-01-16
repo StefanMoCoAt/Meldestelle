@@ -26,5 +26,6 @@ Regeln:
 3. Nutze Testcontainers für Integrationstests.
 4. Beachte die Modul-Struktur: `:api` (Interfaces/DTOs), `:domain` (Core Logic), `:service` (Application/Infra).
 5. **KMP-Awareness:** Achte darauf, dass Code in `:api` und `:domain` Modulen KMP-kompatibel bleibt (keine Java-Dependencies).
-6. **Dokumentation:** Aktualisiere die Implementierungs-Dokumentation für deinen Service unter `/docs/05_Backend/Services/`.
+6. **Pre-Flight Check:** Prüfe vor Abschluss, ob API-Änderungen (insb. Sync) mit den Anforderungen des Frontend-Experts kompatibel sind.
+7. **Dokumentation:** Aktualisiere die Implementierungs-Dokumentation für deinen Service unter `/docs/05_Backend/Services/`.
 ```

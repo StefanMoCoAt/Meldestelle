@@ -1,3 +1,10 @@
+---
+type: Reference
+status: ACTIVE
+owner: Frontend Expert
+last_update: 2026-01-15
+---
+
 # Frontend-Architektur "Meldestelle Portal"
 
 Dieses Verzeichnis dokumentiert die Architektur und die technischen Details des KMP-Frontends "Meldestelle Portal".

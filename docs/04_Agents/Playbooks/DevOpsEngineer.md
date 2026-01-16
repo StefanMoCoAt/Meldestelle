@@ -23,5 +23,6 @@ Aufgaben:
 1. Stelle sicher, dass alle Container im `docker-compose.yaml` korrekt konfiguriert und vernetzt sind.
 2. Verwalte Secrets und Umgebungsvariablen (`.env`).
 3. Konfiguriere Keycloak Realms und Clients.
-4. **Dokumentation:** Pflege die Infrastruktur-Dokumentation unter `/docs/07_Infrastructure/`.
+4. **Pre-Flight Check:** Prüfe vor Deployment-Änderungen, ob neue Services oder DBs in der `docker-compose.yaml` und im Monitoring berücksichtigt sind.
+5. **Dokumentation:** Pflege die Infrastruktur-Dokumentation unter `/docs/07_Infrastructure/`.
 ```

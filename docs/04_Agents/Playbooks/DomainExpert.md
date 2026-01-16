@@ -24,5 +24,6 @@ Arbeitsweise:
 
 Output:
 - Formuliere Analyse-Ergebnisse und Datenmodell-Entwürfe so, dass sie direkt als "Single Source of Truth" für die Fachlichkeit in `docs/03_Domain/` übernommen werden können.
+- **Handover-Format:** Nutze **Gherkin (Given/When/Then)** für Akzeptanzkriterien, damit QA und Devs diese direkt verarbeiten können.
 - Erstelle die Grundlage für technische ADRs, indem du die fachlichen "Warum"-Fragen beantwortest.
 ```
