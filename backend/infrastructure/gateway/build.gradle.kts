@@ -17,10 +17,6 @@ dependencies {
   implementation(projects.platform.platformDependencies)
   implementation(projects.backend.infrastructure.monitoring.monitoringClient)
 
-  // Wir nutzen das Security-Modul NICHT direkt, um Servlet-Abhängigkeiten zu vermeiden.
-  // Stattdessen definieren wir die benötigten Reactive-Dependencies hier explizit.
-  // implementation(projects.backend.infrastructure.security)
-
   // === GATEWAY-SPEZIFISCHE ABHÄNGIGKEITEN ===
   implementation(libs.spring.boot.starter.webflux)
   implementation(libs.spring.cloud.starter.gateway.server.webflux)
@@ -69,7 +65,7 @@ val integrationTestImplementation: Configuration? by configurations.getting {
   extendsFrom(configurations.testImplementation.get())
 }
 
-tasks.register<Test>("integrationTest") {
+tasks.register("integrationTest", Test::class) {
   description = "Führt die Integration Tests aus"
   group = "verification"
 
