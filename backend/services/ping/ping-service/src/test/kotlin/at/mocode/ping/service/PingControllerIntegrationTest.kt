@@ -2,16 +2,22 @@ package at.mocode.ping.service
 
 import at.mocode.ping.application.PingUseCase
 import at.mocode.ping.domain.Ping
+import at.mocode.ping.infrastructure.persistence.PingRepositoryAdapter
 import at.mocode.ping.infrastructure.web.PingController
+import at.mocode.ping.test.TestPingServiceApplication
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -22,21 +28,29 @@ import java.time.Instant
  */
 @WebMvcTest(
   controllers = [PingController::class],
-  excludeAutoConfiguration = [
-    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration::class,
-    org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration::class
-  ]
+  properties = ["spring.aop.proxy-target-class=true"]
 )
-@Import(PingControllerIntegrationTest.TestConfig::class)
+@ContextConfiguration(classes = [TestPingServiceApplication::class])
+@ActiveProfiles("test")
+@Import(PingControllerIntegrationTest.PingControllerIntegrationTestConfig::class)
 class PingControllerIntegrationTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    @TestConfiguration
-    class TestConfig {
-        @Bean
+    @Autowired
+    @Qualifier("pingUseCaseIntegrationMock")
+    private lateinit var pingUseCase: PingUseCase
+
+    @Configuration
+    class PingControllerIntegrationTestConfig {
+        @Bean("pingUseCaseIntegrationMock")
+        @Primary
         fun pingUseCase(): PingUseCase = mockk(relaxed = true)
+
+        @Bean
+        @Primary
+        fun pingRepositoryAdapter(): PingRepositoryAdapter = mockk(relaxed = true)
     }
 
     @Test
@@ -46,8 +60,7 @@ class PingControllerIntegrationTest {
 
         // For endpoints that require the use-case, the relaxed mock is sufficient,
         // but we still provide deterministic ping data.
-        val useCase = TestConfig().pingUseCase()
-        every { useCase.executePing(any()) } returns Ping(
+        every { pingUseCase.executePing(any()) } returns Ping(
             message = "Simple Ping",
             timestamp = Instant.parse("2023-10-01T10:00:00Z")
         )

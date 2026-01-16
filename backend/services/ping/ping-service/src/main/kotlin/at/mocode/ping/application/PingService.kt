@@ -3,6 +3,7 @@ package at.mocode.ping.application
 import at.mocode.ping.domain.Ping
 import at.mocode.ping.domain.PingRepository
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.uuid.ExperimentalUuidApi
@@ -14,6 +15,7 @@ import kotlin.uuid.Uuid
  * Hier darf Spring (@Service, @Transactional) verwendet werden, da es "Application Logic" ist.
  */
 @Service
+@Profile("!test") // Nicht im Test-Profil laden, damit wir Mocks nutzen können
 @OptIn(ExperimentalUuidApi::class)
 class PingService(
     private val repository: PingRepository

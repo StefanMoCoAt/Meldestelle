@@ -21,30 +21,21 @@ class TestPingApiClient : PingApi {
   var simplePingResponse: PingResponse? = null
   var enhancedPingResponse: EnhancedPingResponse? = null
   var healthResponse: HealthResponse? = null
+  var publicPingResponse: PingResponse? = null
+  var securePingResponse: PingResponse? = null
 
   // Call tracking
   var simplePingCalled = false
   var enhancedPingCalledWith: Boolean? = null
   var healthCheckCalled = false
+  var publicPingCalled = false
+  var securePingCalled = false
   var callCount = 0
 
   override suspend fun simplePing(): PingResponse {
     simplePingCalled = true
     callCount++
-
-    if (simulateDelay) {
-      kotlinx.coroutines.delay(delayMs)
-    }
-
-    if (shouldThrowException) {
-      throw Exception(exceptionMessage)
-    }
-
-    return simplePingResponse ?: PingResponse(
-      status = "OK",
-      timestamp = "2025-09-27T21:27:00Z",
-      service = "test-ping-service"
-    )
+    return handleRequest(simplePingResponse)
   }
 
   override suspend fun enhancedPing(simulate: Boolean): EnhancedPingResponse {
@@ -88,6 +79,34 @@ class TestPingApiClient : PingApi {
     )
   }
 
+  override suspend fun publicPing(): PingResponse {
+    publicPingCalled = true
+    callCount++
+    return handleRequest(publicPingResponse)
+  }
+
+  override suspend fun securePing(): PingResponse {
+    securePingCalled = true
+    callCount++
+    return handleRequest(securePingResponse)
+  }
+
+  private suspend fun handleRequest(response: PingResponse?): PingResponse {
+    if (simulateDelay) {
+      kotlinx.coroutines.delay(delayMs)
+    }
+
+    if (shouldThrowException) {
+      throw Exception(exceptionMessage)
+    }
+
+    return response ?: PingResponse(
+      status = "OK",
+      timestamp = "2025-09-27T21:27:00Z",
+      service = "test-ping-service"
+    )
+  }
+
   // Test utilities
   fun reset() {
     shouldThrowException = false
@@ -97,9 +116,13 @@ class TestPingApiClient : PingApi {
     simplePingResponse = null
     enhancedPingResponse = null
     healthResponse = null
+    publicPingResponse = null
+    securePingResponse = null
     simplePingCalled = false
     enhancedPingCalledWith = null
     healthCheckCalled = false
+    publicPingCalled = false
+    securePingCalled = false
     callCount = 0
   }
 }

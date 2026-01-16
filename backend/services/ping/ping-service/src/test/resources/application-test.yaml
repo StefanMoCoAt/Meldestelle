@@ -1,6 +1,8 @@
 spring:
   application:
     name: ping-service-test
+  main:
+    allow-bean-definition-overriding: true
   cloud:
     consul:
       enabled: false

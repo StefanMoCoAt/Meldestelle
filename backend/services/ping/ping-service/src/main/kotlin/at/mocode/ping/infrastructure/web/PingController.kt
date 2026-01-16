@@ -83,6 +83,7 @@ class PingController(
     )
 
     // Fallback
+    @Suppress("unused", "UNUSED_PARAMETER")
     fun fallbackPing(simulate: Boolean, ex: Exception): EnhancedPingResponse {
         logger.warn("Circuit breaker fallback triggered: {}", ex.message)
         return EnhancedPingResponse(

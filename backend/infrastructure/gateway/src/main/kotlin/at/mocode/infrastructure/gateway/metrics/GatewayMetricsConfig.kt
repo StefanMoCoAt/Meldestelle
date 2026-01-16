@@ -33,7 +33,6 @@ class GatewayMetricsConfig {
     const val GATEWAY_ERROR_COUNTER = "gateway_errors_total"
     const val GATEWAY_REQUESTS_COUNTER = "gateway_requests_total"
     const val GATEWAY_CIRCUIT_BREAKER_COUNTER = "gateway_circuit_breaker_events_total"
-    const val GATEWAY_DOWNSTREAM_HEALTH_GAUGE = "gateway_downstream_health_status"
   }
 
   /**
@@ -70,13 +69,6 @@ class GatewayMetricsConfig {
   fun gatewayMetricsWebFilter(meterRegistry: MeterRegistry): WebFilter {
     return GatewayMetricsWebFilter(meterRegistry)
   }
-
-  /**
-   * Bean für Request Duration Timer - entfernt um Konflikte mit dem WebFilter zu vermeiden.
-   * Die Request-Zeiten werden automatisch im GatewayMetricsWebFilter erfasst.
-   */
-  // @Bean - entfernt, um Prometheus Meter-Konflikte zu vermeiden,
-  // fun requestTimer(meterRegistry: MeterRegistry): Timer { ... }
 
   /**
    * Bean für Error Counter - ermöglicht manuelles Error Tracking.

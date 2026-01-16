@@ -2,6 +2,7 @@ package at.mocode.ping.infrastructure.persistence
 
 import at.mocode.ping.domain.Ping
 import at.mocode.ping.domain.PingRepository
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Repository
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -10,6 +11,7 @@ import kotlin.uuid.toKotlinUuid
 
 @OptIn(ExperimentalUuidApi::class)
 @Repository
+@Profile("!test") // Nicht im Test-Profil laden, damit wir Mocks nutzen können
 class PingRepositoryAdapter(
     private val jpaRepository: SpringDataPingRepository
 ) : PingRepository {

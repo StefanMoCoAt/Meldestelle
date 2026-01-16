@@ -39,4 +39,12 @@ class PingApiClient(
   override suspend fun healthCheck(): HealthResponse {
     return client.get("$baseUrl/api/ping/health").body()
   }
+
+  override suspend fun publicPing(): PingResponse {
+    return client.get("$baseUrl/api/ping/public").body()
+  }
+
+  override suspend fun securePing(): PingResponse {
+    return client.get("$baseUrl/api/ping/secure").body()
+  }
 }

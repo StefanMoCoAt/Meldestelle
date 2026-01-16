@@ -27,6 +27,9 @@ class GlobalSecurityConfig {
                 // Explizite Freigaben (Health, Info, Public Endpoints)
                 auth.requestMatchers("/actuator/**").permitAll()
                 auth.requestMatchers("/ping/public").permitAll()
+                auth.requestMatchers("/ping/simple").permitAll()
+                auth.requestMatchers("/ping/enhanced").permitAll()
+                auth.requestMatchers("/ping/health").permitAll()
                 auth.requestMatchers("/error").permitAll()
 
                 // Alles andere muss authentifiziert sein

@@ -1,8 +1,10 @@
 package at.mocode.ping.service
 
-import at.mocode.ping.domain.Ping
-import at.mocode.ping.infrastructure.web.PingController
 import at.mocode.ping.application.PingUseCase
+import at.mocode.ping.domain.Ping
+import at.mocode.ping.infrastructure.persistence.PingRepositoryAdapter
+import at.mocode.ping.infrastructure.web.PingController
+import at.mocode.ping.test.TestPingServiceApplication
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.every
 import io.mockk.mockk
@@ -10,12 +12,16 @@ import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
@@ -30,12 +36,11 @@ import java.time.Instant
  */
 @WebMvcTest(
     controllers = [PingController::class],
-    excludeAutoConfiguration = [
-        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration::class,
-        org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration::class
-    ]
+    properties = ["spring.aop.proxy-target-class=true"]
 )
-@Import(PingControllerTest.TestConfig::class)
+@ContextConfiguration(classes = [TestPingServiceApplication::class])
+@ActiveProfiles("test")
+@Import(PingControllerTest.PingControllerTestConfig::class)
 @AutoConfigureMockMvc
 class PingControllerTest {
 
@@ -43,15 +48,21 @@ class PingControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
+    @Qualifier("pingUseCaseMock")
     private lateinit var pingUseCase: PingUseCase
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    @TestConfiguration
-    class TestConfig {
-        @Bean
+    @Configuration
+    class PingControllerTestConfig {
+        @Bean("pingUseCaseMock")
+        @Primary
         fun pingUseCase(): PingUseCase = mockk(relaxed = true)
+
+        @Bean
+        @Primary
+        fun pingRepositoryAdapter(): PingRepositoryAdapter = mockk(relaxed = true)
     }
 
     @BeforeEach
@@ -77,10 +88,7 @@ class PingControllerTest {
             .andExpect(status().isOk)
             .andReturn()
 
-        // In some environments the JSONPath matcher fails to parse the response body.
-        // We still validate the serialized output contains the expected fields.
         val body = result.response.contentAsString
-        System.out.println("[DEBUG_LOG] /ping/simple response status=${result.response.status} contentType=${result.response.contentType} body=$body")
         val json = objectMapper.readTree(body)
         assertThat(json.has("status")).isTrue
         assertThat(json["status"].asText()).isEqualTo("pong")
@@ -107,7 +115,6 @@ class PingControllerTest {
             .andReturn()
 
         val body = result.response.contentAsString
-        System.out.println("[DEBUG_LOG] /ping/enhanced response status=${result.response.status} contentType=${result.response.contentType} body=$body")
         val json = objectMapper.readTree(body)
         assertThat(json.has("status")).isTrue
         assertThat(json["status"].asText()).isEqualTo("pong")
@@ -128,7 +135,6 @@ class PingControllerTest {
             .andReturn()
 
         val body = result.response.contentAsString
-        System.out.println("[DEBUG_LOG] /ping/health response status=${result.response.status} contentType=${result.response.contentType} body=$body")
         val json = objectMapper.readTree(body)
         assertThat(json.has("status")).isTrue
         assertThat(json["status"].asText()).isEqualTo("up")

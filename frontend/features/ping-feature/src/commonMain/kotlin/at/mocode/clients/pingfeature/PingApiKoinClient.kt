@@ -26,4 +26,12 @@ class PingApiKoinClient(private val client: HttpClient) : PingApi {
   override suspend fun healthCheck(): HealthResponse {
     return client.get("/api/ping/health").body()
   }
+
+  override suspend fun publicPing(): PingResponse {
+    return client.get("/api/ping/public").body()
+  }
+
+  override suspend fun securePing(): PingResponse {
+    return client.get("/api/ping/secure").body()
+  }
 }
