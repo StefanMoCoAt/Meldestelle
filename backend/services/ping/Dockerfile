@@ -3,36 +3,30 @@
 # ===================================================================
 # Multi-stage Dockerfile for Meldestelle Ping Service
 # Features: Security hardening, monitoring support, optimal caching, BuildKit cache mounts
-# Version: 2.1.0 - Optimized and corrected version
+# Version: 2.2.0 - Optimized for Monorepo (Fixed missing frontend dirs)
 # ===================================================================
 
 # === CENTRALIZED BUILD ARGUMENTS ===
-# Values sourced from docker/versions.toml and docker/build-args/
-# Global arguments (docker/build-args/global.env)
 ARG GRADLE_VERSION
 ARG JAVA_VERSION
 ARG BUILD_DATE
 ARG VERSION
 
-# Note: No runtime profiles as build ARGs
-
-# Build stage: compile the ping-service JAR inside Docker
+# ===================================================================
+# Build Stage
+# ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
-# Re-declare build arguments for this stage
 ARG VERSION
 ARG BUILD_DATE
 
-# Add metadata labels
 LABEL stage=builder
 LABEL service=ping-service
 LABEL maintainer="Meldestelle Development Team"
-LABEL version="${VERSION}"
-LABEL build.date="${BUILD_DATE}"
 
 WORKDIR /workspace
 
-# Gradle optimizations for containerized builds (removed deprecated configureondemand)
+# Gradle optimizations
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -Dorg.gradle.daemon=false \
                  -Dorg.gradle.parallel=true \
@@ -41,84 +35,76 @@ ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -XX:+UseParallelGC \
                  -XX:MaxMetaspaceSize=512m"
 
-# Set Gradle user home for better caching
 ENV GRADLE_USER_HOME=/home/gradle/.gradle
 
-# Copy gradle wrapper and configuration files first for optimal caching
+# Copy gradle wrapper and configuration files
 COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
 COPY gradle/ gradle/
 
-# Make gradlew executable (required on Linux/Unix systems)
 RUN chmod +x gradlew
 
-# Copy platform dependencies (changes less frequently)
+# Copy platform and core dependencies
 COPY platform/ platform/
-
-# Copy frontend/client directories (required by settings.gradle.kts)
-COPY frontend/ frontend/
-
-# Copy core directories (required by settings.gradle.kts)
 COPY core/ core/
 
-# Copy backend (includes services and infrastructure in new structure)
+# Copy backend directories
 COPY backend/ backend/
-
-# Copy contracts directory
 COPY contracts/ contracts/
 
-# Copy docs directory (required by settings.gradle.kts)
-COPY docs/ docs/
+# Create dummy frontend directories to satisfy settings.gradle.kts include paths
+RUN mkdir -p \
+    frontend/core/domain \
+    frontend/core/design-system \
+    frontend/core/navigation \
+    frontend/core/network \
+    frontend/core/local-db \
+    frontend/core/sync \
+    frontend/features/auth-feature \
+    frontend/features/ping-feature \
+    frontend/shared \
+    frontend/shells/meldestelle-portal \
+    docs
 
 # Copy root build configuration
 COPY build.gradle.kts ./
 
-# Download and cache dependencies in a separate layer with build cache
+# Download and cache dependencies
 RUN --mount=type=cache,id=gradle-cache-ping,target=/home/gradle/.gradle/caches \
     --mount=type=cache,id=gradle-wrapper-ping,target=/home/gradle/.gradle/wrapper \
     ./gradlew :backend:services:ping:ping-service:dependencies --no-daemon --info
 
-# Build the application with optimizations and build cache
+# Build the application
 RUN --mount=type=cache,id=gradle-cache-ping,target=/home/gradle/.gradle/caches \
     --mount=type=cache,id=gradle-wrapper-ping,target=/home/gradle/.gradle/wrapper \
     ./gradlew :backend:services:ping:ping-service:bootJar --no-daemon --info
 
 # ===================================================================
-# Runtime stage: optimized JRE image for production
+# Runtime Stage
 # ===================================================================
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
 
-# Build arguments for runtime stage
 ARG BUILD_DATE
 ARG VERSION
 ARG JAVA_VERSION
 
-# Convert build arguments to environment variables
 ENV JAVA_VERSION=${JAVA_VERSION} \
     VERSION=${VERSION} \
     BUILD_DATE=${BUILD_DATE}
 
-# Add comprehensive metadata
 LABEL service="ping-service" \
       version="${VERSION}" \
       description="Microservice demonstrating circuit breaker patterns and monitoring" \
       maintainer="Meldestelle Development Team" \
-      java.version="${JAVA_VERSION}" \
-      build.date="${BUILD_DATE}" \
       org.opencontainers.image.title="Ping Service" \
-      org.opencontainers.image.description="Spring Boot microservice with circuit breaker patterns" \
-      org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.created="${BUILD_DATE}"
 
-# Build arguments for runtime configuration
 ARG APP_USER=appuser
 ARG APP_GROUP=appgroup
 ARG APP_UID=1001
 ARG APP_GID=1001
 
-# Set working directory
 WORKDIR /app
 
-# Enhanced Alpine setup with security hardening
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache \
@@ -132,22 +118,16 @@ RUN apk update && \
     chown -R ${APP_USER}:${APP_GROUP} /app && \
     chmod -R 750 /app
 
-# Copy the built JAR from builder stage with proper ownership
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} \
      /workspace/backend/services/ping/ping-service/build/libs/*.jar app.jar
 
-# Switch to non-root user
 USER ${APP_USER}
 
-# Expose application port and debug port
 EXPOSE 8082 5005
 
-# Enhanced health check with better configuration
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=3 \
     CMD curl -fsS --max-time 2 http://localhost:8082/actuator/health/readiness || exit 1
 
-# Optimized JVM settings for Spring Boot microservice with Java 25
-# Removed deprecated UseTransparentHugePages flag for better compatibility
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
     -XX:+UseG1GC \
     -XX:+UseStringDeduplication \
@@ -166,13 +146,10 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
     -Dmanagement.endpoint.health.show-details=always \
     -Dmanagement.prometheus.metrics.export.enabled=true"
 
-# Spring Boot configuration
-ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
-ENV SERVER_PORT=8082
-ENV LOGGING_LEVEL_ROOT=INFO
+ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
+    SERVER_PORT=8082 \
+    LOGGING_LEVEL_ROOT=INFO
 
-# Enhanced entrypoint with tini init system and conditional debug support
-# Fixed memory cgroup path for better compatibility with different container runtimes
 ENTRYPOINT ["tini", "--", "sh", "-c", "\
     echo 'Starting Ping Service with Java ${JAVA_VERSION}...'; \
     echo 'Service port: ${SERVER_PORT}'; \

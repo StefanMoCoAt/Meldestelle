@@ -1,4 +1,3 @@
-import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {

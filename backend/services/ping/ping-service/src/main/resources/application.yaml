@@ -9,9 +9,10 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/meldestelle}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    # Defaults für lokalen Start (Docker Compose Ports)
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pg-meldestelle-db}
+    username: ${SPRING_DATASOURCE_USERNAME:pg-user}
+    password: ${SPRING_DATASOURCE_PASSWORD:pg-password}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -28,9 +29,9 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # Keycloak URL (innerhalb Docker Netzwerk oder Localhost)
-          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9090/realms/meldestelle}
-          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:9090/realms/meldestelle/protocol/openid-connect/certs}
+          # Keycloak URL (lokal via Port Forwarding)
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/meldestelle}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/meldestelle/protocol/openid-connect/certs}
 
   cloud:
     consul:
