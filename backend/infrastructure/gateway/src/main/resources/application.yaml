@@ -25,7 +25,12 @@ spring:
         response-timeout: 5s
       routes:
         - id: ping-service
-          uri: http://ping-service:8080
+          # Nutze lb:// wenn Service Discovery aktiv ist, sonst http://hostname:port
+          # Da wir Consul nutzen, ist lb://ping-service besser, aber für Tracer Bullet
+          # und direkte Docker-Kommunikation ist http://ping-service:8082 sicherer,
+          # falls Consul noch nicht 100% stabil ist.
+          # Wir nutzen hier den Docker Alias und den konfigurierten Port.
+          uri: http://ping-service:8082
           predicates:
             - Path=/api/ping/**
           filters:
@@ -42,13 +47,12 @@ management:
         include: health,info,prometheus
   tracing:
     sampling:
-      probability: 1.0 # 100% der Requests tracen (für Dev/Test sinnvoll, in Prod reduzieren)
+      probability: 1.0
     propagation:
-      type: w3c # Standard W3C Trace Context (kompatibel mit OpenTelemetry)
+      type: w3c
 
-# Gateway-spezifische Einstellungen
 gateway:
   ratelimit:
-    enabled: false # Start: ausgeschaltet; zum Aktivieren default-filters plus RequestRateLimiter in YAML hinzufügen
+    enabled: false
     replenish-rate: 10
     burst-capacity: 20

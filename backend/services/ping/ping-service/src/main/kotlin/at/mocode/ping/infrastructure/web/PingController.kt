@@ -7,6 +7,7 @@ import at.mocode.ping.api.PingResponse
 import at.mocode.ping.application.PingUseCase
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import org.slf4j.LoggerFactory
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -32,14 +33,8 @@ class PingController(
 
     @GetMapping("/ping/simple")
     override suspend fun simplePing(): PingResponse {
-        // Ruft Use Case auf -> Speichert in DB
         val domainPing = pingUseCase.executePing("Simple Ping")
-
-        return PingResponse(
-            status = "pong",
-            timestamp = domainPing.timestamp.atOffset(ZoneOffset.UTC).format(formatter),
-            service = "ping-service"
-        )
+        return createResponse(domainPing, "pong")
     }
 
     @GetMapping("/ping/enhanced")
@@ -53,9 +48,7 @@ class PingController(
             throw RuntimeException("Simulated service failure")
         }
 
-        // Use Case Aufruf
         val domainPing = pingUseCase.executePing("Enhanced Ping")
-
         val elapsedMs = (System.nanoTime() - start) / 1_000_000
 
         return EnhancedPingResponse(
@@ -67,7 +60,29 @@ class PingController(
         )
     }
 
-    // Fallback muss public sein für Resilience4j Proxy
+    // Neue Endpunkte
+
+    @GetMapping("/ping/public")
+    override suspend fun publicPing(): PingResponse {
+        val domainPing = pingUseCase.executePing("Public Ping")
+        return createResponse(domainPing, "public-pong")
+    }
+
+    @GetMapping("/ping/secure")
+    @PreAuthorize("hasRole('MELD_USER') or hasRole('MELD_ADMIN')") // Beispiel-Rollen
+    override suspend fun securePing(): PingResponse {
+        val domainPing = pingUseCase.executePing("Secure Ping")
+        return createResponse(domainPing, "secure-pong")
+    }
+
+    // Helper
+    private fun createResponse(domainPing: at.mocode.ping.domain.Ping, status: String) = PingResponse(
+        status = status,
+        timestamp = domainPing.timestamp.atOffset(ZoneOffset.UTC).format(formatter),
+        service = "ping-service"
+    )
+
+    // Fallback
     fun fallbackPing(simulate: Boolean, ex: Exception): EnhancedPingResponse {
         logger.warn("Circuit breaker fallback triggered: {}", ex.message)
         return EnhancedPingResponse(
@@ -89,7 +104,6 @@ class PingController(
         )
     }
 
-    // Zusätzlicher Endpunkt um die DB zu prüfen (History)
     @GetMapping("/ping/history")
     fun getHistory() = pingUseCase.getPingHistory().map {
         mapOf("id" to it.id.toString(), "message" to it.message, "time" to it.timestamp.toString())

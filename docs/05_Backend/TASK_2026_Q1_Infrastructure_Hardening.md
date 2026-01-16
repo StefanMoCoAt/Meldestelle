@@ -34,7 +34,7 @@ Dieses Modul wurde neu angelegt. Fülle es mit Leben.
     *   Implementiere OAuth2 Resource Server Support (JWT Validierung).
     *   Definiere globale CORS-Regeln (Frontend darf zugreifen).
 *   [ ] **Role Converter:**
-    *   Implementiere einen `KeycloakRoleConverter`, der die Rollen aus dem JWT (Realm/Resource Access) in Spring Security `GrantedAuthority` mappt.
+    *   Implementiere einen `KeycloakRoleConverter`, der die Rollen aus dem JWT (Realm/Resource Access) in Spring Security `GrantedAuthority` mapping.
 *   **Wichtig:** Achte auf Kompatibilität. Das Gateway nutzt WebFlux (Reactive), die Services nutzen WebMVC (Servlet). Falls nötig, trenne die Konfigurationen oder nutze `ConditionalOnWebApplication`.
 
 ### B. Persistence Layer (`backend/infrastructure/persistence`)
@@ -46,7 +46,7 @@ Das Modul ist bereits konfiguriert.
     *   Nutze `JpaRepository` für Standard-CRUD-Operationen.
 
 ### C. Ping Service Hardening (`backend/services/ping/ping-service`)
-Mache den Service "Production Ready".
+Mache den Service "Production Ready."
 
 *   [ ] **Flyway:**
     *   Erstelle `src/main/resources/db/migration/V1__init_ping.sql`.

@@ -8,27 +8,29 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
-#  datasource:
-#    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pg-meldestelle-db}
-#    username: ${SPRING_DATASOURCE_USERNAME:pg-user}
-#    password: ${SPRING_DATASOURCE_PASSWORD:pg-password}
-#    driver-class-name: org.postgresql.Driver
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/meldestelle}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
 
-#  # --- REDIS KONFIGURATION (NEU) ---
-#  data:
-#    redis:
-#      host: ${SPRING_DATA_REDIS_HOST:localhost}
-#      port: ${SPRING_DATA_REDIS_PORT:6379}
-#      password: ${SPRING_DATA_REDIS_PASSWORD:redis-password} # Leer lassen als Default
-#      # Optional: Timeouts für Stabilität
-#      connect-timeout: 5s
-#      timeout: 2s
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate # Flyway kümmert sich um Schema!
+    open-in-view: false
 
-#  jpa:
-#    database-platform: org.hibernate.dialect.PostgreSQLDialect
-#    hibernate:
-#      ddl-auto: update
-#    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Keycloak URL (innerhalb Docker Netzwerk oder Localhost)
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:9090/realms/meldestelle}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:9090/realms/meldestelle/protocol/openid-connect/certs}
 
   cloud:
     consul:
@@ -54,49 +56,29 @@ management:
       probes:
         enabled: true
   tracing:
-    # Disable tracing by default to avoid Zipkin connection errors
     enabled: ${TRACING_ENABLED:false}
     sampling:
       probability: ${TRACING_SAMPLING_PROBABILITY:0.1}
   zipkin:
     tracing:
-      # Only configure endpoint if tracing is explicitly enabled
       endpoint: ${ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
-      # Configure timeout and connection settings to handle missing Zipkin gracefully
       connect-timeout: 1s
       read-timeout: 5s
 
-# Resilience4j Circuit Breaker Configuration
 resilience4j:
   circuitbreaker:
     configs:
       default:
-        # Circuit breaker opens when the failure rate exceeds 50%
         failure-rate-threshold: 50
-        # Minimum number of calls to calculate the failure rate
         minimum-number-of-calls: 5
-        # Time to wait before transitioning from OPEN to HALF_OPEN
         wait-duration-in-open-state: 10s
-        # Number of calls in HALF_OPEN state before deciding to close/open
         permitted-number-of-calls-in-half-open-state: 3
-        # Sliding window size for calculating failure rate
         sliding-window-size: 10
-        # Type of sliding window (COUNT_BASED or TIME_BASED)
         sliding-window-type: COUNT_BASED
-        # Record exceptions that should be considered as failures
         record-exceptions:
           - java.lang.Exception
-        # Ignore certain exceptions (don't count as failures)
         ignore-exceptions:
           - java.lang.IllegalArgumentException
     instances:
       pingCircuitBreaker:
-        # Use default configuration
         base-config: default
-        # Override specific settings for this instance if needed
-        failure-rate-threshold: 60
-        minimum-number-of-calls: 4
-        wait-duration-in-open-state: 5s
-
-  # Metrics configuration removed to avoid property resolution warnings
-  # Use micrometer and actuator endpoints for metrics instead
