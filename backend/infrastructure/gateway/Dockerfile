@@ -3,37 +3,30 @@
 # ===================================================================
 # Multi-stage Dockerfile for Meldestelle API Gateway
 # Features: Security hardening, monitoring support, optimal caching, BuildKit cache mounts
-# Version: 2.1.0 - Optimized and corrected version
+# Version: 2.2.1 - Optimized for Monorepo (Fixed missing frontend dirs)
 # ===================================================================
 
 # === CENTRALIZED BUILD ARGUMENTS ===
-# Values sourced from docker/versions.toml and docker/build-args/
-# Global arguments (docker/build-args/global.env)
 ARG GRADLE_VERSION
 ARG JAVA_VERSION
 ARG BUILD_DATE
 ARG VERSION
-
-# Note: No runtime profiles as build ARGs
 
 # ===================================================================
 # Build Stage
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION}-alpine AS builder
 
-# Re-declare build arguments for this stage
 ARG VERSION
 ARG BUILD_DATE
 
 LABEL stage=builder
 LABEL service="api-gateway"
 LABEL maintainer="Meldestelle Development Team"
-LABEL version="${VERSION}"
-LABEL build.date="${BUILD_DATE}"
 
 WORKDIR /workspace
 
-# Gradle optimizations for containerized builds (removed deprecated configureondemand)
+# Gradle optimizations
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -Dorg.gradle.daemon=false \
                  -Dorg.gradle.parallel=true \
@@ -42,45 +35,52 @@ ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -XX:+UseParallelGC \
                  -XX:MaxMetaspaceSize=512m"
 
-# Set Gradle user home for better caching
 ENV GRADLE_USER_HOME=/home/gradle/.gradle
 
-# Copy gradle wrapper and configuration files first for optimal caching
+# Copy gradle wrapper and configuration files
 COPY gradlew gradlew.bat gradle.properties settings.gradle.kts ./
 COPY gradle/ gradle/
 
-# Make gradlew executable (required on Linux/Unix systems)
 RUN chmod +x gradlew
 
-# Copy platform dependencies (changes less frequently)
+# Copy platform and core dependencies
 COPY platform/ platform/
 COPY core/ core/
 
-# Copy backend/infrastructure directories (required by settings.gradle.kts)
+# Copy backend directories
 COPY backend/infrastructure/ backend/infrastructure/
 COPY backend/services/ backend/services/
 COPY contracts/ contracts/
 
-# Copy client directories (required by settings.gradle.kts)
-COPY frontend/ frontend/
-
-# Copy docs directory (required by settings.gradle.kts)
-COPY docs/ docs/
+# Create dummy frontend directories to satisfy settings.gradle.kts include paths
+# This prevents Gradle from failing configuration phase without copying actual frontend code
+RUN mkdir -p \
+    frontend/core/domain \
+    frontend/core/design-system \
+    frontend/core/navigation \
+    frontend/core/network \
+    frontend/core/local-db \
+    frontend/core/sync \
+    frontend/features/auth-feature \
+    frontend/features/ping-feature \
+    frontend/shared \
+    frontend/shells/meldestelle-portal \
+    docs
 
 # Copy root build configuration
 COPY build.gradle.kts ./
 
-# Download and cache dependencies with BuildKit cache mount (removed deprecated flag)
+# Download and cache dependencies
 RUN --mount=type=cache,id=gradle-cache-gateway,target=/home/gradle/.gradle/caches \
     --mount=type=cache,id=gradle-wrapper-gateway,target=/home/gradle/.gradle/wrapper \
     ./gradlew :backend:infrastructure:gateway:dependencies --info
 
-# Build the application with optimizations and build cache (removed deprecated flag)
+# Build the application
 RUN --mount=type=cache,id=gradle-cache-gateway,target=/home/gradle/.gradle/caches \
     --mount=type=cache,id=gradle-wrapper-gateway,target=/home/gradle/.gradle/wrapper \
     ./gradlew :backend:infrastructure:gateway:bootJar --info
 
-# Extract JAR layers for better caching in runtime stage
+# Extract JAR layers
 RUN mkdir -p build/dependency && \
     (cd build/dependency; java -Djarmode=layertools -jar /workspace/backend/infrastructure/gateway/build/libs/*.jar extract)
 
@@ -88,32 +88,22 @@ RUN mkdir -p build/dependency && \
 # Runtime Stage
 # ===================================================================
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine AS runtime
-#eclipse-temurin:25-jre-alpine-3.22
 
-# Build arguments for runtime stage
 ARG BUILD_DATE
 ARG VERSION
 ARG JAVA_VERSION
 
-# Convert build arguments to environment variables
 ENV JAVA_VERSION=${JAVA_VERSION} \
     VERSION=${VERSION} \
     BUILD_DATE=${BUILD_DATE}
 
-# Enhanced metadata
 LABEL service="api-gateway" \
       version="${VERSION}" \
       description="Spring Cloud Gateway for Meldestelle microservices architecture" \
       maintainer="Meldestelle Development Team" \
-      java.version="${JAVA_VERSION}" \
-      build.date="${BUILD_DATE}" \
       org.opencontainers.image.title="Meldestelle API Gateway" \
-      org.opencontainers.image.description="Spring Cloud Gateway with service discovery and monitoring" \
-      org.opencontainers.image.version="${VERSION}" \
-      org.opencontainers.image.vendor="Österreichischer Pferdesportverband" \
       org.opencontainers.image.created="${BUILD_DATE}"
 
-# Build arguments for user configuration
 ARG APP_USER=gateway
 ARG APP_GROUP=gateway
 ARG APP_UID=1001
@@ -121,7 +111,6 @@ ARG APP_GID=1001
 
 WORKDIR /app
 
-# Enhanced Alpine setup with security hardening
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache \
@@ -135,24 +124,18 @@ RUN apk update && \
     chown -R ${APP_USER}:${APP_GROUP} /app && \
     chmod -R 750 /app
 
-# Copy Spring Boot layers from builder stage for optimal caching
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} /workspace/build/dependency/dependencies/ ./
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} /workspace/build/dependency/spring-boot-loader/ ./
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} /workspace/build/dependency/snapshot-dependencies/ ./
 COPY --from=builder --chown=${APP_USER}:${APP_GROUP} /workspace/build/dependency/application/ ./
 
-# Switch to non-root user
 USER ${APP_USER}
 
-# Expose application port and debug port
 EXPOSE 8081 5005
 
-# Enhanced health check with better configuration
 HEALTHCHECK --interval=15s --timeout=3s --start-period=40s --retries=3 \
     CMD curl -fsS --max-time 2 http://localhost:8081/actuator/health/readiness || exit 1
 
-# Optimized JVM settings for Spring Cloud Gateway with Java 25
-# Removed deprecated UseTransparentHugePages flag for better compatibility
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -XX:+UseG1GC \
     -XX:+UseStringDeduplication \
@@ -171,14 +154,11 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=80.0 \
     -Dmanagement.endpoint.health.show-details=always \
     -Dmanagement.prometheus.metrics.export.enabled=true"
 
-# Spring Boot configuration (Profile nur zur Laufzeit setzen, nicht im Build)
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
     SERVER_PORT=8081 \
     LOGGING_LEVEL_ROOT=INFO \
     LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY=DEBUG
 
-# Enhanced entrypoint with tini init system and conditional debug support
-# Fixed memory cgroup path for better compatibility with different container runtimes
 ENTRYPOINT ["tini", "--", "sh", "-c", "\
     echo 'Starting API Gateway with Java ${JAVA_VERSION}...'; \
     echo 'Active Spring profiles: '${SPRING_PROFILES_ACTIVE:-not-set}; \

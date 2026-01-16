@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
@@ -28,7 +29,8 @@ dependencies {
   implementation(libs.spring.boot.starter.oauth2.resource.server)
   implementation(libs.spring.security.oauth2.jose)
 
-  implementation(libs.spring.cloud.starter.circuitbreaker.resilience4j)
+  // Resilience (Reactive) - WICHTIG: Reactor-Variante für WebFlux!
+  implementation(libs.spring.cloud.starter.circuitbreaker.reactor.resilience4j)
 
   implementation(libs.kotlin.logging.jvm)
   implementation(libs.logback.classic)
