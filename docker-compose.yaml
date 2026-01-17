@@ -215,6 +215,19 @@ services:
           - "grafana"
     profiles: [ "ops", "all" ]
 
+  # --- MONITORING: Zipkin ---
+  zipkin:
+    image: "${ZIPKIN_IMAGE:-openzipkin/zipkin:3}"
+    container_name: "${PROJECT_NAME:-meldestelle}-zipkin"
+    restart: no
+    ports:
+      - "${ZIPKIN_PORT:-9411:9411}"
+    profiles: [ "ops", "all" ]
+    networks:
+      meldestelle-network:
+        aliases:
+          - "zipkin"
+
   # --- CONSUL ---
   consul:
     image: "${CONSUL_IMAGE:-hashicorp/consul:1.22.1}"
@@ -289,6 +302,10 @@ services:
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY: "DEBUG"
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "DEBUG"
 
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
     depends_on:
       postgres:
         condition: "service_healthy"
@@ -349,6 +366,10 @@ services:
       SPRING_DATA_REDIS_PASSWORD: "${REDIS_PASSWORD:-redis-password}"
       SPRING_DATA_REDIS_CONNECT_TIMEOUT: "${REDIS_SERVER_CONNECT_TIMEOUT:-5s}"
 
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
     depends_on:
       postgres:
         condition: "service_healthy"
@@ -392,6 +413,11 @@ services:
       SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
       SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
       SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
     depends_on:
       postgres:
         condition: "service_healthy"
@@ -430,6 +456,11 @@ services:
       SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
       SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
       SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
     depends_on:
       postgres:
         condition: "service_healthy"
@@ -468,6 +499,11 @@ services:
       SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
       SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
       SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
     depends_on:
       postgres:
         condition: "service_healthy"
