@@ -13,4 +13,5 @@ interface PingUseCase {
     fun executePing(message: String): Ping
     fun getPingHistory(): List<Ping>
     fun getPing(id: Uuid): Ping?
+    fun getPingsSince(timestamp: Long): List<Ping>
 }

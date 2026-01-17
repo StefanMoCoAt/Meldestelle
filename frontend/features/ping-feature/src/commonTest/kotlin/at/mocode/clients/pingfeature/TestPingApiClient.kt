@@ -4,6 +4,7 @@ import at.mocode.ping.api.PingApi
 import at.mocode.ping.api.PingResponse
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
+import at.mocode.ping.api.PingEvent
 
 /**
  * Test double implementation of PingApi for testing purposes.
@@ -23,6 +24,7 @@ class TestPingApiClient : PingApi {
   var healthResponse: HealthResponse? = null
   var publicPingResponse: PingResponse? = null
   var securePingResponse: PingResponse? = null
+  var syncPingsResponse: List<PingEvent> = emptyList()
 
   // Call tracking
   var simplePingCalled = false
@@ -30,6 +32,7 @@ class TestPingApiClient : PingApi {
   var healthCheckCalled = false
   var publicPingCalled = false
   var securePingCalled = false
+  var syncPingsCalledWith: Long? = null
   var callCount = 0
 
   override suspend fun simplePing(): PingResponse {
@@ -91,6 +94,21 @@ class TestPingApiClient : PingApi {
     return handleRequest(securePingResponse)
   }
 
+  override suspend fun syncPings(lastSyncTimestamp: Long): List<PingEvent> {
+    syncPingsCalledWith = lastSyncTimestamp
+    callCount++
+
+    if (simulateDelay) {
+      kotlinx.coroutines.delay(delayMs)
+    }
+
+    if (shouldThrowException) {
+      throw Exception(exceptionMessage)
+    }
+
+    return syncPingsResponse
+  }
+
   private suspend fun handleRequest(response: PingResponse?): PingResponse {
     if (simulateDelay) {
       kotlinx.coroutines.delay(delayMs)
@@ -118,11 +136,13 @@ class TestPingApiClient : PingApi {
     healthResponse = null
     publicPingResponse = null
     securePingResponse = null
+    syncPingsResponse = emptyList()
     simplePingCalled = false
     enhancedPingCalledWith = null
     healthCheckCalled = false
     publicPingCalled = false
     securePingCalled = false
+    syncPingsCalledWith = null
     callCount = 0
   }
 }

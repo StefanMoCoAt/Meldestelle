@@ -2,6 +2,7 @@ package at.mocode.ping.domain
 
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import java.time.Instant
 
 /**
  * Secondary Port (Outbound Port).
@@ -12,4 +13,5 @@ interface PingRepository {
     fun save(ping: Ping): Ping
     fun findAll(): List<Ping>
     fun findById(id: Uuid): Ping?
+    fun findByTimestampAfter(timestamp: Instant): List<Ping>
 }

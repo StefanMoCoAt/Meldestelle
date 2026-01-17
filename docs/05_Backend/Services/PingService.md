@@ -17,6 +17,7 @@ Der `ping-service` ist der "Tracer Bullet" Service für die Meldestelle-Architek
 | GET | `/ping/secure` | Geschützter Endpoint (benötigt Rolle) | **Secure** (MELD_USER) |
 | GET | `/ping/health` | Health Check | Public |
 | GET | `/ping/history` | Historie aller Pings | Public (Debug) |
+| GET | `/ping/sync` | Delta-Sync für Offline-Clients | Public |
 
 ## Architektur
 Der Service folgt der Hexagonalen Architektur (Ports & Adapters):
@@ -36,3 +37,9 @@ Der Service folgt der Hexagonalen Architektur (Ports & Adapters):
 
 ## Resilience
 *   Circuit Breaker: Resilience4j (für DB-Zugriffe und simulierte Fehler).
+
+## Sync-Strategie (Phase 3)
+*   Implementiert Delta-Sync via `/ping/sync`.
+*   Parameter: `lastSyncTimestamp` (Long, Epoch Millis).
+*   Response: Liste von `PingEvent` (ID, Message, LastModified).
+*   Client kann basierend auf dem Timestamp nur neue/geänderte Daten abrufen.

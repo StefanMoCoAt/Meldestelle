@@ -3,6 +3,7 @@ package at.mocode.ping.infrastructure.web
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
 import at.mocode.ping.api.PingApi
+import at.mocode.ping.api.PingEvent
 import at.mocode.ping.api.PingResponse
 import at.mocode.ping.application.PingUseCase
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
+import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Driving Adapter (REST Controller).
@@ -20,6 +22,7 @@ import kotlin.random.Random
 @RestController
 // Spring requires using `originPatterns` (not wildcard `origins`) when credentials are enabled.
 @CrossOrigin(allowedHeaders = ["*"], allowCredentials = "true", originPatterns = ["*"])
+@OptIn(ExperimentalUuidApi::class)
 class PingController(
     private val pingUseCase: PingUseCase
 ) : PingApi {
@@ -73,6 +76,19 @@ class PingController(
     override suspend fun securePing(): PingResponse {
         val domainPing = pingUseCase.executePing("Secure Ping")
         return createResponse(domainPing, "secure-pong")
+    }
+
+    @GetMapping("/ping/sync")
+    override suspend fun syncPings(
+        @RequestParam(required = false, defaultValue = "0") lastSyncTimestamp: Long
+    ): List<PingEvent> {
+        return pingUseCase.getPingsSince(lastSyncTimestamp).map {
+            PingEvent(
+                id = it.id.toString(),
+                message = it.message,
+                lastModified = it.timestamp.toEpochMilli()
+            )
+        }
     }
 
     // Helper

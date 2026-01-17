@@ -8,4 +8,7 @@ interface PingApi {
     // Neue Endpunkte für Security Hardening
     suspend fun publicPing(): PingResponse
     suspend fun securePing(): PingResponse
+
+    // Phase 3: Delta-Sync
+    suspend fun syncPings(lastSyncTimestamp: Long): List<PingEvent>
 }

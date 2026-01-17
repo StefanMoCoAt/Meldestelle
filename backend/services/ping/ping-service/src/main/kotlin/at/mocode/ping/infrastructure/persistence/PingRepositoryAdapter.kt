@@ -8,6 +8,7 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
 import kotlin.uuid.toKotlinUuid
+import java.time.Instant
 
 @OptIn(ExperimentalUuidApi::class)
 @Repository
@@ -28,6 +29,10 @@ class PingRepositoryAdapter(
 
     override fun findById(id: Uuid): Ping? {
         return jpaRepository.findById(id.toJavaUuid()).map { it.toDomain() }.orElse(null)
+    }
+
+    override fun findByTimestampAfter(timestamp: Instant): List<Ping> {
+        return jpaRepository.findByCreatedAtAfter(timestamp).map { it.toDomain() }
     }
 
     private fun Ping.toEntity() = PingJpaEntity(

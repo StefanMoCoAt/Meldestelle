@@ -3,6 +3,7 @@ package at.mocode.clients.pingfeature
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
 import at.mocode.ping.api.PingApi
+import at.mocode.ping.api.PingEvent
 import at.mocode.ping.api.PingResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -33,5 +34,11 @@ class PingApiKoinClient(private val client: HttpClient) : PingApi {
 
   override suspend fun securePing(): PingResponse {
     return client.get("/api/ping/secure").body()
+  }
+
+  override suspend fun syncPings(lastSyncTimestamp: Long): List<PingEvent> {
+    return client.get("/api/ping/sync") {
+      url.parameters.append("lastSyncTimestamp", lastSyncTimestamp.toString())
+    }.body()
   }
 }

@@ -4,6 +4,7 @@ import at.mocode.ping.api.PingApi
 import at.mocode.ping.api.PingResponse
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
+import at.mocode.ping.api.PingEvent
 import at.mocode.shared.core.AppConstants
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -51,5 +52,11 @@ class PingApiClient(
 
   override suspend fun securePing(): PingResponse {
     return client.get("$baseUrl/api/ping/secure").body()
+  }
+
+  override suspend fun syncPings(lastSyncTimestamp: Long): List<PingEvent> {
+    return client.get("$baseUrl/api/ping/sync") {
+      parameter("lastSyncTimestamp", lastSyncTimestamp)
+    }.body()
   }
 }

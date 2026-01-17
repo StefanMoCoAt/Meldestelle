@@ -41,7 +41,7 @@ import java.time.Instant
 @ContextConfiguration(classes = [TestPingServiceApplication::class])
 @ActiveProfiles("test")
 @Import(PingControllerTest.PingControllerTestConfig::class)
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false) // Disable security filters for unit tests
 class PingControllerTest {
 
     @Autowired
@@ -139,5 +139,35 @@ class PingControllerTest {
         assertThat(json.has("status")).isTrue
         assertThat(json["status"].asText()).isEqualTo("up")
         assertThat(json["service"].asText()).isEqualTo("ping-service")
+    }
+
+    @Test
+    fun `should return sync pings`() {
+        // Given
+        val timestamp = 1696154400000L // 2023-10-01T10:00:00Z
+        every { pingUseCase.getPingsSince(timestamp) } returns listOf(
+            Ping(
+                message = "Sync Ping",
+                timestamp = Instant.ofEpochMilli(timestamp + 1000)
+            )
+        )
+
+        // When & Then
+        val mvcResult: MvcResult = mockMvc.perform(get("/ping/sync").param("lastSyncTimestamp", timestamp.toString()))
+            .andExpect(request().asyncStarted())
+            .andReturn()
+
+        val result = mockMvc.perform(asyncDispatch(mvcResult))
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val body = result.response.contentAsString
+        val json = objectMapper.readTree(body)
+        assertThat(json.isArray).isTrue
+        assertThat(json.size()).isEqualTo(1)
+        assertThat(json[0]["message"].asText()).isEqualTo("Sync Ping")
+        assertThat(json[0]["lastModified"].asLong()).isEqualTo(timestamp + 1000)
+
+        verify { pingUseCase.getPingsSince(timestamp) }
     }
 }

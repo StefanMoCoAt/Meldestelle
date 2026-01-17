@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import java.time.Instant
 
 /**
  * Application Service.
@@ -42,5 +43,11 @@ class PingService(
     @Transactional(readOnly = true)
     override fun getPing(id: Uuid): Ping? {
         return repository.findById(id)
+    }
+
+    @Transactional(readOnly = true)
+    override fun getPingsSince(timestamp: Long): List<Ping> {
+        val instant = Instant.ofEpochMilli(timestamp)
+        return repository.findByTimestampAfter(instant)
     }
 }
