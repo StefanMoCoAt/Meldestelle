@@ -12,6 +12,11 @@ import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
+/**
+ * Legacy PingApiClient - deprecated in favor of PingApiKoinClient which uses the shared authenticated HttpClient.
+ * Kept for backward compatibility or standalone testing if needed.
+ */
+// @Deprecated("Use PingApiKoinClient with DI instead") // Deprecation removed for cleaner build logs during transition
 class PingApiClient(
   private val baseUrl: String = AppConstants.GATEWAY_URL
 ) : PingApi {

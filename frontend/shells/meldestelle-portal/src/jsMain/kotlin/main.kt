@@ -9,7 +9,8 @@ import at.mocode.frontend.core.localdb.localDbModule
 import at.mocode.frontend.core.localdb.DatabaseProvider
 import at.mocode.frontend.core.localdb.AppDatabase
 import at.mocode.frontend.core.sync.di.syncModule
-import at.mocode.ping.feature.di.pingFeatureModule
+import at.mocode.clients.pingfeature.di.pingFeatureModule
+import at.mocode.ping.feature.di.pingSyncFeatureModule
 import navigation.navigationModule
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -30,7 +31,7 @@ fun main() {
   console.log("[WebApp] main() entered")
   // Initialize DI (Koin) with shared modules + network + local DB modules
   try {
-    initKoin { modules(networkModule, localDbModule, syncModule, pingFeatureModule, authFeatureModule, navigationModule) }
+    initKoin { modules(networkModule, localDbModule, syncModule, pingFeatureModule, pingSyncFeatureModule, authFeatureModule, navigationModule) }
     console.log("[WebApp] Koin initialized with networkModule + localDbModule + authFeatureModule + navigationModule")
   } catch (e: dynamic) {
     console.warn("[WebApp] Koin initialization warning:", e)

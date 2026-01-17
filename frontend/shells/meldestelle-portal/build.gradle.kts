@@ -146,11 +146,18 @@ val copySqliteWorkerJs by tasks.registering(Copy::class) {
 
   // Root build directory where Kotlin JS packages are assembled.
   // Use a concrete path (instead of a Provider) so the Copy task always materializes the directory.
-  into(rootProject.layout.buildDirectory.asFile.get().resolve("js/packages/${rootProject.name}-frontend-shells-meldestelle-portal/kotlin"))
+  // The package name is constructed from the project path: Meldestelle-frontend-shells-meldestelle-portal
+  // Note: We use rootProject.layout.buildDirectory because Kotlin JS plugin puts packages in root build dir.
+  into(rootProject.layout.buildDirectory.dir("js/packages/${rootProject.name}-frontend-shells-meldestelle-portal/kotlin"))
 }
 
 // Ensure the worker is present for the production bundle.
 tasks.named("jsBrowserProductionWebpack") {
+  dependsOn(copySqliteWorkerJs)
+}
+
+// Ensure the worker is present for the development bundle.
+tasks.named("jsBrowserDevelopmentWebpack") {
   dependsOn(copySqliteWorkerJs)
 }
 

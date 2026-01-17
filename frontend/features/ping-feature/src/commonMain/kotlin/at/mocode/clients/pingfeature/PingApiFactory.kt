@@ -11,4 +11,9 @@ import io.ktor.client.HttpClient
  * as a fallback to keep the feature working without DI.
  */
 fun providePingApi(httpClient: HttpClient? = null): PingApi =
-  if (httpClient != null) PingApiKoinClient(httpClient) else PingApiClient()
+  if (httpClient != null) PingApiKoinClient(httpClient) else {
+    // Fallback to a new KoinClient with a default HttpClient if none provided,
+    // effectively removing the dependency on the deprecated PingApiClient
+    // while maintaining the signature. Ideally, this path should not be hit in production.
+    PingApiKoinClient(HttpClient())
+  }

@@ -23,7 +23,7 @@ data class PingUiState(
 )
 
 class PingViewModel(
-  private val apiClient: PingApi = PingApiClient()
+  private val apiClient: PingApi
 ) : ViewModel() {
 
   var uiState by mutableStateOf(PingUiState())
@@ -78,6 +78,24 @@ class PingViewModel(
         uiState = uiState.copy(
           isLoading = false,
           errorMessage = "Health check failed: ${e.message}"
+        )
+      }
+    }
+  }
+
+  fun performSecurePing() {
+    viewModelScope.launch {
+      uiState = uiState.copy(isLoading = true, errorMessage = null)
+      try {
+        val response = apiClient.securePing()
+        uiState = uiState.copy(
+          isLoading = false,
+          simplePingResponse = response
+        )
+      } catch (e: Exception) {
+        uiState = uiState.copy(
+          isLoading = false,
+          errorMessage = "Secure ping failed: ${e.message}"
         )
       }
     }

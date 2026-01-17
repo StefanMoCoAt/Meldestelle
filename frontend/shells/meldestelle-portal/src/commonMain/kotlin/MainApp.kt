@@ -8,7 +8,7 @@ import androidx.compose.runtime.collectAsState
 import at.mocode.clients.shared.navigation.AppScreen
 import at.mocode.clients.authfeature.AuthTokenManager
 import at.mocode.clients.pingfeature.PingScreen
-import at.mocode.ping.feature.presentation.PingViewModel
+import at.mocode.clients.pingfeature.PingViewModel
 import at.mocode.shared.core.AppConstants
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.text.input.PasswordVisualTransformation
