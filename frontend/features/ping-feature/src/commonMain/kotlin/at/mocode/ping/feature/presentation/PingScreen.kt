@@ -48,7 +48,7 @@ fun PingScreen(viewModel: PingViewModel) {
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.error
           )
-          Text(text = uiState.errorMessage ?: "")
+          Text(text = uiState.errorMessage)
           Button(onClick = { viewModel.clearError() }) {
             Text("Clear")
           }

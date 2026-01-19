@@ -1,17 +1,13 @@
 package at.mocode.ping.feature.integration
 
 import at.mocode.frontend.core.sync.SyncManager
-import at.mocode.ping.api.PingEvent
 import at.mocode.ping.feature.domain.PingSyncServiceImpl
 import at.mocode.ping.feature.test.FakePingEventRepository
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.*
+import io.ktor.client.engine.mock.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
