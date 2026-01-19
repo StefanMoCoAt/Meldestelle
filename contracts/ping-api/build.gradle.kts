@@ -27,7 +27,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(projects.core.coreDomain)
+                api(projects.core.coreDomain) // Changed from implementation to api to export Syncable
                 implementation(libs.kotlinx.serialization.json)
             }
         }

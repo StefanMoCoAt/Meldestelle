@@ -1,4 +1,4 @@
-package at.mocode.clients.pingfeature
+package at.mocode.ping.feature.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,7 +36,7 @@ fun PingScreen(viewModel: PingViewModel) {
       fontWeight = FontWeight.Bold
     )
 
-    if (uiState.isLoading) {
+    if (uiState.isLoading || uiState.isSyncing) {
       CircularProgressIndicator()
     }
 
@@ -48,11 +48,23 @@ fun PingScreen(viewModel: PingViewModel) {
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.error
           )
-          // Safe call or fallback to empty string to avoid unnecessary non-null assertion warning
-          Text(text = uiState.errorMessage)
+          Text(text = uiState.errorMessage ?: "")
           Button(onClick = { viewModel.clearError() }) {
             Text("Clear")
           }
+        }
+      }
+    }
+
+    if (uiState.lastSyncResult != null) {
+      Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+          Text(
+            text = "Sync Status",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+          )
+          Text(text = uiState.lastSyncResult)
         }
       }
     }
@@ -72,6 +84,12 @@ fun PingScreen(viewModel: PingViewModel) {
       }
       Button(onClick = { viewModel.performSecurePing() }) {
         Text("Secure Ping")
+      }
+    }
+
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+      Button(onClick = { viewModel.triggerSync() }) {
+        Text("Sync Now")
       }
     }
 

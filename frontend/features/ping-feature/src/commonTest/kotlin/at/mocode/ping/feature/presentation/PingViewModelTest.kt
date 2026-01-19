@@ -1,24 +1,45 @@
-package at.mocode.clients.pingfeature
+package at.mocode.ping.feature.presentation
 
-import at.mocode.ping.api.PingResponse
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
-import kotlinx.coroutines.*
-import kotlinx.coroutines.test.*
-import kotlin.test.*
+import at.mocode.ping.api.PingResponse
+import at.mocode.ping.feature.test.FakePingSyncService
+import at.mocode.ping.feature.test.TestPingApiClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PingViewModelTest {
 
   private lateinit var viewModel: PingViewModel
   private lateinit var testApiClient: TestPingApiClient
+  private lateinit var fakeSyncService: FakePingSyncService
+
   private val testDispatcher = StandardTestDispatcher()
 
   @BeforeTest
   fun setup() {
     Dispatchers.setMain(testDispatcher)
     testApiClient = TestPingApiClient()
-    viewModel = PingViewModel(testApiClient)
+    fakeSyncService = FakePingSyncService()
+
+    viewModel = PingViewModel(
+      apiClient = testApiClient,
+      syncService = fakeSyncService
+    )
   }
 
   @AfterTest
@@ -52,7 +73,7 @@ class PingViewModelTest {
 
     // When
     viewModel.performSimplePing()
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then
     val finalState = viewModel.uiState
@@ -77,7 +98,7 @@ class PingViewModelTest {
     assertNull(viewModel.uiState.errorMessage)
 
     // When - complete the operation
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then - should not be loading anymore
     assertFalse(viewModel.uiState.isLoading)
@@ -92,7 +113,7 @@ class PingViewModelTest {
 
     // When
     viewModel.performSimplePing()
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then
     val finalState = viewModel.uiState
@@ -116,7 +137,7 @@ class PingViewModelTest {
 
     // When
     viewModel.performEnhancedPing(simulate = false)
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then
     val finalState = viewModel.uiState
@@ -130,7 +151,7 @@ class PingViewModelTest {
   fun `performEnhancedPing should handle simulate parameter correctly`() = runTest(testDispatcher) {
     // When
     viewModel.performEnhancedPing(simulate = true)
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then
     assertEquals(true, testApiClient.enhancedPingCalledWith)
@@ -145,7 +166,7 @@ class PingViewModelTest {
 
     // When
     viewModel.performEnhancedPing()
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then
     val finalState = viewModel.uiState
@@ -167,7 +188,7 @@ class PingViewModelTest {
 
     // When
     viewModel.performHealthCheck()
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then
     val finalState = viewModel.uiState
@@ -186,7 +207,7 @@ class PingViewModelTest {
 
     // When
     viewModel.performHealthCheck()
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then
     val finalState = viewModel.uiState
@@ -196,12 +217,41 @@ class PingViewModelTest {
   }
 
   @Test
+  fun `triggerSync should call syncService and update state`() = runTest(testDispatcher) {
+    // When
+    viewModel.triggerSync()
+    advanceUntilIdle()
+
+    // Then
+    assertTrue(fakeSyncService.syncPingsCalled)
+    assertFalse(viewModel.uiState.isSyncing)
+    assertNotNull(viewModel.uiState.lastSyncResult)
+    assertNull(viewModel.uiState.errorMessage)
+  }
+
+  @Test
+  fun `triggerSync should handle error and update state`() = runTest(testDispatcher) {
+    // Given
+    fakeSyncService.shouldThrowException = true
+    fakeSyncService.exceptionMessage = "Sync failed"
+
+    // When
+    viewModel.triggerSync()
+    advanceUntilIdle()
+
+    // Then
+    assertTrue(fakeSyncService.syncPingsCalled)
+    assertFalse(viewModel.uiState.isSyncing)
+    assertEquals("Sync failed: Sync failed", viewModel.uiState.errorMessage)
+  }
+
+  @Test
   fun `clearError should remove error message from state`() {
     // Given - set up an error state by simulating an error
     testApiClient.shouldThrowException = true
     runTest(testDispatcher) {
       viewModel.performSimplePing()
-      testDispatcher.scheduler.advanceUntilIdle()
+      advanceUntilIdle()
     }
 
     // Verify error is present
@@ -220,7 +270,7 @@ class PingViewModelTest {
     // Given - first operation fails
     testApiClient.shouldThrowException = true
     viewModel.performSimplePing()
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
     assertNotNull(viewModel.uiState.errorMessage)
 
     // When - second operation succeeds
@@ -228,7 +278,7 @@ class PingViewModelTest {
     val successResponse = PingResponse("SUCCESS", "2025-09-27T21:27:00Z", "test-service")
     testApiClient.simplePingResponse = successResponse
     viewModel.performSimplePing()
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then - error should be cleared
     assertNull(viewModel.uiState.errorMessage)
@@ -239,7 +289,7 @@ class PingViewModelTest {
   fun `loading state should be false after successful operation`() = runTest(testDispatcher) {
     // Given
     viewModel.performSimplePing()
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then
     assertFalse(viewModel.uiState.isLoading)
@@ -251,7 +301,7 @@ class PingViewModelTest {
     viewModel.performSimplePing()
     viewModel.performEnhancedPing(true)
     viewModel.performHealthCheck()
-    testDispatcher.scheduler.advanceUntilIdle()
+    advanceUntilIdle()
 
     // Then
     assertTrue(testApiClient.simplePingCalled)

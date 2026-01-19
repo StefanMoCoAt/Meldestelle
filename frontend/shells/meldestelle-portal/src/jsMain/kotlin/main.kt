@@ -1,13 +1,12 @@
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import at.mocode.clients.authfeature.di.authFeatureModule
-import at.mocode.clients.pingfeature.di.pingFeatureModule
 import at.mocode.frontend.core.localdb.AppDatabase
 import at.mocode.frontend.core.localdb.DatabaseProvider
 import at.mocode.frontend.core.localdb.localDbModule
 import at.mocode.frontend.core.network.networkModule
 import at.mocode.frontend.core.sync.di.syncModule
-import at.mocode.ping.feature.di.pingSyncFeatureModule
+import at.mocode.ping.feature.di.pingFeatureModule
 import at.mocode.shared.di.initKoin
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -27,8 +26,9 @@ fun main() {
   console.log("[WebApp] main() entered")
   // Initialize DI (Koin) with shared modules + network + local DB modules
   try {
-    initKoin { modules(networkModule, localDbModule, syncModule, pingFeatureModule, pingSyncFeatureModule, authFeatureModule, navigationModule) }
-    console.log("[WebApp] Koin initialized with networkModule + localDbModule + authFeatureModule + navigationModule")
+    // Updated: Only load the consolidated pingFeatureModule from at.mocode.ping.feature.di
+    initKoin { modules(networkModule, localDbModule, syncModule, pingFeatureModule, authFeatureModule, navigationModule) }
+    console.log("[WebApp] Koin initialized with networkModule + localDbModule + authFeatureModule + navigationModule + pingFeatureModule")
   } catch (e: dynamic) {
     console.warn("[WebApp] Koin initialization warning:", e)
   }

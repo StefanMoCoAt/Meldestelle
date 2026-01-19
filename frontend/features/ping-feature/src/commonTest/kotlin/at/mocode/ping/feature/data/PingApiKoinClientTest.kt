@@ -1,4 +1,4 @@
-package at.mocode.clients.pingfeature
+package at.mocode.ping.feature.data
 
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
@@ -13,7 +13,7 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PingApiClientTest {
+class PingApiKoinClientTest {
 
   // Helper to create a testable client using the new DI-friendly implementation
   private fun createTestClient(mockEngine: MockEngine): PingApiKoinClient {

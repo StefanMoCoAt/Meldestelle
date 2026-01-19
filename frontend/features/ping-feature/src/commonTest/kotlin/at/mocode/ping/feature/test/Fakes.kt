@@ -1,10 +1,48 @@
-package at.mocode.clients.pingfeature
+package at.mocode.ping.feature.test
 
-import at.mocode.ping.api.PingApi
-import at.mocode.ping.api.PingResponse
+import at.mocode.frontend.core.sync.SyncableRepository
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse
+import at.mocode.ping.api.PingApi
 import at.mocode.ping.api.PingEvent
+import at.mocode.ping.api.PingResponse
+import at.mocode.ping.feature.domain.PingSyncService
+import kotlinx.coroutines.delay
+
+/**
+ * Fake implementation of PingSyncService for testing.
+ */
+class FakePingSyncService : PingSyncService {
+  var syncPingsCalled = false
+  var shouldThrowException = false
+  var exceptionMessage = "Sync failed"
+
+  override suspend fun syncPings() {
+    syncPingsCalled = true
+    if (shouldThrowException) {
+      throw Exception(exceptionMessage)
+    }
+  }
+}
+
+/**
+ * Fake implementation of PingEventRepository for testing.
+ */
+class FakePingEventRepository : SyncableRepository<PingEvent> {
+  var storedEvents = mutableListOf<PingEvent>()
+  var latestSince: String? = null
+
+  override suspend fun getLatestSince(): String? {
+    return latestSince
+  }
+
+  override suspend fun upsert(items: List<PingEvent>) {
+    // Simple upsert logic: remove existing with same ID, add new
+    val ids = items.map { it.id }.toSet()
+    storedEvents.removeAll { it.id in ids }
+    storedEvents.addAll(items)
+  }
+}
 
 /**
  * Test double implementation of PingApi for testing purposes.
@@ -46,7 +84,7 @@ class TestPingApiClient : PingApi {
     callCount++
 
     if (simulateDelay) {
-      kotlinx.coroutines.delay(delayMs)
+      delay(delayMs)
     }
 
     if (shouldThrowException) {
@@ -67,7 +105,7 @@ class TestPingApiClient : PingApi {
     callCount++
 
     if (simulateDelay) {
-      kotlinx.coroutines.delay(delayMs)
+      delay(delayMs)
     }
 
     if (shouldThrowException) {
@@ -99,7 +137,7 @@ class TestPingApiClient : PingApi {
     callCount++
 
     if (simulateDelay) {
-      kotlinx.coroutines.delay(delayMs)
+      delay(delayMs)
     }
 
     if (shouldThrowException) {
@@ -111,7 +149,7 @@ class TestPingApiClient : PingApi {
 
   private suspend fun handleRequest(response: PingResponse?): PingResponse {
     if (simulateDelay) {
-      kotlinx.coroutines.delay(delayMs)
+      delay(delayMs)
     }
 
     if (shouldThrowException) {

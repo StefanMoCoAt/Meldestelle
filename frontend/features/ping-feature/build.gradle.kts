@@ -80,7 +80,7 @@ kotlin {
     }
 
     jvmTest.dependencies {
-      implementation(libs.mockk)
+      implementation(libs.mockk) // MockK only for JVM tests
       implementation(projects.platform.platformTesting)
       implementation(libs.bundles.testing.jvm)
     }

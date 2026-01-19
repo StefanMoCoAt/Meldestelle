@@ -1,4 +1,4 @@
-package at.mocode.clients.pingfeature
+package at.mocode.ping.feature.data
 
 import at.mocode.ping.api.EnhancedPingResponse
 import at.mocode.ping.api.HealthResponse

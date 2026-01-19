@@ -6,8 +6,7 @@ import at.mocode.shared.di.initKoin
 import at.mocode.frontend.core.network.networkModule
 import at.mocode.clients.authfeature.di.authFeatureModule
 import at.mocode.frontend.core.sync.di.syncModule
-import at.mocode.clients.pingfeature.di.pingFeatureModule
-import at.mocode.ping.feature.di.pingSyncFeatureModule
+import at.mocode.ping.feature.di.pingFeatureModule
 import at.mocode.frontend.core.localdb.AppDatabase
 import at.mocode.frontend.core.localdb.DatabaseProvider
 import navigation.navigationModule
@@ -18,8 +17,9 @@ import org.koin.dsl.module
 fun main() = application {
   // Initialize DI (Koin) with shared modules + network module
   try {
-    initKoin { modules(networkModule, syncModule, pingFeatureModule, pingSyncFeatureModule, authFeatureModule, navigationModule) }
-    println("[DesktopApp] Koin initialized with networkModule + authFeatureModule + navigationModule")
+    // Updated: Only load the consolidated pingFeatureModule from at.mocode.ping.feature.di
+    initKoin { modules(networkModule, syncModule, pingFeatureModule, authFeatureModule, navigationModule) }
+    println("[DesktopApp] Koin initialized with networkModule + authFeatureModule + navigationModule + pingFeatureModule")
   } catch (e: Exception) {
     println("[DesktopApp] Koin initialization warning: ${e.message}")
   }

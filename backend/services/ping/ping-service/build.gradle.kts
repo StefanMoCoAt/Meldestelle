@@ -22,7 +22,8 @@ dependencies {
 
     // Infrastructure Modules
     implementation(projects.backend.infrastructure.persistence)
-    implementation(projects.backend.infrastructure.security) // NEU: Security Module
+    implementation(projects.backend.infrastructure.security)
+    implementation(projects.backend.infrastructure.monitoring.monitoringClient) // NEU: Monitoring & Tracing
 
     // === Spring Boot & Cloud ===
     // Standard dependencies for a secure microservice
