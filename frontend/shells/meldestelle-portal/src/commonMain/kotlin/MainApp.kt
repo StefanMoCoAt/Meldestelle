@@ -36,7 +36,7 @@ fun MainApp() {
       val authApiClient = koinInject<AuthApiClient>()
       // Delta-Sync blueprint: resolve the Ping feature view model via Koin.
       val pingViewModel: PingViewModel = koinViewModel()
-      rememberCoroutineScope()
+      // scope removed (unused)
 
       // Handle PKCE callback on an app load (web)
       LaunchedEffect(Unit) {

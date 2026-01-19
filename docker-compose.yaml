@@ -2,7 +2,7 @@ name: "${PROJECT_NAME:-meldestelle}"
 
 services:
   # ==========================================
-  # CORE INFRASTRUCTURE
+  # 1. INFRASTRUCTURE (Stateful & Core)
   # ==========================================
 
   # --- DATABASE: PostgreSQL ---
@@ -55,6 +55,60 @@ services:
         aliases:
           - "redis"
 
+  # --- SERVICE DISCOVERY: Consul ---
+  consul:
+    image: "${CONSUL_IMAGE:-hashicorp/consul:1.22.1}"
+    container_name: "${PROJECT_NAME:-meldestelle}-consul"
+    restart: no
+    ports:
+      - "${CONSUL_PORT:-8500:8500}"
+      - "${CONSUL_UDP_PORT:-8600:8600/udp}"
+    command: "agent -server -bootstrap-expect=1 -ui -client=0.0.0.0"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: "30s"
+      timeout: "10s"
+      retries: "3"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "consul"
+    profiles: [ "infra", "all" ]
+
+  # --- TRACING: Zipkin ---
+  zipkin:
+    image: "${ZIPKIN_IMAGE:-openzipkin/zipkin:3}"
+    container_name: "${PROJECT_NAME:-meldestelle}-zipkin"
+    restart: no
+    ports:
+      - "${ZIPKIN_PORT:-9411:9411}"
+    profiles: [ "infra", "all" ]
+    networks:
+      meldestelle-network:
+        aliases:
+          - "zipkin"
+
+  # --- EMAIL TESTING: Mailpit ---
+  mailpit:
+    image: "axllent/mailpit"
+    container_name: "${PROJECT_NAME:-meldestelle}-mailpit"
+    restart: no
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP Port
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    volumes:
+      - "mailpit-data:/data"
+    profiles: [ "infra", "all" ]
+    networks:
+      meldestelle-network:
+        aliases:
+          - "mailpit"
+
   # --- IAM: Keycloak ---
   keycloak:
     image: "meldestelle-keycloak:latest"
@@ -80,6 +134,12 @@ services:
       KC_PROXY_HEADERS: "xforwarded"
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
+      # Mailpit Configuration
+      KC_SPI_EMAIL_TEMPLATE_PROVIDER: "freemarker"
+      KC_SPI_EMAIL_SENDER_PROVIDER: "default"
+      KC_SPI_EMAIL_SENDER_DEFAULT_HOST: "mailpit"
+      KC_SPI_EMAIL_SENDER_DEFAULT_PORT: "1025"
+      KC_SPI_EMAIL_SENDER_DEFAULT_FROM: "keycloak@meldestelle.local"
     ports:
       - "${KC_PORT:-8180:8080}"
       - "${KC_DEBUG_PORT:-9000:9000}"
@@ -88,6 +148,8 @@ services:
         condition: "service_healthy"
       redis:
         condition: "service_healthy"
+      mailpit:
+        condition: "service_started"
     volumes:
       - "./config/docker/keycloak:/opt/keycloak/data/import:Z"
     profiles: [ "infra", "all" ]
@@ -102,6 +164,347 @@ services:
       meldestelle-network:
         aliases:
           - "keycloak"
+
+  # ==========================================
+  # 2. BACKEND SERVICES (Spring Boot)
+  # ==========================================
+
+  # --- API-GATEWAY: Spring Cloud Gateway ---
+  api-gateway:
+    build:
+      context: .
+      dockerfile: backend/infrastructure/gateway/Dockerfile
+      args:
+        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
+        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
+        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
+        BUILD_DATE: "${DOCKER_BUILD_DATE}"
+    labels:
+      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
+    container_name: "${PROJECT_NAME:-meldestelle}-gateway"
+    restart: no
+    ports:
+      - "${GATEWAY_PORT:-8081:8081}"
+      - "${GATEWAY_DEBUG_PORT:-5005:5005}"
+    environment:
+      SERVER_PORT: "${GATEWAY_SERVER_PORT:-8081}"
+      SPRING_PROFILES_ACTIVE: "${GATEWAY_SPRING_PROFILES_ACTIVE:-docker}"
+      DEBUG: "${GATEWAY_DEBUG:-true}"
+
+      # --- KEYCLOAK ---
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "${SSEC_ISSUER_URI:-http://keycloak:8080/realms/meldestelle}"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "${SSEC_JWK_SET_URI:-http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs}"
+
+      # --- CONSUL ---
+      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
+      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
+      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "${GATEWAY_SERVICE_NAME:-api-gateway}"
+      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "${GATEWAY_CONSUL_PREFER_IP:-true}"
+
+      # --- POSTGRES ---
+      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
+      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
+      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+
+      # --- REDIS ---
+      SPRING_DATA_REDIS_HOST: "${REDIS_SERVER_HOSTNAME:-redis}"
+      SPRING_DATA_REDIS_PORT: "${REDIS_SERVICE_PORT:-6379}"
+      SPRING_DATA_REDIS_PASSWORD: "${REDIS_PASSWORD:-redis-password}"
+      SPRING_DATA_REDIS_CONNECT_TIMEOUT: "${REDIS_SERVER_CONNECT_TIMEOUT:-5s}"
+
+      # --- LOGGING ---
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY: "DEBUG"
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "DEBUG"
+
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
+    depends_on:
+      postgres:
+        condition: "service_healthy"
+      keycloak:
+        condition: "service_healthy"
+      consul:
+        condition: "service_healthy"
+      redis:
+        condition: "service_healthy"
+      zipkin:
+        condition: "service_started"
+
+    networks:
+      meldestelle-network:
+        aliases:
+          - "api-gateway"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
+
+  # --- MICROSERVICE: Ping Service ---
+  ping-service:
+    build:
+      context: .
+      dockerfile: backend/services/ping/Dockerfile
+      args:
+        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
+        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
+        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
+        BUILD_DATE: "${DOCKER_BUILD_DATE}"
+    labels:
+      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
+    container_name: "${PROJECT_NAME:-meldestelle}-ping-service"
+    restart: no
+    ports:
+      - "${PING_PORT:-8082:8082}"
+      - "${PING_DEBUG_PORT:-5006:5006}"
+    environment:
+      SPRING_PROFILES_ACTIVE: "${PING_SPRING_PROFILES_ACTIVE:-docker}"
+      DEBUG: "${PING_DEBUG:-true}"
+      SERVER_PORT: "${PING_SERVER_PORT:-8082}"
+
+      # --- CONSUL ---
+      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
+      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
+      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "${PING_SERVICE_NAME:-ping-service}"
+      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "${PING_CONSUL_PREFER_IP:-true}"
+
+      # - DATENBANK VERBINDUNG -
+      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
+      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
+      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+
+      # --- REDIS ---
+      SPRING_DATA_REDIS_HOST: "${REDIS_SERVER_HOSTNAME:-redis}"
+      SPRING_DATA_REDIS_PORT: "${REDIS_SERVICE_PORT:-6379}"
+      SPRING_DATA_REDIS_PASSWORD: "${REDIS_PASSWORD:-redis-password}"
+      SPRING_DATA_REDIS_CONNECT_TIMEOUT: "${REDIS_SERVER_CONNECT_TIMEOUT:-5s}"
+
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
+    depends_on:
+      postgres:
+        condition: "service_healthy"
+      keycloak:
+        condition: "service_healthy"
+      consul:
+        condition: "service_healthy"
+      redis:
+        condition: "service_healthy"
+      zipkin:
+        condition: "service_started"
+
+    networks:
+      meldestelle-network:
+        aliases:
+          - "ping-service"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
+
+  # --- MICROSERVICE: Entries Service ---
+  entries-service:
+    build:
+      context: .
+      dockerfile: backend/services/entries/Dockerfile
+      args:
+        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
+        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
+        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
+        BUILD_DATE: "${DOCKER_BUILD_DATE}"
+    labels:
+      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
+    container_name: "${PROJECT_NAME:-meldestelle}-entries-service"
+    restart: no
+    ports:
+      - "8083:8083"
+    environment:
+      SERVER_PORT: "8083"
+      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE:-docker}"
+      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
+      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
+      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "entries-service"
+      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
+      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
+      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
+    depends_on:
+      postgres:
+        condition: "service_healthy"
+      consul:
+        condition: "service_healthy"
+      zipkin:
+        condition: "service_started"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "entries-service"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
+
+  # --- MICROSERVICE: Results Service ---
+  results-service:
+    build:
+      context: .
+      dockerfile: backend/services/results/results-service/Dockerfile
+      args:
+        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
+        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
+        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
+        BUILD_DATE: "${DOCKER_BUILD_DATE}"
+    labels:
+      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
+    container_name: "${PROJECT_NAME:-meldestelle}-results-service"
+    restart: no
+    ports:
+      - "8084:8084"
+    environment:
+      SERVER_PORT: "8084"
+      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE:-docker}"
+      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
+      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
+      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "results-service"
+      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
+      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
+      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
+    depends_on:
+      postgres:
+        condition: "service_healthy"
+      consul:
+        condition: "service_healthy"
+      zipkin:
+        condition: "service_started"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "results-service"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
+
+  # --- MICROSERVICE: Scheduling Service ---
+  scheduling-service:
+    build:
+      context: .
+      dockerfile: backend/services/scheduling/scheduling-service/Dockerfile
+      args:
+        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
+        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
+        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
+        BUILD_DATE: "${DOCKER_BUILD_DATE}"
+    labels:
+      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
+    container_name: "${PROJECT_NAME:-meldestelle}-scheduling-service"
+    restart: no
+    ports:
+      - "8085:8085"
+    environment:
+      SERVER_PORT: "8085"
+      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE:-docker}"
+      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
+      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
+      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "scheduling-service"
+      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
+      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
+      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+
+      # --- ZIPKIN ---
+      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
+
+    depends_on:
+      postgres:
+        condition: "service_healthy"
+      consul:
+        condition: "service_healthy"
+      zipkin:
+        condition: "service_started"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "scheduling-service"
+    profiles: [ "backend", "all" ]
+    volumes:
+      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
+
+  # ==========================================
+  # 3. FRONTEND (UI)
+  # ==========================================
+
+  # --- WEB-APP ---
+  web-app:
+    build:
+      context: . # Wichtig: Root Context für Monorepo Zugriff
+      dockerfile: config/docker/nginx/web-app/Dockerfile
+      args:
+        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
+        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
+        # Frontend spezifisch:
+        NODE_VERSION: "${DOCKER_NODE_VERSION:-24.12.0}"
+        NGINX_IMAGE_TAG: "${DOCKER_NGINX_VERSION:-1.28.0-alpine}"
+        WEB_BUILD_PROFILE: "${WEB_BUILD_PROFILE:-dev}" # dev oder prod
+        # Metadaten:
+        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
+        BUILD_DATE: "${DOCKER_BUILD_DATE}"
+    labels:
+      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
+    container_name: "${PROJECT_NAME:-meldestelle}-web-app"
+    restart: no
+    ports:
+      - "${WEB_APP_PORT:-4000:4000}"
+    environment:
+      dummy_var: "prevent_empty_block"
+    depends_on:
+      api-gateway:
+        condition: "service_started"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "web-app"
+    profiles: [ "gui", "all" ]
+
+  # --- DESKTOP-APP (optional) ---
+  desktop-app:
+    build:
+      context: .
+      dockerfile: config/docker/nginx/desktop-app/Dockerfile
+      args:
+        BUILD_DATE: "${DOCKER_BUILD_DATE}"
+    labels:
+      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
+    container_name: "${PROJECT_NAME:-meldestelle}-desktop-app"
+    restart: no
+    environment:
+      API_BASE_URL: "http://api-gateway:8081"
+    ports:
+      - "${DESKTOP_APP_VNC_PORT:-5901:5901}"
+      - "${DESKTOP_APP_NOVNC_PORT:-6080:6080}"
+    depends_on:
+      api-gateway:
+        condition: "service_started"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "desktop-app"
+    profiles: [ "gui", "all" ]
+
+  # ==========================================
+  # 4. OPS & TOOLS (Monitoring & Admin)
+  # ==========================================
 
   # --- DATENBANK-MANAGEMENT-TOOL: pgAdmin4 ---
   pgadmin:
@@ -145,9 +548,6 @@ services:
     ports:
       - "${ALERTMANAGER_PORT:-9093:9093}"
     volumes:
-      # Wir müssen hier envsubst nutzen ODER die Config ohne Variablen schreiben.
-      # Einfachste Lösung: Ein Entrypoint-Script, das envsubst macht (ähnlich wie bei Nginx).
-      # ODER: Wir hardcoden es für Dev erst mal.
       - ./config/docker/monitoring/alertmanager/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml
     command:
       - --config.file=/etc/alertmanager/alertmanager.yaml
@@ -196,9 +596,7 @@ services:
       - "${GF_PORT:-3000:3000}"
     volumes:
       - grafana-data:/var/lib/grafana
-      # Provisioning (datasources/dashboards) from central config
       - ./config/docker/monitoring/grafana/provisioning:/etc/grafana/provisioning:Z
-      # Dashboards directory (referenced by a provisioning file path: /var/lib/grafana/dashboards)
       - ./config/docker/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:Z
     depends_on:
       prometheus:
@@ -215,381 +613,13 @@ services:
           - "grafana"
     profiles: [ "ops", "all" ]
 
-  # --- MONITORING: Zipkin ---
-  zipkin:
-    image: "${ZIPKIN_IMAGE:-openzipkin/zipkin:3}"
-    container_name: "${PROJECT_NAME:-meldestelle}-zipkin"
-    restart: no
-    ports:
-      - "${ZIPKIN_PORT:-9411:9411}"
-    profiles: [ "ops", "all" ]
-    networks:
-      meldestelle-network:
-        aliases:
-          - "zipkin"
-
-  # --- CONSUL ---
-  consul:
-    image: "${CONSUL_IMAGE:-hashicorp/consul:1.22.1}"
-    container_name: "${PROJECT_NAME:-meldestelle}-consul"
-    restart: no
-    ports:
-      - "${CONSUL_PORT:-8500:8500}"
-      - "${CONSUL_UDP_PORT:-8600:8600/udp}"
-    command: "agent -server -bootstrap-expect=1 -ui -client=0.0.0.0"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
-      interval: "30s"
-      timeout: "10s"
-      retries: "3"
-    networks:
-      meldestelle-network:
-        aliases:
-          - "consul"
-    profiles: [ "infra", "all" ]
-
-  # --- API-GATEWAY: Spring Cloud Gateway ---
-  api-gateway:
-    build:
-      context: .
-      dockerfile: backend/infrastructure/gateway/Dockerfile
-      args:
-        # Build-Args aus deinen .env Dateien (werden hier statisch benötigt für den Build)
-        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
-        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
-        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
-        BUILD_DATE: "${DOCKER_BUILD_DATE}"
-    labels:
-      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
-    container_name: "${PROJECT_NAME:-meldestelle}-gateway"
-    restart: no
-    ports:
-      - "${GATEWAY_PORT:-8081:8081}"
-      - "${GATEWAY_DEBUG_PORT:-5005:5005}"
-    environment:
-      # server.port must be an integer. Do not pass host:container mapping here.
-      SERVER_PORT: "${GATEWAY_SERVER_PORT:-8081}"
-      SPRING_PROFILES_ACTIVE: "${GATEWAY_SPRING_PROFILES_ACTIVE:-docker}"
-      DEBUG: "${GATEWAY_DEBUG:-true}"
-
-      # --- KEYCLOAK ---
-      # Container-zu-Container Kommunikation (intern)
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "${SSEC_ISSUER_URI:-http://keycloak:8080/realms/meldestelle}"
-      # JWK Set Uri erzwingen, damit er nicht über den Issuer (localhost vs keycloak) stolpert
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "${SSEC_JWK_SET_URI:-http://keycloak:8080/realms/meldestelle/protocol/openid-connect/certs}"
-
-      # --- CONSUL ---
-      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
-      # Consul port must be an integer (container internal port)
-      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
-      # Registrierungsname in Consul
-      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "${GATEWAY_SERVICE_NAME:-api-gateway}"
-      # Wichtig für Docker: Wir wollen IP-Adressen registrieren, keine Hostnames, die DNS brauchen
-      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "${GATEWAY_CONSUL_PREFER_IP:-true}"
-
-      # --- POSTGRES ---
-      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
-      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
-      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
-
-      # --- REDIS ---
-      SPRING_DATA_REDIS_HOST: "${REDIS_SERVER_HOSTNAME:-redis}"
-      SPRING_DATA_REDIS_PORT: "${REDIS_SERVICE_PORT:-6379}"
-      SPRING_DATA_REDIS_PASSWORD: "${REDIS_PASSWORD:-redis-password}"
-      SPRING_DATA_REDIS_CONNECT_TIMEOUT: "${REDIS_SERVER_CONNECT_TIMEOUT:-5s}"
-
-      # --- LOGGING ---
-      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_GATEWAY: "DEBUG"
-      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "DEBUG"
-
-      # --- ZIPKIN ---
-      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
-
-    depends_on:
-      postgres:
-        condition: "service_healthy"
-      keycloak:
-        condition: "service_healthy"
-      consul:
-        condition: "service_healthy"
-      redis:
-        condition: "service_healthy"
-
-    networks:
-      meldestelle-network:
-        aliases:
-          - "api-gateway"
-    profiles: [ "backend", "all" ]
-    volumes:
-      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
-
-  # ==========================================
-  # MICROSERVICES
-  # ==========================================
-  ping-service:
-    build:
-      context: .
-      dockerfile: backend/services/ping/Dockerfile
-      args:
-        # Build-Args aus deinen .env Dateien (werden hier statisch benötigt für den Build)
-        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
-        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
-        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
-        BUILD_DATE: "${DOCKER_BUILD_DATE}"
-    labels:
-      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
-    container_name: "${PROJECT_NAME:-meldestelle}-ping-service"
-    restart: no
-    ports:
-      - "${PING_PORT:-8082:8082}"
-      - "${PING_DEBUG_PORT:-5006:5006}"
-    environment:
-      SPRING_PROFILES_ACTIVE: "${PING_SPRING_PROFILES_ACTIVE:-docker}"
-      DEBUG: "${PING_DEBUG:-true}"
-      SERVER_PORT: "${PING_SERVER_PORT:-8082}"
-
-      # --- CONSUL ---
-      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
-      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
-      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "${PING_SERVICE_NAME:-ping-service}"
-      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "${PING_CONSUL_PREFER_IP:-true}"
-
-      # - DATENBANK VERBINDUNG -
-      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
-      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
-      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
-
-      # --- REDIS ---
-      SPRING_DATA_REDIS_HOST: "${REDIS_SERVER_HOSTNAME:-redis}"
-      SPRING_DATA_REDIS_PORT: "${REDIS_SERVICE_PORT:-6379}"
-      SPRING_DATA_REDIS_PASSWORD: "${REDIS_PASSWORD:-redis-password}"
-      SPRING_DATA_REDIS_CONNECT_TIMEOUT: "${REDIS_SERVER_CONNECT_TIMEOUT:-5s}"
-
-      # --- ZIPKIN ---
-      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
-
-    depends_on:
-      postgres:
-        condition: "service_healthy"
-      keycloak:
-        condition: "service_healthy"
-      consul:
-        condition: "service_healthy"
-      redis:
-        condition: "service_healthy"
-
-    networks:
-      meldestelle-network:
-        aliases:
-          - "ping-service"
-    profiles: [ "backend", "all" ]
-    volumes:
-      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
-
-  entries-service:
-    build:
-      context: .
-      dockerfile: backend/services/entries/Dockerfile
-      args:
-        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
-        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
-        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
-        BUILD_DATE: "${DOCKER_BUILD_DATE}"
-    labels:
-      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
-    container_name: "${PROJECT_NAME:-meldestelle}-entries-service"
-    restart: no
-    ports:
-      - "8083:8083"
-    environment:
-      SERVER_PORT: "8083"
-      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE:-docker}"
-      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
-      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
-      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "entries-service"
-      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "true"
-      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
-      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
-      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
-
-      # --- ZIPKIN ---
-      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
-
-    depends_on:
-      postgres:
-        condition: "service_healthy"
-      consul:
-        condition: "service_healthy"
-    networks:
-      meldestelle-network:
-        aliases:
-          - "entries-service"
-    profiles: [ "backend", "all" ]
-    volumes:
-      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
-
-  results-service:
-    build:
-      context: .
-      dockerfile: backend/services/results/results-service/Dockerfile
-      args:
-        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
-        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
-        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
-        BUILD_DATE: "${DOCKER_BUILD_DATE}"
-    labels:
-      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
-    container_name: "${PROJECT_NAME:-meldestelle}-results-service"
-    restart: no
-    ports:
-      - "8084:8084"
-    environment:
-      SERVER_PORT: "8084"
-      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE:-docker}"
-      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
-      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
-      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "results-service"
-      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "true"
-      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
-      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
-      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
-
-      # --- ZIPKIN ---
-      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
-
-    depends_on:
-      postgres:
-        condition: "service_healthy"
-      consul:
-        condition: "service_healthy"
-    networks:
-      meldestelle-network:
-        aliases:
-          - "results-service"
-    profiles: [ "backend", "all" ]
-    volumes:
-      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
-
-  scheduling-service:
-    build:
-      context: .
-      dockerfile: backend/services/scheduling/scheduling-service/Dockerfile
-      args:
-        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
-        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
-        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
-        BUILD_DATE: "${DOCKER_BUILD_DATE}"
-    labels:
-      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
-    container_name: "${PROJECT_NAME:-meldestelle}-scheduling-service"
-    restart: no
-    ports:
-      - "8085:8085"
-    environment:
-      SERVER_PORT: "8085"
-      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE:-docker}"
-      SPRING_CLOUD_CONSUL_HOST: "${CONSUL_HOST:-consul}"
-      SPRING_CLOUD_CONSUL_PORT: "${CONSUL_HTTP_PORT:-8500}"
-      SPRING_CLOUD_CONSUL_DISCOVERY_SERVICE_NAME: "scheduling-service"
-      SPRING_CLOUD_CONSUL_DISCOVERY_PREFER_IP_ADDRESS: "true"
-      SPRING_DATASOURCE_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
-      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER:-pg-user}"
-      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
-
-      # --- ZIPKIN ---
-      MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}"
-      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "${ZIPKIN_SAMPLING_PROBABILITY:-1.0}"
-
-    depends_on:
-      postgres:
-        condition: "service_healthy"
-      consul:
-        condition: "service_healthy"
-    networks:
-      meldestelle-network:
-        aliases:
-          - "scheduling-service"
-    profiles: [ "backend", "all" ]
-    volumes:
-      - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
-
-  # ==========================================
-  # FRONTEND
-  # ==========================================
-
-  # --- WEB-APP ---
-  web-app:
-    build:
-      context: . # Wichtig: Root Context für Monorepo Zugriff
-      dockerfile: config/docker/nginx/web-app/Dockerfile
-      args:
-        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
-        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
-        # Frontend spezifisch:
-        NODE_VERSION: "${DOCKER_NODE_VERSION:-24.12.0}"
-        NGINX_IMAGE_TAG: "${DOCKER_NGINX_VERSION:-1.28.0-alpine}"
-        WEB_BUILD_PROFILE: "${WEB_BUILD_PROFILE:-dev}" # dev oder prod
-        # Metadaten:
-        VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
-        BUILD_DATE: "${DOCKER_BUILD_DATE}"
-    labels:
-      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
-    container_name: "${PROJECT_NAME:-meldestelle}-web-app"
-    restart: no
-    ports:
-      - "${WEB_APP_PORT:-4000:4000}"
-    environment:
-      # Nginx braucht eigentlich keine Env-Vars zur Laufzeit für die Config,
-      # außer man nutzt envsubst im Entrypoint (für dynamische API URLs).
-      # Hier nutzen wir den Docker-DNS Namen 'api-gateway', der ist fest in nginx.conf.
-      dummy_var: "prevent_empty_block"
-    #    volumes:
-    #      # Hot-Reloading der Nginx Config (Optional)
-    #      - ./config/docker/nginx/web-app/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      api-gateway:
-        condition: "service_started"
-    networks:
-      meldestelle-network:
-        aliases:
-          - "web-app"
-    profiles: [ "gui", "all" ]
-
-  # --- DESKTOP-APP (optional) ---
-  desktop-app:
-    build:
-      context: .
-      dockerfile: config/docker/nginx/desktop-app/Dockerfile
-      args:
-        BUILD_DATE: "${DOCKER_BUILD_DATE}"
-    labels:
-      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
-    container_name: "${PROJECT_NAME:-meldestelle}-desktop-app"
-    restart: no
-    environment:
-      API_BASE_URL: "http://api-gateway:8081"
-    ports:
-      - "${DESKTOP_APP_VNC_PORT:-5901:5901}"
-      - "${DESKTOP_APP_NOVNC_PORT:-6080:6080}"
-    depends_on:
-      api-gateway:
-        condition: "service_started"
-    networks:
-      meldestelle-network:
-        aliases:
-          - "desktop-app"
-    profiles: [ "gui", "all" ]
-
 volumes:
   postgres-data:
   pgadmin-data:
   redis-data:
   prometheus-data:
   grafana-data:
+  mailpit-data: # NEU
 
 networks:
   meldestelle-network:

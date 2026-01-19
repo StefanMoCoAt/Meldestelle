@@ -49,6 +49,7 @@ management:
   endpoints:
     web:
       exposure:
+        # Ergänzt die Defaults (health, info, prometheus) um metrics und circuitbreakers
         include: health,info,metrics,prometheus,circuitbreakers
   endpoint:
     health:
@@ -56,15 +57,8 @@ management:
       show-components: always
       probes:
         enabled: true
-  tracing:
-    enabled: ${TRACING_ENABLED:false}
-    sampling:
-      probability: ${TRACING_SAMPLING_PROBABILITY:0.1}
-  zipkin:
-    tracing:
-      endpoint: ${ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
-      connect-timeout: 1s
-      read-timeout: 5s
+  # Tracing & Zipkin Konfiguration wird nun zentral aus monitoring-client (monitoring-defaults.properties) geladen.
+  # Defaults: Enabled=true, Endpoint=http://localhost:9411/api/v2/spans
 
 resilience4j:
   circuitbreaker:
