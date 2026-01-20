@@ -1,0 +1,155 @@
+name: "${PROJECT_NAME:-meldestelle}"
+
+services:
+  # ==========================================
+  # 1. INFRASTRUCTURE (Stateful & Core)
+  # ==========================================
+
+  # --- DATABASE: PostgreSQL ---
+  postgres:
+    image: "${POSTGRES_IMAGE:-postgres:16-alpine}"
+    container_name: "${PROJECT_NAME:-meldestelle}-postgres"
+    restart: no
+    ports:
+      - "${POSTGRES_PORT:-5432:5432}"
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-pg-user}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+      POSTGRES_DB: "${POSTGRES_DB:-pg-meldestelle-db}"
+    volumes:
+      - "postgres-data:/var/lib/postgresql/data"
+      - "./config/docker/postgres:/docker-entrypoint-initdb.d:Z"
+      - "./config/docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:Z"
+    profiles: [ "infra", "all" ]
+    command: [ "postgres", "-c", "config_file=/etc/postgresql/postgresql.conf" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: "5s"
+      timeout: "5s"
+      retries: "5"
+      start_period: "10s"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "postgres"
+
+  # --- CACHE: Redis ---
+  redis:
+    image: "${REDIS_IMAGE:-redis:7.4-alpine}"
+    container_name: "${PROJECT_NAME:-meldestelle}-redis"
+    restart: no
+    ports:
+      - "${REDIS_PORT:-6379:6379}"
+    volumes:
+      - "redis-data:/data"
+      - "./config/docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
+    profiles: [ "infra", "all" ]
+    command: [ "sh", "-lc", "exec redis-server /usr/local/etc/redis/redis.conf --protected-mode no ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "[ -z \"$REDIS_PASSWORD\" ] && redis-cli ping | grep PONG || redis-cli -a \"$REDIS_PASSWORD\" ping | grep PONG" ]
+      interval: "5s"
+      timeout: "5s"
+      retries: "3"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "redis"
+
+  # --- SERVICE DISCOVERY: Consul ---
+  consul:
+    image: "${CONSUL_IMAGE:-hashicorp/consul:1.22.1}"
+    container_name: "${PROJECT_NAME:-meldestelle}-consul"
+    restart: no
+    ports:
+      - "${CONSUL_PORT:-8500:8500}"
+      - "${CONSUL_UDP_PORT:-8600:8600/udp}"
+    command: "agent -server -bootstrap-expect=1 -ui -client=0.0.0.0"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: "30s"
+      timeout: "10s"
+      retries: "3"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "consul"
+    profiles: [ "infra", "all" ]
+
+  # --- TRACING: Zipkin ---
+  zipkin:
+    image: "${ZIPKIN_IMAGE:-openzipkin/zipkin:3}"
+    container_name: "${PROJECT_NAME:-meldestelle}-zipkin"
+    restart: no
+    ports:
+      - "${ZIPKIN_PORT:-9411:9411}"
+    profiles: [ "infra", "all" ]
+    networks:
+      meldestelle-network:
+        aliases:
+          - "zipkin"
+
+  # --- EMAIL TESTING: Mailpit ---
+  mailpit:
+    image: "axllent/mailpit"
+    container_name: "${PROJECT_NAME:-meldestelle}-mailpit"
+    restart: no
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP Port
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    volumes:
+      - "mailpit-data:/data"
+    profiles: [ "infra", "all" ]
+    networks:
+      meldestelle-network:
+        aliases:
+          - "mailpit"
+
+  # --- IAM: Keycloak (DEBUG MODE) ---
+  keycloak:
+    image: "quay.io/keycloak/keycloak:26.4"
+    container_name: "${PROJECT_NAME:-meldestelle}-keycloak"
+    restart: no
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: "${KC_ADMIN_USERNAME:-kc-admin}"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "${KC_ADMIN_PASSWORD:-kc-password}"
+      KC_DB: "${KC_DB:-postgres}"
+      KC_DB_SCHEMA: "${KC_DB_SCHEMA:-keycloak}"
+      KC_DB_URL: "${POSTGRES_DB_URL:-jdbc:postgresql://postgres:5432/pg-meldestelle-db}"
+      KC_DB_USERNAME: "${POSTGRES_USER:-pg-user}"
+      KC_DB_PASSWORD: "${POSTGRES_PASSWORD:-pg-password}"
+      KC_HOSTNAME: "${KC_HOSTNAME:-localhost}"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: "xforwarded"
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_LOG_LEVEL: "INFO"
+    ports:
+      - "${KC_PORT:-8180:8080}"
+      - "${KC_DEBUG_PORT:-9000:9000}"
+    depends_on:
+      postgres:
+        condition: "service_healthy"
+    volumes:
+      # Mount für den Import
+      - "./config/docker/keycloak:/opt/keycloak/data/import:Z"
+    # Import beim Start aktivieren
+    command: "start-dev --import-realm"
+    networks:
+      meldestelle-network:
+        aliases:
+          - "keycloak"
+    profiles: [ "infra", "all" ]
+
+volumes:
+  postgres-data:
+  redis-data:
+  mailpit-data:
+
+networks:
+  meldestelle-network:
+    driver: bridge
