@@ -95,6 +95,8 @@ Wenn die Umgebung mit dem `all`-Profil läuft, sind die folgenden Tools verfügb
 - **Consul UI (Service Discovery):** [http://localhost:8500](http://localhost:8500)
 - **API Gateway:** [http://localhost:8081](http://localhost:8081)
 - **Web App:** [http://localhost:4000](http://localhost:4000)
+- **Mailpit (E-Mail Testing):** [http://localhost:8025](http://localhost:8025)
+  - Fängt alle E-Mails ab, die von Keycloak oder den Services gesendet werden.
 
 ## 6. Fortgeschrittene Anwendungsfälle: Override-Dateien
 
@@ -122,4 +124,3 @@ docker-compose -f docker-compose.yaml -f docker-compose.frontend.yaml up
 ```
 
 Docker Compose wird die Konfigurationen zusammenführen, wobei die Definitionen in der `docker-compose.frontend.yaml` Vorrang haben.
-```

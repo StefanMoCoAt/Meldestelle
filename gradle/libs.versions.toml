@@ -1,6 +1,6 @@
 # This file is the SINGLE SOURCE OF TRUTH for all project dependencies.
 # Organized by Domain: Frontend (KMP) vs. Backend (Spring/JVM)
-# Last updated: 2026-01-09
+# Last updated: 2026-01-20
 
 [versions]
 # ==============================================================================

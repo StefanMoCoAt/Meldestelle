@@ -2,7 +2,7 @@
 type: Roadmap
 status: ACTIVE
 owner: Lead Architect
-last_update: 2026-01-15
+last_update: 2026-01-20
 ---
 
 # MASTER ROADMAP Q1 2026: "Operation Tracer Bullet"
@@ -12,8 +12,8 @@ Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> 
 
 **Aktueller technischer Stand:**
 *   Build System: ✅ Grün (Gradle, Kotlin 2.3, Spring Boot 3.5.9, Spring Cloud 2025.0.1).
-*   Code-Basis: ✅ `ping-service` existiert rudimentär.
-*   Infrastruktur: ⚠️ Muss gehärtet werden.
+*   Code-Basis: ✅ `ping-service` existiert, Delta-Sync implementiert.
+*   Infrastruktur: ✅ Docker Environment stabil, Tracing aktiv.
 
 ---
 
@@ -25,14 +25,14 @@ Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> 
 #### 👷 Agent: Senior Backend Developer
 Deine Aufgabe ist es, den `ping-service` von einem "Hello World" zu einem Enterprise-Microservice zu machen.
 
-*   [ ] **Security Implementation (Prio 1):**
+*   [x] **Security Implementation (Prio 1):**
     *   Konfiguriere Spring Security als OAuth2 Resource Server.
     *   Implementiere RBAC (Role Based Access Control) für `/ping/secure`.
     *   Stelle sicher, dass Tokens vom Keycloak (Docker) korrekt validiert werden.
 *   [ ] **Resilience (Prio 2):**
     *   Aktiviere Resilience4j CircuitBreaker für Datenbank-Zugriffe.
     *   Implementiere Fallbacks (z.B. "Degraded Mode" wenn DB weg ist).
-*   [ ] **Observability (Prio 3):**
+*   [x] **Observability (Prio 3):**
     *   Aktiviere Spring Boot Actuator (Health, Info, Prometheus).
     *   Stelle sicher, dass Tracing-IDs (Micrometer/Zipkin) durchgereicht werden.
 *   [ ] **Persistence Härtung:**
@@ -42,7 +42,7 @@ Deine Aufgabe ist es, den `ping-service` von einem "Hello World" zu einem Enterp
 #### 🏗️ Agent: Infrastructure & DevOps
 Deine Aufgabe ist die Stabilität der Laufzeitumgebung.
 
-*   [ ] **Docker Environment:**
+*   [x] **Docker Environment:**
     *   Stabilisiere `docker-compose.yaml`. Alle Services (Consul, Keycloak, Postgres, Zipkin) müssen zuverlässig starten.
     *   Prüfe Migration von Redis zu **Valkey** (Open Source Härtung), wie im Hardening-Dokument vorgeschlagen.
 *   [ ] **Gateway Config:**
@@ -71,7 +71,7 @@ Deine Aufgabe ist die Anbindung des gehärteten Backends.
 *Ziel: Datenkonsistenz auch bei Netzwerk-Verlust.*
 
 #### 🤝 Joint Task Force (Backend & Frontend)
-*   [ ] **Sync-Protokoll:**
+*   [x] **Sync-Protokoll:**
     *   Implementierung des Delta-Syncs basierend auf `PingEvent` (UUIDv7 + Timestamp).
     *   Frontend: Speicherung in SQLDelight (lokal).
     *   Backend: Bereitstellung des Sync-Endpunkts.

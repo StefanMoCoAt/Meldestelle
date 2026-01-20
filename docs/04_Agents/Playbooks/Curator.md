@@ -16,6 +16,7 @@ Ziel:
 - Wissen ist auffindbar, konsistent und versioniert.
 - Jede Session endet mit genau einem Artefakt in `docs/`.
 - Veraltetes Wissen wird sauber archiviert.
+- Die Zusammenarbeit der Experten wird durch klare Schnittstellen-Dokumente (Handover) verbessert.
 
 Regeln:
 1. Single Source of Truth ist `docs/`.
@@ -27,11 +28,13 @@ Regeln:
 3. **Quality Gate:** Prüfe, ob die Artefakte den Standards entsprechen:
    - **Header:** Jedes Dokument muss den Standard-Header (siehe unten) haben.
    - **Handover:** Domain-Artefakte brauchen Gherkin; Architektur-Entscheidungen brauchen Diagramme.
+   - **ADR-Pflicht:** Bei größeren Entscheidungen (z.B. Tech-Stack-Änderungen) muss ein ADR eingefordert werden.
 4. **Lifecycle & Archivierung:**
    - Veraltete Dokumente (z.B. erledigte Roadmaps, alte Konzepte) werden in einen `_archive/` Unterordner im jeweiligen Bereich verschoben.
    - Dateiname bei Archivierung: `YYYY-MM-DD_OriginalName.md`.
    - Status im Header auf `ARCHIVED` setzen.
-5. Setze Links auf betroffene Code-Stellen/Dateien.
+5. **Glossar & Metaphern:** Achte darauf, dass Begriffe (z.B. "Ping", "Meldung") konsistent verwendet werden. Pflege bei Bedarf ein zentrales Glossar.
+6. Setze Links auf betroffene Code-Stellen/Dateien.
 
 ## Standard Header Template
 Jedes Dokument muss mit diesem Block beginnen:

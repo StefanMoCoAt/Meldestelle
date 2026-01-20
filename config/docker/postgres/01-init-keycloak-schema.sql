@@ -11,22 +11,15 @@
 -- Erstellt das Keycloak-Schema, falls es noch nicht existiert.
 CREATE SCHEMA IF NOT EXISTS keycloak;
 
--- Da der "POSTGRES_USER" (Superuser) das Skript ausführt,
--- gehört ihm das Schema automatisch oder er hat Zugriff.
--- Explizite GRANTS auf "pg-user" entfernen, um .env-Unabhängigkeit zu wahren.
-
--- Falls du es explizit willst, nutze current_user (der ausführende User):
+-- Der User, der dieses Skript ausführt (definiert durch POSTGRES_USER),
+-- ist automatisch Owner. Wir stellen sicher, dass er alle Rechte hat.
 GRANT ALL PRIVILEGES ON SCHEMA keycloak TO current_user;
--- Gewährt dem Benutzer „meldestelle“ alle Berechtigungen für das Schema.
--- GRANT ALL PRIVILEGES ON SCHEMA keycloak TO "pg-user";
 
--- Gewährt die Nutzung des Schemas
-GRANT USAGE ON SCHEMA keycloak TO "pg-user";
-
--- Standardberechtigungen für zukünftige Tabellen im Keycloak-Schema festlegen
-ALTER DEFAULT PRIVILEGES IN SCHEMA keycloak GRANT ALL ON TABLES TO "pg-user";
-ALTER DEFAULT PRIVILEGES IN SCHEMA keycloak GRANT ALL ON SEQUENCES TO "pg-user";
-ALTER DEFAULT PRIVILEGES IN SCHEMA keycloak GRANT ALL ON FUNCTIONS TO "pg-user";
+-- Wir setzen die Default-Privilegien für zukünftige Tabellen,
+-- damit der aktuelle User (der auch der App-User ist) Zugriff hat.
+ALTER DEFAULT PRIVILEGES IN SCHEMA keycloak GRANT ALL ON TABLES TO current_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA keycloak GRANT ALL ON SEQUENCES TO current_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA keycloak GRANT ALL ON FUNCTIONS TO current_user;
 
 -- Log successful schema Erstellung
 DO $$
