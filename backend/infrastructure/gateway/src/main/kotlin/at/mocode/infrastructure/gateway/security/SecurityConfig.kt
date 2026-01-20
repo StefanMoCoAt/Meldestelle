@@ -51,7 +51,7 @@ class SecurityConfig(
 
     @Bean
     fun reactiveJwtDecoder(
-        @Value($$"${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}") jwkSetUri: String
+        @Value("\${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}") jwkSetUri: String
     ): ReactiveJwtDecoder {
         return ResilienceReactiveJwtDecoder(jwkSetUri)
     }
@@ -127,7 +127,8 @@ data class GatewaySecurityProperties(
         "/v3/api-docs/**",
         "/api/auth/**",
         "/api/ping/public",
-        "/api/ping/health"
+        "/api/ping/health",
+        "/api/ping/simple"
     )
 )
 
