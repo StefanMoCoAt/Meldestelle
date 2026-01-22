@@ -36,7 +36,10 @@
   "oauth2DeviceCodeLifespan": 600,
   "oauth2DevicePollingInterval": 5,
   "internationalizationEnabled": true,
-  "supportedLocales": ["de", "en"],
+  "supportedLocales": [
+    "de",
+    "en"
+  ],
   "defaultLocale": "de",
   "roles": {
     "realm": [
@@ -49,6 +52,12 @@
       {
         "name": "USER",
         "description": "Standard user role with limited access",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "MELD_USER",
+        "description": "Verified user role (Technical placeholder for REITER)",
         "composite": false,
         "clientRole": false
       },
@@ -195,6 +204,26 @@
       "attributes": {
         "pkce.code.challenge.method": "S256"
       }
+    },
+    {
+      "clientId": "postman-client",
+      "name": "Postman Test Client",
+      "description": "Confidential client for backend testing via Postman",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "postman-secret-123",
+      "redirectUris": [
+        "https://oauth.pstmn.io/v1/callback"
+      ],
+      "webOrigins": [],
+      "protocol": "openid-connect",
+      "bearerOnly": false,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true
     }
   ],
   "users": [
@@ -212,15 +241,26 @@
           "temporary": true
         }
       ],
-      "realmRoles": ["ADMIN", "USER"],
+      "realmRoles": [
+        "ADMIN",
+        "USER",
+        "MELD_USER"
+      ],
       "clientRoles": {
-        "api-gateway": ["ADMIN"]
+        "api-gateway": [
+          "ADMIN"
+        ]
       }
     }
   ],
   "groups": [],
-  "defaultRoles": ["USER", "GUEST"],
-  "requiredCredentials": ["password"],
+  "defaultRoles": [
+    "USER",
+    "GUEST"
+  ],
+  "requiredCredentials": [
+    "password"
+  ],
   "passwordPolicy": "length(8)",
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
@@ -228,12 +268,20 @@
   "otpPolicyDigits": 6,
   "otpPolicyLookAheadWindow": 1,
   "otpPolicyPeriod": 30,
-  "otpSupportedApplications": ["FreeOTP", "Google Authenticator"],
+  "otpSupportedApplications": [
+    "FreeOTP",
+    "Google Authenticator"
+  ],
   "webAuthnPolicyRpEntityName": "meldestelle",
-  "webAuthnPolicySignatureAlgorithms": ["ES256", "RS256"],
+  "webAuthnPolicySignatureAlgorithms": [
+    "ES256",
+    "RS256"
+  ],
   "smtpServer": {},
   "eventsEnabled": true,
-  "eventsListeners": ["jboss-logging"],
+  "eventsListeners": [
+    "jboss-logging"
+  ],
   "enabledEventTypes": [
     "LOGIN",
     "LOGIN_ERROR",
@@ -254,7 +302,9 @@
         "providerId": "rsa-generated",
         "subComponents": {},
         "config": {
-          "priority": ["100"]
+          "priority": [
+            "100"
+          ]
         }
       },
       {
@@ -262,8 +312,12 @@
         "providerId": "hmac-generated",
         "subComponents": {},
         "config": {
-          "priority": ["100"],
-          "algorithm": ["HS256"]
+          "priority": [
+            "100"
+          ],
+          "algorithm": [
+            "HS256"
+          ]
         }
       },
       {
@@ -271,7 +325,9 @@
         "providerId": "aes-generated",
         "subComponents": {},
         "config": {
-          "priority": ["100"]
+          "priority": [
+            "100"
+          ]
         }
       }
     ]

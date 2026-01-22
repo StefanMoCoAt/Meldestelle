@@ -25,12 +25,12 @@ Damit wir testen können, brauchen wir einen User und einen Client in Keycloak, 
 *   **Realm:** Wähle oben links `meldestelle` aus (wurde beim Start importiert).
 
 **Check:**
-*   **User:** Gibt es einen User? (z.B. `testuser` / `password` mit Rolle `MELD_USER`)?
-    *   *Falls nicht:* Lege schnell einen User an, setze Credentials (temporary: off) und weise ihm unter "Role Mapping" die Rolle `MELD_USER` zu.
-*   **Client:** Gibt es einen Client? (z.B. `meldestelle-frontend` oder `postman`)?
-    *   *Falls nicht:* Lege einen Client `postman` an.
-    *   Access Type: `public` (oder `confidential` wenn du Client Secret nutzen willst, public reicht für Postman oft).
-    *   Valid Redirect URIs: `*` (für Tests ok) oder `https://oauth.pstmn.io/v1/callback`.
+*   **User:** Der Standard-Admin User `admin` hat bereits die notwendige Rolle `MELD_USER`.
+*   **Client:** Es gibt einen dedizierten Test-Client `postman-client`.
+    *   Client ID: `postman-client`
+    *   Client Secret: `postman-secret-123`
+    *   Access Type: `confidential`
+    *   Direct Access Grants: `Enabled`
 
 ---
 
@@ -42,9 +42,10 @@ Erstelle eine neue Collection "Meldestelle Ping Test".
 Setze folgende Variablen in Postman (Environment "Local Docker"):
 *   `gateway_url`: `http://localhost:8081`
 *   `auth_url`: `http://localhost:8180/realms/meldestelle/protocol/openid-connect/token`
-*   `client_id`: `meldestelle-frontend` (oder wie dein Client heißt)
-*   `username`: `testuser` (dein User)
-*   `password`: `password` (dein Passwort)
+*   `client_id`: `postman-client`
+*   `client_secret`: `postman-secret-123`
+*   `username`: `admin`
+*   `password`: `Change_Me_In_Production!`
 
 ---
 
@@ -108,6 +109,7 @@ Wir testen nun die verschiedenen Endpunkte und Sicherheitsstufen.
 *   Grant Type: `Password Credentials`
 *   Access Token URL: `{{auth_url}}`
 *   Client ID: `{{client_id}}`
+*   Client Secret: `{{client_secret}}`
 *   Username: `{{username}}`
 *   Password: `{{password}}`
 *   Klick auf "Get New Access Token".
