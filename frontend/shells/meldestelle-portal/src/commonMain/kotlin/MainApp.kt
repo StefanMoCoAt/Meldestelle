@@ -4,20 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import at.mocode.clients.shared.navigation.AppScreen
 import at.mocode.frontend.core.auth.data.AuthTokenManager
-import at.mocode.frontend.core.auth.data.AuthApiClient
 import at.mocode.frontend.core.auth.presentation.LoginScreen
 import at.mocode.frontend.core.auth.presentation.LoginViewModel
 import at.mocode.ping.feature.presentation.PingScreen
 import at.mocode.ping.feature.presentation.PingViewModel
-import at.mocode.shared.core.AppConstants
 import at.mocode.frontend.core.designsystem.components.AppFooter
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 

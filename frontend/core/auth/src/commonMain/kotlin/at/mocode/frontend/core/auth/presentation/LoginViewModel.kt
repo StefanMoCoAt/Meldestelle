@@ -46,6 +46,10 @@ class LoginViewModel(
         _uiState.value = _uiState.value.copy(
           isAuthenticated = authState.isAuthenticated
         )
+        // If logged out, clear credentials
+        if (!authState.isAuthenticated) {
+          _uiState.value = LoginUiState()
+        }
       }
     }
   }
@@ -128,16 +132,5 @@ class LoginViewModel(
         )
       }
     }
-  }
-
-  fun logout() {
-    authTokenManager.clearToken()
-    // Reset UI state (clear username/password)
-    _uiState.value = LoginUiState()
-  }
-
-  fun checkAuthenticationStatus() {
-    val isAuthenticated = authTokenManager.hasValidToken()
-    _uiState.value = _uiState.value.copy(isAuthenticated = isAuthenticated)
   }
 }

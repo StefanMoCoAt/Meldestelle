@@ -87,6 +87,7 @@ private fun ButtonContent(
   }
 }
 
+@Suppress("unused")
 @Composable
 fun PrimaryButton(
   text: String,
@@ -105,6 +106,7 @@ fun PrimaryButton(
   fullWidth = fullWidth
 )
 
+@Suppress("unused")
 @Composable
 fun SecondaryButton(
   text: String,

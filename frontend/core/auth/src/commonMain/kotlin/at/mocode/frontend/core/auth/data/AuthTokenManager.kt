@@ -70,6 +70,7 @@ data class AuthState(
  * to prevent XSS attacks. The token is lost when the browser tab is closed
  * or refreshed, requiring re-authentication.
  */
+@Suppress("unused")
 class AuthTokenManager {
 
   private var currentToken: String? = null

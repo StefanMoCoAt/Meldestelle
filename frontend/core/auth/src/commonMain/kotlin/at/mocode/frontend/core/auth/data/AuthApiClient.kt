@@ -3,18 +3,10 @@ package at.mocode.frontend.core.auth.data
 import at.mocode.shared.core.AppConstants
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
-
-/**
- * Data classes for authentication API communication
- */
-@Serializable
-data class LoginRequest(
-  val username: String,
-  val password: String
-)
 
 @Serializable
 data class LoginResponse(
@@ -86,49 +78,6 @@ class AuthApiClient(
   }
 
   /**
-   * Exchange an authorization code (PKCE) for tokens
-   */
-  suspend fun exchangeAuthorizationCode(code: String, codeVerifier: String, redirectUri: String): LoginResponse {
-    val tokenEndpoint = "$keycloakBaseUrl/realms/$realm/protocol/openid-connect/token"
-    return try {
-      val response = httpClient.submitForm(
-        url = tokenEndpoint,
-        formParameters = Parameters.build {
-          append("grant_type", "authorization_code")
-          append("client_id", clientId)
-          if (!clientSecret.isNullOrBlank()) {
-            append("client_secret", clientSecret)
-          }
-          append("code", code)
-          append("code_verifier", codeVerifier)
-          append("redirect_uri", redirectUri)
-        }
-      ) {
-        contentType(ContentType.Application.FormUrlEncoded)
-      }
-
-      if (response.status.isSuccess()) {
-        val kc = response.body<KeycloakTokenResponse>()
-        LoginResponse(
-          success = true,
-          token = kc.access_token,
-          message = null
-        )
-      } else {
-        LoginResponse(
-          success = false,
-          message = "Code-Exchange fehlgeschlagen: HTTP ${'$'}{response.status.value}"
-        )
-      }
-    } catch (e: Exception) {
-      LoginResponse(
-        success = false,
-        message = "Code-Exchange Fehler: ${'$'}{e.message}"
-      )
-    }
-  }
-
-  /**
    * Refresh authentication token
    */
   suspend fun refreshToken(refreshToken: String): LoginResponse {
@@ -167,15 +116,6 @@ class AuthApiClient(
         message = "Token refresh Fehler: ${e.message}"
       )
     }
-  }
-
-  /**
-   * Logout and invalidate token
-   */
-  suspend fun logout(token: String): Boolean {
-    // Empfehlung: Frontend-seitig Token lokal verwerfen.
-    // Optional könnten hier Keycloak-Endpoints für Token-Revocation aufgerufen werden.
-    return true
   }
 
   @Serializable

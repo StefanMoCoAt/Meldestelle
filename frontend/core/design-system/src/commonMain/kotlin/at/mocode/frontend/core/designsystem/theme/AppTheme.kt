@@ -35,6 +35,7 @@ private val DarkColorScheme = darkColorScheme(
   onSurface = Color(0xFFE0E0E0)
 )
 
+@Suppress("unused")
 @Composable
 fun AppTheme(
   darkTheme: Boolean = false, // For now, we'll default to light theme

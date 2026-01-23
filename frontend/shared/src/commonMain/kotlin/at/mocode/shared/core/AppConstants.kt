@@ -6,6 +6,7 @@ package at.mocode.shared.core
  */
 object AppConstants {
   // Gateway base URL (reverse proxy / API gateway)
+  // Used by NetworkConfig via PlatformConfig
   const val GATEWAY_URL: String = "http://localhost:8081"
 
   // Keycloak configuration
@@ -21,33 +22,5 @@ object AppConstants {
   // For the Desktop App Pilot, we use this to simulate a secure client.
   const val KEYCLOAK_CLIENT_SECRET: String = "postman-secret-123"
 
-  // Default redirect URI for web PKCE flow (served by Nginx in web image)
-  // We use the root path so Keycloak can redirect back to /?code=...
-  fun webRedirectUri(): String = "http://localhost:4000/"
-
-  fun registerUrl(): String =
-    "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/registrations?client_id=web-app&response_type=code&redirect_uri=${
-      encode(
-        webRedirectUri()
-      )
-    }"
-
-  fun loginUrl(): String =
-    "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/auth?client_id=web-app&response_type=code&redirect_uri=${
-      encode(
-        webRedirectUri()
-      )
-    }"
-
-  fun authorizeEndpoint(): String =
-    "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/auth"
-
-  fun tokenEndpoint(): String =
-    "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/token"
-
-  fun desktopDownloadUrl(): String = "http://localhost:4000/downloads/"
-
-  // Helper to URL-encode values (very small percent-encoding sufficient for URIs here)
-  private fun encode(value: String): String =
-    value.replace("://", ":%2F%2F").replace("/", "%2F").replace(":", "%3A")
+  // Removed unused browser flow URLs (registerUrl, loginUrl, etc.) as we focus on Desktop App.
 }

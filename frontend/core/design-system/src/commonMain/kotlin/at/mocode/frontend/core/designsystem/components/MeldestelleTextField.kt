@@ -92,6 +92,7 @@ fun MeldestelleTextField(
   }
 }
 
+@Suppress("unused")
 @Composable
 fun MeldestellePasswordField(
   value: String,
@@ -136,6 +137,7 @@ fun MeldestellePasswordField(
   )
 }
 
+@Suppress("unused")
 @Composable
 fun MeldestelleEmailField(
   value: String,
@@ -169,6 +171,7 @@ fun MeldestelleEmailField(
 /**
  * Form validation utilities
  */
+@Suppress("unused")
 object FormValidation {
   fun validateEmail(email: String): String? {
     return when {

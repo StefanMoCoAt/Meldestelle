@@ -51,6 +51,7 @@ fun LoadingIndicator(
   }
 }
 
+@Suppress("unused")
 @Composable
 fun FullScreenLoading(
   message: String = "Loading...",
@@ -67,6 +68,7 @@ fun FullScreenLoading(
   }
 }
 
+@Suppress("unused")
 @Composable
 fun InlineLoading(
   message: String? = null,
@@ -84,6 +86,7 @@ fun InlineLoading(
   }
 }
 
+@Suppress("unused")
 @Composable
 fun LinearLoadingIndicator(
   modifier: Modifier = Modifier,
