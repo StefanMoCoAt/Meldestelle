@@ -12,22 +12,28 @@ object AppConstants {
   const val KEYCLOAK_URL: String = "http://localhost:8180"
   const val KEYCLOAK_REALM: String = "meldestelle"
 
-  // Use public client configured in realm import: `web-app`
-  const val KEYCLOAK_CLIENT_ID: String = "web-app"
+  // Use 'postman-client' for Desktop App Password Flow (Direct Access Grants enabled)
+  // 'web-app' is for Browser Flow (PKCE)
+  const val KEYCLOAK_CLIENT_ID: String = "postman-client"
+
+  // DEV ONLY: Client Secret for 'postman-client' (Confidential Client)
+  // In Production, this should NEVER be in the frontend code.
+  // For the Desktop App Pilot, we use this to simulate a secure client.
+  const val KEYCLOAK_CLIENT_SECRET: String = "postman-secret-123"
 
   // Default redirect URI for web PKCE flow (served by Nginx in web image)
   // We use the root path so Keycloak can redirect back to /?code=...
   fun webRedirectUri(): String = "http://localhost:4000/"
 
   fun registerUrl(): String =
-    "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/registrations?client_id=$KEYCLOAK_CLIENT_ID&response_type=code&redirect_uri=${
+    "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/registrations?client_id=web-app&response_type=code&redirect_uri=${
       encode(
         webRedirectUri()
       )
     }"
 
   fun loginUrl(): String =
-    "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/auth?client_id=$KEYCLOAK_CLIENT_ID&response_type=code&redirect_uri=${
+    "$KEYCLOAK_URL/realms/$KEYCLOAK_REALM/protocol/openid-connect/auth?client_id=web-app&response_type=code&redirect_uri=${
       encode(
         webRedirectUri()
       )

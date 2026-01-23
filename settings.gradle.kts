@@ -129,6 +129,8 @@ include(":docs")
 // FRONTEND
 // ==========================================================================
 // --- CORE ---
+// frontend/core/auth
+include(":frontend:core:auth") // MOVED from features
 include(":frontend:core:domain")
 include(":frontend:core:design-system")
 include(":frontend:core:navigation")
@@ -137,7 +139,6 @@ include(":frontend:core:local-db")
 include(":frontend:core:sync")
 
 // --- FEATURES ---
-include(":frontend:features:auth-feature")
 // include(":frontend:features:members-feature")
 include(":frontend:features:ping-feature")
 

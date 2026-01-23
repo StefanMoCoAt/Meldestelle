@@ -80,8 +80,8 @@ kotlin {
       implementation(projects.frontend.core.navigation)
       implementation(projects.frontend.core.network)
       implementation(projects.frontend.core.sync)
-      implementation(project(":frontend:core:local-db"))
-      implementation(projects.frontend.features.authFeature)
+      implementation(projects.frontend.core.localDb)
+      implementation(projects.frontend.core.auth)
       implementation(projects.frontend.features.pingFeature)
 
       // DI (Koin) needed to call initKoin { modules(...) }

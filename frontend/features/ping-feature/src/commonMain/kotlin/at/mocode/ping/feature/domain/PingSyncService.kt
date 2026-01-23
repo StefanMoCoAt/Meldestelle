@@ -20,6 +20,7 @@ class PingSyncServiceImpl(
 ) : PingSyncService {
 
   override suspend fun syncPings() {
-    syncManager.performSync(repository, "/api/pings/sync")
+    // Corrected endpoint: /api/ping/sync (singular)
+    syncManager.performSync(repository, "/api/ping/sync")
   }
 }

@@ -1,6 +1,6 @@
 package navigation
 
-import at.mocode.clients.authfeature.AuthTokenManager
+import at.mocode.frontend.core.auth.data.AuthTokenManager
 import at.mocode.frontend.core.domain.models.User
 import at.mocode.frontend.core.navigation.CurrentUserProvider
 import at.mocode.frontend.core.navigation.DeepLinkHandler
