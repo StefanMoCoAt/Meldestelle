@@ -1,3 +1,17 @@
+---
+type: Report
+status: ARCHIVED
+owner: Lead Architect
+date: 2026-01-10
+tags: [backend, ping-service, task]
+---
+
+# Arbeitsauftrag: Implementierung des `ping-service` (Tracer Bullet)
+
+**ARCHIVED:** This is the original task description. The implementation has evolved. Please refer to `docs/05_Backend/Services/PingService_Reference.md`.
+
+---
+
 **An:** Senior Backend Developer
 **Von:** Lead Software Architect
 **Betreff:** Arbeitsauftrag: Implementierung des `ping-service` (Tracer Bullet)
@@ -199,4 +213,3 @@ Der Auftrag gilt als erledigt, wenn:
 5. Die Requests in der Zipkin UI als Trace sichtbar sind.
 
 Bei Fragen zur Konfiguration oder zur Architektur stehe ich dir zur Verfügung.
-

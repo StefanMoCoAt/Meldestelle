@@ -18,12 +18,15 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate # Flyway kümmert sich um Schema!
+      # WICHTIG: Flyway kümmert sich um das Schema. Hibernate darf nur validieren.
+      ddl-auto: validate
     open-in-view: false
 
   flyway:
     enabled: true
+    # Erlaubt Migration auch wenn DB nicht leer ist (wichtig für Dev)
     baseline-on-migrate: true
+    # Sucht standardmäßig in classpath:db/migration
 
   security:
     oauth2:

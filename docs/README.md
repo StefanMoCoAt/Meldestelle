@@ -1,37 +1,44 @@
-# Projektdokumentation "Meldestelle"
+# 📚 Projektdokumentation "Meldestelle"
 
-Willkommen zur zentralen Projektdokumentation. Dieses Verzeichnis ist die "Single Source of Truth" für alle architektonischen Entscheidungen, Anleitungen und Implementierungsdetails.
+Willkommen im "Gehirn" des Projekts. Dieses Verzeichnis ist die **Single Source of Truth**.
 
-Die Dokumentation wird nach dem **"Docs-as-Code"**-Prinzip gepflegt: Sie liegt neben dem Code, wird mit Git versioniert und von allen Teammitgliedern (Mensch und KI) aktuell gehalten.
+## 📂 Struktur
 
-## Struktur der Dokumentation
+### 🏗️ Core
+*   **[`01_Architecture`](01_Architecture/)**: Der Masterplan. ADRs, Roadmaps und C4-Modelle.
+    *   *Start hier:* `MASTER_ROADMAP_2026_Q1.md`
+*   **[`02_Onboarding`](02_Onboarding/)**: Guides für neue Entwickler (Setup, Guidelines).
+*   **[`03_Domain`](03_Domain/)**: Fachlichkeit (Turnierregeln, Entities).
 
-*   **/01_Architecture**: Architektur (ADRs, C4/Diagramme, Architektur-Referenzen).
-*   **/02_Onboarding**: Einstieg & Entwickler-Workflow (lokales Setup, PR-Workflow, Style-Guides).
-*   **/03_Domain**: Fachliche Domäne (Kern-Modell, Referenzen, Analyse).
-*   **/04_Agents**: Agent Operating Model (AOM) + Playbooks für KI-Unterstützung.
-*   **/05_Backend**: Backend-spezifische Dokumentation (Services, Datenmodelle, Integrationen).
-*   **/06_Frontend**: Frontend-spezifische Dokumentation (KMP/Compose, Offline/Synchronisierung).
-*   **/07_Infrastructure**: Betrieb & Infrastruktur (Docker, Keycloak, Observability, Runbooks).
-*   **/90_Reports**: Berichte/Analysen/Status-Reports (zeitlich geordnet, nicht zwingend „verbindliche Regeln“).
-*   **/99_Journal**: Kurzprotokolle pro Session (Anti-Wissensverlust, Nachvollziehbarkeit).
+### 🛠️ Tech Stack
+*   **[`05_Backend`](05_Backend/)**: Spring Boot Services, API-Specs, DB-Schema.
+    *   *Referenz:* `Services/PingService_Reference.md`
+*   **[`06_Frontend`](06_Frontend/)**: Kotlin Multiplatform, Compose UI, State Management.
+*   **[`07_Infrastructure`](07_Infrastructure/)**: Docker, Keycloak, CI/CD.
 
-## Wie man diese Dokumentation pflegt
+### 🤖 Process
+*   **[`04_Agents`](04_Agents/)**: Playbooks für unsere KI-Mitarbeiter.
+*   **[`90_Reports`](90_Reports/)**: Statusberichte und Meilenstein-Analysen.
+*   **[`99_Journal`](99_Journal/)**: Tägliche Session-Logs.
 
-Jeder Entwickler und jeder KI-Agent ist dafür verantwortlich, die Dokumentation, die seinen Arbeitsbereich betrifft, zu aktualisieren.
+---
 
-*   **Bei neuen Features:** Erstelle oder aktualisiere die entsprechende Implementierungs-Doku.
-*   **Bei Architektur-Änderungen:** Erstelle ein neues ADR oder aktualisiere ein bestehendes.
-*   **Bei Änderungen am Setup:** Passe die Anleitungen im `Onboarding`- oder `Infrastructure`-Verzeichnis an.
+## 📝 Regeln für die Dokumentation
 
-Änderungen an der Dokumentation sollten Teil derselben Pull Request/Commit sein wie die zugehörigen Code-Änderungen.
+1.  **Docs-as-Code:** Doku liegt beim Code und wird im selben PR aktualisiert.
+2.  **Frontmatter:** Jede Markdown-Datei muss einen YAML-Header haben:
+    ```yaml
+    ---
+    type: [ADR, Guide, Reference, Report, Journal]
+    status: [DRAFT, ACTIVE, DEPRECATED, ARCHIVED]
+    owner: [Rolle]
+    ---
+    ```
+3.  **Archivierung:** Lösche nichts. Verschiebe veraltetes Wissen in `_archive` Ordner oder markiere es als `ARCHIVED`.
 
-### Wichtigste Einstiege
+---
 
-*   Lokales Setup/Workflow: `docs/02_Onboarding/`
-*   Fachliches Modell: `docs/03_Domain/`
-*   Agenten/Arbeitsmodus: `docs/04_Agents/`
-*   Architekturentscheidungen: `docs/01_Architecture/adr/`
-*   Backend (pro Service): `docs/05_Backend/Services/`
-*   Ping-Service (Startpunkt): `docs/05_Backend/Services/ping-service.md`
-*   Ping-Service Implementierungs-Report (Historie): `docs/90_Reports/Ping-Service_Impl_01-2026.md`
+## 🚀 Quick Links
+*   [Master Roadmap](01_Architecture/MASTER_ROADMAP_2026_Q1.md)
+*   [Ping Service Reference](05_Backend/Services/PingService_Reference.md)
+*   [Agent Playbooks](04_Agents/)

@@ -1,12 +1,16 @@
 ---
 type: Report
-status: DRAFT
+status: ARCHIVED
 owner: Frontend Expert
 date: 2026-01-20
 tags: [frontend, backend, integration, ping-feature]
 ---
 
 # 🚩 Statusbericht: Frontend-Backend Integration (20. Jänner 2026)
+
+**ARCHIVED:** This report reflects a past state. Please refer to `2026-01-23_Weekend_Status_Report.md` for the current status.
+
+---
 
 **Status:** ✅ **Erfolgreich verifiziert**
 

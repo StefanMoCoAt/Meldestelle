@@ -1,12 +1,16 @@
 ---
 type: Report
-status: ACTION_REQUIRED
+status: ARCHIVED
 owner: Lead Architect
 date: 2026-01-17
 tags: [architecture, handover, critique, roadmap]
 ---
 
 # 🏗️ Lead Architect Status Report & Handover
+
+**ARCHIVED:** This report reflects a past state. Please refer to `2026-01-23_Weekend_Status_Report.md` for the current status.
+
+---
 
 **Datum:** 17. Jänner 2026
 **Status:** 🟡 **PARTIALLY BLOCKED** (Frontend Architecture Split)

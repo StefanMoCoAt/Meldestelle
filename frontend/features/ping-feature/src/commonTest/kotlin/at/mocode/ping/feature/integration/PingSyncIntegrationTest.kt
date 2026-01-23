@@ -23,7 +23,7 @@ class PingSyncIntegrationTest {
 
     // Mock API Response
     val mockEngine = MockEngine { request ->
-      assertEquals("/api/pings/sync", request.url.encodedPath)
+      assertEquals("/api/ping/sync", request.url.encodedPath)
 
       val responseBody = """
         [

@@ -1,12 +1,16 @@
 ---
 type: Report
-status: FINAL
+status: ARCHIVED
 owner: Frontend Expert
 date: 2026-01-19
 tags: [frontend, refactoring, clean-architecture, ping-feature]
 ---
 
 # 🚩 Statusbericht: Frontend Refactoring (19. Jänner 2026)
+
+**ARCHIVED:** This report reflects a past state. Please refer to `2026-01-23_Weekend_Status_Report.md` for the current status.
+
+---
 
 **Status:** ✅ **Erfolgreich abgeschlossen**
 

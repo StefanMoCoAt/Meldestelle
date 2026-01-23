@@ -1,12 +1,16 @@
 ---
 type: Report
-status: APPROVED
+status: ARCHIVED
 owner: Lead Architect
 date: 2026-01-19
 tags: [architecture, review, frontend, ping-feature]
 ---
 
 # 🏗️ Lead Architect Review: Frontend Refactoring
+
+**ARCHIVED:** This report reflects a past state. Please refer to `2026-01-23_Weekend_Status_Report.md` for the current status.
+
+---
 
 **Datum:** 19. Jänner 2026
 **Status:** ✅ **APPROVED**

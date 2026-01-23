@@ -1,12 +1,16 @@
 ---
 type: Report
-status: FINAL
+status: ARCHIVED
 owner: DevOps Engineer
 last_update: 2026-01-20
 context: Phase 1-3 (Backend Ready)
 ---
 
 # Infrastructure Status Report: "Tracer Bullet" Readiness
+
+**ARCHIVED:** This report reflects a past state. Please refer to `2026-01-23_Weekend_Status_Report.md` for the current status.
+
+---
 
 **Datum:** 20. Jänner 2026
 **Autor:** DevOps & Infrastructure Engineer (Updated by Backend Developer)
