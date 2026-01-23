@@ -24,78 +24,79 @@ import org.w3c.dom.HTMLElement
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
   console.log("[WebApp] main() entered")
-  // Initialize DI (Koin) with shared modules + network + local DB modules
+
+  // 1. Initialize DI (Koin) with static modules
   try {
-    // Updated: Only load the consolidated pingFeatureModule from at.mocode.ping.feature.di
     initKoin { modules(networkModule, localDbModule, syncModule, pingFeatureModule, authModule, navigationModule) }
-    console.log("[WebApp] Koin initialized with networkModule + localDbModule + authModule + navigationModule + pingFeatureModule")
+    console.log("[WebApp] Koin initialized with static modules")
   } catch (e: dynamic) {
     console.warn("[WebApp] Koin initialization warning:", e)
   }
-  // Simple smoke request using DI apiClient
-  try {
-    val client = GlobalContext.get().get<HttpClient>(named("apiClient"))
-    MainScope().launch {
-      try {
-        val resp: String = client.get("/api/ping/health").body()
-        console.log("[WebApp] /api/ping/health → ", resp)
-      } catch (e: dynamic) {
-        console.warn("[WebApp] /api/ping/health failed:", e?.message ?: e)
-      }
-    }
-  } catch (e: dynamic) {
-    console.warn("[WebApp] Unable to resolve apiClient from Koin:", e)
-  }
 
-  // Simple local DB smoke: create DB instance (avoid query calls to keep smoke minimal)
-  try {
-    val provider = GlobalContext.get().get<DatabaseProvider>()
-    MainScope().launch {
-      try {
-        val db = provider.createDatabase()
-        // Register the created DB instance into Koin so feature repositories can use it.
-        // This is the central place where we bridge the async DB creation into the DI graph.
-        // Inject the created DB instance into Koin.
-        // We register a one-off module that provides this concrete instance.
-        loadKoinModules(
-          module {
-            single<AppDatabase> { db }
-          }
-        )
-        console.log("[WebApp] Local DB created:", jsTypeOf(db))
-      } catch (e: dynamic) {
-        console.warn("[WebApp] Local DB smoke failed:", e?.message ?: e)
-      }
-    }
-  } catch (e: dynamic) {
-    console.warn("[WebApp] Unable to resolve DatabaseProvider from Koin:", e)
-  }
-  fun startApp() {
+  // 2. Async Initialization Chain
+  // We must ensure DB is ready and registered in Koin BEFORE we mount the UI.
+  val provider = GlobalContext.get().get<DatabaseProvider>()
+
+  MainScope().launch {
     try {
-      console.log("[WebApp] startApp(): readyState=", document.asDynamic().readyState)
-      val root = document.getElementById("ComposeTarget") as HTMLElement
-      console.log("[WebApp] ComposeTarget exists? ", (true))
-      ComposeViewport(root) {
-        MainApp()
-      }
-      // Remove the static loading placeholder if present
-      (document.querySelector(".loading") as? HTMLElement)?.let { it.parentElement?.removeChild(it) }
-      console.log("[WebApp] ComposeViewport mounted, loading placeholder removed")
-    } catch (e: Exception) {
-      console.error("Failed to start Compose Web app", e)
-      val fallbackTarget = (document.getElementById("ComposeTarget") ?: document.body) as HTMLElement
-      fallbackTarget.innerHTML =
-        "<div style='padding: 50px; text-align: center;'>❌ Failed to load app: ${e.message}</div>"
+      console.log("[WebApp] Initializing Database...")
+      val db = provider.createDatabase()
+
+      // Register the created DB instance into Koin
+      loadKoinModules(
+        module {
+          single<AppDatabase> { db }
+        }
+      )
+      console.log("[WebApp] Local DB created and registered in Koin")
+
+      // 3. Start App only after DB is ready
+      startAppWhenDomReady()
+
+    } catch (e: dynamic) {
+      console.error("[WebApp] CRITICAL: Database initialization failed:", e)
+      renderFatalError("Database initialization failed: ${e?.message ?: e}")
     }
   }
+}
 
-  // Start immediately if DOM is already parsed, otherwise wait for DOMContentLoaded.
+@OptIn(ExperimentalComposeUiApi::class)
+fun startAppWhenDomReady() {
   val state = document.asDynamic().readyState as String?
   if (state == "interactive" || state == "complete") {
-    console.log("[WebApp] DOM already ready (", state, ") → starting immediately")
-    startApp()
+    mountComposeApp()
   } else {
-    console.log("[WebApp] Waiting for DOMContentLoaded, current state:", state)
-    document.addEventListener("DOMContentLoaded", { startApp() })
+    document.addEventListener("DOMContentLoaded", { mountComposeApp() })
   }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+fun mountComposeApp() {
+  try {
+    console.log("[WebApp] Mounting Compose App...")
+    val root = document.getElementById("ComposeTarget") as HTMLElement
+
+    ComposeViewport(root) {
+      MainApp()
+    }
+
+    // Remove loading spinner
+    (document.querySelector(".loading") as? HTMLElement)?.let { it.parentElement?.removeChild(it) }
+    console.log("[WebApp] App mounted successfully")
+
+  } catch (e: Exception) {
+    console.error("Failed to start Compose Web app", e)
+    renderFatalError("UI Mount failed: ${e.message}")
+  }
+}
+
+fun renderFatalError(message: String) {
+  val fallbackTarget = (document.getElementById("ComposeTarget") ?: document.body) as HTMLElement
+  fallbackTarget.innerHTML = """
+    <div style='padding: 50px; text-align: center; color: #D32F2F; font-family: sans-serif;'>
+      <h1>System Error</h1>
+      <p>The application could not be started.</p>
+      <pre style='background: #FFEBEE; padding: 10px; border-radius: 4px; text-align: left; display: inline-block;'>$message</pre>
+    </div>
+  """.trimIndent()
 }

@@ -6,12 +6,12 @@ import org.w3c.dom.Worker
 
 actual class DatabaseDriverFactory {
     actual suspend fun createDriver(): SqlDriver {
-        // Load the worker script. This assumes the worker is bundled correctly by Webpack.
-        // We use a custom worker entry point to support OPFS if needed (as per report).
-        // For now, we point to a resource we will create.
-        val worker = Worker(
-            js("""new URL("sqlite.worker.js", import.meta.url)""")
-        )
+        // Load the worker script.
+        // We use a simple string path instead of `new URL(..., import.meta.url)` to prevent Webpack
+        // from trying to resolve/bundle this file at build time.
+        // The file 'sqlite.worker.js' is copied to the root of the distribution by the Gradle build script.
+        val worker = Worker("sqlite.worker.js")
+
         val driver = WebWorkerDriver(worker)
 
         // Initialize schema asynchronously

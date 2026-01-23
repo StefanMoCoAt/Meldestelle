@@ -13,12 +13,14 @@ import at.mocode.frontend.core.auth.presentation.LoginViewModel
 import at.mocode.ping.feature.presentation.PingScreen
 import at.mocode.ping.feature.presentation.PingViewModel
 import at.mocode.frontend.core.designsystem.components.AppFooter
+import at.mocode.frontend.core.designsystem.theme.AppTheme
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MainApp() {
-  MaterialTheme {
+  // Wrap the entire app in our centralized AppTheme
+  AppTheme {
     Surface(
       modifier = Modifier.fillMaxSize(),
       color = MaterialTheme.colorScheme.background
