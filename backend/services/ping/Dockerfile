@@ -3,7 +3,7 @@
 # ===================================================================
 # Multi-stage Dockerfile for Meldestelle Ping Service
 # Features: Security hardening, monitoring support, optimal caching, BuildKit cache mounts
-# Version: 2.2.0 - Optimized for Monorepo (Fixed missing frontend dirs)
+# Version: 2.2.1 - Optimized for Monorepo (Fixed frontend paths after refactoring)
 # ===================================================================
 
 # === CENTRALIZED BUILD ARGUMENTS ===
@@ -53,13 +53,13 @@ COPY contracts/ contracts/
 
 # Create dummy frontend directories to satisfy settings.gradle.kts include paths
 RUN mkdir -p \
+    frontend/core/auth \
     frontend/core/domain \
     frontend/core/design-system \
     frontend/core/navigation \
     frontend/core/network \
     frontend/core/local-db \
     frontend/core/sync \
-    frontend/features/auth-feature \
     frontend/features/ping-feature \
     frontend/shared \
     frontend/shells/meldestelle-portal \

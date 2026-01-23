@@ -15,10 +15,10 @@ val authModule = module {
   // Single in-memory token manager
   single { AuthTokenManager() }
 
-  // AuthApiClient with injected apiClient and DEV client secret
+  // AuthApiClient with injected baseHttpClient (NOT apiClient)
   single {
     AuthApiClient(
-      httpClient = get(named("apiClient")),
+      httpClient = get(named("baseHttpClient")),
       clientSecret = AppConstants.KEYCLOAK_CLIENT_SECRET
     )
   }
@@ -30,8 +30,7 @@ val authModule = module {
   single<TokenProvider> {
     object : TokenProvider {
       override fun getAccessToken(): String? {
-        val token = get<AuthTokenManager>().getToken()
-        return token
+        return get<AuthTokenManager>().getToken()
       }
     }
   }

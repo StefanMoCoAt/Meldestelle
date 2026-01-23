@@ -4,6 +4,7 @@ import at.mocode.shared.core.AppConstants
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
 
@@ -63,9 +64,10 @@ class AuthApiClient(
           username = username
         )
       } else {
+        val errorBody = response.bodyAsText()
         LoginResponse(
           success = false,
-          message = "Login fehlgeschlagen: HTTP ${response.status.value}"
+          message = "Login fehlgeschlagen: HTTP ${response.status.value} - $errorBody"
         )
       }
     } catch (e: Exception) {
@@ -104,9 +106,10 @@ class AuthApiClient(
           message = null
         )
       } else {
+        val errorBody = response.bodyAsText()
         LoginResponse(
           success = false,
-          message = "Token refresh fehlgeschlagen: HTTP ${response.status.value}"
+          message = "Token refresh fehlgeschlagen: HTTP ${response.status.value} - $errorBody"
         )
       }
     } catch (e: Exception) {

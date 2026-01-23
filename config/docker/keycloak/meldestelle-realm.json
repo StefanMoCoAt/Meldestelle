@@ -238,7 +238,7 @@
         {
           "type": "password",
           "value": "Change_Me_In_Production!",
-          "temporary": true
+          "temporary": false
         }
       ],
       "realmRoles": [

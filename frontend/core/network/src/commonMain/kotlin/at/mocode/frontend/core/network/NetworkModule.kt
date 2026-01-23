@@ -2,10 +2,9 @@ package at.mocode.frontend.core.network
 
 import io.ktor.client.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.auth.*
-import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
+import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
@@ -19,10 +18,28 @@ interface TokenProvider {
 }
 
 /**
- * Koin module that provides a preconfigured Ktor HttpClient under the named qualifier "apiClient".
- * The client uses the environment-aware base URL from NetworkConfig.
+ * Koin module providing HttpClients.
  */
 val networkModule = module {
+
+  // 1. Base Client (Raw, for Auth/Keycloak)
+  single(named("baseHttpClient")) {
+    HttpClient {
+      install(ContentNegotiation) {
+        json(Json { ignoreUnknownKeys = true; isLenient = true; encodeDefaults = true })
+      }
+      install(Logging) {
+        logger = object : Logger {
+          override fun log(message: String) {
+            println("[baseClient] $message")
+          }
+        }
+        level = LogLevel.INFO
+      }
+    }
+  }
+
+  // 2. API Client (Configured for Gateway & Auth Header)
   single(named("apiClient")) {
     val tokenProvider: TokenProvider? = try { get<TokenProvider>() } catch (_: Throwable) { null }
     HttpClient {
@@ -54,19 +71,15 @@ val networkModule = module {
         exponentialDelay()
       }
 
-      // Authentication plugin (Bearer)
-      install(Auth) {
-        bearer {
-          loadTokens {
-            val token = tokenProvider?.getAccessToken()
-            token?.let { BearerTokens(it, refreshToken = "") }
-          }
-          // Only send token to our API base URL
-          sendWithoutRequest { request ->
-            val base = NetworkConfig.baseUrl.trimEnd('/')
-            val url = request.url.toString()
-            url.startsWith(base)
-          }
+      // Manual Auth Header Injection (instead of Auth plugin) to support immediate logout
+      install(DefaultRequest) {
+        val base = NetworkConfig.baseUrl.trimEnd('/')
+        url(base) // Set base URL
+
+        // Inject Authorization header if token is present
+        val token = tokenProvider?.getAccessToken()
+        if (token != null) {
+            header("Authorization", "Bearer $token")
         }
       }
 
@@ -78,12 +91,6 @@ val networkModule = module {
           }
         }
         level = LogLevel.INFO
-      }
-
-      // Set base URL
-      defaultRequest {
-        // Set only the base URL; endpoints will append paths
-        url(NetworkConfig.baseUrl)
       }
     }
   }
