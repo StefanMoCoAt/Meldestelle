@@ -286,7 +286,7 @@ class AuthTokenManager {
    */
   private fun extractPermissionsFromJson(jsonString: String): List<String>? {
     return try {
-      // Simple regex to find permissions array
+      // Simple regex to find a permissions array
       val permissionsRegex = """"permissions":\s*\[(.*?)\]""".toRegex()
       val match = permissionsRegex.find(jsonString)
 
