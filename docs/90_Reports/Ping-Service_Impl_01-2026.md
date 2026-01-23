@@ -39,7 +39,7 @@ Implementierungsmoduls:
 
 Stelle sicher, dass die Module in der `settings.gradle.kts` registriert sind.
 
-  ```kotlin 
+  ```text
   include(
   ":platform:platform-bom",
   ":platform:platform-testing",
@@ -55,10 +55,10 @@ Stelle sicher, dass die Module in der `settings.gradle.kts` registriert sind.
 Definiere in `ping-api/src/commonMain/kotlin` ein einfaches, serialisierbares DTO. Dieses Modul darf **keine
 JVM-spezifischen Abhängigkeiten** enthalten, um die KMP-Kompatibilität für das Frontend zu gewährleisten.
 
-  ```kotlin
+  ```text
   PingResponse.kt
   ```
-  ```kotlin
+  ```text
   package de.meldestelle.api.ping
   
   import kotlinx . serialization . Serializable
@@ -80,7 +80,7 @@ Implementiere die Spring Boot Anwendung.
 
 Hier ist ein Implementierungsvorschlag für den Controller:
 
-  ```kotlin
+  ```text
   // in backend/services/ping/ping-service/src/main/kotlin/.../PingController.kt
   
   @RestController
@@ -156,7 +156,7 @@ Erstelle die `application.yml` für den Service. Sie muss die Anwendung für uns
 Achte auf die korrekte und saubere Definition der Abhängigkeiten.
 
 - `ping-api/build.gradle.kts`
-  ```kotlin
+  ```text
       plugins {
         alias(libs.plugins.kotlin.multiplatform)
         alias(libs.plugins.kotlin.serialization)
@@ -174,7 +174,7 @@ Achte auf die korrekte und saubere Definition der Abhängigkeiten.
   ```
   
 - `ping-service/build.gradle.kts`
-  ```kotlin
+  ```text
       plugins {
         alias(libs.plugins.spring.boot)
         alias(libs.plugins.kotlin.jvm)

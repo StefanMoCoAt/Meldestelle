@@ -92,7 +92,9 @@ Column(Modifier.fillMaxSize()) {
    SearchRow(Modifier.focusRequester(focusSearch))
    LazyColumn(
        verticalArrangement = Arrangement.spacedBy(4.dp) // Wenig Abstand
-   ) { ... }
+   ) { 
+       // ... Items ...
+   }
    FooterActions(Modifier.height(32.dp))
 }
 ```

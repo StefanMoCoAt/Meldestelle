@@ -7,7 +7,7 @@ Willkommen im "Gehirn" des Projekts. Dieses Verzeichnis ist die **Single Source 
 ### 🏗️ Core
 *   **[`01_Architecture`](01_Architecture/)**: Der Masterplan. ADRs, Roadmaps und C4-Modelle.
     *   *Start hier:* `MASTER_ROADMAP_2026_Q1.md`
-*   **[`02_Onboarding`](02_Onboarding/)**: Guides für neue Entwickler (Setup, Guidelines).
+*   **[`02_Guides`](02_Guides/)**: Guides für neue Entwickler (Setup, Guidelines).
 *   **[`03_Domain`](03_Domain/)**: Fachlichkeit (Turnierregeln, Entities).
 
 ### 🛠️ Tech Stack
