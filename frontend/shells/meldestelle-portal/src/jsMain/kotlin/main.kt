@@ -8,16 +8,12 @@ import at.mocode.frontend.core.network.networkModule
 import at.mocode.frontend.core.sync.di.syncModule
 import at.mocode.ping.feature.di.pingFeatureModule
 import at.mocode.shared.di.initKoin
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import navigation.navigationModule
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.loadKoinModules
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.w3c.dom.HTMLElement
 
