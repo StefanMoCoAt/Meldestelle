@@ -44,23 +44,40 @@ function runWorker({ driver }) {
     };
 }
 
-sqlite3InitModule({
-    print: console.log,
-    printErr: console.error,
-}).then((sqlite3) => {
-    const opfsAvailable = 'opfs' in sqlite3;
+// Error handling wrapper
+self.onerror = function(event) {
+    console.error("Error in Web Worker:", event.message, event.filename, event.lineno);
+    // Optionally, send the error back to the main thread
+    self.postMessage({ type: 'error', message: event.message, filename: event.filename, lineno: event.lineno });
+};
 
-    runWorker({
-        driver: {
-            open: (name) => {
-                if (opfsAvailable) {
-                    console.log("Initialisiere persistente OPFS Datenbank: " + name);
-                    return new sqlite3.oo1.OpfsDb(name);
-                } else {
-                    console.warn("OPFS nicht verfügbar, Fallback auf In-Memory");
-                    return new sqlite3.oo1.DB(name);
+try {
+    sqlite3InitModule({
+        print: console.log,
+        printErr: console.error,
+    }).then((sqlite3) => {
+        try {
+            const opfsAvailable = 'opfs' in sqlite3;
+
+            runWorker({
+                driver: {
+                    open: (name) => {
+                        if (opfsAvailable) {
+                            console.log("Initialisiere persistente OPFS Datenbank: " + name);
+                            return new sqlite3.oo1.OpfsDb(name);
+                        } else {
+                            console.warn("OPFS nicht verfügbar, Fallback auf In-Memory");
+                            return new sqlite3.oo1.DB(name);
+                        }
+                    }
                 }
-            }
+            });
+        } catch (e) {
+             console.error("Database initialization error in worker (inner):", e);
+             self.postMessage({ type: 'error', message: 'Database initialization failed (inner): ' + e.message });
         }
     });
-});
+} catch (e) {
+    console.error("Database initialization error in worker (outer):", e);
+    self.postMessage({ type: 'error', message: 'Database initialization failed (outer): ' + e.message });
+}

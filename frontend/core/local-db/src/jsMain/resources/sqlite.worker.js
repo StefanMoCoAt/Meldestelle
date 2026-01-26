@@ -1,10 +1,14 @@
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 
+console.log("Worker: sqlite.worker.js loaded. Starting initialization...");
+
 // Minimal worker protocol compatible with SQLDelight's `web-worker-driver`.
 // Mirrors the message format used by SQLDelight's `sqljs.worker.js` implementation.
 function runWorker({ driver }) {
+    console.log("Worker: runWorker called");
     let db = null;
     const open = (name) => {
+        console.log("Worker: Opening database", name);
         db = driver.open(name);
     };
 
@@ -41,28 +45,59 @@ function runWorker({ driver }) {
                     throw new Error(`Unsupported action: ${data && data.action}`);
             }
         } catch (err) {
+            console.error("Worker: Error processing message", err);
             return postMessage({ id: data && data.id, error: err?.message ?? String(err) });
         }
     };
 }
 
-sqlite3InitModule({
-    print: console.log,
-    printErr: console.error,
-}).then((sqlite3) => {
-    const opfsAvailable = 'opfs' in sqlite3;
+// Error handling wrapper
+self.onerror = function(event) {
+    console.error("Error in Web Worker (onerror):", event.message, event.filename, event.lineno);
+    // Optionally, send the error back to the main thread
+    self.postMessage({ type: 'error', message: event.message, filename: event.filename, lineno: event.lineno });
+};
 
-    runWorker({
-        driver: {
-            open: (name) => {
-                if (opfsAvailable) {
-                    console.log("Initialisiere persistente OPFS Datenbank: " + name);
-                    return new sqlite3.oo1.OpfsDb(name);
-                } else {
-                    console.warn("OPFS nicht verfügbar, Fallback auf In-Memory");
-                    return new sqlite3.oo1.DB(name);
+// Manually fetch the WASM file to bypass Webpack/sqlite-wasm loading issues
+async function init() {
+    try {
+        console.log("Worker: Fetching sqlite3.wasm manually...");
+        const response = await fetch('/sqlite3.wasm');
+        if (!response.ok) {
+            throw new Error(`Failed to fetch sqlite3.wasm: ${response.status} ${response.statusText}`);
+        }
+        const wasmBinary = await response.arrayBuffer();
+        console.log("Worker: sqlite3.wasm fetched successfully, size:", wasmBinary.byteLength);
+
+        console.log("Worker: Calling sqlite3InitModule with wasmBinary...");
+        const sqlite3 = await sqlite3InitModule({
+            print: console.log,
+            printErr: console.error,
+            wasmBinary: wasmBinary // Provide the binary directly!
+        });
+
+        console.log("Worker: sqlite3InitModule resolved successfully");
+        const opfsAvailable = 'opfs' in sqlite3;
+        console.log("Worker: OPFS available:", opfsAvailable);
+
+        runWorker({
+            driver: {
+                open: (name) => {
+                    if (opfsAvailable) {
+                        console.log("Initialisiere persistente OPFS Datenbank: " + name);
+                        return new sqlite3.oo1.OpfsDb(name);
+                    } else {
+                        console.warn("OPFS nicht verfügbar, Fallback auf In-Memory");
+                        return new sqlite3.oo1.DB(name);
+                    }
                 }
             }
-        }
-    });
-});
+        });
+
+    } catch (e) {
+        console.error("Database initialization error in worker:", e);
+        self.postMessage({ type: 'error', message: 'Database initialization failed: ' + e.message });
+    }
+}
+
+init();

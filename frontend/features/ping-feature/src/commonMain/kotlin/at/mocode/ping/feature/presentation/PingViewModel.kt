@@ -50,7 +50,7 @@ class PingViewModel(
 
   fun performSimplePing() {
     viewModelScope.launch {
-      uiState = uiState.copy(isLoading = true)
+      uiState = uiState.copy(isLoading = true, errorMessage = null)
       addLog("SimplePing", "Sending request...")
       try {
         val response = apiClient.simplePing()
@@ -60,7 +60,8 @@ class PingViewModel(
         )
         addLog("SimplePing", "Success: ${response.status} from ${response.service}")
       } catch (e: Exception) {
-        uiState = uiState.copy(isLoading = false)
+        val msg = "Simple ping failed: ${e.message}"
+        uiState = uiState.copy(isLoading = false, errorMessage = msg)
         addLog("SimplePing", "Failed: ${e.message}", isError = true)
       }
     }
@@ -68,7 +69,7 @@ class PingViewModel(
 
   fun performEnhancedPing(simulate: Boolean = false) {
     viewModelScope.launch {
-      uiState = uiState.copy(isLoading = true)
+      uiState = uiState.copy(isLoading = true, errorMessage = null)
       addLog("EnhancedPing", "Sending request (simulate=$simulate)...")
       try {
         val response = apiClient.enhancedPing(simulate)
@@ -78,7 +79,8 @@ class PingViewModel(
         )
         addLog("EnhancedPing", "Success: CB=${response.circuitBreakerState}, Time=${response.responseTime}ms")
       } catch (e: Exception) {
-        uiState = uiState.copy(isLoading = false)
+        val msg = "Enhanced ping failed: ${e.message}"
+        uiState = uiState.copy(isLoading = false, errorMessage = msg)
         addLog("EnhancedPing", "Failed: ${e.message}", isError = true)
       }
     }
@@ -86,7 +88,7 @@ class PingViewModel(
 
   fun performHealthCheck() {
     viewModelScope.launch {
-      uiState = uiState.copy(isLoading = true)
+      uiState = uiState.copy(isLoading = true, errorMessage = null)
       addLog("HealthCheck", "Checking system health...")
       try {
         val response = apiClient.healthCheck()
@@ -96,7 +98,8 @@ class PingViewModel(
         )
         addLog("HealthCheck", "Status: ${response.status}, Healthy: ${response.healthy}")
       } catch (e: Exception) {
-        uiState = uiState.copy(isLoading = false)
+        val msg = "Health check failed: ${e.message}"
+        uiState = uiState.copy(isLoading = false, errorMessage = msg)
         addLog("HealthCheck", "Failed: ${e.message}", isError = true)
       }
     }
@@ -104,7 +107,7 @@ class PingViewModel(
 
   fun performSecurePing() {
     viewModelScope.launch {
-      uiState = uiState.copy(isLoading = true)
+      uiState = uiState.copy(isLoading = true, errorMessage = null)
       addLog("SecurePing", "Sending authenticated request...")
       try {
         val response = apiClient.securePing()
@@ -114,7 +117,8 @@ class PingViewModel(
         )
         addLog("SecurePing", "Success: Authorized access granted.")
       } catch (e: Exception) {
-        uiState = uiState.copy(isLoading = false)
+        val msg = "Secure ping failed: ${e.message}"
+        uiState = uiState.copy(isLoading = false, errorMessage = msg)
         addLog("SecurePing", "Access Denied/Error: ${e.message}", isError = true)
       }
     }
@@ -122,7 +126,7 @@ class PingViewModel(
 
   fun triggerSync() {
     viewModelScope.launch {
-      uiState = uiState.copy(isSyncing = true)
+      uiState = uiState.copy(isSyncing = true, errorMessage = null)
       addLog("Sync", "Starting delta sync...")
       try {
         syncService.syncPings()
@@ -133,7 +137,8 @@ class PingViewModel(
         )
         addLog("Sync", "Sync completed successfully.")
       } catch (e: Exception) {
-        uiState = uiState.copy(isSyncing = false)
+        val msg = "Sync failed: ${e.message}"
+        uiState = uiState.copy(isSyncing = false, errorMessage = msg)
         addLog("Sync", "Sync failed: ${e.message}", isError = true)
       }
     }
