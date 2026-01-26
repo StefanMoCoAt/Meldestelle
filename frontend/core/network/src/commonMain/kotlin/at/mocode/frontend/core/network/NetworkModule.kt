@@ -41,11 +41,14 @@ val networkModule = module {
 
   // 2. API Client (Configured for Gateway & Auth Header)
   single(named("apiClient")) {
+    // Resolve TokenProvider lazily to avoid circular dependency issues during init
     val tokenProvider: TokenProvider? = try {
       get<TokenProvider>()
     } catch (_: Throwable) {
+      println("[apiClient] Warning: No TokenProvider found in Koin")
       null
     }
+
     HttpClient {
       // JSON (kotlinx) configuration
       install(ContentNegotiation) {
@@ -75,16 +78,10 @@ val networkModule = module {
         exponentialDelay()
       }
 
-      // Manual Auth Header Injection (instead of Auth plugin) to support immediate logout
-      install(DefaultRequest) {
+      // Base URL configuration
+      defaultRequest {
         val base = NetworkConfig.baseUrl.trimEnd('/')
-        url(base) // Set base URL
-
-        // Inject Authorization header if token is present
-        val token = tokenProvider?.getAccessToken()
-        if (token != null) {
-          header("Authorization", "Bearer $token")
-        }
+        url(base)
       }
 
       // Logging for development
@@ -95,6 +92,22 @@ val networkModule = module {
           }
         }
         level = LogLevel.INFO
+      }
+    }.also { client ->
+      // Dynamic Auth Header Injection via HttpSend plugin
+      // This ensures we get the CURRENT token for each request
+      if (tokenProvider != null) {
+        client.plugin(HttpSend).intercept { request ->
+          try {
+            val token = tokenProvider.getAccessToken()
+            if (token != null) {
+              request.header("Authorization", "Bearer $token")
+            }
+          } catch (e: Exception) {
+            println("[apiClient] Error getting access token: $e")
+          }
+          execute(request)
+        }
       }
     }
   }

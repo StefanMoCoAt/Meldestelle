@@ -8,8 +8,6 @@ import org.w3c.dom.Worker
 actual class DatabaseDriverFactory {
   actual suspend fun createDriver(): SqlDriver {
     // Wir nutzen eine Helper-Funktion, um den Worker zu erstellen.
-    // Dies ermöglicht uns, 'new URL(..., import.meta.url)' in JS zu verwenden,
-    // was Webpack dazu bringt, den Pfad korrekt aufzulösen.
     val worker = createWorker()
     val driver = WebWorkerDriver(worker)
 
@@ -20,11 +18,8 @@ actual class DatabaseDriverFactory {
   }
 }
 
-// Helper function to create the worker using proper URL resolution
+// Helper function to create the worker
 private fun createWorker(): Worker {
-  return js(
-    """
-        new Worker(new URL('sqlite.worker.js', import.meta.url), { type: 'module' })
-    """
-  )
+  // Try the relative path again, as an absolute path might fail depending on base href
+  return js("new Worker('sqlite.worker.js')")
 }

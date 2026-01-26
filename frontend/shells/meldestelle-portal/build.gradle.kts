@@ -109,34 +109,6 @@ kotlin {
   }
 }
 
-// ---------------------------------------------------------------------------
-// SQLDelight WebWorker (OPFS) resource
-// ---------------------------------------------------------------------------
-// `:frontend:core:local-db` ships `sqlite.worker.js` as a JS resource.
-// We need to ensure this worker file is available in the output directory so the browser can load it.
-// The WASM file itself is handled by Webpack (via CopyWebpackPlugin in webpack.config.d/sqlite-config.js).
-
-val copySqliteWorkerToWebpackSource by tasks.registering(Copy::class) {
-  val localDb = project(":frontend:core:local-db")
-  dependsOn(localDb.tasks.named("jsProcessResources"))
-
-  from(localDb.layout.buildDirectory.file("processedResources/js/main/sqlite.worker.js"))
-
-  // Root build directory where Kotlin JS packages are assembled.
-  // This is one of the directories served by webpack-dev-server for static content.
-  into(rootProject.layout.buildDirectory.dir("js/packages/${rootProject.name}-frontend-shells-meldestelle-portal/kotlin"))
-}
-
-// Ensure the worker is present for the development bundle.
-tasks.named("jsBrowserDevelopmentWebpack") {
-  dependsOn(copySqliteWorkerToWebpackSource)
-}
-
-// Ensure the worker is present for the production bundle.
-tasks.named("jsBrowserProductionWebpack") {
-  dependsOn(copySqliteWorkerToWebpackSource)
-}
-
 // KMP Compile-Optionen
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
   compilerOptions {

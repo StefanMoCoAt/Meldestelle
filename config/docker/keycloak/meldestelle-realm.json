@@ -191,11 +191,13 @@
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,
       "redirectUris": [
+        "http://localhost:8080/*",
         "http://localhost:4000/*",
         "http://localhost:3000/*",
         "https://app.meldestelle.at/*"
       ],
       "webOrigins": [
+        "http://localhost:8080",
         "http://localhost:4000",
         "http://localhost:3000",
         "https://app.meldestelle.at"
