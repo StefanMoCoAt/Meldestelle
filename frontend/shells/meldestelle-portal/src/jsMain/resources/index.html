@@ -15,7 +15,7 @@
 <script>
   // Prefer explicit query param override (?apiBaseUrl=http://host:port),
   // then fall back to same-origin. This avoids Docker secrets and works with Nginx proxy.
-  (function(){
+  (function () {
     try {
       const params = new URLSearchParams(window.location.search);
       const override = params.get('apiBaseUrl');
@@ -29,13 +29,13 @@
     }
   })();
   // KMP bundle will read globalThis.API_BASE_URL in PlatformConfig.js
- </script>
+</script>
 <script src="web-app.js"></script>
 <script>
   // Register Service Worker only in non-localhost environments
   if ('serviceWorker' in navigator && !['localhost', '127.0.0.1', '::1'].includes(location.hostname)) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js').catch(function(err){
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function (err) {
         console.warn('ServiceWorker registration failed:', err);
       });
     });

@@ -108,6 +108,11 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
+# Web Specifics
+#npm-sqljs = { module = "sql.js", version = "1.12.0" }
+#npm-copy-webpack = { module = "copy-webpack-plugin", version = "12.0.0" }
+
+
 # ==============================================================================
 # === FRONTEND: COMPOSE UI ===
 # ==============================================================================
@@ -143,6 +148,7 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", ver
 # ==============================================================================
 # === FRONTEND: LOCAL PERSISTENCE (SQLDelight) ===
 # ==============================================================================
+sqldelight-gradle = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqldelight" }
 sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
 sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqldelight-driver-sqlite = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" } # JVM
@@ -269,99 +275,99 @@ kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 # === FRONTEND BUNDLES ===
 # Use these in commonMain to reduce boilerplate
 kmp-common = [
-    "kotlinx-coroutines-core",
-    "kotlinx-serialization-json",
-    "kotlinx-datetime"
+  "kotlinx-coroutines-core",
+  "kotlinx-serialization-json",
+  "kotlinx-datetime"
 ]
 
 ktor-client-common = [
-    "ktor-client-core",
-    "ktor-client-contentNegotiation",
-    "ktor-client-serialization-kotlinx-json",
-    "ktor-client-auth",
-    "ktor-client-logging"
+  "ktor-client-core",
+  "ktor-client-contentNegotiation",
+  "ktor-client-serialization-kotlinx-json",
+  "ktor-client-auth",
+  "ktor-client-logging"
 ]
 
 compose-common = [
-    "androidx-lifecycle-viewmodelCompose",
-    "androidx-lifecycle-runtimeCompose"
+  "androidx-lifecycle-viewmodelCompose",
+  "androidx-lifecycle-runtimeCompose"
 ]
 
 # === BACKEND BUNDLES ===
 testing-jvm = [
-    "junit-jupiter-api",
-    "junit-jupiter-engine",
-    "junit-jupiter-params",
-    "junit-platform-launcher",
-    "mockk",
-    "assertj-core"
+  "junit-jupiter-api",
+  "junit-jupiter-engine",
+  "junit-jupiter-params",
+  "junit-platform-launcher",
+  "mockk",
+  "assertj-core"
 ]
 test-spring = [
-    "spring-boot-starter-test",
-    "spring-security-test"
+  "spring-boot-starter-test",
+  "spring-security-test"
 ]
 spring-boot-service-complete = [
-    "spring-boot-starter-web",
-    "spring-boot-starter-validation",
-    "spring-boot-starter-actuator",
-    "spring-boot-starter-json",
-    "spring-boot-starter-aop",
-    "jackson-module-kotlin",
-    "jackson-datatype-jsr310",
-    "micrometer-prometheus",
-    "micrometer-tracing-bridge-brave",
-    "zipkin-reporter-brave",
-    "zipkin-sender-okhttp3"
+  "spring-boot-starter-web",
+  "spring-boot-starter-validation",
+  "spring-boot-starter-actuator",
+  "spring-boot-starter-json",
+  "spring-boot-starter-aop",
+  "jackson-module-kotlin",
+  "jackson-datatype-jsr310",
+  "micrometer-prometheus",
+  "micrometer-tracing-bridge-brave",
+  "zipkin-reporter-brave",
+  "zipkin-sender-okhttp3"
 ]
 
 # Standard dependencies for a "secure" Spring Boot microservice (architecture-approved baseline)
 spring-boot-secure-service = [
-    "spring-boot-starter-web",
-    "spring-boot-starter-actuator",
-    "spring-boot-starter-security",
-    "spring-boot-starter-oauth2-resource-server",
-    "spring-cloud-starter-consul-discovery"
+  "spring-boot-starter-web",
+  "spring-boot-starter-actuator",
+  "spring-boot-starter-security",
+  "spring-boot-starter-oauth2-resource-server",
+  "spring-cloud-starter-consul-discovery"
 ]
 database-complete = [
-    "spring-boot-starter-data-jpa",
-    "postgresql-driver",
-    "hikari-cp",
-    "flyway-core",
-    "flyway-postgresql"
+  "spring-boot-starter-data-jpa",
+  "postgresql-driver",
+  "hikari-cp",
+  "flyway-core",
+  "flyway-postgresql"
 ]
 redis-cache = [
-    "spring-boot-starter-data-redis",
-    "lettuce-core",
-    "jackson-module-kotlin",
-    "jackson-datatype-jsr310"
+  "spring-boot-starter-data-redis",
+  "lettuce-core",
+  "jackson-module-kotlin",
+  "jackson-datatype-jsr310"
 ]
 testcontainers = [
-    "testcontainers-core",
-    "testcontainers-junit-jupiter",
-    "testcontainers-postgresql",
-    "testcontainers-kafka",
-    "testcontainers-keycloak"
+  "testcontainers-core",
+  "testcontainers-junit-jupiter",
+  "testcontainers-postgresql",
+  "testcontainers-kafka",
+  "testcontainers-keycloak"
 ]
 kafka-config = [
-    "spring-kafka",
-    "reactor-kafka",
-    "jackson-module-kotlin",
-    "jackson-datatype-jsr310"
+  "spring-kafka",
+  "reactor-kafka",
+  "jackson-module-kotlin",
+  "jackson-datatype-jsr310"
 ]
 monitoring-client = [
-    "spring-boot-starter-actuator",
-    "micrometer-prometheus",
-    "micrometer-tracing-bridge-brave",
-    "zipkin-reporter-brave",
-    "zipkin-sender-okhttp3"
+  "spring-boot-starter-actuator",
+  "micrometer-prometheus",
+  "micrometer-tracing-bridge-brave",
+  "zipkin-reporter-brave",
+  "zipkin-sender-okhttp3"
 ]
 jackson-kotlin = [
-    "jackson-module-kotlin",
-    "jackson-datatype-jsr310"
+  "jackson-module-kotlin",
+  "jackson-datatype-jsr310"
 ]
 resilience = [
-    "resilience4j-spring-boot3",
-    "resilience4j-reactor"
+  "resilience4j-spring-boot3",
+  "resilience4j-reactor"
 ]
 
 [plugins]

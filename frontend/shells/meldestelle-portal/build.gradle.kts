@@ -51,8 +51,6 @@ kotlin {
       }
       // Browser-Tests komplett deaktivieren (Configuration Cache kompatibel)
       testTask {
-//                enabled = false
-
         useKarma {
           useChromeHeadless()
           environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
@@ -61,15 +59,6 @@ kotlin {
     }
     binaries.executable()
   }
-
-  // Wasm vorerst deaktiviert
-  /*
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-    binaries.executable()
-  }
-  */
 
   sourceSets {
     commonMain.dependencies {
@@ -114,18 +103,6 @@ kotlin {
       implementation(devNpm("copy-webpack-plugin", "11.0.0"))
     }
 
-    /*
-    val wasmJsMain = getByName("wasmJsMain")
-    wasmJsMain.dependencies {
-      implementation(libs.ktor.client.js) // WASM verwendet JS-Client [cite: 7]
-
-      // Compose für shared UI components für WASM
-      implementation(compose.runtime)
-      implementation(compose.foundation)
-      implementation(compose.material3)
-    }
-    */
-
     commonTest.dependencies {
       implementation(libs.kotlin.test)
     }
@@ -136,104 +113,28 @@ kotlin {
 // SQLDelight WebWorker (OPFS) resource
 // ---------------------------------------------------------------------------
 // `:frontend:core:local-db` ships `sqlite.worker.js` as a JS resource.
-// When bundling the final JS app, webpack resolves `new URL("sqlite.worker.js", import.meta.url)`
-// relative to the Kotlin JS package folder (root build dir). We therefore copy the worker into
-// that folder before webpack runs.
+// We need to ensure this worker file is available in the output directory so the browser can load it.
+// The WASM file itself is handled by Webpack (via CopyWebpackPlugin in webpack.config.d/sqlite-config.js).
 
-// HACK: Overwrite sqlite3.wasm in node_modules with a dummy JS file to fool Webpack
-val patchSqliteWasmInNodeModules by tasks.registering(Copy::class) {
-  dependsOn(rootProject.tasks.named("kotlinNpmInstall"))
+val copySqliteWorkerToWebpackSource by tasks.registering(Copy::class) {
   val localDb = project(":frontend:core:local-db")
   dependsOn(localDb.tasks.named("jsProcessResources"))
 
-  // We take our dummy.js
-  from(localDb.layout.buildDirectory.file("processedResources/js/main/dummy.js")) {
-    rename { "sqlite3.wasm" } // Rename it to sqlite3.wasm
-  }
-
-  // And copy it OVER the original wasm file in node_modules
-  into(rootProject.layout.buildDirectory.dir("js/node_modules/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm"))
-
-  // Force overwrite
-  duplicatesStrategy = DuplicatesStrategy.INCLUDE
-}
-
-val copySqliteAssetsToWebpackSource by tasks.registering(Copy::class) {
-  val localDb = project(":frontend:core:local-db")
-  dependsOn(localDb.tasks.named("jsProcessResources"), rootProject.tasks.named("kotlinNpmInstall"))
-
-  // Explicit dependency on the patch task to ensure we copy the REAL wasm file before it gets patched?
-  // NO! We want to copy the REAL wasm file to the output, but PATCH the one in node_modules.
-  // So we must copy the real one BEFORE patching.
-  // But wait, copySqliteAssetsToWebpackSource copies FROM node_modules.
-  // If we patch node_modules first, we copy the dummy file!
-
-  // So: copySqliteAssetsToWebpackSource must run BEFORE patchSqliteWasmInNodeModules?
-  // Or we copy from a different source (e.g. the original npm package cache? No access).
-
-  // Better: We copy the real wasm file from node_modules to a temporary location FIRST,
-  // then patch node_modules, then copy from temp to output.
-
-  // Actually, we can just copy from node_modules BEFORE the patch task runs.
-  // But Gradle task ordering is tricky.
-
-  // Let's change the source of the copy. We can't easily access the original npm package.
-  // But we know that `kotlinNpmInstall` restores the original files.
-
-  // So the order must be:
-  // 1. kotlinNpmInstall (restores original sqlite3.wasm)
-  // 2. copySqliteAssetsToWebpackSource (copies original sqlite3.wasm to output)
-  // 3. patchSqliteWasmInNodeModules (overwrites sqlite3.wasm with dummy.js)
-  // 4. webpack (uses dummy.js)
-
-  mustRunAfter(rootProject.tasks.named("kotlinNpmInstall"))
-
   from(localDb.layout.buildDirectory.file("processedResources/js/main/sqlite.worker.js"))
-  from(rootProject.layout.buildDirectory.file("js/node_modules/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm/sqlite3.wasm"))
 
   // Root build directory where Kotlin JS packages are assembled.
   // This is one of the directories served by webpack-dev-server for static content.
   into(rootProject.layout.buildDirectory.dir("js/packages/${rootProject.name}-frontend-shells-meldestelle-portal/kotlin"))
 }
 
-// Additional task to copy the worker and its wasm dependency to the distribution folder (for production build)
-val copySqliteAssetsToDist by tasks.registering(Copy::class) {
-  val localDb = project(":frontend:core:local-db")
-  dependsOn(localDb.tasks.named("jsProcessResources"), rootProject.tasks.named("kotlinNpmInstall"))
-
-  // Same logic here: copy before patch
-  mustRunAfter(rootProject.tasks.named("kotlinNpmInstall"))
-
-  from(localDb.layout.buildDirectory.file("processedResources/js/main/sqlite.worker.js"))
-  from(rootProject.layout.buildDirectory.file("js/node_modules/@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm/sqlite3.wasm"))
-
-  // Copy to the distribution directory where index.html resides
-  into(layout.buildDirectory.dir("dist/js/productionExecutable"))
-}
-
-// Ensure the assets are present for the production bundle.
-tasks.named("jsBrowserProductionWebpack") {
-  dependsOn(copySqliteAssetsToWebpackSource)
-  dependsOn(patchSqliteWasmInNodeModules)
-
-  // Enforce order: Copy real assets first, then patch node_modules
-  // patchSqliteWasmInNodeModules must run AFTER copySqliteAssetsToWebpackSource
-  // But wait, dependsOn doesn't guarantee order.
-  // We need to configure the tasks themselves.
-
-  finalizedBy(copySqliteAssetsToDist)
-}
-
-// Configure task ordering
-patchSqliteWasmInNodeModules {
-  mustRunAfter(copySqliteAssetsToWebpackSource)
-  // Removed circular dependency: mustRunAfter(copySqliteAssetsToDist)
-}
-
-// Ensure the assets are present for the development bundle.
+// Ensure the worker is present for the development bundle.
 tasks.named("jsBrowserDevelopmentWebpack") {
-  dependsOn(copySqliteAssetsToWebpackSource)
-  dependsOn(patchSqliteWasmInNodeModules)
+  dependsOn(copySqliteWorkerToWebpackSource)
+}
+
+// Ensure the worker is present for the production bundle.
+tasks.named("jsBrowserProductionWebpack") {
+  dependsOn(copySqliteWorkerToWebpackSource)
 }
 
 // KMP Compile-Optionen
@@ -253,9 +154,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 // Kotlin/JS source maps
 // ---------------------------------------------------------------------------
 // Production source maps must remain enabled for browser debugging.
-// The remaining Kotlin/Gradle message
-// `Cannot rewrite paths in JavaScript source maps: Too many sources or format is not supported`
-// is treated as an external Kotlin/JS toolchain limitation and is documented separately.
 
 // Configure a duplicate handling strategy for distribution tasks
 tasks.withType<Tar> {
@@ -268,7 +166,7 @@ tasks.withType<Zip> {
 
 // Duplicate-Handling für Distribution
 tasks.withType<Copy> {
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Statt EXCLUDE
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.withType<Sync> {

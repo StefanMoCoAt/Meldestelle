@@ -8,7 +8,9 @@ import kotlin.test.assertTrue
 
 private class FakeNav : NavigationPort {
   var last: String? = null
-  override fun navigateTo(route: String) { last = route }
+  override fun navigateTo(route: String) {
+    last = route
+  }
 }
 
 private class FakeUserProvider(private val user: User?) : CurrentUserProvider {

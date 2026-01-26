@@ -1,6 +1,5 @@
 package at.mocode.shared.network
 
-
 import at.mocode.shared.domain.model.ApiError
 import kotlinx.coroutines.delay
 

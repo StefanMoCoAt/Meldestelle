@@ -13,9 +13,9 @@ actual object PlatformConfig {
     // In Wasm, we can access a window directly if we are in the browser main thread.
     // However, we need to be careful about exceptions.
     val origin = try {
-        window.location.origin
+      window.location.origin
     } catch (e: Throwable) {
-        null
+      null
     }
 
     if (!origin.isNullOrBlank()) return origin.removeSuffix("/")
@@ -28,9 +28,11 @@ actual object PlatformConfig {
 // Helper function for JS interop in Wasm
 // Kotlin/Wasm does not support 'dynamic' type or complex js() blocks inside functions.
 // We must use top-level external functions or simple js() expressions.
-private fun getGlobalApiBaseUrl(): String = js("""
+private fun getGlobalApiBaseUrl(): String = js(
+  """
     (function() {
         var global = typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {}));
         return (global.API_BASE_URL && typeof global.API_BASE_URL === 'string') ? global.API_BASE_URL : "";
     })()
-""")
+"""
+)

@@ -22,23 +22,23 @@ import at.mocode.frontend.core.designsystem.theme.Dimens
  */
 @Composable
 fun DenseButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    containerColor: Color = MaterialTheme.colorScheme.primary
+  text: String,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+  containerColor: Color = MaterialTheme.colorScheme.primary
 ) {
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.height(32.dp), // Fixe, kompakte Höhe
-        shape = MaterialTheme.shapes.small, // Nutzt unsere 4dp Rundung
-        colors = ButtonDefaults.buttonColors(containerColor = containerColor),
-        contentPadding = PaddingValues(horizontal = Dimens.SpacingM, vertical = 0.dp) // Wenig Padding
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium // Kleinere Schrift
-        )
-    }
+  Button(
+    onClick = onClick,
+    enabled = enabled,
+    modifier = modifier.height(32.dp), // Fixe, kompakte Höhe
+    shape = MaterialTheme.shapes.small, // Nutzt unsere 4dp Rundung
+    colors = ButtonDefaults.buttonColors(containerColor = containerColor),
+    contentPadding = PaddingValues(horizontal = Dimens.SpacingM, vertical = 0.dp) // Wenig Padding
+  ) {
+    Text(
+      text = text,
+      style = MaterialTheme.typography.labelMedium // Kleinere Schrift
+    )
+  }
 }

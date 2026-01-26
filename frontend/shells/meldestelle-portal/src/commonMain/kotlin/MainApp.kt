@@ -39,6 +39,7 @@ fun MainApp() {
           onPrimaryCta = { currentScreen = AppScreen.Login },
           onSecondary = { currentScreen = AppScreen.Home }
         )
+
         is AppScreen.Home -> WelcomeScreen(
           authTokenManager = authTokenManager,
           onOpenPing = { currentScreen = AppScreen.Ping },
@@ -169,7 +170,7 @@ private fun LandingScreen(
 
 @Composable
 private fun FeatureCard(number: String, title: String, body: String) {
-  Surface( tonalElevation = 0.dp ) {
+  Surface(tonalElevation = 0.dp) {
     Row(modifier = Modifier.fillMaxWidth()) {
       Column(modifier = Modifier.width(56.dp).padding(top = 6.dp)) {
         Text(text = number, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)

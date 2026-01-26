@@ -16,10 +16,10 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 data class LogEntry(
-    val timestamp: String,
-    val source: String,
-    val message: String,
-    val isError: Boolean = false
+  val timestamp: String,
+  val source: String,
+  val message: String,
+  val isError: Boolean = false
 )
 
 data class PingUiState(
@@ -43,7 +43,9 @@ class PingViewModel(
 
   private fun addLog(source: String, message: String, isError: Boolean = false) {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    val timeString = "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}:${now.second.toString().padStart(2, '0')}"
+    val timeString = "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}:${
+      now.second.toString().padStart(2, '0')
+    }"
     val entry = LogEntry(timeString, source, message, isError)
     uiState = uiState.copy(logs = listOf(entry) + uiState.logs) // Prepend for newest first
   }

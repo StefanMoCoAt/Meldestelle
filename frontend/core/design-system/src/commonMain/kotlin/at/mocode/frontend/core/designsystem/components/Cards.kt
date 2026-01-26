@@ -21,22 +21,22 @@ import at.mocode.frontend.core.designsystem.theme.Dimens
  */
 @Composable
 fun DashboardCard(
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
+  modifier: Modifier = Modifier,
+  content: @Composable ColumnScope.() -> Unit
 ) {
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), // Dünner Rahmen
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // Kein Schatten
+  Card(
+    modifier = modifier,
+    shape = MaterialTheme.shapes.medium,
+    colors = CardDefaults.cardColors(
+      containerColor = MaterialTheme.colorScheme.surface
+    ),
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), // Dünner Rahmen
+    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // Kein Schatten
+  ) {
+    Column(
+      modifier = Modifier.padding(Dimens.SpacingS) // Kompaktes Padding innen
     ) {
-        Column(
-            modifier = Modifier.padding(Dimens.SpacingS) // Kompaktes Padding innen
-        ) {
-            content()
-        }
+      content()
     }
+  }
 }

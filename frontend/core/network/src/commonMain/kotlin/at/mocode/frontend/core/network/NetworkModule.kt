@@ -11,7 +11,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /**
- * Simple token provider interface so core network module does not depend on auth-feature.
+ * Simple token provider interface so the core network module does not depend on auth-feature.
  */
 interface TokenProvider {
   fun getAccessToken(): String?
@@ -41,7 +41,11 @@ val networkModule = module {
 
   // 2. API Client (Configured for Gateway & Auth Header)
   single(named("apiClient")) {
-    val tokenProvider: TokenProvider? = try { get<TokenProvider>() } catch (_: Throwable) { null }
+    val tokenProvider: TokenProvider? = try {
+      get<TokenProvider>()
+    } catch (_: Throwable) {
+      null
+    }
     HttpClient {
       // JSON (kotlinx) configuration
       install(ContentNegotiation) {
@@ -79,7 +83,7 @@ val networkModule = module {
         // Inject Authorization header if token is present
         val token = tokenProvider?.getAccessToken()
         if (token != null) {
-            header("Authorization", "Bearer $token")
+          header("Authorization", "Bearer $token")
         }
       }
 
