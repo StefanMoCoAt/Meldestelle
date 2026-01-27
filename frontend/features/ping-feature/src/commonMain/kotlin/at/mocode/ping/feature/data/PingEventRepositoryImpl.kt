@@ -3,7 +3,6 @@ package at.mocode.ping.feature.data
 import at.mocode.frontend.core.localdb.AppDatabase
 import at.mocode.frontend.core.sync.SyncableRepository
 import at.mocode.ping.api.PingEvent
-import app.cash.sqldelight.async.coroutines.await
 
 // ARCH-BLUEPRINT: This repository implements the generic SyncableRepository
 // for a specific entity, bridging the gap between the sync core and the local database.

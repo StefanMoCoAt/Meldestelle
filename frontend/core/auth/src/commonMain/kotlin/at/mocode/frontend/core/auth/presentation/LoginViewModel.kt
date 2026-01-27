@@ -4,8 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.mocode.frontend.core.auth.data.AuthApiClient
 import at.mocode.frontend.core.auth.data.AuthTokenManager
-import io.ktor.client.request.post
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
