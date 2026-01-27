@@ -44,5 +44,6 @@ VALUES ?;
 
 upsertPingEvent:
 -- Single-row convenience upsert (used by repositories).
+-- Force re-generation comment
 INSERT OR REPLACE INTO PingEvent(id, message, last_modified)
 VALUES (?, ?, ?);

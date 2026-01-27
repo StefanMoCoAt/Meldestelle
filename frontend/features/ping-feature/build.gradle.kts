@@ -52,6 +52,7 @@ kotlin {
 
       // Local DB (SQLDelight)
       implementation(projects.frontend.core.localDb)
+      implementation(libs.sqldelight.coroutines) // Explicitly add coroutines extension for async driver support
 
       // Shared sync contract base (Syncable)
       implementation(projects.core.coreDomain)

@@ -2,7 +2,7 @@
 type: Roadmap
 status: ACTIVE
 owner: Lead Architect
-last_update: 2026-01-20
+last_update: 2026-01-27
 ---
 
 # MASTER ROADMAP Q1 2026: "Operation Tracer Bullet"
@@ -14,6 +14,7 @@ Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> 
 *   Build System: ✅ Grün (Gradle, Kotlin 2.3, Spring Boot 3.5.9, Spring Cloud 2025.0.1).
 *   Code-Basis: ✅ `ping-service` existiert, Delta-Sync implementiert.
 *   Infrastruktur: ✅ Docker Environment stabil, Tracing aktiv.
+*   Frontend: ✅ Web-App läuft (JS/Wasm), Login funktioniert, Sync (Full) funktioniert.
 
 ---
 
@@ -56,13 +57,13 @@ Deine Aufgabe ist die Stabilität der Laufzeitumgebung.
 #### 🎨 Agent: KMP Frontend Expert
 Deine Aufgabe ist die Anbindung des gehärteten Backends.
 
-*   [ ] **HTTP Client Core:**
+*   [x] **HTTP Client Core:**
     *   Konfiguriere Ktor Client mit `AuthInterceptor` (Bearer Token Injection).
     *   Implementiere Global Error Handling (Umgang mit 401, 403, 503).
-*   [ ] **Authentication Flow:**
+*   [x] **Authentication Flow:**
     *   Implementiere den OIDC Login Flow (Keycloak) für Desktop und Web.
     *   Speichere Tokens sicher im Memory (AuthState).
-*   [ ] **UI Implementation:**
+*   [x] **UI Implementation:**
     *   Baue einen Debug-Screen, der die Endpunkte `/ping/simple` und `/ping/secure` visualisiert.
 
 ---
@@ -75,6 +76,9 @@ Deine Aufgabe ist die Anbindung des gehärteten Backends.
     *   Implementierung des Delta-Syncs basierend auf `PingEvent` (UUIDv7 + Timestamp).
     *   Frontend: Speicherung in SQLDelight (lokal).
     *   Backend: Bereitstellung des Sync-Endpunkts.
+*   [x] **Web-App Sync:**
+    *   Implementierung von SQLDelight mit WebWorkerDriver (OPFS).
+    *   Workaround für Async-Select-Bug (Full-Sync).
 
 ---
 
