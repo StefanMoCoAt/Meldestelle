@@ -139,7 +139,7 @@ val networkModule = module {
           // But let's make it robust anyway.
 
           // We will use a safe lazy resolution pattern.
-        } catch (e: Exception) {
+        } catch (_: Exception) {
            // ignore
         }
         execute(request)
@@ -153,7 +153,7 @@ val networkModule = module {
             // Attempt to resolve TokenProvider from the capturing scope
             val tokenProvider = try {
                 koinScope.get<TokenProvider>()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
 
