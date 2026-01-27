@@ -114,7 +114,10 @@ class LoginViewModel(
           viewModelScope.launch {
             try {
               // Fire-and-forget sync call; Bearer token added by Ktor Auth plugin
-              apiClient.post("/api/members/sync")
+              // IMPORTANT: Use relative path (no leading slash) so Ktor appends it to baseUrl
+              // baseUrl is http://localhost:8080/api (JS) or http://localhost:8081 (JVM)
+              // Result: http://localhost:8080/api/members/sync -> Proxy -> http://localhost:8081/api/members/sync
+              apiClient.post("members/sync")
             } catch (_: Exception) {
               // Non-fatal: Wir zeigen Sync-Fehler im Login nicht an
             }

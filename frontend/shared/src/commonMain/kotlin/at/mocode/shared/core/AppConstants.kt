@@ -15,11 +15,14 @@ object AppConstants {
 
   // Use 'postman-client' for Desktop App Password Flow (Direct Access Grants enabled)
   // 'web-app' is for Browser Flow (PKCE)
-  const val KEYCLOAK_CLIENT_ID: String = "postman-client"
+  // TODO: Make this platform-dependent (Desktop vs Web)
+  const val KEYCLOAK_CLIENT_ID: String = "web-app"
 
   // DEV ONLY: Client Secret for 'postman-client' (Confidential Client)
   // In Production, this should NEVER be in the frontend code.
   // For the Desktop App Pilot, we use this to simulate a secure client.
+  // For 'web-app' (Public Client), this is not needed/used if configured correctly,
+  // but our AuthApiClient might be sending it.
   const val KEYCLOAK_CLIENT_SECRET: String = "postman-secret-123"
 
   // Removed unused browser flow URLs (registerUrl, loginUrl, etc.) as we focus on Desktop App.

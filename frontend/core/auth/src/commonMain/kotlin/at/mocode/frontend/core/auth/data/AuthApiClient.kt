@@ -43,9 +43,19 @@ class AuthApiClient(
         formParameters = Parameters.build {
           append("grant_type", "password")
           append("client_id", clientId)
-          if (!clientSecret.isNullOrBlank()) {
+
+          // IMPORTANT: Only send client_secret if it's NOT a public client (like 'web-app')
+          // Keycloak rejects requests from public clients that contain a client_secret.
+          // We check if the client ID suggests a public client or if secret is explicitly provided.
+          // For now, we rely on the fact that 'web-app' is public and should NOT have a secret sent.
+
+          // Logic: If clientId is 'web-app', we force ignore the secret, or we rely on caller to pass null.
+          // Since AppConstants might still have the secret for 'postman-client', we need to be careful.
+
+          if (!clientSecret.isNullOrBlank() && clientId != "web-app") {
             append("client_secret", clientSecret)
           }
+
           append("username", username)
           append("password", password)
         }
@@ -89,7 +99,7 @@ class AuthApiClient(
         formParameters = Parameters.build {
           append("grant_type", "refresh_token")
           append("client_id", clientId)
-          if (!clientSecret.isNullOrBlank()) {
+          if (!clientSecret.isNullOrBlank() && clientId != "web-app") {
             append("client_secret", clientSecret)
           }
           append("refresh_token", refreshToken)

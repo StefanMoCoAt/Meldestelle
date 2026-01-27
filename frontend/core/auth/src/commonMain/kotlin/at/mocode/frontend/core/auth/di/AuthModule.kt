@@ -28,9 +28,11 @@ val authModule = module {
 
   // Bridge to core network TokenProvider without adding a hard dependency there
   single<TokenProvider> {
+    // We need to capture the AuthTokenManager instance to avoid issues with 'this' context in JS
+    val tokenManager = get<AuthTokenManager>()
     object : TokenProvider {
       override fun getAccessToken(): String? {
-        return get<AuthTokenManager>().getToken()
+        return tokenManager.getToken()
       }
     }
   }

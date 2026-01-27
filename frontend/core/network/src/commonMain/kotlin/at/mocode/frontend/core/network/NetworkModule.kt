@@ -42,12 +42,8 @@ val networkModule = module {
   // 2. API Client (Configured for Gateway & Auth Header)
   single(named("apiClient")) {
     // Resolve TokenProvider lazily to avoid circular dependency issues during init
-    val tokenProvider: TokenProvider? = try {
-      get<TokenProvider>()
-    } catch (_: Throwable) {
-      println("[apiClient] Warning: No TokenProvider found in Koin")
-      null
-    }
+    // We use a provider lambda to get the TokenProvider instance when needed
+    // This avoids resolving it immediately during module definition
 
     HttpClient {
       // JSON (kotlinx) configuration
@@ -96,18 +92,79 @@ val networkModule = module {
     }.also { client ->
       // Dynamic Auth Header Injection via HttpSend plugin
       // This ensures we get the CURRENT token for each request
-      if (tokenProvider != null) {
-        client.plugin(HttpSend).intercept { request ->
-          try {
-            val token = tokenProvider.getAccessToken()
-            if (token != null) {
-              request.header("Authorization", "Bearer $token")
-            }
-          } catch (e: Exception) {
-            println("[apiClient] Error getting access token: $e")
-          }
-          execute(request)
+      client.plugin(HttpSend).intercept { request ->
+        try {
+          // Resolve TokenProvider dynamically from Koin scope
+          // This assumes Koin is initialized and accessible
+          // Since we are inside a Koin component, we should be able to get it?
+          // No, 'this' here is HttpSendScope.
+
+          // We need to capture the Koin scope or use GlobalContext if necessary,
+          // BUT better: we inject the TokenProvider into the module definition lambda
+          // and use it here.
+
+          // However, `get<TokenProvider>()` might fail if not yet registered.
+          // Let's try to resolve it safely.
+
+          // The issue with the previous code was likely that `get<TokenProvider>()` was called
+          // during module definition time (or bean creation time), and if it wasn't ready or
+          // if it was null (due to try-catch), the interceptor logic was skipped or broken.
+
+          // Let's try to get it from the Koin instance that created this client.
+          // But we are inside `single { ... }`.
+
+          // We can capture the `Scope` from the `single` block.
+          // val scope = this // Koin Scope
+
+          // But we can't easily pass `scope` into `intercept`.
+
+          // Let's try to resolve TokenProvider lazily using a lazy delegate or similar.
+          // Or just resolve it inside the interceptor if we can access Koin.
+
+          // Since we are in `single`, we can get the provider.
+          // The previous error `TypeError: this.getToken_wiq2bn_k$ is not a function`
+          // was in AuthModule, which we fixed.
+
+          // The current error `Error_0: Fail to fetch` is a CORS error on the network level,
+          // NOT a JS runtime error in the interceptor (unless the interceptor causes it).
+
+          // Wait, the logs show:
+          // [baseClient] REQUEST: .../token
+          // Access to fetch at ... blocked by CORS policy
+
+          // This confirms it is a CORS issue on the Keycloak server side, or the browser side.
+          // The JS error `TypeError` is GONE in the latest log!
+
+          // So the interceptor logic in NetworkModule might be fine, or at least not the cause of the CORS error.
+          // But let's make it robust anyway.
+
+          // We will use a safe lazy resolution pattern.
+        } catch (e: Exception) {
+           // ignore
         }
+        execute(request)
+      }
+
+      // Re-applying the logic with proper Koin resolution
+      val koinScope = this@single
+
+      client.plugin(HttpSend).intercept { request ->
+        try {
+            // Attempt to resolve TokenProvider from the capturing scope
+            val tokenProvider = try {
+                koinScope.get<TokenProvider>()
+            } catch (e: Exception) {
+                null
+            }
+
+            val token = tokenProvider?.getAccessToken()
+            if (token != null) {
+                request.header("Authorization", "Bearer $token")
+            }
+        } catch (e: Exception) {
+            println("[apiClient] Error injecting auth header: $e")
+        }
+        execute(request)
       }
     }
   }

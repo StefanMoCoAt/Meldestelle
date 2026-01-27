@@ -13,7 +13,10 @@ actual object PlatformConfig {
     } catch (_: dynamic) {
       ""
     }
-    if (fromGlobal.isNotEmpty()) return fromGlobal.removeSuffix("/")
+    if (fromGlobal.isNotEmpty()) {
+      console.log("[PlatformConfig] Resolved API_BASE_URL from global: $fromGlobal")
+      return fromGlobal.removeSuffix("/")
+    }
 
     // 2) Try window location origin (same origin gateway/proxy setup)
     val origin = try {
@@ -21,9 +24,16 @@ actual object PlatformConfig {
     } catch (_: dynamic) {
       null
     }
-    if (!origin.isNullOrBlank()) return origin.removeSuffix("/")
 
-    // 3) Fallback to the local gateway
-    return "http://localhost:8081"
+    if (!origin.isNullOrBlank()) {
+        val resolvedUrl = origin.removeSuffix("/") + "/api"
+        console.log("[PlatformConfig] Resolved API_BASE_URL from window.location.origin: $resolvedUrl")
+        return resolvedUrl
+    }
+
+    // 3) Fallback to the local gateway directly (e.g. for tests without window)
+    val fallbackUrl = "http://localhost:8081/api"
+    console.log("[PlatformConfig] Fallback API_BASE_URL: $fallbackUrl")
+    return fallbackUrl
   }
 }

@@ -41,7 +41,26 @@ if (config.devServer) {
         target: 'http://localhost:8081',
         changeOrigin: true,
         secure: false,
-        pathRewrite: {'^/api': ''}
+        // WICHTIG: pathRewrite entfernt /api, wenn das Backend unter /api lauscht,
+        // ist das falsch. Wenn das Backend unter / lauscht, ist es richtig.
+        // Das API Gateway lauscht unter http://localhost:8081/api/...
+        // Wenn wir also /api/ping aufrufen, soll es zu http://localhost:8081/api/ping gehen.
+        // Daher KEIN pathRewrite, wenn das Gateway selbst /api erwartet.
+        // Wenn das Gateway aber die Routen ohne /api mappt (z.B. /ping), dann brauchen wir Rewrite.
+        //
+        // Analyse:
+        // Gateway Routes sind oft: /api/ping -> Ping Service /api/ping oder /ping
+        // Wenn Gateway Routes definiert sind als:
+        // - id: ping-service
+        //   uri: lb://ping-service
+        //   predicates:
+        //     - Path=/api/ping/**
+        //
+        // Dann leitet das Gateway /api/ping weiter.
+        // Wenn wir pathRewrite machen, kommt beim Gateway nur /ping an.
+        // Das Gateway matcht aber auf /api/ping.
+        // Also: pathRewrite entfernen!
+        // pathRewrite: {'^/api': ''}
       }
     ]
   }

@@ -13,11 +13,12 @@ class PingEventRepositoryImpl(
 ) : SyncableRepository<PingEvent> {
 
   // The `since` parameter for our sync is the ID of the last event, not a timestamp.
-  override suspend fun getLatestSince(): String? = withContext(Dispatchers.Default) {
-    db.appDatabaseQueries.selectLatestPingEventId().executeAsOneOrNull()
+  override suspend fun getLatestSince(): String? {
+      // Direct call, no withContext needed if a driver handles threading (which it does)
+      return db.appDatabaseQueries.selectLatestPingEventId().executeAsOneOrNull()
   }
 
-  override suspend fun upsert(items: List<PingEvent>) = withContext(Dispatchers.Default) {
+  override suspend fun upsert(items: List<PingEvent>) {
     // Always perform bulk operations within a transaction.
     db.transaction {
       items.forEach { event ->
