@@ -34,7 +34,7 @@ Für detailliertere Anleitungen, wie z.B. das Starten einzelner Services oder da
 
 ## 🤝 Contributing
 
-Beiträge sind willkommen. Bitte beachte unseren [**-> Branch- und PR-Workflow**](./docs/02_Onboarding/branchschutz-und-pr-workflow.md).
+Beiträge sind willkommen. Bitte beachte unseren [**→ Branch- und PR-Workflow**](./docs/02_Onboarding/branchschutz-und-pr-workflow.md).
 
 ## 📜 Lizenz
 
