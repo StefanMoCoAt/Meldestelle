@@ -40,6 +40,7 @@ Das `frontend`-Verzeichnis ist wie folgt strukturiert, um eine klare Trennung de
 
 ## Wichtige Dokumente
 
+*   **[State-Management Strategie (UDF)](state-management-strategy.md):** Beschreibt die empfohlene Strategie für komplexe Screens.
 *   **[ADR-0010: SQLDelight für Cross-Platform-Persistenz](../01_Architecture/adr/0010-sqldelight-for-cross-platform-persistence.md):** Beschreibt die Entscheidung für SQLDelight.
 *   **[ADR-0011: Koin für Dependency Injection](../01_Architecture/adr/0011-koin-for-dependency-injection.md):** Beschreibt die Entscheidung für Koin.
 *   **[Offline-First-Architektur](offline-first-architecture.md):** Detaillierte Beschreibung der Offline-First-Strategie.
