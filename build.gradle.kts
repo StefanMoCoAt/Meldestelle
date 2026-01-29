@@ -181,108 +181,6 @@ subprojects {
   }
 }
 
-// ==================================================================
-// Architecture Guards (lightweight, fast checks)
-// ==================================================================
-
-// Fails if any source file contains manual Authorization header setting.
-// Policy: Authorization must be injected by the DI-provided HttpClient (apiClient).
-tasks.register("archGuardForbiddenAuthorizationHeader") {
-  group = "verification"
-  description = "Fail build if code sets Authorization header manually."
-  doLast {
-    val forbiddenPatterns =
-      listOf(
-        ".header(\"Authorization\"",
-        "setHeader(\"Authorization\"",
-        "headers[\"Authorization\"]",
-        "headers[\'Authorization\']",
-        ".header(HttpHeaders.Authorization",
-        "header(HttpHeaders.Authorization",
-      )
-    // Scope: Frontend-only enforcement. Backend/Test code is excluded.
-    val srcDirs = listOf("clients", "frontend")
-    val violations = mutableListOf<File>()
-    srcDirs.map { file(it) }
-      .filter { it.exists() }
-      .forEach { rootDir ->
-        rootDir.walkTopDown()
-          .filter { it.isFile && (it.extension == "kt" || it.extension == "kts") }
-          .forEach { f ->
-            val text = f.readText()
-            // Skip test sources
-            val path = f.invariantSeparatorsPath
-            val isTest =
-              path.contains("/src/commonTest/") ||
-                path.contains("/src/jsTest/") ||
-                path.contains("/src/jvmTest/") ||
-                path.contains("/src/test/")
-            if (!isTest && forbiddenPatterns.any { text.contains(it) }) {
-              violations += f
-            }
-          }
-      }
-    if (violations.isNotEmpty()) {
-      val msg =
-        buildString {
-          appendLine("Forbidden manual Authorization header usage found in:")
-          violations.take(50).forEach { appendLine(" - ${it.path}") }
-          if (violations.size > 50) appendLine(" ... and ${violations.size - 50} more files")
-          appendLine()
-          appendLine("Policy: Use DI-provided apiClient (Koin named \"apiClient\").")
-        }
-      throw GradleException(msg)
-    }
-  }
-}
-
-// Guard: Frontend Feature Isolation (no feature -> feature project dependencies)
-tasks.register("archGuardNoFeatureToFeatureDeps") {
-  group = "verification"
-  description = "Fail build if a :frontend:features:* module depends on another :frontend:features:* module"
-  doLast {
-    val featurePrefix = ":frontend:features:"
-    val violations = mutableListOf<String>()
-
-    rootProject.subprojects.forEach { p ->
-      if (p.path.startsWith(featurePrefix)) {
-        // Check all configurations except test-related ones
-        p.configurations
-          .matching { cfg ->
-            val n = cfg.name.lowercase()
-            !n.contains("test") && !n.contains("debug") // ignore test/debug configs
-          }
-          .forEach { cfg ->
-            cfg.dependencies.withType(ProjectDependency::class.java).forEach { dep ->
-              // Use reflection to avoid compile-time issues with dependencyProject property
-              val proj =
-                try {
-                  dep.javaClass.getMethod("getDependencyProject").invoke(dep) as Project
-                } catch (e: Throwable) {
-                  null
-                }
-              val target = proj?.path ?: ""
-              if (target.startsWith(featurePrefix) && target != p.path) {
-                violations += "${p.path} -> $target (configuration: ${cfg.name})"
-              }
-            }
-          }
-      }
-    }
-
-    if (violations.isNotEmpty()) {
-      val msg =
-        buildString {
-          appendLine("Feature isolation violation(s) detected:")
-          violations.forEach { appendLine(" - $it") }
-          appendLine()
-          appendLine("Policy: frontend features must not depend on other features. Use navigation/shared domain in :frontend:core instead.")
-        }
-      throw GradleException(msg)
-    }
-  }
-}
-
 // ------------------------------------------------------------------
 // Bundle Size Budgets for Frontend Shells (Kotlin/JS)
 // ------------------------------------------------------------------
@@ -404,14 +302,6 @@ tasks.register("checkBundleBudget") {
   }
 }
 
-// Aggregate convenience task
-tasks.register("archGuards") {
-  group = "verification"
-  description = "Run all architecture guard checks"
-  dependsOn("archGuardForbiddenAuthorizationHeader")
-  dependsOn("archGuardNoFeatureToFeatureDeps")
-}
-
 // Composite verification task including static analyzers if present
 tasks.register("staticAnalysis") {
   group = "verification"
@@ -420,7 +310,8 @@ tasks.register("staticAnalysis") {
   dependsOn(
     tasks.matching { it.name == "detekt" },
     tasks.matching { it.name == "ktlintCheck" },
-    tasks.named("archGuards"),
+    // ARCHITECTURE-TESTS: Replaced old archGuards with the new test module
+    project(":platform:architecture-tests").tasks.named("test"),
   )
 }
 

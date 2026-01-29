@@ -159,3 +159,4 @@ include(":platform:platform-dependencies")
 
 // --- TESTING ---
 include(":platform:platform-testing")
+include(":platform:architecture-tests")

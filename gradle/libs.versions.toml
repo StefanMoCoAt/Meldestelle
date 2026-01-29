@@ -1,6 +1,6 @@
 # This file is the SINGLE SOURCE OF TRUTH for all project dependencies.
 # Organized by Domain: Frontend (KMP) vs. Backend (Spring/JVM)
-# Last updated: 2026-01-20
+# Last updated: 2026-01-29
 
 [versions]
 # ==============================================================================
@@ -86,6 +86,7 @@ testcontainersKeycloak = "4.0.1"
 testcontainersJunitJupiter = "1.21.4"
 testcontainersPostgresql = "1.21.4"
 testcontainersKafka = "1.21.4"
+archunit = "1.4.1"
 
 # Gradle Plugins
 foojayResolver = "1.0.0"
@@ -100,6 +101,7 @@ dokka = "2.1.0"
 # ==============================================================================
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5", version.ref = "kotlin" }
 
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
@@ -265,6 +267,9 @@ testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", ve
 testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainersPostgresql" }
 testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainersKafka" }
 testcontainers-keycloak = { module = "com.github.dasniko:testcontainers-keycloak", version.ref = "testcontainersKeycloak" }
+
+archunit-junit5-api = { module = "com.tngtech.archunit:archunit-junit5-api", version.ref = "archunit" }
+archunit-junit5-engine = { module = "com.tngtech.archunit:archunit-junit5-engine", version.ref = "archunit" }
 
 # BOMs
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
