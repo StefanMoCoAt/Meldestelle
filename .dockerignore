@@ -21,7 +21,7 @@
 **/CHANGELOG*
 **/LICENSE*
 **/CONTRIBUTING*
-docs/
+# docs/  <- REMOVED: Required by Docker build context
 **/*.md
 
 # ===================================================================
