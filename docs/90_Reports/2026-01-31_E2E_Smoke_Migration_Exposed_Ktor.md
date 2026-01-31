@@ -6,6 +6,7 @@ date: 2026-01-31
 tags: [e2e, smoke, docker, migration, ktor-3.4.0, exposed-1.0.0]
 ---
 
+
 # E2E Smoke – Migration Exposed 1.0.0 & Ktor 3.4.0
 
 ## Setup
