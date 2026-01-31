@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.8
 # ===================================================================
 # Multi-Stage Dockerfile for Meldestelle Web-App (Kotlin/JS)
-# Version: 2.1.0 - Fix: Use Debian for Build (Glibc), Alpine for Run
+# Version: 2.2.2 - Added 'contracts' to build context
 # ===================================================================
 
 # === GLOBAL ARGS ===
@@ -16,7 +16,6 @@ ARG BUILD_DATE
 # ===================================================================
 # Stage 1: Build Stage (Debian-based for Node.js compatibility)
 # ===================================================================
-# WICHTIG: Wir nutzen hier NICHT Alpine, damit die Node-Binaries funktionieren!
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION} AS builder
 
 ARG WEB_BUILD_PROFILE
@@ -27,8 +26,6 @@ LABEL stage=builder
 WORKDIR /workspace
 
 # 1. Gradle Optimizations
-# Hinweis: Wir lassen Node/Yarn Download Flags weg, da Gradle auf Debian
-# die Standard-Binaries problemlos laden und ausführen kann.
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -Dorg.gradle.daemon=false \
                  -Dorg.gradle.parallel=true \
@@ -50,11 +47,14 @@ COPY platform/ platform/
 COPY core/ core/
 COPY backend/ backend/
 COPY frontend/ frontend/
-# FIX: Docs Ordner ist notwendig für die Gradle-Konfigurationsphase
-COPY docs/ docs/
+COPY config/ config/
+# FIX: 'contracts' is required by Gradle during configuration phase
+COPY contracts/ contracts/
+
+# FIX: Create dummy docs dir to satisfy Gradle configuration phase
+RUN mkdir -p docs
 
 # 4. Resolve Dependencies
-# Wir lassen Gradle Node.js selbst herunterladen (funktioniert jetzt, da wir auf Debian sind)
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
     ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-daemon
@@ -92,13 +92,11 @@ LABEL service="web-app" \
 
 # Tools & User Setup
 RUN apk add --no-cache curl && \
-    rm /etc/nginx/conf.d/default.conf && \
-    mkdir -p /usr/share/nginx/html/downloads
+    rm /etc/nginx/conf.d/default.conf
 
 # Copy Artifacts
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /workspace/config/docker/nginx/web-app/nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/dist/ /usr/share/nginx/html/
-COPY downloads/ /usr/share/nginx/html/downloads/
 
 # Permissions
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
