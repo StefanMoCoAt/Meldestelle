@@ -1,0 +1,16 @@
+name: PR Guard
+
+on:
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  no-hardcoded-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run hardcoded versions check
+        shell: bash
+        run: |
+          chmod +x config/quality/check-no-hardcoded-versions.sh
+          config/quality/check-no-hardcoded-versions.sh
