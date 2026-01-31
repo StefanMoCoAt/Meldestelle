@@ -1,3 +1,10 @@
+---
+type: Reference
+status: ACTIVE
+owner: Lead Architect
+date: 2026-01-31
+---
+
 # Technische Analyse: Ktor Framework Migration (3.3.3 -> 3.4.0)
 
 ### Einleitung und Management-Zusammenfassung
@@ -76,7 +83,12 @@ statt statische Dateien beim Build zu erzeugen.
 - **Neues Feature:** Du kannst Routen nun direkt im Code beschreiben
 
 ```kotlin
- get("/users") { ... }.describe { summary = "Getusers" response < List >(HttpStatusCode.OK) }
+get("/users") {
+    // ...
+}.describe {
+    summary = "Get users"
+    response<List<User>>(HttpStatusCode.OK)
+}
 ```
 
 Dadurch sind Code und Dokumentation immer synchron.

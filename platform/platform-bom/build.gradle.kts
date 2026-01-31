@@ -63,6 +63,8 @@ dependencies {
         // --- Jackson Modules ---
         api(libs.jackson.module.kotlin)
         api(libs.jackson.datatype.jsr310)
+        // --- Ktor OpenAPI (runtime-based docs require explicit routing-openapi in 3.4.0) ---
+        api("io.ktor:ktor-server-routing-openapi:${libs.versions.ktor.get()}")
         // --- Testcontainers ---
         // Testcontainers Bundle kann nicht direkt in constraints verwendet werden
         api(libs.testcontainers.core)

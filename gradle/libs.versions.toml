@@ -23,8 +23,8 @@ androidx-lifecycle = "2.9.6"
 uiDesktop = "1.7.0"
 
 # Network: Ktor (Client & Server)
-# Kotlin 2.3.0 Alignment + iOS SSE Fix
-ktor = "3.3.3"
+# Align with Kotlin 2.3.0 – upgrade to 3.4.0 (runtime OpenAPI + lifecycle improvements)
+ktor = "3.4.0"
 
 # Dependency Injection
 koin = "4.1.1"
@@ -46,7 +46,8 @@ springDependencyManagement = "1.1.7"
 springdoc = "3.0.0"
 
 # Server Persistence
-exposed = "1.0.0-rc-4"
+# Final release 1.0.0 (UUID API refinements vs rc-4)
+exposed = "1.0.0"
 postgresql = "42.7.8"
 hikari = "7.0.2"
 h2 = "2.4.240"
@@ -208,6 +209,7 @@ ktor-server-openapi = { module = "io.ktor:ktor-server-openapi", version.ref = "k
 ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor" }
 ktor-server-tests = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktor" }
 ktor-server-testHost = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
+ktor-server-routing-openapi = { module = "io.ktor:ktor-server-routing-openapi", version.ref = "ktor" }
 
 # ==============================================================================
 # === BACKEND: PERSISTENCE & INFRA ===
