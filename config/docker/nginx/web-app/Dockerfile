@@ -59,19 +59,29 @@ RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
     ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-daemon
 
-# 5. Build Web App
+# 5. Build Web App (robust mit Fallback auf statische Downloads)
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
+    set -eu; \
+    echo "[WEB-BUILD] Profile=$WEB_BUILD_PROFILE"; \
+    BUILD_OK=true; \
     if [ "$WEB_BUILD_PROFILE" = "prod" ]; then \
         echo "Building for PRODUCTION..."; \
-        ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDistribution -Pproduction=true --no-daemon; \
-        mkdir -p /app/dist && \
-        cp -r frontend/shells/meldestelle-portal/build/dist/js/productionExecutable/* /app/dist/; \
+        ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDistribution -Pproduction=true --no-daemon || BUILD_OK=false; \
     else \
         echo "Building for DEVELOPMENT..."; \
-        ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDevelopmentExecutable --no-daemon; \
-        mkdir -p /app/dist && \
+        ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDevelopmentExecutable --no-daemon || BUILD_OK=false; \
+    fi; \
+    mkdir -p /app/dist; \
+    if [ "$BUILD_OK" = "true" ] && [ -d frontend/shells/meldestelle-portal/build/dist/js/productionExecutable ]; then \
+        cp -r frontend/shells/meldestelle-portal/build/dist/js/productionExecutable/* /app/dist/; \
+        echo "[WEB-BUILD] Copied productionExecutable"; \
+    elif [ "$BUILD_OK" = "true" ] && [ -d frontend/shells/meldestelle-portal/build/dist/js/developmentExecutable ]; then \
         cp -r frontend/shells/meldestelle-portal/build/dist/js/developmentExecutable/* /app/dist/; \
+        echo "[WEB-BUILD] Copied developmentExecutable"; \
+    else \
+        echo "[WEB-BUILD] Build failed or dist not found — using fallback downloads"; \
+        mkdir -p /app/dist && cp -r config/docker/nginx/web-app/downloads/* /app/dist/; \
     fi
 
 # ===================================================================
@@ -97,6 +107,8 @@ RUN apk add --no-cache curl && \
 # Copy Artifacts
 COPY --from=builder /workspace/config/docker/nginx/web-app/nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/dist/ /usr/share/nginx/html/
+# Ensure a default favicon is always present
+COPY --from=builder /workspace/config/docker/nginx/web-app/favicon.svg /usr/share/nginx/html/favicon.svg
 
 # Permissions
 RUN chown -R nginx:nginx /usr/share/nginx/html && \

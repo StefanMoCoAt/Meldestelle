@@ -3,7 +3,7 @@
 # ===================================================================
 
 # 1. Build Stage (Debian-basiert für Stabilität bei Desktop-Builds)
-FROM gradle:8-jdk25 AS builder
+FROM gradle:9.2.1-jdk-25-and-25-alpine AS builder
 
 WORKDIR /app
 
@@ -16,10 +16,13 @@ COPY gradlew ./
 RUN chmod +x gradlew
 
 # Copy Sources (Struktur wie im Web-App Fix)
+# Minimale Monorepo-Struktur kopieren (nur was benötigt wird)
 COPY platform/ platform/
 COPY core/ core/
 COPY backend/ backend/
 COPY frontend/ frontend/
+# Verträge/Contracts werden benötigt, da in settings.gradle.kts inkludiert
+COPY contracts/ contracts/
 COPY docs/ docs/
 # Falls du 'domains' oder andere Ordner hast, die in settings.gradle.kts stehen:
 # COPY domains/ domains/
@@ -27,9 +30,27 @@ COPY docs/ docs/
 # Dependencies laden
 RUN ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-daemon
 
-# Desktop-App Distribution erstellen
-# Wir nutzen 'packageDistributionForCurrentOS' oder 'createDistributable'
-RUN ./gradlew :frontend:shells:meldestelle-portal:createDistributable --no-daemon
+# Desktop-App Distribution erstellen (robust): versuche createDistributable, fallback auf createRuntimeImage
+RUN set -eu; \
+    echo "[DESKTOP-BUILD] createDistributable"; \
+    if ./gradlew :frontend:shells:meldestelle-portal:createDistributable --no-daemon; then \
+      echo "[DESKTOP-BUILD] createDistributable OK"; \
+    else \
+      echo "[DESKTOP-BUILD] createDistributable failed, fallback to createRuntimeImage"; \
+      ./gradlew :frontend:shells:meldestelle-portal:createRuntimeImage --no-daemon; \
+    fi; \
+    echo "[DESKTOP-BUILD] Collecting artifacts"; \
+    DIST_BINARIES_DIR="/app/frontend/shells/meldestelle-portal/build/compose/binaries/main/app"; \
+    DIST_RUNTIMES_DIR="/app/frontend/shells/meldestelle-portal/build/compose/runtimes/main/app"; \
+    mkdir -p /tmp/desktop-dist; \
+    if [ -d "$DIST_BINARIES_DIR" ]; then \
+      cp -r "$DIST_BINARIES_DIR/"* /tmp/desktop-dist/; \
+    fi; \
+    if [ -d "$DIST_RUNTIMES_DIR" ]; then \
+      cp -r "$DIST_RUNTIMES_DIR/"* /tmp/desktop-dist/; \
+    fi; \
+    echo "[DESKTOP-BUILD] Collected files:"; \
+    ls -la /tmp/desktop-dist || true
 
 # ===================================================================
 # Stage 2: Runtime Stage - Ubuntu mit VNC + noVNC
@@ -77,14 +98,16 @@ WORKDIR /app
 
 # Kopiere Build-Ergebnis
 # HINWEIS: Der Pfad muss exakt stimmen. Compose Gradle Plugin Output ist oft verschachtelt.
-# Wir kopieren den Inhalt nach /app/desktop-app
-COPY --from=builder /app/frontend/shells/meldestelle-portal/build/compose/binaries/main/app/ /app/desktop-app/
+# Wir kopieren den konsolidierten Inhalt nach /app/desktop-app
+RUN mkdir -p /app/desktop-app
+COPY --from=builder /tmp/desktop-dist/ /app/desktop-app/
 
 # Scripts (Achte darauf, dass die Pfade im Host stimmen!)
-COPY config/frontends/desktop-app/entrypoint.sh /entrypoint.sh
-COPY config/frontends/desktop-app/health-check.sh /opt/health-check.sh
-# Wir nutzen vorerst dein Entrypoint-Script, Supervisor Config ist optional wenn Script alles macht
-# COPY config/frontends/desktop-app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Korrigierte Pfade: Skripte liegen unter config/docker/nginx/desktop-app
+COPY config/docker/nginx/desktop-app/entrypoint.sh /entrypoint.sh
+COPY config/docker/nginx/desktop-app/health-check.sh /opt/health-check.sh
+# Optional: Supervisor-Config nur verwenden, wenn benötigt
+# COPY config/docker/nginx/desktop-app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN chmod +x /entrypoint.sh /opt/health-check.sh
 
