@@ -91,52 +91,69 @@ implementation("io.ktor:ktor-server-routing-openapi:3.4.0")
 Tust du das nicht, wird deine Anwendung beim Start mit einer `NoClassDefFoundError` abstürzen, sobald auf Swagger
 zugegriffen wird.
 
-### 2.2 Structured Concurrency: HttpRequestLifecycle
-Ktor 3.4.0 führt das Plugin HttpRequestLifecycle ein.
+### 2.2 Structured Concurrency: `HttpRequestLifecycle`
 
-Problem in 3.3.3: Wenn ein Client die Verbindung abbrach (z.B. Browser-Tab geschlossen), lief die Verarbeitung auf dem
-Server oft weiter (Datenbankabfragen, Berechnungen), was Ressourcen verschwendete.
+Ktor 3.4.0 führt das Plugin `HttpRequestLifecycle` ein.
 
-Lösung in 3.4.0: Mit diesem Plugin wird der Abbruch der TCP-Verbindung an den Kotlin-Coroutine-Scope weitergeleitet. Die
-Verarbeitung wird sofort abgebrochen (cancelled).
+- **Problem in 3.3.3:** Wenn ein Client die Verbindung abbrach (z.B. Browser-Tab geschlossen), lief die Verarbeitung auf
+  dem
+  Server oft weiter (Datenbankabfragen, Berechnungen), was Ressourcen verschwendete.
 
-Kotlin
+- **Lösung in 3.4.0:** Mit diesem Plugin wird der Abbruch der TCP-Verbindung an den Kotlin-Coroutine-Scope
+  weitergeleitet. Die
+  Verarbeitung wird sofort abgebrochen (`cancelled`).
+
+```Kotlin
 install(HttpRequestLifecycle)
+```
+
 Dies ist für deine Netty-Engine voll unterstützt.
 
-2.3 Authentifizierung & Sicherheit (ktor-server-auth-jwt, cors)
-JWT Fail-Early: Wenn die JWT-Konfiguration fehlerhaft ist (z.B. fehlender Verifier), bricht der Server nun sofort beim
-Start ab ("Fail-Fast"). In 3.3.3 trat der Fehler erst beim ersten Request auf, was das Debuggen in Staging/Prod
-erschwerte.
+### 2.3 Authentifizierung & Sicherheit (`ktor-server-auth-jwt`, `cors`)
 
-CORS Fix: Ein Bug wurde behoben, bei dem OPTIONS Preflight-Requests mit 405 Method Not Allowed abgelehnt wurden, wenn
-das CORS-Plugin innerhalb einer spezifischen route (statt global) installiert war.
+- **JWT Fail-Early:** Wenn die JWT-Konfiguration fehlerhaft ist (z.B. fehlender Verifier), bricht der Server nun sofort
+  beim
+  Start ab ("Fail-Fast"). In 3.3.3 trat der Fehler erst beim ersten Request auf, was das Debuggen in Staging/Prod
+  erschwerte.
 
-2.4 Observability (call-logging, status-pages)
-MDC & Trace IDs: Ein Fehler wurde korrigiert, bei dem MDC-Kontextinformationen (wie Trace-IDs) verloren gingen, wenn
-innerhalb einer Route eine Exception geworfen wurde. Deine Logs sollten nun auch bei Fehlern (Stacktraces) die korrekten
-Request-IDs enthalten.
+- **CORS Fix:** Ein Bug wurde behoben, bei dem `OPTIONS` Preflight-Requests mit `405 Method Not Allowed` abgelehnt
+  wurden, wenn
+  das CORS-Plugin innerhalb einer spezifischen `route` (statt global) installiert war.
 
-StatusPages Header: Error-Handler in StatusPages haben nun Zugriff auf die Header des OutgoingContent, was wichtig ist,
-um korrekte Authentifizierungs-Header (z.B. WWW-Authenticate) auch im Fehlerfall zu senden.
+### 2.4 Observability (`call-logging`, `status-pages`)
 
-3. Checkliste für die Migration
-   Hier ist ein konkreter Fahrplan für das Upgrade deiner Konfiguration:
+- **MDC & Trace IDs:** Ein Fehler wurde korrigiert, bei dem MDC-Kontextinformationen (wie Trace-IDs) verloren gingen,
+  wenn
+  innerhalb einer Route eine Exception geworfen wurde. Deine Logs sollten nun auch bei Fehlern (Stacktraces) die
+  korrekten
+  Request-IDs enthalten.
 
-Versionen anheben: Setze die ktor Version in deinem Version-Catalog oder gradle.properties auf 3.4.0.
+- **StatusPages Header:** Error-Handler in `StatusPages` haben nun Zugriff auf die Header des `OutgoingContent`, was
+  wichtig ist,
+  um korrekte Authentifizierungs-Header (z.B. `WWW-Authenticate`) auch im Fehlerfall zu senden.
 
-JS-Target anpassen: Suche im build.gradle.kts (Frontend) nach jsAndWasmShared und ersetze es durch web. Benenne
-entsprechende Source-Sets um (z.B. jsAndWasmSharedMain -> webMain).
+---
 
-OpenAPI fixen: Füge io.ktor:ktor-server-routing-openapi:3.4.0 explizit zu deinen Backend-Dependencies hinzu.
+## 3. Checkliste für die Migration
 
-Lifecycle Plugin aktivieren: Installiere das HttpRequestLifecycle Plugin in deiner Server-Initialisierung für besseres
-Ressourcenmanagement.
+Hier ist ein konkreter Fahrplan für das Upgrade deiner Konfiguration:
 
-Zeit-Bibliothek prüfen: Falls du dich darauf verlassen hast, dass ktor-server-default-headers automatisch
-kotlinx-datetime mitbringt: Dies wurde entfernt. Füge kotlinx-datetime ggf. explizit hinzu.
+- **Versionen anheben:** Setze die `ktor` Version in deinem Version-Catalog oder `gradle.properties` auf `3.4.0`.
 
-Fazit
-Das Update auf Ktor 3.4.0 lohnt sich vor allem wegen der Runtime-OpenAPI-Generierung und dem besseren
-Ressourcenmanagement durch das Lifecycle-Plugin. Die Hürden sind primär die Umbenennung des JS-Targets und die fehlende
-transitive Abhängigkeit bei OpenAPI, die aber leicht manuell behoben werden kann.
+- **JS-Target anpassen:** Suche im `build.gradle.kts` (Frontend) nach `jsAndWasmShared` und ersetze es durch `web`.
+  Benenne entsprechende `Source-Sets` um (z.B. `jsAndWasmSharedMain` → `webMain`).
+
+- **OpenAPI fixen:** Füge `io.ktor:ktor-server-routing-openapi:3.4.0` explizit zu deinen Backend-Dependencies hinzu.
+
+- **Lifecycle Plugin aktivieren:** Installiere das `HttpRequestLifecycle` Plugin in deiner Server-Initialisierung für
+  besseres
+  Ressourcenmanagement.
+
+- **Zeit-Bibliothek prüfen:** Falls du dich darauf verlassen hast, dass `ktor-server-default-headers` automatisch
+  `kotlinx-datetime` mitbringt: Dies wurde entfernt. Füge `kotlinx-datetime` ggf. explizit hinzu.
+
+## Fazit
+
+Das Update auf **Ktor 3.4.0** lohnt sich vor allem wegen der **Runtime-OpenAPI-Generierung** und des **besseren
+Ressourcenmanagements** durch das Lifecycle-Plugin. Die Hürden sind primär die Umbenennung des JS-Targets und die
+fehlende transitive Abhängigkeit bei OpenAPI, die aber leicht manuell behoben werden können.
