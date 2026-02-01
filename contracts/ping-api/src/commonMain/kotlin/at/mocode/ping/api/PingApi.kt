@@ -10,5 +10,6 @@ interface PingApi {
     suspend fun securePing(): PingResponse
 
     // Phase 3: Delta-Sync
-    suspend fun syncPings(lastSyncTimestamp: Long): List<PingEvent>
+    // Changed parameter name to 'since' to match SyncManager convention and backend controller
+    suspend fun syncPings(since: Long): List<PingEvent>
 }

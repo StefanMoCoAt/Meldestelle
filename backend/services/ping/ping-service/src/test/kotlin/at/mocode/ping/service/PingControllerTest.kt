@@ -153,7 +153,8 @@ class PingControllerTest {
         )
 
         // When & Then
-        val mvcResult: MvcResult = mockMvc.perform(get("/ping/sync").param("lastSyncTimestamp", timestamp.toString()))
+        // Changed parameter name to 'since' to match the controller update
+        val mvcResult: MvcResult = mockMvc.perform(get("/ping/sync").param("since", timestamp.toString()))
             .andExpect(request().asyncStarted())
             .andReturn()
 

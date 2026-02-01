@@ -80,9 +80,10 @@ class PingController(
 
     @GetMapping("/ping/sync")
     override suspend fun syncPings(
-        @RequestParam(required = false, defaultValue = "0") lastSyncTimestamp: Long
+        // Changed the parameter name to 'since' to match SyncManager convention
+        @RequestParam(required = false, defaultValue = "0") since: Long
     ): List<PingEvent> {
-        return pingUseCase.getPingsSince(lastSyncTimestamp).map {
+        return pingUseCase.getPingsSince(since).map {
             PingEvent(
                 id = it.id.toString(),
                 message = it.message,
