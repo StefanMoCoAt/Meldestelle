@@ -42,6 +42,7 @@ dependencies {
 
     // === Testing ===
     testImplementation(libs.bundles.testing.jvm)
+    testImplementation(libs.bundles.testcontainers) // WICHTIG: Testcontainer Bundle hinzugefügt
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.security.test)
 }
