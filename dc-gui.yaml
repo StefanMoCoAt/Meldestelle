@@ -38,29 +38,29 @@ services:
     profiles: [ "gui", "all" ]
 
   # --- DESKTOP-APP (optional) ---
-  desktop-app:
-    build:
-      context: .
-      dockerfile: config/docker/nginx/desktop-app/Dockerfile
-      args:
-        BUILD_DATE: "${DOCKER_BUILD_DATE}"
-    labels:
-      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
-    container_name: "${PROJECT_NAME:-meldestelle}-desktop-app"
-    restart: no
-    environment:
-      API_BASE_URL: "http://api-gateway:8081"
-    ports:
-      - "${DESKTOP_APP_VNC_PORT:-5901:5901}"
-      - "${DESKTOP_APP_NOVNC_PORT:-6080:6080}"
-    depends_on:
-      api-gateway:
-        condition: "service_started"
-    networks:
-      meldestelle-network:
-        aliases:
-          - "desktop-app"
-    profiles: [ "gui", "all" ]
+#  desktop-app:
+#    build:
+#      context: .
+#      dockerfile: config/docker/nginx/desktop-app/Dockerfile
+#      args:
+#        BUILD_DATE: "${DOCKER_BUILD_DATE}"
+#    labels:
+#      - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
+#    container_name: "${PROJECT_NAME:-meldestelle}-desktop-app"
+#    restart: no
+#    environment:
+#      API_BASE_URL: "http://api-gateway:8081"
+#    ports:
+#      - "${DESKTOP_APP_VNC_PORT:-5901:5901}"
+#      - "${DESKTOP_APP_NOVNC_PORT:-6080:6080}"
+#    depends_on:
+#      api-gateway:
+#        condition: "service_started"
+#    networks:
+#      meldestelle-network:
+#        aliases:
+#          - "desktop-app"
+#    profiles: [ "gui", "all" ]
 
 networks:
   meldestelle-network:

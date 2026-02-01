@@ -45,12 +45,12 @@ Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> 
 
 ---
 
-### PHASE 3: Offline & Sync (IN PROGRESS)
+### PHASE 3: Offline & Sync (ABGESCHLOSSEN)
 *Ziel: Datenkonsistenz auch bei Netzwerk-Verlust.*
 
 #### 🤝 Joint Task Force (Backend & Frontend)
 *   [x] **Sync-Protokoll:** `PingEvent` Contract definiert.
-*   [ ] **Sync-Fix (CRITICAL):** Typ-Mismatch beheben! Backend erwartet `Long` Timestamp, Frontend muss sicherstellen, dass kein String-Cursor gesendet wird.
+*   [x] **Sync-Fix (CRITICAL):** Typ-Mismatch behoben! Backend und Frontend nutzen nun konsistent `since: Long`.
 *   [x] **Web-App Sync:** SQLDelight Integration vorbereitet.
 
 ---
@@ -63,6 +63,5 @@ Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> 
 5.  [x] In Zipkin ist der komplette Request-Trace (Frontend -> Gateway -> Service -> DB) sichtbar.
 
 ## 4. Next Steps (Q1/2026)
-1.  **Sync-Fix:** Typ-Sicherheit zwischen Frontend und Backend herstellen.
-2.  **Entries Service:** Beginn der Implementierung des ersten echten Fach-Services ("Nennungen").
-3.  **System Hardening:** Keycloak Production-Config (kein `start-dev`).
+1.  **Entries Service:** Beginn der Implementierung des ersten echten Fach-Services ("Nennungen").
+2.  **System Hardening:** Keycloak Production-Config (kein `start-dev`).
