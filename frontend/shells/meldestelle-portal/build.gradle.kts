@@ -63,7 +63,7 @@ kotlin {
   sourceSets {
     commonMain.dependencies {
       // Shared modules
-      implementation(projects.frontend.shared)
+      // implementation(projects.frontend.shared) // REMOVED: Shared module deleted
       implementation(projects.frontend.core.domain)
       implementation(projects.frontend.core.designSystem)
       implementation(projects.frontend.core.navigation)

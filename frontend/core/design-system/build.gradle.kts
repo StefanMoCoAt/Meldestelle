@@ -24,8 +24,6 @@ kotlin {
 
   sourceSets {
     commonMain.dependencies {
-      // Shared module dependency
-      implementation(projects.frontend.shared)
 
       // Compose dependencies
       implementation(compose.runtime)

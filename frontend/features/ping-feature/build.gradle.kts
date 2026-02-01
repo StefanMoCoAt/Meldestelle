@@ -44,9 +44,6 @@ kotlin {
       // UI Kit (Design System)
       implementation(projects.frontend.core.designSystem)
 
-      // Shared Konfig & Utilities
-      implementation(projects.frontend.shared)
-
       // Generic Delta-Sync core
       implementation(projects.frontend.core.sync)
 

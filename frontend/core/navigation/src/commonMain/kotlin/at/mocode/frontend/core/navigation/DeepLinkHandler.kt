@@ -28,7 +28,7 @@ class DeepLinkHandler(
   private fun processDeepLink(deepLink: DeepLink): Boolean {
     val route = cleanRoute(deepLink.route)
 
-    // If route requires auth and user is missing → redirect to login
+    // If the route requires auth and the user is missing → redirect to log in
     if (requiresAuth(route)) {
       val user = currentUserProvider.getCurrentUser()
       if (user == null) {

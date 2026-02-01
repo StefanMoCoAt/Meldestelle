@@ -69,50 +69,8 @@ include(":backend:infrastructure:security")
 include(":backend:services:entries:entries-api")
 include(":backend:services:entries:entries-service")
 
-// --- EVENTS (Event Management) ---
-// include(":backend:services:events:events-api")
-// include(":backend:services:events:events-common")
-// include(":backend:services:events:events-domain")
-// include(":backend:services:events:events-infrastructure")
-// include(":backend:services:events:events-service")
-
-// --- HORSES (Horse Management) ---
-// include(":backend:services:horses:horses-api")
-// include(":backend:services:horses:horses-common")
-// include(":backend:services:horses:horses-domain")
-// include(":backend:services:horses:horses-infrastructure")
-// include(":backend:services:horses:horses-service")
-
-// --- MASTERDATA (The Rulebook) ---
-// include(":backend:services:masterdata:masterdata-api")
-// include(":backend:services:masterdata:masterdata-common")
-// include(":backend:services:masterdata:masterdata-domain")
-// include(":backend:services:masterdata:masterdata-infrastructure")
-// include(":backend:services:masterdata:masterdata-service")
-
-// --- MEMBERS (Member Management) ---
-// include(":backend:services:members:members-api")
-// include(":backend:services:members:members-common")
-// include(":backend:services:members:members-domain")
-// include(":backend:services:members:members-infrastructure")
-// include(":backend:services:members:members-service")
-
 // --- PING (Ping Service) ---
 include(":backend:services:ping:ping-service")
-
-// --- REGISTRY (Single Source of Truth) ---
-// Verwaltet Personen, Pferde & Vereine (ZNS Importe).
-// Ersetzt das alte 'members' und 'horses' Modul.
-include(":backend:services:registry:oeps-importer") // NEU: Der Gatekeeper für ZNS Daten
-include(":backend:services:registry:registry-api")
-include(":backend:services:registry:registry-domain")
-include(":backend:services:registry:registry-service")
-
-// --- RESULTS (Ergebnisse) ---
-include(":backend:services:results:results-service")
-
-// --- SCHEDULING (Zeitplan/Abteilungen) ---
-include(":backend:services:scheduling:scheduling-service")
 
 // ==========================================================================
 // CORE
@@ -141,9 +99,6 @@ include(":frontend:core:sync")
 // --- FEATURES ---
 // include(":frontend:features:members-feature")
 include(":frontend:features:ping-feature")
-
-// --- SHARED
-include(":frontend:shared")
 
 // --- SHELLS ---
 include(":frontend:shells:meldestelle-portal")

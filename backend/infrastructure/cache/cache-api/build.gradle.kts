@@ -1,5 +1,5 @@
 // Dieses Modul definiert die provider-agnostische Caching-API.
-// Es enthält nur Interfaces (z.B. `CacheService`) und Datenmodelle,
+// Es enthält nur Interfaces (z. B. `CacheService`) und Datenmodelle,
 // aber keine konkrete Implementierung.
 plugins {
     alias(libs.plugins.kotlinJvm)

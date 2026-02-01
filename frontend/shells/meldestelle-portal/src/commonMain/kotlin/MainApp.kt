@@ -6,7 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
-import at.mocode.clients.shared.navigation.AppScreen
+import at.mocode.frontend.core.navigation.AppScreen
 import at.mocode.frontend.core.auth.data.AuthTokenManager
 import at.mocode.frontend.core.auth.presentation.LoginScreen
 import at.mocode.frontend.core.auth.presentation.LoginViewModel
@@ -14,6 +14,7 @@ import at.mocode.ping.feature.presentation.PingScreen
 import at.mocode.ping.feature.presentation.PingViewModel
 import at.mocode.frontend.core.designsystem.components.AppFooter
 import at.mocode.frontend.core.designsystem.theme.AppTheme
+import navigation.StateNavigationPort
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -25,7 +26,9 @@ fun MainApp() {
       modifier = Modifier.fillMaxSize(),
       color = MaterialTheme.colorScheme.background
     ) {
-      var currentScreen by remember { mutableStateOf<AppScreen>(AppScreen.Landing) }
+      // Resolve NavigationPort to observe state changes
+      val navigationPort = koinInject<StateNavigationPort>()
+      val currentScreen by navigationPort.currentScreen.collectAsState()
 
       // Resolve AuthTokenManager from Koin
       val authTokenManager = koinInject<AuthTokenManager>()
@@ -36,31 +39,31 @@ fun MainApp() {
 
       when (currentScreen) {
         is AppScreen.Landing -> LandingScreen(
-          onPrimaryCta = { currentScreen = AppScreen.Login },
-          onSecondary = { currentScreen = AppScreen.Home }
+          onPrimaryCta = { navigationPort.navigateToScreen(AppScreen.Login) },
+          onSecondary = { navigationPort.navigateToScreen(AppScreen.Home) }
         )
 
         is AppScreen.Home -> WelcomeScreen(
           authTokenManager = authTokenManager,
-          onOpenPing = { currentScreen = AppScreen.Ping },
-          onOpenLogin = { currentScreen = AppScreen.Login },
-          onOpenProfile = { currentScreen = AppScreen.Profile }
+          onOpenPing = { navigationPort.navigateToScreen(AppScreen.Ping) },
+          onOpenLogin = { navigationPort.navigateToScreen(AppScreen.Login) },
+          onOpenProfile = { navigationPort.navigateToScreen(AppScreen.Profile) }
         )
 
         is AppScreen.Login -> LoginScreen(
           viewModel = loginViewModel,
-          onLoginSuccess = { currentScreen = AppScreen.Profile },
-          onBack = { currentScreen = AppScreen.Home }
+          onLoginSuccess = { navigationPort.navigateToScreen(AppScreen.Profile) },
+          onBack = { navigationPort.navigateToScreen(AppScreen.Home) }
         )
 
         is AppScreen.Ping -> PingScreen(
           viewModel = pingViewModel,
-          onBack = { currentScreen = AppScreen.Home } // Navigate back to Home
+          onBack = { navigationPort.navigateToScreen(AppScreen.Home) } // Navigate back to Home
         )
 
         is AppScreen.Profile -> AuthStatusScreen(
           authTokenManager = authTokenManager,
-          onBackToHome = { currentScreen = AppScreen.Home }
+          onBackToHome = { navigationPort.navigateToScreen(AppScreen.Home) }
         )
 
         else -> {}

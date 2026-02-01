@@ -1,11 +1,12 @@
 package at.mocode.frontend.core.auth.data
 
-import at.mocode.shared.core.AppConstants
+import at.mocode.frontend.core.domain.AppConstants
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -68,7 +69,7 @@ class AuthApiClient(
         val kc = response.body<KeycloakTokenResponse>()
         LoginResponse(
           success = true,
-          token = kc.access_token,
+          token = kc.accessToken,
           message = null,
           userId = null,
           username = username
@@ -112,7 +113,7 @@ class AuthApiClient(
         val kc = response.body<KeycloakTokenResponse>()
         LoginResponse(
           success = true,
-          token = kc.access_token,
+          token = kc.accessToken,
           message = null
         )
       } else {
@@ -132,13 +133,13 @@ class AuthApiClient(
 
   @Serializable
   private data class KeycloakTokenResponse(
-    val access_token: String,
-    val expires_in: Long? = null,
-    val refresh_expires_in: Long? = null,
-    val refresh_token: String? = null,
-    val token_type: String? = null,
-    val not_before_policy: Long? = null,
-    val session_state: String? = null,
-    val scope: String? = null
+    @SerialName("access_token") val accessToken: String,
+    @SerialName("expires_in") val expiresIn: Long? = null,
+    @SerialName("refresh_expires_in") val refreshExpiresIn: Long? = null,
+    @SerialName("refresh_token") val refreshToken: String? = null,
+    @SerialName("token_type") val tokenType: String? = null,
+    @SerialName("not_before_policy") val notBeforePolicy: Long? = null,
+    @SerialName("session_state") val sessionState: String? = null,
+    @SerialName("scope") val scope: String? = null
   )
 }

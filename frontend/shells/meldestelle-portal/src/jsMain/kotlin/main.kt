@@ -7,12 +7,12 @@ import at.mocode.frontend.core.localdb.localDbModule
 import at.mocode.frontend.core.network.networkModule
 import at.mocode.frontend.core.sync.di.syncModule
 import at.mocode.ping.feature.di.pingFeatureModule
-import at.mocode.shared.di.initKoin
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import navigation.navigationModule
 import org.koin.core.context.GlobalContext
+import org.koin.core.context.startKoin
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 import org.w3c.dom.HTMLElement
@@ -23,7 +23,7 @@ fun main() {
 
   // 1. Initialize DI (Koin) with static modules
   try {
-    initKoin { modules(networkModule, localDbModule, syncModule, pingFeatureModule, authModule, navigationModule) }
+    startKoin { modules(networkModule, localDbModule, syncModule, pingFeatureModule, authModule, navigationModule) }
     console.log("[WebApp] Koin initialized with static modules")
   } catch (e: dynamic) {
     console.warn("[WebApp] Koin initialization warning:", e)

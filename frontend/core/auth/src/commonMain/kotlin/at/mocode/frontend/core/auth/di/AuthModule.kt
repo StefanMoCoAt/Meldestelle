@@ -4,7 +4,7 @@ import at.mocode.frontend.core.auth.data.AuthApiClient
 import at.mocode.frontend.core.auth.data.AuthTokenManager
 import at.mocode.frontend.core.auth.presentation.LoginViewModel
 import at.mocode.frontend.core.network.TokenProvider
-import at.mocode.shared.core.AppConstants
+import at.mocode.frontend.core.domain.AppConstants
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 

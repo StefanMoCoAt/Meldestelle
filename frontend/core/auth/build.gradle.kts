@@ -26,11 +26,11 @@ kotlin {
       // UI Kit (Design System)
       implementation(projects.frontend.core.designSystem)
 
-      // Shared Konfig & Utilities
-      implementation(projects.frontend.shared)
-
       // Network core (provides apiClient + TokenProvider interface)
       implementation(projects.frontend.core.network)
+
+      // Domain core (provides AppConstants)
+      implementation(projects.frontend.core.domain)
 
       // Compose dependencies
       implementation(compose.runtime)
