@@ -9,6 +9,7 @@ import io.ktor.http.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// Force re-compile trigger for a Docker build
 @Serializable
 data class LoginResponse(
   val success: Boolean,

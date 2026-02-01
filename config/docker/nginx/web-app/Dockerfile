@@ -1,26 +1,20 @@
 # syntax=docker/dockerfile:1.8
 # ===================================================================
 # Multi-Stage Dockerfile for Meldestelle Web-App (Kotlin/JS)
-# Version: 2.2.2 - Added 'contracts' to build context
+# Version: 2.3.0 - Optimized for Production Build
 # ===================================================================
 
 # === GLOBAL ARGS ===
-ARG GRADLE_VERSION
-ARG JAVA_VERSION
-ARG NODE_VERSION
-ARG NGINX_IMAGE_TAG
-ARG WEB_BUILD_PROFILE
-ARG VERSION
+ARG GRADLE_VERSION=8.5
+ARG JAVA_VERSION=21
+ARG NGINX_IMAGE_TAG=1.25-alpine
+ARG VERSION=1.0.0-SNAPSHOT
 ARG BUILD_DATE
 
 # ===================================================================
-# Stage 1: Build Stage (Debian-based for Node.js compatibility)
+# Stage 1: Build Stage
 # ===================================================================
 FROM gradle:${GRADLE_VERSION}-jdk${JAVA_VERSION} AS builder
-
-ARG WEB_BUILD_PROFILE
-ARG VERSION
-ARG BUILD_DATE
 
 LABEL stage=builder
 WORKDIR /workspace
@@ -29,10 +23,9 @@ WORKDIR /workspace
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
                  -Dorg.gradle.daemon=false \
                  -Dorg.gradle.parallel=true \
-                 -Dorg.gradle.workers.max=2 \
-                 -Dorg.gradle.jvmargs=-Xmx2g \
-                 -XX:+UseParallelGC \
-                 -XX:MaxMetaspaceSize=512m"
+                 -Dorg.gradle.workers.max=4 \
+                 -Dorg.gradle.jvmargs=-Xmx3g \
+                 -XX:+UseParallelGC"
 ENV GRADLE_USER_HOME=/home/gradle/.gradle
 
 # 2. Copy Build Configs
@@ -43,45 +36,33 @@ COPY build.gradle.kts ./
 RUN chmod +x gradlew
 
 # 3. Copy Sources (Monorepo Structure)
+# We copy only what's needed to invalidate cache less frequently
 COPY platform/ platform/
 COPY core/ core/
 COPY backend/ backend/
 COPY frontend/ frontend/
 COPY config/ config/
-# FIX: 'contracts' is required by Gradle during configuration phase
 COPY contracts/ contracts/
 
-# FIX: Create dummy docs dir to satisfy Gradle configuration phase
+# Create dummy docs dir to satisfy Gradle configuration phase if needed
 RUN mkdir -p docs
 
-# 4. Resolve Dependencies
+# 4. Build Web App (Production Only)
+# We explicitly build the production distribution for optimized artifacts.
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
-    ./gradlew :frontend:shells:meldestelle-portal:dependencies --no-daemon
+    ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDistribution \
+    -Pproduction=true \
+    --no-daemon \
+    --stacktrace
 
-# 5. Build Web App (robust mit Fallback auf statische Downloads)
-RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
-    --mount=type=cache,target=/home/gradle/.gradle/wrapper \
-    set -eu; \
-    echo "[WEB-BUILD] Profile=$WEB_BUILD_PROFILE"; \
-    BUILD_OK=true; \
-    if [ "$WEB_BUILD_PROFILE" = "prod" ]; then \
-        echo "Building for PRODUCTION..."; \
-        ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDistribution -Pproduction=true --no-daemon || BUILD_OK=false; \
-    else \
-        echo "Building for DEVELOPMENT..."; \
-        ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDevelopmentExecutable --no-daemon || BUILD_OK=false; \
-    fi; \
-    mkdir -p /app/dist; \
-    if [ "$BUILD_OK" = "true" ] && [ -d frontend/shells/meldestelle-portal/build/dist/js/productionExecutable ]; then \
+# 5. Prepare Dist
+# Verify build output exists and move to a clean directory
+RUN mkdir -p /app/dist && \
+    if [ -d "frontend/shells/meldestelle-portal/build/dist/js/productionExecutable" ]; then \
         cp -r frontend/shells/meldestelle-portal/build/dist/js/productionExecutable/* /app/dist/; \
-        echo "[WEB-BUILD] Copied productionExecutable"; \
-    elif [ "$BUILD_OK" = "true" ] && [ -d frontend/shells/meldestelle-portal/build/dist/js/developmentExecutable ]; then \
-        cp -r frontend/shells/meldestelle-portal/build/dist/js/developmentExecutable/* /app/dist/; \
-        echo "[WEB-BUILD] Copied developmentExecutable"; \
     else \
-        echo "[WEB-BUILD] Build failed or dist not found — using fallback downloads"; \
-        mkdir -p /app/dist && cp -r config/docker/nginx/web-app/downloads/* /app/dist/; \
+        echo "ERROR: Build artifact not found at expected path!" && exit 1; \
     fi
 
 # ===================================================================
@@ -91,7 +72,6 @@ FROM nginx:${NGINX_IMAGE_TAG}
 
 ARG VERSION
 ARG BUILD_DATE
-ARG JAVA_VERSION
 
 # Metadata
 LABEL service="web-app" \
