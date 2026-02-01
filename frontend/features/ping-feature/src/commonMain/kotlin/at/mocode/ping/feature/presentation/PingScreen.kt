@@ -19,8 +19,6 @@ import at.mocode.frontend.core.designsystem.components.DashboardCard
 import at.mocode.frontend.core.designsystem.components.DenseButton
 import at.mocode.frontend.core.designsystem.theme.Dimens
 
-// --- Refactored PingScreen using Design System ---
-
 @Composable
 fun PingScreen(
   viewModel: PingViewModel,

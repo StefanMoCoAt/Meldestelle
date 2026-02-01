@@ -26,9 +26,9 @@ actual object PlatformConfig {
     }
 
     if (!origin.isNullOrBlank()) {
-        val resolvedUrl = origin.removeSuffix("/") + "/api"
-        console.log("[PlatformConfig] Resolved API_BASE_URL from window.location.origin: $resolvedUrl")
-        return resolvedUrl
+      val resolvedUrl = origin.removeSuffix("/") + "/api"
+      console.log("[PlatformConfig] Resolved API_BASE_URL from window.location.origin: $resolvedUrl")
+      return resolvedUrl
     }
 
     // 3) Fallback to the local gateway directly (e.g. for tests without window)

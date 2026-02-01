@@ -10,7 +10,8 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 
 /**
- * PingApi implementation that uses a provided HttpClient (e.g., DI-provided "apiClient").
+ * PingApi-Implementierung, die einen bereitgestellten HttpClient verwendet (z. B. den per Dependency Injection
+ * bereitgestellten "apiClient").
  */
 class PingApiKoinClient(private val client: HttpClient) : PingApi {
 

@@ -10,7 +10,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.ExperimentalTime
 
 /**
- * Client-side permission enumeration that mirrors server-side BerechtigungE
+ * Client-side Berechtigungsaufzählung, welche die serverseitige BerechtigungE widerspiegelt
  */
 @Serializable
 enum class Permission {
@@ -66,9 +66,9 @@ data class AuthState(
 /**
  * Secure in-memory JWT token manager
  *
- * For web clients, storing tokens in memory is the most secure approach
- * to prevent XSS attacks. The token is lost when the browser tab is closed
- * or refreshed, requiring re-authentication.
+ * Für Webclients ist das Speichern von Tokens im Arbeitsspeicher der sicherste Ansatz,
+ * um XSS-Angriffe zu verhindern. Das Token geht beim Schließen des Browser-Tabs verloren,
+ * was eine erneute Authentifizierung erforderlich macht.
  */
 @Suppress("unused")
 class AuthTokenManager {
@@ -141,38 +141,38 @@ class AuthTokenManager {
   fun getUserId(): String? = tokenPayload?.sub
 
   /**
-   * Get username from token
+   * Get username from a token
    */
   fun getUsername(): String? = tokenPayload?.username
 
   /**
-   * Get current user permissions
+   * Get current user permissions (Berechtigungen)
    */
   fun getPermissions(): List<Permission> = _authState.value.permissions
 
   /**
-   * Check if user has a specific permission
+   * Check if the user has a specific permission
    */
   fun hasPermission(permission: Permission): Boolean {
     return _authState.value.permissions.contains(permission)
   }
 
   /**
-   * Check if user has any of the specified permissions
+   * Check if the user has any of the specified permissions
    */
   fun hasAnyPermission(vararg permissions: Permission): Boolean {
     return permissions.any { _authState.value.permissions.contains(it) }
   }
 
   /**
-   * Check if user has all of the specified permissions
+   * Check if the user has all the specified permissions
    */
   fun hasAllPermissions(vararg permissions: Permission): Boolean {
     return permissions.all { _authState.value.permissions.contains(it) }
   }
 
   /**
-   * Check if user can perform read operations
+   * Check if the user can perform read operations
    */
   fun canRead(): Boolean {
     return hasAnyPermission(
@@ -184,7 +184,7 @@ class AuthTokenManager {
   }
 
   /**
-   * Check if user can perform create operations
+   * Check if the user can perform create operations
    */
   fun canCreate(): Boolean {
     return hasAnyPermission(
@@ -196,7 +196,7 @@ class AuthTokenManager {
   }
 
   /**
-   * Check if user can perform update operations
+   * Check if the user can perform update operations
    */
   fun canUpdate(): Boolean {
     return hasAnyPermission(
@@ -208,7 +208,7 @@ class AuthTokenManager {
   }
 
   /**
-   * Check if user can perform delete operations (admin-level)
+   * Check if the user can perform delete operations (admin-level)
    */
   fun canDelete(): Boolean {
     return hasAnyPermission(
@@ -220,12 +220,12 @@ class AuthTokenManager {
   }
 
   /**
-   * Check if user is admin (has delete permissions)
+   * Check if the user is admin (has deleted permissions)
    */
   fun isAdmin(): Boolean = canDelete()
 
   /**
-   * Check if token expires within specified minutes
+   * Check if the token expires within specified minutes
    */
   @OptIn(ExperimentalTime::class)
   fun isTokenExpiringSoon(minutesThreshold: Int = 5): Boolean {
@@ -238,8 +238,8 @@ class AuthTokenManager {
   }
 
   /**
-   * Parse JWT payload for basic validation and user info extraction
-   * Note: This is for client-side info extraction only, not security validation
+   * JWT-Payload für grundlegende Validierung und Extraktion von Benutzerinformationen analysieren
+   * Hinweis: Dies dient ausschließlich der clientseitigen Informationsextraktion, nicht der Sicherheitsvalidierung.
    */
   @OptIn(ExperimentalEncodingApi::class)
   private fun parseJwtPayload(token: String): JwtPayload? {
@@ -250,7 +250,7 @@ class AuthTokenManager {
       // Decode the payload (second part)
       val payloadJson = Base64.decode(parts[1]).decodeToString()
 
-      // First try to parse with standard approach
+      // First, try to parse with a standard approach
       val basicPayload = try {
         Json.decodeFromString<JwtPayload>(payloadJson)
       } catch (e: Exception) {
@@ -263,7 +263,7 @@ class AuthTokenManager {
         return basicPayload
       }
 
-      // Otherwise, extract permissions manually from JSON string
+      // Otherwise, extract permissions manually from a JSON string
       val permissions = extractPermissionsFromJson(payloadJson)
 
       // Return payload with manually extracted permissions
@@ -282,16 +282,16 @@ class AuthTokenManager {
   }
 
   /**
-   * Extract permissions array from JSON string using simple string parsing
+   * Extract permissions array from a JSON string using simple string parsing
    */
   private fun extractPermissionsFromJson(jsonString: String): List<String>? {
     return try {
       // Simple regex to find a permissions array
-      val permissionsRegex = """"permissions":\s*\[(.*?)\]""".toRegex()
+      val permissionsRegex = """"permissions":\s*\[(.*?)]""".toRegex()
       val match = permissionsRegex.find(jsonString)
 
-      match?.let {
-        val permissionsContent = it.groupValues[1]
+      match?.let { matchResult ->
+        val permissionsContent = matchResult.groupValues[1]
         if (permissionsContent.isBlank()) return emptyList()
 
         // Extract individual permission strings

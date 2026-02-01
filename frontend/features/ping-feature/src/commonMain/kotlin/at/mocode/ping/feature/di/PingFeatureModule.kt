@@ -11,19 +11,18 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /**
- * Consolidated Koin module for the Ping Feature (Clean Architecture).
- * Replaces the old 'clients.pingfeature' module.
+ * Konsolidiertes Koin-Modul für die Ping-Funktion (Clean Architecture).
  */
 val pingFeatureModule = module {
   // 1. API Client (Data Layer)
-  // Uses the shared authenticated 'apiClient' from Core Network
+  // Verwendet den gemeinsam genutzten, authentifizierten „apiClient“ aus dem Kernnetzwerk.
   single<PingApi> { PingApiKoinClient(get(named("apiClient"))) }
 
   // 2. Repository (Data Layer)
   single { PingEventRepositoryImpl(get<AppDatabase>()) }
 
   // 3. Domain Service (Domain Layer)
-  // Wraps SyncManager and Repository to decouple ViewModel from SyncManager implementation details
+  // Wraps SyncManager und Repository, um ViewModel von den Implementierungsdetails von SyncManager zu entkoppeln.
   single<PingSyncService> {
     PingSyncServiceImpl(
       syncManager = get(),
@@ -32,7 +31,7 @@ val pingFeatureModule = module {
   }
 
   // 4. ViewModel (Presentation Layer)
-  // Injects API and Domain Service
+  // Injects API und Domain Service
   factory {
     PingViewModel(
       apiClient = get(),

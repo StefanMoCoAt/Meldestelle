@@ -5,21 +5,24 @@ import at.mocode.frontend.core.sync.SyncableRepository
 import at.mocode.ping.api.PingEvent
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 
-// ARCH-BLUEPRINT: This repository implements the generic SyncableRepository
-// for a specific entity, bridging the gap between the sync core and the local database.
+/**
+ ** ARCH-BLUEPRINT: Dieses Repository implementiert das generische Syncable Repository
+ ** für eine bestimmte Entität und überbrückt so die Lücke zwischen dem Sync-Core und der
+ ** lokalen Datenbank.
+ */
 class PingEventRepositoryImpl(
   private val db: AppDatabase
 ) : SyncableRepository<PingEvent> {
 
-  // The `since` parameter for our sync is the ID of the last event, not a timestamp.
+  // Der `since`-Parameter für unsere Synchronisierung ist die ID des letzten Ereignisses, kein Zeitstempel.
   override suspend fun getLatestSince(): String? {
-      println("PingEventRepositoryImpl: getLatestSince called - using corrected async implementation")
-      // FIX: Use .awaitAsOneOrNull() for async drivers instead of the blocking .executeAsOneOrNull()
-      return db.appDatabaseQueries.selectLatestPingEventId().awaitAsOneOrNull()
+    println("PingEventRepositoryImpl: getLatestSince called - using corrected async implementation")
+    // FIX: Verwenden Sie .awaitAsOneOrNull() für asynchrone Treiber anstelle des blockierenden .executeAsOneOrNull().
+    return db.appDatabaseQueries.selectLatestPingEventId().awaitAsOneOrNull()
   }
 
   override suspend fun upsert(items: List<PingEvent>) {
-    // Always perform bulk operations within a transaction.
+    // Führen Sie Massenoperationen immer innerhalb einer Transaktion durch.
     db.transaction {
       items.forEach { event ->
         db.appDatabaseQueries.upsertPingEvent(

@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 // --- 1. Farben (Palette) ---
-// Wir definieren eine professionelle, kontrastreiche Palette.
+// wir definieren eine professionelle, kontrastreiche Palette.
 // Blau steht für Aktion/Information, Grau für Struktur.
 
 private val LightColorScheme = lightColorScheme(

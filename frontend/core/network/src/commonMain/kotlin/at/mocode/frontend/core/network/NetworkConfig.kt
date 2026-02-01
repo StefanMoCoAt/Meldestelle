@@ -3,8 +3,8 @@ package at.mocode.frontend.core.network
 import kotlin.native.concurrent.ThreadLocal
 
 /**
- * Network configuration with sensible defaults and environment overrides.
- * Defaults to the local API Gateway on port 8081.
+ * Netzwerkkonfiguration mit sinnvollen Standardeinstellungen und Umgebungseinstellungen zum Überschreiben.
+ * Standardmäßig wird das lokale API-Gateway auf Port 8081 verwendet.
  */
 @ThreadLocal
 object NetworkConfig {

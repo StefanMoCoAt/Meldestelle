@@ -132,7 +132,7 @@ val networkModule = module {
           // [baseClient] REQUEST: .../token
           // Access to fetch at ... blocked by CORS policy
 
-          // This confirms it is a CORS issue on the Keycloak server side, or the browser side.
+          // This confirms it is a CORS issue on the Keycloak server side or the browser side.
           // The JS error `TypeError` is GONE in the latest log!
 
           // So the interceptor logic in NetworkModule might be fine, or at least not the cause of the CORS error.
@@ -140,7 +140,7 @@ val networkModule = module {
 
           // We will use a safe lazy resolution pattern.
         } catch (_: Exception) {
-           // ignore
+          // ignore
         }
         execute(request)
       }
@@ -150,19 +150,19 @@ val networkModule = module {
 
       client.plugin(HttpSend).intercept { request ->
         try {
-            // Attempt to resolve TokenProvider from the capturing scope
-            val tokenProvider = try {
-                koinScope.get<TokenProvider>()
-            } catch (_: Exception) {
-                null
-            }
+          // Attempt to resolve TokenProvider from the capturing scope
+          val tokenProvider = try {
+            koinScope.get<TokenProvider>()
+          } catch (_: Exception) {
+            null
+          }
 
-            val token = tokenProvider?.getAccessToken()
-            if (token != null) {
-                request.header("Authorization", "Bearer $token")
-            }
+          val token = tokenProvider?.getAccessToken()
+          if (token != null) {
+            request.header("Authorization", "Bearer $token")
+          }
         } catch (e: Exception) {
-            println("[apiClient] Error injecting auth header: $e")
+          println("[apiClient] Error injecting auth header: $e")
         }
         execute(request)
       }

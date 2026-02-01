@@ -35,7 +35,7 @@ fun AppHeader(
 
       // Authentication buttons
       if (isAuthenticated) {
-        // Show username with admin indicator if user has delete permissions
+        // Show username with admin indicator if user has deleted permissions
         username?.let { user ->
           val isAdmin = userPermissions.any { it.contains("DELETE") }
           Text(
@@ -55,7 +55,7 @@ fun AppHeader(
           }
         }
       } else {
-        // Show login button
+        // Show the login button
         onNavigateToLogin?.let { loginAction ->
           TextButton(
             onClick = loginAction

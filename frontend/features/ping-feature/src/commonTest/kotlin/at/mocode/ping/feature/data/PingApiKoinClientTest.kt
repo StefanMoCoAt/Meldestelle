@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 
 class PingApiKoinClientTest {
 
-  // Helper to create a testable client using the new DI-friendly implementation
+  // Hilfe zur Erstellung eines testbaren Clients mithilfe der neuen DI-freundlichen Implementierung
   private fun createTestClient(mockEngine: MockEngine): PingApiKoinClient {
     val client = HttpClient(mockEngine) {
       install(ContentNegotiation) {

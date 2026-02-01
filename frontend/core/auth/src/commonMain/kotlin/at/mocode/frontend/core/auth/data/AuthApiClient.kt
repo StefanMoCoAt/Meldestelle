@@ -44,13 +44,13 @@ class AuthApiClient(
           append("grant_type", "password")
           append("client_id", clientId)
 
-          // IMPORTANT: Only send client_secret if it's NOT a public client (like 'web-app')
-          // Keycloak rejects requests from public clients that contain a client_secret.
-          // We check if the client ID suggests a public client or if secret is explicitly provided.
-          // For now, we rely on the fact that 'web-app' is public and should NOT have a secret sent.
+          // WICHTIG: Senden Sie client_secret nur, wenn es sich NICHT um einen öffentlichen Client (wie 'web-app') handelt.
+          // Keycloak lehnt Anfragen von öffentlichen Clients ab, die client_secret enthalten.
+          // Wir prüfen, ob die Client-ID auf einen öffentlichen Client hindeutet oder ob ein Secret explizit angegeben wurde.
+          // Aktuell gehen wir davon aus, dass 'web-app' öffentlich ist und daher kein Secret gesendet werden sollte.
 
-          // Logic: If clientId is 'web-app', we force ignore the secret, or we rely on caller to pass null.
-          // Since AppConstants might still have the secret for 'postman-client', we need to be careful.
+          // Logik: Wenn clientId 'web-app' ist, ignorieren wir das Geheimnis oder verlassen uns darauf, dass der Aufrufer null übergibt.
+          // Da AppConstants möglicherweise noch das Geheimnis für 'postman-client' enthält, ist Vorsicht geboten.
 
           if (!clientSecret.isNullOrBlank() && clientId != "web-app") {
             append("client_secret", clientSecret)

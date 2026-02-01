@@ -5,14 +5,14 @@ import at.mocode.frontend.core.sync.SyncableRepository
 import at.mocode.ping.api.PingEvent
 
 /**
- * Interface for the Ping Sync Service to allow easier testing and decoupling.
+ * Interface für den Ping-Sync-Dienst zur einfacheren Prüfung und Entkopplung.
  */
 interface PingSyncService {
   suspend fun syncPings()
 }
 
 /**
- * Implementation of PingSyncService using the generic SyncManager.
+ * Implementierung des PingSyncService unter Verwendung des generischen SyncManager.
  */
 class PingSyncServiceImpl(
   private val syncManager: SyncManager,

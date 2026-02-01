@@ -9,7 +9,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 /**
- * Koin module for core-auth: provides AuthTokenManager and binds it as TokenProvider for apiClient.
+ * Koin-Modul für core-auth: stellt AuthTokenManager bereit und bindet ihn als TokenProvider für apiClient.
  */
 val authModule = module {
   // Single in-memory token manager
@@ -26,9 +26,9 @@ val authModule = module {
   // LoginViewModel
   factory { LoginViewModel(get(), get(), get(named("apiClient"))) }
 
-  // Bridge to core network TokenProvider without adding a hard dependency there
+  // Brücke zum TokenProvider des Kernnetzwerks, ohne dort eine harte Abhängigkeit hinzuzufügen
   single<TokenProvider> {
-    // We need to capture the AuthTokenManager instance to avoid issues with 'this' context in JS
+    // Wir müssen die AuthTokenManager-Instanz erfassen, um Probleme mit dem 'this'-Kontext in JavaScript zu vermeiden.
     val tokenManager = get<AuthTokenManager>()
     object : TokenProvider {
       override fun getAccessToken(): String? {
