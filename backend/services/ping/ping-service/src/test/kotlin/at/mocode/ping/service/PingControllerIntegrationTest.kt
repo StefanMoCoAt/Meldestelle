@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.test.context.ActiveProfiles
@@ -42,7 +42,7 @@ class PingControllerIntegrationTest {
     @Qualifier("pingUseCaseIntegrationMock")
     private lateinit var pingUseCase: PingUseCase
 
-    @Configuration
+    @TestConfiguration
     class PingControllerIntegrationTestConfig {
         @Bean("pingUseCaseIntegrationMock")
         @Primary
