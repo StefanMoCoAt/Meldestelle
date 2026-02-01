@@ -25,7 +25,7 @@ actual class DatabaseDriverFactory {
           setVersion(driver, schemaVersion)
           console.log("Database Schema created and version set to $schemaVersion")
         } catch (e: Throwable) {
-          // If tables already exist but version was 0 (e.g. previous broken run), we might get here.
+          // If tables already exist but a version was 0 (e.g., previous broken run), we might get here.
           val msg = e.message ?: ""
           if (msg.contains("already exists", ignoreCase = true)) {
             console.warn("Tables already exist but version was 0. Assuming DB is initialized. Setting version to $schemaVersion.")
@@ -58,7 +58,7 @@ actual class DatabaseDriverFactory {
     var cursorRef: SqlCursor? = null
 
     // executeQuery returns QueryResult<Boolean> because mapper returns QueryResult<Boolean>
-    val hasNext = driver.executeQuery<Boolean>(
+    val hasNext = driver.executeQuery(
       identifier = null,
       sql = "PRAGMA user_version;",
       mapper = { cursor ->

@@ -12,9 +12,7 @@ import io.ktor.client.request.parameter
 interface SyncableRepository<T : Syncable> {
   /**
    * Cursor für Delta-Sync.
-   *
    * Konvention: UUIDv7 als String (Backend kann `>` vergleichen) oder ein kompatibler Cursor.
-   *
    * @return letzter bekannter Cursor lokal oder `null`, wenn noch keine Daten existieren.
    */
   suspend fun getLatestSince(): String?

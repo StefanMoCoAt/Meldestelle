@@ -16,15 +16,15 @@ actual class DatabaseDriverFactory {
 
     // Schema creation/migration needs to be handled carefully.
     // For now, we just create it if it doesn't exist.
-    // In a real app, we'd check version and migrate.
-    // Since generateAsync=true, the Schema.create signature might be suspend or return AsyncResult.
+    // In a real app, we'd check the version and migrate.
+    // Since generateAsync=true, the Schema.create signature might be suspended or return AsyncResult.
     // However, JdbcSqliteDriver is synchronous. We might need to wrap or await.
-    // But wait! Schema.create(driver) returns void or Unit usually.
+    // But wait! Schema.create(driver) usually returns void or Unit.
     // Let's check the generated code later. For now, we assume standard behavior.
 
     try {
       AppDatabase.Schema.create(driver).await()
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       // Schema might already exist.
       // SQLDelight doesn't have "createIfNotExists" built-in easily without version check.
       // We'll leave this simple for now and refine with proper migration logic later.
