@@ -2,7 +2,6 @@ package at.mocode.ping.infrastructure.persistence
 
 import at.mocode.ping.domain.Ping
 import at.mocode.ping.domain.PingRepository
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Repository
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -12,7 +11,8 @@ import java.time.Instant
 
 @OptIn(ExperimentalUuidApi::class)
 @Repository
-@Profile("!test") // Nicht im Test-Profil laden, damit wir Mocks nutzen können
+// @Profile("!test") entfernt, damit Integrationstests den echten Adapter nutzen können.
+// In Unit-Tests wird er durch Mocks (@MockBean oder @TestConfiguration) ersetzt.
 class PingRepositoryAdapter(
     private val jpaRepository: SpringDataPingRepository
 ) : PingRepository {
