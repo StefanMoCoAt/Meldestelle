@@ -33,20 +33,23 @@ services:
         aliases:
           - "postgres"
 
-  # --- CACHE: Redis ---
+  # --- CACHE: Valkey (formerly Redis) ---
   redis:
-    image: "${REDIS_IMAGE:-redis:7.4-alpine}"
+    # Valkey 9.0 (User Request)
+    image: "${VALKEY_IMAGE:-valkey/valkey:9.0}"
     container_name: "${PROJECT_NAME:-meldestelle}-redis"
     restart: no
     ports:
       - "${REDIS_PORT:-6379:6379}"
     volumes:
       - "redis-data:/data"
-      - "./config/docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:Z"
+      # Wir nutzen weiterhin die redis.conf, da Valkey kompatibel ist
+      - "./config/docker/redis/redis.conf:/etc/valkey/valkey.conf:Z"
     profiles: [ "infra", "all" ]
-    command: [ "sh", "-lc", "exec redis-server /usr/local/etc/redis/redis.conf --protected-mode no ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}" ]
+    # Anpassung der Binaries auf valkey-server und valkey-cli
+    command: [ "sh", "-lc", "exec valkey-server /etc/valkey/valkey.conf --protected-mode no ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}" ]
     healthcheck:
-      test: [ "CMD-SHELL", "[ -z \"$REDIS_PASSWORD\" ] && redis-cli ping | grep PONG || redis-cli -a \"$REDIS_PASSWORD\" ping | grep PONG" ]
+      test: [ "CMD-SHELL", "[ -z \"$REDIS_PASSWORD\" ] && valkey-cli ping | grep PONG || valkey-cli -a \"$REDIS_PASSWORD\" ping | grep PONG" ]
       interval: "5s"
       timeout: "5s"
       retries: "3"
@@ -54,6 +57,7 @@ services:
       meldestelle-network:
         aliases:
           - "redis"
+          - "valkey"
 
   # --- SERVICE DISCOVERY: Consul ---
   consul:
