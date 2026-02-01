@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1.8
 # ===================================================================
 # Multi-Stage Dockerfile for Meldestelle Web-App (Kotlin/JS)
-# Version: 2.3.0 - Optimized for Production Build
+# Version: 2.3.1 - Optimized for Production Build (No Source Maps)
 # ===================================================================
 
 # === GLOBAL ARGS ===
-ARG GRADLE_VERSION=8.5
-ARG JAVA_VERSION=21
-ARG NGINX_IMAGE_TAG=1.25-alpine
+ARG GRADLE_VERSION=9.2.1
+ARG JAVA_VERSION=25
+ARG NGINX_IMAGE_TAG=1.28-alpine
 ARG VERSION=1.0.0-SNAPSHOT
 ARG BUILD_DATE
 
@@ -49,10 +49,12 @@ RUN mkdir -p docs
 
 # 4. Build Web App (Production Only)
 # We explicitly build the production distribution for optimized artifacts.
+# Added -PnoSourceMaps=true to disable source maps and speed up build/reduce memory usage.
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
     ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDistribution \
     -Pproduction=true \
+    -PnoSourceMaps=true \
     --no-daemon \
     --stacktrace
 

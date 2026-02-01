@@ -136,3 +136,28 @@ config.devServer.devMiddleware.mimeTypes = {
     'application/wasm': ['wasm'],
     'application/javascript': ['js']
 };
+
+// 10. OPTIMIZATION: Exclude SQLite workers from parsing and minification
+// This fixes the "return outside of function" error in Terser and speeds up build
+config.module.noParse = config.module.noParse || [];
+if (Array.isArray(config.module.noParse)) {
+    config.module.noParse.push(/sqlite3-worker1\.mjs/);
+    config.module.noParse.push(/sqlite3\.mjs/);
+} else {
+    // If it's a function or RegExp, we wrap it (simplified for now, assuming array or undefined)
+    config.module.noParse = [config.module.noParse, /sqlite3-worker1\.mjs/, /sqlite3\.mjs/];
+}
+
+if (config.optimization && config.optimization.minimizer) {
+    config.optimization.minimizer.forEach(minimizer => {
+        if (minimizer.constructor.name === 'TerserPlugin') {
+            minimizer.options.exclude = minimizer.options.exclude || [];
+            const excludePattern = /sqlite3-worker1\.mjs/;
+            if (Array.isArray(minimizer.options.exclude)) {
+                minimizer.options.exclude.push(excludePattern);
+            } else {
+                minimizer.options.exclude = [minimizer.options.exclude, excludePattern];
+            }
+        }
+    });
+}

@@ -39,6 +39,11 @@ kotlin {
           KotlinWebpackConfig.Mode.PRODUCTION
         else
           KotlinWebpackConfig.Mode.DEVELOPMENT
+
+        // Source Maps Optimierung für Docker Builds
+        if (project.hasProperty("noSourceMaps")) {
+            sourceMaps = false
+        }
       }
 
       webpackTask {
