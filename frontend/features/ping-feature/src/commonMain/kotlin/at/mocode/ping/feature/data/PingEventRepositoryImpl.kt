@@ -14,11 +14,18 @@ class PingEventRepositoryImpl(
   private val db: AppDatabase
 ) : SyncableRepository<PingEvent> {
 
-  // Der `since`-Parameter für unsere Synchronisierung ist die ID des letzten Ereignisses, kein Zeitstempel.
+  // Der `since`-Parameter für unsere Synchronisierung ist der Zeitstempel des letzten Ereignisses.
+  // Das Backend erwartet einen Long (Timestamp), keinen String (UUID).
   override suspend fun getLatestSince(): String? {
-    println("PingEventRepositoryImpl: getLatestSince called - using corrected async implementation")
-    // FIX: Verwenden Sie .awaitAsOneOrNull() für asynchrone Treiber anstelle des blockierenden .executeAsOneOrNull().
-    return db.appDatabaseQueries.selectLatestPingEventId().awaitAsOneOrNull()
+    println("PingEventRepositoryImpl: getLatestSince called - fetching latest timestamp")
+    // Wir holen den letzten Timestamp aus der DB.
+    val lastModified = db.appDatabaseQueries.selectLatestPingEventTimestamp().awaitAsOneOrNull()
+
+    // Wir geben ihn als String zurück, da das Interface String? erwartet.
+    // Der SyncManager wird ihn als Parameter "since" an den Request hängen.
+    // Das Backend erwartet "since" als Long, aber HTTP Parameter sind Strings.
+    // Spring Boot konvertiert "123456789" automatisch in Long 123456789.
+    return lastModified?.toString()
   }
 
   override suspend fun upsert(items: List<PingEvent>) {

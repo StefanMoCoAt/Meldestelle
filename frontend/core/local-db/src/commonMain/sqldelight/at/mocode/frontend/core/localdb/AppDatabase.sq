@@ -36,6 +36,12 @@ FROM PingEvent
 ORDER BY id DESC
 LIMIT 1;
 
+selectLatestPingEventTimestamp:
+SELECT last_modified
+FROM PingEvent
+ORDER BY last_modified DESC
+LIMIT 1;
+
 upsertPingEvents:
 -- SQLite dialect configured for this project is 3.18 (no UPSERT support).
 -- Use INSERT OR REPLACE as pragmatic upsert.
