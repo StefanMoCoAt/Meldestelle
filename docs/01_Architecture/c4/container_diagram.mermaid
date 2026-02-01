@@ -1,0 +1,33 @@
+C4Container
+    title Container Diagram for Meldestelle System
+
+    Person(user, "User", "Meldestelle Staff")
+
+    System_Boundary(c1, "Meldestelle Platform") {
+
+        Container(webapp, "Single Page App / Desktop App", "Kotlin/Compose", "Provides UI for users")
+
+        Container(gateway, "API Gateway", "Spring Cloud Gateway", "Entry point, Routing, Resilience")
+
+        Container(ping_service, "Ping Service", "Spring Boot", "Handles Ping/Pong & Sync Tests")
+
+        ContainerDb(ping_db, "Ping DB", "PostgreSQL", "Stores Ping Events")
+        ContainerDb(valkey, "Cache", "Valkey (Redis)", "Session Store, Rate Limiting")
+
+        Container(consul, "Service Discovery", "Consul", "Service Registry")
+        Container(zipkin, "Tracing", "Zipkin", "Distributed Tracing")
+    }
+
+    System_Ext(keycloak, "Keycloak", "IAM")
+
+    Rel(user, webapp, "Uses", "HTTPS")
+    Rel(webapp, gateway, "API Requests", "JSON/HTTPS")
+    Rel(webapp, keycloak, "Auth", "OIDC")
+
+    Rel(gateway, ping_service, "Proxies", "HTTP")
+    Rel(gateway, consul, "Discover", "HTTP")
+    Rel(gateway, valkey, "Rate Limit", "Redis Protocol")
+
+    Rel(ping_service, ping_db, "Persist", "JDBC")
+    Rel(ping_service, zipkin, "Trace", "HTTP")
+    Rel(ping_service, consul, "Register", "HTTP")

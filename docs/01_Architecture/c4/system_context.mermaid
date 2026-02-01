@@ -1,0 +1,21 @@
+C4Context
+    title System Context Diagram for Meldestelle System
+
+    Person(user, "Meldestelle User", "Nutzer der Web/Desktop App")
+
+    System_Boundary(meldestelle, "Meldestelle System") {
+        System(webapp, "Web/Desktop App", "Kotlin Multiplatform (Compose)", "Frontend für Benutzer")
+        System(gateway, "API Gateway", "Spring Cloud Gateway", "Routing, Auth, Rate Limiting")
+        System(ping, "Ping Service", "Spring Boot", "Tracer Bullet / Health Check Service")
+        System(keycloak, "Identity Provider", "Keycloak", "Authentifizierung & Autorisierung")
+    }
+
+    System_Ext(mail, "Mail Server", "SMTP", "Versendet E-Mails")
+
+    Rel(user, webapp, "Uses", "HTTPS")
+    Rel(webapp, gateway, "API Calls", "HTTPS/JSON (OAuth2)")
+    Rel(webapp, keycloak, "Authenticates", "OIDC")
+    Rel(gateway, ping, "Routes to", "HTTP")
+    Rel(gateway, keycloak, "Validates Token", "JWT")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")

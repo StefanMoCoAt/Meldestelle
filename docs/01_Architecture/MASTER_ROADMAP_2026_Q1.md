@@ -2,7 +2,7 @@
 type: Roadmap
 status: ACTIVE
 owner: Lead Architect
-last_update: 2026-01-27
+last_update: 2026-02-01
 ---
 
 # MASTER ROADMAP Q1 2026: "Operation Tracer Bullet"
@@ -10,81 +10,59 @@ last_update: 2026-01-27
 **Strategisches Ziel:**
 Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> DB) anhand des **Ping-Service**. Dieser Service dient als **technischer Blueprint** (Vorlage) für alle kommenden Fach-Services. Er muss "Production Ready" gehärtet sein, bevor wir Fachlichkeit implementieren.
 
-**Aktueller technischer Stand:**
+**Aktueller technischer Stand (01.02.2026):**
 *   Build System: ✅ Grün (Gradle, Kotlin 2.3, Spring Boot 3.5.9, Spring Cloud 2025.0.1).
 *   Code-Basis: ✅ `ping-service` existiert, Delta-Sync implementiert.
-*   Infrastruktur: ✅ Docker Environment stabil, Tracing aktiv.
-*   Frontend: ✅ Web-App läuft (JS/Wasm), Login funktioniert, Sync (Full) funktioniert.
+*   Infrastruktur: ✅ Docker Environment stabil (Valkey, Keycloak, Consul, Zipkin).
+*   Frontend: ✅ Web-App & Desktop-App (KMP), Login funktioniert, Sync-Logik vorhanden.
 
 ---
 
 ## 2. Arbeitsaufträge an die AGENTS (Phasenplan)
 
-### PHASE 1: Backend Hardening & Infrastructure (Woche 2)
+### PHASE 1: Backend Hardening & Infrastructure (ABGESCHLOSSEN)
 *Ziel: Der Ping-Service läuft sicher, stabil und beobachtbar in der Docker-Umgebung.*
 
 #### 👷 Agent: Senior Backend Developer
-Deine Aufgabe ist es, den `ping-service` von einem "Hello World" zu einem Enterprise-Microservice zu machen.
-
-*   [x] **Security Implementation (Prio 1):**
-    *   Konfiguriere Spring Security als OAuth2 Resource Server.
-    *   Implementiere RBAC (Role Based Access Control) für `/ping/secure`.
-    *   Stelle sicher, dass Tokens vom Keycloak (Docker) korrekt validiert werden.
-*   [ ] **Resilience (Prio 2):**
-    *   Aktiviere Resilience4j CircuitBreaker für Datenbank-Zugriffe.
-    *   Implementiere Fallbacks (z.B. "Degraded Mode" wenn DB weg ist).
-*   [x] **Observability (Prio 3):**
-    *   Aktiviere Spring Boot Actuator (Health, Info, Prometheus).
-    *   Stelle sicher, dass Tracing-IDs (Micrometer/Zipkin) durchgereicht werden.
-*   [ ] **Persistence Härtung:**
-    *   Integriere **Flyway** für Datenbank-Migrationen (kein `ddl-auto` in Prod!).
-    *   Implementiere einen "Deep Health Check" (`/actuator/health`), der DB und Cache aktiv prüft.
+*   [x] **Security Implementation:** OAuth2 Resource Server & RBAC implementiert.
+*   [x] **Resilience:** CircuitBreaker für `/ping/enhanced` aktiv.
+*   [x] **Observability:** Actuator, Micrometer & Zipkin Tracing aktiv.
+*   [x] **Persistence:** Flyway & Postgres Integration stabil.
 
 #### 🏗️ Agent: Infrastructure & DevOps
-Deine Aufgabe ist die Stabilität der Laufzeitumgebung.
-
-*   [x] **Docker Environment:**
-    *   Stabilisiere `docker-compose.yaml`. Alle Services (Consul, Keycloak, Postgres, Zipkin) müssen zuverlässig starten.
-    *   Prüfe Migration von Redis zu **Valkey** (Open Source Härtung), wie im Hardening-Dokument vorgeschlagen.
-*   [ ] **Gateway Config:**
-    *   Konfiguriere Routen und CircuitBreaker im Spring Cloud Gateway für den `ping-service`.
+*   [x] **Docker Environment:** `dc-infra`, `dc-backend`, `dc-gui` stabil. Valkey als Redis-Ersatz integriert.
+*   [x] **Gateway Config:** Routing `/api/ping/**` -> `ping-service` mit CircuitBreaker Fallback konfiguriert.
 
 ---
 
-### PHASE 2: Frontend Integration (Woche 3)
+### PHASE 2: Frontend Integration (ABGESCHLOSSEN)
 *Ziel: Das Frontend kann authentifiziert mit dem Backend sprechen.*
 
 #### 🎨 Agent: KMP Frontend Expert
-Deine Aufgabe ist die Anbindung des gehärteten Backends.
-
-*   [x] **HTTP Client Core:**
-    *   Konfiguriere Ktor Client mit `AuthInterceptor` (Bearer Token Injection).
-    *   Implementiere Global Error Handling (Umgang mit 401, 403, 503).
-*   [x] **Authentication Flow:**
-    *   Implementiere den OIDC Login Flow (Keycloak) für Desktop und Web.
-    *   Speichere Tokens sicher im Memory (AuthState).
-*   [x] **UI Implementation:**
-    *   Baue einen Debug-Screen, der die Endpunkte `/ping/simple` und `/ping/secure` visualisiert.
+*   [x] **HTTP Client Core:** Ktor Client mit Auth & Error Handling.
+*   [x] **Authentication Flow:** OIDC Login Flow (Keycloak) implementiert.
+*   [x] **UI Implementation:** Debug-Screen für Pings vorhanden.
 
 ---
 
-### PHASE 3: Offline & Sync (Woche 4)
+### PHASE 3: Offline & Sync (IN PROGRESS)
 *Ziel: Datenkonsistenz auch bei Netzwerk-Verlust.*
 
 #### 🤝 Joint Task Force (Backend & Frontend)
-*   [x] **Sync-Protokoll:**
-    *   Implementierung des Delta-Syncs basierend auf `PingEvent` (UUIDv7 + Timestamp).
-    *   Frontend: Speicherung in SQLDelight (lokal).
-    *   Backend: Bereitstellung des Sync-Endpunkts.
-*   [x] **Web-App Sync:**
-    *   Implementierung von SQLDelight mit WebWorkerDriver (OPFS).
-    *   Workaround für Async-Select-Bug (Full-Sync).
+*   [x] **Sync-Protokoll:** `PingEvent` Contract definiert.
+*   [ ] **Sync-Fix (CRITICAL):** Typ-Mismatch beheben! Backend erwartet `Long` Timestamp, Frontend muss sicherstellen, dass kein String-Cursor gesendet wird.
+*   [x] **Web-App Sync:** SQLDelight Integration vorbereitet.
 
 ---
 
 ## 3. Definition of Done (für Phase 1 & 2)
-1.  `docker compose up` startet den kompletten Stack fehlerfrei.
-2.  Frontend-User kann sich einloggen (Keycloak).
-3.  Frontend zeigt Daten vom `ping-service` an.
-4.  Beim Abschalten der DB zeigt der Service einen sauberen Fallback (CircuitBreaker offen).
-5.  In Zipkin ist der komplette Request-Trace (Frontend -> Gateway -> Service -> DB) sichtbar.
+1.  [x] `docker compose up` startet den kompletten Stack fehlerfrei.
+2.  [x] Frontend-User kann sich einloggen (Keycloak).
+3.  [x] Frontend zeigt Daten vom `ping-service` an.
+4.  [x] Beim Abschalten der DB zeigt der Service einen sauberen Fallback (CircuitBreaker offen).
+5.  [x] In Zipkin ist der komplette Request-Trace (Frontend -> Gateway -> Service -> DB) sichtbar.
+
+## 4. Next Steps (Q1/2026)
+1.  **Sync-Fix:** Typ-Sicherheit zwischen Frontend und Backend herstellen.
+2.  **Entries Service:** Beginn der Implementierung des ersten echten Fach-Services ("Nennungen").
+3.  **System Hardening:** Keycloak Production-Config (kein `start-dev`).
