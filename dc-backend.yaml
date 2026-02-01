@@ -143,7 +143,8 @@ services:
     volumes:
       - ./config/app/base-application.yaml:/workspace/config/application.yml:Z
 
-#  # --- MICROSERVICE: Entries Service ---
+  # --- MICROSERVICE: Entries Service (ON HOLD) ---
+  # Currently disabled in docker-compose but present in build
 #  entries-service:
 #    build:
 #      context: .
