@@ -33,8 +33,6 @@ dependencyResolutionManagement {
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
     maven { url = uri("https://us-central1-maven.pkg.dev/varabyte-repos/public") }
-    // Add JetBrains Compose repository for RC versions
-    maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
   }
 }
 
