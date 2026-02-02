@@ -9,7 +9,12 @@ kotlin {
   jvm()
   js(IR) {
     binaries.library()
-    // browser {} block removed to fix "Plugin loaded multiple times" error.
+    // Re-enabled browser environment after Root NodeJs fix
+    browser {
+        testTask {
+            enabled = false
+        }
+    }
   }
 
   sourceSets {

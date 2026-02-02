@@ -15,8 +15,12 @@ kotlin {
 
   js {
     binaries.library()
-    // browser {} block is intentionally removed to prevent "Plugin loaded multiple times" error.
-    // The warning "JS Environment Not Selected" is acceptable for now.
+    // Re-enabled browser environment after Root NodeJs fix
+    browser {
+        testTask {
+            enabled = false
+        }
+    }
   }
 
   sourceSets {

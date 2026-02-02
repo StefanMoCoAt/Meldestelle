@@ -2,6 +2,7 @@ import groovy.json.JsonSlurper
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
@@ -32,6 +33,10 @@ plugins {
   alias(libs.plugins.detekt)
   alias(libs.plugins.ktlint)
 }
+
+// Workaround for Gradle 9 / KMP Race Condition:
+// Wir erzwingen die Initialisierung des NodeJsRootPlugins im Root-Projekt
+apply<NodeJsRootPlugin>()
 
 // ##################################################################
 // ###                  ALLPROJECTS CONFIGURATION                 ###
@@ -252,7 +257,8 @@ tasks.register("checkBundleBudget") {
       }
 
       // Collect JS files under distributions (avoid .map and .txt)
-      val jsFiles = distDir.walkTopDown().filter { it.isFile && it.extension == "js" && !it.name.endsWith(".map") }.toList()
+      val jsFiles =
+        distDir.walkTopDown().filter { it.isFile && it.extension == "js" && !it.name.endsWith(".map") }.toList()
       if (jsFiles.isEmpty()) {
         report.appendLine("- ${shell.path}: no JS artifacts found in ${distDir.path}")
         return@forEach
