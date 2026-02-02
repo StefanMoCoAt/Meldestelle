@@ -1,8 +1,9 @@
 package at.mocode.masterdata.infrastructure.persistence
 
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.kotlin.datetime.datetime
-import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.kotlin.datetime.datetime
+import org.jetbrains.exposed.v1.core.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.v1.core.javaUUID
 
 /**
  * Exposed-Tabellendefinition für die Bundesland-Entität (Bundesländer/Regionen).
@@ -11,8 +12,8 @@ import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
  * Verwaltungseinheiten entsprechend der BundeslandDefinition Domain-Entität.
  */
 object BundeslandTable : Table("bundesland") {
-    val id = uuid("id").autoGenerate()
-    val landId = uuid("land_id").references(LandTable.id)
+    val id = javaUUID("id").autoGenerate()
+    val landId = javaUUID("land_id").references(LandTable.id)
     val oepsCode = varchar("oeps_code", 10).nullable()
     val iso3166_2_Code = varchar("iso_3166_2_code", 10).nullable()
     val name = varchar("name", 100)

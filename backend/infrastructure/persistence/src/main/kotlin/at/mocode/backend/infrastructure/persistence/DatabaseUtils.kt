@@ -4,10 +4,11 @@ import at.mocode.core.domain.model.ErrorCodes
 import at.mocode.core.domain.model.ErrorDto
 import at.mocode.core.domain.model.PagedResponse
 import at.mocode.core.utils.Result
+import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.Table
-import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.statements.BatchInsertStatement
+import org.jetbrains.exposed.v1.core.statements.StatementType
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
 import org.jetbrains.exposed.v1.jdbc.Query
@@ -28,9 +29,13 @@ inline fun <T> transactionResult(
   crossinline block: JdbcTransaction.() -> T
 ): Result<T> {
   return try {
-    val result = transaction(database) { block() }
+    // Wir nutzen hier explizit Exposed JDBC Transaktionen.
+    // Der Cast ist sicher, solange wir nur JDBC Databases verwenden (was wir tun).
+    val result = transaction(database) {
+      this.block()
+    }
     Result.success(result)
-  } catch (e: SQLTimeoutException) {
+  } catch (_: SQLTimeoutException) {
     Result.failure(
       ErrorDto(
         code = ErrorCodes.DATABASE_TIMEOUT,
@@ -40,26 +45,25 @@ inline fun <T> transactionResult(
   } catch (e: SQLException) {
     // Robustere Fehlerbehandlung über SQLSTATE (Postgres)
     val mapped = when (e.sqlState) {
-      // unique_violation
       "23505" -> ErrorCodes.DUPLICATE_ENTRY
-      // foreign_key_violation
       "23503" -> ErrorCodes.FOREIGN_KEY_VIOLATION
-      // check_violation
       "23514" -> ErrorCodes.CHECK_VIOLATION
+      "40001" -> ErrorCodes.DATABASE_ERROR // serialization_failure / deadlock
+      "08000", "08003", "08006" -> ErrorCodes.DATABASE_ERROR // connection errors
       else -> ErrorCodes.DATABASE_ERROR
     }
 
     Result.failure(
       ErrorDto(
         code = mapped,
-        message = "Datenbank-Operation fehlgeschlagen"
+        message = "Datenbank-Operation fehlgeschlagen: ${e.message}"
       )
     )
   } catch (e: Exception) {
     Result.failure(
       ErrorDto(
         code = ErrorCodes.TRANSACTION_ERROR,
-        message = "Transaktion fehlgeschlagen"
+        message = "Transaktion fehlgeschlagen: ${e.message}"
       )
     )
   }
@@ -87,14 +91,11 @@ fun <T> Query.toPagedResponse(
   size: Int,
   transform: (ResultRow) -> T
 ): PagedResponse<T> {
-  // Validate input parameters
   require(page >= 0) { "Page number must be non-negative" }
   require(size > 0) { "Page size must be positive" }
 
-  // Calculate the total count first (executes a COUNT query)
   val totalCount = this.count()
 
-  // If there are no results, return an empty page
   if (totalCount == 0L) {
     return PagedResponse.create(
       content = emptyList(),
@@ -107,23 +108,30 @@ fun <T> Query.toPagedResponse(
     )
   }
 
-  // Calculate total pages - use ceil division to ensure we round up
   val totalPages = ((totalCount + size - 1) / size).toInt()
 
-  // Ensure the requested page exists (if page is beyond available pages, return the last page)
-  val adjustedPage = if (page >= totalPages) (totalPages - 1).coerceAtLeast(0) else page
+  if (page >= totalPages) {
+    return PagedResponse.create(
+      content = emptyList(),
+      page = page,
+      size = size,
+      totalElements = totalCount,
+      totalPages = totalPages,
+      hasNext = false,
+      hasPrevious = totalPages > 0
+    )
+  }
 
-  // Then apply pagination and transform results
-  val content = this.paginate(adjustedPage, size).map(transform)
+  val content = this.paginate(page, size).map(transform)
 
   return PagedResponse.create(
     content = content,
-    page = adjustedPage,
+    page = page,
     size = size,
     totalElements = totalCount,
     totalPages = totalPages,
-    hasNext = adjustedPage < totalPages - 1,
-    hasPrevious = adjustedPage > 0
+    hasNext = page < totalPages - 1,
+    hasPrevious = page > 0
   )
 }
 
@@ -131,10 +139,10 @@ object DatabaseUtils {
 
   fun tableExists(tableName: String, database: Database? = null): Boolean {
     return transactionResult(database) {
-      // Postgres-spezifischer, robuster Ansatz über to_regclass
       val valid = tableName.trim()
       if (!valid.matches(Regex("^[A-Za-z_][A-Za-z0-9_]*$"))) return@transactionResult false
-      exec("SELECT to_regclass('$valid')") { rs ->
+
+      this.exec("SELECT to_regclass('$valid')", explicitStatementType = StatementType.SELECT) { rs ->
         if (rs.next()) rs.getString(1) else null
       } != null
     }.fold(
@@ -161,7 +169,6 @@ object DatabaseUtils {
     database: Database? = null
   ): Result<Unit> {
     return transactionResult(database) {
-      // Einfache Sanitization + Quoting der Identifier
       fun quoteIdent(name: String): String {
         require(name.matches(Regex("^[A-Za-z_][A-Za-z0-9_]*$"))) { "Ungültiger Identifier: $name" }
         return "\"$name\""
@@ -172,20 +179,27 @@ object DatabaseUtils {
       val qIndex = quoteIdent(indexName)
       val cols = columns.map { quoteIdent(it) }.joinToString(", ")
       val sql = "CREATE $uniqueStr INDEX IF NOT EXISTS $qIndex ON $qTable ($cols)"
-      exec(sql)
+
+      this.exec(sql, explicitStatementType = StatementType.CREATE)
       Unit
     }
   }
 
   fun executeRawSql(sql: String, database: Database? = null): Result<Unit> = transactionResult(database) {
-    exec(sql)
+    this.exec(sql, explicitStatementType = StatementType.OTHER)
     Unit
   }
 
   fun executeUpdate(sql: String, database: Database? = null): Result<Int> = transactionResult(database) {
-    // Nutzt Exposed PreparedStatementApi, kein AutoCloseable
-    val ps = this.connection.prepareStatement(sql, false)
-    ps.executeUpdate()
+    // Exposed 1.0.0: prepareStatement returns PreparedStatementApi which is NOT AutoCloseable
+    // and executeUpdate() might be missing on the interface or requires casting.
+    // We use the safe way via try-finally and closeIfPossible()
+    val stmt = this.connection.prepareStatement(sql, false)
+    try {
+      stmt.executeUpdate()
+    } finally {
+      stmt.closeIfPossible()
+    }
   }
 
   inline fun <T> batchInsert(
@@ -218,8 +232,7 @@ fun ResultRow.toMap(): Map<String, Any?> {
         else -> result[expression.toString()] = this[expression]
       }
     } catch (e: Exception) {
-      // Ignore columns that can't be read and log the error if needed
-      // You could add logging here in a production environment
+      // Spalten ignorieren
     }
   }
   return result

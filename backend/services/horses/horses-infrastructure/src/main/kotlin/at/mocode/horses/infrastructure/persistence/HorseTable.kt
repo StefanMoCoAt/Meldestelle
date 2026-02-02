@@ -2,9 +2,10 @@ package at.mocode.horses.infrastructure.persistence
 
 import at.mocode.core.domain.model.PferdeGeschlechtE
 import at.mocode.core.domain.model.DatenQuelleE
-import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.kotlin.datetime.date
-import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
+import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
+import org.jetbrains.exposed.v1.core.kotlin.datetime.date
+import org.jetbrains.exposed.v1.core.kotlin.datetime.timestamp
+import org.jetbrains.exposed.v1.core.javaUUID
 
 /**
  * Database table definition for horses in the horse-registry context.
@@ -21,8 +22,8 @@ object HorseTable : UUIDTable("horses") {
     val farbe = varchar("farbe", 100).nullable()
 
     // Ownership and Responsibility
-    val besitzerId = uuid("besitzer_id").nullable()
-    val verantwortlichePersonId = uuid("verantwortliche_person_id").nullable()
+    val besitzerId = javaUUID("besitzer_id").nullable()
+    val verantwortlichePersonId = javaUUID("verantwortliche_person_id").nullable()
 
     // Breeding Information
     val zuechterName = varchar("zuechter_name", 255).nullable()

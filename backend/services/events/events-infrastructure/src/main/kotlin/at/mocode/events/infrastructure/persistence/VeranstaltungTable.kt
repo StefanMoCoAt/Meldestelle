@@ -1,9 +1,10 @@
 package at.mocode.events.infrastructure.persistence
 
 import at.mocode.core.domain.model.SparteE
-import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.kotlin.datetime.date
-import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
+import org.jetbrains.exposed.v1.core.dao.id.java.UUIDTable
+import org.jetbrains.exposed.v1.core.kotlin.datetime.date
+import org.jetbrains.exposed.v1.core.kotlin.datetime.timestamp
+import org.jetbrains.exposed.v1.core.javaUUID
 
 /**
  * Database table definition for events (Veranstaltung) in the event-management context.
@@ -24,7 +25,8 @@ object VeranstaltungTable : UUIDTable("veranstaltungen") {
 
     // Location and Organization
     val ort = varchar("ort", 255)
-    val veranstalterVereinId = uuid("veranstalter_verein_id")
+    // Migration to Exposed 1.0.0: Use javaUUID for java.util.UUID compatibility
+    val veranstalterVereinId = javaUUID("veranstalter_verein_id")
 
     // Event Details
     val sparten = text("sparten") // JSON array of SparteE values

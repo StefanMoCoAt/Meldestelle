@@ -96,19 +96,39 @@ Das Handling von JSONB-Spalten in SQLite wurde vereinheitlicht.
 5. JSON/SQLite:
    - Verhalten von `jsonb()` mit `castToJsonFormat` prüfen und ggf. deaktivieren.
 
-## 3. Test-Matrix
+## 3. Troubleshooting & Lessons Learned (Update 2026-02-02)
+
+### 3.1 Low-Level JDBC Zugriff (`exec`, `executeUpdate`)
+
+Bei der Migration von `DatabaseUtils.kt` traten Probleme mit der Auflösung von `exec` und `executeUpdate` auf.
+
+*   **Problem:** Die generische `Transaction` Klasse bietet in Exposed 1.0.0 keinen direkten Zugriff mehr auf `exec` mit `ResultSet`-Verarbeitung oder `executeUpdate`. Diese Methoden sind nun spezifischer in `JdbcTransaction` oder `PreparedStatementApi` verortet.
+*   **Lösung:**
+    *   **Explizite `JdbcTransaction`:** Unsere Transaction-Wrapper (`transactionResult`) wurden angepasst, um `JdbcTransaction` als Receiver (`this`) zu erzwingen.
+    *   **`exec` mit `StatementType`:** Aufrufe von `exec` müssen nun den `explicitStatementType` Parameter (z.B. `StatementType.SELECT`) nutzen, damit der Compiler die korrekte Überladung wählt.
+    *   **`executeUpdate` Workaround:** Da `PreparedStatementApi` in Exposed 1.0.0 nicht `AutoCloseable` ist und `executeUpdate` teilweise schwer aufzulösen war, nutzen wir `try-finally` mit `closeIfPossible()` und greifen bei Bedarf auf die native JDBC Connection zu.
+
+```kotlin
+// Beispiel für korrekten Low-Level Zugriff in Exposed 1.0.0
+transactionResult(database) {
+    // 'this' ist JdbcTransaction
+    this.exec("SELECT ...", explicitStatementType = StatementType.SELECT) { rs -> ... }
+}
+```
+
+## 4. Test-Matrix
 
 - Unit: DSL-Typen (UUID, Zeittypen), Mappings, einfache Inserts/Selects.
 - Integration: JDBC/Hikari Konfiguration, `batchInsert`, Upsert/Ignore-Pfade.
 - E2E (Docker): CRUD-Flows über den Service hinweg; Metriken/Health.
 
-## 4. Rollback-Plan
+## 5. Rollback-Plan
 
 - `git revert` des Version-Bumps in `libs.versions.toml` und ggf. betroffener Anpassungs-Commits.
 - Rebuild; E2E-Smoketest durchführen.
 - Dokumentenstatus auf `ARCHIVED` setzen oder Nachtrag mit „Rollback erfolgt“ ergänzen.
 
-## 5. Diagramm (Flow)
+## 6. Diagramm (Flow)
 
 ```mermaid
 flowchart TD

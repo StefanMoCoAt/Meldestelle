@@ -37,9 +37,9 @@ class PingApiKoinClient(private val client: HttpClient) : PingApi {
     return client.get("/api/ping/secure").body()
   }
 
-  override suspend fun syncPings(lastSyncTimestamp: Long): List<PingEvent> {
+  override suspend fun syncPings(since: Long): List<PingEvent> {
     return client.get("/api/ping/sync") {
-      url.parameters.append("lastSyncTimestamp", lastSyncTimestamp.toString())
+      url.parameters.append("lastSyncTimestamp", since.toString())
     }.body()
   }
 }

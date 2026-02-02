@@ -1,8 +1,9 @@
 package at.mocode.masterdata.infrastructure.persistence
 
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.kotlin.datetime.datetime
-import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.kotlin.datetime.datetime
+import org.jetbrains.exposed.v1.core.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.v1.core.javaUUID
 
 /**
  * Exposed-Tabellendefinition für die Platz-Entität (Turnierplätze/Wettkampfstätten).
@@ -11,8 +12,8 @@ import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
  * entsprechend der Platz Domain-Entität.
  */
 object PlatzTable : Table("platz") {
-    val id = uuid("id").autoGenerate()
-    val turnierId = uuid("turnier_id") // Foreign key to tournament (not enforced here as tournament might be in different module)
+    val id = javaUUID("id").autoGenerate()
+    val turnierId = javaUUID("turnier_id") // Foreign key to tournament (not enforced here as tournament might be in different module)
     val name = varchar("name", 200)
     val dimension = varchar("dimension", 50).nullable()
     val boden = varchar("boden", 100).nullable()

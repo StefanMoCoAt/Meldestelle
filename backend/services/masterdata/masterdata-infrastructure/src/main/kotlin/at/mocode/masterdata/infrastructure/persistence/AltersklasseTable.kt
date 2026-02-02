@@ -1,8 +1,9 @@
 package at.mocode.masterdata.infrastructure.persistence
 
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.kotlin.datetime.datetime
-import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.kotlin.datetime.datetime
+import org.jetbrains.exposed.v1.core.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.v1.core.javaUUID
 
 /**
  * Exposed-Tabellendefinition für die Altersklasse-Entität (Altersklassendefinitionen).
@@ -11,7 +12,7 @@ import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
  * entsprechend der AltersklasseDefinition Domain-Entität.
  */
 object AltersklasseTable : Table("altersklasse") {
-    val id = uuid("id").autoGenerate()
+    val id = javaUUID("id").autoGenerate()
     val altersklasseCode = varchar("altersklasse_code", 50).uniqueIndex()
     val bezeichnung = varchar("bezeichnung", 200)
     val minAlter = integer("min_alter").nullable()
@@ -19,7 +20,7 @@ object AltersklasseTable : Table("altersklasse") {
     val stichtagRegelText = varchar("stichtag_regel_text", 500).nullable()
     val sparteFilter = varchar("sparte_filter", 50).nullable() // Enum as string
     val geschlechtFilter = char("geschlecht_filter").nullable()
-    val oetoRegelReferenzId = uuid("oeto_regel_referenz_id").nullable()
+    val oetoRegelReferenzId = javaUUID("oeto_regel_referenz_id").nullable()
     val istAktiv = bool("ist_aktiv").default(true)
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)

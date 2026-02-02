@@ -1,8 +1,9 @@
 package at.mocode.masterdata.infrastructure.persistence
 
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.kotlin.datetime.datetime
-import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.kotlin.datetime.datetime
+import org.jetbrains.exposed.v1.core.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.v1.core.javaUUID
 
 /**
  * Exposed-Tabellendefinition für die Land-Entität (Länderstammdaten).
@@ -11,7 +12,7 @@ import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
  * der LandDefinition Domain-Entität.
  */
 object LandTable : Table("land") {
-    val id = uuid("id").autoGenerate()
+    val id = javaUUID("id").autoGenerate()
     val isoAlpha2Code = varchar("iso_alpha2_code", 2).uniqueIndex()
     val isoAlpha3Code = varchar("iso_alpha3_code", 3).uniqueIndex()
     val isoNumerischerCode = varchar("iso_numerischer_code", 3).nullable()
