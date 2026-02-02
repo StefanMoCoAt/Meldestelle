@@ -4,7 +4,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  * Dieses Modul kapselt die gesamte UI und Logik für das Ping-Feature.
  */
 plugins {
-  alias(libs.plugins.kotlinMultiplatform)
+  // Fix for "Plugin loaded multiple times": Apply plugin by ID without version (inherited from root)
+  id("org.jetbrains.kotlin.multiplatform")
   alias(libs.plugins.composeMultiplatform)
   alias(libs.plugins.composeCompiler)
   alias(libs.plugins.kotlinSerialization)

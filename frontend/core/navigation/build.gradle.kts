@@ -3,7 +3,8 @@
  * Es ist noch simpler.
  */
 plugins {
-  alias(libs.plugins.kotlinMultiplatform)
+  // Fix for "Plugin loaded multiple times": Apply plugin by ID without version (inherited from root)
+  id("org.jetbrains.kotlin.multiplatform")
 }
 
 group = "at.mocode.clients.shared"

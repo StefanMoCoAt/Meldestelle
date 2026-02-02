@@ -3,7 +3,8 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
-  alias(libs.plugins.kotlinMultiplatform)
+  // Fix for "Plugin loaded multiple times": Apply plugin by ID without version (inherited from root)
+  id("org.jetbrains.kotlin.multiplatform")
   alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.sqldelight)
 }

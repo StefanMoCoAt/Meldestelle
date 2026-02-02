@@ -2,7 +2,6 @@ import groovy.json.JsonSlurper
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
@@ -17,7 +16,8 @@ plugins {
   // This prevents "plugin loaded multiple times" errors in Gradle 9.2.1+
   // Subprojects apply these plugins via version catalog: alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.kotlinJvm) apply false
-  alias(libs.plugins.kotlinMultiplatform) apply false
+  // CHANGE: Apply KMP plugin at root (but don't configure targets yet) to claim NodeJsRootPlugin ownership
+  alias(libs.plugins.kotlinMultiplatform) apply true
   alias(libs.plugins.kotlinSerialization) apply false
   alias(libs.plugins.kotlinSpring) apply false
   alias(libs.plugins.kotlinJpa) apply false
@@ -34,9 +34,11 @@ plugins {
   alias(libs.plugins.ktlint)
 }
 
-// Workaround for Gradle 9 / KMP Race Condition:
-// Wir erzwingen die Initialisierung des NodeJsRootPlugins im Root-Projekt
-apply<NodeJsRootPlugin>()
+// Minimal KMP configuration for Root Project to satisfy the plugin
+// This ensures NodeJsRootPlugin is initialized here first.
+kotlin {
+  jvm() // Dummy target to keep KMP happy
+}
 
 // ##################################################################
 // ###                  ALLPROJECTS CONFIGURATION                 ###

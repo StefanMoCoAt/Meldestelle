@@ -10,6 +10,15 @@ pluginManagement {
     maven("https://us-central1-maven.pkg.dev/varabyte-repos/public")
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") } // Added snapshots for plugins
   }
+  plugins {
+    // Centralized Plugin Version Management
+    // This allows subprojects to apply plugins without versions, avoiding conflicts.
+    id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0"
+    id("org.jetbrains.compose") version "1.10.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.0"
+    id("app.cash.sqldelight") version "2.2.1"
+  }
 }
 
 plugins {

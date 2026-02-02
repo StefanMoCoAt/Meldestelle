@@ -5,7 +5,7 @@
 # ===================================================================
 
 # === GLOBAL ARGS ===
-ARG GRADLE_VERSION=9.2.1
+ARG GRADLE_VERSION=9.3.1
 ARG JAVA_VERSION=25
 ARG CADDY_VERSION=2.11-alpine
 ARG VERSION=1.0.0-SNAPSHOT
@@ -21,8 +21,8 @@ WORKDIR /workspace
 
 # 1. Gradle Optimizations (Memory & Caching)
 # Increased Heap to 4g for Kotlin 2.3 JS Compilation
+# REMOVED: -Dorg.gradle.daemon=false (We want the daemon to handle classloading correctly!)
 ENV GRADLE_OPTS="-Dorg.gradle.caching=true \
-                 -Dorg.gradle.daemon=false \
                  -Dorg.gradle.parallel=true \
                  -Dorg.gradle.workers.max=4 \
                  -Dorg.gradle.jvmargs=-Xmx4g \
@@ -49,14 +49,13 @@ COPY contracts/ contracts/
 RUN mkdir -p docs
 
 # 4. Build Web App
-# Using --no-configuration-cache initially to avoid issues with first run in docker,
-# but can be enabled if stable.
+# REMOVED: --no-daemon flag to allow Gradle to manage its classloaders properly
+# This fixes the "IsolatedKotlinClasspathClassCastException" in Gradle 9.x + KMP
 RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
     --mount=type=cache,target=/home/gradle/.gradle/wrapper \
     ./gradlew :frontend:shells:meldestelle-portal:jsBrowserDistribution \
     -Pproduction=true \
     -PnoSourceMaps=true \
-    --no-daemon \
     --stacktrace
 
 # 5. Prepare Dist

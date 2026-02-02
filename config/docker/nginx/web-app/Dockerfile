@@ -5,7 +5,7 @@
 # ===================================================================
 
 # === GLOBAL ARGS ===
-ARG GRADLE_VERSION=9.2.1
+ARG GRADLE_VERSION=9.3.1
 ARG JAVA_VERSION=25
 ARG NGINX_IMAGE_TAG=1.28-alpine
 ARG VERSION=1.0.0-SNAPSHOT

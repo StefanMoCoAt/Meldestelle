@@ -3,7 +3,7 @@
 # ===================================================================
 
 # 1. Build Stage (Debian-basiert für Stabilität bei Desktop-Builds)
-FROM gradle:9.2.1-jdk-25-and-25-alpine AS builder
+FROM gradle:9.3.1-jdk-25-and-25-alpine AS builder
 
 WORKDIR /app
 
@@ -55,7 +55,7 @@ RUN set -eu; \
 # ===================================================================
 # Stage 2: Runtime Stage - Ubuntu mit VNC + noVNC
 # ===================================================================
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 

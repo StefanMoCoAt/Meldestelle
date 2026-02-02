@@ -11,7 +11,7 @@ services:
       context: . # Wichtig: Root Context für Monorepo Zugriff
       dockerfile: config/docker/caddy/web-app/Dockerfile
       args:
-        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
+        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.3.1}"
         JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
         # Frontend spezifisch:
         CADDY_VERSION: "${DOCKER_CADDY_VERSION:-2.9-alpine}"
