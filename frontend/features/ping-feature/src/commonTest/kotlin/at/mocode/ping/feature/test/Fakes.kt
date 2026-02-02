@@ -132,8 +132,8 @@ class TestPingApiClient : PingApi {
     return handleRequest(securePingResponse)
   }
 
-  override suspend fun syncPings(lastSyncTimestamp: Long): List<PingEvent> {
-    syncPingsCalledWith = lastSyncTimestamp
+  override suspend fun syncPings(since: Long): List<PingEvent> {
+    syncPingsCalledWith = since
     callCount++
 
     if (simulateDelay) {

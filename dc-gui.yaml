@@ -9,13 +9,12 @@ services:
   web-app:
     build:
       context: . # Wichtig: Root Context für Monorepo Zugriff
-      dockerfile: config/docker/nginx/web-app/Dockerfile
+      dockerfile: config/docker/caddy/web-app/Dockerfile
       args:
         GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.2.1}"
         JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
         # Frontend spezifisch:
-        NODE_VERSION: "${DOCKER_NODE_VERSION:-24.12.0}"
-        NGINX_IMAGE_TAG: "${DOCKER_NGINX_VERSION:-1.28.0-alpine}"
+        CADDY_VERSION: "${DOCKER_CADDY_VERSION:-2.9-alpine}"
         # Metadaten:
         VERSION: "${DOCKER_VERSION:-1.0.0-SNAPSHOT}"
         BUILD_DATE: "${DOCKER_BUILD_DATE}"
@@ -26,7 +25,11 @@ services:
     ports:
       - "${WEB_APP_PORT:-4000:4000}"
     environment:
-      dummy_var: "prevent_empty_block"
+      # Runtime Configuration for Caddy Templates
+      # Browser can access API via localhost:8081 (Gateway)
+      # In Docker network, it might be http://api-gateway:8081, but browser runs on host!
+      # Usually, for local dev, we want the browser to hit localhost:8081.
+      API_BASE_URL: "${WEB_APP_API_URL:-http://localhost:8081}"
     depends_on:
       api-gateway:
         condition: "service_started"

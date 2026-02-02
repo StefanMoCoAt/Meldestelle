@@ -10,27 +10,13 @@ group = "at.mocode.clients.shared"
 version = "1.0.0"
 
 kotlin {
-  // Toolchain is now handled centrally in the root build.gradle.kts
-
   jvm()
-
   js {
+    binaries.library()
     browser {
-      testTask {
-        // Browser testing is disabled to avoid environment issues (e.g. missing ChromeHeadless).
-        // Tests are still run on JVM.
-        enabled = false
-      }
+        testTask { enabled = false }
     }
   }
-
-  // Wasm vorerst deaktiviert
-  /*
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-  }
-  */
 
   sourceSets {
     commonMain.dependencies {

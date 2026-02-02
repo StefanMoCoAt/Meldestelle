@@ -4,15 +4,20 @@ plugins {
 }
 
 kotlin {
-  // Targets are configured centrally in the shells/feature modules; here we just provide common code.
   jvm()
   js(IR) {
-    browser()
+    binaries.library()
+    browser {
+        testTask { enabled = false }
+    }
   }
 
   sourceSets {
     commonMain.dependencies {
+      // Correct dependency: Syncable interface is in the shared core domain
       implementation(projects.core.coreDomain)
+      // Also include frontend domain if needed (e.g., for frontend-specific models)
+      implementation(projects.frontend.core.domain)
 
       // Networking
       implementation(libs.ktor.client.core)

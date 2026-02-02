@@ -21,20 +21,30 @@ import org.w3c.dom.HTMLElement
 fun main() {
   console.log("[WebApp] main() entered")
 
-  // 1. Initialize DI (Koin) with static modules
-  try {
-    startKoin { modules(networkModule, localDbModule, syncModule, pingFeatureModule, authModule, navigationModule) }
-    console.log("[WebApp] Koin initialized with static modules")
-  } catch (e: dynamic) {
-    console.warn("[WebApp] Koin initialization warning:", e)
-  }
-
-  // 2. Async Initialization Chain
-  // We must ensure DB is ready and registered in Koin BEFORE we mount the UI.
-  val provider = GlobalContext.get().get<DatabaseProvider>()
-
   MainScope().launch {
     try {
+      // 1. Load Runtime Configuration (Async)
+      console.log("[WebApp] Loading configuration...")
+      val config = loadAppConfig()
+      console.log("[WebApp] Configuration loaded: apiBaseUrl=${config.apiBaseUrl}")
+
+      // 2. Initialize DI (Koin)
+      // We register the config immediately so other modules can use it
+      startKoin {
+        modules(
+          module { single { config } }, // Make AppConfig available for injection
+          networkModule,
+          localDbModule,
+          syncModule,
+          pingFeatureModule,
+          authModule,
+          navigationModule
+        )
+      }
+      console.log("[WebApp] Koin initialized")
+
+      // 3. Initialize Database (Async)
+      val provider = GlobalContext.get().get<DatabaseProvider>()
       console.log("[WebApp] Initializing Database...")
       val db = provider.createDatabase()
 
@@ -46,12 +56,12 @@ fun main() {
       )
       console.log("[WebApp] Local DB created and registered in Koin")
 
-      // 3. Start App only after DB is ready
+      // 4. Start UI
       startAppWhenDomReady()
 
     } catch (e: dynamic) {
-      console.error("[WebApp] CRITICAL: Database initialization failed:", e)
-      renderFatalError("Database initialization failed: ${e?.message ?: e}")
+      console.error("[WebApp] CRITICAL: Initialization failed:", e)
+      renderFatalError("Initialization failed: ${e?.message ?: e}")
     }
   }
 }

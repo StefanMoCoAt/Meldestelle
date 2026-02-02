@@ -6,48 +6,27 @@ plugins {
 }
 
 kotlin {
-  // Toolchain is now handled centrally in the root build.gradle.kts
 
   jvm()
-  js(IR) {
-    browser()
-//        nodejs()
-  }
 
-  // Wasm vorerst deaktiviert
-  /*
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
+  js(IR) {
+    binaries.library()
+    // Explicitly select browser environment to satisfy Kotlin/JS compiler warning
+    browser {
+        testTask { enabled = false }
+    }
   }
-  */
 
   sourceSets {
     commonMain.dependencies {
-
-      // Compose dependencies
       implementation(compose.runtime)
       implementation(compose.foundation)
       implementation(compose.material3)
       implementation(compose.ui)
       implementation(compose.components.resources)
-
-      // Coroutines
       implementation(libs.kotlinx.coroutines.core)
-
-      // Serialization
       implementation(libs.kotlinx.serialization.json)
-
-      // DateTime
       implementation(libs.kotlinx.datetime)
-    }
-
-    jsMain.dependencies {
-      // JS-specific UI dependencies if needed
-    }
-
-    jvmMain.dependencies {
-      // JVM-specific UI dependencies if needed
     }
   }
 }

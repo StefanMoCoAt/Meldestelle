@@ -9,28 +9,18 @@ plugins {
 }
 
 kotlin {
-  // Toolchain is now handled centrally in the root build.gradle.kts
-
   jvm()
   js {
+    binaries.library()
     browser {
-      testTask { enabled = false }
+        testTask { enabled = false }
     }
-    binaries.executable()
   }
-
-  // Wasm vorerst deaktiviert, um Stabilität mit JS zu gewährleisten
-  /*
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-  }
-  */
 
   sourceSets {
     commonMain.dependencies {
       implementation(libs.koin.core)
-      implementation(libs.bundles.kmp.common) // Coroutines, Serialization, DateTime
+      implementation(libs.bundles.kmp.common)
       implementation(libs.sqldelight.runtime)
       implementation(libs.sqldelight.coroutines)
     }
@@ -41,17 +31,8 @@ kotlin {
 
     jsMain.dependencies {
       implementation(libs.sqldelight.driver.web)
-
-      // NPM deps used by `sqlite.worker.js` (OPFS-backed SQLite WASM worker)
       implementation(npm("@sqlite.org/sqlite-wasm", "3.51.1-build2"))
     }
-
-    /*
-    val wasmJsMain = getByName("wasmJsMain")
-    wasmJsMain.dependencies {
-      implementation(libs.sqldelight.driver.web)
-    }
-    */
 
     commonTest.dependencies {
       implementation(libs.kotlin.test)
@@ -63,7 +44,7 @@ sqldelight {
   databases {
     create("AppDatabase") {
       packageName.set("at.mocode.frontend.core.localdb")
-      generateAsync.set(true) // WICHTIG: Async-First für JS Support
+      generateAsync.set(true)
     }
   }
 }

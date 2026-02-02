@@ -9,23 +9,13 @@ plugins {
 }
 
 kotlin {
-  // Toolchain is now handled centrally in the root build.gradle.kts
-
-  // Wasm is now a first-class citizen in our stack, so we enable it by default
-  // val enableWasm = providers.gradleProperty("enableWasm").orNull == "true"
-
   jvm()
   js {
+    binaries.library()
     browser {
-      testTask { enabled = false }
+        testTask { enabled = false }
     }
   }
-
-  // Wasm vorerst deaktiviert
-  /*
-  @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-  wasmJs { browser() }
-  */
 
   sourceSets {
     commonMain.dependencies {
