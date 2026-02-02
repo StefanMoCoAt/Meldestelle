@@ -14,15 +14,9 @@ kotlin {
   jvm()
 
   js {
-    // browser {} block removed to avoid NodeJsRootPlugin conflicts in multi-module builds
-    // We only need explicit browser configuration in the shell (application) module.
-    // Tests are disabled via root build.gradle.kts configuration anyway.
-    nodejs {
-        testTask {
-            enabled = false
-        }
-    }
     binaries.library()
+    // browser {} block is intentionally removed to prevent "Plugin loaded multiple times" error.
+    // The warning "JS Environment Not Selected" is acceptable for now.
   }
 
   sourceSets {

@@ -7,16 +7,14 @@ kotlin {
   jvm()
   js(IR) {
     binaries.library()
-    browser {
-        testTask { enabled = false }
-    }
+    // browser {} block removed to fix "Plugin loaded multiple times" error.
   }
 
   sourceSets {
     commonMain.dependencies {
-      // Correct dependency: Syncable interface is in the shared core domain
+      // Correct dependency: Syncable interface is in shared core domain
       implementation(projects.core.coreDomain)
-      // Also include frontend domain if needed (e.g., for frontend-specific models)
+      // Also include frontend domain if needed (e.g. for frontend specific models)
       implementation(projects.frontend.core.domain)
 
       // Networking

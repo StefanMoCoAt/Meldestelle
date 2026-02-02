@@ -6,15 +6,10 @@ plugins {
 }
 
 kotlin {
-
   jvm()
-
   js(IR) {
     binaries.library()
-    // Explicitly select browser environment to satisfy Kotlin/JS compiler warning
-    browser {
-        testTask { enabled = false }
-    }
+    // browser {} block removed to fix "Plugin loaded multiple times" error.
   }
 
   sourceSets {

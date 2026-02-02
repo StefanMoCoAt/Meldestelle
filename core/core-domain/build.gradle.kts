@@ -12,11 +12,7 @@ kotlin {
 
   js(IR) {
     binaries.library()
-    browser {
-      testTask {
-        enabled = false
-      }
-    }
+    // browser {} block removed to fix "Plugin loaded multiple times" error.
   }
 
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)

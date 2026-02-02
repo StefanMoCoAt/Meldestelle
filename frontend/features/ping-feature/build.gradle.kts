@@ -17,9 +17,7 @@ kotlin {
   jvm()
   js {
     binaries.library()
-    browser {
-        testTask { enabled = false }
-    }
+    // browser {} block removed to fix "Plugin loaded multiple times" error.
   }
 
   sourceSets {
