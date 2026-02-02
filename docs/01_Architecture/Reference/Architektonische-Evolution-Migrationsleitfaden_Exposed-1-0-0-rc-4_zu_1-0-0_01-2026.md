@@ -2,7 +2,7 @@
 type: Reference
 status: ACTIVE
 owner: Lead Architect
-date: 2026-01-31
+date: 2026-02-02
 ---
 
 # Architektonische Evolution – Migrationsleitfaden: Exposed 1.0.0-rc-4 → 1.0.0
@@ -82,19 +82,19 @@ Das Handling von JSONB-Spalten in SQLite wurde vereinheitlicht.
 ## 2. Migrationsschritte (How-To)
 
 1. Zentralversion heben:
-   - `gradle/libs.versions.toml`: `exposed = "1.0.0"` setzen.
-   - Platform-BOM importieren; keine Direktversionen in Modul-Builds.
+  - `gradle/libs.versions.toml`: `exposed = "1.0.0"` setzen.
+  - Platform-BOM importieren; keine Direktversionen in Modul-Builds.
 2. UUID-Pfade prüfen:
-   - Nutzung von `Table.uuid()` evaluieren; falls `java.util.UUID` benötigt, auf `Table.javaUUID()` wechseln.
-   - Etwaige Referenzen auf verschobene `.UUID*`-Typen auf das neue `.java`-Subpaket anpassen.
+  - Nutzung von `Table.uuid()` evaluieren; falls `java.util.UUID` benötigt, auf `Table.javaUUID()` wechseln.
+  - Etwaige Referenzen auf verschobene `.UUID*`-Typen auf das neue `.java`-Subpaket anpassen.
 3. TransactionManager-Aufrufe:
-   - Verwendungen von `TransactionManagerApi.currentOrNull()` entfernen.
-   - Stattdessen `JdbcTransactionManager.currentOrNull()` bzw. `TransactionManager.currentOrNull()` einsetzen.
+  - Verwendungen von `TransactionManagerApi.currentOrNull()` entfernen.
+  - Stattdessen `JdbcTransactionManager.currentOrNull()` bzw. `TransactionManager.currentOrNull()` einsetzen.
 4. R2DBC (falls verwendet):
-   - Entfernte Methoden (`closeIfPossible`, `cancel`) nicht mehr aufrufen.
-   - Umbenennung auf `.clearExecutedStatements()` berücksichtigen (non-suspending).
+  - Entfernte Methoden (`closeIfPossible`, `cancel`) nicht mehr aufrufen.
+  - Umbenennung auf `.clearExecutedStatements()` berücksichtigen (non-suspending).
 5. JSON/SQLite:
-   - Verhalten von `jsonb()` mit `castToJsonFormat` prüfen und ggf. deaktivieren.
+  - Verhalten von `jsonb()` mit `castToJsonFormat` prüfen und ggf. deaktivieren.
 
 ## 3. Troubleshooting & Lessons Learned (Update 2026-02-02)
 
@@ -102,17 +102,23 @@ Das Handling von JSONB-Spalten in SQLite wurde vereinheitlicht.
 
 Bei der Migration von `DatabaseUtils.kt` traten Probleme mit der Auflösung von `exec` und `executeUpdate` auf.
 
-*   **Problem:** Die generische `Transaction` Klasse bietet in Exposed 1.0.0 keinen direkten Zugriff mehr auf `exec` mit `ResultSet`-Verarbeitung oder `executeUpdate`. Diese Methoden sind nun spezifischer in `JdbcTransaction` oder `PreparedStatementApi` verortet.
-*   **Lösung:**
-    *   **Explizite `JdbcTransaction`:** Unsere Transaction-Wrapper (`transactionResult`) wurden angepasst, um `JdbcTransaction` als Receiver (`this`) zu erzwingen.
-    *   **`exec` mit `StatementType`:** Aufrufe von `exec` müssen nun den `explicitStatementType` Parameter (z.B. `StatementType.SELECT`) nutzen, damit der Compiler die korrekte Überladung wählt.
-    *   **`executeUpdate` Workaround:** Da `PreparedStatementApi` in Exposed 1.0.0 nicht `AutoCloseable` ist und `executeUpdate` teilweise schwer aufzulösen war, nutzen wir `try-finally` mit `closeIfPossible()` und greifen bei Bedarf auf die native JDBC Connection zu.
+* **Problem:** Die generische `Transaction` Klasse bietet in Exposed 1.0.0 keinen direkten Zugriff mehr auf `exec` mit
+  `ResultSet`-Verarbeitung oder `executeUpdate`. Diese Methoden sind nun spezifischer in `JdbcTransaction` oder
+  `PreparedStatementApi` verortet.
+* **Lösung:**
+  * **Explizite `JdbcTransaction`:** Unsere Transaction-Wrapper (`transactionResult`) wurden angepasst, um
+    `JdbcTransaction` als Receiver (`this`) zu erzwingen.
+  * **`exec` mit `StatementType`:** Aufrufe von `exec` müssen nun den `explicitStatementType` Parameter (z.B.
+    `StatementType.SELECT`) nutzen, damit der Compiler die korrekte Überladung wählt.
+  * **`executeUpdate` Workaround:** Da `PreparedStatementApi` in Exposed 1.0.0 nicht `AutoCloseable` ist und
+    `executeUpdate` teilweise schwer aufzulösen war, nutzen wir `try-finally` mit `closeIfPossible()` und greifen bei
+    Bedarf auf die native JDBC Connection zu.
 
 ```kotlin
 // Beispiel für korrekten Low-Level Zugriff in Exposed 1.0.0
 transactionResult(database) {
-    // 'this' ist JdbcTransaction
-    this.exec("SELECT ...", explicitStatementType = StatementType.SELECT) { rs -> ... }
+  // 'this' ist JdbcTransaction
+  this.exec("SELECT ...", explicitStatementType = StatementType.SELECT) { rs -> ... }
 }
 ```
 
