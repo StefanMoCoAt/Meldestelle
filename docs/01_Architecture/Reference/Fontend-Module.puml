@@ -1,0 +1,37 @@
+@startuml
+!theme vibrant
+
+package "Frontend" {
+  package "Shells" <<Cloud>> {
+    [Android App]
+    [Desktop App]
+  }
+
+  package "Features" <<Database>> {
+    [Feature A]
+    [Feature B]
+    [Feature C]
+  }
+
+  package "Core" <<Component>> {
+    [UI Components]
+    [Design System]
+    [Utils]
+  }
+}
+
+[Android App] --> [Feature A]
+[Android App] --> [Feature B]
+[Desktop App] --> [Feature A]
+[Desktop App] --> [Feature C]
+
+[Feature A] ..> [Feature B] : (optional dependency)
+
+[Feature A] --> [Core]
+[Feature B] --> [Core]
+[Feature C] --> [Core]
+
+[Android App] --> [Core]
+[Desktop App] --> [Core]
+
+@enduml

@@ -3,7 +3,6 @@
 
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 /**
@@ -11,16 +10,13 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
  * setzt sie zu einer lauffähigen Anwendung zusammen.
  */
 plugins {
-  // Fix for "Plugin loaded multiple times": Apply plugin by ID without version (inherited from root)
-  id("org.jetbrains.kotlin.multiplatform")
+  alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.composeCompiler)
   alias(libs.plugins.composeMultiplatform)
   alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
-  // Toolchain is now handled centrally in the root build.gradle.kts
-
   // JVM Target für Desktop
   jvm {
     binaries {
@@ -31,7 +27,7 @@ kotlin {
   }
 
   // JavaScript Target für Web
-  js(IR) {
+  js {
     browser {
       commonWebpackConfig {
         cssSupport { enabled = true }
@@ -43,7 +39,7 @@ kotlin {
 
         // Source Maps Optimierung für Docker Builds
         if (project.hasProperty("noSourceMaps")) {
-            sourceMaps = false
+          sourceMaps = false
         }
       }
 
@@ -55,13 +51,6 @@ kotlin {
       runTask {
         mainOutputFileName.set("web-app.js")
       }
-      // Browser-Tests komplett deaktivieren (Configuration Cache kompatibel)
-      testTask {
-        useKarma {
-          useChromeHeadless()
-          environment("CHROME_BIN", "/usr/bin/google-chrome-stable")
-        }
-      }
     }
     binaries.executable()
   }
@@ -69,7 +58,6 @@ kotlin {
   sourceSets {
     commonMain.dependencies {
       // Shared modules
-      // implementation(projects.frontend.shared) // REMOVED: Shared module deleted
       implementation(projects.frontend.core.domain)
       implementation(projects.frontend.core.designSystem)
       implementation(projects.frontend.core.navigation)
@@ -92,7 +80,7 @@ kotlin {
       implementation(compose.components.resources)
       implementation(compose.materialIconsExtended)
 
-      // Bundles (Cleaned up dependencies)
+      // Bundles
       implementation(libs.bundles.kmp.common)        // Coroutines, Serialization, DateTime
       implementation(libs.bundles.compose.common)     // ViewModel & Lifecycle
     }
@@ -106,7 +94,7 @@ kotlin {
     jsMain.dependencies {
       implementation(compose.html.core)
       // Benötigt für custom webpack config (wasm.js)
-      implementation(devNpm("copy-webpack-plugin", "11.0.0"))
+      implementation(devNpm("copy-webpack-plugin", libs.versions.copyWebpackPlugin.get()))
     }
 
     commonTest.dependencies {
@@ -115,39 +103,12 @@ kotlin {
   }
 }
 
-// KMP Compile-Optionen
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-  compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_25)
-    freeCompilerArgs.addAll(
-      "-opt-in=kotlin.RequiresOptIn",
-      "-Xskip-metadata-version-check", // Für bleeding-edge Versionen
-      // Suppress beta warning for expect/actual declarations used in this module
-      "-Xexpect-actual-classes"
-    )
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Kotlin/JS source maps
-// ---------------------------------------------------------------------------
-// Production source maps must remain enabled for browser debugging.
-
-// Configure a duplicate handling strategy for distribution tasks
+// Duplicate-Handling für Distribution (Zentralisiert in Root build.gradle.kts, aber hier spezifisch für Distribution Tasks)
 tasks.withType<Tar> {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.withType<Zip> {
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-// Duplicate-Handling für Distribution
-tasks.withType<Copy> {
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-tasks.withType<Sync> {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 

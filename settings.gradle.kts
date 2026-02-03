@@ -5,23 +5,16 @@ pluginManagement {
   repositories {
     gradlePluginPortal()
     mavenCentral()
-    google() // Removed content filtering to ensure all artifacts are found
+    google()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     maven("https://us-central1-maven.pkg.dev/varabyte-repos/public")
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") } // Added snapshots for plugins
-  }
-  plugins {
-    // Centralized Plugin Version Management
-    // This allows subprojects to apply plugins without versions, avoiding conflicts.
-    id("org.jetbrains.kotlin.multiplatform") version "2.3.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0"
-    id("org.jetbrains.compose") version "1.10.0"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.3.0"
-    id("app.cash.sqldelight") version "2.2.1"
+    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
   }
 }
 
 plugins {
+  // Settings plugins cannot easily use version catalogs because the catalog is loaded
+  // as part of the settings evaluation. We must hardcode the version here.
   id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
@@ -95,7 +88,7 @@ include(":docs")
 // ==========================================================================
 // --- CORE ---
 // frontend/core/auth
-include(":frontend:core:auth") // MOVED from features
+include(":frontend:core:auth")
 include(":frontend:core:domain")
 include(":frontend:core:design-system")
 include(":frontend:core:navigation")

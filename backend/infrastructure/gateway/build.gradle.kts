@@ -31,28 +31,10 @@ dependencies {
   // Resilience (Reactive) - WICHTIG: Reactor-Variante für WebFlux!
   implementation(libs.spring.cloud.starter.circuitbreaker.reactor.resilience4j)
 
-  implementation(libs.kotlin.logging.jvm)
-  implementation(libs.logback.classic)
-  implementation(libs.logback.core)
-  implementation(libs.jackson.module.kotlin)
-  implementation(libs.jackson.datatype.jsr310)
-
   implementation(libs.spring.boot.starter.data.redis)
-
   implementation(libs.micrometer.tracing.bridge.brave)
 
   testImplementation(projects.platform.platformTesting)
-  testImplementation(libs.junit.jupiter.api)
-  testImplementation(libs.junit.jupiter.engine)
-  testImplementation(libs.junit.jupiter.params)
-  testImplementation(libs.junit.platform.launcher)
-  testImplementation(libs.mockk)
-  testImplementation(libs.assertj.core)
-  testImplementation(libs.kotlinx.coroutines.test)
-}
-
-tasks.test {
-  useJUnitPlatform()
 }
 
 sourceSets {

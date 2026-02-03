@@ -75,7 +75,11 @@ subprojects {
   tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
       jvmTarget.set(JvmTarget.JVM_25)
-      freeCompilerArgs.add("-Xannotation-default-target=param-property")
+      freeCompilerArgs.addAll(
+        "-opt-in=kotlin.RequiresOptIn",
+        "-Xannotation-default-target=param-property",
+        "-Xexpect-actual-classes",
+      )
     }
   }
 

@@ -37,7 +37,3 @@ dependencies {
   implementation(project(":frontend:core:sync"))
   implementation(project(":frontend:shells:meldestelle-portal"))
 }
-
-tasks.withType<Test>().configureEach {
-  useJUnitPlatform()
-}

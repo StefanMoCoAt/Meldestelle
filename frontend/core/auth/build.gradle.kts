@@ -1,8 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-  // Fix for "Plugin loaded multiple times": Apply plugin by ID without version (inherited from root)
-  id("org.jetbrains.kotlin.multiplatform")
+  alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.composeMultiplatform)
   alias(libs.plugins.composeCompiler)
   alias(libs.plugins.kotlinSerialization)
@@ -13,11 +10,9 @@ version = "1.0.0"
 
 kotlin {
   jvm()
-
   js {
     binaries.library()
-    // CHANGED: Use nodejs() instead of browser() to minimize NodeJsRootPlugin conflicts in Docker
-    // while still satisfying the "configured for JS usage" requirement.
+    // Use nodejs() to minimize NodeJsRootPlugin conflicts in Docker
     nodejs()
   }
 
@@ -68,15 +63,5 @@ kotlin {
     jsMain.dependencies {
       implementation(libs.ktor.client.js)
     }
-  }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-  compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_25)
-    freeCompilerArgs.addAll(
-      "-opt-in=kotlin.RequiresOptIn",
-      "-Xexpect-actual-classes"
-    )
   }
 }

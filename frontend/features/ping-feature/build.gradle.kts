@@ -1,11 +1,8 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 /**
  * Dieses Modul kapselt die gesamte UI und Logik für das Ping-Feature.
  */
 plugins {
-  // Fix for "Plugin loaded multiple times": Apply plugin by ID without version (inherited from root)
-  id("org.jetbrains.kotlin.multiplatform")
+  alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.composeMultiplatform)
   alias(libs.plugins.composeCompiler)
   alias(libs.plugins.kotlinSerialization)
@@ -18,12 +15,7 @@ kotlin {
   jvm()
   js {
     binaries.library()
-    // Re-enabled browser environment after Root NodeJs fix
-    browser {
-        testTask {
-            enabled = false
-        }
-    }
+    browser()
   }
 
   sourceSets {
@@ -68,14 +60,5 @@ kotlin {
     jsMain.dependencies {
       implementation(libs.ktor.client.js)
     }
-  }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-  compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_25)
-    freeCompilerArgs.addAll(
-      "-opt-in=kotlin.RequiresOptIn"
-    )
   }
 }

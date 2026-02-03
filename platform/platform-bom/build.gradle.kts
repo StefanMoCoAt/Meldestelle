@@ -16,40 +16,37 @@ dependencies {
     // Importiert andere wichtige BOMs. Die Versionen werden durch diese
     // importierten Plattformen transitiv verwaltet.
     api(platform(libs.spring.boot.dependencies))
-    api(platform(libs.spring.cloud.dependencies)) // NEU: Spring Cloud BOM hinzugefügt
+    api(platform(libs.spring.cloud.dependencies))
     api(platform(libs.kotlin.bom))
     api(platform(libs.kotlinx.coroutines.bom))
+
     // `constraints` erzwingt spezifische Versionen für einzelne Bibliotheken.
     // Alle Versionen werden sicher aus `libs.versions.toml` bezogen.
     constraints {
-        // --- Spring Boot Core Constraints wurden entfernt. ---
-        // Die Versionen werden jetzt vollständig durch das importierte Spring Boot BOM verwaltet.
-        // Das ist der saubere und empfohlene Weg.
-
         // --- Utilities & Other ---
         api(libs.caffeine)
         api(libs.reactor.kafka)
         api(libs.redisson)
-        // Removed the legacy UUID library constraint (com.benasher44:uuid) since project uses Kotlin stdlib UUID
         api(libs.bignum)
-        // api(libs.consul.client) wird getauscht mir spring-cloud-starter-consul-discovery
         api(libs.spring.cloud.starter.consul.discovery)
         api(libs.kotlin.logging.jvm)
         api(libs.jakarta.annotation.api)
         api(libs.auth0.java.jwt)
+
+        // Logging: WICHTIG! Core und Classic müssen synchronisiert sein.
         api(libs.logback.classic)
+        api(libs.logback.core)
+
         // --- Spring & SpringDoc ---
         api(libs.springdoc.openapi.starter.common)
-        // KORREKTUR: `webmvc`-Starter durch `webflux`-Starter ersetzt, um Konflikt zu beheben.
         api(libs.springdoc.openapi.starter.webflux.ui)
+
         // --- Database & Persistence ---
-        // Exposed Bundle wieder aktiviert, da Version jetzt kompatibel ist
         api(libs.exposed.core)
         api(libs.exposed.dao)
         api(libs.exposed.jdbc)
         api(libs.exposed.kotlin.datetime)
 
-        // Flyway Bundle kann nicht direkt in constraints verwendet werden, müssen einzeln gelistet werden
         api(libs.flyway.core)
         api(libs.flyway.postgresql)
 
@@ -57,16 +54,19 @@ dependencies {
         api(libs.hikari.cp)
         api(libs.h2.driver)
         api(libs.lettuce.core)
+
         // --- Kotlinx Libraries ---
         api(libs.kotlinx.serialization.json)
         api(libs.kotlinx.datetime)
+
         // --- Jackson Modules ---
         api(libs.jackson.module.kotlin)
         api(libs.jackson.datatype.jsr310)
-        // --- Ktor OpenAPI (runtime-based docs require explicit routing-openapi in 3.4.0) ---
+
+        // --- Ktor OpenAPI ---
         api("io.ktor:ktor-server-routing-openapi:${libs.versions.ktor.get()}")
+
         // --- Testcontainers ---
-        // Testcontainers Bundle kann nicht direkt in constraints verwendet werden
         api(libs.testcontainers.core)
         api(libs.testcontainers.junit.jupiter)
         api(libs.testcontainers.postgresql)

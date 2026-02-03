@@ -1,21 +1,15 @@
 plugins {
-  // Fix for "Plugin loaded multiple times": Apply plugin by ID without version (inherited from root)
-  id("org.jetbrains.kotlin.multiplatform")
-  alias(libs.plugins.composeMultiplatform)
-  alias(libs.plugins.composeCompiler)
+  alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.kotlinSerialization)
+  alias(libs.plugins.composeCompiler)
+  alias(libs.plugins.composeMultiplatform)
 }
 
 kotlin {
   jvm()
-  js(IR) {
+  js {
     binaries.library()
-    // Re-enabled browser environment after Root NodeJs fix
-    browser {
-        testTask {
-            enabled = false
-        }
-    }
+    browser()
   }
 
   sourceSets {
@@ -25,9 +19,7 @@ kotlin {
       implementation(compose.material3)
       implementation(compose.ui)
       implementation(compose.components.resources)
-      implementation(libs.kotlinx.coroutines.core)
-      implementation(libs.kotlinx.serialization.json)
-      implementation(libs.kotlinx.datetime)
+      implementation(libs.bundles.kmp.common)
     }
   }
 }

@@ -1,7 +1,6 @@
 @file:OptIn(ExperimentalKotlinGradlePluginApi::class)
 
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
@@ -14,9 +13,9 @@ kotlin {
     binaries.library()
     // Re-enabled browser environment after Root NodeJs fix
     browser {
-        testTask {
-            enabled = false
-        }
+      testTask {
+        enabled = false
+      }
     }
   }
 
@@ -27,9 +26,4 @@ kotlin {
   }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-  compilerOptions {
-    jvmTarget.set(JvmTarget.JVM_25)
-    freeCompilerArgs.addAll("-opt-in=kotlin.RequiresOptIn")
-  }
-}
+// KMP Compile-Optionen sind jetzt zentral in der Root build.gradle.kts definiert
