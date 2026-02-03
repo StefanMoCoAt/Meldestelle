@@ -38,6 +38,13 @@ plugins {
 // This ensures NodeJsRootPlugin is initialized here first.
 kotlin {
   jvm() // Dummy target to keep KMP happy
+
+  // FIX: Explicitly initialize JS target at root to force NodeJsRootPlugin loading
+  // This prevents "IsolatedKotlinClasspathClassCastException" in subprojects
+  js {
+    browser()
+    nodejs()
+  }
 }
 
 // ##################################################################

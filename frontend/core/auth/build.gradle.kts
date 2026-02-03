@@ -16,12 +16,9 @@ kotlin {
 
   js {
     binaries.library()
-    // Re-enabled browser environment after Root NodeJs fix
-    browser {
-        testTask {
-            enabled = false
-        }
-    }
+    // CHANGED: Use nodejs() instead of browser() to minimize NodeJsRootPlugin conflicts in Docker
+    // while still satisfying the "configured for JS usage" requirement.
+    nodejs()
   }
 
   sourceSets {
