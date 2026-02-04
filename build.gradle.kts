@@ -16,8 +16,8 @@ plugins {
   // This prevents "plugin loaded multiple times" errors in Gradle 9.2.1+
   // Subprojects apply these plugins via version catalog: alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.kotlinJvm) apply false
-  // CHANGE: Apply KMP plugin at root (but don't configure targets yet) to claim NodeJsRootPlugin ownership
-  alias(libs.plugins.kotlinMultiplatform) apply true
+  // KMP plugin applied as 'apply false' to avoid root project conflict
+  alias(libs.plugins.kotlinMultiplatform) apply false
   alias(libs.plugins.kotlinSerialization) apply false
   alias(libs.plugins.kotlinSpring) apply false
   alias(libs.plugins.kotlinJpa) apply false
@@ -34,19 +34,6 @@ plugins {
   alias(libs.plugins.ktlint)
 }
 
-// Minimal KMP configuration for Root Project to satisfy the plugin
-// This ensures NodeJsRootPlugin is initialized here first.
-kotlin {
-  jvm() // Dummy target to keep KMP happy
-
-  // FIX: Explicitly initialize JS target at root to force NodeJsRootPlugin loading
-  // This prevents "IsolatedKotlinClasspathClassCastException" in subprojects
-  js {
-    browser()
-    nodejs()
-  }
-}
-
 // ##################################################################
 // ###                  ALLPROJECTS CONFIGURATION                 ###
 // ##################################################################
@@ -54,11 +41,6 @@ kotlin {
 allprojects {
   group = "at.mocode"
   version = "1.0.0-SNAPSHOT"
-
-  // The 'repositories' block was removed from here.
-  // Repository configuration is now centralized in 'settings.gradle.kts'
-  // as per modern Gradle best practices. This resolves dependency resolution
-  // conflicts with platforms and Spring Boot 4+.
 }
 
 subprojects {
@@ -94,8 +76,6 @@ subprojects {
     maxHeapSize = "2g"
     // Parallel test execution for better performance
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
-    // Removed byte-buddy-agent configuration to fix Gradle 9.0.0 deprecation warning
-    // The agent configuration was causing Task.project access at execution time
   }
 
   // ---------------------------------------------------------------------------

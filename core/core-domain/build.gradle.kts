@@ -1,6 +1,5 @@
 plugins {
-  // Fix for "Plugin loaded multiple times": Apply plugin by ID without version (inherited from root)
-  id("org.jetbrains.kotlin.multiplatform")
+  alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.kotlinSerialization)
 }
 
@@ -15,16 +14,16 @@ kotlin {
     binaries.library()
     // Re-enabled browser environment after Root NodeJs fix
     browser {
-        testTask {
-            enabled = false
-        }
+      testTask {
+        enabled = false
+      }
     }
   }
 
   @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
   wasmJs {
-      binaries.library()
-      browser()
+    binaries.library()
+    browser()
   }
 
   sourceSets {

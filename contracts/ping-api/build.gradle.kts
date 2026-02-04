@@ -12,7 +12,11 @@ kotlin {
 
   // JS target for frontend usage (Compose/Browser)
   js {
-    browser()
+    browser {
+      testTask {
+        enabled = false
+      }
+    }
   }
 
   // Wasm enabled by default

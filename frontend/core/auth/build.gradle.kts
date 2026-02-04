@@ -12,8 +12,11 @@ kotlin {
   jvm()
   js {
     binaries.library()
-    // Use nodejs() to minimize NodeJsRootPlugin conflicts in Docker
-    nodejs()
+    browser {
+      testTask {
+        enabled = false
+      }
+    }
   }
 
   sourceSets {

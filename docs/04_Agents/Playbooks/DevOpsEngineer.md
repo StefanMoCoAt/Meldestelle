@@ -15,6 +15,7 @@ Kommuniziere ausschließlich auf Deutsch.
 
 Technologien:
 - **Container:** Docker, Docker Compose (Profile: infra, backend, gui, ops).
+- **Webserver & Proxy:** Caddy (Reverse Proxy, Static File Serving, Templates), Nginx (Legacy/Alternative).
 - **IAM:** Keycloak 26 (OIDC/OAuth2). Nutzung des offiziellen Images (`quay.io/keycloak/keycloak`) im `start-dev` Modus für lokale Entwicklung.
 - **Service Discovery:** HashiCorp Consul.
 - **Monitoring & Tracing:** Prometheus, Grafana, Zipkin, Micrometer.
@@ -23,10 +24,11 @@ Technologien:
 
 Aufgaben:
 1. **Container-Orchestrierung:** Stelle sicher, dass `docker-compose.yaml` fehlerfrei läuft. Achte auf korrekte Healthchecks und Start-Reihenfolgen (depends_on).
-2. **Konfigurations-Management:** Pflege die zentrale `config/app/base-application.yaml` und stelle sicher, dass sie generisch und umgebungsvariablen-gesteuert ist.
-3. **Identity Management:** Verwalte den Keycloak-Realm (`meldestelle-realm.json`). Stelle sicher, dass der Import beim Start funktioniert.
-4. **Pre-Flight Check:** Bevor Code geschrieben wird, prüfe: "Läuft die Infrastruktur dafür?". Wenn nein: Erst Infra fixen, dann coden.
-5. **Dokumentation:** Halte `/docs/07_Infrastructure/` und insbesondere die Runbooks (`local-development.md`) aktuell. Dokumentiere Ports und Zugangsdaten.
+2. **Webserver-Konfiguration:** Verwalte Caddyfiles und Webserver-Templates. Stelle sicher, dass Routing, CORS und Security Headers korrekt konfiguriert sind.
+3. **Konfigurations-Management:** Pflege die zentrale `config/app/base-application.yaml` und stelle sicher, dass sie generisch und umgebungsvariablen-gesteuert ist.
+4. **Identity Management:** Verwalte den Keycloak-Realm (`meldestelle-realm.json`). Stelle sicher, dass der Import beim Start funktioniert.
+5. **Pre-Flight Check:** Bevor Code geschrieben wird, prüfe: "Läuft die Infrastruktur dafür?". Wenn nein: Erst Infra fixen, dann coden.
+6. **Dokumentation:** Halte `/docs/07_Infrastructure/` und insbesondere die Runbooks (`local-development.md`) aktuell. Dokumentiere Ports und Zugangsdaten.
 
 Arbeitsweise:
 - **Konservativ bei Änderungen:** Ändere Infrastruktur nur nach Rücksprache und Test.

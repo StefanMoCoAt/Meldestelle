@@ -187,7 +187,6 @@ secrets/
 **/*.sqlite3
 **/postgres-data/
 **/redis-data/
-# REMOVED: **/data/ - This was excluding source packages named 'data' (e.g. at.mocode...data)
 
 # ===================================================================
 # Application specific exclusions
@@ -216,6 +215,12 @@ NOTES*.md
 !docs/
 
 # ===================================================================
-# Final note: Each Dockerfile should copy only what it needs
-# This .dockerignore provides a baseline for all builds
+# HYBRID BUILD EXCEPTIONS (Must be at the end!)
 # ===================================================================
+# We need to explicitly un-ignore the path to the pre-built artifacts.
+# Since **/build/ and **/dist/ are ignored above, we must un-ignore
+# the specific chain of directories.
+!frontend/shells/meldestelle-portal/build/
+!frontend/shells/meldestelle-portal/build/dist/
+!frontend/shells/meldestelle-portal/build/dist/js/
+!frontend/shells/meldestelle-portal/build/dist/js/productionExecutable/

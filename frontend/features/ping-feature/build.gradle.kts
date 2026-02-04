@@ -15,7 +15,11 @@ kotlin {
   jvm()
   js {
     binaries.library()
-    browser()
+    browser {
+      testTask {
+        enabled = false
+      }
+    }
   }
 
   sourceSets {

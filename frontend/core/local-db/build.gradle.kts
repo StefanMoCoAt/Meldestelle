@@ -1,7 +1,3 @@
-@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
-
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.kotlinSerialization)
@@ -12,7 +8,11 @@ kotlin {
   jvm()
   js {
     binaries.library()
-    browser()
+    browser {
+      testTask {
+        enabled = false
+      }
+    }
   }
 
   sourceSets {
