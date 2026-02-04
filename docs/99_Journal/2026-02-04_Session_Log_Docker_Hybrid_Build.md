@@ -41,19 +41,30 @@ Den Docker-Build für den `web-app` Service reparieren, der aufgrund von Gradle/
 *   **Lösung:** Template auf einfache Syntax zurückgesetzt: `{{env "API_BASE_URL" ...}}`.
 *   **Playbook Update:** DevOps Engineer übernimmt explizit die Verantwortung für Caddy/Webserver-Konfiguration.
 
+### 5. Problem: Ping-Service Erreichbarkeit (CORS/Routing)
+*   **Symptom:** Frontend erhielt HTML (SPA Fallback) statt JSON vom Backend.
+*   **Ursache:** Caddy leitete `/api/*` nicht an den `api-gateway` weiter, sondern lieferte die `index.html` aus.
+*   **Lösung:**
+    1.  **Caddyfile:** `reverse_proxy /api/* api-gateway:8081` hinzugefügt.
+    2.  **config.json:** `apiBaseUrl` auf leer (`""`) gesetzt, damit Frontend relative Pfade nutzt.
+    3.  **Security:** Caddyfile um Security Headers (`Permissions-Policy`, `Referrer-Policy`) und Logging erweitert.
+
 ## ✅ Ergebnisse
 1.  **Web-App läuft:** Der Container `meldestelle-web-app` startet erfolgreich und ist unter `http://localhost:4000` erreichbar.
-2.  **Build-Prozess:** Stabilisiert durch Hybrid-Ansatz (Lokal bauen -> Docker kopieren).
-3.  **Infrastruktur:** `build.gradle.kts` (Root) ist sauberer und performanter.
+2.  **API-Zugriff funktioniert:** Ping-Service liefert JSON (`200 OK`) an das Frontend.
+3.  **Build-Prozess:** Stabilisiert durch Hybrid-Ansatz (Lokal bauen -> Docker kopieren).
+4.  **Infrastruktur:** `build.gradle.kts` (Root) ist sauberer und performanter.
 
 ## ⏭️ Nächste Schritte (Open Points)
-*   **Ping-Service Erreichbarkeit:** Das Frontend kann den Ping-Service (`http://localhost:8081`) noch nicht erreichen (CORS oder Netzwerk-Thema). -> Übergabe an Backend/Frontend.
 *   **CI/CD:** Für die CI-Pipeline muss der Hybrid-Build berücksichtigt werden (Build-Step vor Docker-Build).
+*   **WebGL Warnungen:** Im Browser-Log tauchen WebGL-Warnungen auf (vermutlich Compose/Skiko related), die aber die Funktion nicht beeinträchtigen.
 
 ## 📂 Betroffene Dateien
 *   `build.gradle.kts` (Root)
 *   `gradle.properties`
 *   `config/docker/caddy/web-app/Dockerfile`
+*   `config/docker/caddy/web-app/Caddyfile`
 *   `.dockerignore`
 *   `config/docker/caddy/web-app/config.json`
+*   `dc-gui.yaml`
 *   `docs/04_Agents/Playbooks/DevOpsEngineer.md`

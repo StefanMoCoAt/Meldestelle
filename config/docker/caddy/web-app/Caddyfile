@@ -1,41 +1,69 @@
+{
+# Global Options
+# Enable Prometheus metrics
+  servers {
+            metrics
+          }
+}
+
 :4000 {
-    # Root directory for static files
-    root * /usr/share/caddy
+# Root directory for static files
+  root * /usr/share/caddy
 
-    # Enable Gzip/Zstd compression
-    encode gzip zstd
+# Access Logs (JSON format for Docker)
+  log {
+        output stdout
+        format json
+      }
 
-    # Serve static files
-    file_server
+# Enable Gzip/Zstd compression
+  encode gzip zstd
 
-    # Templates for runtime configuration (config.json)
-    templates {
-        mime application/json
-    }
+# Templates for runtime configuration (config.json)
+  templates {
+              mime application/json
+            }
 
-    # SPA Routing: Fallback to index.html for non-existent files
-    try_files {path} /index.html
+# Cache Control for static assets (immutable)
+  @static {
+            file
+            path *.js *.css *.png *.jpg *.svg *.wasm
+          }
+  header @static Cache-Control "public, max-age=31536000, immutable"
 
-    # Cache Control for static assets (immutable)
-    @static {
-        file
-        path *.js *.css *.png *.jpg *.svg *.wasm
-    }
-    header @static Cache-Control "public, max-age=31536000, immutable"
+# Security Headers (Future Proofing for Wasm)
+  header {
+         # Cross-Origin Isolation for SharedArrayBuffer (required for some Wasm features)
+           Cross-Origin-Opener-Policy "same-origin"
+           Cross-Origin-Embedder-Policy "require-corp"
 
-    # Security Headers (Future Proofing for Wasm)
-    header {
-        # Cross-Origin Isolation for SharedArrayBuffer (required for some Wasm features)
-        Cross-Origin-Opener-Policy "same-origin"
-        Cross-Origin-Embedder-Policy "require-corp"
+         # Standard Security Headers
+           X-Content-Type-Options "nosniff"
+           X-Frame-Options "DENY"
+           Referrer-Policy "strict-origin-when-cross-origin"
+           Permissions-Policy "camera=(), microphone=(), geolocation=()"
+         }
 
-        # Standard Security Headers
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-    }
+# --- ROUTING LOGIC ---
 
-    # Health Check
-    handle /health {
-        respond "healthy" 200
-    }
+# 1. API Proxy (Priority 1)
+  handle /api/* {
+                  reverse_proxy api-gateway:8081 {
+                                                   header_up Host {upstream_hostport}
+                                                 }
+                }
+
+# 2. Health Check
+  handle /health {
+                   respond "healthy" 200
+                 }
+
+# 3. Static Files & SPA Fallback (Priority 2)
+  handle {
+         # Serve static files if they exist
+           file_server
+
+         # SPA Routing: Fallback to index.html for non-existent files
+           try_files {path} /index.html
+         }
 }

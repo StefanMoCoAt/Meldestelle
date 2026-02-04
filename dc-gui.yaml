@@ -11,8 +11,6 @@ services:
       context: . # Wichtig: Root Context für Monorepo Zugriff
       dockerfile: config/docker/caddy/web-app/Dockerfile
       args:
-        GRADLE_VERSION: "${DOCKER_GRADLE_VERSION:-9.3.1}"
-        JAVA_VERSION: "${DOCKER_JAVA_VERSION:-25}"
         # Frontend spezifisch:
         CADDY_VERSION: "${DOCKER_CADDY_VERSION:-2.9-alpine}"
         # Metadaten:
@@ -21,14 +19,12 @@ services:
     labels:
       - "org.opencontainers.image.created=${DOCKER_BUILD_DATE}"
     container_name: "${PROJECT_NAME:-meldestelle}-web-app"
-    restart: no
+    restart: unless-stopped
     ports:
       - "${WEB_APP_PORT:-4000:4000}"
     environment:
       # Runtime Configuration for Caddy Templates
       # Browser can access API via localhost:8081 (Gateway)
-      # In Docker network, it might be http://api-gateway:8081, but browser runs on host!
-      # Usually, for local dev, we want the browser to hit localhost:8081.
       API_BASE_URL: "${WEB_APP_API_URL:-http://localhost:8081}"
     depends_on:
       api-gateway:
