@@ -242,7 +242,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "Change_Me_In_Production!",
+          "value": "password",
           "temporary": false
         }
       ],

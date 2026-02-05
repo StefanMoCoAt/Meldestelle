@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Unit tests for PingController
@@ -42,6 +43,7 @@ import java.time.Instant
 @ActiveProfiles("test")
 @Import(PingControllerTest.PingControllerTestConfig::class)
 @AutoConfigureMockMvc(addFilters = false) // Disable security filters for unit tests
+@OptIn(ExperimentalUuidApi::class)
 class PingControllerTest {
 
     @Autowired

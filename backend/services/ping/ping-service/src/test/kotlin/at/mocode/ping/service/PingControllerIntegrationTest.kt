@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Lightweight Spring MVC integration test (no full application context / datasource).
@@ -33,6 +34,7 @@ import java.time.Instant
 @ContextConfiguration(classes = [TestPingServiceApplication::class])
 @ActiveProfiles("test")
 @Import(PingControllerIntegrationTest.PingControllerIntegrationTestConfig::class)
+@OptIn(ExperimentalUuidApi::class)
 class PingControllerIntegrationTest {
 
     @Autowired
