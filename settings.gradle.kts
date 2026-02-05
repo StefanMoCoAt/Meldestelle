@@ -8,7 +8,8 @@ pluginManagement {
     google()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     maven("https://us-central1-maven.pkg.dev/varabyte-repos/public")
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://jitpack.io")
   }
 }
 
@@ -20,12 +21,13 @@ plugins {
 
 dependencyResolutionManagement {
   repositories {
+    gradlePluginPortal()
     mavenCentral()
     google()
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
-    maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
-    maven { url = uri("https://us-central1-maven.pkg.dev/varabyte-repos/public") }
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven("https://us-central1-maven.pkg.dev/varabyte-repos/public")
+    maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://jitpack.io")
   }
 }
 

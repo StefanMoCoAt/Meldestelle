@@ -340,14 +340,57 @@ val dokkaAll =
       val dest = layout.buildDirectory.dir("dokka/all").get().asFile
       if (dest.exists()) dest.deleteRecursively()
       dest.mkdirs()
+
+      val modules = mutableListOf<Pair<String, String>>()
+
       subprojects.filter { it.plugins.hasPlugin("org.jetbrains.dokka") }.forEach { p ->
-        // Dokka V2 writes into build/dokka; copy everything to keep format/plugins agnostic
-        val out = p.layout.buildDirectory.dir("dokka").get().asFile
-        if (out.exists()) {
-          out.copyRecursively(File(dest, p.path.trimStart(':').replace(':', '/')), overwrite = true)
+        // Dokka V2 writes into build/dokka/html
+        val outHtml = p.layout.buildDirectory.dir("dokka/html").get().asFile
+        if (outHtml.exists()) {
+          val modulePath = p.path.trimStart(':').replace(':', '/')
+          val targetDir = File(dest, modulePath)
+          outHtml.copyRecursively(targetDir, overwrite = true)
+          modules.add(p.name to modulePath)
         }
       }
+
+      // Generate a simple index.html to navigate the modules
+      val indexFile = File(dest, "index.html")
+      val links =
+        modules.sortedBy { it.first }.joinToString("\n") { (name, path) ->
+          """<li><a href="$path/index.html">$name</a> <span style="color:gray; font-size:0.8em">($path)</span></li>"""
+        }
+
+      indexFile.writeText(
+        """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Meldestelle Documentation</title>
+            <style>
+                body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.5; }
+                h1 { border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
+                ul { list-style-type: none; padding: 0; }
+                li { margin: 0.5rem 0; padding: 0.5rem; background: #f9f9f9; border-radius: 4px; }
+                li:hover { background: #f0f0f0; }
+                a { text-decoration: none; color: #0066cc; font-weight: 500; }
+                a:hover { text-decoration: underline; }
+            </style>
+        </head>
+        <body>
+            <h1>Meldestelle Project Documentation</h1>
+            <p>Generated on ${java.time.LocalDateTime.now()}</p>
+            <ul>
+                $links
+            </ul>
+        </body>
+        </html>
+        """.trimIndent(),
+      )
+
       println("[DOKKA] Aggregated Dokka V2 outputs into ${dest.absolutePath}")
+      println("[DOKKA] Open ${dest.resolve("index.html").absolutePath} in your browser")
     }
   }
 
