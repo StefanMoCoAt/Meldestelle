@@ -2,7 +2,7 @@
 type: Roadmap
 status: ACTIVE
 owner: Lead Architect
-last_update: 2026-02-01
+last_update: 2026-02-06
 ---
 
 # MASTER ROADMAP Q1 2026: "Operation Tracer Bullet"
@@ -10,7 +10,7 @@ last_update: 2026-02-01
 **Strategisches Ziel:**
 Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> DB) anhand des **Ping-Service**. Dieser Service dient als **technischer Blueprint** (Vorlage) für alle kommenden Fach-Services. Er muss "Production Ready" gehärtet sein, bevor wir Fachlichkeit implementieren.
 
-**Aktueller technischer Stand (01.02.2026):**
+**Aktueller technischer Stand (06.02.2026):**
 *   Build System: ✅ Grün (Gradle, Kotlin 2.3, Spring Boot 3.5.9, Spring Cloud 2025.0.1).
 *   Code-Basis: ✅ `ping-service` existiert, Delta-Sync implementiert.
 *   Infrastruktur: ✅ Docker Environment stabil (Valkey, Keycloak, Consul, Zipkin).
@@ -65,3 +65,15 @@ Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> 
 ## 4. Next Steps (Q1/2026)
 1.  **Entries Service:** Beginn der Implementierung des ersten echten Fach-Services ("Nennungen").
 2.  **System Hardening:** Keycloak Production-Config (kein `start-dev`).
+3.  **Reporting / Printing:** (Vorgemerkt)
+    *   Anforderung: PDF-Generierung für Startlisten, Ergebnislisten, Dressur-Protokolle (personalisiert).
+    *   Architektur-Entscheidung ausstehend: Dezentral (pro Service) vs. Zentraler Reporting-Service.
+    *   Technologie-Evaluierung: JasperReports, Thymeleaf + Flying Saucer, etc.
+4.  **Infrastructure Setup (Home-Server):**
+    *   Hardware: Minisforum MS-R1 (ARM64).
+    *   OS: Debian 12 (Bookworm).
+    *   Hypervisor: **Incus** (LXC/LXD Fork) für Container & VMs.
+    *   Services:
+        *   `infra-gitea` (LXC): Gitea + Actions Runner (ARM64 Native Builds).
+        *   `docker-host-prod` (LXC, nesting=true): Docker Host für Meldestelle-Stack.
+    *   Networking: Cloudflare Tunnel (kein Port-Forwarding).
