@@ -15,7 +15,7 @@ pluginManagement {
 
 plugins {
   // Settings plugins cannot easily use version catalogs because the catalog is loaded
-  // as part of the settings evaluation. We must hardcode the version here.
+  // as part of the settings evaluation. We must hard-code the version here.
   id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 

@@ -41,7 +41,7 @@ Wir haben heute die technische Basis des Frontends massiv stabilisiert und das "
 
 Als **Documentation & Knowledge Curator** habe ich die Erkenntnisse der heutigen Session gesichert:
 
-1.  **Neues Dokument:** [`docs/06_Frontend/feature-implementation-guide.md`](../06_Frontend/feature-implementation-guide.md)
+1.  **Neues Dokument:** [`docs/06_Frontend/feature-implementation-guide.md`](../../06_Frontend/feature-implementation-guide.md)
     *   Dient als "Blaupause" für alle zukünftigen Features.
     *   Beschreibt exakt, wie man den `AuthenticatedHttpClient` einbindet und die Koin-Module strukturiert.
     *   Dokumentiert den Web-Worker-Copy-Prozess für SQLDelight.

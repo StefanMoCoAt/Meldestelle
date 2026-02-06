@@ -67,13 +67,16 @@ Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> 
 2.  **System Hardening:** Keycloak Production-Config (kein `start-dev`).
 3.  **Reporting / Printing:** (Vorgemerkt)
     *   Anforderung: PDF-Generierung für Startlisten, Ergebnislisten, Dressur-Protokolle (personalisiert).
-    *   Architektur-Entscheidung ausstehend: Dezentral (pro Service) vs. Zentraler Reporting-Service.
+    *   Architektur-Entscheidung: Dezentraler Microservice (wegen Resource-Bursts).
     *   Technologie-Evaluierung: JasperReports, Thymeleaf + Flying Saucer, etc.
 4.  **Infrastructure Setup (Home-Server):**
-    *   Hardware: Minisforum MS-R1 (ARM64).
-    *   OS: Debian 12 (Bookworm).
-    *   Hypervisor: **Incus** (LXC/LXD Fork) für Container & VMs.
-    *   Services:
-        *   `infra-gitea` (LXC): Gitea + Actions Runner (ARM64 Native Builds).
-        *   `docker-host-prod` (LXC, nesting=true): Docker Host für Meldestelle-Stack.
-    *   Networking: Cloudflare Tunnel (kein Port-Forwarding).
+    *   Hardware: Minisforum MS-R1 (ARM64, 12 Cores, 10G LAN).
+    *   OS: Debian 12 (Vendor Variant) als Host.
+    *   Hypervisor: **Incus** (LXC/LXD Fork).
+    *   Virtualization Strategy:
+        *   `infra-gitea` (LXC Container): Gitea + Actions Runner (Native ARM Builds).
+        *   `docker-host-prod` (VM): Debian VM als Docker Host für den Meldestelle-Stack (Isolation, keine Nesting-Probleme).
+    *   CI/CD: **Multi-Arch Support** (Native ARM64 Builds + x86_64 via `docker buildx` & QEMU).
+    *   Networking: Cloudflare Tunnel (Remote Access).
+    *   Local Discovery: DNS/mDNS Strategie für Offline-Szenarien (Main-App als lokaler Anchor).
+    *   Backup: Automatisierte Snapshots auf externe USB-SSD.
