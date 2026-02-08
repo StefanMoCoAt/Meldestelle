@@ -2,7 +2,7 @@
 type: Roadmap
 status: ACTIVE
 owner: Lead Architect
-last_update: 2026-02-06
+last_update: 2026-02-07
 ---
 
 # MASTER ROADMAP Q1 2026: "Operation Tracer Bullet"
@@ -10,11 +10,12 @@ last_update: 2026-02-06
 **Strategisches Ziel:**
 Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> DB) anhand des **Ping-Service**. Dieser Service dient als **technischer Blueprint** (Vorlage) für alle kommenden Fach-Services. Er muss "Production Ready" gehärtet sein, bevor wir Fachlichkeit implementieren.
 
-**Aktueller technischer Stand (06.02.2026):**
+**Aktueller technischer Stand (07.02.2026):**
 *   Build System: ✅ Grün (Gradle, Kotlin 2.3, Spring Boot 3.5.9, Spring Cloud 2025.0.1).
 *   Code-Basis: ✅ `ping-service` existiert, Delta-Sync implementiert.
 *   Infrastruktur: ✅ Docker Environment stabil (Valkey, Keycloak, Consul, Zipkin).
 *   Frontend: ✅ Web-App & Desktop-App (KMP), Login funktioniert, Sync-Logik vorhanden.
+*   Hardware: ✅ Minisforum MS-R1 eingetroffen.
 
 ---
 
@@ -70,7 +71,7 @@ Wir validieren die gesamte Architektur-Kette (Frontend -> Gateway -> Service -> 
     *   Architektur-Entscheidung: Dezentraler Microservice (wegen Resource-Bursts).
     *   Technologie-Evaluierung: JasperReports, Thymeleaf + Flying Saucer, etc.
 4.  **Infrastructure Setup (Home-Server):**
-    *   Hardware: Minisforum MS-R1 (ARM64, 12 Cores, 10G LAN).
+    *   Hardware: Minisforum MS-R1 (ARM64, 12 Cores, 10G LAN) ✅ **GELIEFERT (07.02.2026)**.
     *   OS: Debian 12 (Vendor Variant) als Host.
     *   Hypervisor: **Incus** (LXC/LXD Fork).
     *   Virtualization Strategy:
