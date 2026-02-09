@@ -70,3 +70,4 @@ build/diagrams/
 .phpunit.result.cache
 .dataSources/
 dataSources.local.xml
+/_backup/
